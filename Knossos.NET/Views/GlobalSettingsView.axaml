@@ -1,0 +1,272 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="1500"
+             x:Class="Knossos.NET.Views.GlobalSettingsView"
+			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+
+	<Design.DataContext>
+		<vm:GlobalSettingsViewModel/>
+	</Design.DataContext>
+
+	<Grid Background="#18191A" RowDefinitions="Auto,*">
+		<Border Margin="0,5,0,5" Grid.Row="0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
+			<Grid Margin="5" ColumnDefinitions="*,*,Auto" >
+				<Button Command="{Binding SaveCommand}" Grid.Column="2" FontWeight="Bold" Foreground="White" Background="Green">SAVE</Button>
+				<Button Command="{Binding ReloadFlagData}" Foreground="White" Background="Black" Grid.Column="1" Margin="5,0,0,0">Reload Data</Button>
+				<Button Command="{Binding ResetCommand}" Grid.Column="0" FontWeight="Bold" Foreground="White" Background="Red">RESET</Button>
+			</Grid>
+		</Border>
+		<ScrollViewer Grid.Row="1">
+			<StackPanel>
+				<!--KNOSSOS SETTINGS-->
+				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
+					<StackPanel Margin="5">
+						<Label FontWeight="Bold">Knossos Settings</Label>
+						<!-- Base Path -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Library Path</TextBlock>
+							<TextBox Text="{Binding BasePath}" Margin="10,0,0,0" Grid.Column="1" IsReadOnly="True" Width="500"></TextBox>
+							<Button Grid.Column="2" Command="{Binding BrowseFolderCommand}">Browse</Button>
+						</Grid>
+						<!-- Lib Info -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Library Info</TextBlock>
+							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
+								<Label Margin="0,5,0,0" FontWeight="Bold">Mods:</Label>
+								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
+								<Label Margin="50,5,0,0" FontWeight="Bold">Builds:</Label>
+								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfBuilds}"></TextBlock>
+								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding Fs2RootPack}">FS2 Root Pack</CheckBox>
+							</WrapPanel>
+						</Grid>
+						<!-- Sys Info -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">System Info</TextBlock>
+							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
+								<Label Margin="0,5,0,0" FontWeight="Bold">OS:</Label>
+								<TextBlock Margin="5,8,0,0" Text="{Binding DetectedOS}"></TextBlock>
+								<Label Margin="50,5,0,0" FontWeight="Bold">CPU Arch:</Label>
+								<TextBlock Margin="5,8,0,0" Text="{Binding CpuArch}"></TextBlock>
+								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX}">AVX</CheckBox>
+								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX2}">AVX2</CheckBox>
+							</WrapPanel>
+						</Grid>
+						<!-- Log File -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Grid.Column="0" IsChecked="{Binding EnableLogFile}" Width="200">Enable Log File</CheckBox>
+							<ComboBox SelectedIndex="{Binding LogLevel}" IsEnabled="{Binding EnableLogFile}" Grid.Column="1" Width="150" Margin="10,0,0,0">
+								<ComboBoxItem Tag="0">Information</ComboBoxItem>
+								<ComboBoxItem Tag="1">Warning</ComboBoxItem>
+								<ComboBoxItem Tag="2">Error</ComboBoxItem>
+							</ComboBox>
+						</Grid>
+					</StackPanel>
+				</Border>
+				<!--VIDEO SETTINGS-->
+				<Border BorderBrush="Black" BorderThickness="5" CornerRadius="2">
+					<StackPanel Margin="5">
+						<Label FontWeight="Bold">Video Settings</Label>
+						<!-- Resolution -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Display Resolution</TextBlock>
+							<ComboBox SelectedIndex="{Binding BitsSelectedIndex}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="2" Width="100" Margin="10,0,0,0">
+								<ComboBoxItem Tag="32">32 Bit</ComboBoxItem>
+								<ComboBoxItem Tag="16" IsEnabled="{Binding Enable16BitColor}">16 bit</ComboBoxItem>
+							</ComboBox>
+							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<ComboBox SelectedIndex="{Binding ResolutionSelectedIndex}" Items="{Binding ResolutionItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="300" Margin="10,0,0,0"></ComboBox>
+						</Grid>
+						<!-- Resolution -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Texture Filtering</TextBlock>
+							<ComboBox SelectedIndex="{Binding TextureSelectedIndex}" Grid.Column="1" Width="100" Margin="10,0,0,0">
+								<ComboBoxItem Tag="0">Bilinear</ComboBoxItem>
+								<ComboBoxItem Tag="1">Trilinear</ComboBoxItem>
+							</ComboBox>
+						</Grid>
+						<!-- Shadows -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="-enable_shadows" Grid.Column="0" IsChecked="{Binding EnableShadows}" Width="200">Enable Shadows</CheckBox>
+							<ComboBox Tag="-shadow_quality" SelectedIndex="{Binding ShadowQualitySelectedIndex}" IsEnabled="{Binding EnableShadows}" Grid.Column="1" Width="150" Margin="10,0,0,0">
+								<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
+								<ComboBoxItem Tag="1">Low</ComboBoxItem>
+								<ComboBoxItem Tag="2">Medium</ComboBoxItem>
+								<ComboBoxItem Tag="3">High</ComboBoxItem>
+								<ComboBoxItem Tag="4">Ultra</ComboBoxItem>
+							</ComboBox>
+						</Grid>
+						<!-- AA Filter -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="-aa" Grid.Column="0" IsChecked="{Binding EnableAA}" Width="200">Anti Aliasing</CheckBox>
+							<ComboBox Tag="-aa_preset" SelectedIndex="{Binding AaSelectedIndex}" Grid.Column="1" IsEnabled="{Binding EnableAA}" Width="150" Margin="10,0,0,0">
+								<ComboBoxItem Tag="0">FXAA Low</ComboBoxItem>
+								<ComboBoxItem Tag="1">FXAA Medium</ComboBoxItem>
+								<ComboBoxItem Tag="2">FXAA High</ComboBoxItem>
+								<ComboBoxItem Tag="3">SMAA Low</ComboBoxItem>
+								<ComboBoxItem Tag="4">SMAA Medium</ComboBoxItem>
+								<ComboBoxItem Tag="5">SMAA High</ComboBoxItem>
+								<ComboBoxItem Tag="6">SMAA Ultra</ComboBoxItem>
+							</ComboBox>
+						</Grid>
+						<!-- Enable soft particles -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="-soft_particles" Grid.Column="0" IsChecked="{Binding EnableSoftParticles}" Width="200">Enable soft particles</CheckBox>
+						</Grid>
+						<!-- Window -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="-window" Grid.Column="0" IsChecked="{Binding RunInWindow}" Width="200">Run in a Window </CheckBox>
+						</Grid>
+						<!-- Borderless Window -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="-fullscreen_window" Grid.Column="0" IsChecked="{Binding BorderlessWindow}" Width="200">Borderless Window </CheckBox>
+						</Grid>
+						<!-- VSYNC -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="-no_vsync" Grid.Column="0" IsChecked="{Binding NoVsync}" Width="200">Disable VSync</CheckBox>
+						</Grid>
+						<!-- Disable Post Processing -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="-no_post_process" Grid.Column="0" IsChecked="{Binding NoProstProcess}" Width="200">Disable Post Processing</CheckBox>
+						</Grid>
+						<!-- FPS Cap -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="-no_fps_capping" Grid.Column="0" IsChecked="{Binding NoFpsCapping}" Width="200">Disable 120 FPS Limit</CheckBox>
+						</Grid>
+						<!-- Show FPS -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="-fps" Grid.Column="0" IsChecked="{Binding ShowFps}" Width="200">Display FPS</CheckBox>
+						</Grid>
+					</StackPanel>
+				</Border>
+
+				<!--Audio SETTINGS-->
+				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
+					<StackPanel Margin="5">
+						<Label FontWeight="Bold">Audio Settings</Label>
+						<!-- Playback -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Playback Devices</TextBlock>
+							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<ComboBox SelectedIndex="{Binding PlaybackSelectedIndex}" Items="{Binding PlaybackItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+						</Grid>
+						<!-- Capture -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Capture Devices</TextBlock>
+							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<ComboBox SelectedIndex="{Binding CaptureSelectedIndex}" Items="{Binding CaptureItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+						</Grid>
+						<!-- Sample Rate -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Sample Rate</TextBlock>
+							<ComboBox SelectedIndex="{Binding SampleRateSelectedIndex}" Grid.Column="1" Width="125" Margin="10,0,0,0">
+								<ComboBoxItem Tag="44100">44.1 kHz</ComboBoxItem>
+								<ComboBoxItem Tag="48000">48 kHz</ComboBoxItem>
+								<ComboBoxItem Tag="96000">96 kHz</ComboBoxItem>
+								<ComboBoxItem Tag="192000">192 kHz</ComboBoxItem>
+							</ComboBox>
+						</Grid>
+						<!-- Enable EFX -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="efx" Grid.Column="0" IsChecked="{Binding EnableEFX}" Width="200">Enable EFX</CheckBox>
+						</Grid>
+						<!-- Disable Audio -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="-nosound" Grid.Column="0" IsChecked="{Binding DisableAudio}" Width="200">Disable Audio</CheckBox>
+						</Grid>
+						<!-- Disable Music -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<CheckBox Tag="-nomusic" Grid.Column="0" IsChecked="{Binding DisableMusic}" Width="200">Disable Music</CheckBox>
+						</Grid>
+						<!-- TTS -->
+						<CheckBox IsChecked="{Binding EnableTTS}" Margin="5">Enable TTS (Text to speech)</CheckBox>
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Voice</TextBlock>
+							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<ComboBox SelectedIndex="{Binding VoiceSelectedIndex}" Items="{Binding VoiceItems}" IsEnabled="{Binding EnableTTS}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+							<Button IsVisible="False" Command="{Binding TestVoiceCommand}" IsEnabled="{Binding EnableTTS}" Margin="5,0,0,0" Background="Black" Foreground="White" Grid.Column="2">Test</Button>
+						</Grid>
+						<Button Command="{Binding OpenGetVoices}" IsVisible="{Binding WindowsOS}" Margin="214,5,0,5" Background="Black" Foreground="White" Grid.Column="2">Get Additional SAPI Voices</Button>
+						<Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="210">Enabled in</TextBlock>
+							<CheckBox Grid.Column="1" IsChecked="{Binding TtsTechroom}" IsEnabled="{Binding EnableTTS}">Techroom</CheckBox>
+							<CheckBox Grid.Column="2" IsChecked="{Binding TtsBriefings}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Briefings</CheckBox>
+							<CheckBox Grid.Column="3" IsChecked="{Binding TtsIngame}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Ingame</CheckBox>
+							<CheckBox Grid.Column="4" IsChecked="{Binding TtsMulti}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Multi</CheckBox>
+						</Grid>
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Speech Volume</TextBlock>
+							<Slider Grid.Column="1" Width="500" Value="{Binding TtsVolume}" Maximum="100" Minimum="0"></Slider>
+						</Grid>
+					</StackPanel>
+				</Border>
+
+				<!--JOYSTIC SETTINGS-->
+				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
+					<StackPanel Margin="5">
+						<Label FontWeight="Bold">Joystick Settings</Label>
+						<!-- Joy1 -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #0</TextBlock>
+							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<ComboBox Grid.Column="1" SelectedIndex="{Binding Joy1SelectedIndex}" Items="{Binding Joystick1Items}" IsVisible="{Binding FlagDataLoaded}" Width="500" Margin="10,0,0,0"></ComboBox>
+						</Grid>
+						<!-- Joy2 -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5" IsEnabled="{Binding Joy1SelectedIndex}">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #1</TextBlock>
+							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<ComboBox SelectedIndex="{Binding Joy2SelectedIndex}" Items="{Binding Joystick2Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+						</Grid>
+						<!-- Joy3 -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5" IsEnabled="{Binding Joy2SelectedIndex}">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #2</TextBlock>
+							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<ComboBox SelectedIndex="{Binding Joy3SelectedIndex}" Items="{Binding Joystick3Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+						</Grid>
+						<!-- Joy4 -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5" IsEnabled="{Binding Joy3SelectedIndex}">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #3</TextBlock>
+							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<ComboBox SelectedIndex="{Binding Joy4SelectedIndex}" Items="{Binding Joystick4Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+						</Grid>
+					</StackPanel>
+				</Border>
+		
+				<!--MOD SETTINGS-->
+				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
+					<StackPanel Margin="5">
+						<Label FontWeight="Bold">FSO Global Settings</Label>
+						<!-- GLOBAL FSO BUiLD -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<Label ToolTip.Tip="The global FSO build, if set, will be used as the 'Mod default' build for all mods." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Default FSO Build</Label>
+							<v:FsoBuildPickerView Content="{Binding FsoPicker}" ToolTip.Tip="The global FSO build, if set, will be used as the 'Mod default' build for all mods." Grid.Column="1" Width="600" />
+						</Grid>
+						<!-- GLOBAL CMDLINE -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Cmdline</Label>
+							<TextBox Text="{Binding GlobalCmd}" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="1" Width="500"></TextBox>
+							<Button Command="{Binding GlobalCmdHelp}" Foreground="White" Background="Black" Grid.Column="2" Margin="10,0,0,0">?</Button>
+						</Grid>
+						<!-- FS2 Lang -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="3,0,0,0" Width="200">FS2 Language</TextBlock>
+							<ComboBox SelectedIndex="{Binding Fs2LangSelectedIndex}" Grid.Column="1" Width="200" Margin="7,0,0,0">
+								<ComboBoxItem>English</ComboBoxItem>
+								<ComboBoxItem>German</ComboBoxItem>
+								<ComboBoxItem>French</ComboBoxItem>
+								<ComboBoxItem>Polish</ComboBoxItem>
+							</ComboBox>
+						</Grid>
+						<!-- Multi Port -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+							<Label ToolTip.Tip="Network port used by multiplayer. Default is 7808." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Multiplayer Port</Label>
+							<NumericUpDown Value="{Binding MultiPort}" Grid.Column="1" Width="150"></NumericUpDown>
+						</Grid>
+					</StackPanel>
+				</Border>
+			</StackPanel>
+		</ScrollViewer>
+	</Grid>
+</UserControl>

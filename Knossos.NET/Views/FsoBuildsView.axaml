@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.FsoBuildsView"
+			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
+	         xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+
+	<Design.DataContext>
+		<vm:FsoBuildsViewModel/>
+	</Design.DataContext>
+
+	<Grid RowDefinitions="Auto,*">
+		<TabControl Grid.Row="1">
+			<TabItem Header="Stable Builds" VerticalContentAlignment="Center">
+				<ListBox Items="{Binding StableItems}">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<v:FsoBuildItemView Content="{Binding}"/>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</TabItem>
+			<TabItem Header="RC Builds">
+				<ListBox Items="{Binding RcItems}">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<v:FsoBuildItemView Content="{Binding}"/>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</TabItem>
+			<TabItem Header="Nightly Builds">
+				<ListBox Items="{Binding NightlyItems}">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<v:FsoBuildItemView Content="{Binding}"/>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</TabItem>
+			<TabItem Header="Custom Builds">
+				<Grid RowDefinitions="Auto,*">
+					<Button Command="{Binding CommandAddUserBuild}" Margin="0,0,0,5">Add Build</Button>
+					<ListBox Grid.Row="1" Items="{Binding CustomItems}">
+						<ListBox.ItemTemplate>
+							<DataTemplate>
+								<v:FsoBuildItemView Content="{Binding}"/>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
+				</Grid>
+			</TabItem>
+		</TabControl>
+	</Grid>
+	
+</UserControl>

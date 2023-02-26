@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1800" d:DesignHeight="30"
+             x:Class="Knossos.NET.Views.FsoBuildItemView"
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+	
+	<Design.DataContext>
+		<vm:FsoBuildsViewModel/>
+	</Design.DataContext>
+	<Border BorderBrush="Gray" BorderThickness="1">
+		<Grid Background="Black" ColumnDefinitions="Auto,Auto,Auto,*" ToolTip.Tip="{Binding Tooltip}">
+			<Label FontWeight="Bold" Width="150" Grid.Column="0" Content="{Binding Date}" VerticalAlignment="Center"></Label>
+			<Label FontWeight="Bold" Width="300" Grid.Column="1" Content="{Binding Title}" VerticalAlignment="Center"></Label>
+		
+			<WrapPanel Grid.Column="2" VerticalAlignment="Center">
+				<Border Background="Brown" IsVisible="{Binding X86}" Margin="5,0,0,0" CornerRadius="2">
+					<Label FontWeight="Bold">X86</Label>
+				</Border>
+				<Border Background="Red" IsVisible="{Binding X64}" Margin="5,0,0,0" CornerRadius="2">
+					<Label FontWeight="Bold">X64</Label>
+				</Border>
+				<Border Background="Green" IsVisible="{Binding Avx}" Margin="5,0,0,0" CornerRadius="2">
+					<Label FontWeight="Bold">AVX</Label>
+				</Border>
+				<Border Background="Brown" IsVisible="{Binding Arm32}" Margin="5,0,0,0" CornerRadius="2">
+					<Label FontWeight="Bold">ARM32</Label>
+				</Border>
+				<Border Background="Red" IsVisible="{Binding Arm64}" Margin="5,0,0,0" CornerRadius="2">
+					<Label FontWeight="Bold">ARM64</Label>
+				</Border>
+				<Border Background="DarkBlue" IsVisible="{Binding Release}" Margin="20,0,0,0" CornerRadius="2">
+					<Label FontWeight="Bold">Release</Label>
+				</Border>
+				<Border Background="DarkGoldenrod" IsVisible="{Binding Debug}" Margin="5,0,0,0" CornerRadius="2">
+					<Label FontWeight="Bold">Debug</Label>
+				</Border>
+				<Border Background="DarkOrange" IsVisible="{Binding Fred2}" Margin="5,0,0,0" CornerRadius="2">
+					<Label FontWeight="Bold">Fred2</Label>
+				</Border>
+				<Border Background="DarkOliveGreen" IsVisible="{Binding Qtfred}" Margin="5,0,0,0" CornerRadius="2">
+					<Label FontWeight="Bold">QtFred</Label>
+				</Border>
+				<Border Background="DarkRed" IsVisible="{Binding !IsValid}" Margin="30,0,0,0" CornerRadius="2">
+					<Label FontWeight="Bold">No valid or usable files were found in this build</Label>
+				</Border>
+			</WrapPanel>
+
+			<WrapPanel Grid.Column="3" Margin="30,0,0,0" HorizontalAlignment="Right">
+				<Button FontWeight="Bold" IsVisible="{Binding IsInstalled}" Background="DarkRed" Command="{Binding DeleteBuildCommand}">Delete</Button>
+				<Button FontWeight="Bold" IsVisible="{Binding !IsInstalled}" Background="DarkGreen" Command="{Binding DownloadBuildCommand}">Download</Button>
+			</WrapPanel>
+		</Grid>
+	</Border>
+</UserControl>

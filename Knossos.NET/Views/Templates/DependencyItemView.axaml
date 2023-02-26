@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
+             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="100"
+             x:Class="Knossos.NET.Views.DependencyItemView"
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+
+	<Design.DataContext>
+		<vm:DependencyItemViewModel/>
+	</Design.DataContext>
+
+	<Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
+		<Button Command="{Binding DeleteCommand}" Grid.Column="0" Background="Black" IsEnabled="{Binding !ReadOnly}">X</Button>
+		<Button Command="{Binding ArrowUPCommand}" Grid.Column="1" Background="Black" IsEnabled="{Binding !ArrowsReadOnly}">↑</Button>
+		<Button Command="{Binding ArrowDOWNCommand}" Grid.Column="2" Background="Black" IsEnabled="{Binding !ArrowsReadOnly}">↓</Button>
+		<ComboBox SelectedIndex="{Binding ModSelectedIndex}" Items="{Binding ModItems}" IsEnabled="{Binding !ReadOnly}" HorizontalAlignment="Stretch" Margin="2" Grid.Column="3" FontWeight="Bold" FontSize="18" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
+		<ComboBox SelectedIndex="{Binding VersionSelectedIndex}" Items="{Binding VersionItems}" IsEnabled="{Binding !ReadOnly}" MinWidth="125" Margin="2" Grid.Column="4" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
+	</Grid>
+	
+</UserControl>

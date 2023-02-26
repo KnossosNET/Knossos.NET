@@ -1,0 +1,67 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Knossos.NET.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
+		xmlns:m="clr-namespace:Knossos.NET.Models;assembly=Knossos.NET"	
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="900"
+        x:Class="Knossos.NET.Views.MainWindow"
+        Icon="/Assets/knossos-icon.ico"
+		WindowStartupLocation="CenterScreen"
+        Title="Knossos.NET v0.0.1">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+	
+
+	<!-- Main View -->
+	<Grid Background="#18191A" RowDefinitions="Auto,*">
+		<v:TaskView Grid.Row="0" Content="{Binding TaskView}"/>
+		<TabControl Grid.Row="1">
+			<!--Installed Mods / Home-->
+			<TabItem Header="Home">
+				<ScrollViewer>
+					<v:ModListView Content="{Binding InstalledModsView}"/>
+				</ScrollViewer>
+			</TabItem>
+			<!--Nebula Mods / Explore-->
+			<TabItem Header="Nebula">
+				<ScrollViewer>
+					<v:ModListView Content="{Binding NebulaModsView}"/>
+				</ScrollViewer>
+			</TabItem>
+			<!--FSO Builds-->
+			<TabItem Header="Engine">
+				<ScrollViewer>
+					<v:FsoBuildsView Content="{Binding FsoBuildsView}"/>
+				</ScrollViewer>
+			</TabItem>
+			<!--Dev-->
+			<TabItem Header="Develop">
+				<v:DeveloperModsView Content="{Binding DeveloperModView}"/>
+			</TabItem>
+			<!--PXO-->
+			<TabItem Header="PXO">
+				<v:PxoView Content="{Binding PxoView}"/>
+			</TabItem>
+			<!--Global Settings-->
+			<TabItem Header="Settings" >
+				<v:GlobalSettingsView Content="{Binding GlobalSettingsView}"/>
+			</TabItem>
+			<!--Debug-->
+			<TabItem Header="Debug">
+				<Grid RowDefinitions="Auto,*">
+					<WrapPanel Grid.Row="0" Margin="5">
+						<Button Margin="5" Command="{Binding OpenLog}">View Logfile</Button>
+						<Button Margin="5" Command="{Binding OpenSettings}">View Settings File</Button>
+						<Button Margin="5" Command="{Binding OpenFS2Log}">View fs2_open.log</Button>
+						<Button Margin="5" Command="{Binding OpenFS2Ini}">View fs2_open.ini</Button>
+					</WrapPanel>
+					<TextBox Grid.Row="1" Text="{Binding UiConsoleOutput}" IsReadOnly="True"></TextBox>
+				</Grid>
+			</TabItem>
+		</TabControl>
+	</Grid>
+</Window>

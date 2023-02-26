@@ -1,0 +1,67 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Knossos.NET.Views.Windows.AddUserBuildView"
+		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+		Icon="/Assets/knossos-icon.ico"
+		WindowStartupLocation="CenterScreen"
+        Title="Add Custom FSO Build" 
+		SizeToContent="WidthAndHeight" 
+		CanResize="False">
+	
+	<Design.DataContext>
+		<vm:AddUserBuildViewModel/>
+	</Design.DataContext>
+
+	<StackPanel Background="#18191A">
+		<StackPanel IsEnabled="{Binding !CopyProgress}">
+			<Label>1) Click on the button and select the folders were the executables are located.</Label>
+			<Button Command="{Binding OpenFolderCommand}">Open Folder</Button>
+			<TextBlock TextWrapping="Wrap" Text="{Binding ScanResults}"></TextBlock>
+			<StackPanel Margin="0,15,0,0" IsVisible="{Binding Stage2}">
+				<Label>2) Verify autodetect values and update if needed</Label>
+				<WrapPanel>
+					<CheckBox IsChecked="{Binding X86}" Margin="5">X86</CheckBox>
+					<CheckBox IsChecked="{Binding X64}" Margin="5">X64</CheckBox>
+					<CheckBox IsChecked="{Binding AVX}" Margin="5">AVX</CheckBox>
+					<CheckBox IsChecked="{Binding Arm32}" Margin="5">ARM32</CheckBox>
+					<CheckBox IsChecked="{Binding Arm64}" Margin="5">ARM64</CheckBox>
+				</WrapPanel>
+				<Label Margin="0,10,0,0" FontWeight="Bold">Release</Label>
+				<TextBlock TextWrapping="Wrap" Text="{Binding Release}"></TextBlock>
+				<Button Command="{Binding ChangeReleaseCommand}">Select Release</Button>
+				<Label Margin="0,10,0,0" FontWeight="Bold">Debug</Label>
+				<TextBlock TextWrapping="Wrap" Text="{Binding DebugFile}"></TextBlock>
+				<Button Command="{Binding ChangeDebugCommand}">Select Debug</Button>
+				<Label Margin="0,10,0,0" FontWeight="Bold">Fred2</Label>
+				<TextBlock TextWrapping="Wrap" Text="{Binding Fred2}"></TextBlock>
+				<Button Command="{Binding ChangeFred2Command}">Select Fred2</Button>
+				<Label Margin="0,10,0,0" FontWeight="Bold">Fred2 Debug</Label>
+				<TextBlock TextWrapping="Wrap" Text="{Binding Fred2Debug}"></TextBlock>
+				<Button Command="{Binding ChangeFred2DebugCommand}">Select Fred2 Debug</Button>
+				<Label Margin="0,10,0,0" FontWeight="Bold">QtFred</Label>
+				<TextBlock TextWrapping="Wrap" Text="{Binding QtFred}"></TextBlock>
+				<Button Command="{Binding ChangeQtFredCommand}">Select QtFred</Button>
+				<Label Margin="0,10,0,0" FontWeight="Bold">QtFred Debug</Label>
+				<TextBlock TextWrapping="Wrap" Text="{Binding QtFredDebug}"></TextBlock>
+				<Button Command="{Binding ChangeQtFredDebugCommand}">Select QtFred Debug</Button>
+				<Label Margin="0,20,0,0" FontWeight="Bold">Build Version</Label>
+				<TextBox Width="200" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding BuildVersion}"></TextBox>
+				<Label>*Required, it has to be a valid semantic version.</Label>
+				<Label Margin="0,20,0,0" FontWeight="Bold">Build Name</Label>
+				<TextBox Width="200" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding BuildName}"></TextBox>
+				<Label>*Required</Label>
+			</StackPanel>
+			<StackPanel IsVisible="{Binding Stage2}" Margin="0,30,0,0">
+				<Label>3) Click the button when ready, the folder will be copied to:</Label>
+				<TextBlock TextWrapping="Wrap" Text="{Binding BuildNewPath}"></TextBlock>
+				<Label>Any (.lib, .pdb and .exp) will be ignored, and a mod.json file will be generated.</Label>
+				<Button VerticalAlignment="Center" Command="{Binding AddCommand}">Add new build</Button>
+			</StackPanel>
+		</StackPanel>
+		<ProgressBar IsVisible="{Binding CopyProgress}" Value="{Binding CopyProgress}" Maximum="{Binding MaxFiles}" Height="50" Minimum="0" Width="200" HorizontalAlignment="Center"></ProgressBar>
+		<Label IsVisible="{Binding ModCreated}" HorizontalAlignment="Center" FontWeight="Bold">Complete!</Label>
+	</StackPanel>
+</Window>

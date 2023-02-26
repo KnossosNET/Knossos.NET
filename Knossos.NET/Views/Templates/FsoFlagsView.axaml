@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.FsoFlagsView"
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+
+	<Design.DataContext>
+		<vm:FsoFlagsViewModel/>
+	</Design.DataContext>
+
+	<StackPanel>
+		<Label>Global Settings:</Label>
+		<TextBox Text="{Binding GlobalCmd}" TextWrapping="Wrap" Height="50" Foreground="White" IsReadOnly="True"></TextBox>
+		<Label FontSize="11">Global settings flags and values will always be added to the command line at launch and will override any custom value of the same flag here.</Label>
+		<Separator Height="10"></Separator>
+		<Label>Cmdline:</Label>
+		<TextBox Text="{Binding CmdLine}" TextWrapping="Wrap" Height="100" Foreground="White"></TextBox>
+		<Separator Height="10"></Separator>
+		<TreeView Items="{Binding Flags}">
+			<TreeView.DataTemplates>
+				<TreeDataTemplate DataType="vm:FlagCategoryItem" ItemsSource="{Binding FlagItemList}">
+					<TextBlock FontWeight="Bold" Text="{Binding Name}" />
+				</TreeDataTemplate>
+				<DataTemplate DataType="vm:FlagItem">
+					<Grid ColumnDefinitions="Auto,Auto,Auto">
+						<CheckBox Command="{Binding ToggleFlag}" Grid.Column="0" Content="{Binding Description}" IsChecked="{Binding Enabled}" Width="350"></CheckBox>
+						<TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Cmd}" Width="150" />
+						<Button Grid.Column="2" Command="{Binding OpenFlagInfoURL}" Foreground="White" Background="Black" Width="25">?</Button>
+					</Grid>
+				</DataTemplate>
+			</TreeView.DataTemplates>
+		</TreeView>
+	</StackPanel>
+
+</UserControl>

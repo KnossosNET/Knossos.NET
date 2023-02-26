@@ -1,0 +1,28 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Knossos.NET.Views.AddSapiVoicesView"
+		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+		Icon="/Assets/knossos-icon.ico"
+		WindowStartupLocation="CenterScreen"
+        Title="How to add new SAPI voices to Windows" 
+		SizeToContent="WidthAndHeight" 
+		CanResize="False">
+	
+	<Design.DataContext>
+		<vm:AddSapiVoicesViewModel/>
+	</Design.DataContext>
+	<StackPanel MaxWidth="500" Background="#18191A">
+		<TextBlock Margin="10" TextWrapping="Wrap">Freespace 2 Open uses Windows SAPI as TTS engine. SAPI is now legacy and Windows 10/11 uses a new TTS system. Most of the voices for the new system can still be used by SAPI and FSO. In order to use it you will need to copy the registry entries, KnossosNET can do this for you.</TextBlock>
+		<Label Margin="10">First download the new voices for Windows in Speech Settings menu.</Label>
+		<Button Command="{Binding OpenSpeechSettings}" Margin="10,0,0,0">Open Speech Settings</Button>
+		<TextBlock TextWrapping="Wrap" Margin="10">Once the voices have finished installing click on the following button to copy the OneCore registry keys to the Sapi one</TextBlock>
+		<TextBlock TextWrapping="Wrap" Margin="10">The first time you do this a backup of the original sapi keys will be saved to the knossos data folder in cae you ever need it.</TextBlock>
+		<TextBlock TextWrapping="Wrap" Margin="10">Your user must have admin rights in order to work.</TextBlock>
+		<Button Command="{Binding CopyKeys}" Margin="10,0,0,0">Copy Registry Keys</Button>
+		<TextBlock TextWrapping="Wrap" Margin="10">Thats it! Press "Reload Data" button on the settings tab to update the list of installed voices</TextBlock>
+		<TextBlock TextWrapping="Wrap" Margin="10">Note: if you install more voices after copying the registry keys, you will need to copy the registry keys again in order to be avalible for SAPI.</TextBlock>
+	</StackPanel>
+</Window>

@@ -1,0 +1,54 @@
+<Window xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="1000"
+			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
+             x:Class="Knossos.NET.Views.ModSettingsView"
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+			 Icon="/Assets/knossos-icon.ico"
+			 WindowStartupLocation="CenterScreen"
+			 Title="{Binding Title}" 
+			 SizeToContent="WidthAndHeight"
+			 CanResize="True">
+
+	<Design.DataContext>
+		<vm:ModSettingsViewModel/>
+	</Design.DataContext>
+
+	<Grid>
+		<Border Background="#18191A" BorderBrush="Gray" BorderThickness="3" CornerRadius="2">
+			<Grid RowDefinitions="Auto,*">
+				<Grid ColumnDefinitions="Auto,Auto" HorizontalAlignment="Center" Grid.Row="0">
+					<Button Command="{Binding SaveSettingsCommand}" Grid.Column="1" FontWeight="Bold" FontSize="18" Background="Green" Foreground="White" Margin="5">Save</Button>
+					<Button Command="{Binding ResetSettingsCommand}" Grid.Column="0" FontWeight="Bold" FontSize="18" Background="Red" Foreground="White" Margin="5">Reset</Button>
+				</Grid>
+				<ScrollViewer Grid.Row="1">
+					<StackPanel>
+						<!--FSO Build Settings -->
+						<Label>FSO BUILD</Label>
+						<v:FsoBuildPickerView Content="{Binding FsoPicker}"/>
+						<Button IsVisible="{Binding !ConfigureBuildOpen}" Command="{Binding ConfigureBuildCommand}" CommandParameter="false" Margin="5" FontWeight="Bold" FontSize="18" Background="Black" Foreground="White">Configure</Button>
+						<v:FsoFlagsView Content="{Binding FsoFlags}"/>
+						<!--FSO Build END -->
+						<Separator Height="20"></Separator>
+						<!--Dependencies Settings-->
+						<StackPanel>
+							<Label>MOD DEPENDENCIES</Label>
+							<CheckBox Command="{Binding CustomDependenciesClick}" IsChecked="{Binding CustomDependencies}" Margin="5,0,0,0">Enable custom mod dependencies</CheckBox>
+							<Button Command="{Binding AddDependencyCommand}" IsVisible="{Binding CustomDependencies}" FontWeight="Bold" FontSize="18" Background="Black" Foreground="White" Margin="5">+</Button>
+							<ListBox Items="{Binding DepItems}">
+								<ListBox.ItemTemplate>
+									<DataTemplate>
+										<v:DependencyItemView Content="{Binding}"/>
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+						</StackPanel>
+						<!--Dependencies End-->
+					</StackPanel>
+				</ScrollViewer>
+			</Grid>
+		</Border>
+	</Grid>
+</Window>

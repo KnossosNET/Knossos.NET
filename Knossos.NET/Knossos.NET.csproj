@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <!--Avalonia doesen't support TrimMode=link currently,but we are working on that https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
+    <TrimMode>copyused</TrimMode>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+  </PropertyGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+    <None Remove=".gitignore" />
+    <None Remove="ViewModels\ModCardViewModel.cs~RF423e49e6.TMP" />
+    <None Remove="Views\Windows\ModDetailsView.axaml~RF2bc1dec5.TMP" />
+  </ItemGroup>
+  <ItemGroup>
+    <!--This helps with theme dll-s trimming.
+	If you will publish your application in self-contained mode with p:PublishTrimmed=true and it will use Fluent theme Default theme will be trimmed from the output and vice versa.
+	https://github.com/AvaloniaUI/Avalonia/issues/5593 -->
+    <TrimmableAssembly Include="Avalonia.Themes.Fluent" />
+    <TrimmableAssembly Include="Avalonia.Themes.Default" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="0.10.18" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.18" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.18" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
+    <PackageReference Include="XamlNameReferenceGenerator" Version="1.5.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Views\Templates\DependencyItemView.axaml.cs">
+      <DependentUpon>DependencyItemView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\FsoBuildsView.axaml.cs">
+      <DependentUpon>FsoBuildsView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\DeveloperModsView.axaml.cs">
+      <DependentUpon>DeveloperModsView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Windows\MessageBox.axaml.cs">
+      <DependentUpon>MessageBox.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\ModListView.axaml.cs">
+      <DependentUpon>ModListView.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Lang\" />
+    <Folder Include="Styles\" />
+  </ItemGroup>
+</Project>
