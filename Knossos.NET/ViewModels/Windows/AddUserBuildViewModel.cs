@@ -297,7 +297,7 @@ namespace Knossos.NET.ViewModels
                 if(CopyFilesRecursively(folderPath, BuildNewPath))
                 {
                     Mod mod = new Mod();
-                    mod.fullPath = BuildNewPath;
+                    mod.fullPath = BuildNewPath + @"\";
                     mod.folderName = buildId;
                     mod.firstRelease = mod.lastUpdate = DateTime.Now.Year.ToString("0000") + "-" + DateTime.Now.Month.ToString("00") + "-" + DateTime.Now.Day.ToString("00");
                     mod.installed = true;
@@ -420,7 +420,9 @@ namespace Knossos.NET.ViewModels
                     mod.packages.Add(package);
                     mod.SaveJson();
 
-                    Knossos.AddBuild(new FsoBuild(BuildNewPath+@"\", mod));
+                    var userBuild = new FsoBuild(mod);
+                    Knossos.AddBuild(userBuild);
+                    FsoBuildsViewModel.Instance?.AddBuildToUi(userBuild);
 
                     ModCreated = true;
                 }

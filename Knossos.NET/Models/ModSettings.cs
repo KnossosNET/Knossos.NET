@@ -50,8 +50,9 @@ namespace Knossos.NET.Models
                 this.filePath = fullPath + @"\mod_settings.json";
                 if(File.Exists(filePath))
                 {
-                    string jsonString = File.ReadAllText(filePath);
-                    var tempSettings = JsonSerializer.Deserialize<ModSettings>(jsonString);
+                    using FileStream jsonFile = File.OpenRead(filePath);
+                    var tempSettings = JsonSerializer.Deserialize<ModSettings>(jsonFile)!;
+                    jsonFile.Close();
                     if (tempSettings != null)
                     {
                         customDependencies = tempSettings.customDependencies;

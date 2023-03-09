@@ -57,10 +57,12 @@ namespace Knossos.NET.Models
         public FsoStability stability;
         public List<FsoFile> executables = new List<FsoFile>();
         public string folderPath;
-        public bool isInstalled = false;
         public string? date = string.Empty;
         public string? directExec = null;
-
+        public bool isInstalled = true;
+        /*
+         Direct Exe
+         */
         public FsoBuild(string directExecpath)
         {
             id = "DirectExec";
@@ -92,20 +94,25 @@ namespace Knossos.NET.Models
             }
             folderPath = directExecpath;
             stability = FsoStability.Custom;
-            isInstalled = true;
             date = DateTime.Now.ToString();
             directExec = directExecpath;
         }
-
-        public FsoBuild(string path, Mod modJson)
+        /*
+         Installed/nebula builds
+         */
+        public FsoBuild(Mod modJson)
         {
+            if (modJson.fullPath == string.Empty)
+            {
+                //This is a nebula build
+                isInstalled = false;
+            }
             id = modJson.id;
             title = modJson.title;
             description = modJson.description;
             version = modJson.version;
-            folderPath = path;
+            folderPath = modJson.fullPath;
             stability = GetFsoStability(modJson.stability, modJson.id);
-            isInstalled = modJson.installed;
             date = modJson.lastUpdate;
             LoadExecutables(modJson);
         }
@@ -225,6 +232,10 @@ namespace Knossos.NET.Models
                         {
                             if (exec.file != null)
                             {
+                                if(!isInstalled && package.environment != null)
+                                {
+                                    exec.properties = FillProperties(package.environment);
+                                }
                                 string filename = exec.file;
                                 FsoExecType type = GetExecType(exec.label);
                                 FsoExecArch arch = GetExecArch(exec.properties);
@@ -241,13 +252,42 @@ namespace Knossos.NET.Models
         }
 
         /*
+         Complete mod executable properties if missing from the enviroment
+         */
+        public static ModProperties FillProperties(string environment)
+        {
+            var properties = new ModProperties();
+            if((environment.ToLower().Contains("x86") || environment.ToLower().Contains("x86_64") ) && !environment.ToLower().Contains("avx"))
+            {
+                properties.sse2 = true;
+            }
+            if ((environment.ToLower().Contains("x86") || environment.ToLower().Contains("x86_64")) && environment.ToLower().Contains("avx"))
+            {
+                properties.avx = true;
+            }
+            if (environment.ToLower().Contains("x86_64"))
+            {
+                properties.x64 = true;
+            }
+            if (environment.ToLower().Contains("arm64"))
+            {
+                properties.arm64 = true;
+            }
+            if (environment.ToLower().Contains("arm32"))
+            {
+                properties.arm32 = true;
+            }
+            return properties;
+        }
+
+        /*
             Determine the operating system this build file is compiled for 
         */
         private FsoExecEnvironment GetExecEnvironment(string? enviroment)
         {
             if (enviroment == null)
             {
-                Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetExecEnvironment", "Unable to determine the proper build enviroment for " + folderPath + " Env: null");
+                Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetExecEnvironment", "Unable to determine the proper build enviroment. Env: null");
                 return FsoExecEnvironment.Unknown;
             }
 
@@ -258,7 +298,7 @@ namespace Knossos.NET.Models
             if (enviroment.ToLower().Contains("mac"))
                 return FsoExecEnvironment.Mac;
 
-            Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetExecEnvironment", "Unable to determine the proper build enviroment for " + folderPath + " Env: " + enviroment);
+            Log.Add(Log.LogSeverity.Information, "FsoBuild.GetExecEnvironment", "Unable to determine the proper build enviroment. Env: " + enviroment);
             return FsoExecEnvironment.Unknown;
         }
 
@@ -303,10 +343,12 @@ namespace Knossos.NET.Models
             switch (label)
             {
                 case "FastDebug":
+                case "Rollback Build": 
                 case "Fast Debug": return FsoExecType.Debug;
 
                 case "Fred FastDebug":
                 case "FRED Fast Debug":
+                case "FRED Debug":
                 case "FRED2 Debug": return FsoExecType.Fred2Debug;
 
                 case "FRED":
@@ -320,7 +362,7 @@ namespace Knossos.NET.Models
 
 
                 default:
-                    Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetExecType", "Unable to determine FSO Exec Type for " + folderPath + ". Label: " + label);
+                    Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetExecType", "Unable to determine FSO Exec Type. Label: " + label);
                     return FsoExecType.Unknown;
             }
         }
@@ -333,7 +375,7 @@ namespace Knossos.NET.Models
         {
             if (modId == null || stability == null)
             {
-                Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetFsoStability", "Unable to determine the proper build stability for " + folderPath);
+                Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetFsoStability", "Unable to determine the proper build stability for " + modId);
                 return FsoStability.Stable;
             }
 
@@ -347,7 +389,7 @@ namespace Knossos.NET.Models
                 case "nightly": return FsoStability.Nightly;
 
                 default:
-                    Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetFsoStability", "Unable to determine the proper build stability for " + folderPath);
+                    Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetFsoStability", "Unable to determine the proper build stability: " + stability);
                     return FsoStability.Stable;
             }
         }
@@ -388,7 +430,14 @@ namespace Knossos.NET.Models
             this.type = type;
             this.arch = arch;
             this.env = env;
-            isValid = IsValid(modpath);
+            if(arch == FsoExecArch.other || env == FsoExecEnvironment.Unknown || type == FsoExecType.Unknown)
+            {
+                isValid = false;
+            }
+            else
+            {
+                isValid = IsValid(modpath);
+            }
         }
 
         /*
@@ -397,7 +446,7 @@ namespace Knossos.NET.Models
         */
         private bool IsValid(string modpath)
         {
-            if (!File.Exists(modpath + filename.Replace(@"/", @"\")))
+            if (modpath != string.Empty && !File.Exists(modpath + filename.Replace(@"/", @"\")))
             {
                 Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " does not exist!");
                 return false;
@@ -405,43 +454,50 @@ namespace Knossos.NET.Models
 
             if(env == FsoExecEnvironment.Windows && !SysInfo.IsWindows || env == FsoExecEnvironment.Linux && !SysInfo.IsLinux || env == FsoExecEnvironment.Mac && !SysInfo.IsMacOS)
             {
-                Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this OS. Detected: "+env);
+                if(modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this OS. Detected: "+env);
                 return false;
             }
 
             if (arch == FsoExecArch.x86 && SysInfo.CpuArch != "X86" && SysInfo.CpuArch != "X64")
             {
-                Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: "+ SysInfo.CpuArch);
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: "+ SysInfo.CpuArch);
                 return false;
             }
 
             if (arch == FsoExecArch.x64 && (SysInfo.CpuArch != "X64"))
             {
-                Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
                 return false;
             }
 
             if (arch == FsoExecArch.x86_avx && SysInfo.CpuArch != "X86" && SysInfo.CpuArch != "X64" && !SysInfo.CpuAVX)
             {
-                Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
                 return false;
             }
 
             if (arch == FsoExecArch.x64_avx && SysInfo.CpuArch != "X64" && !SysInfo.CpuAVX)
             {
-                Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
                 return false;
             }
 
             if (arch == FsoExecArch.arm32 && SysInfo.CpuArch != "Armv6" && SysInfo.CpuArch != "Arm")
             {
-                Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
                 return false;
             }
 
             if (arch == FsoExecArch.arm64 && SysInfo.CpuArch != "Armv64")
             {
-                Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
                 return false;
             }
 

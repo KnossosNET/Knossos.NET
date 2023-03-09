@@ -1,4 +1,5 @@
-﻿using Avalonia.Media;
+﻿using Avalonia;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
@@ -33,11 +34,17 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool qtfred = false;
         [ObservableProperty]
-        private string? tooltip;
+        private string? tooltip = null;
         [ObservableProperty]
         private bool isValid = false;
         [ObservableProperty]
         private bool isInstalled = false;
+        [ObservableProperty]
+        private bool isDownloading = false;
+        [ObservableProperty]
+        public float progressBarMax = 100;
+        [ObservableProperty]
+        public float progressBarCurrent = 0;
 
         public FsoBuildItemViewModel() 
         {
@@ -79,7 +86,8 @@ namespace Knossos.NET.ViewModels
                     }
                 }
             }
-            tooltip = build.folderPath;
+            if(build.folderPath != string.Empty)
+                tooltip = build.folderPath;
         }
 
         private async void DeleteBuildCommand()
@@ -91,13 +99,34 @@ namespace Knossos.NET.ViewModels
                 {
                     Log.Add(Log.LogSeverity.Information, "FsoBuildItemViewModel.DeleteBuildCommand()", "Deleting FSO build " + build.ToString());
                     buildsView.DeleteBuild(build,this);
+                    var result = await Nebula.GetModData(build.id, build.version);
+                    if (result != null)
+                    {
+                        buildsView.AddBuildToUi(new FsoBuild(result));
+                    }
                 }
             }
         }
 
-        private void DownloadBuildCommand()
+        private async void DownloadBuildCommand()
         {
-
+            if (MainWindow.instance != null && build != null)
+            {
+                var result = await MessageBox.Show(MainWindow.instance, "This will download and install the FSO Build: " + build?.ToString() + ". Do you want to continue?", "Install FSO engine build", MessageBox.MessageBoxButtons.YesNo);
+                if (result == MessageBox.MessageBoxResult.Yes)
+                {
+                    IsDownloading = true;
+                    FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!,this)!;
+                    if (newBuild != null)
+                    {
+                        //Install completed
+                        IsInstalled = true;
+                        build = newBuild;
+                    }
+                    IsDownloading = false;
+                }
+            }
         }
+
     }
 }

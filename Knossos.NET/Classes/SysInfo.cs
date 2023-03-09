@@ -1,6 +1,4 @@
-﻿using Knossos.NET.Classes;
-using Knossos.NET.Models;
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
@@ -8,8 +6,15 @@ using System.Text.Json;
 
 namespace Knossos.NET
 {
-    public class SysInfo
+
+
+    public static class SysInfo
     {
+        private struct LegacySettings
+        {
+            public string? base_path { get; set; }
+        }
+
         private static readonly bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         private static readonly bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         private static readonly bool isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
@@ -67,9 +72,10 @@ namespace Knossos.NET
                 string jsonPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\knossos\settings.json";
                 if (File.Exists(jsonPath))
                 {
-                    string jsonString = File.ReadAllText(jsonPath);
-                    var jsonObject = JsonSerializer.Deserialize<LegacySettings>(jsonString);
-                    return jsonObject?.base_path;
+                    using FileStream jsonFile = File.OpenRead(jsonPath);
+                    var jsonObject = JsonSerializer.Deserialize<LegacySettings>(jsonFile)!;
+                    jsonFile.Close();
+                    return jsonObject.base_path;
                 }
             } 
             catch(Exception ex) 

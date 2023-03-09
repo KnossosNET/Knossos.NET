@@ -58,7 +58,7 @@ namespace Knossos.NET.ViewModels
                     var matchingBuilds = Knossos.GetInstalledBuildsList(modJson.modSettings.customBuildId);
                     if (matchingBuilds.Any())
                     {
-                        var theBuild = matchingBuilds.First(build => build.version == modJson.modSettings.customBuildVersion);
+                        var theBuild = matchingBuilds.FirstOrDefault(build => build.version == modJson.modSettings.customBuildVersion);
                         if (theBuild != null)
                         {
                             fsoPicker = new FsoBuildPickerViewModel(theBuild);

@@ -5,14 +5,18 @@ using Knossos.NET.Views;
 using Knossos.NET.Views.Windows;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
     public partial class FsoBuildsViewModel : ViewModelBase
     {
+        public static FsoBuildsViewModel? Instance; 
+
         private ObservableCollection<FsoBuildItemViewModel> StableItems { get; set; } = new ObservableCollection<FsoBuildItemViewModel>();
         private ObservableCollection<FsoBuildItemViewModel> RcItems { get; set; } = new ObservableCollection<FsoBuildItemViewModel>();
         private ObservableCollection<FsoBuildItemViewModel> NightlyItems { get; set; } = new ObservableCollection<FsoBuildItemViewModel>();
@@ -20,7 +24,7 @@ namespace Knossos.NET.ViewModels
 
         public FsoBuildsViewModel()
         {
-           
+            Instance = this;
         }
 
         public void ClearView()
@@ -31,36 +35,66 @@ namespace Knossos.NET.ViewModels
             CustomItems.Clear();
         }
 
-        public void LoadAllBuilds()
+        public void AddBuildToUi(FsoBuild build)
         {
-            StableItems.Clear();
-            RcItems.Clear();
-            NightlyItems.Clear();
-            var allBuilds=Knossos.GetInstalledBuildsList("FSO");
-            allBuilds.Sort(FsoBuild.CompareDatesAsTimestamp);
-
-            foreach (var build in allBuilds)
+            switch(build.stability)
             {
-                if (build.stability == FsoStability.Stable)
-                    StableItems.Add(new FsoBuildItemViewModel(build,this));
-                if (build.stability == FsoStability.RC)
-                    RcItems.Add(new FsoBuildItemViewModel(build, this));
-                if (build.stability == FsoStability.Nightly)
-                    NightlyItems.Add(new FsoBuildItemViewModel(build, this));
-            }
-            LoadCustomBuilds();
-        }
-
-
-
-        private void LoadCustomBuilds()
-        {
-            CustomItems.Clear();
-            var builds = Knossos.GetInstalledBuildsList(null, Models.FsoStability.Custom);
-            builds.Sort(FsoBuild.CompareDatesAsTimestamp);
-            foreach (var build in builds)
-            {
-                CustomItems.Add(new FsoBuildItemViewModel(build, this));
+                case FsoStability.Stable:
+                    var previous = StableItems.FirstOrDefault(b=> string.Compare(b.Date,build.date) < 0);
+                    if (previous != null)
+                    {
+                        int index = StableItems.IndexOf(previous);
+                        if (index == -1)
+                            index = 0;
+                        StableItems.Insert(index, new FsoBuildItemViewModel(build, this));
+                    }
+                    else
+                    {
+                        StableItems.Add(new FsoBuildItemViewModel(build, this));
+                    }
+                    break;
+                case FsoStability.RC:
+                    var previousRc = RcItems.FirstOrDefault(b => string.Compare(b.Date, build.date) < 0);
+                    if (previousRc != null)
+                    {
+                        int index = RcItems.IndexOf(previousRc);
+                        if (index == -1)
+                            index = 0;
+                        RcItems.Insert(index, new FsoBuildItemViewModel(build, this));
+                    }
+                    else
+                    {
+                        RcItems.Add(new FsoBuildItemViewModel(build, this));
+                    }
+                    break;
+                case FsoStability.Nightly:
+                    var previousNL = NightlyItems.FirstOrDefault(b => string.Compare(b.Date, build.date) < 0);
+                    if (previousNL != null)
+                    {
+                        int index = NightlyItems.IndexOf(previousNL);
+                        if (index == -1)
+                            index = 0;
+                        NightlyItems.Insert(index, new FsoBuildItemViewModel(build, this));
+                    }
+                    else
+                    {
+                        NightlyItems.Add(new FsoBuildItemViewModel(build, this));
+                    }
+                    break;
+                case FsoStability.Custom:
+                    var previousCu = CustomItems.FirstOrDefault(b => string.Compare(b.Date, build.date) < 0);
+                    if (previousCu != null)
+                    {
+                        int index = CustomItems.IndexOf(previousCu);
+                        if (index == -1)
+                            index = 0;
+                        CustomItems.Insert(index, new FsoBuildItemViewModel(build, this));
+                    }
+                    else
+                    {
+                        CustomItems.Add(new FsoBuildItemViewModel(build, this));
+                    }
+                    break;
             }
         }
 
@@ -95,7 +129,6 @@ namespace Knossos.NET.ViewModels
                 dialog.DataContext = new AddUserBuildViewModel();
 
                 await dialog.ShowDialog<AddUserBuildView?>(MainWindow.instance);
-                LoadCustomBuilds();
             }
         }
     }

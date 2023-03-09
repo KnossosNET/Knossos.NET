@@ -171,6 +171,21 @@ namespace Knossos.NET.Classes
                 return false;
             }
 
+            if (dependencyVersion.Contains("<="))
+            {
+                var versionDep = new SemanticVersion(dependencyVersion.Replace("<=", ""));
+                /* major minor and revision needs to be equal or inferior*/
+                if (version.major <= versionDep.major || version.major == versionDep.major && version.minor <= versionDep.minor || version.major == versionDep.major && version.minor == versionDep.minor && version.revision <= versionDep.revision)
+                {
+                    if (Compare(version, versionDep) <= 0)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
             if (Compare(version, new SemanticVersion(dependencyVersion)) == 0)
             {
                 return true;

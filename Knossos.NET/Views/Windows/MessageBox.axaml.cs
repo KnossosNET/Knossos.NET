@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.Views
@@ -24,9 +25,10 @@ namespace Knossos.NET.Views
 
         public MessageBox()
         {
-            AvaloniaXamlLoader.Load(this);
+            AvaloniaXamlLoader.Load(this);//not thread safe!
         }
 
+        //Messagebox is not thread safe!
         public static Task<MessageBoxResult> Show(Window parent, string text, string title, MessageBoxButtons buttons)
         {
             var msgbox = new MessageBox()

@@ -9,7 +9,7 @@
         x:Class="Knossos.NET.Views.MainWindow"
         Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterScreen"
-        Title="Knossos.NET v0.0.1">
+        Title="Knossos.NET v0.0.2-Alpha">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -34,9 +34,7 @@
 			</TabItem>
 			<!--FSO Builds-->
 			<TabItem Header="Engine">
-				<ScrollViewer>
-					<v:FsoBuildsView Content="{Binding FsoBuildsView}"/>
-				</ScrollViewer>
+				<v:FsoBuildsView Margin="10" Content="{Binding FsoBuildsView}"/>
 			</TabItem>
 			<!--Dev-->
 			<TabItem Header="Develop">

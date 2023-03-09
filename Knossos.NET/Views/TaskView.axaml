@@ -4,14 +4,24 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Knossos.NET.Views.TaskView"
+			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
 			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
 
 	<Design.DataContext>
 		<vm:TaskViewModel/>
 	</Design.DataContext>
 
-	<StackPanel Height="100">
-		<Label>TaskView Not Implemented!</Label>
-	</StackPanel>
-	
+	<Border BorderBrush="Gray" BorderThickness="2" CornerRadius="1">
+		<ScrollViewer MaxHeight="500">
+			<Grid RowDefinitions="Auto">
+				<ListBox Grid.Row="0" Items="{Binding TaskList}" BorderThickness="1" BorderBrush="Black">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<v:TaskItemView Content="{Binding}"/>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</Grid>
+		</ScrollViewer>
+	</Border>
 </UserControl>

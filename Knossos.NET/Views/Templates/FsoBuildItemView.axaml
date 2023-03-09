@@ -47,9 +47,13 @@
 				</Border>
 			</WrapPanel>
 
-			<WrapPanel Grid.Column="3" Margin="30,0,0,0" HorizontalAlignment="Right">
+			<WrapPanel IsVisible="{Binding !IsDownloading}" Grid.Column="3" Margin="30,0,0,0" HorizontalAlignment="Right">
 				<Button FontWeight="Bold" IsVisible="{Binding IsInstalled}" Background="DarkRed" Command="{Binding DeleteBuildCommand}">Delete</Button>
-				<Button FontWeight="Bold" IsVisible="{Binding !IsInstalled}" Background="DarkGreen" Command="{Binding DownloadBuildCommand}">Download</Button>
+				<Button FontWeight="Bold" IsVisible="{Binding !IsInstalled}" IsEnabled="{Binding IsValid}" Background="DarkGreen" Command="{Binding DownloadBuildCommand}">Download</Button>
+			</WrapPanel>
+			<WrapPanel IsVisible="{Binding IsDownloading}" Grid.Column="3" Margin="30,0,0,0" HorizontalAlignment="Right">
+				<Label Foreground="White" FontWeight="Bold" FontSize="18">Downloading</Label>
+				<ProgressBar Width="200" Maximum="{Binding ProgressBarMax}" Minimum="0" Value="{Binding ProgressBarCurrent}" Margin="10,0,20,0" Height="20" ShowProgressText="False"></ProgressBar>
 			</WrapPanel>
 		</Grid>
 	</Border>

@@ -6,12 +6,16 @@
     <!--Avalonia doesen't support TrimMode=link currently,but we are working on that https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
     <TrimMode>copyused</TrimMode>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationIcon>Assets\knossos-icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <None Remove=".gitignore" />
     <None Remove="ViewModels\ModCardViewModel.cs~RF423e49e6.TMP" />
     <None Remove="Views\Windows\ModDetailsView.axaml~RF2bc1dec5.TMP" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\knossos-icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <!--This helps with theme dll-s trimming.
@@ -26,7 +30,8 @@
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.18" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
-    <PackageReference Include="XamlNameReferenceGenerator" Version="1.5.1" />
+    <PackageReference Include="SharpCompress" Version="0.32.2" />
+    <PackageReference Include="XamlNameReferenceGenerator" Version="1.6.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Views\Templates\DependencyItemView.axaml.cs">

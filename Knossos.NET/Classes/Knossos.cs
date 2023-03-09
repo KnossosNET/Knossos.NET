@@ -56,7 +56,7 @@ namespace Knossos.NET
             //Load knossos config
             LoadKnossosSettings();
 
-            //Load base path 
+            //Load base path from knossos legacy
             if(globalSettings.basePath == null)
             {
                 globalSettings.basePath = SysInfo.GetBasePathFromKnossosLegacy();
@@ -65,13 +65,18 @@ namespace Knossos.NET
             LoadBasePath();
         }
 
-        public async static void LoadBasePath()
+        public static void ResetBasePath()
         {
             mainView?.ClearBasePathViews();
             installedMods.Clear();
             engineBuilds.Clear();
             retailFs2RootFound = false;
+            TaskViewModel.Instance?.CancelAllRunningTasks();
+            LoadBasePath();
+        }
 
+        public async static void LoadBasePath()
+        {
             if (globalSettings.basePath != null)
             {
                 await FolderSearchRecursive(globalSettings.basePath);
@@ -79,8 +84,9 @@ namespace Knossos.NET
                 //Load config options to view, must be done after loading the fso builds due to flag data
                 mainView?.GlobalSettingsLoadData();
 
-                //Load FSO Builds to View
-                mainView?.LoadAllBuilds();
+                //Enter the nebula
+                //Note: this has to be done after scanning the local folder
+                await Task.Run(() => { Nebula.Trinity(); });
             }
         }
 
@@ -95,8 +101,9 @@ namespace Knossos.NET
             {
                 if (File.Exists(SysInfo.GetKnossosDataFolderPath() + @"\settings.json"))
                 {
-                    string jsonString = File.ReadAllText(SysInfo.GetKnossosDataFolderPath() + @"\settings.json");
-                    var tempSettings = JsonSerializer.Deserialize<GlobalSettings>(jsonString);
+                    using FileStream jsonFile = File.OpenRead(SysInfo.GetKnossosDataFolderPath() + @"\settings.json");
+                    var tempSettings = JsonSerializer.Deserialize<GlobalSettings>(jsonFile)!;
+                    jsonFile.Close();
                     if (tempSettings != null)
                     {
                         globalSettings = tempSettings;
@@ -569,8 +576,10 @@ namespace Knossos.NET
                                     mainView.AddInstalledMod(modJson);
                                     break;
 
-                                case "engine": 
-                                    engineBuilds.Add(new FsoBuild(path, modJson));
+                                case "engine":
+                                    var build = new FsoBuild(modJson);
+                                    engineBuilds.Add(build);
+                                    FsoBuildsViewModel.Instance?.AddBuildToUi(build);
                                     break;
                             }
                         }

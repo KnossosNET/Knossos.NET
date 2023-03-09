@@ -30,6 +30,8 @@ namespace Knossos.NET.Models
         public string? type { get; set; } // "<mod|tc|engine|tool|ext>",  Folder Structure: <Knossos>\TC\MOD-VER, <Knossos>\TC\TC-VER, <Knossos>\bin\ENGINE-VER, <Knossos>\FS2(TC)\<Retail fs2> + <MOD-VER FOLDERS>
         public string? parent { get; set; } // null if type=tc and tc name if type=mod. Examples TC: FS2, Wing_commander_saga, Solaris, etc. 
         public string version { get; set; } = "0.0.0"; // required, http://semver.org/
+        [JsonPropertyName("_private")]
+        public bool isPrivate { get; set; } = false;
         public string? stability { get; set; } // "<stable|rc|nightly>"  default: stable. Only applies to type == engine. 
         public string? description { get; set; } // optional, with optional html format, should match the mod.ini's description
         public string? notes { get; set; } // optional, these will be displayed during the installation.
@@ -75,6 +77,23 @@ namespace Knossos.NET.Models
             }
             this.fullPath = modPath;
             this.folderName = folderName;
+        }
+
+        /*
+            Clear all the data that is not needed for normal operation
+            (so everything not needed to play or view details/settings)
+        */
+        public void ClearUnusedData()
+        {
+            notes = null;
+            attachments.Clear();
+            foreach (ModPackage pkg in packages)
+            {
+                pkg.notes = null;
+                pkg.filelist = null;
+                pkg.files = null;
+                pkg.checkNotes = null;
+            }
         }
 
         /*
@@ -251,9 +270,9 @@ namespace Knossos.NET.Models
         {
             try
             {
-                string jsonString = File.ReadAllText(modPath + @"\mod.json");
-                var tempMod = JsonSerializer.Deserialize<Mod>(jsonString)!;
-
+                using FileStream jsonFile = File.OpenRead(modPath + @"\mod.json");
+                var tempMod = JsonSerializer.Deserialize<Mod>(jsonFile)!;
+                jsonFile.Close();
                 installed = tempMod.installed;
                 id = tempMod.id;
                 title = tempMod.title;
@@ -263,6 +282,7 @@ namespace Knossos.NET.Models
                 stability = tempMod.stability;
                 description = tempMod.description;
                 notes = tempMod.notes;
+                isPrivate = tempMod.isPrivate;
                 logo = tempMod.logo;
                 tile = tempMod.tile;
                 banner = tempMod.banner;
@@ -277,6 +297,7 @@ namespace Knossos.NET.Models
                 devMode = tempMod.devMode;
                 customBuild = tempMod.customBuild;
                 packages = tempMod.packages;
+                tempMod = null;
             }
             catch (Exception ex)
             {
@@ -436,14 +457,14 @@ public class ModFile
 
     public class ModProperties
     {
-        public bool x64 { get; set; } // optional
-        public bool sse2 { get; set; } // optional
-        public bool avx { get; set; } // optional
-        public bool avx2 { get; set; } // optional
+        public bool x64 { get; set; } 
+        public bool sse2 { get; set; } 
+        public bool avx { get; set; } 
+        public bool avx2 { get; set; }
 
         /* Knossos.NET added */
-        public bool arm64 { get; set; } // optional
-        public bool arm32 { get; set; } // optional
-        public bool other { get; set; } // optional
+        public bool arm64 { get; set; }
+        public bool arm32 { get; set; } 
+        public bool other { get; set; }
     }
 }

@@ -735,7 +735,7 @@ namespace Knossos.NET.ViewModels
                 {
                     Knossos.globalSettings.basePath = result;
                     Knossos.globalSettings.Save();
-                    Knossos.LoadBasePath();
+                    Knossos.ResetBasePath();
                     LoadData();
                 }
             }

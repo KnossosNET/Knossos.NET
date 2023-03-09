@@ -9,6 +9,8 @@ namespace Knossos.NET.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase 
     {
+        public static MainWindowViewModel? Instance { get; set; }
+
         /* UI Bindings, use the uppercase version, otherwise changes will not register */
         [ObservableProperty]
         private ModListViewModel installedModsView = new ModListViewModel();
@@ -30,6 +32,7 @@ namespace Knossos.NET.ViewModels
         public MainWindowViewModel()
         {
             Knossos.SetMainView(this);
+            Instance = this;
             Knossos.StartUp();
         }
 
@@ -48,12 +51,6 @@ namespace Knossos.NET.ViewModels
         public void RemoveInstalledMod(string id)
         {
             InstalledModsView.RemoveMod(id);
-        }
-
-
-        public void LoadAllBuilds()
-        {
-            FsoBuildsView.LoadAllBuilds();
         }
 
         public void GlobalSettingsLoadData()

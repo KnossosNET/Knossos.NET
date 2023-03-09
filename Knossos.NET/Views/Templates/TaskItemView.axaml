@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.TaskItemView"
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+	
+	<Design.DataContext>
+		<vm:TaskItemViewModel/>
+	</Design.DataContext>
+	<WrapPanel ToolTip.Tip="{Binding Tooltip}">
+		<Button Command="{Binding CancelTaskCommand}" IsVisible="{Binding CancelButtonVisible}" Margin="5,0,0,0" Height="20" FontSize="8" Background="Red" Foreground="Black" FontWeight="Bold">X</Button>
+		<!--Build Install-->
+		<WrapPanel IsVisible="{Binding IsBuildInstallTask}" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+			<TreeView Margin="10,0,0,0" Items="{Binding TaskRoot}">
+				<TreeView.DataTemplates>
+					<TreeDataTemplate DataType="vm:TaskItemViewModel" ItemsSource="{Binding TaskList}">
+						<WrapPanel>
+							<Label Height="20" Width="400" HorizontalContentAlignment="Left" FontSize="12" Margin="5,0,0,0" Content="{Binding Name}"/>
+							<ProgressBar Width="250" IsVisible="{Binding !IsMsgTask}" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="{Binding ShowProgressText}"></ProgressBar>
+							<Label Height="20" FontSize="12" Margin="5,0,0,0" Content="{Binding Info}"/>
+							<Label Height="20" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding IsCompleted}" Foreground="Green" Margin="10,0,0,0" Content="Task Complete!"/>
+							<Label Height="20" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding CancelTask}" Foreground="Red" Margin="10,0,0,0" Content="Task Canceled!"/>
+						</WrapPanel>
+					</TreeDataTemplate>
+				</TreeView.DataTemplates>
+			</TreeView>
+		</WrapPanel>
+		
+		<!--File Download-->
+		<WrapPanel IsVisible="{Binding IsFileDownloadTask}" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+			<Label Height="20" FontSize="12" Margin="5,0,0,0" Content="{Binding Name}"/>
+			<ProgressBar Width="400" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="True"></ProgressBar>
+			<Label Height="20" FontSize="12" Margin="5,0,0,0" Content="{Binding Info}"/>
+			<Label Height="20" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding IsCompleted}" Foreground="Green" Margin="10,0,0,0" Content="Task Complete!"/>
+			<Label Height="20" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding CancelTask}" Foreground="Red" Margin="10,0,0,0" Content="Task Canceled!"/>
+		</WrapPanel>
+		
+		<!--Message-->
+		<WrapPanel IsVisible="{Binding IsMsgTask}" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+			<TextBlock Height="20" FontSize="14" Margin="5,0,0,0" TextWrapping="Wrap" Text="{Binding Name}"/>
+		</WrapPanel>
+	
+	</WrapPanel>
+</UserControl>
