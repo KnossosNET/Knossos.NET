@@ -104,7 +104,11 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool ttsMulti = true;
         [ObservableProperty]
+        private bool ttsDescription = true;
+        [ObservableProperty]
         private int ttsVolume = 100;
+        [ObservableProperty]
+        private string? ttsVoiceName = null;
 
         /*JOYSTICK*/
         private ObservableCollection<ComboBoxItem> Joystick1Items { get; set; } = new ObservableCollection<ComboBoxItem>();
@@ -384,6 +388,7 @@ namespace Knossos.NET.ViewModels
             TtsIngame = Knossos.globalSettings.ttsIngame;
             TtsMulti = Knossos.globalSettings.ttsMulti;
             TtsVolume = Knossos.globalSettings.ttsVolume;
+            TtsDescription = Knossos.globalSettings.ttsDescription;
             VoiceItems.Clear();
             if (flagData != null && flagData.voices != null)
             {
@@ -406,6 +411,11 @@ namespace Knossos.NET.ViewModels
                     VoiceSelectedIndex = Knossos.globalSettings.ttsVoice.Value;
                 }
             }
+            if (Knossos.globalSettings.ttsVoiceName == null && VoiceItems.Count-1 >= VoiceSelectedIndex)
+            {
+                Knossos.globalSettings.ttsVoiceName = VoiceItems[VoiceSelectedIndex].Tag?.ToString();
+            }
+
             //Joysticks
             //The reason for this BS is that i cant re-use comboBox items in multiple controls
             Joystick1Items.Clear();
@@ -832,8 +842,13 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.ttsTechroom = TtsTechroom;
             Knossos.globalSettings.ttsIngame = TtsIngame;
             Knossos.globalSettings.ttsMulti = TtsMulti;
+            Knossos.globalSettings.ttsDescription = TtsDescription;
             Knossos.globalSettings.ttsVoice = VoiceSelectedIndex;
             Knossos.globalSettings.ttsVolume = TtsVolume;
+            if (VoiceSelectedIndex + 1 <= VoiceItems.Count)
+            {
+                Knossos.globalSettings.ttsVoiceName = VoiceItems[VoiceSelectedIndex].Tag?.ToString();
+            }
 
             /* JOYSTICKS */
             if (Joy1SelectedIndex + 1 <= Joystick1Items.Count)
@@ -895,7 +910,10 @@ namespace Knossos.NET.ViewModels
 
         private void TestVoiceCommand()
         {
-
+            if (VoiceSelectedIndex != -1)
+            {
+                Knossos.Tts("Developed in a joint operation by the Vasudan and Terran governments, the GTF Ulysses is an excellent all-around fighter. It offers superior maneuverability and a high top speed.", VoiceItems[VoiceSelectedIndex].Tag!.ToString(), TtsVolume);
+            }
         }
 
         private void GlobalCmdHelp()

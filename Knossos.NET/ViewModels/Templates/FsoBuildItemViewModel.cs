@@ -59,6 +59,10 @@ namespace Knossos.NET.ViewModels
             title = build.ToString();
             date = build.date;
             isInstalled = build.isInstalled;
+            if(build.stability == FsoStability.Custom)
+            {
+                Tooltip = build.description;
+            }
 
             foreach(var exe in build.executables)
             {

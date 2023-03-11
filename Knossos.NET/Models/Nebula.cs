@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Knossos.NET.ViewModels;
 using System.Linq;
 using System.Text.Json.Serialization;
+using Avalonia.Threading;
 
 namespace Knossos.NET.Models
 {
@@ -95,7 +96,8 @@ namespace Knossos.NET.Models
 
                     JsonSerializerOptions serializerOptions = new JsonSerializerOptions();
                     var mods = JsonSerializer.DeserializeAsyncEnumerable<Mod?>(fileStream);
-                    
+
+                    Mod? lastMod = null;
                     await foreach (Mod? mod in mods)
                     {
                         if (mod != null && !mod.isPrivate)
@@ -106,7 +108,28 @@ namespace Knossos.NET.Models
                                 var isInstalled = Knossos.GetInstalledBuildsList(mod.id)?.Where(b => b.version == mod.version);
                                 if (isInstalled == null || isInstalled.Count() == 0)
                                 {
-                                    FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod));
+                                    await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod)), DispatcherPriority.Background);
+                                }
+                            }
+                            if (mod.type == "tc" || mod.type == "mod")
+                            {
+                                //This is already installed?
+                                var isInstalled = Knossos.GetInstalledModList(mod.id);
+                                if (isInstalled == null || isInstalled.Count() == 0)
+                                {
+                                    if(lastMod == null || lastMod.id == mod.id)
+                                    {
+                                        lastMod = mod;
+                                    }
+                                    else
+                                    {
+                                        if (lastMod.id != mod.id)
+                                        {
+                                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddNebulaMod(lastMod), DispatcherPriority.Background);
+                                            lastMod = mod;
+                                        }
+                                    }
+                                    
                                 }
                             }
                         }

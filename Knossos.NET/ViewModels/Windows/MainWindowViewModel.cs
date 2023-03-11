@@ -31,7 +31,6 @@ namespace Knossos.NET.ViewModels
 
         public MainWindowViewModel()
         {
-            Knossos.SetMainView(this);
             Instance = this;
             Knossos.StartUp();
         }
@@ -46,6 +45,11 @@ namespace Knossos.NET.ViewModels
         public void AddInstalledMod(Mod modJson)
         {
             InstalledModsView.AddMod(modJson);
+        }
+
+        public void AddNebulaMod(Mod modJson)
+        {
+            NebulaModsView.AddMod(modJson);
         }
 
         public void RemoveInstalledMod(string id)

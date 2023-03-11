@@ -186,15 +186,16 @@
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Voice</TextBlock>
 							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding VoiceSelectedIndex}" Items="{Binding VoiceItems}" IsEnabled="{Binding EnableTTS}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
-							<Button IsVisible="False" Command="{Binding TestVoiceCommand}" IsEnabled="{Binding EnableTTS}" Margin="5,0,0,0" Background="Black" Foreground="White" Grid.Column="2">Test</Button>
+							<Button IsVisible="{Binding EnableTTS}" Command="{Binding TestVoiceCommand}" IsEnabled="{Binding EnableTTS}" Margin="5,0,0,0" Background="Black" Foreground="White" Grid.Column="2">Test</Button>
 						</Grid>
 						<Button Command="{Binding OpenGetVoices}" IsVisible="{Binding WindowsOS}" Margin="214,5,0,5" Background="Black" Foreground="White" Grid.Column="2">Get Additional SAPI Voices</Button>
-						<Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" Margin="5">
+						<Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="210">Enabled in</TextBlock>
 							<CheckBox Grid.Column="1" IsChecked="{Binding TtsTechroom}" IsEnabled="{Binding EnableTTS}">Techroom</CheckBox>
 							<CheckBox Grid.Column="2" IsChecked="{Binding TtsBriefings}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Briefings</CheckBox>
 							<CheckBox Grid.Column="3" IsChecked="{Binding TtsIngame}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Ingame</CheckBox>
 							<CheckBox Grid.Column="4" IsChecked="{Binding TtsMulti}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Multi</CheckBox>
+							<CheckBox Grid.Column="5" IsChecked="{Binding TtsDescription}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Mod Description</CheckBox>
 						</Grid>
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Speech Volume</TextBlock>

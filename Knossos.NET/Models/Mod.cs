@@ -79,6 +79,11 @@ namespace Knossos.NET.Models
             this.folderName = folderName;
         }
 
+        public override string ToString()
+        {
+            return title + " " + version;
+        }
+
         /*
             Clear all the data that is not needed for normal operation
             (so everything not needed to play or view details/settings)

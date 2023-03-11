@@ -14,16 +14,7 @@
 	<Grid RowDefinitions="Auto,*">
 		<TabControl Grid.Row="1">
 			<TabItem Header="Stable Builds" VerticalContentAlignment="Center">
-				<ListBox Items="{Binding StableItems}">
-					<ListBox.ItemTemplate>
-						<DataTemplate>
-							<v:FsoBuildItemView Content="{Binding}"/>
-						</DataTemplate>
-					</ListBox.ItemTemplate>
-				</ListBox>
-			</TabItem>
-			<TabItem Header="RC Builds">
-				<ListBox Items="{Binding RcItems}">
+				<ListBox Items="{Binding StableItems}" VirtualizationMode="Simple">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<v:FsoBuildItemView Content="{Binding}"/>
@@ -32,7 +23,7 @@
 				</ListBox>
 			</TabItem>
 			<TabItem Header="Nightly Builds">
-				<ListBox Items="{Binding NightlyItems}">
+				<ListBox Items="{Binding NightlyItems}" VirtualizationMode="Simple">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<v:FsoBuildItemView Content="{Binding}"/>
@@ -40,10 +31,19 @@
 					</ListBox.ItemTemplate>
 				</ListBox>
 			</TabItem>
-			<TabItem Header="Custom Builds">
+			<TabItem Header="RC Builds">
+				<ListBox Items="{Binding RcItems}" VirtualizationMode="Simple">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<v:FsoBuildItemView Content="{Binding}"/>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</TabItem>
+			<TabItem Header="Custom Builds" >
 				<Grid RowDefinitions="Auto,*">
 					<Button Command="{Binding CommandAddUserBuild}" Margin="0,0,0,5">Add Build</Button>
-					<ListBox Grid.Row="1" Items="{Binding CustomItems}">
+					<ListBox Grid.Row="1" Items="{Binding CustomItems}" VirtualizationMode="Simple">
 						<ListBox.ItemTemplate>
 							<DataTemplate>
 								<v:FsoBuildItemView Content="{Binding}"/>

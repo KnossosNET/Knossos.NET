@@ -35,44 +35,44 @@
 				<TextBlock Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" Foreground="White"/>
 			</StackPanel>
 			<!--Message Overlay-->
-			<StackPanel Name="Messages" ZIndex="2">
+			<StackPanel IsVisible="{Binding IsInstalled}" Name="Messages" ZIndex="2">
 				<!--Version-->
-				<Grid Height="20" IsVisible="{Binding ShowVersion}">
+				<Grid Height="20">
 					<StackPanel Width="150" Background="Black" HorizontalAlignment="Left"></StackPanel>
 					<Label Content="{Binding ModVersion}" FontWeight="Bold" FontSize="12" Width="150" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				</Grid>
-				<!--Update-->
-				<Grid Height="20" IsVisible="{Binding UpdateAvalible}">
-					<StackPanel Width="150" Background="Blue" HorizontalAlignment="Left"></StackPanel>
-					<Label Content="Update Avalible!" FontWeight="Bold" FontSize="12" Width="150" HorizontalContentAlignment="Center" Foreground="White"/>
-				</Grid>
 			</StackPanel>
-			<!--Mouse Over Overlay-->
-			<StackPanel Name="Overlay" ZIndex="1" Background="Black" Height="225" VerticalAlignment="Top">
-				<!--MissionType-->
-				<Grid Height="20" Margin="0,40,0,0">
-					<!--<StackPanel Width="150" Background="{Binding BorderColor}" HorizontalAlignment="Left"></StackPanel>-->
-					<!--<Label Content="{Binding MissionTypeText}" FontWeight="Bold" FontSize="12" Width="150" HorizontalContentAlignment="Center" Foreground="White"/>-->
-				</Grid>
-				<!--Buttons 1-->
-				<StackPanel IsVisible="{Binding ButtonPage1}">
-					<Button Command="{Binding ButtonCommandPlay}" Content="Play" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,5,0,0" Width="100" ></Button>
-					<Button Command="{Binding ButtonCommandUpdate}" Content="Update" IsVisible="{Binding UpdateAvalible}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Blue" Margin="0,2,0,0" Width="100" ></Button>
-					<Button Command="{Binding ButtonCommandDetails}" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Gray" Margin="0,2,0,0" Width="100" ></Button>
-					<Button Command="{Binding ButtonCommandSettings}" Content="Settings" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,2,0,0" Width="100" ></Button>
+
+			<StackPanel ToolTip.Tip="{Binding Tooltip}" Name="Overlay" ZIndex="1" Background="Black" Height="225" VerticalAlignment="Top">
+				<StackPanel IsVisible="{Binding #Overlay.Opacity}">
+					<!--Installed Overlay-->
+					<StackPanel IsVisible="{Binding IsInstalled}">
+						<!--Buttons 1-->
+						<StackPanel Margin="0,40,0,0" IsVisible="{Binding ButtonPage1}">
+							<Button Command="{Binding ButtonCommandPlay}" Content="Play" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,5,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommandUpdate}" Content="Update" IsVisible="{Binding UpdateAvalible}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Blue" Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommandDetails}" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Gray" Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommandSettings}" Content="Settings" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,2,0,0" Width="100" ></Button>
+						</StackPanel>
+						<!--Buttons 2-->
+						<StackPanel Margin="0,40,0,0" IsVisible="{Binding !ButtonPage1}">
+							<Button Command="{Binding ButtonCommandFred2}" Content="Fred2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,5,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommandDebug}" Content="Fso Debug" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,5,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommandQtFred}" Content="QtFred" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,5,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommandDelete}" Content="Delete" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,5,0,0" Width="100" ></Button>
+						</StackPanel>
+						<!--Page Control-->
+						<Grid ColumnDefinitions="Auto,Auto" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10">
+							<Button IsVisible="{Binding ButtonPage1}" Command="{Binding ButtonCommandGoPage2}" Grid.Column="0">↓</Button>
+							<Button IsVisible="{Binding !ButtonPage1}" Command="{Binding ButtonCommandGoPage1}" Grid.Column="1">↑</Button>
+						</Grid>
+					</StackPanel>
+					<!--Nebula Overlay--> 
+					<StackPanel IsVisible="{Binding !IsInstalled}" Margin="0,40,0,0">
+						<Button Command="{Binding ButtonCommandPlay}" Content="Install" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,5,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommandDetails}" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,5,0,0" Width="100" ></Button>
+					</StackPanel>
 				</StackPanel>
-				<!--Buttons 2-->
-				<StackPanel IsVisible="{Binding !ButtonPage1}">
-					<Button Command="{Binding ButtonCommandFred2}" Content="Fred2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,5,0,0" Width="100" ></Button>
-					<Button Command="{Binding ButtonCommandDebug}" Content="Fso Debug" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,5,0,0" Width="100" ></Button>
-					<Button Command="{Binding ButtonCommandQtFred}" Content="QtFred" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,5,0,0" Width="100" ></Button>
-					<Button Command="{Binding ButtonCommandDelete}" Content="Delete" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,5,0,0" Width="100" ></Button>
-				</StackPanel>
-				<!--Page Control-->
-				<Grid ColumnDefinitions="Auto,Auto" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10">
-					<Button IsVisible="{Binding ButtonPage1}" Command="{Binding ButtonCommandGoPage2}" Grid.Column="0">↓</Button>
-					<Button IsVisible="{Binding !ButtonPage1}" Command="{Binding ButtonCommandGoPage1}" Grid.Column="1">↑</Button>
-				</Grid>
 			</StackPanel>
 		</Grid>
 

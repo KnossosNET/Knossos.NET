@@ -11,6 +11,8 @@ using Knossos.NET.Views;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using System.Text.RegularExpressions;
 
 namespace Knossos.NET.ViewModels
 {
@@ -31,15 +33,15 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool visible = true;
         [ObservableProperty]
-        private bool showVersion = true;
-        [ObservableProperty]
         private bool updateAvalible = false;
+        [ObservableProperty]
+        private bool isInstalled = false;
         [ObservableProperty]
         private IBrush borderColor = Brushes.Green;
         [ObservableProperty]
-        private string missionTypeText = "Singleplayer";
-        [ObservableProperty]
         private bool buttonPage1 = true;
+        [ObservableProperty]
+        private string? tooltip;
 
 
         /* Should only be used by the editor preview */
@@ -57,26 +59,39 @@ namespace Knossos.NET.ViewModels
 
         public ModCardViewModel(Mod modJson)
         {
-            Log.Add(Log.LogSeverity.Information, "ModCardViewModel(Constructor)", "Creating mod card for " + modJson.folderName);
+            Log.Add(Log.LogSeverity.Information, "ModCardViewModel(Constructor)", "Creating mod card for " + modJson.title +" "+ modJson.version);
             modJson.ClearUnusedData();
             modVersions.Add(modJson);
             Name = modJson.title;
             ModVersion = modJson.version;
             ID = modJson.id;
+            IsInstalled = modJson.installed;
+            if (modJson.description != null)
+            {
+                if (modJson.description.Length > 500)
+                {
+                    Tooltip = Regex.Replace(modJson.description.Substring(0, 500) + "\n...", @" ?\[.*?\]", string.Empty);
+
+                }
+                else
+                {
+                    Tooltip = Regex.Replace(modJson.description, @" ?\[.*?\]", string.Empty);
+                }
+            }
             LoadImage();
         }
         
         public void AddModVersion(Mod modJson)
         {
-            Log.Add(Log.LogSeverity.Information, "ModCardViewModel.AddModVersion()", "Adding additional version for mod id: " + ID + " -> " + modJson.folderName);
             modJson.ClearUnusedData();
+            Log.Add(Log.LogSeverity.Information, "ModCardViewModel.AddModVersion()", "Adding additional version for mod id: " + ID + " -> " + modJson.folderName);
             modVersions.Add(modJson);
-            if (SemanticVersion.Compare(modJson.version,modVersions[activeVersionIndex].version) > 0)
+            if (SemanticVersion.Compare(modJson.version, modVersions[activeVersionIndex].version) > 0)
             {
                 Log.Add(Log.LogSeverity.Information, "ModCardViewModel.AddModVersion()", "Changing active version for this mod from " + modVersions[activeVersionIndex].version + " to " + modJson.version);
                 activeVersionIndex = modVersions.Count - 1;
                 Name = modJson.title;
-                ModVersion = modJson.version + " (+" + (modVersions.Count-1) +")";
+                ModVersion = modJson.version + " (+" + (modVersions.Count - 1) + ")";
                 LoadImage();
             }
         }
@@ -88,7 +103,19 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Information, "ModCardViewModel.SwitchModVersion()", "Changing active version for mod id " + ID + " to " + modVersions[newIndex].version);
                 activeVersionIndex = newIndex;
                 Name = modVersions[newIndex].title;
-                ModVersion = modVersions[newIndex].version + " (+" + (modVersions.Count - 1) + ")"; ;
+                ModVersion = modVersions[newIndex].version + " (+" + (modVersions.Count - 1) + ")";
+                if (modVersions[newIndex].description != null)
+                {
+                    if (modVersions[newIndex].description!.Length > 500)
+                    {
+                        Tooltip = Regex.Replace(modVersions[newIndex].description!.Substring(0, 500) + "\n...", @" ?\[.*?\]", string.Empty);
+
+                    }
+                    else
+                    {
+                        Tooltip = Regex.Replace(modVersions[newIndex].description!, @" ?\[.*?\]", string.Empty);
+                    }
+                }
                 LoadImage();
             }
         }
@@ -166,6 +193,7 @@ namespace Knossos.NET.ViewModels
 
         private void LoadImage()
         {
+            Image?.Dispose();
             var assets = Avalonia.AvaloniaLocator.Current.GetService<IAssetLoader>();
             if (assets != null)
             {
@@ -201,8 +229,11 @@ namespace Knossos.NET.ViewModels
                 {
                     HttpResponseMessage response = await client.GetAsync(url);
                     byte[] content = await response.Content.ReadAsByteArrayAsync();
-                    Stream stream = new MemoryStream(content);
-                    Image = new Avalonia.Media.Imaging.Bitmap(stream);
+                    await using (Stream stream = new MemoryStream(content))
+                    {
+                        
+                        Image = new Bitmap(stream);
+                    }
                 }
             }
             catch (Exception ex)

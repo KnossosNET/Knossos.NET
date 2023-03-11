@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
@@ -30,11 +30,9 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private Bitmap? banner = null;
         [ObservableProperty]
-        private bool updateAvalible = true;
-        [ObservableProperty]
         private bool forumAvalible = true;
         [ObservableProperty]
-        private List<Image> imageCarousel = new List<Image>();
+        private bool isInstalled = true;
         private ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
         private int itemSelectedIndex = 0;
@@ -81,6 +79,25 @@ namespace Knossos.NET.ViewModels
 
             if (modVersions.Count == 1)
                 LoadVersion(0);
+
+            if(Knossos.globalSettings.ttsDescription)
+            {
+                PlayDescription(500);
+            }
+        }
+
+        private async void PlayDescription(int delay = 0)
+        {
+            if(delay > 0)
+            {
+                await Task.Delay(delay);
+            }
+            Knossos.Tts(Regex.Replace(modVersions[ItemSelectedIndex].description!, @" ?\[.*?\]", string.Empty));
+        }
+
+        private void StopTts()
+        {
+            Knossos.Tts(string.Empty);
         }
 
         private void LoadVersion(int index)
@@ -89,6 +106,15 @@ namespace Knossos.NET.ViewModels
             LastUpdated = modVersions[index].lastUpdate;
             Description = modVersions[index].description;
             Released = modVersions[index].firstRelease;
+            IsInstalled = modVersions[index].installed;
+            if (modVersions[index].releaseThread != null)
+            {
+                ForumAvalible = true;
+            }
+            else
+            {
+                ForumAvalible = false;
+            }
             LoadImage(index);
             modCard?.SwitchModVersion(index);
         }

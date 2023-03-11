@@ -1,5 +1,4 @@
-﻿using Avalonia.Controls.Shapes;
-using Knossos.NET.Classes;
+﻿using Avalonia.Threading;
 using Knossos.NET.Models;
 using Knossos.NET.ViewModels;
 using Knossos.NET.Views;
@@ -15,11 +14,11 @@ namespace Knossos.NET
 {
     public static class Knossos
     {
-        private static MainWindowViewModel? mainView;
         private static List<Mod> installedMods = new List<Mod>();
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();
         public static GlobalSettings globalSettings = new GlobalSettings();
         public static bool retailFs2RootFound = false;
+        private static object? ttsObject = null;
 
         public static async void StartUp()
         {            
@@ -67,7 +66,7 @@ namespace Knossos.NET
 
         public static void ResetBasePath()
         {
-            mainView?.ClearBasePathViews();
+            MainWindowViewModel.Instance?.ClearBasePathViews();
             installedMods.Clear();
             engineBuilds.Clear();
             retailFs2RootFound = false;
@@ -82,7 +81,7 @@ namespace Knossos.NET
                 await FolderSearchRecursive(globalSettings.basePath);
 
                 //Load config options to view, must be done after loading the fso builds due to flag data
-                mainView?.GlobalSettingsLoadData();
+                MainWindowViewModel.Instance?.GlobalSettingsLoadData();
 
                 //Enter the nebula
                 //Note: this has to be done after scanning the local folder
@@ -121,11 +120,6 @@ namespace Knossos.NET
             {
                 Log.Add(Log.LogSeverity.Error, "GlobalSettings.Load()", ex);
             }
-        }
-
-        public static void SetMainView(MainWindowViewModel mainViewDataModel)
-        {
-            mainView = mainViewDataModel;
         }
 
         public static async void PlayMod(Mod mod, FsoExecType fsoExecType)
@@ -557,36 +551,27 @@ namespace Knossos.NET
                     try
                     {
                         var modJson = new Mod(path,di.Name);
-
-                        if (mainView != null)
+                        switch (modJson.type)
                         {
-                            switch (modJson.type)
-                            {
-                                case "tc":
-                                case "mod": 
-                                    installedMods.Add(modJson);
-                                    if (modJson.id == "FS2" && modJson.type == "tc" && modJson.parent == "FS2")
+                            case "tc":
+                            case "mod": 
+                                installedMods.Add(modJson);
+                                if (modJson.id == "FS2" && modJson.type == "tc" && modJson.parent == "FS2")
+                                {
+                                    if (File.Exists(modJson.fullPath + @"\root_fs2.vp"))
                                     {
-                                        if (File.Exists(modJson.fullPath + @"\root_fs2.vp"))
-                                        {
-                                            retailFs2RootFound = true;
-                                            Log.Add(Log.LogSeverity.Information, "Knossos.FolderSearchRecursive", "Found FS2 Root Pack!");
-                                        }
+                                        retailFs2RootFound = true;
+                                        Log.Add(Log.LogSeverity.Information, "Knossos.FolderSearchRecursive", "Found FS2 Root Pack!");
                                     }
-                                    mainView.AddInstalledMod(modJson);
-                                    break;
+                                }
+                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(modJson), DispatcherPriority.Background);
+                                break;
 
-                                case "engine":
-                                    var build = new FsoBuild(modJson);
-                                    engineBuilds.Add(build);
-                                    FsoBuildsViewModel.Instance?.AddBuildToUi(build);
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            /* This should not happen */
-                            Log.Add(Log.LogSeverity.Error, "Knossos.ModSearchRecursive", "Unable to proccess a mod because mainView was not set : "+path);
+                            case "engine":
+                                var build = new FsoBuild(modJson);
+                                engineBuilds.Add(build);
+                                await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(build), DispatcherPriority.Background);
+                                break;
                         }
                     }
                     catch (Exception ex)
@@ -630,7 +615,7 @@ namespace Knossos.NET
 
         public static void WriteToUIConsole(string message)
         {
-            mainView?.WriteToUIConsole(message);
+            MainWindowViewModel.Instance?.WriteToUIConsole(message);
         }
 
         public static void RemoveBuild(FsoBuild build)
@@ -651,7 +636,7 @@ namespace Knossos.NET
                 var delete = installedMods.Where(m => m.id == modId).ToList();
                 if (delete.Any())
                 {
-                    mainView?.RemoveInstalledMod(modId);
+                    MainWindowViewModel.Instance?.RemoveInstalledMod(modId);
                     foreach (var mod in delete)
                     {
                         Log.Add(Log.LogSeverity.Information, "Knossos.RemoveMod()", "Deleting mod: "+mod.title + " " +mod.version);
@@ -678,6 +663,70 @@ namespace Knossos.NET
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Knossos.RemoveMod()", ex);
+            }
+        }
+
+        public static void Tts(string text, string? voiceName = null, int? volume = null)
+        {
+            if(globalSettings.enableTts)
+            {
+                #pragma warning disable CA1416 //Im using sysinfo to ensure the incompatible code is not executed on a unsupported os
+                try
+                {
+                    if (SysInfo.IsWindows)
+                    {
+                        if(ttsObject != null)
+                        {
+                            var sp = (System.Speech.Synthesis.SpeechSynthesizer)ttsObject;
+                            sp.SpeakAsyncCancelAll();
+                        }
+                        if (text != string.Empty)
+                        {
+                            Task.Run(() =>
+                            {
+                                using (var sp = new System.Speech.Synthesis.SpeechSynthesizer())
+                                {
+                                    if (volume.HasValue)
+                                    {
+                                        sp.Volume = volume.Value;
+                                    }
+                                    else
+                                    {
+                                        sp.Volume = globalSettings.ttsVolume;
+                                    }
+                                    try
+                                    {
+                                        if (voiceName != null)
+                                        {
+                                            //I need to adjust for SAPI->OneCore voices name selector, remove "Desktop" and everything after "-"
+                                            sp.SelectVoice(voiceName.Replace("Desktop", "").Split("-")[0].Trim());
+                                        }
+                                        else
+                                        {
+                                            if (globalSettings.ttsVoiceName != null)
+                                                sp.SelectVoice(globalSettings.ttsVoiceName.Replace("Desktop", "").Split("-")[0].Trim());
+                                        }
+                                    }
+                                    catch (ArgumentException ex)
+                                    {
+                                        Log.Add(Log.LogSeverity.Error, "Knossos.Tts()", ex);
+                                    }
+                                    ttsObject = sp;
+                                    try
+                                    {
+                                        sp.Speak(text);
+                                    }
+                                    catch (OperationCanceledException) { }
+                                    ttsObject = null;
+                                }
+                            });
+                        }
+                    }
+                } catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "Knossos.Tts()", ex);
+                }
+                #pragma warning restore CA1416
             }
         }
     }

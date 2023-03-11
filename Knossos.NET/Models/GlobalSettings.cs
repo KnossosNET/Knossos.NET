@@ -80,8 +80,12 @@ namespace Knossos.NET.Models
         public bool ttsIngame { get; set; } = true;
         [JsonPropertyName("tts_multi")]
         public bool ttsMulti { get; set; } = true;
+        [JsonPropertyName("tts_description")]
+        public bool ttsDescription { get; set; } = true;
         [JsonPropertyName("tts_volume")]
         public int ttsVolume { get; set; } = 100;
+        [JsonPropertyName("tts_voice_name")]
+        public string? ttsVoiceName { get; set; } = null;
 
         /* JOYSTICKS */
         public Joystick? joystick1 { get; set; } = null;
