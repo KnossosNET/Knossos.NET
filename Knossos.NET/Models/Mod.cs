@@ -63,6 +63,10 @@ namespace Knossos.NET.Models
         public string folderName { get; set; } = string.Empty;
         [JsonIgnore]
         public ModSettings modSettings { get; set; } = new ModSettings();
+        [JsonIgnore]
+        public bool isSelected { get; set; } = false;
+        [JsonIgnore]
+        public bool isEnabled { get; set; } = false;
 
         public Mod()
         {
@@ -369,6 +373,12 @@ namespace Knossos.NET.Models
         public List<ModExecutable>? executables { get; set; } // optional
         [JsonPropertyName("check_notes")]
         public string? checkNotes { get; set; }
+
+        /* Added for Internal use Only */
+        [JsonIgnore]
+        public bool isSelected { get; set; } = false;
+        [JsonIgnore]
+        public bool isEnabled { get; set; } = false;
     }
 
     public class ModDependency
@@ -432,6 +442,11 @@ namespace Knossos.NET.Models
             }
 
             return validBuild;
+        }
+
+        public override string ToString()
+        {
+            return id + " " + version;
         }
     }
 

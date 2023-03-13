@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.Threading;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 
 namespace Knossos.NET.ViewModels
@@ -30,6 +32,15 @@ namespace Knossos.NET.ViewModels
                 modCard.AddModVersion(modJson);
             }
             
+        }
+
+        public void SetInstalling(string id, CancellationTokenSource cancelToken)
+        {
+            var modCard = FindModCard(id);
+            if (modCard != null)
+            {
+                modCard.InstallingMod(cancelToken);
+            }
         }
 
         public void RemoveMod(string id)

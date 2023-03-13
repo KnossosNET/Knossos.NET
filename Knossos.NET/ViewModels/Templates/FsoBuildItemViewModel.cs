@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Knossos.NET.ViewModels
 {
@@ -11,6 +12,7 @@ namespace Knossos.NET.ViewModels
     {
         private FsoBuild? build;
         private FsoBuildsViewModel? buildsView;
+        public CancellationTokenSource? cancellationTokenSource = null;
         [ObservableProperty]
         private string title;
         [ObservableProperty]
@@ -112,6 +114,12 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        private void CancelDownloadCommand()
+        {
+            cancellationTokenSource?.Cancel();
+            IsDownloading = false;
+        }
+
         private async void DownloadBuildCommand()
         {
             if (MainWindow.instance != null && build != null)
@@ -120,6 +128,7 @@ namespace Knossos.NET.ViewModels
                 if (result == MessageBox.MessageBoxResult.Yes)
                 {
                     IsDownloading = true;
+                    cancellationTokenSource = new CancellationTokenSource();
                     FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!,this)!;
                     if (newBuild != null)
                     {
@@ -128,6 +137,8 @@ namespace Knossos.NET.ViewModels
                         build = newBuild;
                     }
                     IsDownloading = false;
+                    cancellationTokenSource?.Dispose();
+                    cancellationTokenSource = null;
                 }
             }
         }

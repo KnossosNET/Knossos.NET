@@ -1,0 +1,55 @@
+<Window xmlns="https://github.com/avaloniaui"
+		x:Name="InstallModWindow"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Knossos.NET.Views.ModInstallView"
+		WindowStartupLocation="CenterScreen"
+		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+		xmlns:models="clr-namespace:Knossos.NET.Models;assembly=Knossos.NET"
+		Icon="/Assets/knossos-icon.ico"
+		SizeToContent="WidthAndHeight"
+		Title="{Binding Title}"
+		CanResize="True">
+	
+	<Design.DataContext>
+		<vm:ModInstallViewModel/>
+	</Design.DataContext>
+	
+	<Grid MinHeight="400" MinWidth="300" RowDefinitions="Auto,*,Auto" Background="#18191A">
+		<StackPanel Margin="0,20,0,0" Grid.Row="0">
+		<Label IsVisible="{Binding !DataLoaded}" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center">Loading data from repo...</Label>
+			<TextBlock Text="{Binding Name}" IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center"></TextBlock>
+			<ComboBox Items="{Binding ModVersions}" SelectedItem="{Binding SelectedMod}" SelectedIndex="{Binding SelectedIndex}"  IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="22" HorizontalAlignment="Center">
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding version}" />
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+		</StackPanel>
+		<TreeView IsVisible="{Binding DataLoaded}" Grid.Row="1" Margin="30" Items="{Binding ModInstallList}"  HorizontalAlignment="Center">
+			<TreeView.Styles>
+				<Style Selector="TreeViewItem">
+					<Setter Property="IsExpanded" Value="True" />
+				</Style>
+			</TreeView.Styles>
+			<TreeView.DataTemplates>
+				<TreeDataTemplate DataType="models:Mod" ItemsSource="{Binding packages}">
+					<WrapPanel>
+						<CheckBox Content="{Binding title}" IsChecked="{Binding isSelected}" IsEnabled="{Binding isEnabled}" MaxWidth="600" FontWeight="Bold"></CheckBox>
+						<TextBlock Margin="10,0,0,0" FontWeight="Bold" Text="{Binding version}" IsEnabled="{Binding isEnabled}" VerticalAlignment="Center" />
+					</WrapPanel>
+				</TreeDataTemplate>
+				<DataTemplate DataType="models:ModPackage">
+					<WrapPanel>
+						<CheckBox ToolTip.Tip="{Binding notes}" Content="{Binding name}" IsChecked="{Binding isSelected}" IsEnabled="{Binding isEnabled}" Width="350"></CheckBox>
+					</WrapPanel>
+				</DataTemplate>
+			</TreeView.DataTemplates>
+		</TreeView>
+		<Button IsVisible="{Binding DataLoaded}" Grid.Row="2" Command="{Binding InstallMod, Mode=OneWay}" CommandParameter="{Binding ElementName=InstallModWindow}" Background="Green" FontWeight="Bold" Width="150" HorizontalAlignment="Center" HorizontalContentAlignment="Center">Install</Button>
+	</Grid>
+	
+</Window>

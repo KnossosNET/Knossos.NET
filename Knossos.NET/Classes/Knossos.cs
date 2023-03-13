@@ -505,6 +505,11 @@ namespace Knossos.NET
             }
         }
 
+        public static Mod? GetInstalledMod(string id, string version)
+        {
+            return installedMods.FirstOrDefault(m => m.id == id && m.version == version);
+        }
+
         public static List<FsoBuild> GetInstalledBuildsList(string? id=null, FsoStability? stability = null)
         {
             if (id != null)

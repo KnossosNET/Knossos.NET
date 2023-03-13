@@ -43,7 +43,7 @@
 				</Grid>
 			</StackPanel>
 
-			<StackPanel ToolTip.Tip="{Binding Tooltip}" Name="Overlay" ZIndex="1" Background="Black" Height="225" VerticalAlignment="Top">
+			<StackPanel IsVisible="{Binding !IsInstalling}" ToolTip.Tip="{Binding Tooltip}" Name="Overlay" ZIndex="1" Background="Black" Height="225" VerticalAlignment="Top">
 				<StackPanel IsVisible="{Binding #Overlay.Opacity}">
 					<!--Installed Overlay-->
 					<StackPanel IsVisible="{Binding IsInstalled}">
@@ -69,10 +69,15 @@
 					</StackPanel>
 					<!--Nebula Overlay--> 
 					<StackPanel IsVisible="{Binding !IsInstalled}" Margin="0,40,0,0">
-						<Button Command="{Binding ButtonCommandPlay}" Content="Install" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,5,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommandInstall}" Content="Install" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,5,0,0" Width="100" ></Button>
 						<Button Command="{Binding ButtonCommandDetails}" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,5,0,0" Width="100" ></Button>
 					</StackPanel>
 				</StackPanel>
+			</StackPanel>
+			<!--Installing Overlay-->
+			<StackPanel IsVisible="{Binding IsInstalling}" Opacity="0.8" ZIndex="2" Background="Black" Height="225" VerticalAlignment="Top">
+				<Label Content="Installing..." FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="0,50,0,0" Width="100"></Label>
+				<Button Command="{Binding CancelInstall}" Content="Cancel" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,5,0,0" Width="100" ></Button>
 			</StackPanel>
 		</Grid>
 

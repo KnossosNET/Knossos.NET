@@ -21,7 +21,6 @@
 							<ProgressBar Width="250" IsVisible="{Binding !IsMsgTask}" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="{Binding ShowProgressText}"></ProgressBar>
 							<Label Height="20" FontSize="12" Margin="5,0,0,0" Content="{Binding Info}"/>
 							<Label Height="20" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding IsCompleted}" Foreground="Green" Margin="10,0,0,0" Content="Task Complete!"/>
-							<Label Height="20" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding CancelTask}" Foreground="Red" Margin="10,0,0,0" Content="Task Canceled!"/>
 						</WrapPanel>
 					</TreeDataTemplate>
 				</TreeView.DataTemplates>
@@ -34,7 +33,6 @@
 			<ProgressBar Width="400" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="True"></ProgressBar>
 			<Label Height="20" FontSize="12" Margin="5,0,0,0" Content="{Binding Info}"/>
 			<Label Height="20" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding IsCompleted}" Foreground="Green" Margin="10,0,0,0" Content="Task Complete!"/>
-			<Label Height="20" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding CancelTask}" Foreground="Red" Margin="10,0,0,0" Content="Task Canceled!"/>
 		</WrapPanel>
 		
 		<!--Message-->

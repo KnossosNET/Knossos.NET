@@ -13,6 +13,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Knossos.NET.ViewModels
 {
@@ -21,6 +22,7 @@ namespace Knossos.NET.ViewModels
         /* General Mod variables */
         private List<Mod> modVersions = new List<Mod>();
         private int activeVersionIndex = 0;
+        private CancellationTokenSource? cancellationTokenSource = null;
         public string ID { get; set; }
 
         /* UI Bindings */
@@ -42,6 +44,8 @@ namespace Knossos.NET.ViewModels
         private bool buttonPage1 = true;
         [ObservableProperty]
         private string? tooltip;
+        [ObservableProperty]
+        private bool isInstalling = false;
 
 
         /* Should only be used by the editor preview */
@@ -145,6 +149,26 @@ namespace Knossos.NET.ViewModels
         private void ButtonCommandUpdate()
         {
 
+        }
+
+        private async void ButtonCommandInstall()
+        {
+            var dialog = new ModInstallView();
+            dialog.DataContext = new ModInstallViewModel(modVersions[0]);
+            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
+        }
+
+        public void InstallingMod(CancellationTokenSource cancelToken)
+        {
+            IsInstalling = true;
+            cancellationTokenSource = cancelToken;
+        }
+
+        public void CancelInstall()
+        {
+            IsInstalling = false;
+            cancellationTokenSource?.Cancel();
+            cancellationTokenSource = null;
         }
 
         private async void ButtonCommandDelete()

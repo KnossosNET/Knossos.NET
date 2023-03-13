@@ -1,5 +1,7 @@
 ﻿using Knossos.NET.Models;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
@@ -8,6 +10,7 @@ namespace Knossos.NET.ViewModels
     {
         public static TaskViewModel? Instance { get; private set; }
         private ObservableCollection<TaskItemViewModel> TaskList { get; set; } = new ObservableCollection<TaskItemViewModel>();
+        public Queue<TaskItemViewModel> installQueue { get; set; } = new Queue<TaskItemViewModel>();
 
         public TaskViewModel() 
         {
@@ -39,7 +42,18 @@ namespace Knossos.NET.ViewModels
         {
             var newTask = new TaskItemViewModel();
             TaskList.Add(newTask);
-            return await newTask.InstallBuild(build, sender);
+            installQueue.Enqueue(newTask);
+            return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource);
+        }
+
+        public async void InstallMod(Mod mod)
+        {
+            var cancelSource = new CancellationTokenSource();
+            var newTask = new TaskItemViewModel();
+            TaskList.Add(newTask);
+            installQueue.Enqueue(newTask);
+            await newTask.InstallMod(mod, cancelSource);
+            cancelSource.Dispose();
         }
     }
 }
