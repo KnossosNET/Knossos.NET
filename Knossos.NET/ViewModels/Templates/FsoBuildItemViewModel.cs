@@ -114,10 +114,38 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        public bool CompareIdAndVersionToMod(Mod mod)
+        {
+            if(mod.id == build!.id && mod.version == build.version)
+            { 
+                return true; 
+            }
+            return false;
+        }
+
         private void CancelDownloadCommand()
         {
             cancellationTokenSource?.Cancel();
             IsDownloading = false;
+        }
+
+        public async void DownloadBuildExternal(Mod  mod)
+        {
+            if (!IsDownloading && !IsInstalled)
+            {
+                IsDownloading = true;
+                cancellationTokenSource = new CancellationTokenSource();
+                FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, mod)!;
+                if (newBuild != null)
+                {
+                    //Install completed
+                    IsInstalled = true;
+                    build = newBuild;
+                }
+                IsDownloading = false;
+                cancellationTokenSource?.Dispose();
+                cancellationTokenSource = null;
+            }
         }
 
         private async void DownloadBuildCommand()

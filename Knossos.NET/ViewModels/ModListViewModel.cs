@@ -52,6 +52,15 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        public void CancelModInstall(string id)
+        {
+            var modCard = FindModCard(id);
+            if (modCard != null)
+            {
+                modCard.CancelInstall();
+            }
+        }
+
         private ModCardViewModel? FindModCard(string modId) 
         {
             foreach (var mod in Mods)

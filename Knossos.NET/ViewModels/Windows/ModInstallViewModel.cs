@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
@@ -60,64 +61,117 @@ namespace Knossos.NET.ViewModels
         private async void UpdateSelectedVersion()
         {
             ModInstallList.Clear();
+            var allMods = await Nebula.GetAllModsWithID(null);
             if (SelectedMod != null)
             {
                 DataLoaded = false;
                 SelectedMod.isEnabled=false;
                 SelectedMod.isSelected = true;
-                AddModToList(SelectedMod);
                 Name = SelectedMod.title;
                 Version = SelectedMod.version;
-                var dependencies = SelectedMod.GetMissingDependenciesList();
-                var depMods = await Nebula.GetDependecyListModData(dependencies);
-                depMods.ForEach(mod => {
-                    mod.isEnabled = true;
-                    mod.isSelected = true;
-                    var dep = dependencies.FirstOrDefault(d => d.version == mod.version && d.id == mod.id);
-                    foreach (var pkg in mod.packages)
+                await ProcessMod(SelectedMod,allMods);
+            }
+            DataLoaded = true;
+            allMods.Clear();
+            GC.Collect();
+        }
+
+
+        private async Task ProcessMod(Mod mod, List<Mod> allMods)
+        {
+            var dependencies = mod.GetMissingDependenciesList();
+            AddModToList(mod);
+            foreach (var dep in dependencies)
+            {
+                var modDep = await dep.SelectModNebula(allMods);
+                if (modDep != null)
+                { 
+                    modDep.isEnabled = true;
+                    modDep.isSelected = true;
+                    foreach (var pkg in modDep.packages)
                     {
-                        if(dep != null && dep.packages != null)
+                        if (dep != null && dep.packages != null)
                         {
-                            foreach(var depPkg in dep.packages)
+                            foreach (var depPkg in dep.packages)
                             {
-                                if(depPkg == pkg.name)
+                                if (depPkg == pkg.name)
                                 {
                                     pkg.status = "required";
                                 }
                             }
                         }
                     }
-                    AddModToList(mod); 
-                });
-                DataLoaded = true;
+                    await ProcessMod(modDep, allMods);
+                }
             }
-            GC.Collect();
         }
 
         private void AddModToList(Mod mod)
         {
-            foreach (var pkg in mod.packages)
+            Mod? modInList = null;
+            foreach (var inList in ModInstallList)
             {
-                if (pkg.status!.ToLower() == "required")
+                if (mod.id == inList.id && inList.version == mod.version)
                 {
-                    pkg.isEnabled = false;
-                    pkg.isSelected = true;
+                    modInList = inList;
+                    continue;
                 }
-                else
+            }
+
+            if (modInList == null)
+            {
+                /* This mod was not added to the install list yet */
+                foreach (var pkg in mod.packages)
                 {
-                    if (pkg.status!.ToLower() == "recommended")
+                    if (pkg.status!.ToLower() == "required")
                     {
+                        pkg.isEnabled = false;
                         pkg.isSelected = true;
-                        pkg.isEnabled = true;
                     }
                     else
                     {
-                        pkg.isEnabled = true;
-                    }
+                        if (pkg.status!.ToLower() == "recommended")
+                        {
+                            pkg.isSelected = true;
+                            pkg.isEnabled = true;
+                        }
+                        else
+                        {
+                            pkg.isEnabled = true;
+                        }
 
+                    }
+                }
+                ModInstallList.Add(mod);
+            }
+            else
+            {
+                foreach(var pkgInList in modInList.packages)
+                {
+                    /* If the mod is already added make sure recommended and requiered packages are properly marked */
+                    foreach (var pkg in mod.packages)
+                    {
+                        if (pkgInList == pkg)
+                        {
+                            if (pkg.status!.ToLower() == "required")
+                            {
+                                pkgInList.isEnabled = false;
+                                pkgInList.isSelected = true;
+                            }
+                            else
+                            {
+                                if (pkg.status!.ToLower() == "recommended")
+                                {
+                                    pkgInList.isSelected = true;
+                                    pkgInList.isEnabled = true;
+                                }
+
+                            }
+                            continue;
+                        }
+                    }
                 }
             }
-            ModInstallList.Add(mod);
         }
 
         private void InstallMod(Window window)
@@ -126,6 +180,7 @@ namespace Knossos.NET.ViewModels
             {
                 TaskViewModel.Instance!.InstallMod(mod);
             }
+            ModInstallList.Clear();
             window.Close();
         }
     }

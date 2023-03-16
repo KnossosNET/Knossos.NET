@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Knossos.NET.Models;
+using System;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Knossos.NET
 {
@@ -50,16 +52,19 @@ namespace Knossos.NET
             var logString = DateTime.Now.ToString() + " - *" + GetSeverityString(logSeverity) + "* : (" + from + ") " + exception.Message;
             if (Knossos.globalSettings.enableLogFile && (int)logSeverity >= Knossos.globalSettings.logLevel)
             {
-                try
-                {
-                    StreamWriter writer = File.AppendText(LogFilePath);
-                    writer.WriteLine(logString, Encoding.UTF8);
-                    writer.Close();
+                Task.Run(async() => {
+                    try
+                    {
+                        await WaitForFileAccess(LogFilePath);
+                        StreamWriter writer = File.AppendText(LogFilePath);
+                        writer.WriteLine(logString, Encoding.UTF8);
+                        writer.Close();
 
-                }catch(Exception ex)
-                {
-                    WriteToConsole(ex.ToString());
-                }
+                    }catch(Exception ex)
+                    {
+                        WriteToConsole(ex.ToString());
+                    }
+                });
             }
             WriteToConsole(logString);
         }
@@ -70,6 +75,24 @@ namespace Knossos.NET
             if (Debugger.IsAttached)
             {
                 System.Diagnostics.Debug.WriteLine(data);
+            }
+        }
+
+        private static async Task WaitForFileAccess(string filename)
+        {
+            try
+            {
+                using (FileStream inputStream = File.Open(filename, FileMode.Open, FileAccess.Read))
+                {
+                    inputStream.Close();
+                    return;
+                }
+            }
+            catch (IOException)
+            {
+                Log.WriteToConsole("repo.json is in use. Waiting for file access...");
+                await Task.Delay(500);
+                await WaitForFileAccess(filename);
             }
         }
     }

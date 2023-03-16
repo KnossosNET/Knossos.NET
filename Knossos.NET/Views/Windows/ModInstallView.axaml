@@ -9,7 +9,8 @@
 		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
 		xmlns:models="clr-namespace:Knossos.NET.Models;assembly=Knossos.NET"
 		Icon="/Assets/knossos-icon.ico"
-		SizeToContent="WidthAndHeight"
+		SizeToContent="Width"
+		Height="500"
 		Title="{Binding Title}"
 		CanResize="True">
 	

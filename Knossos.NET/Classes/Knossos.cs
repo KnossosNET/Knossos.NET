@@ -247,6 +247,7 @@ namespace Knossos.NET
 
             /* Resolve Dependencies should be all valid at this point */
             var dependencyList = mod.GetModDependencyList();
+            bool hasBuildDependency = false;
             if (dependencyList != null)
             {
                 foreach (var dep in dependencyList)
@@ -263,29 +264,12 @@ namespace Knossos.NET
                             Do not do this if there is a user selected mod-especific or global build
                         */
                         //TODO: What if there are more than one engine build in dependency list? Im not sure what to do in that case.
-                        if (fsoBuild == null && mod.modSettings.customBuildId == null && Knossos.globalSettings.globalBuildId == null)
+                        if (fsoBuild == null && mod.modSettings.customBuildId == null)
                         {
+                            hasBuildDependency = true;
                             fsoBuild = dep.SelectBuild();
                         }
                     }
-                }
-            }
-
-            /* If its mod select and a global build is set assign it */
-            if (fsoBuild == null && Knossos.globalSettings.globalBuildId != null && mod.modSettings.customBuildId == null)
-            {
-                if (Knossos.globalSettings.globalBuildExec == null)
-                {
-                    fsoBuild = engineBuilds.FirstOrDefault(builds => builds.id == Knossos.globalSettings.globalBuildId && builds.version == Knossos.globalSettings.globalBuildVersion);
-                }
-                else
-                {
-                    fsoBuild = new FsoBuild(Knossos.globalSettings.globalBuildExec);
-                }
-
-                if (fsoBuild == null)
-                {
-                    Log.Add(Log.LogSeverity.Warning, "Knossos.PlayMod()", "Unable to find the global build for mod " + mod.title + " " + mod.version + " requested build " + mod.modSettings.customBuildId + " " + mod.modSettings.customBuildVersion);
                 }
             }
 
@@ -438,10 +422,15 @@ namespace Knossos.NET
             if(fsoBuild == null)
             {
                 Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", "Unable to find a valid FSO build for this mod!");
-                if (MainWindow.instance != null)
+                if(hasBuildDependency)
                 {
-                    await MessageBox.Show(MainWindow.instance, "Unable to find a valid FSO build for this mod!", "Error launching mod", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance!, "Unable to find a valid FSO build for this mod!", "Error launching mod", MessageBox.MessageBoxButtons.OK);
                 }
+                else
+                {
+                    await MessageBox.Show(MainWindow.instance!, "This mod does not especifies a engine build to use, you should select one in the mod settings.", "Error launching mod", MessageBox.MessageBoxButtons.OK);
+                }
+
                 return;
             }
             else
@@ -631,6 +620,11 @@ namespace Knossos.NET
         public static void AddBuild(FsoBuild build)
         {
             engineBuilds.Add(build);
+        }
+
+        public static void AddMod(Mod mod)
+        {
+            installedMods.Add(mod);
         }
 
         /* Remove ALL */

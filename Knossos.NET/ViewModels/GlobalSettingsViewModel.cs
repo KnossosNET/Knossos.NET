@@ -178,8 +178,6 @@ namespace Knossos.NET.ViewModels
 
         /*MOD / FS2 */
         [ObservableProperty]
-        private FsoBuildPickerViewModel? fsoPicker;
-        [ObservableProperty]
         private string globalCmd = string.Empty;
         [ObservableProperty]
         private int fs2LangSelectedIndex = 0;
@@ -601,40 +599,6 @@ namespace Knossos.NET.ViewModels
             }
 
             /* MOD SETTINGS */
-            //FSO VERSION
-            if (Knossos.globalSettings.globalBuildId != null)
-            {
-                if (Knossos.globalSettings.globalBuildExec != null)
-                {
-                    FsoPicker = new FsoBuildPickerViewModel(new FsoBuild(Knossos.globalSettings.globalBuildExec));
-                }
-                else
-                {
-                    var matchingBuilds = Knossos.GetInstalledBuildsList(Knossos.globalSettings.globalBuildId);
-                    if (matchingBuilds.Any())
-                    {
-                        var theBuild = matchingBuilds.First(build => build.version == Knossos.globalSettings.globalBuildVersion);
-                        if (theBuild != null)
-                        {
-                            FsoPicker = new FsoBuildPickerViewModel(theBuild);
-                        }
-                        else
-                        {
-                            Log.Add(Log.LogSeverity.Warning, "GlobalSettingsViewModel.LoadData()", "Missing user-saved global build version: " + Knossos.globalSettings.globalBuildId + " and version: " + Knossos.globalSettings.globalBuildVersion);
-                            FsoPicker = new FsoBuildPickerViewModel(null);
-                        }
-                    }
-                    else
-                    {
-                        Log.Add(Log.LogSeverity.Warning, "GlobalSettingsViewModel.LoadData()", "Missing user-saved global build, requested build id: " + Knossos.globalSettings.globalBuildId);
-                        FsoPicker = new FsoBuildPickerViewModel(null);
-                    }
-                }
-            }
-            else
-            {
-                FsoPicker = new FsoBuildPickerViewModel(null);
-            }
 
             //GLOBAL CMD
             if(Knossos.globalSettings.globalCmdLine != null)
@@ -659,67 +623,39 @@ namespace Knossos.NET.ViewModels
         private FlagsJsonV1? GetFlagData()
         {
             FlagDataLoaded = false;
-            if (Knossos.globalSettings.globalBuildId == null)
-            { 
-                var builds = Knossos.GetInstalledBuildsList();
+            var builds = Knossos.GetInstalledBuildsList();
 
-                if (builds.Any())
-                {
-                    //First the stable ones
-                    var stables = builds.Where(b => b.stability == FsoStability.Stable);
-                    if (stables.Any())
-                    {
-                        foreach (var stable in stables)
-                        {
-                            var flags = stable.GetFlagsV1();
-                            if (flags != null)
-                            {
-                                FlagDataLoaded = true;
-                                SysInfo.SetFSODataFolderPath(flags.pref_path);
-                                return flags;
-                            }
-                        }
-                    }
-
-                    //If we are still here try all others
-                    var others = builds.Where(b => b.stability != FsoStability.Stable);
-                    if (others.Any())
-                    {
-                        foreach (var other in others)
-                        {
-                            var flags = other.GetFlagsV1();
-                            if (flags != null)
-                            {
-                                FlagDataLoaded = true;
-                                SysInfo.SetFSODataFolderPath(flags.pref_path);
-                                return flags;
-                            }
-                        }
-                    }
-                }
-            }
-            else
+            if (builds.Any())
             {
-                if (Knossos.globalSettings.globalBuildExec == null)
+                //First the stable ones
+                var stables = builds.Where(b => b.stability == FsoStability.Stable);
+                if (stables.Any())
                 {
-                    var globalBuild = Knossos.GetInstalledBuildsList().FirstOrDefault(builds => builds.id == Knossos.globalSettings.globalBuildId && builds.version == Knossos.globalSettings.globalBuildVersion);
-                    var flags = globalBuild?.GetFlagsV1();
-                    if (flags != null)
+                    foreach (var stable in stables)
                     {
-                        FlagDataLoaded = true;
-                        SysInfo.SetFSODataFolderPath(flags.pref_path);
-                        return flags;
+                        var flags = stable.GetFlagsV1();
+                        if (flags != null)
+                        {
+                            FlagDataLoaded = true;
+                            SysInfo.SetFSODataFolderPath(flags.pref_path);
+                            return flags;
+                        }
                     }
                 }
-                else
+
+                //If we are still here try all others
+                var others = builds.Where(b => b.stability != FsoStability.Stable);
+                if (others.Any())
                 {
-                    var globalBuild = new FsoBuild(Knossos.globalSettings.globalBuildExec);
-                    var flags = globalBuild?.GetFlagsV1();
-                    if (flags != null)
+                    foreach (var other in others)
                     {
-                        FlagDataLoaded = true;
-                        SysInfo.SetFSODataFolderPath(flags.pref_path);
-                        return flags;
+                        var flags = other.GetFlagsV1();
+                        if (flags != null)
+                        {
+                            FlagDataLoaded = true;
+                            SysInfo.SetFSODataFolderPath(flags.pref_path);
+                            return flags;
+                        }
                     }
                 }
             }
@@ -869,20 +805,7 @@ namespace Knossos.NET.ViewModels
             }
 
             /* MOD SETTINGS */
-            //GLOBAL BUILD
-            var globalBuild = FsoPicker?.GetSelectedFsoBuild();
-            if (globalBuild != null)
-            {
-                Knossos.globalSettings.globalBuildId = globalBuild.id;
-                Knossos.globalSettings.globalBuildVersion = globalBuild.version;
-                Knossos.globalSettings.globalBuildExec = globalBuild.directExec;
-            }
-            else
-            {
-                Knossos.globalSettings.globalBuildId = null;
-                Knossos.globalSettings.globalBuildVersion = null;
-                Knossos.globalSettings.globalBuildExec = null;
-            }
+
             //GLOBAL CMD
             if (GlobalCmd.Trim().Length > 0)
             {

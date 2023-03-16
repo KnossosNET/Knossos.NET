@@ -371,7 +371,7 @@ namespace Knossos.NET.Models
            Official FSO builds from nebula use "FSO" as id, only check stability on those.
            For all others the stability is "custom" since we cant really know.    
         */
-        private FsoStability GetFsoStability(string? stability, string? modId)
+        public static FsoStability GetFsoStability(string? stability, string? modId)
         {
             if (modId == null || stability == null)
             {

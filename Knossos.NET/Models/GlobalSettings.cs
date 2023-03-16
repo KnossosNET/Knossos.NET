@@ -94,15 +94,6 @@ namespace Knossos.NET.Models
         public Joystick? joystick4 { get; set; } = null;
 
         /*GLOBAL FSO*/
-        [JsonPropertyName("global_build_id")]
-        public string? globalBuildId { get; set; } = null;
-
-        [JsonPropertyName("global_build_version")]
-        public string? globalBuildVersion { get; set; } = null;
-
-        [JsonPropertyName("global_build_exec")]
-        public string? globalBuildExec { get; set; } = null;
-
         [JsonPropertyName("global_cmdline")]
         public string? globalCmdLine { get; set; } = null;
 

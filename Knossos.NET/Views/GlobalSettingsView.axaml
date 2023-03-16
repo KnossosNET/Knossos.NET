@@ -239,11 +239,6 @@
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<Label FontWeight="Bold">FSO Global Settings</Label>
-						<!-- GLOBAL FSO BUiLD -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<Label ToolTip.Tip="The global FSO build, if set, will be used as the 'Mod default' build for all mods." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Default FSO Build</Label>
-							<v:FsoBuildPickerView Content="{Binding FsoPicker}" ToolTip.Tip="The global FSO build, if set, will be used as the 'Mod default' build for all mods." Grid.Column="1" Width="600" />
-						</Grid>
 						<!-- GLOBAL CMDLINE -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Cmdline</Label>

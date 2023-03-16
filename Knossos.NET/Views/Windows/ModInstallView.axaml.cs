@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using System;
+using System.ComponentModel;
 
 namespace Knossos.NET.Views
 {
@@ -7,6 +9,12 @@ namespace Knossos.NET.Views
         public ModInstallView()
         {
             InitializeComponent();
+            this.Closing += ForceCollectTrash;
+        }
+
+        private void ForceCollectTrash(object? sender, CancelEventArgs e)
+        {
+            GC.Collect();
         }
     }
 }

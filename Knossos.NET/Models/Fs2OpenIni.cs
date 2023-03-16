@@ -594,13 +594,6 @@ namespace Knossos.NET.Models
                     OGL_AnisotropicFilter = 0;
                 }
             }
-            else
-            {
-                OGL_AntiAliasSamples = null;
-                OGL_AnisotropicFilter = null;
-                GammaD3D = null;
-                ForceFullscreen = null;
-            }
         }
 
         private void ParseKey (string line, string section)

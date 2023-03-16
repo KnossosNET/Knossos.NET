@@ -38,22 +38,31 @@ namespace Knossos.NET.ViewModels
             TaskList.Add(newTask);
             newTask.ShowMsg(msg,tooltip);
         }
-        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender)
+
+        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, Mod? modJson=null)
         {
             var newTask = new TaskItemViewModel();
             TaskList.Add(newTask);
             installQueue.Enqueue(newTask);
-            return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource);
+            return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson);
         }
 
         public async void InstallMod(Mod mod)
         {
-            var cancelSource = new CancellationTokenSource();
-            var newTask = new TaskItemViewModel();
-            TaskList.Add(newTask);
-            installQueue.Enqueue(newTask);
-            await newTask.InstallMod(mod, cancelSource);
-            cancelSource.Dispose();
+            if(mod.type == "engine")
+            {
+                //If this is a engine build call the UI element to do the build install process instead
+                FsoBuildsViewModel.Instance?.RelayInstallBuild(mod);
+            }
+            else
+            {
+                var cancelSource = new CancellationTokenSource();
+                var newTask = new TaskItemViewModel();
+                TaskList.Add(newTask);
+                installQueue.Enqueue(newTask);
+                await newTask.InstallMod(mod, cancelSource);
+                cancelSource.Dispose();
+            }
         }
     }
 }

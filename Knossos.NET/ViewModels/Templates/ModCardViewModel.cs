@@ -167,7 +167,11 @@ namespace Knossos.NET.ViewModels
         public void CancelInstall()
         {
             IsInstalling = false;
-            cancellationTokenSource?.Cancel();
+            try
+            {
+                cancellationTokenSource?.Cancel();
+            }
+            catch { }
             cancellationTokenSource = null;
         }
 

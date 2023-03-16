@@ -7,6 +7,7 @@ using Knossos.NET.Classes;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.Models
 {
@@ -314,6 +315,11 @@ namespace Knossos.NET.Models
             }
         }
 
+        public void ReLoadJson()
+        {
+            ParseJson(fullPath);
+        }
+
         /* Saves all data to the json file */
         public void SaveJson()
         {
@@ -417,12 +423,58 @@ namespace Knossos.NET.Models
             return validMod;
         }
 
+        /*
+            Returns the best avalible mod on nebula that meets this dependency by semantic version, null if none.
+            Takes an optional list with all mods, if passed it will use that list intead of checking the repo.json again
+        */
+        public async Task<Mod?> SelectModNebula(List<Mod>? mods = null)
+        {
+            if(mods == null)
+            {
+                mods = await Nebula.GetAllModsWithID(id);
+            }
+
+            Mod? validMod = null;
+
+            foreach (var mod in mods)
+            {
+                if (mod.id == id && SemanticVersion.SastifiesDependency(version, mod.version))
+                {
+                    if (validMod == null)
+                    {
+                        validMod = mod;
+                    }
+                    else
+                    {
+                        if (mod.type == "engine")
+                        {
+                            var stabilityV = FsoBuild.GetFsoStability(validMod.stability, validMod.id);
+                            var stabilityM = FsoBuild.GetFsoStability(mod.stability, mod.id);
+                            //inverted stability comparison
+                            if (stabilityV > stabilityM || stabilityV == stabilityM && SemanticVersion.Compare(mod.version, validMod.version) > 0)
+                            {
+                                validMod = mod;
+                            }
+                        }
+                        else
+                        {
+                            if (SemanticVersion.Compare(mod.version, validMod.version) > 0)
+                            {
+                                validMod = mod;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return validMod;
+        }
+
         public FsoBuild? SelectBuild()
         {
-            var builds = Knossos.GetInstalledBuildsList(id);
             FsoBuild? validBuild = null;
 
-            foreach (var build in builds)
+            foreach (var build in Knossos.GetInstalledBuildsList(id, FsoStability.Stable))
             {
                 if (SemanticVersion.SastifiesDependency(version, build.version))
                 {
@@ -436,6 +488,72 @@ namespace Knossos.NET.Models
                         if (SemanticVersion.Compare(build.version, validBuild.version) > 0)
                         {
                             validBuild = build;
+                        }
+                    }
+                }
+            }
+
+            if(validBuild == null)
+            {
+                foreach (var build in Knossos.GetInstalledBuildsList(id, FsoStability.RC))
+                {
+                    if (SemanticVersion.SastifiesDependency(version, build.version))
+                    {
+
+                        if (validBuild == null)
+                        {
+                            validBuild = build;
+                        }
+                        else
+                        {
+                            if (SemanticVersion.Compare(build.version, validBuild.version) > 0)
+                            {
+                                validBuild = build;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (validBuild == null)
+            {
+                foreach (var build in Knossos.GetInstalledBuildsList(id, FsoStability.Nightly))
+                {
+                    if (SemanticVersion.SastifiesDependency(version, build.version))
+                    {
+
+                        if (validBuild == null)
+                        {
+                            validBuild = build;
+                        }
+                        else
+                        {
+                            if (SemanticVersion.Compare(build.version, validBuild.version) > 0)
+                            {
+                                validBuild = build;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (validBuild == null)
+            {
+                foreach (var build in Knossos.GetInstalledBuildsList(id, FsoStability.Custom))
+                {
+                    if (SemanticVersion.SastifiesDependency(version, build.version))
+                    {
+
+                        if (validBuild == null)
+                        {
+                            validBuild = build;
+                        }
+                        else
+                        {
+                            if (SemanticVersion.Compare(build.version, validBuild.version) > 0)
+                            {
+                                validBuild = build;
+                            }
                         }
                     }
                 }

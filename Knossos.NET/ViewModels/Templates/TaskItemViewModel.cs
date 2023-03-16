@@ -15,6 +15,7 @@ using SharpCompress.Readers;
 using SharpCompress.Common;
 using System.Threading;
 using System.Net;
+using System.Xml.Linq;
 
 namespace Knossos.NET.ViewModels
 {
@@ -129,19 +130,25 @@ namespace Knossos.NET.ViewModels
                                         throw new TaskCanceledException();
                                     }
                                 }
+                                IsCompleted = true;
+                                return true;
                             }
                             catch (TaskCanceledException)
                             {
                                 Info = "Task Cancelled";
+                                return false;
                             }
                             catch (Exception ex)
                             {
+                                Info = "Task Failed";
+                                IsCompleted = false;
+                                CancelButtonVisible = false;
                                 cancellationTokenSource?.Cancel();
                                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.DecompressTask()", ex);
+                                return false;
                             }
                         }
                     });
-                    IsCompleted = true;
                     return true;
                 }
                 else
@@ -152,8 +159,10 @@ namespace Knossos.NET.ViewModels
             catch(TaskCanceledException)
             {
                 Info = "Task Cancelled";
+                IsCompleted = false;
+                CancelButtonVisible = false;
                 //Only dispose the token if it was created locally
-                if(cancelSource == null)
+                if (cancelSource == null)
                 {
                     cancellationTokenSource?.Dispose();
                 }
@@ -161,7 +170,14 @@ namespace Knossos.NET.ViewModels
             }
             catch(Exception ex)
             {
+                Info = "Task Failed";
+                IsCompleted = false;
+                CancelButtonVisible = false;
                 cancellationTokenSource?.Cancel();
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.DecompressTask()", ex);
                 return false;
             }
@@ -202,17 +218,283 @@ namespace Knossos.NET.ViewModels
                         }
                     }
 
+                    /*
+                        Check if its installed, even on install taks it could have been installed by another task that was in the queue
+                    */
+                    var installed=Knossos.GetInstalledMod(mod.id,mod.version);
+                    if(installed != null) 
+                    {
+                        Name = "Modifying " + mod.ToString();
+                    }
+
                     Info = "Starting";
 
-                    await Task.Delay(5000);
+                    /*
+                        -Parse all files we need to download
+                        -Determine mod folder path and rootpack
+                        -Add all "ModFile" to a new list for easy access
+                        -Create all folders
+                        -Create the download token on the root of the mod.
+                        -Set all the data needed here, number of tasks, etc for the progress bar and info
+                        -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 2
+                         (Download, Decompression, Download banner/tile images)
+                    */
+
+                    List<ModFile> files = new List<ModFile>();
+                    string modFolder = mod.id + "-" + mod.version;
+                    string rootPack = string.Empty;
+                    if(mod.type == "tc" && mod.parent == null)
+                    {
+                        rootPack = mod.id;
+                    }
+                    else
+                    {
+                        if(mod.type == "mod" && mod.parent != null)
+                        {
+                            rootPack = mod.parent;
+                        }
+                        else
+                        {
+                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Unable to determine mod root pack " + mod.ToString() + " Type: " + mod.type + " Parent: " + mod.parent);
+                            throw new TaskCanceledException();
+                        }
+                    }
+
+                    modPath = Knossos.GetKnossosLibraryPath() + @"\"+rootPack+@"\" + modFolder;
+                    for (int i = mod.packages.Count - 1; i >= 0; i--)
+                    {
+                        bool alreadyInstalled = false;
+                        if(installed!=null)
+                        {
+                            foreach(var pkg in installed.packages)
+                            {
+                                if(pkg.name == mod.packages[i].name)
+                                {
+                                    alreadyInstalled = true;
+                                    continue;
+                                }
+                            }
+                        }
+                        if (mod.packages[i].isSelected && !alreadyInstalled)
+                        {
+                            files.AddRange(mod.packages[i].files!);
+                        }
+                        else
+                        {
+                            mod.packages.RemoveAt(i);
+                        }
+                    }
+
+                    /* Is there is nothing new to install just end the task */
+                    if(files.Count == 0)
+                    {
+                        Info = string.Empty;
+                        IsCompleted = true;
+                        CancelButtonVisible = false;
+                        if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                        {
+                            TaskViewModel.Instance!.installQueue.Dequeue();
+                        }
+                        return true;
+                    }
+
+                    Directory.CreateDirectory(modPath);
+
+                    foreach (var file in files)
+                    {
+                        if (file.dest != null && file.dest.Trim() != string.Empty)
+                        {
+                            var path = file.dest.Replace('/', '\\');
+                            Directory.CreateDirectory(modPath + "\\" + path);
+                        }
+                    }
+
+                    ProgressBarMin = 0;
+                    ProgressCurrent = 0;
+                    ProgressBarMax = (files.Count * 2) + 2;
+                    Info = "Tasks: 0/" + ProgressBarMax;
+
+                    try
+                    {
+                        File.Create(modPath + @"\knossos_net_download.token").Close();
+                    }
+                    catch { }
+
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
                         throw new TaskCanceledException();
                     }
 
+                    /*
+                        -Use parallel to process this new list, the max parallelism is the max number of concurrent downloads
+                        -Always check canceltask before executing something
+                        -Download File -> Verify Checksum -> Extract file
+                        -Increase main progress when: 
+                         File starts to download, File finishes downloading, Decompression starts, Decompression ends, Image download completed
+                    */
+                    await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Nebula.GetMaxConcurrentDownloads() }, async (file, token) =>
+                    {
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+
+                        //Download
+                        var fileTask = new TaskItemViewModel();
+                        TaskList.Insert(0, fileTask);
+                        if (file.dest == null)
+                        {
+                            file.dest = string.Empty;
+                        }
+                        Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+                        var fileFullPath = modPath + "\\" + file.filename;
+                        var result = await fileTask.DownloadFile(file.urls!, fileFullPath, "Downloading " + file.filename, false, null, cancellationTokenSource);
+
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+
+                        if (result.HasValue && result.Value)
+                        {
+                            ++ProgressCurrent;
+                            Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+                        }
+                        else
+                        {
+                            throw new Exception("Error while downloading file: " + fileFullPath);
+                        }
+
+                        //Checksum
+                        if (file.checksum != null && file.checksum.Count() > 0)
+                        {
+                            if (file.checksum[0].ToLower() == "sha256")
+                            {
+                                using (FileStream? filehash = new FileStream(fileFullPath, FileMode.Open, FileAccess.Read))
+                                {
+                                    using (SHA256 checksum = SHA256.Create())
+                                    {
+                                        filehash.Position = 0;
+                                        var hashValue = BitConverter.ToString(await checksum.ComputeHashAsync(filehash)).Replace("-", String.Empty);
+                                        filehash.Close();
+                                        if (hashValue.ToLower() != file.checksum[1].ToLower())
+                                        {
+                                            throw new Exception("The downloaded file hash was incorrect, expected: " + file.checksum[1] + " Calculated Hash: " + hashValue);
+                                        }
+                                    }
+                                    fileTask.Info += " Checksum OK!";
+                                }
+                            }
+                            else
+                            {
+                                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.InstallMod()", "Unsupported checksum crypto, skipping checksum check :" + file.checksum[0]);
+                            }
+                        }
+
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+
+                        //Decompress
+                        var decompressTask = new TaskItemViewModel();
+                        TaskList.Insert(0, decompressTask);
+                        var decompResult = await decompressTask.DecompressNebulaFile(fileFullPath, file.filename, modPath + "\\" + file.dest.Replace('/', '\\'), cancellationTokenSource);
+                        if (!decompResult)
+                        {
+                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Error while decompressing the file " + fileFullPath);
+                            CancelTaskCommand();
+                        }
+                        ++ProgressCurrent;
+                        File.Delete(fileFullPath);
+                    });
+                    files.Clear();
+
+                    /*
+                        -Delete the download token.
+                        -Download tile and banner images, update those file names on json, increase progress
+                        -Add folder name and full path to the modJson before creating the fsobuild
+                        -Set modJson installed to true before saving json
+                        -Serialize json to folder
+                        -Create the FsoBuild object and add it to the main list
+                        -Return the same FsoObject so it can be updated on the FsoBuildView
+                    */
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    if (!string.IsNullOrEmpty(mod.tile) && installed == null)
+                    {
+                        var tileTask = new TaskItemViewModel();
+                        TaskList.Insert(0, tileTask);
+                        await tileTask.DownloadFile(mod.tile, modPath + @"\kn_tile.png", "Downloading tile image", false, null, cancellationTokenSource);
+                        mod.tile = "kn_tile.png";
+                    }
+                    ++ProgressCurrent;
+                    Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    if (!string.IsNullOrEmpty(mod.banner) && installed == null)
+                    {
+                        var bannerTask = new TaskItemViewModel();
+                        TaskList.Insert(0, bannerTask);
+                        await bannerTask.DownloadFile(mod.banner, modPath + @"\kn_banner.png", "Downloading banner image", false, null, cancellationTokenSource);
+                        mod.banner = "kn_banner.png";
+                    }
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    ++ProgressCurrent;
+                    Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+                    mod.fullPath = modPath + @"\";
+                    mod.folderName = modFolder;
+                    mod.installed = true;
+
+                    if (installed == null)
+                    {
+                        mod.SaveJson();
+                    }
+                    else
+                    {
+                        installed.ReLoadJson();
+                        installed.packages.AddRange(mod.packages);
+                        installed.SaveJson();
+                        installed.ClearUnusedData();
+                    }
+
+                    try
+                    {
+                        File.Delete(mod.fullPath + @"\knossos_net_download.token");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", ex);
+                    }
+
+                    /*
+                        Always Dequeue, always check for check size and verify that the first is this TaskItemViewModel object
+                    */
+                    if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                    {
+                        TaskViewModel.Instance!.installQueue.Dequeue();
+                    }
 
                     //Remove Mod card
-                    MainWindowViewModel.Instance?.NebulaModsView.RemoveMod(mod.id);
+                    if (installed == null)
+                    {
+                        MainWindowViewModel.Instance?.NebulaModsView.RemoveMod(mod.id);
+                        Knossos.AddMod(mod);
+                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(mod), DispatcherPriority.Background);
+                    }
                     Info = string.Empty;
                     IsCompleted = true;
                     CancelButtonVisible = false; 
@@ -249,6 +531,7 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 catch { }
+                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.CancelModInstall(mod.id), DispatcherPriority.Background);
                 //Only dispose the token if it was created locally
                 if (cancelSource == null)
                 {
@@ -280,7 +563,7 @@ namespace Knossos.NET.ViewModels
                 }
 
                 await Task.Delay(2000); //give time for child tasks to cancel first
-                Info = "Task Cancelled";
+                Info = "Task Failed";
                 try
                 {
                     if (modPath != null)
@@ -289,6 +572,7 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 catch { }
+                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.CancelModInstall(mod.id), DispatcherPriority.Background);
                 //Only dispose the token if it was created locally
                 if (cancelSource == null)
                 {
@@ -299,7 +583,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null)
+        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null)
         {
             string? modPath = null;
             try
@@ -335,7 +619,10 @@ namespace Knossos.NET.ViewModels
                     Info = "Starting";
 
                     //parse repo to get the data we need
-                    var modJson = await Nebula.GetModData(build.id, build.version);
+                    if (modJson == null)
+                    {
+                        modJson = await Nebula.GetModData(build.id, build.version);
+                    }
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
@@ -625,7 +912,7 @@ namespace Knossos.NET.ViewModels
                 }
                     
                 await Task.Delay(2000); //give time for child tasks to cancel first
-                Info = "Task Cancelled";
+                Info = "Task Failed";
                 try
                 {
                     if (modPath != null)
@@ -737,6 +1024,9 @@ namespace Knossos.NET.ViewModels
             }
             catch (Exception ex)
             {
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                Info = "Task Failed";
                 //Only dispose the token if it was created locally
                 if (cancelSource == null)
                 {

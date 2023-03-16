@@ -52,6 +52,11 @@ namespace Knossos.NET.ViewModels
             NebulaModsView.AddMod(modJson);
         }
 
+        public void CancelModInstall(string id)
+        {
+            NebulaModsView.CancelModInstall(id);
+        }
+
         public void RemoveInstalledMod(string id)
         {
             InstalledModsView.RemoveMod(id);

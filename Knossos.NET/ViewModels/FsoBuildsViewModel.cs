@@ -35,6 +35,36 @@ namespace Knossos.NET.ViewModels
             CustomItems.Clear();
         }
 
+        public void RelayInstallBuild(Mod mod)
+        {
+            var buildStability = FsoBuild.GetFsoStability(mod.stability, mod.id);
+            ObservableCollection<FsoBuildItemViewModel>? list = null;
+            switch (buildStability)
+            {
+                case FsoStability.Stable: list = StableItems; break;
+                case FsoStability.RC: list = RcItems; break;
+                case FsoStability.Nightly: list = NightlyItems; break;
+                case FsoStability.Custom: list = CustomItems; break;
+            }
+
+            if(list != null)
+            {
+                var uiItem = list.FirstOrDefault(b => b.CompareIdAndVersionToMod(mod) == true);
+                if (uiItem != null)
+                {
+                    uiItem.DownloadBuildExternal(mod);
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "FsoBuildsViewModel.RelayInstallBuild()", "Unable to find the build UI item with these parameters. Build install cancelled. Version: " + mod.version + " ID: " + mod.id);
+                }
+            }
+            else
+            {
+                Log.Add(Log.LogSeverity.Error, "FsoBuildsViewModel.RelayInstallBuild()", "Unable to select the correct build list with these parameters. Build install cancelled. Stability: "+mod.stability + " ID: "+mod.id);
+            }
+        }
+
         public void AddBuildToUi(FsoBuild build)
         {
             switch(build.stability)
