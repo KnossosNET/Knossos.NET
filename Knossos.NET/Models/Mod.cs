@@ -41,9 +41,9 @@ namespace Knossos.NET.Models
         public string? banner { get; set; } // "<path to image>", optional, default: null, Used in the mod detail view. 1070x300. Under some unknown condition this can be a https url.
         [JsonPropertyName("release_thread")]
         public string? releaseThread { get; set; } // optional url string, default: null, Will display a button in the details view which opens the given link
-        public List<string> videos { get; set; } = new List<string>();  // optional, default: [], A list of video links (the links will be loaded in an iframe to display the videos in the mod details view)
-        public List<string> screenshots { get; set; } = new List<string>(); // optional, default: [], A list of images to be displayed in the mod details view.
-        public List<string> attachments { get; set; } = new List<string>();
+        public string[]? videos { get; set; }  // optional, default: [], A list of video links (the links will be loaded in an iframe to display the videos in the mod details view)
+        public string[]? screenshots { get; set; } // optional, default: [], A list of images to be displayed in the mod details view.
+        public string[]? attachments { get; set; }
         [JsonPropertyName("first_release")]
         public string? firstRelease { get; set; } // "YYYY-MM-DD", optional, default: null, the first release formatted in ISO 8601
         [JsonPropertyName("last_update")]
@@ -96,7 +96,6 @@ namespace Knossos.NET.Models
         public void ClearUnusedData()
         {
             notes = null;
-            attachments.Clear();
             foreach (ModPackage pkg in packages)
             {
                 pkg.notes = null;
@@ -280,7 +279,7 @@ namespace Knossos.NET.Models
         {
             try
             {
-                using FileStream jsonFile = File.OpenRead(modPath + @"\mod.json");
+                using FileStream jsonFile = File.OpenRead(modPath + Path.DirectorySeparatorChar + "mod.json");
                 var tempMod = JsonSerializer.Deserialize<Mod>(jsonFile)!;
                 jsonFile.Close();
                 installed = tempMod.installed;
@@ -337,8 +336,8 @@ namespace Knossos.NET.Models
                     };
 
                     var json = JsonSerializer.Serialize(this, options);
-                    File.WriteAllText(fullPath + @"\mod.json", json, Encoding.UTF8);
-                    Log.Add(Log.LogSeverity.Information, "ModJson.SaveJson", "mod.json has been saved to " + fullPath + @"\mod.json");
+                    File.WriteAllText(fullPath + Path.DirectorySeparatorChar + "mod.json", json, Encoding.UTF8);
+                    Log.Add(Log.LogSeverity.Information, "ModJson.SaveJson", "mod.json has been saved to " + fullPath + Path.DirectorySeparatorChar + "mod.json");
                 }
                 else
                 {
@@ -364,7 +363,7 @@ namespace Knossos.NET.Models
             - "optional" (not automatically selected, but user can add them during the install process)
         */
         public string? status { get; set; } // "<required|recommended|optional>"
-        public List<ModDependency>? dependencies { get; set; }
+        public ModDependency[]? dependencies { get; set; }
         /*
             Knossos.Net will only take the "windows" value from here, i assume the other enviroments are called linux and mac until i can get confirmation.
             Im not sure why this exist at this point, the exec arch is indicated on Executable->Properties, so there should be no reason for having it here too.
@@ -374,8 +373,8 @@ namespace Knossos.NET.Models
         public string? folder { get; set; }
         [JsonPropertyName("is_vp")]
         public bool isVp { get; set; } // optional, whether Knossos should pack the files in a VP on upload, default: false
-        public List<ModFile>? files { get; set; }
-        public List<ModFilelist>? filelist { get; set; }
+        public ModFile[]? files { get; set; }
+        public ModFilelist[]? filelist { get; set; }
         public List<ModExecutable>? executables { get; set; } // optional
         [JsonPropertyName("check_notes")]
         public string? checkNotes { get; set; }
@@ -574,7 +573,7 @@ public class ModFile
         public string? dest { get; set; } // "<destination path>"
         public string[]? checksum { get; set; } // sha256, value
         public Int64 filesize { get; set; } // Size in bytes
-        public List<string>? urls { get; set; } // The URLs are full URLs (they contain the filename).
+        public string[]? urls { get; set; } // The URLs are full URLs (they contain the filename).
     }
 
     public class ModFilelist

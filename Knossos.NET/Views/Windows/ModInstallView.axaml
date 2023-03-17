@@ -19,8 +19,8 @@
 	</Design.DataContext>
 	
 	<Grid MinHeight="400" MinWidth="300" RowDefinitions="Auto,*,Auto" Background="#18191A">
-		<StackPanel Margin="0,20,0,0" Grid.Row="0">
-		<Label IsVisible="{Binding !DataLoaded}" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center">Loading data from repo...</Label>
+		<Label IsVisible="{Binding !DataLoaded}" Grid.Row="0" Margin="0,20,0,0" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center">Loading data from repo...</Label>
+		<StackPanel IsVisible="{Binding DataLoaded}" Margin="0,20,0,0" Grid.Row="0">
 			<TextBlock Text="{Binding Name}" IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center"></TextBlock>
 			<ComboBox Items="{Binding ModVersions}" SelectedItem="{Binding SelectedMod}" SelectedIndex="{Binding SelectedIndex}"  IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="22" HorizontalAlignment="Center">
 				<ComboBox.ItemTemplate>
@@ -29,6 +29,7 @@
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
 			</ComboBox>
+			<TextBox IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="Green"> This version is installed, you can add optional packages</TextBox>
 		</StackPanel>
 		<TreeView IsVisible="{Binding DataLoaded}" Grid.Row="1" Margin="30" Items="{Binding ModInstallList}"  HorizontalAlignment="Center">
 			<TreeView.Styles>

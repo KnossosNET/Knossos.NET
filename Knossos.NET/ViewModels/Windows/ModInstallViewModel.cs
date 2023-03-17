@@ -26,7 +26,9 @@ namespace Knossos.NET.ViewModels
         private bool dataLoaded = false;
         [ObservableProperty]
         ObservableCollection<Mod> modInstallList = new ObservableCollection<Mod>();
-        
+        [ObservableProperty]
+        private bool isInstalled = false;
+
         private Mod? selectedMod;
 
         private Mod? SelectedMod
@@ -46,25 +48,62 @@ namespace Knossos.NET.ViewModels
         {
         }
 
-        public ModInstallViewModel(Mod modJson)
+        public ModInstallViewModel(Mod modJson, string? preSelectedVersion = null)
         {
-            Title = "Installing " + modJson.title;
-            InitialLoad(modJson.id);
+            Title = "Installing: " + modJson.title;
+            InitialLoad(modJson.id, preSelectedVersion);
         }
 
-        private async void InitialLoad(string id)
+        private async void InitialLoad(string id, string? preSelectedVersion = null)
         {
             ModVersions=await Nebula.GetAllModsWithID(id);
-            SelectedIndex = ModVersions.Count - 1;
+            
+            if(preSelectedVersion == null)
+            {
+                SelectedIndex = ModVersions.Count - 1;
+            }
+            else
+            {
+                for(var i=0; i < ModVersions.Count; i++)
+                {
+                    if (ModVersions[i].version == preSelectedVersion)
+                    {
+                        SelectedIndex = i;
+                        continue;
+                    }
+                }
+            }
         }
 
         private async void UpdateSelectedVersion()
         {
             ModInstallList.Clear();
+            DataLoaded = false;
             var allMods = await Nebula.GetAllModsWithID(null);
             if (SelectedMod != null)
             {
-                DataLoaded = false;
+                var installed=Knossos.GetInstalledMod(SelectedMod.id,SelectedMod.version);
+                if(installed != null)
+                {
+                    /* If its installed just mark installed packages as required, and optional the non installed ones */
+                    IsInstalled = true;
+                    foreach (var displayPkg in SelectedMod.packages)
+                    {
+                        displayPkg.status = "optional";
+                        foreach (var pkg in installed.packages)
+                        {
+                            if (pkg.name == displayPkg.name)
+                            {
+                                displayPkg.status = "required";
+                            }
+                        }
+                    }
+
+                }
+                else
+                {
+                    IsInstalled = false;
+                }
                 SelectedMod.isEnabled=false;
                 SelectedMod.isSelected = true;
                 Name = SelectedMod.title;
@@ -178,7 +217,8 @@ namespace Knossos.NET.ViewModels
         {
             foreach (var mod in ModInstallList)
             {
-                TaskViewModel.Instance!.InstallMod(mod);
+                if(mod.isSelected)
+                    TaskViewModel.Instance!.InstallMod(mod);
             }
             ModInstallList.Clear();
             window.Close();

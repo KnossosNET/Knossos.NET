@@ -12,15 +12,20 @@
 	</Design.DataContext>
 
 	<Border BorderBrush="Gray" BorderThickness="2" CornerRadius="1">
-		<ScrollViewer MaxHeight="500">
-			<Grid RowDefinitions="Auto">
-				<ListBox Grid.Row="0" Items="{Binding TaskList}" BorderThickness="1" BorderBrush="Black">
-					<ListBox.ItemTemplate>
-						<DataTemplate>
-							<v:TaskItemView Content="{Binding}"/>
-						</DataTemplate>
-					</ListBox.ItemTemplate>
-				</ListBox>
+		<ScrollViewer MaxHeight="400">
+			<Grid>
+				<WrapPanel HorizontalAlignment="Right">
+					<Button Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">Clear</Button>
+				</WrapPanel>
+				<Grid RowDefinitions="Auto">
+					<ItemsControl Grid.Row="0" Items="{Binding TaskList}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<v:TaskItemView Content="{Binding}"/>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</Grid>
 			</Grid>
 		</ScrollViewer>
 	</Border>

@@ -44,6 +44,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool aVX = false;
         [ObservableProperty]
+        private bool aVX2 = false;
+        [ObservableProperty]
         private bool arm32 = false;
         [ObservableProperty]
         private bool arm64 = false;
@@ -73,7 +75,15 @@ namespace Knossos.NET.ViewModels
                 if (folderPath != null)
                 {
                     ScanResults = "Folder:\n" + folderPath;
-                    string[] execs = Directory.GetFiles(folderPath,"*.exe");
+                    string[] execs;
+                    if (SysInfo.IsWindows)
+                    {
+                        execs=Directory.GetFiles(folderPath, "*.exe");
+                    }
+                    else
+                    {
+                        execs=Directory.GetFiles(folderPath, "*.AppImage");
+                    }
                     ScanResults += "\nDetected Executables: " + execs.Count();
                     foreach (string exe in execs)
                     {
@@ -146,7 +156,7 @@ namespace Knossos.NET.ViewModels
                     }
                     Stage2 = true;
                     buildId = @"user_build_" + SysInfo.GetTimestamp(DateTime.Now);
-                    BuildNewPath = Knossos.GetKnossosLibraryPath()+ @"\bin\" + buildId;
+                    BuildNewPath = Knossos.GetKnossosLibraryPath()+ Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + buildId;
                 }
             }catch(Exception ex)
             {
@@ -164,7 +174,10 @@ namespace Knossos.NET.ViewModels
             {
                 X64 = true;
             }
-            if (filename.ToLower().Contains("avx"))
+            if (filename.ToLower().Contains("avx2"))
+            {
+                AVX2 = true;
+            }else if (filename.ToLower().Contains("avx"))
             {
                 AVX = true;
             }
@@ -297,7 +310,7 @@ namespace Knossos.NET.ViewModels
                 if(CopyFilesRecursively(folderPath, BuildNewPath))
                 {
                     Mod mod = new Mod();
-                    mod.fullPath = BuildNewPath + @"\";
+                    mod.fullPath = BuildNewPath + Path.DirectorySeparatorChar;
                     mod.folderName = buildId;
                     mod.firstRelease = mod.lastUpdate = DateTime.Now.Year.ToString("0000") + "-" + DateTime.Now.Month.ToString("00") + "-" + DateTime.Now.Day.ToString("00");
                     mod.installed = true;
@@ -342,6 +355,10 @@ namespace Knossos.NET.ViewModels
                     if (AVX)
                     {
                         package.environment += " && avx";
+                    }
+                    if (AVX2)
+                    {
+                        package.environment += " && avx2";
                     }
                     if (Arm32)
                     {

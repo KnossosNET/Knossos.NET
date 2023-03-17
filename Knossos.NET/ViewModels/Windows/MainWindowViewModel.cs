@@ -42,6 +42,11 @@ namespace Knossos.NET.ViewModels
             FsoBuildsView?.ClearView();
         }
 
+        public void MarkAsUpdateAvalible(string id, bool value = true)
+        {
+            InstalledModsView.UpdateIsAvalible(id, value);
+        }
+
         public void AddInstalledMod(Mod modJson)
         {
             InstalledModsView.AddMod(modJson);
@@ -75,12 +80,12 @@ namespace Knossos.NET.ViewModels
         /* Debug Section */
         private void OpenLog()
         {
-            if (File.Exists(SysInfo.GetKnossosDataFolderPath() + @"\Knossos_log.log"))
+            if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log"))
             {
                 try
                 {
                     var cmd = new Process();
-                    cmd.StartInfo.FileName = SysInfo.GetKnossosDataFolderPath() + @"\Knossos_log.log";
+                    cmd.StartInfo.FileName = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log";
                     cmd.StartInfo.UseShellExecute = true;
                     cmd.Start();
                     cmd.Dispose();
@@ -93,18 +98,18 @@ namespace Knossos.NET.ViewModels
             else
             {
                 if(MainWindow.instance != null)
-                    MessageBox.Show(MainWindow.instance, "Log File " + SysInfo.GetKnossosDataFolderPath() + @"\Knossos_log.log not found.","File not found",MessageBox.MessageBoxButtons.OK);
+                    MessageBox.Show(MainWindow.instance, "Log File " + SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log not found.","File not found",MessageBox.MessageBoxButtons.OK);
             }
         }
 
         private void OpenSettings()
         {
-            if (File.Exists(SysInfo.GetKnossosDataFolderPath() + @"\settings.json"))
+            if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json"))
             {
                 try
                 {
                     var cmd = new Process();
-                    cmd.StartInfo.FileName = SysInfo.GetKnossosDataFolderPath() + @"\settings.json";
+                    cmd.StartInfo.FileName = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar +"settings.json";
                     cmd.StartInfo.UseShellExecute = true;
                     cmd.Start();
                     cmd.Dispose();
@@ -117,18 +122,18 @@ namespace Knossos.NET.ViewModels
             else
             {
                 if (MainWindow.instance != null)
-                    MessageBox.Show(MainWindow.instance, "Log File " + SysInfo.GetKnossosDataFolderPath() + @"\settings.json not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+                    MessageBox.Show(MainWindow.instance, "Log File " + SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
 
         private void OpenFS2Log()
         {
-            if (File.Exists(SysInfo.GetFSODataFolderPath() + @"\data\fs2_open.log"))
+            if (File.Exists(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log"))
             {
                 try
                 {
                     var cmd = new Process();
-                    cmd.StartInfo.FileName = SysInfo.GetFSODataFolderPath() + @"\data\fs2_open.log";
+                    cmd.StartInfo.FileName = SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data"+ Path.DirectorySeparatorChar + "fs2_open.log";
                     cmd.StartInfo.UseShellExecute = true;
                     cmd.Start();
                     cmd.Dispose();
@@ -141,18 +146,18 @@ namespace Knossos.NET.ViewModels
             else
             {
                 if (MainWindow.instance != null)
-                    MessageBox.Show(MainWindow.instance, "Log File " + SysInfo.GetFSODataFolderPath() + @"\data\fs2_open.log not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+                    MessageBox.Show(MainWindow.instance, "Log File " + SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar+ "data"+ Path.DirectorySeparatorChar+"fs2_open.log not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
 
         private void OpenFS2Ini()
         {
-            if (File.Exists(SysInfo.GetFSODataFolderPath() + @"\fs2_open.ini"))
+            if (File.Exists(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar+ "fs2_open.ini"))
             {
                 try
                 {
                     var cmd = new Process();
-                    cmd.StartInfo.FileName = SysInfo.GetFSODataFolderPath() + @"\fs2_open.ini";
+                    cmd.StartInfo.FileName = SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini";
                     cmd.StartInfo.UseShellExecute = true;
                     cmd.Start();
                     cmd.Dispose();
@@ -165,7 +170,7 @@ namespace Knossos.NET.ViewModels
             else
             {
                 if (MainWindow.instance != null)
-                    MessageBox.Show(MainWindow.instance, "Log File " + SysInfo.GetFSODataFolderPath() + @"\fs2_open.ini not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+                    MessageBox.Show(MainWindow.instance, "Log File " + SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
     }

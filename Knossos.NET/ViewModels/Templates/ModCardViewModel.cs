@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Linq;
 
 namespace Knossos.NET.ViewModels
 {
@@ -23,6 +24,7 @@ namespace Knossos.NET.ViewModels
         private List<Mod> modVersions = new List<Mod>();
         private int activeVersionIndex = 0;
         private CancellationTokenSource? cancellationTokenSource = null;
+        private bool devMode { get; set; } = false;
         public string ID { get; set; }
 
         /* UI Bindings */
@@ -82,6 +84,11 @@ namespace Knossos.NET.ViewModels
                     Tooltip = Regex.Replace(modJson.description, @" ?\[.*?\]", string.Empty);
                 }
             }
+            devMode = modJson.devMode;
+            if (devMode)
+            {
+                BorderColor = Brushes.LightSlateGray;
+            }
             LoadImage();
         }
         
@@ -124,6 +131,18 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        public void UpdateIsAvalible(bool value)
+        {
+            UpdateAvalible = value;
+            if(value)
+            {
+                BorderColor = Brushes.Blue;
+            }
+            else
+            {
+                BorderColor = Brushes.Green;
+            }
+        }
 
         /* Button Commands */
         private void ButtonCommandPlay()
@@ -146,9 +165,18 @@ namespace Knossos.NET.ViewModels
             Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.QtFred);
         }
 
-        private void ButtonCommandUpdate()
+        private async void ButtonCommandUpdate()
         {
+            var dialog = new ModInstallView();
+            dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex]);
+            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
+        }
 
+        private async void ButtonCommandModify()
+        {
+            var dialog = new ModInstallView();
+            dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex], modVersions[activeVersionIndex].version);
+            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
         }
 
         private async void ButtonCommandInstall()
@@ -167,23 +195,43 @@ namespace Knossos.NET.ViewModels
         public void CancelInstall()
         {
             IsInstalling = false;
+            cancellationTokenSource = null;
+        }
+
+        public void CancelInstallCommand()
+        {
+            IsInstalling = false;
             try
             {
                 cancellationTokenSource?.Cancel();
             }
             catch { }
             cancellationTokenSource = null;
+            TaskViewModel.Instance?.CancelAllInstallTaskWithID(modVersions[activeVersionIndex].id, modVersions[activeVersionIndex].version);
         }
 
         private async void ButtonCommandDelete()
         {
-            if(MainWindow.instance!= null)
+            if (!modVersions[activeVersionIndex].devMode)
             {
-                var result = await MessageBox.Show(MainWindow.instance, "You are going to remove mod " + Name + " .This will delete ALL versions of the mod. If you only want to delete a specific version you can do it from mod details.\n Do you really want to delete the mod?", "Delete mod", MessageBox.MessageBoxButtons.OKCancel);
-                if(result == MessageBox.MessageBoxResult.OK)
+                if (TaskViewModel.Instance!.IsSafeState())
                 {
-                    Knossos.RemoveMod(modVersions[activeVersionIndex].id);
+                    var result = await MessageBox.Show(MainWindow.instance!, "You are going to remove mod " + Name + " .This will delete ALL versions of the mod. If you only want to delete a specific version you can do it from mod details.\n Do you really want to delete the mod?", "Delete mod", MessageBox.MessageBoxButtons.OKCancel);
+                    if (result == MessageBox.MessageBoxResult.OK)
+                    {
+                        modVersions[modVersions.Count - 1].installed = false;
+                        MainWindowViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
+                        Knossos.RemoveMod(modVersions[activeVersionIndex].id);
+                    }
                 }
+                else
+                {
+                    await MessageBox.Show(MainWindow.instance!, "You can not delete a mod while other install tasks are running, wait until they finish and try again.", "Tasks are running", MessageBox.MessageBoxButtons.OK);
+                }
+            }
+            else
+            {
+                await MessageBox.Show(MainWindow.instance!, "Dev mode mods cant be delated from the main view, go to the Development section.", "Mod is dev mode", MessageBox.MessageBoxButtons.OK);
             }
         }
 
@@ -235,7 +283,7 @@ namespace Knossos.NET.ViewModels
                 {
                     if (!tile.ToLower().Contains("http"))
                     {
-                        Image = new Bitmap(modVersions[activeVersionIndex].fullPath + @"\" + tile);
+                        Image = new Bitmap(modVersions[activeVersionIndex].fullPath + Path.DirectorySeparatorChar + tile);
                     }
                     else
                     {

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.Models
 {
@@ -27,6 +28,8 @@ namespace Knossos.NET.Models
         x64,
         x86_avx,
         x64_avx,
+        x86_avx2,
+        x64_avx2,
         arm32,
         arm64,
         other
@@ -69,7 +72,7 @@ namespace Knossos.NET.Models
             title = "DirectExec";
             try
             {
-                var parts = directExecpath.Split(@"\");
+                var parts = directExecpath.Split(Path.DirectorySeparatorChar);
                 if (parts.Length > 1)
                 {
                     var filename = parts[parts.Count() - 1];
@@ -130,6 +133,12 @@ namespace Knossos.NET.Models
                 return null;
             }
             Log.Add(Log.LogSeverity.Information, "FsoBuild.GetFlags()", "Getting FSO Flags from file: " + fullpath);
+
+            if(SysInfo.IsLinux)
+            {
+                SysInfo.Chmod(fullpath,"+x");
+            }
+
             try
             {
                 var cmd = new Process();
@@ -138,10 +147,11 @@ namespace Knossos.NET.Models
                 cmd.StartInfo.UseShellExecute = false;
                 cmd.StartInfo.CreateNoWindow = true;
                 cmd.StartInfo.RedirectStandardOutput = true;
+                cmd.StartInfo.RedirectStandardInput = true;
                 cmd.StartInfo.StandardOutputEncoding = Encoding.UTF8;
                 cmd.Start();
-                cmd.WaitForInputIdle();
                 string result = cmd.StandardOutput.ReadToEnd();
+                cmd.WaitForExit();
                 cmd.Dispose();
                 return JsonSerializer.Deserialize<FlagsJsonV1>(result);
             }
@@ -169,42 +179,52 @@ namespace Knossos.NET.Models
             {
                 switch(file.arch)
                 {
+                    case FsoExecArch.x64_avx2:
+                        if (SysInfo.CpuArch == "X64" && SysInfo.CpuAVX2)
+                        {
+                            return folderPath + file.filename;
+                        }
+                        break;
                     case FsoExecArch.x64_avx:
                         if (SysInfo.CpuArch == "X64" && SysInfo.CpuAVX)
                         {
-                            return folderPath + file.filename.Replace(@"/", @"\");
+                            return folderPath + file.filename;
                         }
                         break;
                     case FsoExecArch.x64:
                         if(SysInfo.CpuArch == "X64")
                         {
-                            return folderPath + file.filename.Replace(@"/", @"\");
+                            return folderPath + file.filename;
                         }
                         break;
-
-                    case FsoExecArch.x86:
-                        if (SysInfo.CpuArch == "X86" && SysInfo.CpuAVX)
+                    case FsoExecArch.x86_avx2:
+                        if (SysInfo.CpuArch == "X86" && SysInfo.CpuAVX2)
                         {
-                            return folderPath + file.filename.Replace(@"/", @"\");
+                            return folderPath + file.filename;
                         }
                         break;
                     case FsoExecArch.x86_avx:
-                        if (SysInfo.CpuArch == "X86")
+                        if (SysInfo.CpuArch == "X86" && SysInfo.CpuAVX)
                         {
-                            return folderPath + file.filename.Replace(@"/", @"\");
+                            return folderPath + file.filename;
                         }
                         break;
-
+                    case FsoExecArch.x86:
+                        if (SysInfo.CpuArch == "X86")
+                        {
+                            return folderPath + file.filename;
+                        }
+                        break;
                     case FsoExecArch.arm64:
                         if (SysInfo.CpuArch == "Arm64")
                         {
-                            return folderPath + file.filename.Replace(@"/", @"\");
+                            return folderPath + file.filename;
                         }
                         break;
                     case FsoExecArch.arm32:
                         if (SysInfo.CpuArch == "Arm" || SysInfo.CpuArch == "Armv6")
                         {
-                            return folderPath + file.filename.Replace(@"/", @"\");
+                            return folderPath + file.filename;
                         }
                         break;
 
@@ -263,7 +283,14 @@ namespace Knossos.NET.Models
             }
             if ((environment.ToLower().Contains("x86") || environment.ToLower().Contains("x86_64")) && environment.ToLower().Contains("avx"))
             {
-                properties.avx = true;
+                if(environment.ToLower().Contains("avx2"))
+                {
+                    properties.avx2 = true;
+                }
+                else
+                {
+                    properties.avx = true;
+                }
             }
             if (environment.ToLower().Contains("x86_64"))
             {
@@ -318,14 +345,18 @@ namespace Knossos.NET.Models
 
             if (properties.x64)
             {
-                if (properties.avx)
+                if (properties.avx2)
+                    return FsoExecArch.x64_avx2;
+                else if (properties.avx)
                     return FsoExecArch.x64_avx;
                 else
                     return FsoExecArch.x64;
             }
             else
             {
-                if (properties.avx)
+                if (properties.avx2)
+                    return FsoExecArch.x86_avx2;
+                else if(properties.avx)
                     return FsoExecArch.x86_avx;
                 else
                     return FsoExecArch.x86;
@@ -446,7 +477,7 @@ namespace Knossos.NET.Models
         */
         private bool IsValid(string modpath)
         {
-            if (modpath != string.Empty && !File.Exists(modpath + filename.Replace(@"/", @"\")))
+            if (modpath != string.Empty && !File.Exists(modpath + filename))
             {
                 Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " does not exist!");
                 return false;
@@ -473,7 +504,21 @@ namespace Knossos.NET.Models
                 return false;
             }
 
-            if (arch == FsoExecArch.x86_avx && SysInfo.CpuArch != "X86" && SysInfo.CpuArch != "X64" && !SysInfo.CpuAVX)
+            if (arch == FsoExecArch.x86_avx2 && ((SysInfo.CpuArch != "X86" && SysInfo.CpuArch != "X64") || !SysInfo.CpuAVX2))
+            {
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
+                return false;
+            }
+
+            if (arch == FsoExecArch.x86_avx && ((SysInfo.CpuArch != "X86" && SysInfo.CpuArch != "X64" ) || !SysInfo.CpuAVX))
+            {
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
+                return false;
+            }
+
+            if (arch == FsoExecArch.x64_avx2 && (SysInfo.CpuArch != "X64" || !SysInfo.CpuAVX2))
             {
                 if (modpath != string.Empty)
                     Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);

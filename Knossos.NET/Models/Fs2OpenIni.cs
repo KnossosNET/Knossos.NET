@@ -168,10 +168,10 @@ namespace Knossos.NET.Models
 
         public Fs2OpenIni()
         {
-            if (File.Exists(SysInfo.GetFSODataFolderPath() + @"\fs2_open.ini"))
+            if (File.Exists(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini"))
             {
                 var section = string.Empty;
-                using (var fileStream = File.OpenRead(SysInfo.GetFSODataFolderPath() + @"\fs2_open.ini"))
+                using (var fileStream = File.OpenRead(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini"))
                 using (var streamReader = new StreamReader(fileStream, Encoding.UTF8))
                 {
                     string? line;
@@ -220,7 +220,7 @@ namespace Knossos.NET.Models
             SetValuesFromConfig(build);
             try
             {
-                using (StreamWriter inifile = new StreamWriter(SysInfo.GetFSODataFolderPath() + @"\fs2_open.ini"))
+                using (StreamWriter inifile = new StreamWriter(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini"))
                 {
                     inifile.WriteLine("[Default]");
                     if(VideocardFs2open != null)

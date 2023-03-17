@@ -1,15 +1,10 @@
-﻿using Avalonia.Controls;
-using Knossos.NET.Classes;
-using Knossos.NET.Models;
+﻿using Knossos.NET.Models;
 using Knossos.NET.Views;
 using Knossos.NET.Views.Windows;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {

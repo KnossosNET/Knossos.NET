@@ -26,6 +26,7 @@
 					<CheckBox IsChecked="{Binding X86}" Margin="5">X86</CheckBox>
 					<CheckBox IsChecked="{Binding X64}" Margin="5">X64</CheckBox>
 					<CheckBox IsChecked="{Binding AVX}" Margin="5">AVX</CheckBox>
+					<CheckBox IsChecked="{Binding AVX2}" Margin="5">AVX2</CheckBox>
 					<CheckBox IsChecked="{Binding Arm32}" Margin="5">ARM32</CheckBox>
 					<CheckBox IsChecked="{Binding Arm64}" Margin="5">ARM64</CheckBox>
 				</WrapPanel>

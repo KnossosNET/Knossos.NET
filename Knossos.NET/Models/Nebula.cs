@@ -38,9 +38,9 @@ namespace Knossos.NET.Models
         {
             try
             {
-                if (File.Exists(SysInfo.GetKnossosDataFolderPath() + @"\nebula.json"))
+                if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "nebula.json"))
                 {
-                    string jsonString = File.ReadAllText(SysInfo.GetKnossosDataFolderPath() + @"\nebula.json");
+                    string jsonString = File.ReadAllText(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "nebula.json");
                     settings = JsonSerializer.Deserialize<NebulaSettings>(jsonString);
                     Log.Add(Log.LogSeverity.Information, "Nebula.Constructor()", "Nebula seetings has been loaded");
                 }
@@ -55,17 +55,17 @@ namespace Knossos.NET.Models
             }
 
             var webEtag = await GetRepoEtag();
-            if (!File.Exists(SysInfo.GetKnossosDataFolderPath() + @"\repo.json") || settings.etag != webEtag)
+            if (!File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json") || settings.etag != webEtag)
             {
                 //Download the repo.json
                 if(TaskViewModel.Instance != null)
                 {
-                    var result = await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, SysInfo.GetKnossosDataFolderPath() + @"\repo_temp.json", "Downloading repo.json", true, "The repo.json file contains info on all the mods avalible in Nebula, whiout this you will be not be able to install new mods or engine builds");
+                    var result = await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", "Downloading repo.json", true, "The repo.json file contains info on all the mods avalible in Nebula, whiout this you will be not be able to install new mods or engine builds");
 
                     if (result != null && result == true)
                     {
-                        File.Delete(SysInfo.GetKnossosDataFolderPath() + @"\repo.json");
-                        File.Move(SysInfo.GetKnossosDataFolderPath() + @"\repo_temp.json", SysInfo.GetKnossosDataFolderPath() + @"\repo.json");
+                        File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
+                        File.Move(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
                         settings.etag = webEtag;
                         SaveSettings();
                     }
@@ -87,8 +87,8 @@ namespace Knossos.NET.Models
         {
             try
             {
-                await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + @"\repo.json");
-                using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + @"\repo.json", FileMode.Open, FileAccess.ReadWrite))
+                await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
+                using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json", FileMode.Open, FileAccess.ReadWrite))
                 {
                     fileStream.Seek(-1, SeekOrigin.End);
                     if (fileStream.ReadByte() == '}')
@@ -114,7 +114,7 @@ namespace Knossos.NET.Models
                                     await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod)), DispatcherPriority.Background);
                                 }
                             }
-                            if (mod.type == "tc" || mod.type == "mod")
+                            if (mod.type == "tc" || mod.type == "mod" && ( mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound) )
                             {
                                 //This is already installed?
                                 var isInstalled = Knossos.GetInstalledModList(mod.id);
@@ -133,6 +133,21 @@ namespace Knossos.NET.Models
                                         }
                                     }
                                     
+                                }
+                                else
+                                {
+                                    bool update = true;
+                                    foreach(var intMod in isInstalled)
+                                    {
+                                        if(SemanticVersion.Compare(intMod.version, mod.version) >= 0)
+                                        {
+                                            update = false;
+                                        }
+                                    }
+                                    if(update)
+                                    {
+                                        MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id);
+                                    }
                                 }
                             }
                         }
@@ -158,8 +173,8 @@ namespace Knossos.NET.Models
 
         public static async Task<Mod?> GetModData(string id, string version)
         {
-            await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + @"\repo.json");
-            using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + @"\repo.json", FileMode.Open, FileAccess.ReadWrite))
+            await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
+            using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json", FileMode.Open, FileAccess.ReadWrite))
             {
                 try
                 {
@@ -194,8 +209,8 @@ namespace Knossos.NET.Models
         public static async Task<List<Mod>> GetAllModsWithID(string? id)
         {
             var modList = new List<Mod>();
-            await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + @"\repo.json");
-            using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + @"\repo.json", FileMode.Open, FileAccess.ReadWrite))
+            await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
+            using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json", FileMode.Open, FileAccess.ReadWrite))
             {
                 try
                 {
@@ -280,7 +295,7 @@ namespace Knossos.NET.Models
                 };
 
                 var json = JsonSerializer.Serialize(settings, options);
-                File.WriteAllText(SysInfo.GetKnossosDataFolderPath() + @"\nebula.json", json, Encoding.UTF8);
+                File.WriteAllText(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "nebula.json", json, Encoding.UTF8);
                 Log.Add(Log.LogSeverity.Information, "Nebula.SaveSettings()", "Nebula settings has been saved.");
             }
             catch (Exception ex)

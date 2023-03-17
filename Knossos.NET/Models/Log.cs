@@ -1,7 +1,6 @@
-﻿using Knossos.NET.Models;
+﻿using Avalonia.Threading;
 using System;
 using System.Diagnostics;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,7 +30,7 @@ namespace Knossos.NET
             }
         }
 
-        public static string LogFilePath = SysInfo.GetKnossosDataFolderPath()+@"\Knossos_log.log";
+        public static string LogFilePath = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log";
 
         public static void Add(LogSeverity logSeverity, string from, string data)
         {
@@ -39,39 +38,31 @@ namespace Knossos.NET
 
             if (Knossos.globalSettings.enableLogFile && (int)logSeverity >= Knossos.globalSettings.logLevel )
             {
-                StreamWriter writer = File.AppendText(LogFilePath);
-                writer.WriteLine(logString,Encoding.UTF8);
-                writer.Close();
+                try
+                {
+                    Task.Run(async () => {
+                        await WaitForFileAccess(LogFilePath);
+                        StreamWriter writer = File.AppendText(LogFilePath);
+                        writer.WriteLine(logString, Encoding.UTF8);
+                        writer.Close();
+                    });
+                }
+                catch (Exception ex)
+                {
+                    WriteToConsole(ex.ToString());
+                }
             }
-
             WriteToConsole(logString);
         }
 
         public static void Add(LogSeverity logSeverity, string from, Exception exception)
         {
-            var logString = DateTime.Now.ToString() + " - *" + GetSeverityString(logSeverity) + "* : (" + from + ") " + exception.Message;
-            if (Knossos.globalSettings.enableLogFile && (int)logSeverity >= Knossos.globalSettings.logLevel)
-            {
-                Task.Run(async() => {
-                    try
-                    {
-                        await WaitForFileAccess(LogFilePath);
-                        StreamWriter writer = File.AppendText(LogFilePath);
-                        writer.WriteLine(logString, Encoding.UTF8);
-                        writer.Close();
-
-                    }catch(Exception ex)
-                    {
-                        WriteToConsole(ex.ToString());
-                    }
-                });
-            }
-            WriteToConsole(logString);
+            Add(logSeverity,from, exception.Message);
         }
 
-        public static void WriteToConsole(string data)
+        public async static void WriteToConsole(string data)
         {
-            Knossos.WriteToUIConsole(data);
+            await Dispatcher.UIThread.InvokeAsync(() => Knossos.WriteToUIConsole(data), DispatcherPriority.Background);
             if (Debugger.IsAttached)
             {
                 System.Diagnostics.Debug.WriteLine(data);
@@ -90,7 +81,7 @@ namespace Knossos.NET
             }
             catch (IOException)
             {
-                Log.WriteToConsole("repo.json is in use. Waiting for file access...");
+                Log.WriteToConsole("The log file is in use. Waiting for file access...");
                 await Task.Delay(500);
                 await WaitForFileAccess(filename);
             }

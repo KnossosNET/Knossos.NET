@@ -15,7 +15,7 @@ namespace Knossos.NET.ViewModels
         private bool directSeparatorAdded = false;
         private ObservableCollection<ComboBoxItem> BuildItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
-        private bool hideRC = false;
+        private bool hideRC = true;
         private bool HideRC
         {
             get
@@ -64,7 +64,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private bool hideNightly = false;
+        private bool hideNightly = true;
         private bool HideNightly
         {
             get
@@ -177,6 +177,7 @@ namespace Knossos.NET.ViewModels
                     ComboBoxItem item = new ComboBoxItem();
                     item.Content = build;
                     item.Tag = "custom";
+                    item.IsVisible = !HideCustom;
                     BuildItems.Add(item);
                     if (preSelected != null)
                     {
@@ -202,6 +203,7 @@ namespace Knossos.NET.ViewModels
                     ComboBoxItem item = new ComboBoxItem();
                     item.Content = build;
                     item.Tag = "rc";
+                    item.IsVisible = !HideRC;
                     BuildItems.Add(item);
                     if (preSelected != null)
                     {
@@ -227,6 +229,7 @@ namespace Knossos.NET.ViewModels
                     ComboBoxItem item = new ComboBoxItem();
                     item.Content = build;
                     item.Tag = "nightly";
+                    item.IsVisible = !HideNightly;
                     BuildItems.Add(item);
                     if (preSelected != null)
                     {

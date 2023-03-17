@@ -1,4 +1,6 @@
-﻿using Knossos.NET.Models;
+﻿using Avalonia.Threading;
+using Knossos.NET.Models;
+using Knossos.NET.Views;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -25,6 +27,29 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        public void CancelAllInstallTaskWithID(string id, string? version)
+        {
+            foreach (var task in TaskList)
+            {
+                if(!task.IsCompleted && task.installID == id && task.installVersion == version)
+                {
+                    task.CancelTaskCommand();
+                }
+            }
+        }
+
+        public bool IsSafeState()
+        {
+            foreach (var task in TaskList)
+            {
+                if (!task.IsCompleted || task.CancelButtonVisible == true)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public async Task<bool?> AddFileDownloadTask(string url, string dest, string msg, bool showStopButton, string? tooltip = null)
         {
             var newTask = new TaskItemViewModel();
@@ -39,8 +64,27 @@ namespace Knossos.NET.ViewModels
             newTask.ShowMsg(msg,tooltip);
         }
 
+        public void CleanCommand()
+        {
+            for (int i = TaskList.Count - 1; i >= 0; i--)
+            {
+                if (TaskList[i].CancelButtonVisible == false)
+                {
+                    TaskList.RemoveAt(i);
+                }
+            }
+        }
+
         public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, Mod? modJson=null)
         {
+            if(Knossos.GetKnossosLibraryPath() == null)
+            {
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    await MessageBox.Show(MainWindow.instance!, "Knossos library path is not set! Before installing mods go to settings and select a library folder.", "Error", MessageBox.MessageBoxButtons.OK);
+                });
+                return null;
+            }
             var newTask = new TaskItemViewModel();
             TaskList.Add(newTask);
             installQueue.Enqueue(newTask);
@@ -49,7 +93,16 @@ namespace Knossos.NET.ViewModels
 
         public async void InstallMod(Mod mod)
         {
-            if(mod.type == "engine")
+            if (Knossos.GetKnossosLibraryPath() == null)
+            {
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    await MessageBox.Show(MainWindow.instance!, "Knossos library path is not set! Before installing mods go to settings and select a library folder.", "Error", MessageBox.MessageBoxButtons.OK);
+                });
+                return;
+            }
+
+            if (mod.type == "engine")
             {
                 //If this is a engine build call the UI element to do the build install process instead
                 FsoBuildsViewModel.Instance?.RelayInstallBuild(mod);

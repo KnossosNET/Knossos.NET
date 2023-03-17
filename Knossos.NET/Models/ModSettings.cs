@@ -47,7 +47,7 @@ namespace Knossos.NET.Models
         {
             try
             {
-                this.filePath = fullPath + @"\mod_settings.json";
+                this.filePath = fullPath + Path.DirectorySeparatorChar + "mod_settings.json";
                 if(File.Exists(filePath))
                 {
                     using FileStream jsonFile = File.OpenRead(filePath);

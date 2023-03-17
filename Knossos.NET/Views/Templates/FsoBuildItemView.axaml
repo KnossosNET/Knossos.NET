@@ -24,6 +24,9 @@
 				<Border Background="Green" IsVisible="{Binding Avx}" Margin="5,0,0,0" CornerRadius="2">
 					<Label FontWeight="Bold">AVX</Label>
 				</Border>
+				<Border Background="DarkCyan" IsVisible="{Binding Avx2}" Margin="5,0,0,0" CornerRadius="2">
+					<Label FontWeight="Bold">AVX2</Label>
+				</Border>
 				<Border Background="Brown" IsVisible="{Binding Arm32}" Margin="5,0,0,0" CornerRadius="2">
 					<Label FontWeight="Bold">ARM32</Label>
 				</Border>

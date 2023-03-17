@@ -24,6 +24,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool avx = false;
         [ObservableProperty]
+        private bool avx2 = false;
+        [ObservableProperty]
         private bool arm32 = false;
         [ObservableProperty]
         private bool arm64 = false;
@@ -85,6 +87,8 @@ namespace Knossos.NET.ViewModels
                     {
                         case FsoExecArch.x86: x86 = true; break;
                         case FsoExecArch.x64: x64 = true; break;
+                        case FsoExecArch.x86_avx2: avx2 = true; x86 = true; break;
+                        case FsoExecArch.x64_avx2: avx2 = true; x64 = true; break;
                         case FsoExecArch.x86_avx: avx = true; x86 = true; break;
                         case FsoExecArch.x64_avx: avx = true; x64 = true; break;
                         case FsoExecArch.arm32: arm32 = true; break;

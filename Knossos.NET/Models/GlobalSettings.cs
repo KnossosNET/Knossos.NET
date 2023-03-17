@@ -117,7 +117,7 @@ namespace Knossos.NET.Models
                 };
 
                 var json = JsonSerializer.Serialize(this, options);
-                File.WriteAllText(SysInfo.GetKnossosDataFolderPath() + @"\settings.json", json, Encoding.UTF8);
+                File.WriteAllText(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json", json, Encoding.UTF8);
                 Log.Add(Log.LogSeverity.Information, "GlobalSettings.Save()", "Global settings has been saved.");
             }
             catch (Exception ex)
@@ -126,7 +126,7 @@ namespace Knossos.NET.Models
             }
         }
 
-        public string GetSystemCMD()
+        public string GetSystemCMD(FsoBuild? build = null)
         { 
             var cmd = string.Empty;
             if(enableShadows && shadowQuality > 0)
@@ -136,8 +136,38 @@ namespace Knossos.NET.Models
             }
             if(enableAA)
             {
-                cmd += "-aa";
-                cmd += "-aa_preset " + aaPreset;
+                if (build == null || SemanticVersion.Compare(build.version, "21.0.0") >= 0)
+                {
+                    cmd += "-aa";
+                    cmd += "-aa_preset " + aaPreset;
+                }
+                else
+                {
+                    if (SemanticVersion.Compare(build.version, "3.8.0") >= 0)
+                    {
+                        if (aaPreset <= 3)
+                        {
+                            cmd += "-fxaa";
+                            switch (aaPreset)
+                            {
+                                case 0: cmd += "-fxaa_preset 1"; break;
+                                case 1: cmd += "-fxaa_preset 5"; break;
+                                case 2: cmd += "-fxaa_preset 7"; break;
+                            }
+                        }
+                        else
+                        {
+                            cmd += "-smaa";
+                            switch (aaPreset)
+                            {
+                                case 3: cmd += "-smaa_preset 0"; break;
+                                case 4: cmd += "-smaa_preset 1"; break;
+                                case 5: cmd += "-smaa_preset 2"; break;
+                                case 6: cmd += "-smaa_preset 3"; break;
+                            }
+                        }
+                    }
+                }
             }
             if(enableSoftParticles)
             {

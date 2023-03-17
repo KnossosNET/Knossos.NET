@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
@@ -39,7 +40,7 @@ namespace Knossos.NET
 
         public static string GetKnossosDataFolderPath()
         {
-            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)+@"\KnossosNET";
+            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)+ Path.DirectorySeparatorChar +"KnossosNET";
         }
 
         public static string GetFSODataFolderPath()
@@ -50,7 +51,7 @@ namespace Knossos.NET
             }
             else
             {
-                return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\HardLightProductions\FreeSpaceOpen";
+                return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar +"HardLightProductions" + Path.DirectorySeparatorChar + "FreeSpaceOpen";
             }
             
         }
@@ -69,7 +70,7 @@ namespace Knossos.NET
         {
             try
             {
-                string jsonPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\knossos\settings.json";
+                string jsonPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + "knossos" + Path.DirectorySeparatorChar + "settings.json";
                 if (File.Exists(jsonPath))
                 {
                     using FileStream jsonFile = File.OpenRead(jsonPath);
@@ -83,6 +84,28 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "Sysinfo.GetBasePathFromKnossosLegacy", ex);
             }
             return null;
+        }
+
+        public static bool Chmod(string filePath, string permissions = "644", bool recursive = false)
+        {
+            string cmd;
+            if (recursive)
+                cmd = $"chmod -R {permissions} {filePath}";
+            else
+                cmd = $"chmod {permissions} {filePath}";
+
+            try
+            {
+                using (Process proc = Process.Start("/bin/bash", $"-c \"{cmd}\""))
+                {
+                    proc.WaitForExit();
+                    return proc.ExitCode == 0;
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

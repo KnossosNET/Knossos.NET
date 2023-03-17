@@ -17,7 +17,7 @@ namespace Knossos.NET.ViewModels
     {
         private List<Mod> modVersions = new List<Mod>();
         private ModCardViewModel? modCard = null;
-
+        private bool devMode { get; set; } = false;
         /* UI Variables */
         [ObservableProperty]
         private string name = string.Empty;
@@ -73,6 +73,7 @@ namespace Knossos.NET.ViewModels
                 var item = new ComboBoxItem();
                 item.Content = mod.version;
                 VersionItems.Add(item);
+                devMode= mod.devMode;
             }
             //Data loads on selected index change
             ItemSelectedIndex = selectedIndex;
@@ -125,9 +126,9 @@ namespace Knossos.NET.ViewModels
             {
                 if (!string.IsNullOrEmpty(modVersions[selectedIndex].banner))
                 {
-                    if(System.IO.File.Exists(modVersions[selectedIndex].fullPath + @"\" + modVersions[selectedIndex].banner))
+                    if(System.IO.File.Exists(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner))
                     {
-                        Banner = new Bitmap(modVersions[selectedIndex].fullPath + @"\" + modVersions[selectedIndex].banner);
+                        Banner = new Bitmap(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner);
                     }
                     else
                     {
@@ -197,34 +198,47 @@ namespace Knossos.NET.ViewModels
 
         private async void ButtonCommandDelete(ModDetailsView window)
         {
-            if (MainWindow.instance != null)
+            if (!modVersions[ItemSelectedIndex].devMode)
             {
-                if (modVersions.Count > 1)
+                if (TaskViewModel.Instance!.IsSafeState())
                 {
-                    var resp = await MessageBox.Show(MainWindow.instance, "You are about to delete version " + modVersions[ItemSelectedIndex].version + " of this mod, this will remove this version only. Do you want to continue?", "Delete mod version", MessageBox.MessageBoxButtons.YesNo);
-                    if (resp == MessageBox.MessageBoxResult.Yes)
+                    if (modVersions.Count > 1)
                     {
-                        var delete = modVersions[ItemSelectedIndex];
-                        var verDel = VersionItems[ItemSelectedIndex];
-                        modVersions.Remove(delete);
-                        Knossos.RemoveMod(delete);
-                        ItemSelectedIndex = modVersions.Count - 1;
-                        VersionItems.Remove(verDel);
+                        var resp = await MessageBox.Show(MainWindow.instance!, "You are about to delete version " + modVersions[ItemSelectedIndex].version + " of this mod, this will remove this version only. Do you want to continue?", "Delete mod version", MessageBox.MessageBoxButtons.YesNo);
+                        if (resp == MessageBox.MessageBoxResult.Yes)
+                        {
+                            var delete = modVersions[ItemSelectedIndex];
+                            var verDel = VersionItems[ItemSelectedIndex];
+                            modVersions.Remove(delete);
+                            Knossos.RemoveMod(delete);
+                            ItemSelectedIndex = modVersions.Count - 1;
+                            VersionItems.Remove(verDel);
+                        }
+                    }
+                    else
+                    {
+                        var resp = await MessageBox.Show(MainWindow.instance!, "You are about to delete the last installed version of this mod. Do you want to continue?", "Delete mod version", MessageBox.MessageBoxButtons.YesNo);
+                        if (resp == MessageBox.MessageBoxResult.Yes)
+                        {
+                            //Last version
+                            modVersions[0].installed = false;
+                            MainWindowViewModel.Instance?.AddNebulaMod(modVersions[0]);
+                            Knossos.RemoveMod(modVersions[0].id);
+                            if (window != null)
+                            {
+                                window.Close();
+                            }
+                        }
                     }
                 }
                 else
                 {
-                    var resp = await MessageBox.Show(MainWindow.instance, "You are about to delete the last installed version of this mod. Do you want to continue?", "Delete mod version", MessageBox.MessageBoxButtons.YesNo);
-                    if (resp == MessageBox.MessageBoxResult.Yes)
-                    {
-                        //Last version
-                        Knossos.RemoveMod(modVersions[0].id);
-                        if (window != null)
-                        {
-                            window.Close();
-                        }
-                    }
+                    await MessageBox.Show(MainWindow.instance!, "You can not delete a mod while other install tasks are running, wait until they finish and try again.", "Tasks are running", MessageBox.MessageBoxButtons.OK);
                 }
+            }
+            else
+            {
+                await MessageBox.Show(MainWindow.instance!, "Dev mode mods cant be delated from the main view, go to the Development section.", "Mod is dev mode", MessageBox.MessageBoxButtons.OK);
             }
         }
 

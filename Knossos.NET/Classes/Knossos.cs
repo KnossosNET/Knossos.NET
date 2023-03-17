@@ -32,11 +32,11 @@ namespace Knossos.NET
                 else
                 {
                     // Test if we can write to the data directory
-                    using (StreamWriter writer = new StreamWriter(SysInfo.GetKnossosDataFolderPath() + @"\test.txt"))
+                    using (StreamWriter writer = new StreamWriter(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "test.txt"))
                     {
                         writer.WriteLine("test");
                     }
-                    File.Delete(SysInfo.GetKnossosDataFolderPath() + @"\test.txt");
+                    File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "test.txt");
                 }
             }catch(Exception ex)
             {
@@ -98,9 +98,9 @@ namespace Knossos.NET
         {
             try
             {
-                if (File.Exists(SysInfo.GetKnossosDataFolderPath() + @"\settings.json"))
+                if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar +"settings.json"))
                 {
-                    using FileStream jsonFile = File.OpenRead(SysInfo.GetKnossosDataFolderPath() + @"\settings.json");
+                    using FileStream jsonFile = File.OpenRead(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json");
                     var tempSettings = JsonSerializer.Deserialize<GlobalSettings>(jsonFile)!;
                     jsonFile.Close();
                     if (tempSettings != null)
@@ -169,82 +169,6 @@ namespace Knossos.NET
             var modList = new List<Mod>();
             FsoBuild? fsoBuild = null;
 
-            /* Build the cmdline, take in consideration systemcmd, globalcmd, modcmd(with user changes if any) */
-            var modCmd = mod.GetModCmdLine()?.Split('-');
-            var systemCmd = Knossos.globalSettings.GetSystemCMD()?.Split('-');
-            var globalCmd = Knossos.globalSettings.globalCmdLine?.Split('-');
-
-            if(systemCmd!= null)
-            {
-                foreach(var s in systemCmd)
-                {
-                    if(s.Trim().Length > 0)
-                    {
-                        cmdline += " -" + s.Trim();
-                    }
-                        
-                }
-            }
-
-            if (globalCmd != null)
-            {
-                foreach (var s in globalCmd)
-                {
-                    if(s.Trim().Contains(" "))
-                    {
-                        var param = s.Trim().Split(' ')[0];
-                        if(!cmdline.Contains(param))
-                        {
-                            if (s.Trim().Length > 0)
-                            {
-                                cmdline += " -" + s.Trim();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (!cmdline.Contains(s.Trim()))
-                        {
-                            if (s.Trim().Length > 0)
-                            {
-                                cmdline += " -" + s.Trim();
-                            }
-                        }
-                    }
-                    
-                }
-            }
-
-            if (modCmd != null)
-            {
-                foreach (var s in modCmd)
-                {
-                    if (s.Trim().Contains(" "))
-                    {
-                        var param = s.Trim().Split(' ')[0];
-                        if (!cmdline.Contains(param))
-                        {
-                            if (s.Trim().Length > 0)
-                            {
-                                cmdline += " -" + s.Trim();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (!cmdline.Contains(s.Trim()))
-                        {
-                            if (s.Trim().Length > 0)
-                            {
-                                cmdline += " -" + s.Trim();
-                            }
-                        }
-                    }
-
-                }
-            }
-
-
             /* Resolve Dependencies should be all valid at this point */
             var dependencyList = mod.GetModDependencyList();
             bool hasBuildDependency = false;
@@ -304,11 +228,11 @@ namespace Knossos.NET
                         {
                             if (modFlag.Length > 0)
                             {
-                                modFlag += "," + mod.folderName + "\\" + pkg.folder;
+                                modFlag += "," + mod.folderName + Path.DirectorySeparatorChar + pkg.folder;
                             }
                             else
                             {
-                                modFlag += mod.folderName + "\\" + pkg.folder;
+                                modFlag += mod.folderName + Path.DirectorySeparatorChar + pkg.folder;
                             }
                             
                         }
@@ -338,11 +262,11 @@ namespace Knossos.NET
                                 {
                                     if(modFlag.Length > 0)
                                     {
-                                        modFlag += "," + depMod.folderName + "\\" + pkg.folder;
+                                        modFlag += "," + depMod.folderName + Path.DirectorySeparatorChar + pkg.folder;
                                     }
                                     else
                                     {
-                                        modFlag += depMod.folderName + "\\" + pkg.folder;
+                                        modFlag += depMod.folderName + Path.DirectorySeparatorChar + pkg.folder;
                                     }
                                     
                                 }
@@ -363,17 +287,13 @@ namespace Knossos.NET
                 }
             }
 
-            cmdline += " -mod " + modFlag;
-
-            Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used cmdLine : " + cmdline);
-
             /* Determine root folder */
             var rootPath = string.Empty;
 
             /* Others TCs: WCS, Solaris, etc */
             if (mod.type == "tc" && mod.parent == null)
             {
-                rootPath = mod.fullPath.Replace(mod.folderName+"\\","");
+                rootPath = mod.fullPath.Replace(mod.folderName+Path.DirectorySeparatorChar,"");
             }
             else
             {
@@ -397,7 +317,7 @@ namespace Knossos.NET
                                 }
                                 else
                                 {
-                                    rootPath = mod.fullPath.Replace(mod.folderName + "\\", "");
+                                    rootPath = mod.fullPath.Replace(mod.folderName + Path.DirectorySeparatorChar, "");
                                 }
                             }
                         }
@@ -451,25 +371,124 @@ namespace Knossos.NET
                 return;
             }
 
+            /* Build the cmdline, take in consideration systemcmd, globalcmd, modcmd(with user changes if any) */
+            var modCmd = mod.GetModCmdLine()?.Split('-');
+            var systemCmd = Knossos.globalSettings.GetSystemCMD(fsoBuild)?.Split('-');
+            var globalCmd = Knossos.globalSettings.globalCmdLine?.Split('-');
+
+            if (systemCmd != null)
+            {
+                foreach (var s in systemCmd)
+                {
+                    if (s.Trim().Length > 0)
+                    {
+                        cmdline += " -" + s.Trim();
+                    }
+
+                }
+            }
+
+            if (globalCmd != null)
+            {
+                foreach (var s in globalCmd)
+                {
+                    if (s.Trim().Contains(" "))
+                    {
+                        var param = s.Trim().Split(' ')[0];
+                        if (!cmdline.Contains(param))
+                        {
+                            if (s.Trim().Length > 0)
+                            {
+                                cmdline += " -" + s.Trim();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!cmdline.Contains(s.Trim()))
+                        {
+                            if (s.Trim().Length > 0)
+                            {
+                                cmdline += " -" + s.Trim();
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            if (modCmd != null)
+            {
+                foreach (var s in modCmd)
+                {
+                    if (s.Trim().Contains(" "))
+                    {
+                        var param = s.Trim().Split(' ')[0];
+                        if (!cmdline.Contains(param))
+                        {
+                            if (s.Trim().Length > 0)
+                            {
+                                cmdline += " -" + s.Trim();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!cmdline.Contains(s.Trim()))
+                        {
+                            if (s.Trim().Length > 0)
+                            {
+                                cmdline += " -" + s.Trim();
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            cmdline += " -mod " + modFlag;
+
+            Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used cmdLine : " + cmdline);
+
             //Write fs2_open.ini
             Fs2OpenIni iniFile = new Fs2OpenIni();
 
             if(iniFile.WriteIniFile(fsoBuild))
             {
-                //LAUNCH!! FINALLY!
-                var fso = new Process();
-                fso.StartInfo.FileName = execPath;
-                fso.StartInfo.Arguments = cmdline;
-                fso.StartInfo.UseShellExecute = false;
-                fso.StartInfo.WorkingDirectory = rootPath;
-                fso.Start();
+                try
+                {
+                    if (SysInfo.IsLinux)
+                    {
+                        SysInfo.Chmod(execPath, "+x");
+                    }
+
+                    if (SysInfo.IsWindows)
+                    {
+                        using var dpiProccess = new Process();
+                        dpiProccess.StartInfo.FileName = "REG";
+                        dpiProccess.StartInfo.Arguments = "ADD \"HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers\" /V \""+execPath+"\" /T REG_SZ /D HIGHDPIAWARE /F";
+                        dpiProccess.StartInfo.UseShellExecute = false;
+                        dpiProccess.StartInfo.Verb = "runas";
+                        dpiProccess.Start();
+                        dpiProccess.WaitForExit();
+                    }
+
+                    //LAUNCH!! FINALLY!
+                    using var fso = new Process();
+                    fso.StartInfo.FileName = execPath;
+                    fso.StartInfo.Arguments = cmdline;
+                    fso.StartInfo.UseShellExecute = false;
+                    fso.StartInfo.WorkingDirectory = rootPath;
+                    fso.Start();
+                }catch(Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", ex);
+                    await MessageBox.Show(MainWindow.instance!, ex.Message, "Error launching fso", MessageBox.MessageBoxButtons.OK);
+                }
             }
             else
             {
-                if (MainWindow.instance != null)
-                {
-                    await MessageBox.Show(MainWindow.instance, "Unable to write fs2_open.ini file!", "Error launching mod", MessageBox.MessageBoxButtons.OK);
-                }
+                await MessageBox.Show(MainWindow.instance!, "Unable to write fs2_open.ini file!", "Error launching mod", MessageBox.MessageBoxButtons.OK);
                 return;
             }
         }
@@ -536,11 +555,17 @@ namespace Knossos.NET
                 {
                     foreach (DirectoryInfo dir in arrDir)
                     {
-                        await FolderSearchRecursive(dir.ToString() + @"\", folderLevel + 1);
+                        await FolderSearchRecursive(dir.ToString() + Path.DirectorySeparatorChar, folderLevel + 1);
                     }
                 }
 
-                if (File.Exists(path + @"\mod.json"))
+                if(File.Exists(path + Path.DirectorySeparatorChar + "knossos_net_download.token"))
+                {
+                    /* This is a incomplete download, delete the folder */
+                    Log.Add(Log.LogSeverity.Warning, "Knossos.FolderSearchRecursive()", "Deleting incomplete download found at "+path);
+                    Directory.Delete(path, true);
+                }
+                else if (File.Exists(path + Path.DirectorySeparatorChar + "mod.json"))
                 {
                     try
                     {
@@ -552,7 +577,7 @@ namespace Knossos.NET
                                 installedMods.Add(modJson);
                                 if (modJson.id == "FS2" && modJson.type == "tc" && modJson.parent == "FS2")
                                 {
-                                    if (File.Exists(modJson.fullPath + @"\root_fs2.vp"))
+                                    if (File.Exists(modJson.fullPath + Path.DirectorySeparatorChar + "root_fs2.vp"))
                                     {
                                         retailFs2RootFound = true;
                                         Log.Add(Log.LogSeverity.Information, "Knossos.FolderSearchRecursive", "Found FS2 Root Pack!");

@@ -34,6 +34,15 @@ namespace Knossos.NET.ViewModels
             
         }
 
+        public void UpdateIsAvalible(string id,bool value)
+        {
+            var modCard = FindModCard(id);
+            if (modCard != null)
+            {
+                modCard.UpdateIsAvalible(value);
+            }
+        }
+
         public void SetInstalling(string id, CancellationTokenSource cancelToken)
         {
             var modCard = FindModCard(id);
