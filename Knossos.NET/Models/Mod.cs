@@ -326,17 +326,13 @@ namespace Knossos.NET.Models
             {
                 if (fullPath != null)
                 {
-                    var encoderSettings = new TextEncoderSettings();
-                    encoderSettings.AllowRange(UnicodeRanges.All);
-
                     var options = new JsonSerializerOptions
                     {
-                        Encoder = JavaScriptEncoder.Create(encoderSettings),
+                        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                         WriteIndented = true
                     };
-
                     var json = JsonSerializer.Serialize(this, options);
-                    File.WriteAllText(fullPath + Path.DirectorySeparatorChar + "mod.json", json, Encoding.UTF8);
+                    File.WriteAllText(fullPath + Path.DirectorySeparatorChar + "mod.json", json, new UTF8Encoding(false));
                     Log.Add(Log.LogSeverity.Information, "ModJson.SaveJson", "mod.json has been saved to " + fullPath + Path.DirectorySeparatorChar + "mod.json");
                 }
                 else

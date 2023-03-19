@@ -92,7 +92,7 @@ namespace Knossos.NET.Models
                     };
 
                     var json = JsonSerializer.Serialize(this, options);
-                    File.WriteAllText(filePath, json, Encoding.UTF8);
+                    File.WriteAllText(filePath, json, new UTF8Encoding(false));
                     Log.Add(Log.LogSeverity.Information, "ModSettings.Save()", "Mod seetings has been saved to "+filePath);
                 }
                 else

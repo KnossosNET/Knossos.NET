@@ -11,7 +11,7 @@
 		<vm:TaskViewModel/>
 	</Design.DataContext>
 
-	<Border BorderBrush="Gray" BorderThickness="2" CornerRadius="1">
+	<Border IsVisible="{Binding TaskList.Count}" BorderBrush="Gray" BorderThickness="2" CornerRadius="1">
 		<ScrollViewer MaxHeight="400">
 			<Grid>
 				<WrapPanel HorizontalAlignment="Right">

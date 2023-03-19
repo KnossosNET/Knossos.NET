@@ -774,6 +774,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 file.dest = string.Empty;
                             }
+                            
                             Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                             var fileFullPath = modPath + Path.DirectorySeparatorChar + file.filename;
                             var result = await fileTask.DownloadFile(file.urls!, fileFullPath, "Downloading " + file.filename, false, null, cancellationTokenSource);
@@ -785,7 +786,7 @@ namespace Knossos.NET.ViewModels
 
                             if (result.HasValue && result.Value)
                             {
-                                //sender.ProgressBarCurrent = ++ProgressCurrent;
+                                sender.ProgressBarCurrent = ++ProgressCurrent;
                                 Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                             }
                             else
@@ -905,6 +906,13 @@ namespace Knossos.NET.ViewModels
                         if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
                         {
                             TaskViewModel.Instance!.installQueue.Dequeue();
+                        }
+                        /*
+                            If flag data wasnt loaded, load it now
+                        */
+                        if(!Knossos.flagDataLoaded)
+                        {
+                            MainWindowViewModel.Instance?.GlobalSettingsLoadData();
                         }
                         return newBuild;
                     }

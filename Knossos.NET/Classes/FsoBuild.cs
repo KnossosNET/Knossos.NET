@@ -153,6 +153,11 @@ namespace Knossos.NET.Models
                 string result = cmd.StandardOutput.ReadToEnd();
                 cmd.WaitForExit();
                 cmd.Dispose();
+                //avoiding the "fso is running in legacy config mode..."
+                if(result.Contains("{"))
+                {
+                    result = result.Substring(result.IndexOf('{'));
+                }
                 return JsonSerializer.Deserialize<FlagsJsonV1>(result);
             }
             catch (Exception ex)

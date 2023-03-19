@@ -50,17 +50,29 @@ namespace Knossos.NET.ViewModels
 
     public partial class PxoViewModel : ViewModelBase
     {
+        public static PxoViewModel? Instance;
+        private bool initialLoadDone = false;
+
         [ObservableProperty]
         private List<PxoGamesActive> activeGames = new List<PxoGamesActive>();
 
         public PxoViewModel()
         {
-
+            Instance = this;
         }
 
         private void OpenPXOWeb()
         {
             Knossos.OpenBrowserURL(@"https://pxo.nottheeye.com/");
+        }
+
+        public void InitialLoad()
+        {
+            if (!initialLoadDone)
+            {
+                RefreshData();
+                initialLoadDone = true;
+            }
         }
 
         public async void RefreshData()

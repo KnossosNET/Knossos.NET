@@ -90,6 +90,10 @@ namespace Knossos.NET.ViewModels
                 BorderColor = Brushes.LightSlateGray;
             }
             LoadImage();
+            if(!modJson.installed)
+            {
+                BorderColor = Brushes.Black;
+            }
         }
         
         public void AddModVersion(Mod modJson)

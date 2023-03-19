@@ -1,9 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
-using System;
 using System.Diagnostics;
-using System.IO;
 
 namespace Knossos.NET.ViewModels
 {
@@ -28,6 +26,33 @@ namespace Knossos.NET.ViewModels
         private TaskViewModel taskView = new TaskViewModel();
         [ObservableProperty]
         private string uiConsoleOutput = string.Empty;
+
+        private int tabIndex = 0;
+        private int TabIndex
+        {
+            get => tabIndex;
+            set
+            {
+                if (value != tabIndex)
+                {
+                    this.SetProperty(ref tabIndex, value);
+                    if(tabIndex == 4) //PXO
+                    {
+                        PxoViewModel.Instance!.InitialLoad();
+                    }
+                    if (tabIndex == 5) //Settings
+                    {
+                        Knossos.globalSettings.Load();
+                        GlobalSettingsView.LoadData();
+                        Knossos.globalSettings.EnableIniWatch();
+                    }
+                    else
+                    {
+                        Knossos.globalSettings.DisableIniWatch();
+                    }
+                }
+            }
+        }
 
         public MainWindowViewModel()
         {

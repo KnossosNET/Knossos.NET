@@ -32,18 +32,18 @@
 			<!--Default-->
 			<StackPanel ZIndex="0">
 				<Image Source="{Binding Image}" Width="150" Height="225"></Image>
-				<TextBlock Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" Foreground="White"/>
+				<TextBlock Text="{Binding Name}" Width="151" TextWrapping="Wrap" MaxLines="2" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" Foreground="White"/>
 			</StackPanel>
 			<!--Message Overlay-->
 			<StackPanel IsVisible="{Binding IsInstalled}" Name="Messages" ZIndex="2">
 				<!--Version-->
 				<Grid Height="20">
 					<StackPanel Width="150" Background="Black" HorizontalAlignment="Left"></StackPanel>
-					<Label Content="{Binding ModVersion}" FontWeight="Bold" FontSize="12" Width="150" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
+					<Label Content="{Binding ModVersion}" FontWeight="Bold" FontSize="12" Width="151" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				</Grid>
 			</StackPanel>
 
-			<StackPanel IsVisible="{Binding !IsInstalling}" ToolTip.Tip="{Binding Tooltip}" Name="Overlay" ZIndex="1" Background="Black" Height="225" VerticalAlignment="Top">
+			<StackPanel IsVisible="{Binding !IsInstalling}" ToolTip.Tip="{Binding Tooltip}" Name="Overlay" ZIndex="1" Background="Black" Height="225" Width="151" VerticalAlignment="Top">
 				<StackPanel IsVisible="{Binding #Overlay.Opacity}">
 					<!--Installed Overlay-->
 					<StackPanel IsVisible="{Binding IsInstalled}">
@@ -65,10 +65,12 @@
 							<Button IsVisible="{Binding !devMode}" Command="{Binding ButtonCommandDelete}" Content="Delete" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,5,0,0" Width="100" ></Button>
 						</StackPanel>
 						<!--Page Control-->
-						<Grid ColumnDefinitions="Auto,Auto" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10">
-							<Button IsVisible="{Binding ButtonPage1}" Command="{Binding ButtonCommandGoPage2}" Grid.Column="0">↓</Button>
-							<Button IsVisible="{Binding !ButtonPage1}" Command="{Binding ButtonCommandGoPage1}" Grid.Column="1">↑</Button>
-						</Grid>
+						<Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" BorderBrush="White" BorderThickness="1" CornerRadius="2">
+							<Grid ColumnDefinitions="Auto">
+								<Button IsVisible="{Binding ButtonPage1}" Command="{Binding ButtonCommandGoPage2}" Grid.Column="0">↓</Button>
+								<Button IsVisible="{Binding !ButtonPage1}" Command="{Binding ButtonCommandGoPage1}" Grid.Column="0">↑</Button>
+							</Grid>
+						</Border>
 					</StackPanel>
 					<!--Nebula Overlay--> 
 					<StackPanel IsVisible="{Binding !IsInstalled}" Margin="0,40,0,0">
@@ -78,7 +80,7 @@
 				</StackPanel>
 			</StackPanel>
 			<!--Installing Overlay-->
-			<StackPanel IsVisible="{Binding IsInstalling}" Opacity="0.8" ZIndex="2" Background="Black" Height="225" VerticalAlignment="Top">
+			<StackPanel IsVisible="{Binding IsInstalling}" Opacity="0.8" ZIndex="2" Background="Black" Width="151" Height="225" VerticalAlignment="Top">
 				<Label Content="Installing..." FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="0,50,0,0" Width="100"></Label>
 				<Button Command="{Binding CancelInstallCommand}" Content="Cancel" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,5,0,0" Width="100" ></Button>
 			</StackPanel>

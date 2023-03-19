@@ -39,6 +39,7 @@ SystemCMD(Settings) > Global CMD > User/Mod CMD
 -CommunityToolkit.Mvvm 8.1.0<br />
 -XamlNameReferenceGenerator 1.5.1<br />
 -Microsoft.System.Speech 7.0.0<br />
+-ini-parser-netstandard 2.5.2<br />
 <br />
 <br />
 **Compiling for Linux and Mac:**<br />

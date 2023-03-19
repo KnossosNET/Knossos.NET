@@ -7,6 +7,12 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Knossos.NET.Classes;
+using IniParser;
+using IniParser.Model;
+using HarfBuzzSharp;
+using Avalonia.Threading;
+using Knossos.NET.Views;
+using Knossos.NET.ViewModels;
 
 namespace Knossos.NET.Models
 {
@@ -15,6 +21,12 @@ namespace Knossos.NET.Models
     */
     public class GlobalSettings
     {
+        struct Resolution
+        {
+            public uint width { get; set; }
+            public uint height { get; set; }
+        }
+
         /* Knossos Settings */
         [JsonPropertyName("base_path")]
         public string? basePath { get; set; } = null;
@@ -22,102 +34,596 @@ namespace Knossos.NET.Models
         public bool enableLogFile { get; set; } = true;
         [JsonPropertyName("log_level")]
         public int logLevel { get; set; } = 1;
+        [JsonPropertyName("global_cmdline")]
+        public string? globalCmdLine { get; set; } = null;
+
+
+        /* FSO Settings that use the fs2_open.ini are json ignored */
 
         /* Video Settings */
-        [JsonPropertyName("display_resolution")]
+        [JsonIgnore]
         public string? displayResolution { get; set; } = null;
-        [JsonPropertyName("display_index")]
+        [JsonIgnore]
         public int displayIndex { get; set; } = 0;
-        [JsonPropertyName("display_color_depth")]
+        [JsonIgnore]
         public int displayColorDepth { get; set; } = 32;
-        [JsonPropertyName("texture_filter")]
+        [JsonIgnore]
         public int textureFilter { get; set; } = 1;
-        [JsonPropertyName("enable_shadows")]
-        public bool enableShadows { get; set; } = true;
-        [JsonPropertyName("shadow_quality")]
+        [JsonIgnore]
         public int shadowQuality { get; set; } = 3;
-        [JsonPropertyName("enable_aa")]
-        public bool enableAA { get; set; } = true;
-        [JsonPropertyName("aa_preset")]
-        public int aaPreset { get; set; } = 4;
-        [JsonPropertyName("enable_soft_particles")]
+        [JsonIgnore]
+        public int aaPreset { get; set; } = 6;
+        [JsonIgnore]
         public bool enableSoftParticles { get; set; } = true;
-        [JsonPropertyName("run_in_window")]
-        public bool runInWindow { get; set; } = false;
-        [JsonPropertyName("borderless_window")]
-        public bool borderlessWindow { get; set; } = false;
-        [JsonPropertyName("no_vsync")]
-        public bool noVsync { get; set; } = false;
-        [JsonPropertyName("no_post_process")]
-        public bool noProstProcess { get; set; } = false;
+        [JsonIgnore]
+        public int windowMode { get; set; } = 2;
+        [JsonIgnore]
+        public bool vsync { get; set; } = true;
+        [JsonIgnore]
+        public bool postProcess { get; set; } = true;
         [JsonPropertyName("no_fps_capping")]
         public bool noFpsCapping { get; set; } = false;
         [JsonPropertyName("show_fps")]
         public bool showFps { get; set; } = false;
 
         /* AUDIO SETTINGS */
-        [JsonPropertyName("playback_device")]
+        [JsonIgnore]
         public string? playbackDevice { get; set; } = null;
-        [JsonPropertyName("capture_device")]
+        [JsonIgnore]
         public string? captureDevice { get; set; } = null;
         [JsonPropertyName("disable_audio")]
         public bool disableAudio { get; set; } = false;
         [JsonPropertyName("disable_music")]
         public bool disableMusic { get; set; } = false;
-        [JsonPropertyName("sample_rate")]
+        [JsonIgnore]
         public int sampleRate { get; set; } = 44100;
-        [JsonPropertyName("enable_efx")]
+        [JsonIgnore]
         public bool enableEfx { get; set; } = false;
         [JsonPropertyName("enable_tts")]
         public bool enableTts { get; set; } = true;
-        [JsonPropertyName("tts_voice")]
+        [JsonIgnore]
         public int? ttsVoice { get; set; } = null;
-        [JsonPropertyName("tts_techroom")]
+        [JsonIgnore]
         public bool ttsTechroom { get; set; } = true;
-        [JsonPropertyName("tts_briefings")]
+        [JsonIgnore]
         public bool ttsBriefings { get; set; } = true;
-        [JsonPropertyName("tts_ingame")]
+        [JsonIgnore]
         public bool ttsIngame { get; set; } = true;
-        [JsonPropertyName("tts_multi")]
+        [JsonIgnore]
         public bool ttsMulti { get; set; } = true;
         [JsonPropertyName("tts_description")]
         public bool ttsDescription { get; set; } = true;
-        [JsonPropertyName("tts_volume")]
+        [JsonIgnore]
         public int ttsVolume { get; set; } = 100;
-        [JsonPropertyName("tts_voice_name")]
+        [JsonIgnore]
         public string? ttsVoiceName { get; set; } = null;
 
-        /* JOYSTICKS */
+        /* INPUT */
+        [JsonIgnore]
         public Joystick? joystick1 { get; set; } = null;
+        [JsonIgnore]
         public Joystick? joystick2 { get; set; } = null;
+        [JsonIgnore]
         public Joystick? joystick3 { get; set; } = null;
+        [JsonIgnore]
         public Joystick? joystick4 { get; set; } = null;
+        [JsonIgnore]
+        public uint joystickDeadZone { get; set; } = 10;
+        [JsonIgnore]
+        public uint mouseSensitivity { get; set; } = 5;
+        [JsonIgnore]
+        public uint joystickSensitivity { get; set; } = 9;
 
-        /*GLOBAL FSO*/
-        [JsonPropertyName("global_cmdline")]
-        public string? globalCmdLine { get; set; } = null;
-
-        [JsonPropertyName("fs2_lang")]
+        /* MISC */
+        [JsonIgnore]
         public string fs2Lang { get; set; } = "English";
-
-        [JsonPropertyName("multiplayer_port")]
+        [JsonIgnore]
         public uint multiPort { get; set; } = 7808;
 
-        public void Save() 
+        [JsonIgnore]
+        private FileSystemWatcher? iniWatcher = null;
+
+        private void StartWatchingDirectory()
+        {
+            iniWatcher = new FileSystemWatcher(SysInfo.GetFSODataFolderPath());
+            iniWatcher.NotifyFilter = NotifyFilters.LastWrite;
+            iniWatcher.Changed += OnIniChanged;
+            iniWatcher.Filter = "fs2_open.ini";
+        }
+
+        private void OnIniChanged(object sender, FileSystemEventArgs e)
+        {
+            if (e.ChangeType != WatcherChangeTypes.Changed)
+            {
+                return;
+            }
+
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                Log.Add(Log.LogSeverity.Information, "GlobalSettings.OnIniChanged()", "fs2_open.ini was changed externally, loading data.");
+                Load();
+                MainWindowViewModel.Instance?.GlobalSettingsLoadData();
+            });
+        }
+
+        public void EnableIniWatch()
+        {
+            if(iniWatcher != null) 
+                iniWatcher.EnableRaisingEvents = true;
+        }
+        public void DisableIniWatch()
+        {
+            if(iniWatcher != null)
+                iniWatcher.EnableRaisingEvents = false;
+        }
+
+
+        public void ReadFS2IniValues()
         {
             try
             {
-                var encoderSettings = new TextEncoderSettings();
-                encoderSettings.AllowRange(UnicodeRanges.All);
+                if (!File.Exists(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini"))
+                {
+                    return;
+                }
+                var parser = new FileIniDataParser();
+                var data = parser.ReadFile(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
+                data.Configuration.AssigmentSpacer = string.Empty;
 
+                if(iniWatcher == null)
+                {
+                    StartWatchingDirectory();
+                }
+
+
+                //LEGACY ENTRIES, mostly read only by fso
+                /* Default Section */
+                var resoItem = data["Default"]["VideocardFs2open"];
+                if (!string.IsNullOrEmpty(resoItem))
+                {
+                    displayResolution = resoItem.Split('(', ')')[1];
+                    if (resoItem.Contains("16 bit"))
+                    {
+                        displayColorDepth = 16;
+                    }
+                }
+
+                if(!string.IsNullOrEmpty(data["Default"]["TextureFilter"]))
+                {
+                    textureFilter = int.Parse(data["Default"]["TextureFilter"]);
+                }
+
+                //Joysticks!
+                if (!string.IsNullOrEmpty(data["Default"]["CurrentJoystickGUID"]) || !string.IsNullOrEmpty(data["Default"]["Joy0GUID"]))
+                {
+                    joystick1 = new Joystick();
+                    joystick1.name = string.Empty;
+                    if (!string.IsNullOrEmpty(data["Default"]["Joy0GUID"]) && !string.IsNullOrEmpty(data["Default"]["Joy0ID"]))
+                    {
+                        joystick1.guid = data["Default"]["Joy0GUID"];
+                        joystick1.id = int.Parse(data["Default"]["Joy0ID"]);
+                    }
+                    else if (!string.IsNullOrEmpty(data["Default"]["CurrentJoystick"]) && !string.IsNullOrEmpty(data["Default"]["CurrentJoystickGUID"]))
+                    {
+                        joystick1.guid = data["Default"]["CurrentJoystickGUID"];
+                        joystick1.id = int.Parse(data["Default"]["CurrentJoystick"]);
+                    }
+                }
+                if (!string.IsNullOrEmpty(data["Default"]["Joy1GUID"]) && !string.IsNullOrEmpty(data["Default"]["Joy1ID"]))
+                {
+                    joystick2 = new Joystick();
+                    joystick2.name = string.Empty;
+                    joystick2.guid = data["Default"]["Joy1GUID"];
+                    joystick2.id = int.Parse(data["Default"]["Joy1ID"]);
+                }
+                if (!string.IsNullOrEmpty(data["Default"]["Joy2GUID"]) && !string.IsNullOrEmpty(data["Default"]["Joy2ID"]))
+                {
+                    joystick3 = new Joystick();
+                    joystick3.name = string.Empty;
+                    joystick3.guid = data["Default"]["Joy2GUID"];
+                    joystick3.id = int.Parse(data["Default"]["Joy2ID"]);
+                }
+                if (!string.IsNullOrEmpty(data["Default"]["Joy3GUID"]) && !string.IsNullOrEmpty(data["Default"]["Joy3ID"]))
+                {
+                    joystick4 = new Joystick();
+                    joystick4.name = string.Empty;
+                    joystick4.guid = data["Default"]["Joy3GUID"];
+                    joystick4.id = int.Parse(data["Default"]["Joy3ID"]);
+                }
+
+                if (!string.IsNullOrEmpty(data["Default"]["SpeechVolume"]))
+                {
+                    ttsVolume = int.Parse(data["Default"]["SpeechVolume"]);
+                }
+
+                if (!string.IsNullOrEmpty(data["Default"]["SpeechVoice"]))
+                {
+                    ttsVoice = int.Parse(data["Default"]["SpeechVoice"]);
+                }
+
+                if (!string.IsNullOrEmpty(data["Default"]["SpeechTechroom"]))
+                {
+                    if (int.Parse(data["Default"]["SpeechTechroom"]) == 1)
+                    {
+                        ttsTechroom = true;
+                    }
+                    else
+                    {
+                        ttsTechroom = false;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(data["Default"]["SpeechBriefings"]))
+                {
+                    if (int.Parse(data["Default"]["SpeechBriefings"]) == 1)
+                    {
+                        ttsBriefings = true;
+                    }
+                    else
+                    {
+                        ttsBriefings = false;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(data["Default"]["SpeechIngame"]))
+                {
+                    if (int.Parse(data["Default"]["SpeechIngame"]) == 1)
+                    {
+                        ttsIngame = true;
+                    }
+                    else
+                    {
+                        ttsIngame = false;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(data["Default"]["SpeechMulti"]))
+                {
+                    if (int.Parse(data["Default"]["SpeechMulti"]) == 1)
+                    {
+                        ttsIngame = true;
+                    }
+                    else
+                    {
+                        ttsIngame = false;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(data["Default"]["Language"]))
+                {
+                    fs2Lang = data["Default"]["Language"];
+                }
+
+                if (!string.IsNullOrEmpty(data["Default"]["ForcePort"]))
+                {
+                    multiPort = uint.Parse(data["Default"]["ForcePort"]);
+                }
+
+                /* Video Section */
+                if (!string.IsNullOrEmpty(data["Video"]["Display"]))
+                {
+                    displayIndex = int.Parse(data["Video"]["Display"]);
+                }
+                else
+                {
+                    displayIndex = 0;
+                }
+
+                /* Sound Section */
+                captureDevice = data["Sound"]["CaptureDevice"];
+                playbackDevice = data["Sound"]["PlaybackDevice"];
+                if(!string.IsNullOrEmpty(data["Sound"]["SampleRate"]))
+                {
+                    sampleRate = int.Parse(data["Sound"]["SampleRate"]);
+                }
+                if (!string.IsNullOrEmpty(data["Sound"]["EnableEFX"]))
+                {
+                    if(int.Parse(data["Sound"]["EnableEFX"])==1)
+                    {
+                        enableEfx = true;
+                    }
+                    else
+                    {
+                        enableEfx = false;
+                    }
+                }
+
+                //SCPUI ENTRIES
+                /* Graphics Section */
+                var scpUiReso = data["Graphics"]["Resolution"];
+                if (!string.IsNullOrEmpty(scpUiReso))
+                {
+                    var rj=JsonSerializer.Deserialize<Resolution>(scpUiReso)!;
+                    displayResolution = rj.width + "x" + rj.height;
+                }
+                var winMode = data["Graphics"]["WindowMode"];
+                if(!string.IsNullOrEmpty(winMode))
+                {   
+                    windowMode = int.Parse(winMode);
+                }
+                if (data["Graphics"]["Display"] != null)
+                {
+                    displayIndex = int.Parse(data["Graphics"]["Display"]);
+                }
+                else
+                {
+                    displayIndex = 0;
+                }
+
+                if (!string.IsNullOrEmpty(data["Graphics"]["TextureFilter"]))
+                {
+                    textureFilter = int.Parse(data["Graphics"]["TextureFilter"]);
+                }
+
+                if(!string.IsNullOrEmpty(data["Graphics"]["Shadows"]))
+                {
+                    shadowQuality = int.Parse(data["Graphics"]["Shadows"]);
+                }
+
+                if (!string.IsNullOrEmpty(data["Graphics"]["AAMode"]))
+                {
+                    aaPreset = int.Parse(data["Graphics"]["AAMode"]);
+                }
+
+                if (!string.IsNullOrEmpty(data["Graphics"]["SoftParticles"]))
+                {
+                    enableSoftParticles = bool.Parse(data["Graphics"]["SoftParticles"]);
+                }
+
+                if (!string.IsNullOrEmpty(data["Graphics"]["VSync"]))
+                {
+                    vsync = bool.Parse(data["Graphics"]["VSync"]);
+                }
+
+                if (!string.IsNullOrEmpty(data["Graphics"]["PostProcessing"]))
+                {
+                    postProcess = bool.Parse(data["Graphics"]["PostProcessing"]);
+                }
+
+                /* Input Section */
+                if (!string.IsNullOrEmpty(data["Input"]["Joystick"]))
+                {
+                    joystick1 = JsonSerializer.Deserialize<Joystick>(data["Input"]["Joystick"])!;
+                }
+                if (!string.IsNullOrEmpty(data["Input"]["Joystick1"]))
+                {
+                    joystick2 = JsonSerializer.Deserialize<Joystick>(data["Input"]["Joystick1"])!;
+                }
+                if (!string.IsNullOrEmpty(data["Input"]["Joystick2"]))
+                {
+                    joystick3 = JsonSerializer.Deserialize<Joystick>(data["Input"]["Joystick2"])!;
+                }
+                if (!string.IsNullOrEmpty(data["Input"]["Joystick3"]))
+                {
+                    joystick4 = JsonSerializer.Deserialize<Joystick>(data["Input"]["Joystick3"])!;
+                }
+                if (!string.IsNullOrEmpty(data["Input"]["JoystickDeadZone"]))
+                {
+                    joystickDeadZone = uint.Parse(data["Input"]["JoystickDeadZone"]);
+                }
+
+                if (!string.IsNullOrEmpty(data["Input"]["JoystickSensitivity"]))
+                {
+                    joystickSensitivity = uint.Parse(data["Input"]["JoystickSensitivity"]);
+                }
+
+                if (!string.IsNullOrEmpty(data["Input"]["MouseSensitivity"]))
+                {
+                    mouseSensitivity = uint.Parse(data["Input"]["MouseSensitivity"]);
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Information, "GlobalSettings.ReadFS2IniValues()", ex);
+            }
+        }
+
+        public void Load()
+        {
+            try
+            {
+                if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json"))
+                {
+                    using FileStream jsonFile = File.OpenRead(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json");
+                    var tempSettings = JsonSerializer.Deserialize<GlobalSettings>(jsonFile)!;
+                    jsonFile.Close();
+                    if (tempSettings != null)
+                    {
+                        basePath = tempSettings.basePath;
+                        enableLogFile = tempSettings.enableLogFile;
+                        logLevel = tempSettings.logLevel;
+                        globalCmdLine = tempSettings.globalCmdLine;
+
+                        ReadFS2IniValues();
+                        Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");
+                    }
+
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "File settings.json does not exist.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "GlobalSettings.Load()", ex);
+            }
+        }
+
+        public void WriteFS2IniValues()
+        {
+            try
+            {
+                var parser = new FileIniDataParser();
+                if(!File.Exists(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini"))
+                {
+                    Directory.CreateDirectory(SysInfo.GetFSODataFolderPath());
+                    File.Create(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini").Close();
+                }
+
+                var data = parser.ReadFile(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
+                data.Configuration.AssigmentSpacer = string.Empty;
+
+                /* Default Section */
+                if(displayResolution != null)
+                { 
+                    data["Default"]["VideocardFs2open"]  = "OGL -(" + displayResolution + ")x" + displayColorDepth + " bit";
+                }
+                data["Default"]["TextureFilter"] = textureFilter.ToString();
+                data["Default"]["Language"] = fs2Lang;
+                data["Default"]["ForcePort"] = multiPort.ToString();
+                data["Default"]["ConnectionSpeed"] = "Fast";
+                data["Default"]["NetworkConnection"] = "LAN";
+                if (enableTts)
+                {
+                    data["Default"]["SpeechTechroom"] = Convert.ToInt32(ttsTechroom).ToString();
+                    data["Default"]["SpeechBriefings"] = Convert.ToInt32(ttsBriefings).ToString();
+                    data["Default"]["SpeechIngame"] = Convert.ToInt32(ttsIngame).ToString();
+                    data["Default"]["SpeechMulti"] = Convert.ToInt32(ttsMulti).ToString();
+                }
+                else
+                {
+                    data["Default"]["SpeechTechroom"] = "0";
+                    data["Default"]["SpeechBriefings"] = "0";
+                    data["Default"]["SpeechIngame"] = "0";
+                    data["Default"]["SpeechMulti"] = "0";
+                }
+
+                data["Default"]["SpeechVoice"] = ttsVoice.ToString();
+                data["Default"]["SpeechVolume"] = ttsVolume.ToString();
+
+                if (joystick1 != null)
+                {
+                    data["Default"]["CurrentJoystickGUID"] = joystick1.guid;
+                    data["Default"]["CurrentJoystick"] = joystick1.id.ToString();
+                    data["Default"]["Joy0GUID"] = joystick1.guid;
+                    data["Default"]["Joy0ID"] = joystick1.id.ToString();
+                }
+                else
+                {
+                    data["Default"].RemoveKey("CurrentJoystickGUID");
+                    data["Default"].RemoveKey("CurrentJoystick");
+                    data["Default"].RemoveKey("Joy0GUID");
+                    data["Default"].RemoveKey("Joy0ID");
+                }
+                if (joystick2 != null)
+                {
+                    data["Default"]["Joy1GUID"] = joystick2.guid;
+                    data["Default"]["Joy1ID"] = joystick2.id.ToString();
+                }
+                else
+                {
+                    data["Default"].RemoveKey("Joy1GUID");
+                    data["Default"].RemoveKey("Joy1ID");
+                }
+                if (joystick3 != null)
+                {
+                    data["Default"]["Joy2GUID"] = joystick3.guid;
+                    data["Default"]["Joy2ID"] = joystick3.id.ToString();
+                }
+                else
+                {
+                    data["Default"].RemoveKey("Joy2GUID");
+                    data["Default"].RemoveKey("Joy2ID");
+                }
+                if (joystick4 != null)
+                {
+                    data["Default"]["Joy3GUID"] = joystick4.guid;
+                    data["Default"]["Joy3ID"] = joystick4.id.ToString();
+                }
+                else
+                {
+                    data["Default"].RemoveKey("Joy3GUID");
+                    data["Default"].RemoveKey("Joy3ID");
+                }
+                data["Default"]["TextureFilter"] = textureFilter.ToString();
+
+                /* Video Section */
+                data["Video"]["Display"] = displayIndex.ToString();
+
+                /* Sound Section */
+                data["Sound"]["SampleRate"] = sampleRate.ToString();
+                data["Sound"]["EnableEFX"] = Convert.ToInt32(enableEfx).ToString();
+                data["Sound"]["PlaybackDevice"] = playbackDevice;
+                data["Sound"]["CaptureDevice"] = captureDevice;
+
+                /* Graphics Section */
+                if (displayResolution != null)
+                {
+                    data["Graphics"]["Resolution"] = "{\"width\":" + displayResolution.Split("x")[0] +",\"height\":"+ displayResolution.Split("x")[1] + "}";
+                }
+                data["Graphics"]["Shadows"] = shadowQuality.ToString();
+                data["Graphics"]["AAMode"] = aaPreset.ToString();
+                data["Graphics"]["WindowMode"] = windowMode.ToString();
+                data["Graphics"]["Display"] = displayIndex.ToString();
+                data["Graphics"]["TextureFilter"] = textureFilter.ToString();
+                data["Graphics"]["SoftParticles"] = enableSoftParticles.ToString().ToLower();
+                data["Graphics"]["VSync"] = vsync.ToString().ToLower();
+                data["Graphics"]["PostProcessing"] = postProcess.ToString().ToLower();
+
+                /* Input Section */
+                if (joystick1 != null)
+                {
+                    data["Input"]["Joystick"] = "{\"guid\":\"" + joystick1.guid + "\",\"id\":" + joystick1.id + "}";
+                }
+                else
+                {
+                    data["Input"].RemoveKey("Joystick");
+                }
+                if (joystick2 != null)
+                {
+                    data["Input"]["Joystick1"] = "{\"guid\":\"" + joystick2.guid + "\",\"id\":" + joystick2.id + "}";
+                }
+                else
+                {
+                    data["Input"].RemoveKey("Joystick1");
+                }
+                if (joystick3 != null)
+                {
+                    data["Input"]["Joystick2"] = "{\"guid\":\"" + joystick3.guid + "\",\"id\":" + joystick3.id + "}";
+                }
+                else
+                {
+                    data["Input"].RemoveKey("Joystick2");
+                }
+                if (joystick4 != null)
+                {
+                    data["Input"]["Joystick3"] = "{\"guid\":\"" + joystick4.guid + "\",\"id\":" + joystick4.id + "}";
+                }
+                else
+                {
+                    data["Input"].RemoveKey("Joystick3");
+                }
+
+                data["Input"]["JoystickDeadZone"] = joystickDeadZone.ToString();
+                data["Input"]["JoystickSensitivity"] = joystickSensitivity.ToString();
+                data["Input"]["MouseSensitivity"] = mouseSensitivity.ToString();
+                if(iniWatcher!= null)
+                    iniWatcher.EnableRaisingEvents = false;
+                parser.WriteFile(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini", data, new UTF8Encoding(false));
+                if(iniWatcher!= null)
+                    iniWatcher.EnableRaisingEvents = true;
+                Log.Add(Log.LogSeverity.Information, "GlobalSettings.WriteFS2IniValues","Writen ini: "+ SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "GlobalSettings.WriteFS2IniValues()", ex);
+            }
+        }
+
+        public void Save() 
+        {
+            WriteFS2IniValues();
+            try
+            {
                 var options = new JsonSerializerOptions
                 {
-                    Encoder = JavaScriptEncoder.Create(encoderSettings),
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                     WriteIndented = true
                 };
 
                 var json = JsonSerializer.Serialize(this, options);
-                File.WriteAllText(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json", json, Encoding.UTF8);
+                File.WriteAllText(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json", json, new UTF8Encoding(false));
                 Log.Add(Log.LogSeverity.Information, "GlobalSettings.Save()", "Global settings has been saved.");
             }
             catch (Exception ex)
@@ -129,12 +635,12 @@ namespace Knossos.NET.Models
         public string GetSystemCMD(FsoBuild? build = null)
         { 
             var cmd = string.Empty;
-            if(enableShadows && shadowQuality > 0)
+            if(shadowQuality > 0)
             {
                 cmd += "-enable_shadows";
                 cmd += "-shadow_quality " + shadowQuality;
             }
-            if(enableAA)
+            if(aaPreset > 0)
             {
                 if (build == null || SemanticVersion.Compare(build.version, "21.0.0") >= 0)
                 {
@@ -145,7 +651,7 @@ namespace Knossos.NET.Models
                 {
                     if (SemanticVersion.Compare(build.version, "3.8.0") >= 0)
                     {
-                        if (aaPreset <= 3)
+                        if (aaPreset <= 2)
                         {
                             cmd += "-fxaa";
                             switch (aaPreset)
@@ -173,19 +679,17 @@ namespace Knossos.NET.Models
             {
                 cmd += "-soft_particles";
             }
-            if (runInWindow)
+            switch(windowMode)
             {
-                cmd += "-window";
+                case 0: cmd += "-window"; break;
+                case 1: cmd += "-fullscreen_window"; break;
+                case 2: break; //fullscreen
             }
-            if (borderlessWindow)
-            {
-                cmd += "-fullscreen_window";
-            }
-            if (noVsync)
+            if (!vsync)
             {
                 cmd += "-no_vsync";
             }
-            if(noProstProcess)
+            if(!postProcess)
             {
                 cmd += "-no_post_process";
             }

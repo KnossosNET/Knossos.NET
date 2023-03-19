@@ -9,7 +9,7 @@
         x:Class="Knossos.NET.Views.MainWindow"
         Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterScreen"
-        Title="Knossos.NET v0.0.2">
+        Title="Knossos.NET v0.0.3-Alpha1">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -19,7 +19,7 @@
 	<!-- Main View -->
 	<Grid Background="#18191A" RowDefinitions="Auto,*">
 		<v:TaskView Grid.Row="0" Content="{Binding TaskView}"/>
-		<TabControl Grid.Row="1">
+		<TabControl Grid.Row="1" SelectedIndex="{Binding TabIndex}">
 			<!--Installed Mods / Home-->
 			<TabItem Header="Home">
 				<ScrollViewer>
@@ -45,7 +45,7 @@
 				<v:PxoView Content="{Binding PxoView}"/>
 			</TabItem>
 			<!--Global Settings-->
-			<TabItem Header="Settings" >
+			<TabItem Header="Settings">
 				<v:GlobalSettingsView Content="{Binding GlobalSettingsView}"/>
 			</TabItem>
 			<!--Debug-->

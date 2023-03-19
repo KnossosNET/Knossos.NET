@@ -58,7 +58,9 @@ namespace Knossos.NET
 
         public static void SetFSODataFolderPath(string path)
         {
-            fsoPrefPath = path;
+            //FSO responds with this if there is no ini
+            if(path != @".\")
+                fsoPrefPath = path;
         }
 
         public static String GetTimestamp(DateTime value)

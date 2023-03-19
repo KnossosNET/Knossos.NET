@@ -1,15 +1,9 @@
-﻿
-
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
-using Knossos.NET.Views.Windows;
-using System;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 
 namespace Knossos.NET.ViewModels
 {
@@ -53,23 +47,17 @@ namespace Knossos.NET.ViewModels
         private int textureSelectedIndex = 0;
         private ObservableCollection<ComboBoxItem> ResolutionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
-        private bool enableShadows = true;
-        [ObservableProperty]
         private int shadowQualitySelectedIndex = 3;
         [ObservableProperty]
-        private bool enableAA = true;
-        [ObservableProperty]
-        private int aaSelectedIndex = 4;
+        private int aaSelectedIndex = 6;
         [ObservableProperty]
         private bool enableSoftParticles = true;
         [ObservableProperty]
-        private bool runInWindow = false;
+        private int windowMode = 2;
         [ObservableProperty]
-        private bool borderlessWindow = false;
+        private bool vsync = true;
         [ObservableProperty]
-        private bool noVsync = false;
-        [ObservableProperty]
-        private bool noProstProcess = false;
+        private bool postProcess = true;
         [ObservableProperty]
         private bool noFpsCapping = false;
         [ObservableProperty]
@@ -115,66 +103,14 @@ namespace Knossos.NET.ViewModels
         private ObservableCollection<ComboBoxItem> Joystick2Items { get; set; } = new ObservableCollection<ComboBoxItem>();
         private ObservableCollection<ComboBoxItem> Joystick3Items { get; set; } = new ObservableCollection<ComboBoxItem>();
         private ObservableCollection<ComboBoxItem> Joystick4Items { get; set; } = new ObservableCollection<ComboBoxItem>();
-
-        private int joy1SelectedIndex = 0;
-        private int Joy1SelectedIndex
-        {
-            get => joy1SelectedIndex;
-            set {
-                if (value != -1)
-                {
-                    this.SetProperty(ref joy1SelectedIndex, value);
-                    if (value == 0 || value != 0 && value == Joy2SelectedIndex) Joy2SelectedIndex = 0;
-                    if (value != 0 && value == Joy3SelectedIndex) Joy3SelectedIndex = 0;
-                    if (value != 0 && value == Joy4SelectedIndex) Joy4SelectedIndex = 0;
-                }
-            }
-        }
-        private int joy2SelectedIndex = 0;
-        private int Joy2SelectedIndex
-        {
-            get => joy2SelectedIndex;
-            set
-            {
-                if (value != -1)
-                {
-                    this.SetProperty(ref joy2SelectedIndex, value);
-                    if (value != 0 && value == Joy1SelectedIndex) Joy1SelectedIndex = 0;
-                    if (value == 0 || value != 0 && value == Joy3SelectedIndex) Joy3SelectedIndex = 0;
-                    if (value != 0 && value == Joy4SelectedIndex) Joy4SelectedIndex = 0;
-                }
-            }
-        }
-        private int joy3SelectedIndex = 0;
-        private int Joy3SelectedIndex
-        {
-            get => joy3SelectedIndex;
-            set
-            {
-                if (value != -1)
-                {
-                    this.SetProperty(ref joy3SelectedIndex, value);
-                    if (value != 0 && value == Joy2SelectedIndex) Joy2SelectedIndex = 0;
-                    if (value != 0 && value == Joy1SelectedIndex) Joy1SelectedIndex = 0;
-                    if (value == 0 || value != 0 && value == Joy4SelectedIndex) Joy4SelectedIndex = 0;
-                }
-            }
-        }
-        private int joy4SelectedIndex = 0;
-        private int Joy4SelectedIndex
-        {
-            get => joy4SelectedIndex;
-            set
-            {
-                if (value != -1)
-                {
-                    this.SetProperty(ref joy4SelectedIndex, value);
-                    if (value != 0 && value == Joy2SelectedIndex) Joy2SelectedIndex = 0;
-                    if (value != 0 && value == Joy3SelectedIndex) Joy3SelectedIndex = 0;
-                    if (value != 0 && value == Joy1SelectedIndex) Joy1SelectedIndex = 0;
-                }
-            }
-        }
+        [ObservableProperty]
+        private int joy1SelectedIndex = -1;
+        [ObservableProperty]
+        private int joy2SelectedIndex = -1;
+        [ObservableProperty]
+        private int joy3SelectedIndex = -1;
+        [ObservableProperty]
+        private int joy4SelectedIndex = -1;
 
         /*MOD / FS2 */
         [ObservableProperty]
@@ -183,6 +119,12 @@ namespace Knossos.NET.ViewModels
         private int fs2LangSelectedIndex = 0;
         [ObservableProperty]
         private uint multiPort = 7808;
+        [ObservableProperty]
+        private uint mouseSensitivity = 5;
+        [ObservableProperty]
+        private uint joystickSensitivity = 9;
+        [ObservableProperty]
+        private uint joystickDeadZone = 10;
 
         public GlobalSettingsViewModel()
         {
@@ -258,7 +200,7 @@ namespace Knossos.NET.ViewModels
                     }
                 }
             }
-            var resoItem = ResolutionItems.FirstOrDefault(i => i.Content?.ToString() == Knossos.globalSettings.displayResolution);
+            var resoItem = ResolutionItems.FirstOrDefault(i => i.Content?.ToString() == Knossos.globalSettings.displayResolution && i.Tag?.ToString() == Knossos.globalSettings.displayIndex.ToString());
             if (resoItem != null)
             {
                 var index = ResolutionItems.IndexOf(resoItem);
@@ -283,21 +225,17 @@ namespace Knossos.NET.ViewModels
             //Texture Filter
             TextureSelectedIndex = Knossos.globalSettings.textureFilter;
             //Shadows
-            EnableShadows = Knossos.globalSettings.enableShadows;
             ShadowQualitySelectedIndex = Knossos.globalSettings.shadowQuality;
             //AA
-            EnableAA = Knossos.globalSettings.enableAA;
             AaSelectedIndex = Knossos.globalSettings.aaPreset;
             //SoftParticles
             EnableSoftParticles = Knossos.globalSettings.enableSoftParticles;
-            //Window
-            RunInWindow = Knossos.globalSettings.runInWindow;
-            //Borderless Window
-            BorderlessWindow = Knossos.globalSettings.borderlessWindow;
+            //WindowMode
+            WindowMode = Knossos.globalSettings.windowMode;
             //VSYNC
-            NoVsync = Knossos.globalSettings.noVsync;
+            Vsync = Knossos.globalSettings.vsync;
             //No Post Process
-            NoProstProcess = Knossos.globalSettings.noProstProcess;
+            PostProcess = Knossos.globalSettings.postProcess;
             //No FPS Cap
             NoFpsCapping = Knossos.globalSettings.noFpsCapping;
             //FPS
@@ -420,10 +358,10 @@ namespace Knossos.NET.ViewModels
             Joystick2Items.Clear();
             Joystick3Items.Clear();
             Joystick4Items.Clear();
-            Joy1SelectedIndex = 0;
-            Joy2SelectedIndex = 0;
-            Joy3SelectedIndex = 0;
-            Joy4SelectedIndex = 0;
+            Joy1SelectedIndex = -1;
+            Joy2SelectedIndex = -1;
+            Joy3SelectedIndex = -1;
+            Joy4SelectedIndex = -1;
             var noJoyItem = new ComboBoxItem();
             noJoyItem.Content = "No Joystick";
             noJoyItem.Tag = null;
@@ -440,6 +378,10 @@ namespace Knossos.NET.ViewModels
             noJoy4Item.Content = "No Joystick";
             noJoy4Item.Tag = null;
             Joystick4Items.Add(noJoy4Item);
+            Joy1SelectedIndex = 0;
+            Joy2SelectedIndex = 0;
+            Joy3SelectedIndex = 0;
+            Joy4SelectedIndex = 0;
 
             if (flagData != null && flagData.joysticks != null)
             {
@@ -598,6 +540,10 @@ namespace Knossos.NET.ViewModels
                 }
             }
 
+            JoystickDeadZone = Knossos.globalSettings.joystickDeadZone;
+            JoystickSensitivity = Knossos.globalSettings.joystickSensitivity;
+            MouseSensitivity = Knossos.globalSettings.mouseSensitivity;
+
             /* MOD SETTINGS */
 
             //GLOBAL CMD
@@ -624,11 +570,11 @@ namespace Knossos.NET.ViewModels
         {
             FlagDataLoaded = false;
             var builds = Knossos.GetInstalledBuildsList();
-
             if (builds.Any())
             {
                 //First the stable ones
                 var stables = builds.Where(b => b.stability == FsoStability.Stable);
+                builds.Reverse();
                 if (stables.Any())
                 {
                     foreach (var stable in stables)
@@ -637,6 +583,7 @@ namespace Knossos.NET.ViewModels
                         if (flags != null)
                         {
                             FlagDataLoaded = true;
+                            Knossos.flagDataLoaded = true;
                             SysInfo.SetFSODataFolderPath(flags.pref_path);
                             return flags;
                         }
@@ -645,6 +592,7 @@ namespace Knossos.NET.ViewModels
 
                 //If we are still here try all others
                 var others = builds.Where(b => b.stability != FsoStability.Stable);
+                others.Reverse();
                 if (others.Any())
                 {
                     foreach (var other in others)
@@ -653,6 +601,7 @@ namespace Knossos.NET.ViewModels
                         if (flags != null)
                         {
                             FlagDataLoaded = true;
+                            Knossos.flagDataLoaded = true;
                             SysInfo.SetFSODataFolderPath(flags.pref_path);
                             return flags;
                         }
@@ -727,21 +676,17 @@ namespace Knossos.NET.ViewModels
             //Texture Filter
             Knossos.globalSettings.textureFilter = TextureSelectedIndex;
             //Shadows
-            Knossos.globalSettings.enableShadows = EnableShadows;
             Knossos.globalSettings.shadowQuality = ShadowQualitySelectedIndex;
             //AA
-            Knossos.globalSettings.enableAA = EnableAA;
             Knossos.globalSettings.aaPreset = AaSelectedIndex;
             //SoftParticles
             Knossos.globalSettings.enableSoftParticles = EnableSoftParticles;
-            //Window
-            Knossos.globalSettings.runInWindow = RunInWindow;
-            //Borderless Window
-            Knossos.globalSettings.borderlessWindow = BorderlessWindow;
+            //WindowMode
+            Knossos.globalSettings.windowMode = WindowMode;
             //VSYNC
-            Knossos.globalSettings.noVsync = NoVsync;
+            Knossos.globalSettings.vsync = Vsync;
             //No Post Process
-            Knossos.globalSettings.noProstProcess = NoProstProcess;
+            Knossos.globalSettings.postProcess = PostProcess;
             //No FPS Cap
             Knossos.globalSettings.noFpsCapping = NoFpsCapping;
             //FPS
@@ -791,18 +736,38 @@ namespace Knossos.NET.ViewModels
             {
                 Knossos.globalSettings.joystick1 = (Joystick?)Joystick1Items[Joy1SelectedIndex].Tag;
             }
+            else
+            {
+                Knossos.globalSettings.joystick1 = null;
+            }
             if (Joy2SelectedIndex + 1 <= Joystick2Items.Count)
             {
                 Knossos.globalSettings.joystick2 = (Joystick?)Joystick2Items[Joy2SelectedIndex].Tag;
+            }
+            else
+            {
+                Knossos.globalSettings.joystick2 = null;
             }
             if (Joy3SelectedIndex + 1 <= Joystick3Items.Count)
             {
                 Knossos.globalSettings.joystick3 = (Joystick?)Joystick3Items[Joy3SelectedIndex].Tag;
             }
+            else
+            {
+                Knossos.globalSettings.joystick3 = null;
+            }
             if (Joy4SelectedIndex + 1 <= Joystick4Items.Count)
             {
                 Knossos.globalSettings.joystick4 = (Joystick?)Joystick4Items[Joy4SelectedIndex].Tag;
             }
+            else
+            {
+                Knossos.globalSettings.joystick4 = null;
+            }
+
+            Knossos.globalSettings.joystickDeadZone = JoystickDeadZone;
+            Knossos.globalSettings.joystickSensitivity = JoystickSensitivity;
+            Knossos.globalSettings.mouseSensitivity = MouseSensitivity;
 
             /* MOD SETTINGS */
 
@@ -845,6 +810,7 @@ namespace Knossos.NET.ViewModels
         }
         private void ReloadFlagData()
         {
+            Knossos.globalSettings.Load();
             LoadData();
         }
 

@@ -81,7 +81,6 @@ namespace Knossos.NET
             }
             catch (IOException)
             {
-                Log.WriteToConsole("The log file is in use. Waiting for file access...");
                 await Task.Delay(500);
                 await WaitForFileAccess(filename);
             }

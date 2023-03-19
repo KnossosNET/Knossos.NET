@@ -2,13 +2,7 @@
 using Knossos.NET.Models;
 using Knossos.NET.ViewModels;
 using Knossos.NET.Views;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Knossos.NET
 {
@@ -18,6 +12,7 @@ namespace Knossos.NET
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();
         public static GlobalSettings globalSettings = new GlobalSettings();
         public static bool retailFs2RootFound = false;
+        public static bool flagDataLoaded = false;
         private static object? ttsObject = null;
 
         public static async void StartUp()
@@ -53,10 +48,10 @@ namespace Knossos.NET
             Lang.LoadFiles();
 
             //Load knossos config
-            LoadKnossosSettings();
+            globalSettings.Load();
 
             //Load base path from knossos legacy
-            if(globalSettings.basePath == null)
+            if (globalSettings.basePath == null)
             {
                 globalSettings.basePath = SysInfo.GetBasePathFromKnossosLegacy();
             }
@@ -92,34 +87,6 @@ namespace Knossos.NET
         public static string? GetKnossosLibraryPath()
         {
             return globalSettings.basePath;
-        }
-        
-        private static void LoadKnossosSettings()
-        {
-            try
-            {
-                if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar +"settings.json"))
-                {
-                    using FileStream jsonFile = File.OpenRead(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json");
-                    var tempSettings = JsonSerializer.Deserialize<GlobalSettings>(jsonFile)!;
-                    jsonFile.Close();
-                    if (tempSettings != null)
-                    {
-                        globalSettings = tempSettings;
-
-                        Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");
-                    }
-
-                }
-                else
-                {
-                    Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "File settings.json does not exist.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error, "GlobalSettings.Load()", ex);
-            }
         }
 
         public static async void PlayMod(Mod mod, FsoExecType fsoExecType)
@@ -450,46 +417,37 @@ namespace Knossos.NET
 
             Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used cmdLine : " + cmdline);
 
-            //Write fs2_open.ini
-            Fs2OpenIni iniFile = new Fs2OpenIni();
-
-            if(iniFile.WriteIniFile(fsoBuild))
+            try
             {
-                try
+                //In Linux make sure it is marked as executable
+                if (SysInfo.IsLinux)
                 {
-                    if (SysInfo.IsLinux)
-                    {
-                        SysInfo.Chmod(execPath, "+x");
-                    }
-
-                    if (SysInfo.IsWindows)
-                    {
-                        using var dpiProccess = new Process();
-                        dpiProccess.StartInfo.FileName = "REG";
-                        dpiProccess.StartInfo.Arguments = "ADD \"HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers\" /V \""+execPath+"\" /T REG_SZ /D HIGHDPIAWARE /F";
-                        dpiProccess.StartInfo.UseShellExecute = false;
-                        dpiProccess.StartInfo.Verb = "runas";
-                        dpiProccess.Start();
-                        dpiProccess.WaitForExit();
-                    }
-
-                    //LAUNCH!! FINALLY!
-                    using var fso = new Process();
-                    fso.StartInfo.FileName = execPath;
-                    fso.StartInfo.Arguments = cmdline;
-                    fso.StartInfo.UseShellExecute = false;
-                    fso.StartInfo.WorkingDirectory = rootPath;
-                    fso.Start();
-                }catch(Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", ex);
-                    await MessageBox.Show(MainWindow.instance!, ex.Message, "Error launching fso", MessageBox.MessageBoxButtons.OK);
+                    SysInfo.Chmod(execPath, "+x");
                 }
-            }
-            else
+
+                //In Windows enable the High DPI aware
+                if (SysInfo.IsWindows)
+                {
+                    using var dpiProccess = new Process();
+                    dpiProccess.StartInfo.FileName = "REG";
+                    dpiProccess.StartInfo.Arguments = "ADD \"HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers\" /V \""+execPath+"\" /T REG_SZ /D HIGHDPIAWARE /F";
+                    dpiProccess.StartInfo.UseShellExecute = false;
+                    dpiProccess.StartInfo.Verb = "runas";
+                    dpiProccess.Start();
+                    dpiProccess.WaitForExit();
+                }
+
+                //LAUNCH!! FINALLY!
+                using var fso = new Process();
+                fso.StartInfo.FileName = execPath;
+                fso.StartInfo.Arguments = cmdline;
+                fso.StartInfo.UseShellExecute = false;
+                fso.StartInfo.WorkingDirectory = rootPath;
+                fso.Start();
+            }catch(Exception ex)
             {
-                await MessageBox.Show(MainWindow.instance!, "Unable to write fs2_open.ini file!", "Error launching mod", MessageBox.MessageBoxButtons.OK);
-                return;
+                Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", ex);
+                await MessageBox.Show(MainWindow.instance!, ex.Message, "Error launching fso", MessageBox.MessageBoxButtons.OK);
             }
         }
 
