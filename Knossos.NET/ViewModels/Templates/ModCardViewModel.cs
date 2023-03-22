@@ -15,6 +15,7 @@ using Avalonia.Controls;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Linq;
+using Avalonia.Threading;
 
 namespace Knossos.NET.ViewModels
 {
@@ -41,13 +42,13 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool isInstalled = false;
         [ObservableProperty]
-        private IBrush borderColor = Brushes.Green;
-        [ObservableProperty]
-        private bool buttonPage1 = true;
+        private IBrush borderColor = Brushes.Black;
         [ObservableProperty]
         private string? tooltip;
         [ObservableProperty]
         private bool isInstalling = false;
+        [ObservableProperty]
+        private bool buttonPage1 = true;
 
 
         /* Should only be used by the editor preview */
@@ -87,13 +88,9 @@ namespace Knossos.NET.ViewModels
             devMode = modJson.devMode;
             if (devMode)
             {
-                BorderColor = Brushes.LightSlateGray;
+                BorderColor = Brushes.DimGray;
             }
             LoadImage();
-            if(!modJson.installed)
-            {
-                BorderColor = Brushes.Black;
-            }
         }
         
         public void AddModVersion(Mod modJson)
@@ -109,6 +106,30 @@ namespace Knossos.NET.ViewModels
                 ModVersion = modJson.version + " (+" + (modVersions.Count - 1) + ")";
                 LoadImage();
             }
+        }
+
+        public async void CheckDependencyActiveVersion()
+        {
+            await Task.Run(() =>
+            {
+                if (modVersions[activeVersionIndex].installed && !modVersions[activeVersionIndex].devMode && !UpdateAvalible)
+                {
+                    if (modVersions[activeVersionIndex].GetMissingDependenciesList().Any())
+                    {
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            BorderColor = Brushes.Red;
+                        });
+                    }
+                    else
+                    {
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            BorderColor = Brushes.Black;
+                        });
+                    }
+                }
+            });
         }
 
         public void SwitchModVersion(int newIndex)
@@ -132,6 +153,7 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 LoadImage();
+                CheckDependencyActiveVersion();
             }
         }
 
@@ -144,7 +166,7 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                BorderColor = Brushes.Green;
+                BorderColor = Brushes.Black;
             }
         }
 
@@ -226,6 +248,7 @@ namespace Knossos.NET.ViewModels
                         modVersions[modVersions.Count - 1].installed = false;
                         MainWindowViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
                         Knossos.RemoveMod(modVersions[activeVersionIndex].id);
+                        MainWindowViewModel.Instance?.RunDependenciesCheck();
                     }
                 }
                 else
@@ -265,7 +288,7 @@ namespace Knossos.NET.ViewModels
             if (MainWindow.instance != null)
             {
                 var dialog = new ModSettingsView();
-                dialog.DataContext = new ModSettingsViewModel(modVersions[activeVersionIndex]);
+                dialog.DataContext = new ModSettingsViewModel(modVersions[activeVersionIndex],this);
 
                 await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
             }

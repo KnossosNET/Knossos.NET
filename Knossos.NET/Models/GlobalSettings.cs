@@ -133,17 +133,15 @@ namespace Knossos.NET.Models
 
         private void OnIniChanged(object sender, FileSystemEventArgs e)
         {
-            if (e.ChangeType != WatcherChangeTypes.Changed)
-            {
-                return;
-            }
-
+            iniWatcher!.EnableRaisingEvents = false;
             Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Log.Add(Log.LogSeverity.Information, "GlobalSettings.OnIniChanged()", "fs2_open.ini was changed externally, loading data.");
                 Load();
                 MainWindowViewModel.Instance?.GlobalSettingsLoadData();
             });
+            Task.Delay(1000);
+            iniWatcher!.EnableRaisingEvents = true;
         }
 
         public void EnableIniWatch()
@@ -433,6 +431,13 @@ namespace Knossos.NET.Models
                         enableLogFile = tempSettings.enableLogFile;
                         logLevel = tempSettings.logLevel;
                         globalCmdLine = tempSettings.globalCmdLine;
+                        ttsDescription = tempSettings.ttsDescription;
+                        enableTts = tempSettings.enableTts;
+                        noFpsCapping = tempSettings.noFpsCapping;
+                        showFps = tempSettings.showFps;
+                        disableAudio= tempSettings.disableAudio;
+                        disableMusic= tempSettings.disableMusic;
+
 
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");

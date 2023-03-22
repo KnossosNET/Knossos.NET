@@ -1,4 +1,5 @@
 ﻿using Avalonia.Threading;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.ViewModels;
 using Knossos.NET.Views;
@@ -74,6 +75,9 @@ namespace Knossos.NET
             if (globalSettings.basePath != null)
             {
                 await FolderSearchRecursive(globalSettings.basePath);
+
+                //Red border for mod with missing deps
+                MainWindowViewModel.Instance?.RunDependenciesCheck();
 
                 //Load config options to view, must be done after loading the fso builds due to flag data
                 MainWindowViewModel.Instance?.GlobalSettingsLoadData();
@@ -648,7 +652,7 @@ namespace Knossos.NET
             }
         }
 
-        public static void Tts(string text, string? voiceName = null, int? volume = null)
+        public static void Tts(string text, string? voiceName = null, int? volume = null, Func<bool>? callBack = null)
         {
             if(globalSettings.enableTts)
             {
@@ -692,11 +696,15 @@ namespace Knossos.NET
                                     catch (ArgumentException ex)
                                     {
                                         Log.Add(Log.LogSeverity.Error, "Knossos.Tts()", ex);
+                                        if (callBack != null)
+                                            callBack();
                                     }
                                     ttsObject = sp;
                                     try
                                     {
                                         sp.Speak(text);
+                                        if (callBack != null)
+                                            callBack();
                                     }
                                     catch (OperationCanceledException) { }
                                     ttsObject = null;
@@ -707,6 +715,8 @@ namespace Knossos.NET
                 } catch (Exception ex)
                 {
                     Log.Add(Log.LogSeverity.Error, "Knossos.Tts()", ex);
+                    if (callBack != null)
+                        callBack();
                 }
                 #pragma warning restore CA1416
             }

@@ -542,6 +542,16 @@ namespace Knossos.NET.ViewModels
                     }
                     catch {}
 
+                    //Remove Mod card, unmark update avalible, re-run dependencies checks
+                    if (installed == null)
+                    {
+                        MainWindowViewModel.Instance?.NebulaModsView.RemoveMod(mod.id);
+                        Knossos.AddMod(mod);
+                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(mod), DispatcherPriority.Background);
+                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id, false), DispatcherPriority.Background);
+                        MainWindowViewModel.Instance?.RunDependenciesCheck();
+                    }
+
                     /*
                         Always Dequeue, always check for check size and verify that the first is this TaskItemViewModel object
                     */
@@ -550,14 +560,6 @@ namespace Knossos.NET.ViewModels
                         TaskViewModel.Instance!.installQueue.Dequeue();
                     }
 
-                    //Remove Mod card, unmark update avalible
-                    if (installed == null)
-                    {
-                        MainWindowViewModel.Instance?.NebulaModsView.RemoveMod(mod.id);
-                        Knossos.AddMod(mod);
-                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(mod), DispatcherPriority.Background);
-                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id, false), DispatcherPriority.Background);
-                    }
                     Info = string.Empty;
                     IsCompleted = true;
                     CancelButtonVisible = false;
@@ -900,6 +902,10 @@ namespace Knossos.NET.ViewModels
                         Knossos.AddBuild(newBuild);
                         IsCompleted = true;
                         CancelButtonVisible = false;
+
+                        //Re-run Dependencies checks 
+                        MainWindowViewModel.Instance?.RunDependenciesCheck();
+
                         /*
                             Always Dequeue, always check for check size and verify that the first is this TaskItemViewModel object
                         */

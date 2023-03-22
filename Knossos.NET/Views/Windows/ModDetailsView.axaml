@@ -7,7 +7,8 @@
              x:Class="Knossos.NET.Views.ModDetailsView"
 			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
 			 Icon="/Assets/knossos-icon.ico"
-			 WindowStartupLocation="CenterScreen"
+			 Width="1070"
+			 WindowStartupLocation="CenterOwner"
 			 Title="{Binding Name}"
 			 CanResize="True">
 	
@@ -58,8 +59,8 @@
 			</Grid>
 		</StackPanel>
 		<WrapPanel Grid.Row="1" HorizontalAlignment="Center">
-			<Button Background="Black" Command="{Binding StopTts}">Stop</Button>
-			<Button Margin="5,0,0,0" Background="Black" Command="{Binding PlayDescription}" CommandParameter="0">Play</Button>
+			<Button IsVisible="{Binding IsPlayingTTS}" Background="Black" Command="{Binding StopTts}">Stop</Button>
+			<Button IsVisible="{Binding !IsPlayingTTS}" Margin="5,0,0,0" Background="Black" Command="{Binding PlayDescription}" CommandParameter="0">Play</Button>
 		</WrapPanel>
 		
 		<ScrollViewer Grid.Row="2" Margin="25">

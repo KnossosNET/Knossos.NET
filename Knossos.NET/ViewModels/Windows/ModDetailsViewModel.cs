@@ -3,13 +3,8 @@ using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
@@ -33,6 +28,8 @@ namespace Knossos.NET.ViewModels
         private bool forumAvalible = true;
         [ObservableProperty]
         private bool isInstalled = true;
+        [ObservableProperty]
+        private bool isPlayingTTS = false;
         private ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
         private int itemSelectedIndex = 0;
@@ -81,7 +78,7 @@ namespace Knossos.NET.ViewModels
             if (modVersions.Count == 1)
                 LoadVersion(0);
 
-            if(Knossos.globalSettings.ttsDescription)
+            if(Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts) 
             {
                 PlayDescription(500);
             }
@@ -93,12 +90,20 @@ namespace Knossos.NET.ViewModels
             {
                 await Task.Delay(delay);
             }
-            Knossos.Tts(Regex.Replace(modVersions[ItemSelectedIndex].description!, @" ?\[.*?\]", string.Empty));
+            IsPlayingTTS = true;
+            Knossos.Tts(Regex.Replace(modVersions[ItemSelectedIndex].description!, @" ?\[.*?\]", string.Empty),null, null, CompletedCallback);
         }
 
         private void StopTts()
         {
+            IsPlayingTTS = false;
             Knossos.Tts(string.Empty);
+        }
+
+        private bool CompletedCallback()
+        {
+            IsPlayingTTS = false;
+            return true;
         }
 
         private void LoadVersion(int index)
@@ -213,6 +218,7 @@ namespace Knossos.NET.ViewModels
                             Knossos.RemoveMod(delete);
                             ItemSelectedIndex = modVersions.Count - 1;
                             VersionItems.Remove(verDel);
+                            MainWindowViewModel.Instance?.RunDependenciesCheck();
                         }
                     }
                     else
@@ -224,6 +230,7 @@ namespace Knossos.NET.ViewModels
                             modVersions[0].installed = false;
                             MainWindowViewModel.Instance?.AddNebulaMod(modVersions[0]);
                             Knossos.RemoveMod(modVersions[0].id);
+                            MainWindowViewModel.Instance?.RunDependenciesCheck();
                             if (window != null)
                             {
                                 window.Close();

@@ -8,8 +8,8 @@ namespace Knossos.NET.ViewModels
 {
     public partial class ModSettingsViewModel : ViewModelBase
     {
-       // private MainWindowViewModel? mainWindowViewModel { get; set; }
         private Mod? modJson;
+        private ModCardViewModel? modCardViewModel;
 
         private ObservableCollection<DependencyItemViewModel> DepItems { get; set; } = new ObservableCollection<DependencyItemViewModel>();
 
@@ -25,15 +25,18 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private FsoFlagsViewModel? fsoFlags = null;
 
+
+
         public ModSettingsViewModel()
         {
             fsoPicker = new FsoBuildPickerViewModel();
         }
 
-        public ModSettingsViewModel(Mod modJson)
+        public ModSettingsViewModel(Mod modJson, ModCardViewModel? modCard=null)
         {
             //this.mainWindowViewModel = mainWindowViewModel;
             this.modJson = modJson;
+            modCardViewModel = modCard;
             Title = modJson.title + " " + modJson.version + " Mod " + "Settings";
             CreateDependencyItems();
 
@@ -205,6 +208,10 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 modJson.modSettings.Save();
+                if(modCardViewModel != null)
+                {
+                    modCardViewModel.CheckDependencyActiveVersion();
+                }
             }
         }
 

@@ -2,6 +2,7 @@
 using System.Threading;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
+using SharpCompress;
 
 namespace Knossos.NET.ViewModels
 {
@@ -18,6 +19,11 @@ namespace Knossos.NET.ViewModels
         public void ClearView()
         {
             Mods.Clear();
+        }
+
+        public void RunDependencyCheck()
+        {
+            Mods.ForEach(m => m.CheckDependencyActiveVersion());
         }
 
         public void AddMod(Mod modJson)
