@@ -12,7 +12,6 @@ https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.14-wind
 **The current status:**<br />
 <br />
 -Second test version (0.0.2) - Most of the Basic functions are in, including Mod install. Not retail installer yet.<br />
--Directly added SharpCompress as a lib at least until the nuget package get updated. Nebula files cant be currently decompressed with the nuget version.<br />
 -Working in Windows and Linux<br />
 -The look of the UI is not a priority until all basic functionality is in, but help with the design colors and ideas is very welcome as im not a UI designer.<br />
 -MacOS version is untested and unlikely to work.<br />

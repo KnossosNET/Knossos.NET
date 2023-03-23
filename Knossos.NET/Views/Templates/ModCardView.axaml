@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl  IsVisible="{Binding Visible}"  xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -30,10 +30,10 @@
 	<Border Background="#422626" BorderBrush="{Binding BorderColor}" BorderThickness="3" CornerRadius="2">
 		<Grid>
 			<!--Default-->
-			<StackPanel ZIndex="0">
-				<Image Source="{Binding Image}" Width="150" Height="225"></Image>
-				<TextBlock Text="{Binding Name}" Width="151" TextWrapping="Wrap" MaxLines="2" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" FontSize="14" Foreground="White"/>
-			</StackPanel>
+			<Grid RowDefinitions="Auto,*" ZIndex="0">
+				<Image Grid.Row="0" Source="{Binding Image}" Width="150" Height="225"></Image>
+				<TextBlock Grid.Row="1" VerticalAlignment="Center" Width="151" Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" TextAlignment="Center" FontSize="14" Foreground="White"/>
+			</Grid>
 			<!--Message Overlay-->
 			<StackPanel IsVisible="{Binding IsInstalled}" Name="Messages" ZIndex="2">
 				<!--Version-->
@@ -83,8 +83,8 @@
 						<!--Page Control-->
 						<Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" BorderBrush="White" BorderThickness="1" CornerRadius="2">
 							<Grid ColumnDefinitions="Auto">
-								<Button IsVisible="{Binding ButtonPage1}" Command="{Binding ButtonCommandGoPage2}" Grid.Column="0">↓</Button>
-								<Button IsVisible="{Binding !ButtonPage1}" Command="{Binding ButtonCommandGoPage1}" Grid.Column="0">↑</Button>
+								<Button IsVisible="{Binding ButtonPage1}" Command="{Binding ButtonCommandGoPage2}" Grid.Column="0" Content=">>"></Button>
+								<Button IsVisible="{Binding !ButtonPage1}" Command="{Binding ButtonCommandGoPage1}" Grid.Column="0" Content="&lt;&lt;"></Button>
 							</Grid>
 						</Border>
 					</StackPanel>

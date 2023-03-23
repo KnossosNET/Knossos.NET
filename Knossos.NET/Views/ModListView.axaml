@@ -12,17 +12,41 @@
 	</Design.DataContext>
 	
 	<Border Background="#18191A">
-		<ItemsPresenter Items="{Binding Mods}" VirtualizationMode="Simple">
-			<ItemsPresenter.ItemTemplate>
-				<DataTemplate>
-					<v:ModCardView Margin="5" Content="{Binding}"/>
-				</DataTemplate>
-			</ItemsPresenter.ItemTemplate>
-			<ItemsPresenter.ItemsPanel>
-				<ItemsPanelTemplate>
-					<WrapPanel />
-				</ItemsPanelTemplate>
-			</ItemsPresenter.ItemsPanel>
-		</ItemsPresenter>
+		<Grid RowDefinitions="Auto,*">
+			<WrapPanel Grid.Row="0" HorizontalAlignment="Left">
+				<TextBox Text="{Binding Search}" Margin="10" Width="300"></TextBox>
+				<Button IsVisible="{Binding !IsNebulaView}" Content="?" ToolTip.Tip="View Color Codes" HorizontalAlignment="Right">
+					<Button.Flyout>
+						<Flyout Placement="Right">
+							<WrapPanel>
+								<Border Margin="0,0,0,0"  Background="DimGray" Height="30" CornerRadius="5">
+									<Label VerticalAlignment="Center">Dev Mode</Label>
+								</Border>
+								<Border Margin="20,0,0,0" Background="Blue" Height="30" CornerRadius="5">
+									<Label VerticalAlignment="Center">Update Avalible</Label>
+								</Border>
+								<Border Margin="20,0,0,0" Background="Red" Height="30" CornerRadius="5">
+									<Label VerticalAlignment="Center">Problem Detected</Label>
+								</Border>
+							</WrapPanel>
+						</Flyout>
+					</Button.Flyout>
+				</Button>
+			</WrapPanel>
+			<ScrollViewer Grid.Row="1">
+				<ItemsPresenter Items="{Binding Mods}" VirtualizationMode="Simple">
+					<ItemsPresenter.ItemTemplate>
+						<DataTemplate>
+							<v:ModCardView Margin="5" Content="{Binding}"/>
+						</DataTemplate>
+					</ItemsPresenter.ItemTemplate>
+					<ItemsPresenter.ItemsPanel>
+						<ItemsPanelTemplate>
+							<WrapPanel />
+						</ItemsPanelTemplate>
+					</ItemsPresenter.ItemsPanel>
+				</ItemsPresenter>
+			</ScrollViewer>
+		</Grid>
 	</Border>
 </UserControl>

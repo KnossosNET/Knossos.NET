@@ -9,7 +9,7 @@
         x:Class="Knossos.NET.Views.MainWindow"
         Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterScreen"
-        Title="Knossos.NET v0.0.3-Alpha3">
+        Title="Knossos.NET v0.0.3-Alpha4">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -22,15 +22,11 @@
 		<TabControl Grid.Row="1" SelectedIndex="{Binding TabIndex}">
 			<!--Installed Mods / Home-->
 			<TabItem Header="Home">
-				<ScrollViewer>
-					<v:ModListView Content="{Binding InstalledModsView}"/>
-				</ScrollViewer>
+				<v:ModListView Content="{Binding InstalledModsView}"/>
 			</TabItem>
 			<!--Nebula Mods / Explore-->
 			<TabItem Header="Nebula">
-				<ScrollViewer>
-					<v:ModListView Content="{Binding NebulaModsView}"/>
-				</ScrollViewer>
+				<v:ModListView Content="{Binding NebulaModsView}"/>
 			</TabItem>
 			<!--FSO Builds-->
 			<TabItem Header="Engine">

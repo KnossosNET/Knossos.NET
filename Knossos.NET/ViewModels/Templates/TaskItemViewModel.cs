@@ -36,7 +36,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private float progressBarMin = 0;
         [ObservableProperty]
-        private float progressBarMax = 100;
+        private float progressBarMax = 0;
         [ObservableProperty]
         private float progressCurrent = 0;
         [ObservableProperty]
@@ -44,15 +44,13 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool isCompleted = false;
         [ObservableProperty]
+        private bool isCancelled = false;
+        [ObservableProperty]
         private bool isFileDownloadTask = false;
-        [ObservableProperty]
-        private bool isMsgTask = false;
-        [ObservableProperty]
-        private bool isBuildInstallTask = false;
         [ObservableProperty]
         private bool showProgressText = true;
         [ObservableProperty]
-        private bool isDecompressionTask = false;
+        private string currentMirror = string.Empty;
 
 
         [ObservableProperty]
@@ -63,6 +61,7 @@ namespace Knossos.NET.ViewModels
         private CancellationTokenSource? cancellationTokenSource = null;
         public string? installID = null;
         public string? installVersion = null;
+        private bool restartDownload = false;
 
         public TaskItemViewModel() 
         { 
@@ -75,7 +74,6 @@ namespace Knossos.NET.ViewModels
                 if (!TaskIsSet)
                 {
                     TaskIsSet = true;
-                    IsMsgTask = true;
                     IsCompleted = true;
                     Name = msg;
                     if (tooltip != null)
@@ -102,7 +100,6 @@ namespace Knossos.NET.ViewModels
                 if (!TaskIsSet)
                 {
                     TaskIsSet = true;
-                    IsDecompressionTask = true;
                     CancelButtonVisible = false;
                     Name = "Decompressing " + filename;
                     ShowProgressText = false;
@@ -149,6 +146,7 @@ namespace Knossos.NET.ViewModels
                                 catch (TaskCanceledException)
                                 {
                                     Info = "Task Cancelled";
+                                    IsCancelled = true;
                                     fileStream.Close();
                                     return false;
                                 }
@@ -156,6 +154,7 @@ namespace Knossos.NET.ViewModels
                                 {
                                     Info = "Task Failed";
                                     IsCompleted = false;
+                                    IsCancelled = true;
                                     CancelButtonVisible = false;
                                     cancellationTokenSource?.Cancel();
                                     fileStream.Close();
@@ -196,12 +195,14 @@ namespace Knossos.NET.ViewModels
                                 catch (TaskCanceledException)
                                 {
                                     Info = "Task Cancelled";
+                                    IsCancelled = true;
                                     return false;
                                 }
                                 catch (Exception ex)
                                 {
                                     Info = "Task Failed";
                                     IsCompleted = false;
+                                    IsCancelled = true;
                                     CancelButtonVisible = false;
                                     cancellationTokenSource?.Cancel();
                                     Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.DecompressTask()", ex);
@@ -261,7 +262,6 @@ namespace Knossos.NET.ViewModels
                     {
                         cancellationTokenSource = new CancellationTokenSource();
                     }
-                    IsBuildInstallTask = true;
                     CancelButtonVisible = true;
                     Name = "Verifying " + mod.ToString();
                     ShowProgressText = false;
@@ -269,7 +269,7 @@ namespace Knossos.NET.ViewModels
                     Info = "In Queue";
 
                     //Wait in Queue
-                    while (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() != this)
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
                     {
                         await Task.Delay(1000);
                         if (cancellationTokenSource.IsCancellationRequested)
@@ -374,9 +374,9 @@ namespace Knossos.NET.ViewModels
                         throw new TaskCanceledException();
                     }
 
-                    if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                     {
-                        TaskViewModel.Instance!.installQueue.Dequeue();
+                        TaskViewModel.Instance!.taskQueue.Dequeue();
                     }
 
                     IsCompleted = true;
@@ -415,15 +415,16 @@ namespace Knossos.NET.ViewModels
                     Task cancel requested by user
                 */
                 IsCompleted = false;
+                IsCancelled = true;
                 CancelButtonVisible = false;
                 Info = "Cancel Requested";
-                while (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() != this)
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
                 {
                     await Task.Delay(500);
                 }
-                if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                 {
-                    TaskViewModel.Instance!.installQueue.Dequeue();
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
                 }
                 await Task.Delay(2000); //give time for child tasks to cancel first
                 Info = "Task Cancelled";
@@ -441,16 +442,17 @@ namespace Knossos.NET.ViewModels
                     Task cancel forced due to a error
                 */
                 IsCompleted = false;
+                IsCancelled = true;
                 CancelButtonVisible = false;
                 cancellationTokenSource?.Cancel();
                 Info = "Cancel Requested";
-                while (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() != this)
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
                 {
                     await Task.Delay(500);
                 }
-                if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                 {
-                    TaskViewModel.Instance!.installQueue.Dequeue();
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
                 }
 
                 await Task.Delay(2000); //give time for child tasks to cancel first
@@ -485,7 +487,6 @@ namespace Knossos.NET.ViewModels
                     {
                         cancellationTokenSource = new CancellationTokenSource();
                     }
-                    IsBuildInstallTask = true;
                     CancelButtonVisible = true;
                     Name = "Downloading " + mod.ToString();
                     ShowProgressText = false;
@@ -495,7 +496,7 @@ namespace Knossos.NET.ViewModels
                     MainWindowViewModel.Instance?.NebulaModsView.SetInstalling(mod.id, cancellationTokenSource);
 
                     //Wait in Queue
-                    while (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() != this)
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
                     {
                         await Task.Delay(1000);
                         if (cancellationTokenSource.IsCancellationRequested)
@@ -580,9 +581,9 @@ namespace Knossos.NET.ViewModels
                         Info = string.Empty;
                         IsCompleted = true;
                         CancelButtonVisible = false;
-                        if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                        if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                         {
-                            TaskViewModel.Instance!.installQueue.Dequeue();
+                            TaskViewModel.Instance!.taskQueue.Dequeue();
                         }
                         return true;
                     }
@@ -786,9 +787,9 @@ namespace Knossos.NET.ViewModels
                     /*
                         Always Dequeue, always check for check size and verify that the first is this TaskItemViewModel object
                     */
-                    if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                     {
-                        TaskViewModel.Instance!.installQueue.Dequeue();
+                        TaskViewModel.Instance!.taskQueue.Dequeue();
                     }
 
                     Info = string.Empty;
@@ -807,15 +808,16 @@ namespace Knossos.NET.ViewModels
                     Task cancel requested by user
                 */
                 IsCompleted = false;
+                IsCancelled = true;
                 CancelButtonVisible = false;
                 Info = "Cancel Requested";
-                while (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() != this)
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
                 {
                     await Task.Delay(500);
                 }
-                if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                 {
-                    TaskViewModel.Instance!.installQueue.Dequeue();
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
                 }
                 await Task.Delay(2000); //give time for child tasks to cancel first
                 Info = "Task Cancelled";
@@ -842,6 +844,7 @@ namespace Knossos.NET.ViewModels
                     Task cancel forced due to a error
                 */
                 IsCompleted = false;
+                IsCancelled = true;
                 CancelButtonVisible = false;
                 cancellationTokenSource?.Cancel();
                 Info = "Cancel Requested";
@@ -850,13 +853,13 @@ namespace Knossos.NET.ViewModels
                     //Messagebox is not thread safe!
                     await MessageBox.Show(MainWindow.instance!, "An error was ocurred during the download of the mod: " + mod.ToString() + ". Error: " + ex.Message, "Error", MessageBox.MessageBoxButtons.OK);
                 });
-                while (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() != this)
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
                 {
                     await Task.Delay(500);
                 }
-                if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                 {
-                    TaskViewModel.Instance!.installQueue.Dequeue();
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
                 }
 
                 await Task.Delay(2000); //give time for child tasks to cancel first
@@ -897,7 +900,6 @@ namespace Knossos.NET.ViewModels
                     {
                         cancellationTokenSource = new CancellationTokenSource();
                     }
-                    IsBuildInstallTask = true;
                     CancelButtonVisible = true;
                     Name = "Downloading " + build.ToString();
                     ShowProgressText = false;
@@ -905,7 +907,7 @@ namespace Knossos.NET.ViewModels
                     Info = "In Queue";
 
                     //Wait in Queue
-                    while (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() != this)
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
                     {
                         await Task.Delay(1000);
                         if (cancellationTokenSource.IsCancellationRequested)
@@ -1140,9 +1142,9 @@ namespace Knossos.NET.ViewModels
                         /*
                             Always Dequeue, always check for check size and verify that the first is this TaskItemViewModel object
                         */
-                        if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                        if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                         {
-                            TaskViewModel.Instance!.installQueue.Dequeue();
+                            TaskViewModel.Instance!.taskQueue.Dequeue();
                         }
                         /*
                             If flag data wasnt loaded, load it now
@@ -1172,14 +1174,15 @@ namespace Knossos.NET.ViewModels
                 */
                 IsCompleted = false;
                 CancelButtonVisible = false;
+                IsCancelled = true;
                 Info = "Cancel Requested";
-                while(TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() != this)
+                while(TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
                 {
                     await Task.Delay(500);
                 }
-                if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                 {
-                    TaskViewModel.Instance!.installQueue.Dequeue();
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
                 }
                 await Task.Delay(2000); //give time for child tasks to cancel first
                 Info = "Task Cancelled";
@@ -1204,6 +1207,7 @@ namespace Knossos.NET.ViewModels
                     Task cancel forced due to a error
                 */
                 IsCompleted = false;
+                IsCancelled = true;
                 CancelButtonVisible = false;
                 cancellationTokenSource?.Cancel();
                 Info = "Cancel Requested";
@@ -1212,13 +1216,13 @@ namespace Knossos.NET.ViewModels
                     //Messagebox is not thread safe!
                     await MessageBox.Show(MainWindow.instance!, "An error was ocurred during the download of the mod: " + build.ToString() + ". Error: " + ex.Message, "Error", MessageBox.MessageBoxButtons.OK);
                 });
-                while (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() != this)
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
                 {
                     await Task.Delay(500);
                 }
-                if (TaskViewModel.Instance!.installQueue.Count > 0 && TaskViewModel.Instance!.installQueue.Peek() == this)
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                 {
-                    TaskViewModel.Instance!.installQueue.Dequeue();
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
                 }
                     
                 await Task.Delay(2000); //give time for child tasks to cancel first
@@ -1241,6 +1245,11 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        private void RestartDownloadCommand()
+        {
+            restartDownload = true;
+        }
+
         public async Task<bool?> DownloadFile(string url, string dest, string msg, bool showStopButton, string? tooltip, CancellationTokenSource? cancelSource = null)
         {
             string[] mirrors = { url };
@@ -1254,6 +1263,9 @@ namespace Knossos.NET.ViewModels
                 if (!TaskIsSet)
                 {
                     TaskIsSet = true;
+                    ProgressBarMax = 100;
+                    ProgressCurrent = 0;
+                    IsFileDownloadTask = true;
                     if (cancelSource != null)
                     {
                         cancellationTokenSource = cancelSource;
@@ -1262,7 +1274,6 @@ namespace Knossos.NET.ViewModels
                     {
                         cancellationTokenSource = new CancellationTokenSource();
                     }
-                    IsFileDownloadTask = true;
                     CancelButtonVisible = showStopButton;
                     Name = msg;
                     if (tooltip != null)
@@ -1283,7 +1294,7 @@ namespace Knossos.NET.ViewModels
                         {
                             throw new TaskCanceledException();
                         }
-                        return false;
+                        return restartDownload;
                     };
 
                     bool result = false;
@@ -1322,6 +1333,7 @@ namespace Knossos.NET.ViewModels
                     Task cancel requested by user
                 */
                 IsCompleted = false;
+                IsCancelled = true;
                 CancelButtonVisible = false;
                 Info = "Task Cancelled";
                 //Only dispose the token if it was created locally
@@ -1335,6 +1347,7 @@ namespace Knossos.NET.ViewModels
             {
                 IsCompleted = false;
                 CancelButtonVisible = false;
+                IsCancelled = true;
                 Info = "Task Failed";
                 //Only dispose the token if it was created locally
                 if (cancelSource == null)
@@ -1351,6 +1364,7 @@ namespace Knossos.NET.ViewModels
             if (!IsCompleted)
             {
                 cancellationTokenSource?.Cancel();
+                IsCancelled = true;
             }
         }
 
@@ -1399,18 +1413,28 @@ namespace Knossos.NET.ViewModels
         private async Task<bool> Download(string[] downloadMirrors, string destinationFilePath, Func<long?, long, string, double?, bool> progressChanged)
         {
             Random rnd = new Random();
-            int maxRetries = 10;
+            int maxRetries = 15;
             int count = 0;
             bool result = false;
+            IsFileDownloadTask = true;
             do
             {
-                string url = downloadMirrors[rnd.Next(downloadMirrors.Count())];
-                count++;
+                if(restartDownload)
+                {
+                    restartDownload = false;
+                }
+                else
+                {
+                    count++;
+                }
+                Uri uri = new Uri(downloadMirrors[rnd.Next(downloadMirrors.Count())]);
+                CurrentMirror = uri.Host;
+                
                 if (count > 1)
                 {
-                    Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.Download(List<mirrors>)", "Retrying download of file: " + url);
+                    Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.Download(List<mirrors>)", "Retrying download of file: " + uri.ToString());
                 }
-                result = await Download(url, destinationFilePath, progressChanged);
+                result = await Download(uri, destinationFilePath, progressChanged);
                 if (cancellationTokenSource!.IsCancellationRequested)
                 {
                     throw new TaskCanceledException();
@@ -1420,7 +1444,7 @@ namespace Knossos.NET.ViewModels
             return result;
         }
 
-        private async Task<bool> Download(string downloadUrl, string destinationFilePath, Func<long?, long, string, double?, bool> progressChanged)
+        private async Task<bool> Download(Uri downloadUrl, string destinationFilePath, Func<long?, long, string, double?, bool> progressChanged)
         {
             try
             {
@@ -1429,7 +1453,7 @@ namespace Knossos.NET.ViewModels
                 handler.AllowAutoRedirect = true;
                 handler.AutomaticDecompression = DecompressionMethods.GZip;
                 using HttpClient httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromDays(1) };
-                if (downloadUrl.ToLower().Contains(".json"))
+                if (downloadUrl.ToString().ToLower().Contains(".json"))
                 {
                     httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
                 }

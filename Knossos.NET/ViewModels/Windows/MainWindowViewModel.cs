@@ -13,9 +13,9 @@ namespace Knossos.NET.ViewModels
 
         /* UI Bindings, use the uppercase version, otherwise changes will not register */
         [ObservableProperty]
-        private ModListViewModel installedModsView = new ModListViewModel();
+        private ModListViewModel installedModsView = new ModListViewModel(false);
         [ObservableProperty]
-        private ModListViewModel nebulaModsView = new ModListViewModel();
+        private ModListViewModel nebulaModsView = new ModListViewModel(true);
         [ObservableProperty]
         private FsoBuildsViewModel fsoBuildsView = new FsoBuildsViewModel();
         [ObservableProperty]

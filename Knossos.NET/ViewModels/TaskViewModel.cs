@@ -12,7 +12,7 @@ namespace Knossos.NET.ViewModels
     {
         public static TaskViewModel? Instance { get; private set; }
         private ObservableCollection<TaskItemViewModel> TaskList { get; set; } = new ObservableCollection<TaskItemViewModel>();
-        public Queue<TaskItemViewModel> installQueue { get; set; } = new Queue<TaskItemViewModel>();
+        public Queue<TaskItemViewModel> taskQueue { get; set; } = new Queue<TaskItemViewModel>();
 
         public TaskViewModel() 
         {
@@ -42,7 +42,7 @@ namespace Knossos.NET.ViewModels
         {
             foreach (var task in TaskList)
             {
-                if (task.CancelButtonVisible == true )
+                if (!task.IsCancelled && !task.IsCompleted)
                 {
                     return false;
                 }
@@ -87,7 +87,7 @@ namespace Knossos.NET.ViewModels
             }
             var newTask = new TaskItemViewModel();
             TaskList.Add(newTask);
-            installQueue.Enqueue(newTask);
+            taskQueue.Enqueue(newTask);
             return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson);
         }
 
@@ -112,7 +112,7 @@ namespace Knossos.NET.ViewModels
                 var cancelSource = new CancellationTokenSource();
                 var newTask = new TaskItemViewModel();
                 TaskList.Add(newTask);
-                installQueue.Enqueue(newTask);
+                taskQueue.Enqueue(newTask);
                 await newTask.InstallMod(mod, cancelSource, reinstallPkgs);
                 cancelSource.Dispose();
             }
@@ -123,7 +123,7 @@ namespace Knossos.NET.ViewModels
             var cancelSource = new CancellationTokenSource();
             var newTask = new TaskItemViewModel();
             TaskList.Add(newTask);
-            installQueue.Enqueue(newTask);
+            taskQueue.Enqueue(newTask);
             await newTask.VerifyMod(mod, cancelSource);
             cancelSource.Dispose();
         }

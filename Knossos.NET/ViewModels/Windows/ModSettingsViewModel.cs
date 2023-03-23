@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
+using Knossos.NET.Views;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -208,6 +209,7 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 modJson.modSettings.Save();
+                Knossos.globalSettings.Save(false);
                 if(modCardViewModel != null)
                 {
                     modCardViewModel.CheckDependencyActiveVersion();
@@ -244,10 +246,15 @@ namespace Knossos.NET.ViewModels
                 {
                     FsoFlags = new FsoFlagsViewModel(flagsV1,modJson.GetModCmdLine(ignoreUserSettings));
                 }
+                else
+                {
+                    MessageBox.Show(MainWindow.instance!, "Unable to get flag data from build " + fsoBuild + " It might be below the minimal version supported (3.8.1) or some other error ocurred.", "Invalid flag data", MessageBox.MessageBoxButtons.OK);
+                }
             }
             else
             {
                 /* No valid build found, send message */
+                MessageBox.Show(MainWindow.instance!, "Unable to resolve FSO build dependency, download the correct one or manually select a FSO version. ", "Not engine build found", MessageBox.MessageBoxButtons.OK);
             }
         }
 

@@ -15,7 +15,7 @@ namespace Knossos.NET.ViewModels
         private bool directSeparatorAdded = false;
         private ObservableCollection<ComboBoxItem> BuildItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
-        private bool hideRC = true;
+        private bool hideRC = Knossos.globalSettings.hideBuildRC;
         private bool HideRC
         {
             get
@@ -27,7 +27,7 @@ namespace Knossos.NET.ViewModels
                 if (hideRC != value)
                 {
                     hideRC = value;
-
+                    Knossos.globalSettings.hideBuildRC = value;
                     var rcItems = BuildItems.Where(items => items.Tag?.ToString() == "rc");
                     if(rcItems.Any())
                     {
@@ -40,7 +40,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private bool hideCustom = false;
+        private bool hideCustom = Knossos.globalSettings.hideBuildCustom;
         private bool HideCustom
         {
             get
@@ -51,6 +51,7 @@ namespace Knossos.NET.ViewModels
             {
                 if (hideCustom != value)
                 {
+                    Knossos.globalSettings.hideBuildCustom = value;
                     hideCustom = value;
                     var customItems = BuildItems.Where(items => items.Tag?.ToString() == "custom");
                     if (customItems.Any())
@@ -64,7 +65,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private bool hideNightly = true;
+        private bool hideNightly = Knossos.globalSettings.hideBuildNightly;
         private bool HideNightly
         {
             get
@@ -76,6 +77,7 @@ namespace Knossos.NET.ViewModels
                 if (hideNightly != value)
                 {
                     hideNightly = value;
+                    Knossos.globalSettings.hideBuildNightly = value;
                     var nightlyItems = BuildItems.Where(items => items.Tag?.ToString() == "nightly");
                     if (nightlyItems.Any())
                     {

@@ -24,6 +24,7 @@ namespace Knossos.NET.Models
         //https://dl.fsnebula.org/storage/repo.json
         private static readonly string repoUrl = @"https://aigaion.feralhosting.com/discovery/nebula/repo.json";
         private static readonly int defaultMaxConcurrentDownloads = 3;
+        private static readonly bool listFS2Override = false;
 
         private struct NebulaSettings
         {
@@ -114,7 +115,7 @@ namespace Knossos.NET.Models
                                     await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod)), DispatcherPriority.Background);
                                 }
                             }
-                            if (mod.type == "tc" || mod.type == "mod" && ( mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound) )
+                            if (mod.type == "tc" || mod.type == "mod" && ( listFS2Override || ( mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound) ) )
                             {
                                 //This is already installed?
                                 var isInstalled = Knossos.GetInstalledModList(mod.id);

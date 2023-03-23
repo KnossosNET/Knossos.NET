@@ -121,6 +121,13 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public uint multiPort { get; set; } = 7808;
 
+        [JsonPropertyName("hide_build_rc")]
+        public bool hideBuildRC { get; set; } = true;
+        [JsonPropertyName("hide_build_custom")]
+        public bool hideBuildCustom { get; set; } = false;
+        [JsonPropertyName("hide_build_nightly")]
+        public bool hideBuildNightly { get; set; } = true;
+
         [JsonIgnore]
         private FileSystemWatcher? iniWatcher = null;
 
@@ -438,7 +445,9 @@ namespace Knossos.NET.Models
                         showFps = tempSettings.showFps;
                         disableAudio= tempSettings.disableAudio;
                         disableMusic= tempSettings.disableMusic;
-
+                        hideBuildCustom = tempSettings.hideBuildCustom;
+                        hideBuildNightly = tempSettings.hideBuildNightly;
+                        hideBuildRC = tempSettings.hideBuildRC;
 
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");
@@ -617,9 +626,17 @@ namespace Knossos.NET.Models
             }
         }
 
-        public void Save() 
+        /*
+            Write values to settings.json and fs2_open.ini
+            Writing the ini is optional, it should not be done for 
+            Knossos-only settings.
+        */
+        public void Save(bool writeIni = true) 
         {
-            WriteFS2IniValues();
+            if (writeIni)
+            {
+                WriteFS2IniValues();
+            }
             try
             {
                 var options = new JsonSerializerOptions

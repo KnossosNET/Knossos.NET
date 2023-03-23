@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
+using Knossos.NET.Views;
 using System.Collections.ObjectModel;
 using System.Linq;
 

@@ -10,42 +10,44 @@
 		<vm:PxoViewModel/>
 	</Design.DataContext>
 
-	<Grid RowDefinitions="Auto,Auto,*">
+	<Grid RowDefinitions="Auto,*,Auto">
 		<StackPanel>
-			<TextBlock Margin="10" FontSize="24" TextWrapping="Wrap">PXO is Freespace 2 Open Multiplayer system</TextBlock>
+			<TextBlock Margin="10" FontSize="24" TextWrapping="Wrap">PXO is the Freespace 2 Open Multiplayer system</TextBlock>
 			<TextBlock Margin="10" TextWrapping="Wrap">Multiplayer games are listed here by using the PXO Api. You can refresh the list by pressing the button below. There is a small hourly limit on refreshes.</TextBlock>
 		</StackPanel>
-		<StackPanel Grid.Row="1" Margin="10,30,0,30">
+		<StackPanel Margin="5" Grid.Row="1">
+			<Button Command="{Binding RefreshData}">Refresh Game List</Button>
+			<TreeView Margin="10,0,0,0"  Items="{Binding ActiveGames}">
+				<TreeView.Styles>
+					<Style Selector="TreeViewItem">
+						<Setter Property="IsExpanded" Value="True" />
+					</Style>
+				</TreeView.Styles>
+				<TreeView.DataTemplates>
+					<TreeDataTemplate DataType="vm:PxoGamesActive" ItemsSource="{Binding Servers}">
+						<TextBlock FontWeight="Bold" Text="{Binding Game}" />
+					</TreeDataTemplate>
+					<DataTemplate DataType="vm:PxoServer">
+						<WrapPanel>
+							<TextBlock Text="{Binding Game.Name}" Width="300" />
+							<TextBlock Text="{Binding Game.NumPlayers}" Width="15" />
+							<TextBlock Text="/ "/>
+							<TextBlock Text="{Binding Game.MaxPlayers}" Width="15" />
+							<TextBlock Margin="10,0,0,0" Text="{Binding Game.Mode}" Width="100"/>
+							<TextBlock Text="{Binding Game.Type}" Width="100"/>
+							<TextBlock Text="{Binding Game.State}" Width="100"/>
+							<TextBlock Text="{Binding Game.Mission}" Width="150"/>
+							<TextBlock Text="{Binding Game.Channel}" Width="80"/>
+							<TextBlock Text="{Binding Probe}"  />
+						</WrapPanel>
+					</DataTemplate>
+				</TreeView.DataTemplates>
+			</TreeView>
+		</StackPanel>
+		<StackPanel Grid.Row="2" Margin="10,20,0,30">
 			<TextBlock>To play FSO Multiplayer you will first need to register a PXO account here</TextBlock>
 			<Button Command="{Binding OpenPXOWeb}">https://pxo.nottheeye.com/</Button>
 			<TextBlock>And then input the PXO account login number and password in the multiplayer configuration in-game.</TextBlock>
-			<Button Command="{Binding RefreshData}">Refresh Game List</Button>
 		</StackPanel>
-		<TreeView Margin="10,0,0,0" Grid.Row="2" Items="{Binding ActiveGames}">
-			<TreeView.Styles>
-				<Style Selector="TreeViewItem">
-					<Setter Property="IsExpanded" Value="True" />
-				</Style>
-			</TreeView.Styles>
-			<TreeView.DataTemplates>
-				<TreeDataTemplate DataType="vm:PxoGamesActive" ItemsSource="{Binding Servers}">
-					<TextBlock FontWeight="Bold" Text="{Binding Game}" />
-				</TreeDataTemplate>
-				<DataTemplate DataType="vm:PxoServer">
-					<WrapPanel>
-						<TextBlock Text="{Binding Game.Name}" Width="300" />
-						<TextBlock Text="{Binding Game.NumPlayers}" Width="15" />
-						<TextBlock Text="/ "/>
-						<TextBlock Text="{Binding Game.MaxPlayers}" Width="15" />
-						<TextBlock Margin="10,0,0,0" Text="{Binding Game.Mode}" Width="100"/>
-						<TextBlock Text="{Binding Game.Type}" Width="100"/>
-						<TextBlock Text="{Binding Game.State}" Width="100"/>
-						<TextBlock Text="{Binding Game.Mission}" Width="150"/>
-						<TextBlock Text="{Binding Game.Channel}" Width="80"/>
-						<TextBlock Text="{Binding Probe}"  />
-					</WrapPanel>
-				</DataTemplate>
-			</TreeView.DataTemplates>
-		</TreeView>
 	</Grid>
 </UserControl>

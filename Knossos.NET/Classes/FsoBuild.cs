@@ -148,7 +148,8 @@ namespace Knossos.NET.Models
                 cmd.StartInfo.CreateNoWindow = true;
                 cmd.StartInfo.RedirectStandardOutput = true;
                 cmd.StartInfo.RedirectStandardInput = true;
-                cmd.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+                cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
+                cmd.StartInfo.WorkingDirectory = folderPath;
                 cmd.Start();
                 string result = cmd.StandardOutput.ReadToEnd();
                 cmd.WaitForExit();
@@ -159,6 +160,20 @@ namespace Knossos.NET.Models
                     result = result.Substring(result.IndexOf('{'));
                 }
                 return JsonSerializer.Deserialize<FlagsJsonV1>(result);
+            }
+            catch (JsonException exJson)
+            {
+                //json failed try to see if it exported a binary
+                if(File.Exists(folderPath+Path.DirectorySeparatorChar+"flags.lch"))
+                {
+                    Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", "FSO build "+ this +" seems to be below the minimum supported version (3.8.1) and does not support exporting flags as Json.");
+                    File.Delete(folderPath + Path.DirectorySeparatorChar + "flags.lch");
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlags()", exJson);
+                }
+                return null;
             }
             catch (Exception ex)
             {
@@ -449,6 +464,15 @@ namespace Knossos.NET.Models
             if(build2.date == null) 
                 return 1;
             return string.Compare(build2.date.Replace("-", "").Trim(), build1.date.Replace("-", "").Trim());
+        }
+
+        /* 
+         * To use with the List .Sort()
+        */
+        public static int CompareVersion(FsoBuild build1, FsoBuild build2)
+        {
+            //inverted
+            return SemanticVersion.Compare(build2.version, build1.version);
         }
     }
 

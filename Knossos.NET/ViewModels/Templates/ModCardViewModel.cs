@@ -72,6 +72,15 @@ namespace Knossos.NET.ViewModels
             Name = modJson.title;
             ModVersion = modJson.version;
             ID = modJson.id;
+            if (ID == "FS2")
+            {
+                //This is to disable mod delete and mod modify for retail fs2
+                devMode = true;
+            }
+            else
+            {
+                devMode = modJson.devMode;
+            }
             IsInstalled = modJson.installed;
             if (modJson.description != null)
             {
@@ -85,8 +94,8 @@ namespace Knossos.NET.ViewModels
                     Tooltip = Regex.Replace(modJson.description, @" ?\[.*?\]", string.Empty);
                 }
             }
-            devMode = modJson.devMode;
-            if (devMode)
+
+            if (devMode && ID != "FS2")
             {
                 BorderColor = Brushes.DimGray;
             }

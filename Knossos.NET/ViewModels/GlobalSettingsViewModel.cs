@@ -574,10 +574,10 @@ namespace Knossos.NET.ViewModels
             if (builds.Any())
             {
                 //First the stable ones
-                var stables = builds.Where(b => b.stability == FsoStability.Stable);
-                builds.Reverse();
+                var stables = builds.Where(b => b.stability == FsoStability.Stable).ToList();
                 if (stables.Any())
                 {
+                    stables.Sort(FsoBuild.CompareVersion);
                     foreach (var stable in stables)
                     {
                         var flags = stable.GetFlagsV1();
@@ -593,7 +593,6 @@ namespace Knossos.NET.ViewModels
 
                 //If we are still here try all others
                 var others = builds.Where(b => b.stability != FsoStability.Stable);
-                others.Reverse();
                 if (others.Any())
                 {
                     foreach (var other in others)
