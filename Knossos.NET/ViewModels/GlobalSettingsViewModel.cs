@@ -4,6 +4,7 @@ using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Knossos.NET.ViewModels
 {

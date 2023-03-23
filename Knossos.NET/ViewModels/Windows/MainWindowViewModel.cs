@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace Knossos.NET.ViewModels
 {

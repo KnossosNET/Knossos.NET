@@ -30,6 +30,7 @@
 				</ComboBox.ItemTemplate>
 			</ComboBox>
 			<TextBox IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="Green"> This version is installed, you can add optional packages</TextBox>
+			<Button Command="{Binding VerifyCommand}" Margin="5" IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="White" Background="DarkOrange">Verify</Button>
 		</StackPanel>
 		<TreeView IsVisible="{Binding DataLoaded}" Grid.Row="1" Margin="30" Items="{Binding ModInstallList}"  HorizontalAlignment="Center">
 			<TreeView.Styles>

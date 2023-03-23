@@ -4,6 +4,12 @@ using Knossos.NET.Models;
 using Knossos.NET.ViewModels;
 using Knossos.NET.Views;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace Knossos.NET
 {
@@ -95,6 +101,12 @@ namespace Knossos.NET
 
         public static async void PlayMod(Mod mod, FsoExecType fsoExecType)
         {
+            if (TaskViewModel.Instance!.IsSafeState() == false)
+            {
+                await MessageBox.Show(MainWindow.instance!, "You can not launch a mod while other tasks are running, wait until they finish and try again.", "Tasks are running", MessageBox.MessageBoxButtons.OK);
+                return;
+            }
+
             Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Launching Mod: " + mod.folderName);
 
             /* Check the dependencies and stop if there are unresolved ones */

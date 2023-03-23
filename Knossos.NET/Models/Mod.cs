@@ -20,7 +20,7 @@ namespace Knossos.NET.Models
 
     public class Mod
     {
-        public bool installed { get; set; }
+        public bool installed { get; set; } = false;
         public string id { get; set; } = string.Empty; // required, internal *unique* identifier, should be URL friendly, never shown to the user
         public string title { get; set; } = string.Empty; // required, a UTF-8 compatible string, displayed to the user
         /*

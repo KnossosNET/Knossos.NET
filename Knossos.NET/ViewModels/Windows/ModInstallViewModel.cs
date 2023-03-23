@@ -1,11 +1,14 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
@@ -87,6 +90,7 @@ namespace Knossos.NET.ViewModels
                 {
                     /* If its installed just mark installed packages as required, and optional the non installed ones */
                     IsInstalled = true;
+                    SelectedMod.fullPath = installed.fullPath;
                     foreach (var displayPkg in SelectedMod.packages)
                     {
                         displayPkg.status = "optional";
@@ -210,6 +214,14 @@ namespace Knossos.NET.ViewModels
                         }
                     }
                 }
+            }
+        }
+
+        private void VerifyCommand()
+        {
+            if(SelectedMod != null)
+            {
+                TaskViewModel.Instance!.VerifyMod(SelectedMod);
             }
         }
 

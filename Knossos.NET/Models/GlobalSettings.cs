@@ -13,6 +13,7 @@ using HarfBuzzSharp;
 using Avalonia.Threading;
 using Knossos.NET.Views;
 using Knossos.NET.ViewModels;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.Models
 {

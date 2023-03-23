@@ -42,7 +42,7 @@ namespace Knossos.NET.ViewModels
         {
             foreach (var task in TaskList)
             {
-                if (!task.IsCompleted || task.CancelButtonVisible == true)
+                if (task.CancelButtonVisible == true )
                 {
                     return false;
                 }
@@ -91,7 +91,7 @@ namespace Knossos.NET.ViewModels
             return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson);
         }
 
-        public async void InstallMod(Mod mod)
+        public async void InstallMod(Mod mod, List<ModPackage>? reinstallPkgs = null)
         {
             if (Knossos.GetKnossosLibraryPath() == null)
             {
@@ -113,9 +113,19 @@ namespace Knossos.NET.ViewModels
                 var newTask = new TaskItemViewModel();
                 TaskList.Add(newTask);
                 installQueue.Enqueue(newTask);
-                await newTask.InstallMod(mod, cancelSource);
+                await newTask.InstallMod(mod, cancelSource, reinstallPkgs);
                 cancelSource.Dispose();
             }
+        }
+
+        public async void VerifyMod(Mod mod)
+        {
+            var cancelSource = new CancellationTokenSource();
+            var newTask = new TaskItemViewModel();
+            TaskList.Add(newTask);
+            installQueue.Enqueue(newTask);
+            await newTask.VerifyMod(mod, cancelSource);
+            cancelSource.Dispose();
         }
     }
 }
