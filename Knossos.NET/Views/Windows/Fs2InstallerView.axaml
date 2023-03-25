@@ -1,0 +1,49 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="550"
+        x:Class="Knossos.NET.Views.Fs2InstallerView"
+		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+		Icon="/Assets/knossos-icon.ico"
+		WindowStartupLocation="CenterScreen"
+		Title="Freespace 2 Retail Installer" 
+		SizeToContent="WidthAndHeight"
+		CanResize="False">
+
+	<Design.DataContext>
+		<vm:Fs2InstallerViewModel/>
+	</Design.DataContext>
+
+	<ScrollViewer Background="#18191A" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+		<Grid RowDefinitions="Auto, Auto, *">
+			<Border Grid.Row="0" BorderBrush="AliceBlue" BorderThickness="2" CornerRadius="2">
+				<StackPanel>
+					<Label Margin="5" FontWeight="Black" FontSize="18">Freespace 2 is already installed?</Label>
+					<Label Margin="5">GoG, Steam, and the original 3 CDs version install folder is supported.</Label>
+					<Button IsEnabled="{Binding !IsInstalling}" Margin="10" Command="{Binding LoadFolderCommand}">Browse Folder</Button>
+					<Label Margin="5" FontWeight="Bold">Required File List:</Label>
+					<TextBlock Margin="10,0,0,0" Text="root_fs2.vp, smarty_fs2.vp, sparky_fs2.vp, sparky_hi_fs2.vp, stu_fs2.vp, tango1_fs2.vp, tango2_fs2.vp, tango3_fs2.vp, warble_fs2.vp" TextWrapping="Wrap"></TextBlock>
+					<Label Margin="5" FontWeight="Bold">After copying the files to the Knossos library, the original install is not longer needed.</Label>
+				</StackPanel>
+			</Border>
+			
+			<Border IsVisible="{Binding InnoExtractIsAvalible}" Margin="0,5,0,0" Grid.Row="1" BorderBrush="AliceBlue" BorderThickness="2" CornerRadius="2">
+				<StackPanel>
+					<Label Margin="5" FontWeight="Black" FontSize="18">Freespace 2 GoG install file</Label>
+					<Label Margin="5">You dont have Freespace 2 installed, but you have the GoG Freespace 2 install file?</Label>
+					<Button IsEnabled="{Binding !IsInstalling}" Margin="10" Command="{Binding LoadGoGExeCommand}">Select GoG Executable</Button>
+				</StackPanel>
+			</Border>
+			
+			<Border IsVisible="{Binding CanInstall}" Margin="0,5,0,0" Grid.Row="2" BorderBrush="AliceBlue" BorderThickness="2" CornerRadius="2">
+				<StackPanel>
+					<Label HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="5" Foreground="Green">Freespace 2 files detected! You can proceed to install</Label>
+					<Button IsEnabled="{Binding !IsInstalling}" Command="{Binding InstallFS2Command}" HorizontalAlignment="Center" Margin="10" Background="Green">Install FS2 Retail</Button>
+					<ProgressBar Margin="10" Height="20" ShowProgressText="False" Minimum="0" Maximum="{Binding ProgressMax}" Value="{Binding ProgressCurrent}" IsVisible="{Binding IsInstalling}"></ProgressBar>
+					<TextBlock Margin="5" TextWrapping="Wrap" HorizontalAlignment="Center" Text="{Binding InstallText}"></TextBlock>
+				</StackPanel>
+			</Border>
+		</Grid>
+	</ScrollViewer>
+</Window>

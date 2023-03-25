@@ -89,7 +89,7 @@ namespace Knossos.NET.ViewModels
             }
             catch (Exception ex)
             {
-                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.DownloadFile()", ex);
+                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.ShowMsg()", ex);
             }
         }
 

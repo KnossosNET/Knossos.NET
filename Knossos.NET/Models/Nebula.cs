@@ -25,6 +25,8 @@ namespace Knossos.NET.Models
         private static readonly string repoUrl = @"https://aigaion.feralhosting.com/discovery/nebula/repo.json";
         private static readonly int defaultMaxConcurrentDownloads = 3;
         private static readonly bool listFS2Override = false;
+        private static CancellationTokenSource? cancellationToken = null;
+        public static bool repoLoaded = false;
 
         private struct NebulaSettings
         {
@@ -39,6 +41,14 @@ namespace Knossos.NET.Models
         {
             try
             {
+                repoLoaded = false;
+                if (cancellationToken != null)
+                {
+                    cancellationToken.Cancel();
+                    await Task.Delay(5000);
+                }
+                cancellationToken = new CancellationTokenSource();
+
                 if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "nebula.json"))
                 {
                     string jsonString = File.ReadAllText(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "nebula.json");
@@ -54,34 +64,59 @@ namespace Knossos.NET.Models
             {
                 Log.Add(Log.LogSeverity.Error, "Nebula.Constructor()", ex);
             }
-
-            var webEtag = await GetRepoEtag();
-            if (!File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json") || settings.etag != webEtag)
+            try
             {
-                //Download the repo.json
-                if(TaskViewModel.Instance != null)
+                var webEtag = await GetRepoEtag();
+                if (!File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json") || settings.etag != webEtag)
                 {
-                    var result = await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", "Downloading repo.json", true, "The repo.json file contains info on all the mods avalible in Nebula, whiout this you will be not be able to install new mods or engine builds");
-
-                    if (result != null && result == true)
+                    //Download the repo.json
+                    if (TaskViewModel.Instance != null)
                     {
-                        File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
-                        File.Move(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
-                        settings.etag = webEtag;
-                        SaveSettings();
+                        var result = await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", "Downloading repo.json", true, "The repo.json file contains info on all the mods avalible in Nebula, whiout this you will be not be able to install new mods or engine builds");
+                        if (cancellationToken!.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                        if (result != null && result == true)
+                        {
+                            try
+                            {
+                                File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
+                                File.Move(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
+                                settings.etag = webEtag;
+                                SaveSettings();
+                            }
+                            catch (Exception ex)
+                            {
+                                if (cancellationToken != null)
+                                {
+                                    cancellationToken.Dispose();
+                                    cancellationToken = null;
+                                }
+                                Log.Add(Log.LogSeverity.Error, "Nebula.Trinity()", ex);
+                            }
+                        }
                     }
                 }
-            }
-            else
-            {
-                //No update is needed
-                if (TaskViewModel.Instance != null)
+                else
                 {
-                    TaskViewModel.Instance.AddMessageTask("Nebula: repo.json is up to date!");
+                    //No update is needed
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskViewModel.Instance!.AddMessageTask("Nebula: repo.json is up to date!"), DispatcherPriority.Background);
+                    Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "repo.json is up to date!");
                 }
-                Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "repo.json is up to date!"); 
+                if (cancellationToken!.IsCancellationRequested)
+                {
+                    throw new TaskCanceledException();
+                }
+                await ParseRepoJson();
+            }catch(TaskCanceledException)
+            {
+                if (cancellationToken != null)
+                {
+                    cancellationToken.Dispose();
+                    cancellationToken = null;
+                }
             }
-            await ParseRepoJson();
         }
 
         private static async Task ParseRepoJson()
@@ -89,6 +124,10 @@ namespace Knossos.NET.Models
             try
             {
                 await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
+                if (cancellationToken!.IsCancellationRequested)
+                {
+                    throw new TaskCanceledException();
+                }
                 using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json", FileMode.Open, FileAccess.ReadWrite))
                 {
                     fileStream.Seek(-1, SeekOrigin.End);
@@ -104,6 +143,11 @@ namespace Knossos.NET.Models
                     Mod? lastMod = null;
                     await foreach (Mod? mod in mods)
                     {
+                        if (cancellationToken!.IsCancellationRequested)
+                        {
+                            fileStream.Close();
+                            throw new TaskCanceledException();
+                        }
                         if (mod != null && !mod.isPrivate)
                         {
                             if (mod.type == "engine")
@@ -154,11 +198,30 @@ namespace Knossos.NET.Models
                         }
                     }
                     fileStream.Close();
+                    repoLoaded = true;
+                    if(cancellationToken != null)
+                    {
+                        cancellationToken.Dispose();
+                        cancellationToken = null;
+                    }
+                }
+            }
+            catch(TaskCanceledException)
+            {
+                if (cancellationToken != null)
+                {
+                    cancellationToken.Dispose();
+                    cancellationToken = null;
                 }
             }
             catch(Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Nebula.ParseRepoJson()", ex);
+                if (cancellationToken != null)
+                {
+                    cancellationToken.Dispose();
+                    cancellationToken = null;
+                }
             }
             return;
         }
@@ -170,6 +233,14 @@ namespace Knossos.NET.Models
                 return defaultMaxConcurrentDownloads;
             }
             return settings.maxConcurrentDownloads.Value;
+        }
+
+        public static void CancelOperations()
+        {
+            if(cancellationToken != null)
+            {
+                cancellationToken.Cancel();
+            }
         }
 
         public static async Task<Mod?> GetModData(string id, string version)

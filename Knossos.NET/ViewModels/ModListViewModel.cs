@@ -58,6 +58,10 @@ namespace Knossos.NET.ViewModels
             IsNebulaView = isNebulaView;
         }
 
+        public void ReloadRepoCommand()
+        {
+            Knossos.ResetBasePath();
+        }
 
         public void ClearView()
         {

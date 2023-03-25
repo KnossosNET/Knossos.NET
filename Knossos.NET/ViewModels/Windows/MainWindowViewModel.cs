@@ -68,10 +68,11 @@ namespace Knossos.NET.ViewModels
             InstalledModsView.RunDependencyCheck();
         }
 
-        public void ClearBasePathViews()
+        public void ClearViews()
         {
             InstalledModsView?.ClearView();
             FsoBuildsView?.ClearView();
+            NebulaModsView?.ClearView();
         }
 
         public void MarkAsUpdateAvalible(string id, bool value = true)

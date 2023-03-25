@@ -20,7 +20,7 @@
 							<WrapPanel>
 								<Label Height="20" Width="400" HorizontalContentAlignment="Left" FontSize="12" Margin="5,0,0,0" Content="{Binding Name}"/>
 								<WrapPanel IsVisible="{Binding !IsCompleted}">
-									<Button Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" FontWeight="Bold" Height="20" FontSize="7" Command="{Binding RestartDownloadCommand}" IsVisible="{Binding IsFileDownloadTask}">Restart</Button>
+									<Button Margin="5,0,0,0" Background="Black" IsEnabled="{Binding !IsCancelled}" FontWeight="Bold" Height="20" FontSize="7" Command="{Binding RestartDownloadCommand}" IsVisible="{Binding IsFileDownloadTask}">Restart</Button>
 								</WrapPanel>
 								<ProgressBar Width="250" IsVisible="{Binding ProgressBarMax}" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="{Binding ShowProgressText}"></ProgressBar>
 								<Label Height="20" FontSize="12" Margin="5,0,0,0" Content="{Binding Info}"/>
@@ -35,7 +35,7 @@
 					<TextBlock Height="20" FontSize="14" Margin="5,0,0,0" TextWrapping="Wrap" Text="{Binding Name}"/>
 					<WrapPanel IsVisible="{Binding ProgressBarMax}">
 						<WrapPanel IsVisible="{Binding !IsCompleted}">
-							<Button Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" FontWeight="Bold" Height="20" FontSize="7" Command="{Binding RestartDownloadCommand}" IsVisible="{Binding IsFileDownloadTask}">Restart</Button>
+							<Button Margin="5,0,0,0" Background="Black" IsEnabled="{Binding !IsCancelled}" FontWeight="Bold" Height="20" FontSize="7" Command="{Binding RestartDownloadCommand}" IsVisible="{Binding IsFileDownloadTask}">Restart</Button>
 						</WrapPanel>
 						<ProgressBar Width="400" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="True"></ProgressBar>
 						<Label Height="20" FontSize="12" Margin="5,0,0,0" Content="{Binding Info}"/>

@@ -54,14 +54,18 @@ namespace Knossos.NET.ViewModels
         {
             var newTask = new TaskItemViewModel();
             TaskList.Add(newTask);
-            return await newTask.DownloadFile(url,dest,msg,showStopButton,tooltip);
+            return await newTask.DownloadFile(url, dest, msg, showStopButton, tooltip);
         }
 
         public void AddMessageTask(string msg, string? tooltip = null)
         {
-            var newTask = new TaskItemViewModel();
-            TaskList.Add(newTask);
-            newTask.ShowMsg(msg,tooltip);
+            try
+            {
+                var newTask = new TaskItemViewModel();
+                TaskList.Add(newTask);
+                newTask.ShowMsg(msg, tooltip);
+            }
+            catch { }
         }
 
         public void CleanCommand()

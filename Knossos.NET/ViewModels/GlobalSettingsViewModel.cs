@@ -726,13 +726,13 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.ttsDescription = TtsDescription;
             Knossos.globalSettings.ttsVoice = VoiceSelectedIndex;
             Knossos.globalSettings.ttsVolume = TtsVolume;
-            if (VoiceSelectedIndex + 1 <= VoiceItems.Count)
+            if (VoiceSelectedIndex + 1 <= VoiceItems.Count && VoiceSelectedIndex != -1)
             {
                 Knossos.globalSettings.ttsVoiceName = VoiceItems[VoiceSelectedIndex].Tag?.ToString();
             }
 
             /* JOYSTICKS */
-            if (Joy1SelectedIndex + 1 <= Joystick1Items.Count)
+            if (Joy1SelectedIndex + 1 <= Joystick1Items.Count && Joy1SelectedIndex != -1)
             {
                 Knossos.globalSettings.joystick1 = (Joystick?)Joystick1Items[Joy1SelectedIndex].Tag;
             }
@@ -740,7 +740,7 @@ namespace Knossos.NET.ViewModels
             {
                 Knossos.globalSettings.joystick1 = null;
             }
-            if (Joy2SelectedIndex + 1 <= Joystick2Items.Count)
+            if (Joy2SelectedIndex + 1 <= Joystick2Items.Count && Joy2SelectedIndex != -1 )
             {
                 Knossos.globalSettings.joystick2 = (Joystick?)Joystick2Items[Joy2SelectedIndex].Tag;
             }
@@ -748,7 +748,7 @@ namespace Knossos.NET.ViewModels
             {
                 Knossos.globalSettings.joystick2 = null;
             }
-            if (Joy3SelectedIndex + 1 <= Joystick3Items.Count)
+            if (Joy3SelectedIndex + 1 <= Joystick3Items.Count && Joy3SelectedIndex != -1)
             {
                 Knossos.globalSettings.joystick3 = (Joystick?)Joystick3Items[Joy3SelectedIndex].Tag;
             }
@@ -756,7 +756,7 @@ namespace Knossos.NET.ViewModels
             {
                 Knossos.globalSettings.joystick3 = null;
             }
-            if (Joy4SelectedIndex + 1 <= Joystick4Items.Count)
+            if (Joy4SelectedIndex + 1 <= Joystick4Items.Count && Joy4SelectedIndex != -1)
             {
                 Knossos.globalSettings.joystick4 = (Joystick?)Joystick4Items[Joy4SelectedIndex].Tag;
             }
@@ -822,6 +822,28 @@ namespace Knossos.NET.ViewModels
                 dialog.DataContext = new AddSapiVoicesViewModel();
 
                 await dialog.ShowDialog<AddSapiVoicesView?>(MainWindow.instance);
+            }
+        }
+
+        private async void InstallFS2Command()
+        {
+            if (MainWindow.instance != null)
+            {
+                var dialog = new Fs2InstallerView();
+                dialog.DataContext = new Fs2InstallerViewModel();
+
+                await dialog.ShowDialog<Fs2InstallerView?>(MainWindow.instance);
+            }
+        }
+
+        private async void QuickSetupCommand()
+        {
+            if (MainWindow.instance != null)
+            {
+                var dialog = new QuickSetupView();
+                dialog.DataContext = new QuickSetupViewModel();
+
+                await dialog.ShowDialog<QuickSetupView?>(MainWindow.instance);
             }
         }
     }

@@ -68,12 +68,17 @@ namespace Knossos.NET
 
         public static void ResetBasePath()
         {
-            MainWindowViewModel.Instance?.ClearBasePathViews();
-            installedMods.Clear();
-            engineBuilds.Clear();
-            retailFs2RootFound = false;
-            TaskViewModel.Instance?.CancelAllRunningTasks();
-            LoadBasePath();
+            Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                MainWindowViewModel.Instance?.ClearViews();
+                installedMods.Clear();
+                engineBuilds.Clear();
+                retailFs2RootFound = false;
+                TaskViewModel.Instance?.CancelAllRunningTasks();
+                Nebula.CancelOperations();
+                await Task.Delay(2000);
+                LoadBasePath();
+            });
         }
 
         public async static void LoadBasePath()
@@ -222,13 +227,17 @@ namespace Knossos.NET
                     }
                     else
                     {
-                        if (modFlag.Length > 0)
+                        //avoid passing FS2 in modflag because fs2retail runs off the working folder
+                        if (mod.id != "FS2")
                         {
-                            modFlag += "," + mod.folderName;
-                        }
-                        else
-                        {
-                            modFlag += mod.folderName;
+                            if (modFlag.Length > 0)
+                            {
+                                modFlag += "," + mod.folderName;
+                            }
+                            else
+                            {
+                                modFlag += mod.folderName;
+                            }
                         }
                     }
                 }
@@ -429,7 +438,10 @@ namespace Knossos.NET
                 }
             }
 
-            cmdline += " -mod " + modFlag;
+            if (modFlag.Length > 0)
+            {
+                cmdline += " -mod " + modFlag;
+            }
 
             Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used cmdLine : " + cmdline);
 
