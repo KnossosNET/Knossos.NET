@@ -64,6 +64,19 @@ namespace Knossos.NET
             }
 
             LoadBasePath();
+
+            if (globalSettings.basePath == null)
+                OpenQuickSetup();
+        }
+
+        public static void OpenQuickSetup()
+        {
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                var dialog = new QuickSetupView();
+                dialog.DataContext = new QuickSetupViewModel();
+                dialog.Show(MainWindow.instance!);
+            });
         }
 
         public static void ResetBasePath()

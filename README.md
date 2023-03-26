@@ -1,5 +1,5 @@
 # Knossos.NET<br />
-![KnossosNET](https://i.imgur.com/6JPvYmO.png)
+![KnossosNET](https://i.imgur.com/HGmL9iI.png)
 <br />
 <br />
 This project is intended to create a multi platform launcher for Freespace 2 Open using .NET 6.0 and AvaloniaUI<br />
@@ -11,9 +11,8 @@ https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.14-wind
 <br /><br />
 **The current status:**<br />
 <br />
--Second test version (0.0.2) - Most of the Basic functions are in, including Mod install. Not retail installer yet.<br />
+-Third test version (0.0.3) - Most of the Basic functions are in, except for dev mode<br />
 -Working in Windows and Linux<br />
--The look of the UI is not a priority until all basic functionality is in, but help with the design colors and ideas is very welcome as im not a UI designer.<br />
 -MacOS version is untested and unlikely to work.<br />
 -PxoAPI implementation is very basic and WIP<br />
 -Mod details is missing features<br />
@@ -36,7 +35,7 @@ SystemCMD(Settings) > Global CMD > User/Mod CMD
 -Avalonia.Desktop 0.10.18<br />
 -Avalonia.Diagnostics 0.10.18<br />
 -CommunityToolkit.Mvvm 8.1.0<br />
--XamlNameReferenceGenerator 1.5.1<br />
+-XamlNameReferenceGenerator 1.6.1<br />
 -Microsoft.System.Speech 7.0.0<br />
 -ini-parser-netstandard 2.5.2<br />
 -SharpCompress 0.33.0

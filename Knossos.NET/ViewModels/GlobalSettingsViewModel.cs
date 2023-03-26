@@ -836,15 +836,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private async void QuickSetupCommand()
+        private void QuickSetupCommand()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new QuickSetupView();
-                dialog.DataContext = new QuickSetupViewModel();
-
-                await dialog.ShowDialog<QuickSetupView?>(MainWindow.instance);
-            }
+            Knossos.OpenQuickSetup();
         }
     }
 }

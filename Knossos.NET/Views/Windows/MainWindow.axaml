@@ -9,7 +9,7 @@
         x:Class="Knossos.NET.Views.MainWindow"
         Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterScreen"
-        Title="Knossos.NET v0.0.3-Alpha5">
+        Title="Knossos.NET v0.0.3">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
