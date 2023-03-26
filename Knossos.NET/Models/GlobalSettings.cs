@@ -287,11 +287,11 @@ namespace Knossos.NET.Models
                 {
                     if (int.Parse(data["Default"]["SpeechMulti"]) == 1)
                     {
-                        ttsIngame = true;
+                        ttsMulti = true;
                     }
                     else
                     {
-                        ttsIngame = false;
+                        ttsMulti = false;
                     }
                 }
 
