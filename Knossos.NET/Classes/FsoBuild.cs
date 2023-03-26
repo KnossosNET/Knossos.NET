@@ -63,6 +63,7 @@ namespace Knossos.NET.Models
         public string? date = string.Empty;
         public string? directExec = null;
         public bool isInstalled = true;
+        public bool devMode = false;
         /*
          Direct Exe
          */
@@ -112,6 +113,7 @@ namespace Knossos.NET.Models
             }
             id = modJson.id;
             title = modJson.title;
+            devMode = modJson.devMode;
             description = modJson.description;
             version = modJson.version;
             folderPath = modJson.fullPath;
@@ -279,7 +281,10 @@ namespace Knossos.NET.Models
                                 string filename = exec.file;
                                 FsoExecType type = GetExecType(exec.label);
                                 FsoExecArch arch = GetExecArch(exec.properties);
-                                executables.Add(new FsoFile(exec.file, folderPath, type, arch, env));
+                                if(modJson.devMode)
+                                    executables.Add(new FsoFile(package.folder+Path.DirectorySeparatorChar+exec.file.Replace(@"./",""), folderPath, type, arch, env));
+                                else
+                                    executables.Add(new FsoFile(exec.file, folderPath, type, arch, env));
                             }
                             else
                             {
