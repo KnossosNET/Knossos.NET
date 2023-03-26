@@ -19,7 +19,7 @@
 					<Button Grid.Row="0" Command="{Binding ReloadFlagData}" Foreground="White" Background="Black" Grid.Column="1" Margin="5,0,0,0">Reload Data</Button>
 					<Button Grid.Row="0" Command="{Binding ResetCommand}" Grid.Column="0" FontWeight="Bold" Foreground="White" Background="Red">RESET</Button>
 				</Grid>
-				<TextBlock TextWrapping="Wrap" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center">It is not recomended that you leave this tab open while playing, as Knossos constanly scan for .ini changes here.</TextBlock>
+				<TextBlock TextWrapping="Wrap" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center">It is not recommended that you leave this tab open while playing, as Knossos constantly scans here for changes to the .ini file.</TextBlock>
 			</StackPanel>
 		</Border>
 		<ScrollViewer Grid.Row="1">
