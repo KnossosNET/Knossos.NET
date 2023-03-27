@@ -88,13 +88,13 @@ namespace Knossos.NET
             return null;
         }
 
-        public static bool Chmod(string filePath, string permissions = "644", bool recursive = false)
+        public static bool Chmod(string filePath, string permissions = "+x", bool recursive = false)
         {
             string cmd;
             if (recursive)
-                cmd = $"chmod -R {permissions} {filePath}";
+                cmd = $"chmod -R {permissions} '{filePath}'";
             else
-                cmd = $"chmod {permissions} {filePath}";
+                cmd = $"chmod {permissions} '{filePath}'";
 
             try
             {
