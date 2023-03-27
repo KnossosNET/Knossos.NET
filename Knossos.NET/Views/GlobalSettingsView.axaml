@@ -43,7 +43,7 @@
 								<Label Margin="40,5,0,0" FontWeight="Bold">Builds:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfBuilds}"></TextBlock>
 								<CheckBox Margin="40,0,0,0" IsEnabled="False" IsChecked="{Binding Fs2RootPack}">FS2 Root Pack</CheckBox>
-								<Button Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Background="Black" Margin="10,0,0,0">Install FS2 Retail</Button>
+								<Button Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Background="Black" Margin="10,0,0,0">FS2 Retail Installer</Button>
 								<Button Command="{Binding QuickSetupCommand}" Background="Black" Margin="5,0,0,0">Quick Setup Guide</Button>
 							</WrapPanel>
 						</Grid>

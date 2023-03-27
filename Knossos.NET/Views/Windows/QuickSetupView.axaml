@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="450"
         x:Class="Knossos.NET.Views.QuickSetupView"
 		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
 		Icon="/Assets/knossos-icon.ico"
@@ -25,6 +25,7 @@
 		<StackPanel IsVisible="{Binding Page1}" Grid.Row="0">
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center" >Welcome To Knossos.NET</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center" >This quick setup guide will help you go trought the basics of the initial configuration of the launcher. If you already know how to configure the launcher you can close this window.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center" >If you ever need to reopen this guide, there is a button for it inside the "Settings" tab.</TextBlock>
 		</StackPanel>
 		
 		<!--Page2-->
@@ -34,7 +35,7 @@
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">The Knossos library folder is were all game and mod data will be saved to, make sure you always have space available on this drive before installing a new mod or update.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">Current Library Folder</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center" Text="{Binding LibraryPath}"></TextBlock>
-			<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Assign a folder to continue</TextBlock>
+			<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Go to the "Settings" tab and set the library folder to continue</TextBlock>
 		</StackPanel>
 		
 		<!--Page3-->
