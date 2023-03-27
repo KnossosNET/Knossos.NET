@@ -97,7 +97,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private int ttsVolume = 100;
         [ObservableProperty]
-        private string? ttsVoiceName = null;
+        private bool playingTTS = false;
 
         /*JOYSTICK*/
         private ObservableCollection<ComboBoxItem> Joystick1Items { get; set; } = new ObservableCollection<ComboBoxItem>();
@@ -113,7 +113,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private int joy4SelectedIndex = -1;
 
-        /*MOD / FS2 */
+        /* MOD / FS2 */
         [ObservableProperty]
         private string globalCmd = string.Empty;
         [ObservableProperty]
@@ -347,10 +347,6 @@ namespace Knossos.NET.ViewModels
                 {
                     VoiceSelectedIndex = Knossos.globalSettings.ttsVoice.Value;
                 }
-            }
-            if (Knossos.globalSettings.ttsVoiceName == null && VoiceItems.Count-1 >= VoiceSelectedIndex)
-            {
-                Knossos.globalSettings.ttsVoiceName = VoiceItems[VoiceSelectedIndex].Tag?.ToString();
             }
 
             //Joysticks
@@ -726,10 +722,6 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.ttsDescription = TtsDescription;
             Knossos.globalSettings.ttsVoice = VoiceSelectedIndex;
             Knossos.globalSettings.ttsVolume = TtsVolume;
-            if (VoiceSelectedIndex + 1 <= VoiceItems.Count && VoiceSelectedIndex != -1)
-            {
-                Knossos.globalSettings.ttsVoiceName = VoiceItems[VoiceSelectedIndex].Tag?.ToString();
-            }
 
             /* JOYSTICKS */
             if (Joy1SelectedIndex + 1 <= Joystick1Items.Count && Joy1SelectedIndex != -1)
@@ -800,8 +792,20 @@ namespace Knossos.NET.ViewModels
         {
             if (VoiceSelectedIndex != -1)
             {
-                Knossos.Tts("Developed in a joint operation by the Vasudan and Terran governments, the GTF Ulysses is an excellent all-around fighter. It offers superior maneuverability and a high top speed.", VoiceItems[VoiceSelectedIndex].Tag!.ToString(), TtsVolume);
+                PlayingTTS = true;
+                Knossos.Tts("Developed in a joint operation by the Vasudan and Terran governments, the GTF Ulysses is an excellent all-around fighter. It offers superior maneuverability and a high top speed.", VoiceSelectedIndex, TtsVolume, TTSCompletedCallback);
             }
+        }
+
+        private void StopTTS()
+        {
+            Knossos.Tts(string.Empty);
+        }
+
+        private bool TTSCompletedCallback()
+        {
+            PlayingTTS = false;
+            return true;
         }
 
         private void GlobalCmdHelp()

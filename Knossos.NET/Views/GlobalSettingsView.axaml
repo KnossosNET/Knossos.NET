@@ -193,7 +193,10 @@
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Voice</TextBlock>
 							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding VoiceSelectedIndex}" Items="{Binding VoiceItems}" IsEnabled="{Binding EnableTTS}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
-							<Button IsVisible="{Binding EnableTTS}" Command="{Binding TestVoiceCommand}" IsEnabled="{Binding EnableTTS}" Margin="5,0,0,0" Background="Black" Foreground="White" Grid.Column="2">Test</Button>
+							<Grid Grid.Column="2" IsVisible="{Binding EnableTTS}">
+								<Button Command="{Binding TestVoiceCommand}" IsVisible="{Binding !PlayingTTS}" Margin="5,0,0,0" Background="Black" Foreground="White" >Test</Button>
+								<Button Command="{Binding StopTTS}" IsVisible="{Binding PlayingTTS}" Margin="5,0,0,0" Background="Black" Foreground="White" >Stop</Button>
+							</Grid>
 						</Grid>
 						<Button Command="{Binding OpenGetVoices}" IsVisible="{Binding WindowsOS}" Margin="214,5,0,5" Background="Black" Foreground="White" Grid.Column="2">Get Additional SAPI Voices</Button>
 						<Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" Margin="5">

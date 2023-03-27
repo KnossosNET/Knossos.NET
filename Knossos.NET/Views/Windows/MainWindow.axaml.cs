@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.Views
@@ -10,6 +11,12 @@ namespace Knossos.NET.Views
         {
             instance = this;
             InitializeComponent();
+            this.Closing += MainWindow_StopTTS;
+        }
+
+        private void MainWindow_StopTTS(object? sender, CancelEventArgs e)
+        {
+            Knossos.Tts(string.Empty);
         }
     }
 }

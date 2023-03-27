@@ -58,9 +58,9 @@
 				<Label Content="{Binding LastUpdated}" Grid.Column="5" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 			</Grid>
 		</StackPanel>
-		<WrapPanel Grid.Row="1" HorizontalAlignment="Center">
+		<WrapPanel Grid.Row="1" HorizontalAlignment="Center" IsVisible="{Binding TtsAvalible}">
 			<Button IsVisible="{Binding IsPlayingTTS}" Background="Black" Command="{Binding StopTts}">Stop</Button>
-			<Button IsVisible="{Binding !IsPlayingTTS}" Margin="5,0,0,0" Background="Black" Command="{Binding PlayDescription}" CommandParameter="0">Play</Button>
+			<Button IsVisible="{Binding !IsPlayingTTS}" Margin="5,0,0,0" Background="Black" Command="{Binding PlayDescription}" CommandParameter="0">Read Description</Button>
 		</WrapPanel>
 		
 		<ScrollViewer Grid.Row="2" Margin="25">

@@ -10,6 +10,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Avalonia.Platform;
+using Avalonia;
 
 namespace Knossos.NET
 {
@@ -689,73 +691,79 @@ namespace Knossos.NET
             }
         }
 
-        public static void Tts(string text, string? voiceName = null, int? volume = null, Func<bool>? callBack = null)
+        public async static void Tts(string text, int? voice_index = null, int? volume = null, Func<bool>? callBack = null)
         {
-            if(globalSettings.enableTts)
+            try
             {
-                #pragma warning disable CA1416 //Im using sysinfo to ensure the incompatible code is not executed on a unsupported os
-                try
+                if (globalSettings.enableTts)
                 {
                     if (SysInfo.IsWindows)
                     {
-                        if(ttsObject != null)
+                        if (ttsObject != null)
                         {
-                            var sp = (System.Speech.Synthesis.SpeechSynthesizer)ttsObject;
-                            sp.SpeakAsyncCancelAll();
+                            var sp = (Process)ttsObject;
+                            sp.Kill();
+                            ttsObject = null;
                         }
                         if (text != string.Empty)
                         {
-                            Task.Run(() =>
+                            if (!File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
                             {
-                                using (var sp = new System.Speech.Synthesis.SpeechSynthesizer())
+                                var assets = Avalonia.AvaloniaLocator.Current.GetService<IAssetLoader>();
+                                if (assets != null)
                                 {
-                                    if (volume.HasValue)
+                                    if (SysInfo.CpuArch == "X86")
                                     {
-                                        sp.Volume = volume.Value;
+                                        using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
+                                        {
+                                            assets.Open(new Uri("avares://Knossos.NET/Assets/utils/KSapi_x86.exe")).CopyTo(fileStream);
+                                            fileStream.Close();
+                                        }
                                     }
                                     else
                                     {
-                                        sp.Volume = globalSettings.ttsVolume;
-                                    }
-                                    try
-                                    {
-                                        if (voiceName != null)
+                                        using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
                                         {
-                                            //I need to adjust for SAPI->OneCore voices name selector, remove "Desktop" and everything after "-"
-                                            sp.SelectVoice(voiceName.Replace("Desktop", "").Split("-")[0].Trim());
-                                        }
-                                        else
-                                        {
-                                            if (globalSettings.ttsVoiceName != null)
-                                                sp.SelectVoice(globalSettings.ttsVoiceName.Replace("Desktop", "").Split("-")[0].Trim());
+                                            assets.Open(new Uri("avares://Knossos.NET/Assets/utils/KSapi.exe")).CopyTo(fileStream);
+                                            fileStream.Close();
                                         }
                                     }
-                                    catch (ArgumentException ex)
-                                    {
-                                        Log.Add(Log.LogSeverity.Error, "Knossos.Tts()", ex);
-                                        if (callBack != null)
-                                            callBack();
-                                    }
-                                    ttsObject = sp;
-                                    try
-                                    {
-                                        sp.Speak(text);
-                                        if (callBack != null)
-                                            callBack();
-                                    }
-                                    catch (OperationCanceledException) { }
-                                    ttsObject = null;
                                 }
+                            }
+                            await Task.Run(async () =>
+                            {
+                                //Max cmdline lenght is 8192, lets limit the text to 7500
+                                if(text.Length > 7500)
+                                {
+                                    text = text.Substring(0, 7500);
+                                }
+                                await Task.Delay(300);
+                                var voice = globalSettings.ttsVoice;
+                                var vol = globalSettings.ttsVolume;
+                                if (voice_index.HasValue)
+                                    voice = voice_index.Value;
+                                if (volume.HasValue)
+                                    vol = volume.Value;
+                                using var ttsProcess = new Process();
+                                ttsProcess.StartInfo.FileName = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe";
+                                ttsProcess.StartInfo.Arguments = "-text \"" + text + "\" -voice " + voice + " -vol " + vol;
+                                ttsProcess.StartInfo.UseShellExecute = false;
+                                ttsProcess.StartInfo.CreateNoWindow = true;
+                                ttsObject = ttsProcess;
+                                ttsProcess.Start();
+                                ttsProcess.WaitForExit();
+                                ttsObject = null;
+                                if (callBack != null)
+                                    await Dispatcher.UIThread.InvokeAsync(() => callBack(), DispatcherPriority.Background);
                             });
                         }
                     }
-                } catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "Knossos.Tts()", ex);
-                    if (callBack != null)
-                        callBack();
                 }
-                #pragma warning restore CA1416
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error,"Knossos.TTS()",ex);
+                if (callBack != null)
+                    callBack();
             }
         }
     }

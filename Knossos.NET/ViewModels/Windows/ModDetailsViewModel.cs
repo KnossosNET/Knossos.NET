@@ -35,6 +35,8 @@ namespace Knossos.NET.ViewModels
         private bool isInstalled = true;
         [ObservableProperty]
         private bool isPlayingTTS = false;
+        [ObservableProperty]
+        private bool ttsAvalible = true;
         private ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
         private int itemSelectedIndex = 0;
@@ -85,7 +87,11 @@ namespace Knossos.NET.ViewModels
 
             if(Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts) 
             {
-                PlayDescription(500);
+                PlayDescription(200);
+            }
+            else
+            {
+                TtsAvalible = false;
             }
         }
 

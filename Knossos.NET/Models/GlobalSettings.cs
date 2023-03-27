@@ -96,8 +96,6 @@ namespace Knossos.NET.Models
         public bool ttsDescription { get; set; } = true;
         [JsonIgnore]
         public int ttsVolume { get; set; } = 100;
-        [JsonIgnore]
-        public string? ttsVoiceName { get; set; } = null;
 
         /* INPUT */
         [JsonIgnore]
