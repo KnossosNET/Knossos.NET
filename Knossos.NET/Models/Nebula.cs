@@ -73,7 +73,7 @@ namespace Knossos.NET.Models
                     //Download the repo.json
                     if (TaskViewModel.Instance != null)
                     {
-                        var result = await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", "Downloading repo.json", true, "The repo.json file contains info on all the mods avalible in Nebula, whiout this you will be not be able to install new mods or engine builds");
+                        var result = await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", "Downloading repo.json", true, "The repo.json file contains info on all the mods available in Nebula, without this you will not be able to install new mods or engine builds");
                         if (cancellationToken!.IsCancellationRequested)
                         {
                             throw new TaskCanceledException();
