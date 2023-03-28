@@ -758,6 +758,23 @@ namespace Knossos.NET
                             });
                         }
                     }
+                    if(SysInfo.IsLinux)
+                    {
+                        //unimplemented
+                        if (callBack != null)
+                            await Dispatcher.UIThread.InvokeAsync(() => callBack(), DispatcherPriority.Background);
+                    }
+                    if(SysInfo.IsMacOS)
+                    {
+                        //unimplemented
+                        if (callBack != null)
+                            await Dispatcher.UIThread.InvokeAsync(() => callBack(), DispatcherPriority.Background);
+                    }
+                }
+                else
+                {
+                    if (callBack != null)
+                        await Dispatcher.UIThread.InvokeAsync(() => callBack(), DispatcherPriority.Background);
                 }
             }catch(Exception ex)
             {
