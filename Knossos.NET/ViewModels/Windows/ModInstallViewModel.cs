@@ -1,8 +1,10 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
+using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -60,21 +62,33 @@ namespace Knossos.NET.ViewModels
         private async void InitialLoad(string id, string? preSelectedVersion = null)
         {
             ModVersions=await Nebula.GetAllModsWithID(id);
-            
-            if(preSelectedVersion == null)
+            if(ModVersions.Any())
             {
-                SelectedIndex = ModVersions.Count - 1;
+                if(preSelectedVersion == null)
+                {
+                    SelectedIndex = ModVersions.Count() - 1;
+                }
+                else
+                {
+                    for(var i=0; i < ModVersions.Count(); i++)
+                    {
+                        if (ModVersions[i].version == preSelectedVersion)
+                        {
+                            SelectedIndex = i;
+                            continue;
+                        }
+                    }
+                    /* Version not found? maybe deleted from nebula Select the newerest */
+                    if(SelectedIndex == -1)
+                    {
+                        SelectedIndex = ModVersions.Count() - 1;
+                    }
+                }
             }
             else
             {
-                for(var i=0; i < ModVersions.Count; i++)
-                {
-                    if (ModVersions[i].version == preSelectedVersion)
-                    {
-                        SelectedIndex = i;
-                        continue;
-                    }
-                }
+                Log.Add(Log.LogSeverity.Warning, "ModInstallViewModel.InitialLoad()", "Unable to find this mod id: "+ id +" on repo.json");
+                await MessageBox.Show(MainWindow.instance!,"Unable to find this mod ID on nebula repo, maybe the mod was removed from nebula.","Unable to find mod on repo",MessageBox.MessageBoxButtons.OK);
             }
         }
 
@@ -82,8 +96,16 @@ namespace Knossos.NET.ViewModels
         {
             ModInstallList.Clear();
             DataLoaded = false;
-            var allMods = await Nebula.GetAllModsWithID(null);
-            if (SelectedMod != null)
+            List<Mod> allMods;
+            if(SelectedMod != null && !SelectedMod.GetMissingDependenciesList().Any())
+            {
+                allMods = ModVersions.ToList();
+            }
+            else
+            {
+                allMods = await Nebula.GetAllModsWithID(null);
+            }
+            if (SelectedMod != null && allMods.Any())
             {
                 var installed=Knossos.GetInstalledMod(SelectedMod.id,SelectedMod.version);
                 if(installed != null)
