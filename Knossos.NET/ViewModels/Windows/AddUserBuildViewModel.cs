@@ -375,15 +375,22 @@ namespace Knossos.NET.ViewModels
                     var properties = new ModProperties();
                     properties.arm64 = Arm64;
                     properties.arm32 = Arm32;
-                    if(!AVX)
+                    if (!Arm32 && !Arm64)
                     {
-                        properties.sse2 = true;
-                        properties.avx = false;
-                    }
-                    else
-                    {
-                        properties.sse2 = false;
-                        properties.avx= true;
+                        if (!AVX && !AVX2)
+                        {
+                            properties.sse2 = true;
+                            properties.avx = false;
+                            properties.avx2 = false;
+                        }
+                        else
+                        {
+                            properties.sse2 = false;
+                            if (!AVX2)
+                                properties.avx = true;
+                            else
+                                properties.avx2 = true;
+                        }
                     }
                     properties.x64 = X64;
 
