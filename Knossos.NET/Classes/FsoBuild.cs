@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -196,6 +197,7 @@ namespace Knossos.NET.Models
             }
 
             var validExecs = executables.Where(b => b.isValid && b.type == type);
+            var candidates = new List<FsoFile>();
 
             foreach (FsoFile file in validExecs)
             {
@@ -204,37 +206,37 @@ namespace Knossos.NET.Models
                     case FsoExecArch.x64_avx2:
                         if (SysInfo.CpuArch == "X64" && SysInfo.CpuAVX2)
                         {
-                            return folderPath + file.filename;
+                            candidates.Add(file);
                         }
                         break;
                     case FsoExecArch.x64_avx:
                         if (SysInfo.CpuArch == "X64" && SysInfo.CpuAVX)
                         {
-                            return folderPath + file.filename;
+                            candidates.Add(file);
                         }
                         break;
                     case FsoExecArch.x64:
                         if(SysInfo.CpuArch == "X64")
                         {
-                            return folderPath + file.filename;
+                            candidates.Add(file);
                         }
                         break;
                     case FsoExecArch.x86_avx2:
-                        if (SysInfo.CpuArch == "X86" && SysInfo.CpuAVX2)
+                        if ((SysInfo.CpuArch == "X86" || SysInfo.CpuArch == "X64") && SysInfo.CpuAVX2)
                         {
-                            return folderPath + file.filename;
+                            candidates.Add(file);
                         }
                         break;
                     case FsoExecArch.x86_avx:
-                        if (SysInfo.CpuArch == "X86" && SysInfo.CpuAVX)
+                        if ((SysInfo.CpuArch == "X86" || SysInfo.CpuArch == "X64") && SysInfo.CpuAVX)
                         {
-                            return folderPath + file.filename;
+                            candidates.Add(file);
                         }
                         break;
                     case FsoExecArch.x86:
-                        if (SysInfo.CpuArch == "X86")
+                        if (SysInfo.CpuArch == "X86" || SysInfo.CpuArch == "X64")
                         {
-                            return folderPath + file.filename;
+                            candidates.Add(file);
                         }
                         break;
                     case FsoExecArch.arm64:
@@ -255,6 +257,81 @@ namespace Knossos.NET.Models
                         break;
                 }
                 
+            }
+
+            /*
+                Implemented only for x86 and x86_64
+            */
+            if (candidates.Any())
+            {
+                //Well that was easy
+                if(candidates.Count() == 1)
+                {
+                    return folderPath + candidates[0].filename;
+                }
+
+                var fileX64 = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x64);
+                var fileX64AVX = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x64_avx);
+                var fileX64AVX2 = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x64_avx2);
+
+                var fileX86 = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x86);
+                var fileX86AVX = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x86_avx);
+                var fileX86AVX2 = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x86_avx2);
+
+                if (SysInfo.CpuArch == "X64")
+                {
+                    //Try to force the SSE2 build
+                    if (Knossos.globalSettings.forceSSE2 && fileX64 != null)
+                    {
+                        return folderPath + fileX64.filename;
+                    }
+
+                    //AVX2
+                    if (SysInfo.CpuAVX2 && fileX64AVX2 != null)
+                    {
+                        return folderPath + fileX64AVX2.filename;
+                    }
+
+                    //AVX
+                    if (SysInfo.CpuAVX && fileX64AVX != null)
+                    {
+                        return folderPath + fileX64AVX.filename;
+                    }
+
+                    //SSE2
+                    if (fileX64 != null)
+                    {
+                        return folderPath + fileX64.filename;
+                    }
+                }
+
+                //If we are still here this is a x86 cpu or a x64 one with a build with only x86 files
+                if(SysInfo.CpuArch == "X86" || SysInfo.CpuArch == "X64")
+                {
+                    //Try to force the SSE2 build
+                    if (Knossos.globalSettings.forceSSE2 && fileX86 != null)
+                    {
+                        return folderPath + fileX86.filename;
+                    }
+
+                    //AVX2
+                    if (SysInfo.CpuAVX2 && fileX86AVX2 != null)
+                    {
+                        return folderPath + fileX86AVX2.filename;
+                    }
+
+                    //AVX
+                    if (SysInfo.CpuAVX && fileX86AVX != null)
+                    {
+                        return folderPath + fileX86AVX.filename;
+                    }
+
+                    //SSE2
+                    if (fileX86 != null)
+                    {
+                        return folderPath + fileX86.filename;
+                    }
+                }
             }
 
             return null;

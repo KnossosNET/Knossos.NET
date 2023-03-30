@@ -38,6 +38,9 @@ namespace Knossos.NET.Models
         [JsonPropertyName("global_cmdline")]
         public string? globalCmdLine { get; set; } = null;
 
+        [JsonPropertyName("force_sse2")]
+        public bool forceSSE2 { get; set; } = false;
+
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 
@@ -51,7 +54,7 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public int textureFilter { get; set; } = 1;
         [JsonIgnore]
-        public int shadowQuality { get; set; } = 3;
+        public int shadowQuality { get; set; } = 2;
         [JsonIgnore]
         public int aaPreset { get; set; } = 6;
         [JsonIgnore]
@@ -446,6 +449,7 @@ namespace Knossos.NET.Models
                         hideBuildCustom = tempSettings.hideBuildCustom;
                         hideBuildNightly = tempSettings.hideBuildNightly;
                         hideBuildRC = tempSettings.hideBuildRC;
+                        forceSSE2 = tempSettings.forceSSE2;
 
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");

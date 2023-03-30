@@ -59,6 +59,10 @@
 								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX2}">AVX2</CheckBox>
 							</WrapPanel>
 						</Grid>
+						<!-- Force SSE2 -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5" IsVisible="{Binding IsAVX}">
+							<CheckBox Grid.Column="0" ToolTip.Tip="If available, Knossos will run SSE2 FSO builds instead of AVX ones." IsChecked="{Binding ForceSSE2}" Width="200">Force SSE2 Builds</CheckBox>
+						</Grid>
 						<!-- Log File -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<CheckBox Grid.Column="0" IsChecked="{Binding EnableLogFile}" Width="200">Enable Log File</CheckBox>
@@ -104,7 +108,7 @@
 						<!-- Shadows -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<Label VerticalAlignment="Center" Grid.Column="0" Width="200">Shadows</Label>
-							<ComboBox Tag="-shadow_quality" SelectedIndex="{Binding ShadowQualitySelectedIndex}" IsEnabled="{Binding EnableShadows}" Grid.Column="1" Width="150" Margin="10,0,0,0">
+							<ComboBox ToolTip.Tip="High performance impact, especially at Ultra" Tag="-shadow_quality" SelectedIndex="{Binding ShadowQualitySelectedIndex}" IsEnabled="{Binding EnableShadows}" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
 								<ComboBoxItem Tag="1">Low</ComboBoxItem>
 								<ComboBoxItem Tag="2">Medium</ComboBoxItem>

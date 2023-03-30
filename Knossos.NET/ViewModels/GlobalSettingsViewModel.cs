@@ -38,6 +38,8 @@ namespace Knossos.NET.ViewModels
         private bool isAVX = false;
         [ObservableProperty]
         private bool isAVX2 = false;
+        [ObservableProperty]
+        private bool forceSSE2 = false;
 
         /*VIDEO*/
         [ObservableProperty]
@@ -48,7 +50,7 @@ namespace Knossos.NET.ViewModels
         private int textureSelectedIndex = 0;
         private ObservableCollection<ComboBoxItem> ResolutionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
-        private int shadowQualitySelectedIndex = 3;
+        private int shadowQualitySelectedIndex = 2;
         [ObservableProperty]
         private int aaSelectedIndex = 6;
         [ObservableProperty]
@@ -167,6 +169,7 @@ namespace Knossos.NET.ViewModels
             CpuArch = SysInfo.CpuArch;
             IsAVX = SysInfo.CpuAVX;
             IsAVX2 = SysInfo.CpuAVX2;
+            ForceSSE2 = Knossos.globalSettings.forceSSE2;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -648,6 +651,7 @@ namespace Knossos.NET.ViewModels
             }
             Knossos.globalSettings.enableLogFile = EnableLogFile;
             Knossos.globalSettings.logLevel = LogLevel;
+            Knossos.globalSettings.forceSSE2 = ForceSSE2;
 
             /* VIDEO */
             //Resolution
