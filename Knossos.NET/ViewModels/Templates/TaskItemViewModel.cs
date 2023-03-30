@@ -51,6 +51,8 @@ namespace Knossos.NET.ViewModels
         private bool showProgressText = true;
         [ObservableProperty]
         private string currentMirror = string.Empty;
+        [ObservableProperty]
+        private string pauseButtonText = "Pause";
 
 
         [ObservableProperty]
@@ -62,6 +64,7 @@ namespace Knossos.NET.ViewModels
         public string? installID = null;
         public string? installVersion = null;
         private bool restartDownload = false;
+        private bool pauseDownload = false;
 
         public TaskItemViewModel() 
         { 
@@ -1248,6 +1251,17 @@ namespace Knossos.NET.ViewModels
         private void RestartDownloadCommand()
         {
             restartDownload = true;
+            if (pauseDownload)
+                PauseDownloadCommand();
+        }
+
+        private void PauseDownloadCommand()
+        {
+            pauseDownload = !pauseDownload;
+            if (pauseDownload)
+                PauseButtonText = "Resume";
+            else
+                PauseButtonText = "Pause";
         }
 
         public async Task<bool?> DownloadFile(string url, string dest, string msg, bool showStopButton, string? tooltip, CancellationTokenSource? cancelSource = null)
@@ -1491,10 +1505,20 @@ namespace Knossos.NET.ViewModels
                 stopwatch.Start();
                 do
                 {
+                    while(pauseDownload && !restartDownload)
+                    {
+                        await Task.Delay(500);
+                        if (cancellationTokenSource!.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                    }
+
                     if (cancellationTokenSource!.IsCancellationRequested)
                     {
                         throw new TaskCanceledException();
                     }
+
                     var bytesRead = await contentStream.ReadAsync(buffer);
                     if (bytesRead == 0)
                     {
