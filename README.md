@@ -11,11 +11,11 @@ https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.14-wind
 <br /><br />
 **The current status:**<br />
 <br />
--Third test version (0.0.3) - Most of the Basic functions are in, except for dev mode<br />
+-Version 0.0.4 - Most of the user functions are in, except for dev mode<br />
 -Working in Windows and Linux<br />
--MacOS version is untested and unlikely to work.<br />
+-MacOS version is untested<br />
 -PxoAPI implementation is very basic and WIP<br />
--Mod details is missing features<br />
+-Mod details is missing features, waiting for Avalonia 0.11 to see what to do<br />
 <br /><br />
 **CmdLine priority explained:**<br />
 On KnossosNET there are multiples sources of cmdline arguments that are eventually joined into a single one to launch the game, repeating arguments are not allowed.<br />
@@ -27,13 +27,13 @@ SystemCMD(Settings) > Global CMD > User/Mod CMD
 **Dev Enviroment:**<br />
 -MSVC 2022<br />
 -.NET 6.0.406 SDK https://dotnet.microsoft.com/en-us/download/dotnet/6.0<br />
--Avalonia Extension for Visual Studio 0.10.18 https://marketplace.visualstudio.com/items?itemName=AvaloniaTeam.AvaloniaVS<br />
+-Avalonia Extension for Visual Studio https://marketplace.visualstudio.com/items?itemName=AvaloniaTeam.AvaloniaVS<br />
 <br />
 <br />
 **Current NuGet Packages:**<br />
--Avalonia 0.10.18<br />
--Avalonia.Desktop 0.10.18<br />
--Avalonia.Diagnostics 0.10.18<br />
+-Avalonia 0.10.19<br />
+-Avalonia.Desktop 0.10.19<br />
+-Avalonia.Diagnostics 0.10.19<br />
 -CommunityToolkit.Mvvm 8.1.0<br />
 -XamlNameReferenceGenerator 1.6.1<br />
 -ini-parser-netstandard 2.5.2<br />
