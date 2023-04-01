@@ -463,7 +463,7 @@ namespace Knossos.NET
             try
             {
                 //In Linux make sure it is marked as executable
-                if (SysInfo.IsLinux)
+                if (SysInfo.IsLinux || SysInfo.IsMacOS)
                 {
                     SysInfo.Chmod(execPath, "+x");
                 }

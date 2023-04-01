@@ -137,7 +137,7 @@ namespace Knossos.NET.Models
             }
             Log.Add(Log.LogSeverity.Information, "FsoBuild.GetFlags()", "Getting FSO Flags from file: " + fullpath);
 
-            if(SysInfo.IsLinux)
+            if(SysInfo.IsLinux || SysInfo.IsMacOS)
             {
                 SysInfo.Chmod(fullpath,"+x");
             }
