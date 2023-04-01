@@ -24,7 +24,6 @@ namespace Knossos.NET.Models
         //https://cf.fsnebula.org/storage/repo.json
         //https://dl.fsnebula.org/storage/repo.json
         private static readonly string repoUrl = @"https://aigaion.feralhosting.com/discovery/nebula/repo.json";
-        private static readonly int defaultMaxConcurrentDownloads = 3;
         private static readonly bool listFS2Override = false;
         private static CancellationTokenSource? cancellationToken = null;
         public static bool repoLoaded = false;
@@ -32,8 +31,6 @@ namespace Knossos.NET.Models
         private struct NebulaSettings
         {
             public string? etag { get; set; }
-            [JsonPropertyName("max_concurrent_downloads")]
-            public int? maxConcurrentDownloads { get; set; }
         }
 
         private static NebulaSettings settings = new NebulaSettings();
@@ -225,15 +222,6 @@ namespace Knossos.NET.Models
                 }
             }
             return;
-        }
-
-        public static int GetMaxConcurrentDownloads()
-        {
-            if (settings.maxConcurrentDownloads == null)
-            {
-                return defaultMaxConcurrentDownloads;
-            }
-            return settings.maxConcurrentDownloads.Value;
         }
 
         public static void CancelOperations()

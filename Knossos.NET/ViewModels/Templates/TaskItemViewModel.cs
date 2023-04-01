@@ -629,7 +629,7 @@ namespace Knossos.NET.ViewModels
                         -Increase main progress when: 
                          File starts to download, File finishes downloading, Decompression starts, Decompression ends, Image download completed
                     */
-                    await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Nebula.GetMaxConcurrentDownloads() }, async (file, token) =>
+                    await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks }, async (file, token) =>
                     {
                         if (cancellationTokenSource.IsCancellationRequested)
                         {
@@ -998,7 +998,7 @@ namespace Knossos.NET.ViewModels
                             -Increase main progress when: 
                              File starts to download, File finishes downloading, Decompression starts, Decompression ends, Image download completed
                         */
-                        await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Nebula.GetMaxConcurrentDownloads() }, async (file, token) =>
+                        await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks }, async (file, token) =>
                         {
                             if (cancellationTokenSource.IsCancellationRequested)
                             {
@@ -1431,6 +1431,7 @@ namespace Knossos.NET.ViewModels
             int count = 0;
             bool result = false;
             IsFileDownloadTask = true;
+            int lastMirrorIndex = -1;
             do
             {
                 if(restartDownload)
@@ -1441,9 +1442,17 @@ namespace Knossos.NET.ViewModels
                 {
                     count++;
                 }
-                Uri uri = new Uri(downloadMirrors[rnd.Next(downloadMirrors.Count())]);
-                CurrentMirror = uri.Host;
+                var mirrorIndex = rnd.Next(downloadMirrors.Count());
+                while (downloadMirrors.Count() > 1 && mirrorIndex == lastMirrorIndex)
+                {
+                    rnd.Next(downloadMirrors.Count());
+                }
                 
+                Uri uri = new Uri(downloadMirrors[mirrorIndex]);
+                
+                CurrentMirror = uri.Host;
+                lastMirrorIndex = mirrorIndex;
+
                 if (count > 1)
                 {
                     Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.Download(List<mirrors>)", "Retrying download of file: " + uri.ToString());
@@ -1462,6 +1471,7 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
+                bool isJson = false;
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
                 HttpClientHandler handler = new HttpClientHandler();
                 handler.AllowAutoRedirect = true;
@@ -1470,6 +1480,7 @@ namespace Knossos.NET.ViewModels
                 if (downloadUrl.ToString().ToLower().Contains(".json"))
                 {
                     httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
+                    isJson = true;
                 }
                 using var response = await httpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
@@ -1491,7 +1502,7 @@ namespace Knossos.NET.ViewModels
                     }
                 }
 
-                using var contentStream = await response.Content.ReadAsStreamAsync();
+                using var contentStream = Knossos.globalSettings.maxDownloadSpeed > 0 && !isJson ? new ThrottledStream(response.Content.ReadAsStream(), Knossos.globalSettings.maxDownloadSpeed) : response.Content.ReadAsStream();
                 var totalBytesRead = 0L;
                 var totalBytesPerSecond = 0L;
                 var readCount = 0L;

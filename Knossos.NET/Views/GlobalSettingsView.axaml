@@ -63,6 +63,34 @@
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5" IsVisible="{Binding IsAVX}">
 							<CheckBox Grid.Column="0" ToolTip.Tip="If available, Knossos will run SSE2 FSO builds instead of AVX ones." IsChecked="{Binding ForceSSE2}" Width="200">Force SSE2 Builds</CheckBox>
 						</Grid>
+						<!-- SubTasks -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Concurrent Subtasks</TextBlock>
+							<ComboBox SelectedIndex="{Binding MaxConcurrentSubtasks}" ToolTip.Tip="All tasks are done in order, but some tasks like install tasks creates multiple subtasks to download files, etc. This setting controls how many of them can run simultaneously." Grid.Column="1" Width="150" Margin="10,0,0,0">
+								<ComboBoxItem Tag="1">1</ComboBoxItem>
+								<ComboBoxItem Tag="2">2</ComboBoxItem>
+								<ComboBoxItem Tag="3">3</ComboBoxItem>
+								<ComboBoxItem Tag="4">4</ComboBoxItem>
+							</ComboBox>
+						</Grid>
+						<!-- Bandwidth limit -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Bandwidth Limit</TextBlock>
+							<ComboBox SelectedIndex="{Binding MaxDownloadSpeedIndex}" ToolTip.Tip="Bandwidth limiter (Per Individual Download)" Grid.Column="1" Width="150" Margin="10,0,0,0">
+								<ComboBoxItem Tag="0">Unlimited</ComboBoxItem>
+								<ComboBoxItem Tag="1">0.5 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="2">1 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="3">2 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="4">3 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="5">4 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="6">5 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="7">6 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="8">7 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="9">8 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="10">9 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="11">10 MB/s</ComboBoxItem>
+							</ComboBox>
+						</Grid>
 						<!-- Log File -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<CheckBox Grid.Column="0" IsChecked="{Binding EnableLogFile}" Width="200">Enable Log File</CheckBox>

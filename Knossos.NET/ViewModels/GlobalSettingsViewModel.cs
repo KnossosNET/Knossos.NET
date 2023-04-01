@@ -10,6 +10,20 @@ namespace Knossos.NET.ViewModels
 {
     public partial class GlobalSettingsViewModel : ViewModelBase
     {
+        /* Limiters definition */
+        private const long speedUnlimited = 0;
+        private const long speedHalfMB = 850000;
+        private const long speed1MB = 18000000;
+        private const long speed2MB = 34000000;
+        private const long speed3MB = 50000000;
+        private const long speed4MB = 68000000;
+        private const long speed5MB = 84000000;
+        private const long speed6MB = 102000000;
+        private const long speed7MB = 120000000;
+        private const long speed8MB = 137000000;
+        private const long speed9MB = 155000000;
+        private const long speed10MB = 170000000;
+
         [ObservableProperty]
         private bool flagDataLoaded = false;
         [ObservableProperty]
@@ -40,6 +54,10 @@ namespace Knossos.NET.ViewModels
         private bool isAVX2 = false;
         [ObservableProperty]
         private bool forceSSE2 = false;
+        [ObservableProperty]
+        public int maxConcurrentSubtasks = 3;
+        [ObservableProperty]
+        public long maxDownloadSpeedIndex = 0;
 
         /*VIDEO*/
         [ObservableProperty]
@@ -170,6 +188,23 @@ namespace Knossos.NET.ViewModels
             IsAVX = SysInfo.CpuAVX;
             IsAVX2 = SysInfo.CpuAVX2;
             ForceSSE2 = Knossos.globalSettings.forceSSE2;
+            MaxConcurrentSubtasks = Knossos.globalSettings.maxConcurrentSubtasks - 1;
+            switch(Knossos.globalSettings.maxDownloadSpeed)
+            {
+                case speedUnlimited: MaxDownloadSpeedIndex = 0; break;
+                case speedHalfMB: MaxDownloadSpeedIndex = 1; break;
+                case speed1MB: MaxDownloadSpeedIndex = 2; break;
+                case speed2MB: MaxDownloadSpeedIndex = 3; break;
+                case speed3MB: MaxDownloadSpeedIndex = 4; break;
+                case speed4MB: MaxDownloadSpeedIndex = 5; break;
+                case speed5MB: MaxDownloadSpeedIndex = 6; break;
+                case speed6MB: MaxDownloadSpeedIndex = 7; break;
+                case speed7MB: MaxDownloadSpeedIndex = 8; break;
+                case speed8MB: MaxDownloadSpeedIndex = 9; break;
+                case speed9MB: MaxDownloadSpeedIndex = 10; break;
+                case speed10MB: MaxDownloadSpeedIndex = 11; break;
+                default: MaxDownloadSpeedIndex = 0; break;
+            }
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -652,6 +687,22 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.enableLogFile = EnableLogFile;
             Knossos.globalSettings.logLevel = LogLevel;
             Knossos.globalSettings.forceSSE2 = ForceSSE2;
+            Knossos.globalSettings.maxConcurrentSubtasks = MaxConcurrentSubtasks+1;
+            switch (MaxDownloadSpeedIndex)
+            {
+                case 0: Knossos.globalSettings.maxDownloadSpeed = speedUnlimited; break;
+                case 1: Knossos.globalSettings.maxDownloadSpeed = speedHalfMB; break;
+                case 2: Knossos.globalSettings.maxDownloadSpeed = speed1MB; break;
+                case 3: Knossos.globalSettings.maxDownloadSpeed = speed2MB; break;
+                case 4: Knossos.globalSettings.maxDownloadSpeed = speed3MB; break;
+                case 5: Knossos.globalSettings.maxDownloadSpeed = speed4MB; break;
+                case 6: Knossos.globalSettings.maxDownloadSpeed = speed5MB; break;
+                case 7: Knossos.globalSettings.maxDownloadSpeed = speed6MB; break;
+                case 8: Knossos.globalSettings.maxDownloadSpeed = speed7MB; break;
+                case 9: Knossos.globalSettings.maxDownloadSpeed = speed8MB; break;
+                case 10: Knossos.globalSettings.maxDownloadSpeed = speed9MB; break;
+                case 11: Knossos.globalSettings.maxDownloadSpeed = speed10MB; break;
+            }
 
             /* VIDEO */
             //Resolution

@@ -37,10 +37,12 @@ namespace Knossos.NET.Models
         public int logLevel { get; set; } = 1;
         [JsonPropertyName("global_cmdline")]
         public string? globalCmdLine { get; set; } = null;
-
         [JsonPropertyName("force_sse2")]
         public bool forceSSE2 { get; set; } = false;
-
+        [JsonPropertyName("max_concurrent_subtasks")]
+        public int maxConcurrentSubtasks { get; set; } = 3;
+        [JsonPropertyName("max_download_speed")]
+        public long maxDownloadSpeed { get; set; } = 0;
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 
@@ -450,6 +452,8 @@ namespace Knossos.NET.Models
                         hideBuildNightly = tempSettings.hideBuildNightly;
                         hideBuildRC = tempSettings.hideBuildRC;
                         forceSSE2 = tempSettings.forceSSE2;
+                        maxConcurrentSubtasks = tempSettings.maxConcurrentSubtasks;
+                        maxDownloadSpeed = tempSettings.maxDownloadSpeed;
 
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");
