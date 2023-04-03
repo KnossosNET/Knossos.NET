@@ -49,6 +49,10 @@ namespace Knossos.NET.ViewModels
         public float progressBarMax = 100;
         [ObservableProperty]
         public float progressBarCurrent = 0;
+        [ObservableProperty]
+        private bool isDevMode = false;
+        [ObservableProperty]
+        private IBrush backgroundColor = Brushes.Black;
 
         public FsoBuildItemViewModel() 
         {
@@ -66,6 +70,12 @@ namespace Knossos.NET.ViewModels
             if(build.stability == FsoStability.Custom)
             {
                 Tooltip = build.description;
+            }
+
+            IsDevMode = build.devMode;
+            if(IsDevMode)
+            {
+                BackgroundColor = Brushes.DimGray;
             }
 
             foreach(var exe in build.executables)
