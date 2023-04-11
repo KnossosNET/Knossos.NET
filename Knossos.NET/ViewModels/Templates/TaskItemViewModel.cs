@@ -1443,13 +1443,14 @@ namespace Knossos.NET.ViewModels
                     count++;
                 }
                 var mirrorIndex = rnd.Next(downloadMirrors.Count());
-                while (downloadMirrors.Count() > 1 && mirrorIndex == lastMirrorIndex)
-                {
-                    rnd.Next(downloadMirrors.Count());
-                }
-                
                 Uri uri = new Uri(downloadMirrors[mirrorIndex]);
                 
+                while (downloadMirrors.Count() > 1 && ( (mirrorIndex == lastMirrorIndex && (Knossos.globalSettings.mirrorBlacklist == null || downloadMirrors.Count() - Knossos.globalSettings.mirrorBlacklist.Count() > 1 )) || (Knossos.globalSettings.mirrorBlacklist != null && Knossos.globalSettings.mirrorBlacklist.Contains(uri.Host)) ) )
+                {
+                    mirrorIndex = rnd.Next(downloadMirrors.Count());
+                    uri = new Uri(downloadMirrors[mirrorIndex]);
+                }
+
                 CurrentMirror = uri.Host;
                 lastMirrorIndex = mirrorIndex;
 

@@ -25,6 +25,13 @@ namespace Knossos.NET.ViewModels
         private const long speed10MB = 170000000;
 
         [ObservableProperty]
+        private bool blCfNebula = false;
+        [ObservableProperty]
+        private bool blDlNebula = false;
+        [ObservableProperty]
+        private bool blAigaion = false;
+
+        [ObservableProperty]
         private bool flagDataLoaded = false;
         [ObservableProperty]
         private bool enable16BitColor = false;
@@ -204,6 +211,22 @@ namespace Knossos.NET.ViewModels
                 case speed9MB: MaxDownloadSpeedIndex = 10; break;
                 case speed10MB: MaxDownloadSpeedIndex = 11; break;
                 default: MaxDownloadSpeedIndex = 0; break;
+            }
+
+            if (Knossos.globalSettings.mirrorBlacklist != null)
+            {
+                if (Knossos.globalSettings.mirrorBlacklist.Contains("dl.fsnebula.org"))
+                {
+                    BlDlNebula = true;
+                }
+                if (Knossos.globalSettings.mirrorBlacklist.Contains("cf.fsnebula.org"))
+                {
+                    BlCfNebula = true;
+                }
+                if (Knossos.globalSettings.mirrorBlacklist.Contains("aigaion.feralhosting.com"))
+                {
+                    BlAigaion = true;
+                }
             }
 
             /* VIDEO SETTINGS */
@@ -702,6 +725,31 @@ namespace Knossos.NET.ViewModels
                 case 9: Knossos.globalSettings.maxDownloadSpeed = speed8MB; break;
                 case 10: Knossos.globalSettings.maxDownloadSpeed = speed9MB; break;
                 case 11: Knossos.globalSettings.maxDownloadSpeed = speed10MB; break;
+            }
+
+            List<string> blMirrors = new List<string>();
+            if (BlDlNebula)
+            {
+                blMirrors.Add("dl.fsnebula.org");
+            }
+            if (BlCfNebula)
+            {
+                blMirrors.Add("cf.fsnebula.org");
+            }
+            if (BlAigaion)
+            {
+                blMirrors.Add("aigaion.feralhosting.com");
+            }
+            if(blMirrors.Any() && blMirrors.Count() != 3 /*Invalid!*/)
+            {
+                Knossos.globalSettings.mirrorBlacklist = blMirrors.ToArray();
+            }
+            else
+            {
+                Knossos.globalSettings.mirrorBlacklist = null;
+                BlDlNebula = false;
+                BlCfNebula = false;
+                BlAigaion = false;
             }
 
             /* VIDEO */

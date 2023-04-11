@@ -43,6 +43,8 @@ namespace Knossos.NET.Models
         public int maxConcurrentSubtasks { get; set; } = 3;
         [JsonPropertyName("max_download_speed")]
         public long maxDownloadSpeed { get; set; } = 0;
+        [JsonPropertyName("mirror_blacklist")]
+        public string[]? mirrorBlacklist { get; set; } = null;
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 
@@ -454,6 +456,7 @@ namespace Knossos.NET.Models
                         forceSSE2 = tempSettings.forceSSE2;
                         maxConcurrentSubtasks = tempSettings.maxConcurrentSubtasks;
                         maxDownloadSpeed = tempSettings.maxDownloadSpeed;
+                        mirrorBlacklist = tempSettings.mirrorBlacklist;
 
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");
