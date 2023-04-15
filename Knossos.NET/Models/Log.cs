@@ -35,22 +35,20 @@ namespace Knossos.NET
         public static void Add(LogSeverity logSeverity, string from, string data)
         {
             var logString = DateTime.Now.ToString() + " - *" + GetSeverityString(logSeverity) + "* : (" + from + ") " + data;
-
             if (Knossos.globalSettings.enableLogFile && (int)logSeverity >= Knossos.globalSettings.logLevel )
             {
-                try
-                {
-                    Task.Run(async () => {
+                Task.Run(async () => {
+                    try
+                    {
                         await WaitForFileAccess(LogFilePath);
                         StreamWriter writer = File.AppendText(LogFilePath);
                         writer.WriteLine(logString, Encoding.UTF8);
                         writer.Close();
-                    });
-                }
-                catch (Exception ex)
-                {
-                    WriteToConsole(ex.ToString());
-                }
+                    }catch (Exception ex)
+                    {
+                        WriteToConsole(ex.Message);
+                    }
+                });
             }
             WriteToConsole(logString);
         }
@@ -73,10 +71,13 @@ namespace Knossos.NET
         {
             try
             {
-                using (FileStream inputStream = File.Open(filename, FileMode.Open, FileAccess.Read))
+                if (File.Exists(filename))
                 {
-                    inputStream.Close();
-                    return;
+                    using (FileStream inputStream = File.Open(filename, FileMode.Open, FileAccess.Read))
+                    {
+                        inputStream.Close();
+                        return;
+                    }
                 }
             }
             catch (IOException)
