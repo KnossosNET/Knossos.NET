@@ -11,7 +11,7 @@ namespace Knossos.NET.ViewModels
     public partial class TaskViewModel : ViewModelBase
     {
         public static TaskViewModel? Instance { get; private set; }
-        private ObservableCollection<TaskItemViewModel> TaskList { get; set; } = new ObservableCollection<TaskItemViewModel>();
+        private  ObservableCollection<TaskItemViewModel> TaskList { get; set; } = new ObservableCollection<TaskItemViewModel>();
         public Queue<TaskItemViewModel> taskQueue { get; set; } = new Queue<TaskItemViewModel>();
 
         public TaskViewModel() 
@@ -59,13 +59,9 @@ namespace Knossos.NET.ViewModels
 
         public void AddMessageTask(string msg, string? tooltip = null)
         {
-            try
-            {
-                var newTask = new TaskItemViewModel();
-                TaskList.Add(newTask);
-                newTask.ShowMsg(msg, tooltip);
-            }
-            catch { }
+            var newTask = new TaskItemViewModel();
+            TaskList.Add(newTask);
+            newTask.ShowMsg(msg, tooltip);
         }
 
         public void CleanCommand()
