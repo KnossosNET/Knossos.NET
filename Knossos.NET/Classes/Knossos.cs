@@ -227,7 +227,7 @@ namespace Knossos.NET
                     /* Dev Mode ON */
                     if (mod.devMode)
                     {
-                        foreach (var pkg in mod.packages)
+                        foreach (var pkg in mod.packages.OrderBy(x => x.name))
                         {
                             if (modFlag.Length > 0)
                             {
