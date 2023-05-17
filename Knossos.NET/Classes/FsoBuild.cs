@@ -142,6 +142,7 @@ namespace Knossos.NET.Models
                 SysInfo.Chmod(fullpath,"+x");
             }
 
+            string output = string.Empty;
             try
             {
                 var cmd = new Process();
@@ -155,6 +156,7 @@ namespace Knossos.NET.Models
                 cmd.StartInfo.WorkingDirectory = folderPath;
                 cmd.Start();
                 string result = cmd.StandardOutput.ReadToEnd();
+                output = result;
                 cmd.WaitForExit();
                 cmd.Dispose();
                 //avoiding the "fso is running in legacy config mode..."
@@ -175,12 +177,14 @@ namespace Knossos.NET.Models
                 else
                 {
                     Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlags()", exJson);
+                    Log.Add(Log.LogSeverity.Error, "FSO EXE OUTPUT ", output);
                 }
                 return null;
             }
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlags()", ex);
+                Log.Add(Log.LogSeverity.Error, "FSO EXE OUTPUT ", output);
                 return null;
             }
         }
