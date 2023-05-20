@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
