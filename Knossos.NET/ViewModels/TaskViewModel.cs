@@ -118,6 +118,24 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        public async void CompressMod(Mod mod)
+        {
+            if (mod.type == "engine")
+            {
+                //If this is a engine build do nothing
+            }
+            else
+            {
+                //TODO: if a task to compress this mod is already queued but not running, do not queue it again
+                var cancelSource = new CancellationTokenSource();
+                var newTask = new TaskItemViewModel();
+                TaskList.Add(newTask);
+                taskQueue.Enqueue(newTask);
+                await newTask.CompressMod(mod, cancelSource);
+                cancelSource.Dispose();
+            }
+        }
+
         public async void VerifyMod(Mod mod)
         {
             var cancelSource = new CancellationTokenSource();

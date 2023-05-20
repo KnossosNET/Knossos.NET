@@ -34,6 +34,8 @@ namespace Knossos.NET.Models
 
         [JsonPropertyName("custom_cmdline")]
         public string? customCmdLine { get; set; } = null;
+        [JsonPropertyName("is_compressed")]
+        public bool isCompressed { get; set; } = false;
 
         [JsonIgnore]
         private string? filePath = null;
@@ -61,6 +63,7 @@ namespace Knossos.NET.Models
                         customBuildVersion= tempSettings.customBuildVersion;
                         customCmdLine = tempSettings.customCmdLine;
                         customBuildExec = tempSettings.customBuildExec;
+                        isCompressed = tempSettings.isCompressed;
                         Log.Add(Log.LogSeverity.Information, "ModSettings.Load()", "Mod seetings has been loaded from " + filePath);
                     }
                     

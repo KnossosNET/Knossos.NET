@@ -18,6 +18,9 @@ using System.Net;
 using Avalonia;
 using Knossos.NET.Classes;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
+using VP.NET;
+using System.Text;
 
 namespace Knossos.NET.ViewModels
 {
@@ -93,6 +96,417 @@ namespace Knossos.NET.ViewModels
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.ShowMsg()", ex);
+            }
+        }
+
+
+        private async Task<bool> CompressLosseFiles(List<string> filePaths, int alreadySkipped, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = filePaths.Count();
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    if (cancelSource != null)
+                    {
+                        cancellationTokenSource = cancelSource;
+                    }
+                    else
+                    {
+                        cancellationTokenSource = new CancellationTokenSource();
+                    }
+                    CancelButtonVisible = false;
+                    Name = "Compressing loose files";
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    int skippedCount = alreadySkipped;
+                    int compressedCount = 0;
+
+                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.CompressLosseFiles()", "Starting to Loose files" );
+
+                    await Parallel.ForEachAsync(filePaths, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism }, async (file, token) =>
+                    {
+                        var input = new FileStream(file,FileMode.Open,FileAccess.Read, FileShare.Read);
+                        BinaryReader br = new BinaryReader(input);
+
+                        if (!input.CanRead)
+                        {
+                            input.Dispose();
+                            throw new TaskCanceledException();
+                        }
+
+                        //Verify if it is compressed
+                        if (new string(br.ReadChars(4)) != "LZ41")
+                        {
+                            FileInfo fi = new FileInfo(file);
+                            Info = fi.Name + " Files: " + ProgressCurrent + " / " + ProgressBarMax;
+                            input.Seek(0, SeekOrigin.Begin);
+                            var output = new FileStream(fi.FullName+".lz4", FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                            if(!output.CanWrite)
+                            {
+                                input.Dispose();
+                                output.Dispose();
+                                throw new TaskCanceledException();
+                            }
+                            
+                            var compressedSize = await VPCompression.CompressStream(input,output);
+                            output.Dispose();
+                            if(compressedSize < input.Length)
+                            {
+                                //Delete original
+                                input.Dispose();
+                                output.Dispose();
+                                File.Delete(file);
+                                compressedCount++;
+                            }
+                            else
+                            {
+                                //Roll back
+                                input.Dispose();
+                                output.Dispose();
+                                File.Delete(fi.FullName + ".lz4");
+                                skippedCount++;
+                            }
+                        }
+                        else
+                        {
+                            skippedCount++;
+                        }
+                        await input.DisposeAsync();
+                        ProgressCurrent++;
+
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                    });
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    IsCompleted = true;
+                    ProgressCurrent = ProgressBarMax;
+                    Info = "Compressed: "+compressedCount + " Skipped: "+skippedCount;
+                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.CompressLosseFiles()", "Compressing Loose files finished: "+ Info);
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                /*
+                    Task cancel requested by user
+                */
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.CompressLosseFiles()", ex);
+                return false;
+            }
+        }
+
+        private async Task<bool> CompressVP(FileInfo vpFile, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 1;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    if (cancelSource != null)
+                    {
+                        cancellationTokenSource = cancelSource;
+                    }
+                    else
+                    {
+                        cancellationTokenSource = new CancellationTokenSource();
+                    }
+                    CancelButtonVisible = false;
+                    Name = "Compressing: "+ vpFile.Name;
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.CompressVP()", "Starting to compress VP file: " + vpFile.Name);
+
+                    var vp = new VPContainer(vpFile.FullName);
+                    vp.EnableCompression();
+                    await vp.SaveAsAsync(vpFile.FullName + "c", compressionCallback, cancellationTokenSource);
+
+                    File.Delete(vpFile.FullName);
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        try
+                        {
+                            File.Delete(vpFile.FullName + "c");
+                            File.Delete(vpFile.FullName + "c.tmp");
+                        }
+                        catch { }
+                        throw new TaskCanceledException();
+                    }
+                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.CompressVP()", "Compress VP finished: " + vpFile.Name + " Processed Files: " + ProgressBarMax );
+                    Info = "";
+                    IsCompleted = true;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                /*
+                    Task cancel requested by user
+                */
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.CompressVP()", ex);
+                return false;
+            }
+        }
+
+        private void compressionCallback(string filename, int maxFiles)
+        {
+            ProgressBarMax = maxFiles;
+            if (filename != string.Empty)
+            {
+                ProgressCurrent++;
+            }
+            else
+            {
+                ProgressCurrent = 0;
+            }
+            Info = filename + "  -  " + ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString();
+        }
+
+        public async Task<bool> CompressMod(Mod mod, CancellationTokenSource? cancelSource = null, bool isSubTask = false)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    if(!isSubTask)
+                    {
+                        CancelButtonVisible = true;
+                        Name = "Compressing mod: " + mod.title;
+                    }
+                    else
+                    {
+                        Name = "Compressing mod";
+                    }
+                    
+                    ShowProgressText = false;
+                    TaskRoot.Add(this);
+                    ProgressBarMin = 0;
+                    ProgressCurrent = 0;
+                    
+                    if (cancelSource != null)
+                    {
+                        cancellationTokenSource = cancelSource;
+                    }
+                    else
+                    {
+                        cancellationTokenSource = new CancellationTokenSource();
+                    }
+
+                    //Wait in Queue
+                    if (!isSubTask)
+                    {
+                        while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                        {
+                            await Task.Delay(1000);
+                            if (cancellationTokenSource.IsCancellationRequested)
+                            {
+                                throw new TaskCanceledException();
+                            }
+                        }
+                    }
+
+                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.CompressMod()", "Starting to compress Mod: " + mod.title);
+
+                    var vpFiles = Directory.GetFiles(mod.fullPath, "*.vp").ToList();
+                    ProgressBarMax = vpFiles.Count()+1;
+
+                    //Loose Files Compression
+                    if(Directory.Exists(mod.fullPath+Path.DirectorySeparatorChar+"data"))
+                    {
+                        var allFilesInDataFolder = Directory.GetFiles(mod.fullPath + Path.DirectorySeparatorChar + "data", "*.*",SearchOption.AllDirectories).ToList();
+                        int skipped = 0;
+                        //Filter
+                        foreach(var fileInData in allFilesInDataFolder.ToList())
+                        {
+                            var file = new FileInfo(fileInData);
+
+                            if (file.IsReadOnly || file.Length < VPCompression.MinimumSize || VPCompression.ExtensionIgnoreList.Contains(file.Extension.ToLower()) || file.Extension.ToLower() == ".lz4") 
+                            { 
+                                if(file.Extension.ToLower() == ".vp")
+                                {
+                                    vpFiles.Add(fileInData);
+                                }
+                                allFilesInDataFolder.Remove(fileInData);
+                                skipped++;
+                            }
+                        }
+                        //Process
+                        var fileTask = new TaskItemViewModel();
+                        TaskList.Insert(0, fileTask);
+                        Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+
+                        var result = await fileTask.CompressLosseFiles(allFilesInDataFolder, skipped, cancellationTokenSource);
+                        if (!result || cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                    }
+                    ProgressCurrent++;
+                    Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+
+                    //VP Compression
+                    await Parallel.ForEachAsync(vpFiles, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism }, async (file, token) =>
+                    {
+                        var vpTask = new TaskItemViewModel();
+                        TaskList.Insert(0, vpTask);
+                        Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+                        await vpTask.CompressVP(new FileInfo(file), cancellationTokenSource);
+                        ProgressCurrent++;
+                        Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                    });
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    //Update settings json
+                    mod.modSettings.isCompressed = true;
+                    mod.modSettings.Save();
+
+                    IsCompleted = true;
+                    ProgressCurrent = ProgressBarMax;
+                    Info = string.Empty;
+                    CancelButtonVisible = false;
+
+                    if (!isSubTask && TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                    {
+                        TaskViewModel.Instance!.taskQueue.Dequeue();
+                    }
+
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                Info = "Task Cancelled";
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                if (!isSubTask)
+                {
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                    {
+                        await Task.Delay(500);
+                    }
+                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                    {
+                        TaskViewModel.Instance!.taskQueue.Dequeue();
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Info = "Task Failed";
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                cancellationTokenSource?.Cancel();
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                if (!isSubTask)
+                {
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                    {
+                        await Task.Delay(500);
+                    }
+                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                    {
+                        TaskViewModel.Instance!.taskQueue.Dequeue();
+                    }
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.CompressMod()", ex);
+                return false;
             }
         }
 
@@ -495,6 +909,14 @@ namespace Knossos.NET.ViewModels
                     ShowProgressText = false;
                     TaskRoot.Add(this);
                     Info = "In Queue";
+                    bool compressMod = false;
+
+                    //Todo add mod fso version checking
+                    if (Knossos.globalSettings.modCompression == 1)
+                    {
+                        compressMod = true;
+                    }
+
                     //Set Mod card as "installing"
                     MainWindowViewModel.Instance?.NebulaModsView.SetInstalling(mod.id, cancellationTokenSource);
 
@@ -528,6 +950,7 @@ namespace Knossos.NET.ViewModels
                         -Set all the data needed here, number of tasks, etc for the progress bar and info
                         -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 2
                          (Download, Decompression, Download banner/tile images)
+                        -+1 task if we have to compress
                     */
 
                     List<ModFile> files = new List<ModFile>();
@@ -605,6 +1028,10 @@ namespace Knossos.NET.ViewModels
                     ProgressBarMin = 0;
                     ProgressCurrent = 0;
                     ProgressBarMax = (files.Count * 2) + 2;
+                    if(compressMod)
+                    {
+                        ProgressBarMax += 1;
+                    }
                     Info = "Tasks: 0/" + ProgressBarMax;
 
                     /* Do not create the token on mod updates */
@@ -679,7 +1106,7 @@ namespace Knossos.NET.ViewModels
                                             throw new Exception("The downloaded file hash was incorrect, expected: " + file.checksum[1] + " Calculated Hash: " + hashValue);
                                         }
                                     }
-                                    fileTask.Info += " Checksum OK!";
+                                    fileTask.Info = " Checksum OK!";
                                 }
                             }
                             else
@@ -702,8 +1129,8 @@ namespace Knossos.NET.ViewModels
                             Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Error while decompressing the file " + fileFullPath);
                             CancelTaskCommand();
                         }
-                        ++ProgressCurrent;
                         File.Delete(fileFullPath);
+                        ++ProgressCurrent;
                     });
                     files.Clear();
 
@@ -715,6 +1142,7 @@ namespace Knossos.NET.ViewModels
                         -Serialize json to folder
                         -Create the FsoBuild object and add it to the main list
                         -Return the same FsoObject so it can be updated on the FsoBuildView
+                        -Compress Mod if we had to
                     */
 
                     if (cancellationTokenSource.IsCancellationRequested)
@@ -771,6 +1199,21 @@ namespace Knossos.NET.ViewModels
                         installed.ClearUnusedData();
                     }
 
+                    //We have to compress?
+                    if (compressMod)
+                    {
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+
+                        var cpTask = new TaskItemViewModel();
+                        TaskList.Insert(0, cpTask);
+                        await cpTask.CompressMod(mod, cancellationTokenSource, true);
+                        ProgressCurrent++;
+                        Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+                    }
+
                     try
                     {
                         File.Delete(mod.fullPath + Path.DirectorySeparatorChar + "knossos_net_download.token");
@@ -798,6 +1241,7 @@ namespace Knossos.NET.ViewModels
                     Info = string.Empty;
                     IsCompleted = true;
                     CancelButtonVisible = false;
+
                     return true;
                 }
                 else

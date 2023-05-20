@@ -73,6 +73,15 @@
 								<ComboBoxItem Tag="4">4</ComboBoxItem>
 							</ComboBox>
 						</Grid>
+						<!-- Compression -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mod Compression</TextBlock>
+							<ComboBox SelectedIndex="{Binding ModCompression}" ToolTip.Tip="Knossos can try to compress mod files in order to save disk space. 'Manual' means you will have to compress or decompress the files manually from mod settings. 'Always' means Knossos will compress all mods during install and 'Mod Support' means Knossos will compress the files only if the mod FSO engine dependency supports it." Grid.Column="1" Width="150" Margin="10,0,0,0">
+								<ComboBoxItem Tag="0">Manual</ComboBoxItem>
+								<ComboBoxItem Tag="1">Always</ComboBoxItem>
+								<ComboBoxItem Tag="2">Mod Support</ComboBoxItem>
+							</ComboBox>
+						</Grid>
 						<!-- Bandwidth limit -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Bandwidth Limit</TextBlock>

@@ -65,6 +65,8 @@ namespace Knossos.NET.ViewModels
         public int maxConcurrentSubtasks = 3;
         [ObservableProperty]
         public long maxDownloadSpeedIndex = 0;
+        [ObservableProperty]
+        public int modCompression = 0;
 
         /*VIDEO*/
         [ObservableProperty]
@@ -228,6 +230,8 @@ namespace Knossos.NET.ViewModels
                     BlAigaion = true;
                 }
             }
+
+            ModCompression = Knossos.globalSettings.modCompression;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -751,6 +755,8 @@ namespace Knossos.NET.ViewModels
                 BlCfNebula = false;
                 BlAigaion = false;
             }
+
+            Knossos.globalSettings.modCompression = ModCompression;
 
             /* VIDEO */
             //Resolution

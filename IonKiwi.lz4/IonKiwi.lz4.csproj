@@ -1,0 +1,80 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net60</TargetFrameworks>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<PackageId>IonKiwi.lz4.managed</PackageId>
+		<Version>1.0.7</Version>
+		<Authors>Ewout van der Linden</Authors>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+		<SignAssembly>true</SignAssembly>
+		<DelaySign>true</DelaySign>
+		<AssemblyOriginatorKeyFile>235_p384.snk</AssemblyOriginatorKeyFile>
+		<Copyright>Ewout van der Linden</Copyright>
+		<Description>This package is a translation of the lz4 C sources (1.9.4) to C#.
+
+LZ4 has been written by Yann Collet and the original sources can be found on https://github.com/lz4/lz4
+LZ4 is a very fast lossless compression algorithm, providing compression speed at 400 MB/s per core, with near-linear scalability for multi-threaded applications. It also features an extremely fast decoder, with speed in multiple GB/s per core, typically reaching RAM speed limits on multi-core systems.
+
+The original C sources are translated to C#.
+The implementation is compliant with the LZ4 Frame Format (v1.6.2).</Description>
+		<PackageTags>lz4 lz4hc lz4.net managed async stream compression</PackageTags>
+		<PackageProjectUrl>https://github.com/IonKiwi/lz4.managed</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/IonKiwi/lz4.managed</RepositoryUrl>
+		<PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<ContinuousIntegrationBuild Condition="'$(CI_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
+		<SN>"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\sn.exe"</SN>
+		<Platforms>AnyCPU</Platforms>
+		<!--<EmbedUntrackedSources>true</EmbedUntrackedSources>-->
+	</PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'netstandard2.1'">
+    <NoWarn>$(NoWarn);nullable</NoWarn>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<EmbeddedFiles Include="$(GeneratedAssemblyInfoFile)" />
+		<EmbeddedFiles Include="$(TargetFrameworkMonikerAssemblyAttributesPath)" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+	<PropertyGroup>
+		<DefineConstants Condition="'$(Signed)' == 'true'">$(DefineConstants);SIGNED</DefineConstants>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageReleaseNotes>
+			v1.0.6
+			translated lz4 1.9.4
+
+			for .net 6 use intrinsics
+			- BitOperations.TrailingZeroCount
+			- BitOperations.RotateLeft
+			- BinaryPrimitives.ReverseEndianness
+
+			v1.0.7
+			- handle empty blocks
+			- remove System.Runtime.CompilerServices.Unsafe dependency from .net6 target
+		</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Buffers" Version="4.5.1" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
+		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'netstandard2.1'" />
+	</ItemGroup>
+
+	<Target Name="ReSignAfterBuild" AfterTargets="AfterBuild" Condition="'$(Signed)' == 'true'">
+		<Exec Command="$(SN) -R $(TargetPath) $(ProjectDir)..\..\..\Keys\Public\235_priv.snk" />
+	</Target>
+
+</Project>

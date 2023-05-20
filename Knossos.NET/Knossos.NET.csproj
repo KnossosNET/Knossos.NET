@@ -11,6 +11,10 @@
   </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaXaml Remove="Libs\**" />
+    <Compile Remove="Libs\**" />
+    <EmbeddedResource Remove="Libs\**" />
+    <None Remove="Libs\**" />
     <None Remove=".gitignore" />
     <None Remove="ViewModels\ModCardViewModel.cs~RF423e49e6.TMP" />
     <None Remove="ViewModels\Windows\ModInstallViewModel.cs~RF3e55a24c.TMP" />
@@ -55,9 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets\utils\" />
-    <Folder Include="Lang\" />
-    <Folder Include="Libs\" />
-    <Folder Include="Styles\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\VP.NET\VP.NET.csproj" />
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Update="Assets\fs2_res\kn_banner.png">
