@@ -798,6 +798,7 @@ namespace Knossos.NET.ViewModels
 
                     IsCompleted = true;
                     CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
 
                     if (!reinstall.Any())
                     {
@@ -888,7 +889,7 @@ namespace Knossos.NET.ViewModels
         public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null)
         {
             string? modPath = null;
-            var installed = Knossos.GetInstalledMod(mod.id, mod.version);
+            Mod? installed = null;
             try
             {
                 if (!TaskIsSet)
@@ -931,10 +932,10 @@ namespace Knossos.NET.ViewModels
                     }
 
                     /*
-                        Check if its installed, even on install taks it could have been installed by another task that was in the queue
+                        Check if its installed, even on install task it could have been installed by another task that was in the queue
                     */
-                    
-                    if(installed != null) 
+                    installed = Knossos.GetInstalledMod(mod.id, mod.version);
+                    if (installed != null) 
                     {
                         Name = "Modify " + mod.ToString();
                     }
@@ -1131,6 +1132,7 @@ namespace Knossos.NET.ViewModels
                         }
                         File.Delete(fileFullPath);
                         ++ProgressCurrent;
+                        Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                     });
                     files.Clear();
 
