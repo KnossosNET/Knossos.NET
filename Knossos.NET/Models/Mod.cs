@@ -399,22 +399,28 @@ namespace Knossos.NET.Models
 
             foreach (var mod in mods)
             {
-                if(SemanticVersion.SastifiesDependency(version,mod.version))
+
+                try
                 {
-                    if(validMod == null)
+                    if (SemanticVersion.SastifiesDependency(version, mod.version))
                     {
-                        validMod = mod;
-                    }
-                    else
-                    {
-                        if(SemanticVersion.Compare(mod.version,validMod.version) > 0)
+                        if (validMod == null)
                         {
                             validMod = mod;
                         }
+                        else
+                        {
+                            if (SemanticVersion.Compare(mod.version, validMod.version) > 0)
+                            {
+                                validMod = mod;
+                            }
+                        }
                     }
+                } catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "Mod.SelectMod()", "Mod: "+mod.title + " " + ex.Message);
                 }
             }
-
             return validMod;
         }
 
