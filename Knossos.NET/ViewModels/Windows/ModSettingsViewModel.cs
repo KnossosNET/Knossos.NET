@@ -7,6 +7,8 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Linq;
 using Avalonia.Threading;
+using System.IO;
+using System;
 
 namespace Knossos.NET.ViewModels
 {
@@ -32,6 +34,10 @@ namespace Knossos.NET.ViewModels
         private string modSize = "0GB";
         [ObservableProperty]
         private bool compression = false;
+        [ObservableProperty]
+        private bool compressionAvalible = false;
+        [ObservableProperty]
+        private bool isDevMode = false;
 
         public ModSettingsViewModel()
         {
@@ -43,7 +49,13 @@ namespace Knossos.NET.ViewModels
             //this.mainWindowViewModel = mainWindowViewModel;
             this.modJson = modJson;
             modCardViewModel = modCard;
+            isDevMode = modJson.devMode;
             compression = modJson.modSettings.isCompressed;
+            if(Knossos.globalSettings.modCompression != CompressionSettings.Disabled && !modJson.modSettings.isCompressed)
+            {
+                compressionAvalible = true;
+            }
+
             Title = modJson.title + " " + modJson.version + " Mod " + "Settings";
             CreateDependencyItems();
 
@@ -324,6 +336,7 @@ namespace Knossos.NET.ViewModels
 
         private void CompressCommand()
         {
+            //TODO: add FSO version check and warning first
             if(modJson != null && modJson.fullPath != string.Empty)
                 TaskViewModel.Instance?.CompressMod(modJson);
         }

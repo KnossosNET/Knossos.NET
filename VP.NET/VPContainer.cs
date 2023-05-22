@@ -21,6 +21,7 @@ namespace VP.NET
     public struct VPIndexEntry
     {
         public string name; //32 with null terminator
+        public byte[]? nameBytes; //keep the original 32 bytes
         public int timestamp; //unix
         public int size;
         public int offset; //from start of the file
@@ -176,21 +177,27 @@ namespace VP.NET
 
             foreach (var entry in index)
             {
-                var name = entry.name;
-                if(name.Length > 31)
-                {
-                    name = entry.name.Substring(0, 31);
-                }
-                name=name.PadRight(32, '\0');
-
                 var offBytes = BitConverter.GetBytes(entry.offset);
                 await vp.WriteAsync(offBytes, 0, 4);
 
                 var sizeBytes = BitConverter.GetBytes(entry.size);
                 await vp.WriteAsync(sizeBytes, 0, 4);
 
-                var nameBytes = Encoding.ASCII.GetBytes(name);
-                await vp.WriteAsync(nameBytes, 0, 32);
+                if (entry.nameBytes == null || Encoding.ASCII.GetString(entry.nameBytes).Split('\0')[0] != entry.name)
+                {
+                    var name = entry.name;
+                    if (name.Length > 31)
+                    {
+                        name = entry.name.Substring(0, 31);
+                    }
+                    name = name.PadRight(32, '\0');
+                    var nameBytes = Encoding.ASCII.GetBytes(name);
+                    await vp.WriteAsync(nameBytes, 0, 32);
+                }
+                else
+                {
+                    await vp.WriteAsync(entry.nameBytes, 0, 32);
+                }
 
                 var timeBytes = BitConverter.GetBytes(entry.timestamp);
                 await vp.WriteAsync(timeBytes, 0, 4);
@@ -253,7 +260,7 @@ namespace VP.NET
                 switch (file.type)
                 {
                     case VPFileType.Directory:
-                        file.info.offset = (int)vp.Position;
+                        file.info.offset = file.info.offset != 0 ? (int)vp.Position : 0 ;
                         index.Add(file.info);
                         foreach (var subfile in file.files!)
                         {
@@ -265,7 +272,7 @@ namespace VP.NET
                         }
                         break;
                     case VPFileType.BackDir:
-                        file.info.offset = (int)vp.Position;
+                        file.info.offset = file.info.offset != 0 ? (int)vp.Position : 0;
                         index.Add(file.info);
                         break;
                     case VPFileType.File:
@@ -517,7 +524,8 @@ namespace VP.NET
                     var entry = new VPIndexEntry();
                     entry.offset = br.ReadInt32();
                     entry.size = br.ReadInt32();
-                    entry.name = Encoding.ASCII.GetString(br.ReadBytes(32)).Split('\0')[0];
+                    entry.nameBytes = br.ReadBytes(32);
+                    entry.name = Encoding.ASCII.GetString(entry.nameBytes).Split('\0')[0];
                     entry.timestamp = br.ReadInt32();
                     vpIndex.Add(entry);
                 }

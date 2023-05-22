@@ -130,7 +130,9 @@ namespace Knossos.NET.ViewModels
                 var newTask = new TaskItemViewModel();
                 TaskList.Add(newTask);
                 taskQueue.Enqueue(newTask);
-                await newTask.CompressMod(mod, cancelSource);
+                await Task.Run(async() => {
+                    await newTask.CompressMod(mod, cancelSource);
+                });
                 cancelSource.Dispose();
             }
         }
@@ -147,7 +149,9 @@ namespace Knossos.NET.ViewModels
                 var newTask = new TaskItemViewModel();
                 TaskList.Add(newTask);
                 taskQueue.Enqueue(newTask);
-                await newTask.DecompressMod(mod, cancelSource);
+                await Task.Run(async () => {
+                    await newTask.DecompressMod(mod, cancelSource);
+                });
                 cancelSource.Dispose();
             }
         }

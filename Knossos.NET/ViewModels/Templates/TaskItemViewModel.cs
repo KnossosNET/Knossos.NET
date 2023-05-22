@@ -155,7 +155,7 @@ namespace Knossos.NET.ViewModels
                                 throw new TaskCanceledException();
                             }
 
-                            var compressedSize = await VPCompression.DecompressStream(input, output);
+                            var compressedSize = await Task.Run(async () => await VPCompression.DecompressStream(input, output));
 
                             //Delete original
                             input.Dispose();
@@ -281,7 +281,7 @@ namespace Knossos.NET.ViewModels
                                 throw new TaskCanceledException();
                             }
                             
-                            var compressedSize = await VPCompression.CompressStream(input,output);
+                            var compressedSize = await Task.Run(async () => await VPCompression.CompressStream(input,output));
                             output.Dispose();
                             if(compressedSize < input.Length)
                             {
@@ -391,7 +391,7 @@ namespace Knossos.NET.ViewModels
 
                     var vp = new VPContainer(vpFile.FullName);
                     vp.DisableCompression();
-                    await vp.SaveAsAsync(vpFile.FullName.ToLower().Replace(".vpc", ".vp"), compressionCallback, cancellationTokenSource);
+                    await Task.Run(async () => await vp.SaveAsAsync(vpFile.FullName.ToLower().Replace(".vpc", ".vp"), compressionCallback, cancellationTokenSource));
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
@@ -466,7 +466,7 @@ namespace Knossos.NET.ViewModels
                         cancellationTokenSource = new CancellationTokenSource();
                     }
                     CancelButtonVisible = false;
-                    Name = "Compressing: "+ vpFile.Name;
+                    Name = "Compressing: " + vpFile.Name;
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
@@ -477,7 +477,7 @@ namespace Knossos.NET.ViewModels
 
                     var vp = new VPContainer(vpFile.FullName);
                     vp.EnableCompression();
-                    await vp.SaveAsAsync(vpFile.FullName + "c", compressionCallback, cancellationTokenSource);
+                    await Task.Run(async () => await vp.SaveAsAsync(vpFile.FullName + "c", compressionCallback, cancellationTokenSource));
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
@@ -558,7 +558,7 @@ namespace Knossos.NET.ViewModels
                     if(!isSubTask)
                     {
                         CancelButtonVisible = true;
-                        Name = "Compressing mod: " + mod.title;
+                        Name = "Compressing mod: " + mod.title + " " + mod.version;
                     }
                     else
                     {
@@ -631,7 +631,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 throw new TaskCanceledException();
                             }
-                        });
+                        },DispatcherPriority.Background);
                     }
                     ProgressCurrent++;
                     Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
@@ -651,7 +651,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 throw new TaskCanceledException();
                             }
-                        });
+                        },DispatcherPriority.Background);
                     });
 
                     if (cancellationTokenSource.IsCancellationRequested)
@@ -738,7 +738,7 @@ namespace Knossos.NET.ViewModels
                 {
                     TaskIsSet = true;
                     CancelButtonVisible = true;
-                    Name = "Decompressing mod: " + mod.title;
+                    Name = "Decompressing mod: " + mod.title + " " + mod.version;
                     ShowProgressText = false;
                     TaskRoot.Add(this);
                     ProgressBarMin = 0;
@@ -803,7 +803,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 throw new TaskCanceledException();
                             }
-                        });
+                        },DispatcherPriority.Background);
                     }
                     ProgressCurrent++;
                     Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
@@ -823,7 +823,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 throw new TaskCanceledException();
                             }
-                        });
+                        },DispatcherPriority.Background);
                     });
 
                     if (cancellationTokenSource.IsCancellationRequested)
@@ -1299,7 +1299,7 @@ namespace Knossos.NET.ViewModels
                     bool compressMod = false;
 
                     //Todo add mod fso version checking
-                    if (Knossos.globalSettings.modCompression == CompressionSettings.Always)
+                    if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.Always)
                     {
                         compressMod = true;
                     }
@@ -1338,6 +1338,7 @@ namespace Knossos.NET.ViewModels
                         -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 2
                          (Download, Decompression, Download banner/tile images)
                         -+1 task if we have to compress
+                        -If the mod is installeds there is no need to download the baners and title image again so -2 to max tasks
                     */
 
                     List<ModFile> files = new List<ModFile>();
@@ -1414,7 +1415,7 @@ namespace Knossos.NET.ViewModels
 
                     ProgressBarMin = 0;
                     ProgressCurrent = 0;
-                    ProgressBarMax = (files.Count * 2) + 2;
+                    ProgressBarMax = installed == null ? (files.Count * 2) + 2 : (files.Count * 2);
                     if(compressMod)
                     {
                         ProgressBarMax += 1;
@@ -2385,7 +2386,7 @@ namespace Knossos.NET.ViewModels
 
                     if (stopwatch.Elapsed.TotalSeconds >= 1)
                     {
-                        speed = string.Format("@ {0} MB/s", (totalBytesPerSecond / 1024.0 / 1024.0 / stopwatch.Elapsed.TotalSeconds).ToString("0.00"));
+                        speed = SysInfo.FormatBytes(totalBytesPerSecond)+"/s";
                         totalBytesPerSecond = 0L;
                         stopwatch.Restart();
                     }

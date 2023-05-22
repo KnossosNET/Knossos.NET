@@ -243,6 +243,12 @@ namespace Knossos.NET.ViewModels
         {
             if(SelectedMod != null)
             {
+                SelectedMod.modSettings.Load(SelectedMod.fullPath);
+                if (SelectedMod.modSettings.isCompressed)
+                {
+                    MessageBox.Show(MainWindow.instance!, "This mod is compressed, mod verify is not avalible for compressed mods, uncompress it and try again.", "Verify error", MessageBox.MessageBoxButtons.OK);
+                    return;
+                }
                 TaskViewModel.Instance!.VerifyMod(SelectedMod);
             }
         }

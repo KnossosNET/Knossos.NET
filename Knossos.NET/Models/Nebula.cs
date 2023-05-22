@@ -102,7 +102,7 @@ namespace Knossos.NET.Models
                     await Dispatcher.UIThread.InvokeAsync(() => TaskViewModel.Instance!.AddMessageTask("Nebula: repo.json is up to date!"), DispatcherPriority.Background);
                     Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "repo.json is up to date!");
                 }
-                if (cancellationToken!.IsCancellationRequested)
+                if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
                 {
                     throw new TaskCanceledException();
                 }
@@ -122,7 +122,7 @@ namespace Knossos.NET.Models
             try
             {
                 await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
-                if (cancellationToken!.IsCancellationRequested)
+                if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
                 {
                     throw new TaskCanceledException();
                 }
@@ -141,7 +141,7 @@ namespace Knossos.NET.Models
                     Mod? lastMod = null;
                     await foreach (Mod? mod in mods)
                     {
-                        if (cancellationToken!.IsCancellationRequested)
+                        if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
                         {
                             fileStream.Close();
                             throw new TaskCanceledException();
