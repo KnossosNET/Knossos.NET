@@ -269,14 +269,15 @@ namespace VP.NET
         internal bool CheckHaveToCompress()
         {
             if (type != VPFileType.File)
-                return false; 
+                return false;
 
-            if(info.size < VPCompression.MinimumSize) 
+            if (info.size < VPCompression.MinimumSize)
                 return false;
 
             int periodPos = info.name.LastIndexOf('.');
-            if (periodPos > 0) {
-                string ext = info.name.ToLower().Substring(periodPos, 4);
+            if (periodPos > 0)
+            {
+                string ext = info.name.ToLower().Substring(periodPos, info.name.Length - periodPos);
                 if (vp!.compression && !compressionInfo.header.HasValue && VPCompression.ExtensionIgnoreList.IndexOf(ext) == -1)
                 {
                     return true;

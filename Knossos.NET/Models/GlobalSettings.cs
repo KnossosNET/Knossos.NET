@@ -17,6 +17,14 @@ using System.Threading.Tasks;
 
 namespace Knossos.NET.Models
 {
+    public enum CompressionSettings
+    {
+        Disabled,
+        Manual,
+        Always,
+        ModSupport
+    }
+
     /*
         Stores and load the global Knossos.NET configuration.
     */
@@ -46,7 +54,7 @@ namespace Knossos.NET.Models
         [JsonPropertyName("mirror_blacklist")]
         public string[]? mirrorBlacklist { get; set; } = null;
         [JsonPropertyName("mod_compression")]
-        public int modCompression { get; set; } = 0;
+        public CompressionSettings modCompression { get; set; } = CompressionSettings.Manual;
         [JsonPropertyName("compression_max_parallelism")]
         public int compressionMaxParallelism { get; set; } = 4;
 

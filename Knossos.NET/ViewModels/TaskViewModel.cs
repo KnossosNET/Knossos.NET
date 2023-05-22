@@ -126,12 +126,28 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                //TODO: if a task to compress this mod is already queued but not running, do not queue it again
                 var cancelSource = new CancellationTokenSource();
                 var newTask = new TaskItemViewModel();
                 TaskList.Add(newTask);
                 taskQueue.Enqueue(newTask);
                 await newTask.CompressMod(mod, cancelSource);
+                cancelSource.Dispose();
+            }
+        }
+
+        public async void DecompressMod(Mod mod)
+        {
+            if (mod.type == "engine")
+            {
+                //If this is a engine build do nothing
+            }
+            else
+            {
+                var cancelSource = new CancellationTokenSource();
+                var newTask = new TaskItemViewModel();
+                TaskList.Add(newTask);
+                taskQueue.Enqueue(newTask);
+                await newTask.DecompressMod(mod, cancelSource);
                 cancelSource.Dispose();
             }
         }

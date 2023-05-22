@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Linq;
+using Avalonia.Threading;
 
 namespace Knossos.NET.ViewModels
 {
@@ -25,8 +28,10 @@ namespace Knossos.NET.ViewModels
         private FsoBuildPickerViewModel fsoPicker;
         [ObservableProperty]
         private FsoFlagsViewModel? fsoFlags = null;
-
-
+        [ObservableProperty]
+        private string modSize = "0GB";
+        [ObservableProperty]
+        private bool compression = false;
 
         public ModSettingsViewModel()
         {
@@ -38,6 +43,7 @@ namespace Knossos.NET.ViewModels
             //this.mainWindowViewModel = mainWindowViewModel;
             this.modJson = modJson;
             modCardViewModel = modCard;
+            compression = modJson.modSettings.isCompressed;
             Title = modJson.title + " " + modJson.version + " Mod " + "Settings";
             CreateDependencyItems();
 
@@ -79,6 +85,32 @@ namespace Knossos.NET.ViewModels
                         fsoPicker = new FsoBuildPickerViewModel(null);
                     }
                 }
+            }
+
+            //Size
+            Task.Factory.StartNew(() => UpdateModSize());
+        }
+
+        private void UpdateModSize()
+        {
+            if(modJson == null || modJson.fullPath == string.Empty)
+            {
+                return;
+            }
+
+            try
+            {
+                long bytes = 0;
+                var files = Directory.GetFiles(modJson.fullPath, "*.*", SearchOption.AllDirectories);
+                foreach (var file in files)
+                {
+                    var fi = new FileInfo(file);
+                    bytes += fi.Length;
+                }
+                ModSize = SysInfo.FormatBytes(bytes);
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "ModSettingsViewModel.UpdateModSize()", ex);
             }
         }
 
@@ -288,6 +320,18 @@ namespace Knossos.NET.ViewModels
         private void AddDependencyCommand()
         {
             DepItems.Add(new DependencyItemViewModel(this));
+        }
+
+        private void CompressCommand()
+        {
+            if(modJson != null && modJson.fullPath != string.Empty)
+                TaskViewModel.Instance?.CompressMod(modJson);
+        }
+
+        private void DecompressCommand()
+        {
+            if (modJson != null && modJson.fullPath != string.Empty)
+                TaskViewModel.Instance?.DecompressMod(modJson);
         }
     }
 }

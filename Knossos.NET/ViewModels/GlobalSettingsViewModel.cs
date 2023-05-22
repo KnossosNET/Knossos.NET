@@ -67,7 +67,9 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         public long maxDownloadSpeedIndex = 0;
         [ObservableProperty]
-        public int modCompression = 0;
+        public CompressionSettings modCompression = CompressionSettings.Manual;
+        [ObservableProperty]
+        public int compressionMaxParallelism = 4;
 
         /*VIDEO*/
         [ObservableProperty]
@@ -233,6 +235,7 @@ namespace Knossos.NET.ViewModels
             }
 
             ModCompression = Knossos.globalSettings.modCompression;
+            CompressionMaxParallelism = Knossos.globalSettings.compressionMaxParallelism;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -758,6 +761,7 @@ namespace Knossos.NET.ViewModels
             }
 
             Knossos.globalSettings.modCompression = ModCompression;
+            Knossos.globalSettings.compressionMaxParallelism = CompressionMaxParallelism;
 
             /* VIDEO */
             //Resolution
