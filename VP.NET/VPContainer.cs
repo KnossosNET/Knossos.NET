@@ -484,7 +484,7 @@ namespace VP.NET
             {
                 file.Seek(0, SeekOrigin.Begin);
                 BinaryReader br = new BinaryReader(file);
-                header.header = new string(br.ReadChars(4));
+                header.header = Encoding.ASCII.GetString(br.ReadBytes(4));
                 if(header.header != "VPVP")
                 {
                     throw new Exception("This is not a valid VP file: Header mismatch!");
@@ -565,8 +565,8 @@ namespace VP.NET
                     //Check if the file is compressed
                     vpStream.Seek(entry.offset,SeekOrigin.Begin);
                     BinaryReader br = new BinaryReader(vpStream);
-                    var header = new string(br.ReadChars(4));
-                    if(header == "LZ41")
+                    var header = Encoding.ASCII.GetString(br.ReadBytes(4));
+                    if (header == "LZ41")
                     {
                         vpfile.compressionInfo.header = CompressionHeader.LZ41;
                         vpStream.Seek(entry.size-12, SeekOrigin.Current);

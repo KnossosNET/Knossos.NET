@@ -21,6 +21,7 @@ using System.Reflection;
 using System.Reflection.PortableExecutable;
 using VP.NET;
 using System.Text;
+using System.Text.Encodings;
 
 namespace Knossos.NET.ViewModels
 {
@@ -142,10 +143,10 @@ namespace Knossos.NET.ViewModels
                         }
 
                         //Verify if it is compressed
-                        if (new string(br.ReadChars(4)) == "LZ41")
+                        if (Encoding.ASCII.GetString(br.ReadBytes(4)) == "LZ41")
                         {
                             FileInfo fi = new FileInfo(file);
-                            Info = fi.Name + " Files: " + ProgressCurrent + " / " + ProgressBarMax;
+                            Info = ProgressCurrent + " / " + ProgressBarMax + " " + fi.Name;
                             input.Seek(0, SeekOrigin.Begin);
                             var output = new FileStream(fi.FullName.ToLower().Replace(".lz4",string.Empty), FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                             if (!output.CanWrite)
@@ -268,10 +269,10 @@ namespace Knossos.NET.ViewModels
                         }
 
                         //Verify if it is compressed
-                        if (new string(br.ReadChars(4)) != "LZ41")
+                        if (Encoding.ASCII.GetString(br.ReadBytes(4)) != "LZ41")
                         {
                             FileInfo fi = new FileInfo(file);
-                            Info = fi.Name + " Files: " + ProgressCurrent + " / " + ProgressBarMax;
+                            Info = ProgressCurrent + " / " + ProgressBarMax + " " + fi.Name;
                             input.Seek(0, SeekOrigin.Begin);
                             var output = new FileStream(fi.FullName+".lz4", FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                             if(!output.CanWrite)
@@ -2131,10 +2132,10 @@ namespace Knossos.NET.ViewModels
 
                     var downloadProgress = (long? filesize, long bytesDownloaded, string speed, double? progressPercentage) =>
                     {
-                        if (progressPercentage.HasValue)
+                        if (progressPercentage.HasValue && filesize.HasValue)
                         {
                             ProgressCurrent = (float)progressPercentage.Value;
-                            Info = string.Format("{1}MB / {2}MB {0}", speed, bytesDownloaded / 1024 / 1024, filesize / 1024 / 1024);
+                            Info = SysInfo.FormatBytes(bytesDownloaded) + " / " + SysInfo.FormatBytes(filesize.Value) + " @ " + speed ;
                         }
 
                         if (cancellationTokenSource.IsCancellationRequested)

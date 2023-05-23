@@ -113,11 +113,27 @@ namespace Knossos.NET.ViewModels
             try
             {
                 long bytes = 0;
-                var files = Directory.GetFiles(modJson.fullPath, "*.*", SearchOption.AllDirectories);
-                foreach (var file in files)
+                if (modJson.id != "FS2")
                 {
-                    var fi = new FileInfo(file);
-                    bytes += fi.Length;
+                    var files = Directory.GetFiles(modJson.fullPath, "*.*", SearchOption.AllDirectories);
+                    foreach (var file in files)
+                    {
+                        var fi = new FileInfo(file);
+                        bytes += fi.Length;
+                    }
+                }
+                else
+                {
+                    var files = Directory.GetFiles(modJson.fullPath, "*.*").ToList();
+                    if(Directory.Exists(modJson.fullPath+Path.DirectorySeparatorChar+"data"))
+                    {
+                        files.AddRange(Directory.GetFiles(modJson.fullPath + Path.DirectorySeparatorChar + "data", "*.*", SearchOption.AllDirectories).ToList());
+                    }
+                    foreach (var file in files)
+                    {
+                        var fi = new FileInfo(file);
+                        bytes += fi.Length;
+                    }
                 }
                 ModSize = SysInfo.FormatBytes(bytes);
             }catch(Exception ex)

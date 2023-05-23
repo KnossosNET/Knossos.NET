@@ -578,7 +578,7 @@ namespace Knossos.NET
                                 installedMods.Add(modJson);
                                 if (modJson.id == "FS2" && modJson.type == "tc" && modJson.parent == "FS2")
                                 {
-                                    if (File.Exists(modJson.fullPath + Path.DirectorySeparatorChar + "root_fs2.vp"))
+                                    if (File.Exists(modJson.fullPath + Path.DirectorySeparatorChar + "root_fs2.vp") || File.Exists(modJson.fullPath + Path.DirectorySeparatorChar + "root_fs2.vpc"))
                                     {
                                         retailFs2RootFound = true;
                                         Log.Add(Log.LogSeverity.Information, "Knossos.FolderSearchRecursive", "Found FS2 Root Pack!");
