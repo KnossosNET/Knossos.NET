@@ -9,6 +9,7 @@ using System.Linq;
 using Avalonia.Threading;
 using System.IO;
 using System;
+using VP.NET;
 
 namespace Knossos.NET.ViewModels
 {
@@ -33,9 +34,9 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private string modSize = "0GB";
         [ObservableProperty]
-        private bool compression = false;
-        [ObservableProperty]
         private bool compressionAvalible = false;
+        [ObservableProperty]
+        private bool compressed = false;
         [ObservableProperty]
         private bool isDevMode = false;
 
@@ -50,7 +51,7 @@ namespace Knossos.NET.ViewModels
             this.modJson = modJson;
             modCardViewModel = modCard;
             isDevMode = modJson.devMode;
-            compression = modJson.modSettings.isCompressed;
+            compressed = modJson.modSettings.isCompressed;
             if(Knossos.globalSettings.modCompression != CompressionSettings.Disabled && !modJson.modSettings.isCompressed)
             {
                 compressionAvalible = true;
@@ -136,6 +137,8 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 ModSize = SysInfo.FormatBytes(bytes);
+                if (modJson.modSettings.isCompressed)
+                    ModSize += " (Compressed)";
             }catch(Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "ModSettingsViewModel.UpdateModSize()", ex);
@@ -308,13 +311,20 @@ namespace Knossos.NET.ViewModels
                 }
                 else
                 {
-                    MessageBox.Show(MainWindow.instance!, "Unable to get flag data from build " + fsoBuild + " It might be below the minimal version supported (3.8.1) or some other error ocurred.", "Invalid flag data", MessageBox.MessageBoxButtons.OK);
+                    Dispatcher.UIThread.InvokeAsync(async () =>
+                    {
+                        await MessageBox.Show(MainWindow.instance!, "Unable to get flag data from build " + fsoBuild + " It might be below the minimal version supported (3.8.1) or some other error ocurred.", "Invalid flag data", MessageBox.MessageBoxButtons.OK);
+                    });
+                    
                 }
             }
             else
             {
                 /* No valid build found, send message */
-                MessageBox.Show(MainWindow.instance!, "Unable to resolve FSO build dependency, download the correct one or manually select a FSO version. ", "Not engine build found", MessageBox.MessageBoxButtons.OK);
+                Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    await MessageBox.Show(MainWindow.instance!, "Unable to resolve FSO build dependency, download the correct one or manually select a FSO version. ", "Not engine build found", MessageBox.MessageBoxButtons.OK);
+                });
             }
         }
 
@@ -350,17 +360,74 @@ namespace Knossos.NET.ViewModels
             DepItems.Add(new DependencyItemViewModel(this));
         }
 
-        private void CompressCommand()
+        private async void CompressCommand()
         {
-            //TODO: add FSO version check and warning first
-            if(modJson != null && modJson.fullPath != string.Empty)
-                TaskViewModel.Instance?.CompressMod(modJson);
+            var cancel = false;
+            if(modJson!.devMode)
+            {
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    var result = await MessageBox.Show(MainWindow.instance!, "This mod is in devmode, do not compress a mod that have not been uploaded to nebula yet! This increases upload size and disk space on nebula. It is ok if you compress old versions that are already uploaded.", "Mod is in devmode", MessageBox.MessageBoxButtons.ContinueCancel);
+                    if (result != MessageBox.MessageBoxResult.Continue)
+                        cancel = true;
+                });
+            }
+
+            if (cancel)
+                return;
+
+            FsoBuild? fsoBuild = FsoPicker.GetSelectedFsoBuild();
+            if (fsoBuild == null)
+            {
+                foreach (var item in DepItems)
+                {
+                    var dep = item.GetModDependency();
+
+                    if (dep != null && Knossos.GetInstalledBuildsList(dep.id).Any())
+                    {
+                        fsoBuild = dep.SelectBuild();
+                        break;
+                    }
+                }
+            }
+
+            if (fsoBuild != null && SemanticVersion.Compare(fsoBuild.version,VPCompression.MinimumFSOVersion) < 0)
+            {
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    var result = await MessageBox.Show(MainWindow.instance!, "This mod currently resolves to FSO build: "+fsoBuild.version+" the minimum to fully support all features is: "+VPCompression.MinimumFSOVersion + ".\n 23.0.0 may work if the mod do not have loose files, older versions are not going to work.", "FSO Version below minimum", MessageBox.MessageBoxButtons.ContinueCancel);
+                    if (result != MessageBox.MessageBoxResult.Continue)
+                        cancel = true;
+                });
+            }
+
+            if (cancel)
+                return;
+
+            if (modJson != null && modJson.fullPath != string.Empty)
+            {
+                await TaskViewModel.Instance?.CompressMod(modJson)!;
+                if (modJson.modSettings.isCompressed)
+                {
+                    CompressionAvalible = false;
+                    Compressed = true;
+                }
+                await Task.Factory.StartNew(() => UpdateModSize());
+            }
         }
 
-        private void DecompressCommand()
+        private async void DecompressCommand()
         {
             if (modJson != null && modJson.fullPath != string.Empty)
-                TaskViewModel.Instance?.DecompressMod(modJson);
+            {
+                await TaskViewModel.Instance?.DecompressMod(modJson)!;
+                if (!modJson.modSettings.isCompressed)
+                {
+                    CompressionAvalible = true;
+                    Compressed = false;
+                }
+                await Task.Factory.StartNew(() => UpdateModSize());
+            }
         }
     }
 }

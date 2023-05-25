@@ -63,13 +63,13 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool forceSSE2 = false;
         [ObservableProperty]
-        public int maxConcurrentSubtasks = 3;
+        private int maxConcurrentSubtasks = 3;
         [ObservableProperty]
-        public long maxDownloadSpeedIndex = 0;
+        private long maxDownloadSpeedIndex = 0;
         [ObservableProperty]
-        public CompressionSettings modCompression = CompressionSettings.Manual;
+        private CompressionSettings modCompression = CompressionSettings.Manual;
         [ObservableProperty]
-        public int compressionMaxParallelism = 4;
+        private int compressionMaxParallelism = 4;
 
         /*VIDEO*/
         [ObservableProperty]

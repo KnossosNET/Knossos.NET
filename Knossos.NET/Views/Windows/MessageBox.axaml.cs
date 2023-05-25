@@ -12,7 +12,12 @@ namespace Knossos.NET.Views
             OK,
             OKCancel,
             YesNo,
-            YesNoCancel
+            YesNoCancel,
+            Continue,
+            ContinueCancel,
+            Details,
+            DetailsOKCancel,
+            DetailsContinueCancel
         }
 
         public enum MessageBoxResult
@@ -20,7 +25,9 @@ namespace Knossos.NET.Views
             OK,
             Cancel,
             Yes,
-            No
+            No,
+            Continue,
+            Details
         }
 
         public MessageBox()
@@ -56,7 +63,7 @@ namespace Knossos.NET.Views
                 }
             }
 
-            if (buttons == MessageBoxButtons.OK || buttons == MessageBoxButtons.OKCancel)
+            if (buttons == MessageBoxButtons.OK || buttons == MessageBoxButtons.OKCancel || buttons == MessageBoxButtons.DetailsOKCancel)
             {
                 AddButton("OK", MessageBoxResult.OK, true);
             }
@@ -67,9 +74,19 @@ namespace Knossos.NET.Views
                 AddButton("No", MessageBoxResult.No, true);
             }
 
-            if (buttons == MessageBoxButtons.OKCancel || buttons == MessageBoxButtons.YesNoCancel)
+            if (buttons == MessageBoxButtons.Continue || buttons == MessageBoxButtons.ContinueCancel || buttons == MessageBoxButtons.DetailsContinueCancel)
+            {
+                AddButton("Continue", MessageBoxResult.Continue);
+            }
+
+            if (buttons == MessageBoxButtons.OKCancel || buttons == MessageBoxButtons.YesNoCancel || buttons == MessageBoxButtons.ContinueCancel || buttons == MessageBoxButtons.DetailsOKCancel || buttons == MessageBoxButtons.DetailsContinueCancel)
             {
                 AddButton("Cancel", MessageBoxResult.Cancel, true);
+            }
+
+            if (buttons == MessageBoxButtons.Details || buttons == MessageBoxButtons.DetailsOKCancel || buttons == MessageBoxButtons.DetailsContinueCancel)
+            {
+                AddButton("Details", MessageBoxResult.Details);
             }
 
             var tcs = new TaskCompletionSource<MessageBoxResult>();

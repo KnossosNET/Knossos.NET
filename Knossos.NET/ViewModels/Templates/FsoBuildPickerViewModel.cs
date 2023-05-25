@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System.Collections.ObjectModel;
@@ -90,23 +91,8 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-
+        [ObservableProperty]
         private int buildSelectedIndex = 0;
-        private int BuildSelectedIndex
-        {
-            get
-            {
-                return buildSelectedIndex;
-            }
-            set
-            {
-                if (buildSelectedIndex != value)
-                {
-                    buildSelectedIndex = value;
-                    this.SetProperty(ref buildSelectedIndex, value);
-                }
-            }
-        }
 
         public FsoBuildPickerViewModel()
         {
@@ -291,8 +277,9 @@ namespace Knossos.NET.ViewModels
                 ComboBoxItem item = new ComboBoxItem();
                 item.Content = new FsoBuild(path);
                 item.Tag = "directexec";
+                item.IsSelected = true;
                 BuildItems.Add(item);
-                BuildSelectedIndex = BuildItems.IndexOf(item);
+                BuildSelectedIndex = BuildItems.IndexOf(item);  
             }
         }
 

@@ -27,13 +27,9 @@
 					<StackPanel>
 						<!--Compression-->
 						<Label Margin="0,5,0,0" FontWeight="Black" FontSize="20">DISK USAGE</Label>
-						<WrapPanel>
-							<Label Content="{Binding ModSize}"></Label>
-							<Label IsVisible="{Binding Compression}" Content="(Compression is ON)"></Label>
-							<Label IsVisible="{Binding !Compression}" Content="(Compression is OFF)"></Label>
-						</WrapPanel>
+						<Label Content="{Binding ModSize}"></Label>
 						<Button Margin="5" Background="Black" IsVisible="{Binding CompressionAvalible}" Command="{Binding CompressCommand}">Compress</Button>
-						<Button Margin="5" Background="Black" IsVisible="{Binding Compression}" Command="{Binding DecompressCommand}">Decompress</Button>
+						<Button Margin="5" Background="Black" IsVisible="{Binding Compressed}" Command="{Binding DecompressCommand}">Decompress</Button>
 						<!--FSO Build Settings -->
 						<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">FSO BUILD</Label>
 						<v:FsoBuildPickerView Content="{Binding FsoPicker}"/>

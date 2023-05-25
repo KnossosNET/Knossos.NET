@@ -12,6 +12,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Avalonia.Platform;
 using Avalonia;
+using VP.NET;
 
 namespace Knossos.NET
 {
@@ -123,8 +124,9 @@ namespace Knossos.NET
         {
             if (TaskViewModel.Instance!.IsSafeState() == false)
             {
-                await MessageBox.Show(MainWindow.instance!, "You can not launch a mod while other tasks are running, wait until they finish and try again.", "Tasks are running", MessageBox.MessageBoxButtons.OK);
-                return;
+                var result=await MessageBox.Show(MainWindow.instance!, "Other important tasks are running, it is recommended that you wait until they finish before launching the game because it may cause them to fail.\nIf you are absolutely sure those tasks cannot interfere you can continue.", "Tasks are running", MessageBox.MessageBoxButtons.ContinueCancel);
+                if(result != MessageBox.MessageBoxResult.Continue)
+                    return;
             }
 
             Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Launching Mod: " + mod.folderName);
@@ -363,6 +365,51 @@ namespace Knossos.NET
             else
             {
                 Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used FSO build : " + fsoBuild.version);
+                try
+                {
+                    if (SemanticVersion.Compare(fsoBuild.version, VPCompression.MinimumFSOVersion) < 0)
+                    {
+                        if (mod.modSettings.isCompressed)
+                        {
+                            var result = await MessageBox.Show(MainWindow.instance!, "This mod currently resolves to FSO build: " + fsoBuild.version + " and it is compressed, the minimum to fully support all compression features is: " + VPCompression.MinimumFSOVersion + ".\n23.0.0 may work if the mod do not have loose files, older versions are not going to work. Use a newer FSO version or uncompress this mod.", "FSO Version below minimum for compression", MessageBox.MessageBoxButtons.ContinueCancel);
+                            if (result != MessageBox.MessageBoxResult.Continue)
+                                return;
+                        }
+                        else
+                        {
+                            var compressedMods = string.Empty;
+                            if (mod.parent == "FS2")
+                            {
+                                var fs2 = Knossos.GetInstalledMod("FS2", "1.20.0");
+                                if (fs2 != null && fs2.modSettings.isCompressed)
+                                {
+                                    compressedMods += fs2 + ", ";
+                                }
+                            }
+                            var depMods = mod.GetModDependencyList();
+                            if (depMods != null)
+                            {
+                                foreach (var depMod in depMods)
+                                {
+                                    var m = depMod.SelectMod();
+                                    if (m != null && m.modSettings.isCompressed)
+                                    {
+                                        compressedMods += m + ", ";
+                                    }
+                                }
+                            }
+                            if (compressedMods != string.Empty)
+                            {
+                                var result = await MessageBox.Show(MainWindow.instance!, "This mod currently resolves to FSO build: " + fsoBuild.version + " and depends on mods: " + compressedMods + " that are currently compressed, the minimum to fully support all compression features is: " + VPCompression.MinimumFSOVersion + ".\n23.0.0 may work if the mod do not have loose files, older versions are not going to work. Use a newer FSO version or uncompress those mods.", "FSO Version below minimum for compression", MessageBox.MessageBoxButtons.ContinueCancel);
+                                if (result != MessageBox.MessageBoxResult.Continue)
+                                    return;
+                            }
+                        }
+                    }
+                }catch(Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", ex);
+                }
             }
 
             //Get full path for requested exec type

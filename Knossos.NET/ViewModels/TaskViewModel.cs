@@ -118,7 +118,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async void CompressMod(Mod mod)
+        public async Task CompressMod(Mod mod)
         {
             if (mod.type == "engine")
             {
@@ -137,7 +137,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async void DecompressMod(Mod mod)
+        public async Task DecompressMod(Mod mod)
         {
             if (mod.type == "engine")
             {

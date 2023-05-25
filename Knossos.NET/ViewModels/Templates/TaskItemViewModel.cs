@@ -600,9 +600,10 @@ namespace Knossos.NET.ViewModels
                     ProgressBarMax = vpFiles.Count()+1;
 
                     //Loose Files Compression
-                    if(Directory.Exists(mod.fullPath+Path.DirectorySeparatorChar+"data"))
+                    if(Directory.Exists(mod.fullPath+Path.DirectorySeparatorChar+"data") || mod.devMode)
                     {
-                        var allFilesInDataFolder = Directory.GetFiles(mod.fullPath + Path.DirectorySeparatorChar + "data", "*.*",SearchOption.AllDirectories).ToList();
+                        var searchDir = mod.devMode ? mod.fullPath : mod.fullPath + Path.DirectorySeparatorChar + "data";
+                        var allFilesInDataFolder = Directory.GetFiles(searchDir, "*.*",SearchOption.AllDirectories).ToList();
                         int skipped = 0;
                         //Filter
                         foreach(var fileInData in allFilesInDataFolder.ToList())
@@ -771,9 +772,10 @@ namespace Knossos.NET.ViewModels
                     ProgressBarMax = vpcFiles.Count() + 1;
 
                     //Loose Files Compression
-                    if (Directory.Exists(mod.fullPath + Path.DirectorySeparatorChar + "data"))
+                    if (Directory.Exists(mod.fullPath + Path.DirectorySeparatorChar + "data") || mod.devMode)
                     {
-                        var allFilesInDataFolder = Directory.GetFiles(mod.fullPath + Path.DirectorySeparatorChar + "data", "*.*", SearchOption.AllDirectories).ToList();
+                        var searchDir = mod.devMode ? mod.fullPath : mod.fullPath + Path.DirectorySeparatorChar + "data";
+                        var allFilesInDataFolder = Directory.GetFiles(searchDir, "*.*", SearchOption.AllDirectories).ToList();
                         int skipped = 0;
                         //Filter
                         foreach (var fileInData in allFilesInDataFolder.ToList())
@@ -1299,12 +1301,6 @@ namespace Knossos.NET.ViewModels
                     Info = "In Queue";
                     bool compressMod = false;
 
-                    //Todo add mod fso version checking
-                    if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.Always)
-                    {
-                        compressMod = true;
-                    }
-
                     //Set Mod card as "installing"
                     MainWindowViewModel.Instance?.NebulaModsView.SetInstalling(mod.id, cancellationTokenSource);
 
@@ -1315,6 +1311,24 @@ namespace Knossos.NET.ViewModels
                         if (cancellationTokenSource.IsCancellationRequested)
                         {
                             throw new TaskCanceledException();
+                        }
+                    }
+
+                    //Todo add mod fso version checking
+                    if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.Always)
+                    {
+                        compressMod = true;
+                    }
+                    if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.ModSupport)
+                    {
+                        try
+                        {
+                            var fso = mod.GetDependency("FSO");
+                            if (fso != null && (fso.version == null || fso.version.Contains(">=") || SemanticVersion.Compare(fso.version.Replace(">=", "").Replace("<", "").Replace(">", "").Trim(), VPCompression.MinimumFSOVersion) > 0))
+                                compressMod = true;
+                        }catch (Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Error,"Knossos.PlayMod()", ex);
                         }
                     }
 

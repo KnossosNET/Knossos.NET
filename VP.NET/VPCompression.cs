@@ -36,7 +36,7 @@ namespace VP.NET
         /// .json should be always protected, you do not want to compress the mod.json file do you?
         /// .eff are always way too small
         /// </summary>
-        public static List<string> ExtensionIgnoreList { get; set; } = new List<string> { ".ogg", ".wav", ".png", ".jpeg", ".json", ".eff", ".ini", ".vp", ".vpc", ".exe", ".dll", ".doc", ".docx", ".pdf", ".xls", ".xlsx", ".txt", ".so", ".appimage", ".token", ".mp4"/*, ".fc2", ".fs2", ".tbm", ".tbl"*/ };
+        public static List<string> ExtensionIgnoreList { get; set; } = new List<string> { ".ogg", ".wav", ".png", ".jpeg", ".json", ".eff", ".ini", ".vp", ".vpc", ".exe", ".dll", ".doc", ".docx", ".pdf", ".xls", ".xlsx", ".txt", ".so", ".appimage", ".token", ".mp4", ".7z"/*, ".fc2", ".fs2", ".tbm", ".tbl"*/ };
         /// <summary>
         /// Minimum size in bytes that a file has to have in order to compress it
         /// Default is 10240 bytes (10KB)
@@ -45,7 +45,7 @@ namespace VP.NET
         /// <summary>
         /// Minimum FSO version that supports all compression features
         /// </summary>
-        public static string MinimumFSOVersion { get; } = "23.1.0";
+        public static string MinimumFSOVersion { get; } = "23.1.0-202305242005273072";
 
         /// <summary>
         /// Compresses a source stream into a destination stream
