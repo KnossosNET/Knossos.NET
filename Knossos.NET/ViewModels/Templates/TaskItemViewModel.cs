@@ -148,7 +148,7 @@ namespace Knossos.NET.ViewModels
                             FileInfo fi = new FileInfo(file);
                             Info = ProgressCurrent + " / " + ProgressBarMax + " " + fi.Name;
                             input.Seek(0, SeekOrigin.Begin);
-                            var output = new FileStream(fi.FullName.ToLower().Replace(".lz4",string.Empty), FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                            var output = new FileStream(fi.FullName.ToLower().Replace(".lz41",string.Empty), FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                             if (!output.CanWrite)
                             {
                                 input.Dispose();
@@ -274,7 +274,7 @@ namespace Knossos.NET.ViewModels
                             FileInfo fi = new FileInfo(file);
                             Info = ProgressCurrent + " / " + ProgressBarMax + " " + fi.Name;
                             input.Seek(0, SeekOrigin.Begin);
-                            var output = new FileStream(fi.FullName+".lz4", FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                            var output = new FileStream(fi.FullName+".lz41", FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                             if(!output.CanWrite)
                             {
                                 input.Dispose();
@@ -297,7 +297,7 @@ namespace Knossos.NET.ViewModels
                                 //Roll back
                                 input.Dispose();
                                 output.Dispose();
-                                File.Delete(fi.FullName + ".lz4");
+                                File.Delete(fi.FullName + ".lz41");
                                 skippedCount++;
                             }
                         }
@@ -610,7 +610,7 @@ namespace Knossos.NET.ViewModels
                         {
                             var file = new FileInfo(fileInData);
 
-                            if (file.IsReadOnly || file.Length < VPCompression.MinimumSize || VPCompression.ExtensionIgnoreList.Contains(file.Extension.ToLower()) || file.Extension.ToLower() == ".lz4") 
+                            if (file.IsReadOnly || file.Length < VPCompression.MinimumSize || VPCompression.ExtensionIgnoreList.Contains(file.Extension.ToLower()) || file.Extension.ToLower() == ".lz41") 
                             { 
                                 if(file.Extension.ToLower() == ".vp")
                                 {
@@ -782,7 +782,7 @@ namespace Knossos.NET.ViewModels
                         {
                             var file = new FileInfo(fileInData);
 
-                            if (file.IsReadOnly || file.Extension.ToLower() != ".lz4")
+                            if (file.IsReadOnly || file.Extension.ToLower() != ".lz41")
                             {
                                 if (file.Extension.ToLower() == ".vpc")
                                 {
