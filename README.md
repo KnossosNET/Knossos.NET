@@ -11,8 +11,9 @@ https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.14-wind
 <br /><br />
 **The current status:**<br />
 <br />
--Version 0.0.4 - Most of the user functions are in, except for dev mode<br />
+-Version 0.0.7 - Most of the user functions are in, except for dev mode<br />
 -Working in Windows and Linux<br />
+-Mod compression support<br />
 -MacOS version is untested<br />
 -PxoAPI implementation is very basic and WIP<br />
 -Mod details is missing features, waiting for Avalonia 0.11 to see what to do<br />
@@ -30,6 +31,11 @@ SystemCMD(Settings) > Global CMD > User/Mod CMD
 -Avalonia Extension for Visual Studio https://marketplace.visualstudio.com/items?itemName=AvaloniaTeam.AvaloniaVS<br />
 <br />
 <br />
+**Included Libs:**<br />
+-VP.NET<br />
+-IonKiwi.lz4 (modified for LZ41 support)<br />
+<br />
+<br />
 **Current NuGet Packages:**<br />
 -Avalonia 0.10.19<br />
 -Avalonia.Desktop 0.10.19<br />
@@ -40,6 +46,7 @@ SystemCMD(Settings) > Global CMD > User/Mod CMD
 -SharpCompress 0.33.0
 <br />
 <br />
+
 **Compiling for Linux and Mac:**<br />
 -Right click on the project -> Publish<br />
 -Export to folder<br />
