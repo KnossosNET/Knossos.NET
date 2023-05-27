@@ -128,11 +128,11 @@ namespace Knossos.NET.ViewModels
             {
                 var cancelSource = new CancellationTokenSource();
                 var newTask = new TaskItemViewModel();
-                TaskList.Add(newTask);
-                taskQueue.Enqueue(newTask);
-                await Task.Run(async() => {
-                    await newTask.CompressMod(mod, cancelSource);
+                await Dispatcher.UIThread.InvokeAsync( () => {
+                    TaskList.Add(newTask);
+                    taskQueue.Enqueue(newTask);
                 });
+                await newTask.CompressMod(mod, cancelSource);
                 cancelSource.Dispose();
             }
         }
@@ -147,11 +147,11 @@ namespace Knossos.NET.ViewModels
             {
                 var cancelSource = new CancellationTokenSource();
                 var newTask = new TaskItemViewModel();
-                TaskList.Add(newTask);
-                taskQueue.Enqueue(newTask);
-                await Task.Run(async () => {
-                    await newTask.DecompressMod(mod, cancelSource);
+                await Dispatcher.UIThread.InvokeAsync( () => {
+                    TaskList.Add(newTask);
+                    taskQueue.Enqueue(newTask);
                 });
+                await newTask.DecompressMod(mod, cancelSource);
                 cancelSource.Dispose();
             }
         }

@@ -45,7 +45,7 @@ namespace VP.NET
         /// <summary>
         /// Minimum FSO version that supports all compression features
         /// </summary>
-        public static string MinimumFSOVersion { get; } = "23.1.0-202305242005273072";
+        public static string MinimumFSOVersion { get; } = "23.1.0-20230527";
 
         /// <summary>
         /// Compresses a source stream into a destination stream

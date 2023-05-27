@@ -257,61 +257,65 @@ namespace Knossos.NET.ViewModels
 
                     Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.CompressLosseFiles()", "Starting to compress loose files" );
 
-                    await Parallel.ForEachAsync(filePaths, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism }, async (file, token) =>
-                    {
-                        var input = new FileStream(file,FileMode.Open,FileAccess.Read, FileShare.Read);
-                        BinaryReader br = new BinaryReader(input);
-
-                        if (!input.CanRead)
+                    await Task.Run(async () => {
+                        await Parallel.ForEachAsync(filePaths, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism }, async (file, token) =>
                         {
-                            input.Dispose();
-                            throw new TaskCanceledException();
-                        }
+                            var input = new FileStream(file,FileMode.Open,FileAccess.Read, FileShare.Read);
+                            BinaryReader br = new BinaryReader(input);
 
-                        //Verify if it is compressed
-                        if (Encoding.ASCII.GetString(br.ReadBytes(4)) != "LZ41")
-                        {
-                            FileInfo fi = new FileInfo(file);
-                            Info = ProgressCurrent + " / " + ProgressBarMax + " " + fi.Name;
-                            input.Seek(0, SeekOrigin.Begin);
-                            var output = new FileStream(fi.FullName+".lz41", FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-                            if(!output.CanWrite)
+                            if (!input.CanRead)
                             {
                                 input.Dispose();
-                                output.Dispose();
                                 throw new TaskCanceledException();
                             }
-                            
-                            var compressedSize = await Task.Run(async () => await VPCompression.CompressStream(input,output));
-                            output.Dispose();
-                            if(compressedSize < input.Length)
+
+                            //Verify if it is compressed
+                            if (Encoding.ASCII.GetString(br.ReadBytes(4)) != "LZ41")
                             {
-                                //Delete original
-                                input.Dispose();
+                                FileInfo fi = new FileInfo(file);
+                                await Dispatcher.UIThread.InvokeAsync(() => {
+                                    Info = ProgressCurrent + " / " + ProgressBarMax + " " + fi.Name;
+                                });
+                                input.Seek(0, SeekOrigin.Begin);
+                                var output = new FileStream(fi.FullName+".lz41", FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                                if(!output.CanWrite)
+                                {
+                                    input.Dispose();
+                                    output.Dispose();
+                                    throw new TaskCanceledException();
+                                }
+                            
+                                var compressedSize = await VPCompression.CompressStream(input,output);
                                 output.Dispose();
-                                File.Delete(file);
-                                compressedCount++;
+                                if(compressedSize < input.Length)
+                                {
+                                    //Delete original
+                                    input.Dispose();
+                                    output.Dispose();
+                                    File.Delete(file);
+                                    compressedCount++;
+                                }
+                                else
+                                {
+                                    //Roll back
+                                    input.Dispose();
+                                    output.Dispose();
+                                    File.Delete(fi.FullName + ".lz41");
+                                    skippedCount++;
+                                }
                             }
                             else
                             {
-                                //Roll back
-                                input.Dispose();
-                                output.Dispose();
-                                File.Delete(fi.FullName + ".lz41");
                                 skippedCount++;
                             }
-                        }
-                        else
-                        {
-                            skippedCount++;
-                        }
-                        await input.DisposeAsync();
-                        ProgressCurrent++;
+                            await input.DisposeAsync();
+                            ProgressCurrent++;
 
-                        if (cancellationTokenSource.IsCancellationRequested)
-                        {
-                            throw new TaskCanceledException();
-                        }
+                            if (cancellationTokenSource.IsCancellationRequested)
+                            {
+                                throw new TaskCanceledException();
+                            }
+                        });
                     });
 
                     if (cancellationTokenSource.IsCancellationRequested)
@@ -390,9 +394,12 @@ namespace Knossos.NET.ViewModels
 
                     Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.DecompressVP()", "Starting to decompress VP file: " + vpFile.Name);
 
-                    var vp = new VPContainer(vpFile.FullName);
-                    vp.DisableCompression();
-                    await Task.Run(async () => await vp.SaveAsAsync(vpFile.FullName.ToLower().Replace(".vpc", ".vp"), compressionCallback, cancellationTokenSource));
+                    await Task.Run(async () => {
+                        var vp = new VPContainer();
+                        await vp.LoadVP(vpFile.FullName);
+                        vp.DisableCompression();
+                        await vp.SaveAsAsync(vpFile.FullName.ToLower().Replace(".vpc", ".vp"), compressionCallback, cancellationTokenSource);
+                    });
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
@@ -476,9 +483,12 @@ namespace Knossos.NET.ViewModels
 
                     Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.CompressVP()", "Starting to compress VP file: " + vpFile.Name);
 
-                    var vp = new VPContainer(vpFile.FullName);
-                    vp.EnableCompression();
-                    await Task.Run(async () => await vp.SaveAsAsync(vpFile.FullName + "c", compressionCallback, cancellationTokenSource));
+                    await Task.Run(async() => {
+                        var vp = new VPContainer();
+                        await vp.LoadVP(vpFile.FullName);
+                        vp.EnableCompression();
+                        await vp.SaveAsAsync(vpFile.FullName + "c", compressionCallback, cancellationTokenSource);
+                    });
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
@@ -535,9 +545,8 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void compressionCallback(string filename, int maxFiles)
+        private async void compressionCallback(string filename, int maxFiles)
         {
-            ProgressBarMax = maxFiles;
             if (filename != string.Empty)
             {
                 ProgressCurrent++;
@@ -546,7 +555,10 @@ namespace Knossos.NET.ViewModels
             {
                 ProgressCurrent = 0;
             }
-            Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename ;
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                ProgressBarMax = maxFiles;
+                Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+            });
         }
 
         public async Task<bool> CompressMod(Mod mod, CancellationTokenSource? cancelSource = null, bool isSubTask = false)
@@ -567,7 +579,9 @@ namespace Knossos.NET.ViewModels
                     }
                     
                     ShowProgressText = false;
-                    TaskRoot.Add(this);
+                    await Dispatcher.UIThread.InvokeAsync(() => {
+                        TaskRoot.Add(this);
+                    });
                     ProgressBarMin = 0;
                     ProgressCurrent = 0;
                     Info = "In Queue";
@@ -1612,7 +1626,10 @@ namespace Knossos.NET.ViewModels
                         }
 
                         var cpTask = new TaskItemViewModel();
-                        TaskList.Insert(0, cpTask);
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            TaskList.Insert(0, cpTask);
+                        });
                         await cpTask.CompressMod(mod, cancellationTokenSource, true);
                         ProgressCurrent++;
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
