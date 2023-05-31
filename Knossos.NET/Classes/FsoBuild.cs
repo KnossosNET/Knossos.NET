@@ -654,7 +654,7 @@ namespace Knossos.NET.Models
                 return false;
             }
 
-            if (arch == FsoExecArch.arm64 && SysInfo.CpuArch != "Armv64")
+            if (arch == FsoExecArch.arm64 && SysInfo.CpuArch != "Arm64")
             {
                 if (modpath != string.Empty)
                     Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
