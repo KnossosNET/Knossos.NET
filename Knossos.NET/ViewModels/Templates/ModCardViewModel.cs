@@ -123,7 +123,16 @@ namespace Knossos.NET.ViewModels
             {
                 if (modVersions[activeVersionIndex].installed && !modVersions[activeVersionIndex].devMode && !UpdateAvalible)
                 {
-                    if (modVersions[activeVersionIndex].GetMissingDependenciesList().Any())
+                    var missingDeps = modVersions[activeVersionIndex].GetMissingDependenciesList();
+                    foreach (var dependency in missingDeps.ToList())
+                    {
+                        //If we are missing the FSO dep and the user selected a custom build, ignore it
+                        if (modVersions[activeVersionIndex].modSettings.customBuildId != null && dependency.id == "FSO")
+                        {
+                            missingDeps.Remove(dependency);
+                        }
+                    }
+                    if (missingDeps.Any())
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {

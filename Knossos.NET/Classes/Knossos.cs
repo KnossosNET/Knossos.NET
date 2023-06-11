@@ -134,24 +134,33 @@ namespace Knossos.NET
             /* Check the dependencies and stop if there are unresolved ones */
             var missingDeps = mod.GetMissingDependenciesList();
             var errorMsg = string.Empty;
-            foreach (var dependency in missingDeps)
+
+            foreach (var dependency in missingDeps.ToList())
             {
-                Log.Add(Log.LogSeverity.Warning, "Knossos.PlayMod()", "Unable to resolve dependency : " + dependency.id + " - " + dependency.version);
-                errorMsg += "\n" + "Unable to resolve dependency : " + dependency.id + " - " + dependency.version;
-                if (dependency.packages != null)
+                //If we are missing the FSO dep and the user selected a custom build, ignore it
+                if (mod.modSettings.customBuildId != null && dependency.id == "FSO")
                 {
-                    var selected = dependency.SelectMod();
-                    foreach (string okg in dependency.packages)
+                    missingDeps.Remove(dependency);
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Warning, "Knossos.PlayMod()", "Unable to resolve dependency : " + dependency.id + " - " + dependency.version);
+                    errorMsg += "\n" + "Unable to resolve dependency : " + dependency.id + " - " + dependency.version;
+                    if (dependency.packages != null)
                     {
-                        if (selected != null)
+                        var selected = dependency.SelectMod();
+                        foreach (string okg in dependency.packages)
                         {
-                            Log.Add(Log.LogSeverity.Warning, "Knossos.PlayMod()", "Missing Package for : " + dependency.id + " - " + selected.version + " - PKG NAME: " + okg);
-                            errorMsg += "\n" + "Missing Package for : " + dependency.id + " - " + selected.version + " - PKG NAME: " + okg;
-                        }
-                        else
-                        {
-                            Log.Add(Log.LogSeverity.Warning, "Knossos.PlayMod()", "Missing Package for : " + dependency.id + " - PKG NAME: " + okg);
-                            errorMsg += "\n" + "Missing Package for : " + dependency.id + " - PKG NAME: " + okg;
+                            if (selected != null)
+                            {
+                                Log.Add(Log.LogSeverity.Warning, "Knossos.PlayMod()", "Missing Package for : " + dependency.id + " - " + selected.version + " - PKG NAME: " + okg);
+                                errorMsg += "\n" + "Missing Package for : " + dependency.id + " - " + selected.version + " - PKG NAME: " + okg;
+                            }
+                            else
+                            {
+                                Log.Add(Log.LogSeverity.Warning, "Knossos.PlayMod()", "Missing Package for : " + dependency.id + " - PKG NAME: " + okg);
+                                errorMsg += "\n" + "Missing Package for : " + dependency.id + " - PKG NAME: " + okg;
+                            }
                         }
                     }
                 }
