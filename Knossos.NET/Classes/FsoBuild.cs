@@ -85,17 +85,17 @@ namespace Knossos.NET.Models
                     }
                     else
                     {
-                        version = "99.99.99" + SysInfo.GetTimestamp(DateTime.Now);
+                        version = "99.99.99-" + SysInfo.GetTimestamp(DateTime.Now);
                     }
                 }
                 else
                 {
-                    version = "99.99.99" + SysInfo.GetTimestamp(DateTime.Now);
+                    version = "99.99.99-" + SysInfo.GetTimestamp(DateTime.Now);
                 }
             }
             catch
             {
-                version = "99.99.99" + SysInfo.GetTimestamp(DateTime.Now);
+                version = "99.99.99-" + SysInfo.GetTimestamp(DateTime.Now);
             }
             folderPath = directExecpath;
             stability = FsoStability.Custom;
