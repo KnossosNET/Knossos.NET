@@ -97,7 +97,19 @@ namespace Knossos.NET.Models
             {
                 version = "99.99.99-" + SysInfo.GetTimestamp(DateTime.Now);
             }
-            folderPath = directExecpath;
+            try
+            {
+                FileInfo fi = new FileInfo(directExecpath);
+                if(fi != null && fi.Directory != null)
+                    folderPath = fi.Directory.FullName;
+                else
+                    folderPath = directExecpath;
+            }
+            catch
+            {
+                Log.Add(Log.LogSeverity.Error,"FsoBuid()","Unable to determine file folder for "+ directExecpath);
+                folderPath = directExecpath;
+            }
             stability = FsoStability.Custom;
             date = DateTime.Now.ToString();
             directExec = directExecpath;
