@@ -213,143 +213,31 @@ namespace Knossos.NET.Models
             }
 
             var validExecs = executables.Where(b => b.isValid && b.type == type);
-            var candidates = new List<FsoFile>();
 
-            foreach (FsoFile file in validExecs)
+            if(validExecs.Any())
             {
-                switch(file.arch)
+                foreach(var exe in validExecs)
                 {
-                    case FsoExecArch.x64_avx2:
-                        if (SysInfo.CpuArch == "X64" && SysInfo.CpuAVX2)
+                    if (Knossos.globalSettings.forceSSE2)
+                    {
+                        if (exe.arch == FsoExecArch.x64 || exe.arch == FsoExecArch.x86)
                         {
-                            candidates.Add(file);
+                            if (exe.score < 200)
+                                exe.score += 200;
                         }
-                        break;
-                    case FsoExecArch.x64_avx:
-                        if (SysInfo.CpuArch == "X64" && SysInfo.CpuAVX)
+                    }
+                    else
+                    {
+                        if (exe.arch == FsoExecArch.x64 || exe.arch == FsoExecArch.x86)
                         {
-                            candidates.Add(file);
+                            if (exe.score > 200)
+                                exe.score -= 200;
                         }
-                        break;
-                    case FsoExecArch.x64:
-                        if(SysInfo.CpuArch == "X64")
-                        {
-                            candidates.Add(file);
-                        }
-                        break;
-                    case FsoExecArch.x86_avx2:
-                        if ((SysInfo.CpuArch == "X86" || SysInfo.CpuArch == "X64") && SysInfo.CpuAVX2)
-                        {
-                            candidates.Add(file);
-                        }
-                        break;
-                    case FsoExecArch.x86_avx:
-                        if ((SysInfo.CpuArch == "X86" || SysInfo.CpuArch == "X64") && SysInfo.CpuAVX)
-                        {
-                            candidates.Add(file);
-                        }
-                        break;
-                    case FsoExecArch.x86:
-                        if (SysInfo.CpuArch == "X86" || SysInfo.CpuArch == "X64")
-                        {
-                            candidates.Add(file);
-                        }
-                        break;
-                    case FsoExecArch.arm64:
-                        if (SysInfo.CpuArch == "Arm64")
-                        {
-                            return folderPath + file.filename;
-                        }
-                        break;
-                    case FsoExecArch.arm32:
-                        if (SysInfo.CpuArch == "Arm" || SysInfo.CpuArch == "Armv6")
-                        {
-                            return folderPath + file.filename;
-                        }
-                        break;
-
-                    case FsoExecArch.other:
-                        //Unsupported
-                        break;
+                    }
                 }
-                
+                validExecs = validExecs.OrderByDescending(b => b.score);
+                return folderPath + validExecs.ToArray()[0].filename;
             }
-
-            /*
-                Implemented only for x86 and x86_64
-            */
-            if (candidates.Any())
-            {
-                //Well that was easy
-                if(candidates.Count() == 1)
-                {
-                    return folderPath + candidates[0].filename;
-                }
-
-                var fileX64 = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x64);
-                var fileX64AVX = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x64_avx);
-                var fileX64AVX2 = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x64_avx2);
-
-                var fileX86 = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x86);
-                var fileX86AVX = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x86_avx);
-                var fileX86AVX2 = candidates.FirstOrDefault(f => f.arch == FsoExecArch.x86_avx2);
-
-                if (SysInfo.CpuArch == "X64")
-                {
-                    //Try to force the SSE2 build
-                    if (Knossos.globalSettings.forceSSE2 && fileX64 != null)
-                    {
-                        return folderPath + fileX64.filename;
-                    }
-
-                    //AVX2
-                    if (SysInfo.CpuAVX2 && fileX64AVX2 != null)
-                    {
-                        return folderPath + fileX64AVX2.filename;
-                    }
-
-                    //AVX
-                    if (SysInfo.CpuAVX && fileX64AVX != null)
-                    {
-                        return folderPath + fileX64AVX.filename;
-                    }
-
-                    //SSE2
-                    if (fileX64 != null)
-                    {
-                        return folderPath + fileX64.filename;
-                    }
-                }
-
-                //If we are still here this is a x86 cpu or a x64 one with a build with only x86 files
-                if(SysInfo.CpuArch == "X86" || SysInfo.CpuArch == "X64")
-                {
-                    //Try to force the SSE2 build
-                    if (Knossos.globalSettings.forceSSE2 && fileX86 != null)
-                    {
-                        return folderPath + fileX86.filename;
-                    }
-
-                    //AVX2
-                    if (SysInfo.CpuAVX2 && fileX86AVX2 != null)
-                    {
-                        return folderPath + fileX86AVX2.filename;
-                    }
-
-                    //AVX
-                    if (SysInfo.CpuAVX && fileX86AVX != null)
-                    {
-                        return folderPath + fileX86AVX.filename;
-                    }
-
-                    //SSE2
-                    if (fileX86 != null)
-                    {
-                        return folderPath + fileX86.filename;
-                    }
-                }
-            }
-
             return null;
         }
 
@@ -580,7 +468,8 @@ namespace Knossos.NET.Models
         public FsoExecType type;
         public FsoExecArch arch;
         public FsoExecEnvironment env;
-        public bool isValid;
+        public bool isValid = false;
+        internal int score = 0;
 
         public FsoFile(string filename, string modpath, FsoExecType type, FsoExecArch arch, FsoExecEnvironment env)
         {
@@ -588,93 +477,311 @@ namespace Knossos.NET.Models
             this.type = type;
             this.arch = arch;
             this.env = env;
-            if(arch == FsoExecArch.other || env == FsoExecEnvironment.Unknown || type == FsoExecType.Unknown)
-            {
-                isValid = false;
-            }
-            else
-            {
-                isValid = IsValid(modpath);
-            }
+            this.score = DetermineScore(modpath);
+            if(score > 0)
+                isValid = true;
         }
 
         /*
-            Checks if the file actually exist,
-            if the OS system matchs and if the cpu the arch is compatible
-        */
-        private bool IsValid(string modpath)
+            Determine FSO File score based on OS and CPU Arch
+         */
+        private int DetermineScore(string modpath)
         {
+            int score = 0;
+            /* First the cases that are an instant 0 */
+            if (arch == FsoExecArch.other || env == FsoExecEnvironment.Unknown || type == FsoExecType.Unknown)
+            {
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + modpath + filename + " has an unknown cpu arch, build or enviroment type in json.");
+                return 0;
+            }
+
             if (modpath != string.Empty && !File.Exists(modpath + filename))
             {
-                Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " does not exist!");
-                return false;
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + modpath + filename + " does not exist!");
+                return 0;
             }
 
-            if(env == FsoExecEnvironment.Windows && !SysInfo.IsWindows || env == FsoExecEnvironment.Linux && !SysInfo.IsLinux || env == FsoExecEnvironment.Mac && !SysInfo.IsMacOS)
-            {
-                if(modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this OS. Detected: "+env);
-                return false;
-            }
-
-            if (arch == FsoExecArch.x86 && SysInfo.CpuArch != "X86" && SysInfo.CpuArch != "X64")
+            if (env == FsoExecEnvironment.Windows && !SysInfo.IsWindows || env == FsoExecEnvironment.Linux && !SysInfo.IsLinux || env == FsoExecEnvironment.Mac && !SysInfo.IsMacOS)
             {
                 if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: "+ SysInfo.CpuArch);
-                return false;
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + modpath + filename + " is not valid for this OS. Detected: " + env);
+                return 0;
             }
 
-            if (arch == FsoExecArch.x64 && (SysInfo.CpuArch != "X64"))
+            /* Calculate the score, keep in mind in Windows and MAC x86 can run on x64 and X86/X64 can run on ARM64 */
+            /* No support for 32 bits ARM on Windows/Mac */
+            if(SysInfo.IsWindows || SysInfo.IsMacOS)
             {
-                if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
-                return false;
+                switch (arch)
+                {
+                    case FsoExecArch.x64_avx2:
+                        switch(SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                score += SysInfo.CpuAVX2 ? 100 : 0;
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                score += 50;
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.x64_avx:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                score += SysInfo.CpuAVX ? 90 : 0;
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                score += 45;
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.x64:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                score += 80;
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                score += 60; //Non AVX may be safer or faster for this case
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.x86_avx2:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                score += SysInfo.CpuAVX2 ? 50 : 0;
+                                break;
+                            case "X86":
+                                score += SysInfo.CpuAVX2 ? 100 : 0;
+                                break;
+                            case "Arm64":
+                                score += 25;
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.x86_avx:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                score += SysInfo.CpuAVX ? 45 : 0;
+                                break;
+                            case "X86":
+                                score += SysInfo.CpuAVX ? 90 : 0;
+                                break;
+                            case "Arm64":
+                                score += 15;
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.x86:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                score += SysInfo.CpuAVX ? 40 : 0;
+                                break;
+                            case "X86":
+                                score += SysInfo.CpuAVX ? 80 : 0;
+                                break;
+                            case "Arm64":
+                                score += 30; //Non AVX may be safer or faster for this case
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.arm64:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                score += 100;
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.arm32:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                score += 100;
+                                break;
+                        }
+                        break;
+                    default: 
+                        Log.Add(Log.LogSeverity.Error, "FsoFile.DetermineScore", "FsoFile.DetermineScore() is missing the case for: " + arch);
+                        break;
+                }
             }
-
-            if (arch == FsoExecArch.x86_avx2 && ((SysInfo.CpuArch != "X86" && SysInfo.CpuArch != "X64") || !SysInfo.CpuAVX2))
+            else
             {
-                if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
-                return false;
+                //Linux
+                switch (arch)
+                {
+                    case FsoExecArch.x64_avx2:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                score += SysInfo.CpuAVX2 ? 100 : 0;
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.x64_avx:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                score += SysInfo.CpuAVX ? 90 : 0;
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.x64:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                score += 80;
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.x86_avx2:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                break;
+                            case "X86":
+                                score += SysInfo.CpuAVX2 ? 100 : 0;
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.x86_avx:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                break;
+                            case "X86":
+                                score += SysInfo.CpuAVX ? 90 : 0;
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.x86:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                break;
+                            case "X86":
+                                score += SysInfo.CpuAVX ? 80 : 0;
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.arm64:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                score += 100;
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.arm32:
+                        switch (SysInfo.CpuArch)
+                        {
+                            case "X64":
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                score += 100;
+                                break;
+                        }
+                        break;
+                    default:
+                        Log.Add(Log.LogSeverity.Error, "FsoFile.DetermineScore", "FsoFile.DetermineScore() is missing the case for: " + arch);
+                        break;
+                }
             }
 
-            if (arch == FsoExecArch.x86_avx && ((SysInfo.CpuArch != "X86" && SysInfo.CpuArch != "X64" ) || !SysInfo.CpuAVX))
-            {
-                if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
-                return false;
-            }
-
-            if (arch == FsoExecArch.x64_avx2 && (SysInfo.CpuArch != "X64" || !SysInfo.CpuAVX2))
-            {
-                if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
-                return false;
-            }
-
-            if (arch == FsoExecArch.x64_avx && SysInfo.CpuArch != "X64" && !SysInfo.CpuAVX)
-            {
-                if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
-                return false;
-            }
-
-            if (arch == FsoExecArch.arm32 && SysInfo.CpuArch != "Armv6" && SysInfo.CpuArch != "Arm")
-            {
-                if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
-                return false;
-            }
-
-            if (arch == FsoExecArch.arm64 && SysInfo.CpuArch != "Arm64")
-            {
-                if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.CheckValidity", "File: " + modpath + filename + " is not valid for this CPU. Detected: " + arch + " SysInfo: " + SysInfo.CpuArch);
-                return false;
-            }
-
-            return true;
+            return score;
         }
     }
-
 }
