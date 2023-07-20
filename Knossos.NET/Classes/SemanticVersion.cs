@@ -16,47 +16,57 @@ namespace Knossos.NET.Classes
 
         public SemanticVersion(string version)
         {
-            if(version == null)
+            try
             {
-                throw new ArgumentNullException("version can not be null");
-            }
-            if(version.Trim().Length == 0)
-            {
-                major = 0;
-                minor = 0;
-                revision = 0;
-                prerelease = null;
-            }
-            else
-            {
-                string[] parts = version.Replace(" ","").Split('-')[0].Split('.');
-
-                if (parts.Length == 3)
+                if (version == null)
                 {
-                    try
+                    throw new ArgumentNullException("version can not be null");
+                }
+                if (version.Trim().Length == 0)
+                {
+                    major = 0;
+                    minor = 0;
+                    revision = 0;
+                    prerelease = null;
+                }
+                else
+                {
+                    string[] parts = version.Replace(" ", "").Split('-')[0].Split('.');
+
+                    if (parts.Length == 3)
                     {
-                        major = int.Parse(parts[0]);
-                        minor = int.Parse(parts[1]);
-                        revision = int.Parse(parts[2]);
+                        try
+                        {
+                            major = int.Parse(parts[0]);
+                            minor = int.Parse(parts[1]);
+                            revision = int.Parse(parts[2]);
+                        }
+                        catch
+                        {
+                            throw new Exception("version has a invalid semantic format: " + version);
+                        }
                     }
-                    catch
+                    else
                     {
                         throw new Exception("version has a invalid semantic format: " + version);
                     }
-                }
-                else
-                {
-                    throw new Exception("version has a invalid semantic format: " + version);
-                }
 
-                if (version.Contains("-"))
-                {
-                    prerelease = version.Replace(" ", "").Split('-')[1];
+                    if (version.Contains("-"))
+                    {
+                        prerelease = version.Replace(" ", "").Split('-')[1];
+                    }
+                    else
+                    {
+                        prerelease = null;
+                    }
                 }
-                else
-                {
-                    prerelease = null;
-                }
+            }catch(Exception e) 
+            {
+                major=0;
+                minor = 0;
+                revision = 0;
+                prerelease = null;
+                Log.Add(Log.LogSeverity.Error, "SemanticVersion(string version)",e);
             }
         }
 
@@ -136,62 +146,69 @@ namespace Knossos.NET.Classes
         */
         public static bool SastifiesDependency(string? dependencyVersion, SemanticVersion version)
         {
-            /* If dependencyversion is null it means any version will do and the mod will use the newerest installed version avalible */
-            if (dependencyVersion == null)
+            try
             {
-                return true;
-            }
-            
-            if (dependencyVersion.Contains("~"))
-            {
-                var versionDep= new SemanticVersion(dependencyVersion.Replace("~", ""));
-                /* major and minor has to math, revision needs to be equal or superior*/
-                if(version.major == versionDep.major && version.minor == versionDep.minor && version.revision >= versionDep.revision)
+                /* If dependencyversion is null it means any version will do and the mod will use the newerest installed version avalible */
+                if (dependencyVersion == null)
                 {
-                    if (Compare(version, versionDep) >= 0)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            if(dependencyVersion.Contains(">="))
-            {
-                var versionDep = new SemanticVersion(dependencyVersion.Replace(">=", ""));
-                /* major minor and revision needs to be equal or superior*/
-                if (version.major >= versionDep.major || version.major == versionDep.major && version.minor >= versionDep.minor || version.major == versionDep.major && version.minor == versionDep.minor && version.revision >= versionDep.revision)
-                {
-                    if (Compare(version, versionDep) >= 0)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
 
-                return false;
-            }
-
-            if (dependencyVersion.Contains("<="))
-            {
-                var versionDep = new SemanticVersion(dependencyVersion.Replace("<=", ""));
-                /* major minor and revision needs to be equal or inferior*/
-                if (version.major <= versionDep.major || version.major == versionDep.major && version.minor <= versionDep.minor || version.major == versionDep.major && version.minor == versionDep.minor && version.revision <= versionDep.revision)
+                if (dependencyVersion.Contains("~"))
                 {
-                    if (Compare(version, versionDep) <= 0)
+                    var versionDep = new SemanticVersion(dependencyVersion.Replace("~", ""));
+                    /* major and minor has to math, revision needs to be equal or superior*/
+                    if (version.major == versionDep.major && version.minor == versionDep.minor && version.revision >= versionDep.revision)
                     {
-                        return true;
+                        if (Compare(version, versionDep) >= 0)
+                        {
+                            return true;
+                        }
                     }
+                    return false;
+                }
+
+                if (dependencyVersion.Contains(">="))
+                {
+                    var versionDep = new SemanticVersion(dependencyVersion.Replace(">=", ""));
+                    /* major minor and revision needs to be equal or superior*/
+                    if (version.major >= versionDep.major || version.major == versionDep.major && version.minor >= versionDep.minor || version.major == versionDep.major && version.minor == versionDep.minor && version.revision >= versionDep.revision)
+                    {
+                        if (Compare(version, versionDep) >= 0)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
+                if (dependencyVersion.Contains("<="))
+                {
+                    var versionDep = new SemanticVersion(dependencyVersion.Replace("<=", ""));
+                    /* major minor and revision needs to be equal or inferior*/
+                    if (version.major <= versionDep.major || version.major == versionDep.major && version.minor <= versionDep.minor || version.major == versionDep.major && version.minor == versionDep.minor && version.revision <= versionDep.revision)
+                    {
+                        if (Compare(version, versionDep) <= 0)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
+                if (Compare(version, new SemanticVersion(dependencyVersion)) == 0)
+                {
+                    return true;
                 }
 
                 return false;
-            }
-
-            if (Compare(version, new SemanticVersion(dependencyVersion)) == 0)
+            }catch (Exception ex) 
             {
-                return true;
+                Log.Add(Log.LogSeverity.Error, "SemanticVersion.SastifiesDependency()", ex);
+                return false; 
             }
-
-            return false;
         }
     }
 }

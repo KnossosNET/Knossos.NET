@@ -109,7 +109,7 @@ namespace Knossos.NET.ViewModels
             modVersions.Add(modJson);
             if (SemanticVersion.Compare(modJson.version, modVersions[activeVersionIndex].version) > 0)
             {
-                Log.Add(Log.LogSeverity.Information, "ModCardViewModel.AddModVersion()", "Changing active version for this mod from " + modVersions[activeVersionIndex].version + " to " + modJson.version);
+                Log.Add(Log.LogSeverity.Information, "ModCardViewModel.AddModVersion()", "Changing active version for " + modJson.title + " from " + modVersions[activeVersionIndex].version + " to " + modJson.version);
                 activeVersionIndex = modVersions.Count - 1;
                 Name = modJson.title;
                 ModVersion = modJson.version + " (+" + (modVersions.Count - 1) + ")";
