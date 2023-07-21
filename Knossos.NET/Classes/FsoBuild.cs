@@ -511,7 +511,7 @@ namespace Knossos.NET.Models
             }
 
             /* Calculate the score, keep in mind in Windows and MAC x86 can run on x64 and X86/X64 can run on ARM64 */
-            /* No support for 32 bits ARM on Windows/Mac */
+            /* No support for 32 bits ARM on Windows/Mac, also no support for x86/x64 AVX on Windows ARM */
             if(SysInfo.IsWindows || SysInfo.IsMacOS)
             {
                 switch (arch)
@@ -525,7 +525,7 @@ namespace Knossos.NET.Models
                             case "X86":
                                 break;
                             case "Arm64":
-                                score += 50;
+                                //score += 50;
                                 break;
                             case "Arm":
                             case "Armv6":
@@ -541,7 +541,7 @@ namespace Knossos.NET.Models
                             case "X86":
                                 break;
                             case "Arm64":
-                                score += 45;
+                                //score += 45;
                                 break;
                             case "Arm":
                             case "Armv6":
@@ -557,7 +557,7 @@ namespace Knossos.NET.Models
                             case "X86":
                                 break;
                             case "Arm64":
-                                score += 60; //Non AVX may be safer or faster for this case
+                                score += 60;
                                 break;
                             case "Arm":
                             case "Armv6":
@@ -574,7 +574,7 @@ namespace Knossos.NET.Models
                                 score += SysInfo.CpuAVX2 ? 100 : 0;
                                 break;
                             case "Arm64":
-                                score += 25;
+                                //score += 25;
                                 break;
                             case "Arm":
                             case "Armv6":
@@ -591,7 +591,7 @@ namespace Knossos.NET.Models
                                 score += SysInfo.CpuAVX ? 90 : 0;
                                 break;
                             case "Arm64":
-                                score += 15;
+                                //score += 15;
                                 break;
                             case "Arm":
                             case "Armv6":
@@ -608,7 +608,7 @@ namespace Knossos.NET.Models
                                 score += SysInfo.CpuAVX ? 80 : 0;
                                 break;
                             case "Arm64":
-                                score += 30; //Non AVX may be safer or faster for this case
+                                score += 30; 
                                 break;
                             case "Arm":
                             case "Armv6":

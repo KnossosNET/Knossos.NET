@@ -2286,6 +2286,11 @@ namespace Knossos.NET.ViewModels
                 return true;
             }
 
+            if (SysInfo.CpuArch == "Arm64" && (SysInfo.IsMacOS || SysInfo.IsWindows) && !enviroment.ToLower().Contains("arm32") && !enviroment.ToLower().Contains("avx"))
+            {
+                return true;
+            }
+
             return false;
         }
 
