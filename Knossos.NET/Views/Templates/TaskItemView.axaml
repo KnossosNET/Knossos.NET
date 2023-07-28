@@ -14,7 +14,7 @@
 			<Button Command="{Binding CancelTaskCommand}" IsVisible="{Binding CancelButtonVisible}" Margin="5,0,0,0" Height="20" FontSize="8" Background="Red" Foreground="Black" FontWeight="Bold">X</Button>
 			<WrapPanel VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="5">
 				<!--Task Tree-->
-				<TreeView Margin="10,0,0,0" IsVisible="{Binding TaskRoot.Count}" Items="{Binding TaskRoot}">
+				<TreeView Margin="10,0,0,0" IsVisible="{Binding TaskRoot.Count}" ItemsSource="{Binding TaskRoot}">
 					<TreeView.DataTemplates>
 						<TreeDataTemplate DataType="vm:TaskItemViewModel" ItemsSource="{Binding TaskList}">
 							<WrapPanel>

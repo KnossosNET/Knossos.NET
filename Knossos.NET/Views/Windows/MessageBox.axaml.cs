@@ -43,9 +43,9 @@ namespace Knossos.NET.Views
                 Title = title
             };
 
-            msgbox.FindControl<TextBlock>("Text").Text = text;
+            msgbox.FindControl<TextBlock>("Text")!.Text = text;
 
-            var buttonPanel = msgbox.FindControl<StackPanel>("Buttons");
+            var buttonPanel = msgbox.FindControl<StackPanel>("Buttons")!;
 
             var result = MessageBoxResult.OK;
 

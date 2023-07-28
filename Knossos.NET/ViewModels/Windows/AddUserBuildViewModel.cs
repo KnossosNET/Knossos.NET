@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
@@ -67,7 +68,7 @@ namespace Knossos.NET.ViewModels
         {
         }
 
-        private async void OpenFolderCommand()
+        internal async void OpenFolderCommand()
         {
             try
             {
@@ -204,13 +205,19 @@ namespace Knossos.NET.ViewModels
         {
             if(MainWindow.instance != null)
             {
-                var dialog = new OpenFolderDialog();
-                return await dialog.ShowAsync(MainWindow.instance);
+                FolderPickerOpenOptions options = new FolderPickerOpenOptions();
+                options.AllowMultiple = false;
+                options.Title = "Select the folder containing the FSO execs files";
+                var result = await MainWindow.instance.StorageProvider.OpenFolderPickerAsync(options);
+                if (result != null && result.Count > 0)
+                    return result[0].Path.AbsolutePath.ToString();
+                else
+                    return null;
             }
             return null;
         }
 
-        private async void ChangeReleaseCommand()
+        internal async void ChangeReleaseCommand()
         {
             var file = await GetPath(folderPath);
             if(file != null)
@@ -223,7 +230,7 @@ namespace Knossos.NET.ViewModels
                 ParseArch(file);
             }
         }
-        private async void ChangeDebugCommand()
+        internal async void ChangeDebugCommand()
         {
             var file = await GetPath(folderPath);
             if (file != null)
@@ -236,7 +243,7 @@ namespace Knossos.NET.ViewModels
                 ParseArch(file);
             }
         }
-        private async void ChangeFred2Command()
+        internal async void ChangeFred2Command()
         {
             var file = await GetPath(folderPath);
             if (file != null)
@@ -249,7 +256,7 @@ namespace Knossos.NET.ViewModels
                 ParseArch(file);
             }
         }
-        private async void ChangeFred2DebugCommand()
+        internal async void ChangeFred2DebugCommand()
         {
             var file = await GetPath(folderPath);
             if (file != null)
@@ -262,7 +269,7 @@ namespace Knossos.NET.ViewModels
                 ParseArch(file);
             }
         }
-        private async void ChangeQtFredCommand()
+        internal async void ChangeQtFredCommand()
         {
             var file = await GetPath(folderPath);
             if (file != null)
@@ -270,7 +277,7 @@ namespace Knossos.NET.ViewModels
                 QtFred = file;
             }
         }
-        private async void ChangeQtFredDebugCommand()
+        internal async void ChangeQtFredDebugCommand()
         {
             var file = await GetPath(folderPath);
             if (file != null)
@@ -283,22 +290,26 @@ namespace Knossos.NET.ViewModels
         {
             if(MainWindow.instance != null && folderPath != null)
             {
-                OpenFileDialog dialog = new OpenFileDialog();
-                dialog.Directory = folderRoot;
-                dialog.AllowMultiple = false;
-
-                var result = await dialog.ShowAsync(MainWindow.instance);
-
-                if (result != null)
+                FilePickerOpenOptions options = new FilePickerOpenOptions();
+                options.AllowMultiple = false;
+                options.Title = "Select the executable file";
+                if (folderRoot != null)
                 {
-                    var file = new FileInfo(result[0]);
+                    options.SuggestedStartLocation = await MainWindow.instance.StorageProvider.TryGetFolderFromPathAsync(folderRoot);
+                }
+
+                var result = await MainWindow.instance.StorageProvider.OpenFilePickerAsync(options);
+
+                if (result != null && result.Count > 0)
+                {
+                    var file = new FileInfo(result[0].Path.AbsolutePath.ToString());
                     return file.Name;
                 }
             }
             return null;
         }
 
-        private void AddCommand()
+        internal void AddCommand()
         {
             if(!Verify())
             {

@@ -110,7 +110,7 @@ namespace Knossos.NET.ViewModels
                 tooltip = build.folderPath;
         }
 
-        private async void DeleteBuildCommand()
+        internal async void DeleteBuildCommand()
         {
             if (MainWindow.instance != null && build != null && buildsView != null)
             {
@@ -137,7 +137,7 @@ namespace Knossos.NET.ViewModels
             return false;
         }
 
-        private void CancelDownloadCommand()
+        internal void CancelDownloadCommand()
         {
             cancellationTokenSource?.Cancel();
             IsDownloading = false;
@@ -162,7 +162,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private async void DownloadBuildCommand()
+        internal async void DownloadBuildCommand()
         {
             if (MainWindow.instance != null && build != null)
             {

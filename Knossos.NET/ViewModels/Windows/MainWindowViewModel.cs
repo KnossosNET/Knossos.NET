@@ -111,7 +111,7 @@ namespace Knossos.NET.ViewModels
         }
 
         /* Debug Section */
-        private void OpenLog()
+        internal void OpenLog()
         {
             if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log"))
             {
@@ -135,7 +135,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void OpenSettings()
+        internal void OpenSettings()
         {
             if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json"))
             {
@@ -159,7 +159,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void OpenFS2Log()
+        internal void OpenFS2Log()
         {
             if (File.Exists(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log"))
             {
@@ -183,7 +183,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void OpenFS2Ini()
+        internal void OpenFS2Ini()
         {
             if (File.Exists(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar+ "fs2_open.ini"))
             {

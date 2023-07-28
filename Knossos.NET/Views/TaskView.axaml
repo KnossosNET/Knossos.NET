@@ -18,7 +18,7 @@
 					<Button Background="Black" Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">Clear</Button>
 				</WrapPanel>
 				<Grid RowDefinitions="Auto">
-					<ItemsControl Grid.Row="0" Items="{Binding TaskList}">
+					<ItemsControl Grid.Row="0" ItemsSource="{Binding TaskList}">
 						<ItemsControl.ItemTemplate>
 							<DataTemplate>
 								<v:TaskItemView Content="{Binding}"/>

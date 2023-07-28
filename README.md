@@ -11,12 +11,12 @@ https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.14-wind
 <br /><br />
 **The current status:**<br />
 <br />
--Version 0.0.7 - Most of the user functions are in, except for dev mode<br />
+-Version 0.1.0 - Most of the user functions are in, except for dev mode<br />
 -Working in Windows and Linux<br />
 -Mod compression support<br />
 -MacOS version is untested<br />
 -PxoAPI implementation is very basic and WIP<br />
--Mod details is missing features, waiting for Avalonia 0.11 to see what to do<br />
+-Mod details is still missing features<br />
 <br /><br />
 **CmdLine priority explained:**<br />
 On KnossosNET there are multiples sources of cmdline arguments that are eventually joined into a single one to launch the game, repeating arguments are not allowed.<br />
@@ -37,11 +37,11 @@ SystemCMD(Settings) > Global CMD > User/Mod CMD
 <br />
 <br />
 **Current NuGet Packages:**<br />
--Avalonia 0.10.19<br />
--Avalonia.Desktop 0.10.19<br />
--Avalonia.Diagnostics 0.10.19<br />
--CommunityToolkit.Mvvm 8.1.0<br />
--XamlNameReferenceGenerator 1.6.1<br />
+-Avalonia 11.0.1<br />
+-Avalonia.Desktop 11.0.1<br />
+-Avalonia.Diagnostics 11.0.1<br />
+-Avalonia.Themes.Fluent 11.0.1<br />
+-CommunityToolkit.Mvvm 8.2.1<br />
 -ini-parser-netstandard 2.5.2<br />
 -SharpCompress 0.33.0
 <br />

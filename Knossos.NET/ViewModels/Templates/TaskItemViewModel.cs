@@ -2113,14 +2113,14 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void RestartDownloadCommand()
+        internal void RestartDownloadCommand()
         {
             restartDownload = true;
             if (pauseDownload)
                 PauseDownloadCommand();
         }
 
-        private void PauseDownloadCommand()
+        internal void PauseDownloadCommand()
         {
             pauseDownload = !pauseDownload;
             if (pauseDownload)

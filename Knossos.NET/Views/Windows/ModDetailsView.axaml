@@ -35,7 +35,7 @@
 				</WrapPanel>
 				<Separator Width="50" Grid.Column="2"></Separator>
 				<Label Content="Version" Grid.Column="3" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
-				<ComboBox SelectedIndex="{Binding ItemSelectedIndex}" Items="{Binding VersionItems}" MinWidth="125" Margin="5" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
+				<ComboBox SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="5" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
 				<Label Content="Released" Grid.Column="4" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding Released}" Grid.Column="4" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="Last Updated" Grid.Column="5" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
@@ -51,7 +51,7 @@
 				</WrapPanel>
 				<Separator Width="50" Grid.Column="2"></Separator>
 				<Label Content="Newerest Version" Grid.Column="3" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
-				<ComboBox IsEnabled="False" SelectedIndex="{Binding ItemSelectedIndex}" Items="{Binding VersionItems}" MinWidth="125" Margin="5" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
+				<ComboBox IsEnabled="False" SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="5" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
 				<Label Content="Released" Grid.Column="4" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding Released}" Grid.Column="4" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="Last Updated" Grid.Column="5" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
@@ -60,7 +60,7 @@
 		</StackPanel>
 		<WrapPanel Grid.Row="1" HorizontalAlignment="Center" IsVisible="{Binding TtsAvalible}">
 			<Button IsVisible="{Binding IsPlayingTTS}" Background="Black" Command="{Binding StopTts}">Stop</Button>
-			<Button IsVisible="{Binding !IsPlayingTTS}" Margin="5,0,0,0" Background="Black" Command="{Binding PlayDescription}" CommandParameter="0">Read Description</Button>
+			<Button IsVisible="{Binding !IsPlayingTTS}" Margin="5,0,0,0" Background="Black" Command="{Binding PlayDescriptionCommand}">Read Description</Button>
 		</WrapPanel>
 		
 		<ScrollViewer Grid.Row="2" Margin="25">

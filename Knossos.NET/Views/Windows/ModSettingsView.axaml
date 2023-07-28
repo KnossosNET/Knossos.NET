@@ -33,16 +33,16 @@
 						<!--FSO Build Settings -->
 						<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">FSO BUILD</Label>
 						<v:FsoBuildPickerView Content="{Binding FsoPicker}"/>
-						<Button IsVisible="{Binding !ConfigureBuildOpen}" Command="{Binding ConfigureBuildCommand}" CommandParameter="false" Margin="5" FontWeight="Bold" FontSize="18" Background="Black" Foreground="White">Configure</Button>
+						<Button IsVisible="{Binding !ConfigureBuildOpen}" Command="{Binding ConfigureBuildCommand}" Margin="5" FontWeight="Bold" FontSize="18" Background="Black" Foreground="White">Configure</Button>
 						<v:FsoFlagsView Content="{Binding FsoFlags}"/>
 						<!--FSO Build END -->
-						<Separator Height="20"></Separator>
+						
 						<!--Dependencies Settings-->
 						<StackPanel>
 							<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">MOD DEPENDENCIES</Label>
 							<CheckBox Command="{Binding CustomDependenciesClick}" IsChecked="{Binding CustomDependencies}" Margin="5,0,0,0">Enable custom mod dependencies</CheckBox>
 							<Button Command="{Binding AddDependencyCommand}" IsVisible="{Binding CustomDependencies}" FontWeight="Bold" FontSize="18" Background="Black" Foreground="White" Margin="5">+</Button>
-							<ListBox Items="{Binding DepItems}">
+							<ListBox ItemsSource="{Binding DepItems}">
 								<ListBox.ItemTemplate>
 									<DataTemplate>
 										<v:DependencyItemView Content="{Binding}"/>

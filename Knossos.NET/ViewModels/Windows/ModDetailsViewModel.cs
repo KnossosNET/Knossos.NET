@@ -95,6 +95,11 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        internal void PlayDescriptionCommand()
+        {
+            PlayDescription(0);
+        }
+
         private async void PlayDescription(int delay = 0)
         {
             if(delay > 0)
@@ -103,12 +108,6 @@ namespace Knossos.NET.ViewModels
             }
             IsPlayingTTS = true;
             Knossos.Tts(Regex.Replace(modVersions[ItemSelectedIndex].description!, @" ?\[.*?\]", string.Empty),null, null, CompletedCallback);
-        }
-
-        private void StopTts()
-        {
-            IsPlayingTTS = false;
-            Knossos.Tts(string.Empty);
         }
 
         private bool CompletedCallback()
@@ -181,27 +180,33 @@ namespace Knossos.NET.ViewModels
         }
 
         /* Button Commands */
-        private void ButtonCommandPlay()
+        internal void StopTts()
+        {
+            IsPlayingTTS = false;
+            Knossos.Tts(string.Empty);
+        }
+
+        internal void ButtonCommandPlay()
         {
             Knossos.PlayMod(modVersions[ItemSelectedIndex], FsoExecType.Release);
         }
 
-        private void ButtonCommandPlayDebug()
+        internal void ButtonCommandPlayDebug()
         {
             Knossos.PlayMod(modVersions[ItemSelectedIndex], FsoExecType.Debug);
         }
 
-        private void ButtonCommandFred2()
+        internal void ButtonCommandFred2()
         {
             Knossos.PlayMod(modVersions[ItemSelectedIndex], FsoExecType.Fred2);
         }
 
-        private void ButtonCommandQtFred()
+        internal void ButtonCommandQtFred()
         {
             Knossos.PlayMod(modVersions[ItemSelectedIndex], FsoExecType.QtFred);
         }
 
-        private async void ButtonCommandSettings()
+        internal async void ButtonCommandSettings()
         {
             if (MainWindow.instance != null)
             {
@@ -212,7 +217,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private async void ButtonCommandDelete(ModDetailsView window)
+        internal async void ButtonCommandDelete(object window)
         {
             if (!modVersions[ItemSelectedIndex].devMode)
             {
@@ -244,7 +249,8 @@ namespace Knossos.NET.ViewModels
                             MainWindowViewModel.Instance?.RunDependenciesCheck();
                             if (window != null)
                             {
-                                window.Close();
+                                var w = (ModDetailsView)window;
+                                w.Close();
                             }
                         }
                     }
@@ -260,7 +266,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void ButtonCommandForum()
+        internal void ButtonCommandForum()
         {
             var url = modVersions[ItemSelectedIndex].releaseThread;
             if (url != null)

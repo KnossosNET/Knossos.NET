@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
@@ -679,21 +680,23 @@ namespace Knossos.NET.ViewModels
         }
 
         /* UI Buttons */
-        private async void BrowseFolderCommand()
+        internal async void BrowseFolderCommand()
         {
             if (MainWindow.instance != null)
             {
-                var dialog = new OpenFolderDialog();
-                if(BasePath != string.Empty)
-                {
-                    dialog.Directory = BasePath;
+
+                FolderPickerOpenOptions options = new FolderPickerOpenOptions(); 
+                if (BasePath != string.Empty)
+                { 
+                    options.SuggestedStartLocation = await MainWindow.instance.StorageProvider.TryGetFolderFromPathAsync(BasePath);
                 }
+                options.AllowMultiple = false;
 
-                var result = await dialog.ShowAsync(MainWindow.instance);
+                var result = await MainWindow.instance.StorageProvider.OpenFolderPickerAsync(options);
 
-                if (result != null)
+                if (result != null && result.Count > 0)
                 {
-                    Knossos.globalSettings.basePath = result;
+                    Knossos.globalSettings.basePath = result[0].Path.AbsolutePath.ToString();
                     Knossos.globalSettings.Save();
                     Knossos.ResetBasePath();
                     LoadData();
@@ -701,14 +704,14 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void ResetCommand()
+        internal void ResetCommand()
         {
             Knossos.globalSettings = new GlobalSettings();
             LoadData();
             SaveCommand();
         }
 
-        private void SaveCommand()
+        internal void SaveCommand()
         {
             /* Knossos Settings */
             if (BasePath != string.Empty)
@@ -902,7 +905,7 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.Save();
         }
 
-        private void TestVoiceCommand()
+        internal void TestVoiceCommand()
         {
             if (VoiceSelectedIndex != -1)
             {
@@ -911,7 +914,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void StopTTS()
+        internal void StopTTS()
         {
             Knossos.Tts(string.Empty);
         }
@@ -922,17 +925,17 @@ namespace Knossos.NET.ViewModels
             return true;
         }
 
-        private void GlobalCmdHelp()
+        internal void GlobalCmdHelp()
         {
             Knossos.OpenBrowserURL("https://wiki.hard-light.net/index.php/Command-Line_Reference");
         }
-        private void ReloadFlagData()
+        internal void ReloadFlagData()
         {
             Knossos.globalSettings.Load();
             LoadData();
         }
 
-        private async void OpenGetVoices()
+        internal async void OpenGetVoices()
         {
             if (MainWindow.instance != null)
             {
@@ -943,7 +946,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private async void InstallFS2Command()
+        internal async void InstallFS2Command()
         {
             if (MainWindow.instance != null)
             {
@@ -954,7 +957,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void QuickSetupCommand()
+        internal void QuickSetupCommand()
         {
             Knossos.OpenQuickSetup();
         }

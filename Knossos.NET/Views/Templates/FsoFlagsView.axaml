@@ -14,11 +14,11 @@
 		<Label>Global Settings:</Label>
 		<TextBox Text="{Binding GlobalCmd}" TextWrapping="Wrap" Height="50" Foreground="White" IsReadOnly="True"></TextBox>
 		<Label FontSize="11">Global settings flags and values will always be added to the command line at launch and will override any custom value of the same flag here.</Label>
-		<Separator Height="10"></Separator>
+		
 		<Label>Cmdline:</Label>
 		<TextBox Text="{Binding CmdLine}" TextWrapping="Wrap" Height="100" Foreground="White"></TextBox>
-		<Separator Height="10"></Separator>
-		<TreeView Items="{Binding Flags}">
+		
+		<TreeView ItemsSource="{Binding Flags}">
 			<TreeView.DataTemplates>
 				<TreeDataTemplate DataType="vm:FlagCategoryItem" ItemsSource="{Binding FlagItemList}">
 					<TextBlock FontWeight="Bold" Text="{Binding Name}" />

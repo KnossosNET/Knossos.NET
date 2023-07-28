@@ -98,14 +98,14 @@ namespace Knossos.NET.ViewModels
 
         public ModDependency? GetModDependency()
         {
-            var modID = ModItems[ModSelectedIndex].Content.ToString();
+            var modID = ModItems[ModSelectedIndex].Content?.ToString();
             if (ModItems[ModSelectedIndex].IsEnabled && modID != null)
             {
                 var dep = new ModDependency();
                 dep.id = modID;
                 if (VersionItems.Count > 0)
                 {
-                    dep.version = VersionItems[VersionSelectedIndex].Content.ToString();
+                    dep.version = VersionItems[VersionSelectedIndex].Content?.ToString();
                 }
 
                 if (dep.version == "Newest")
@@ -117,7 +117,7 @@ namespace Knossos.NET.ViewModels
             return null;
         }
 
-        private void ArrowUPCommand()
+        internal void ArrowUPCommand()
         {
             if(modSettingsViewModel != null)
             {
@@ -125,7 +125,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void ArrowDOWNCommand()
+        internal void ArrowDOWNCommand()
         {
             if (modSettingsViewModel != null)
             {
@@ -133,7 +133,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void DeleteCommand() 
+        internal void DeleteCommand() 
         {
             if (modSettingsViewModel != null)
             {
@@ -154,7 +154,7 @@ namespace Knossos.NET.ViewModels
 
             foreach (var mod in mods)
             {
-                if (usedIds.IndexOf(mod.id) == -1 && (ModItems.Count == 0 || mod.id != ModItems[0].Content.ToString()))
+                if (usedIds.IndexOf(mod.id) == -1 && (ModItems.Count == 0 || mod.id != ModItems[0].Content!.ToString()))
                 {
                     var itemMod = new ComboBoxItem();
                     itemMod.Content = mod.id;
@@ -170,7 +170,7 @@ namespace Knossos.NET.ViewModels
 
             foreach (var build in builds)
             {
-                if (usedIds.IndexOf(build.id) == -1 && (ModItems.Count == 0 || build.id != ModItems[0].Content.ToString()))
+                if (usedIds.IndexOf(build.id) == -1 && (ModItems.Count == 0 || build.id != ModItems[0].Content!.ToString()))
                 {
                     var itemMod = new ComboBoxItem();
                     itemMod.Content = build.id;
@@ -184,10 +184,10 @@ namespace Knossos.NET.ViewModels
         {
             if(ModItems.Count > 0)
             {
-                var id = ModItems[ModSelectedIndex].Content.ToString();
+                var id = ModItems[ModSelectedIndex].Content!.ToString();
                 var mods = Knossos.GetInstalledModList(id);
 
-                if(VersionItems.Count == 0 || VersionItems[0].Content.ToString() != "Newest")
+                if(VersionItems.Count == 0 || VersionItems[0].Content!.ToString() != "Newest")
                 {
                     var separator = new ComboBoxItem();
                     separator.Content = "----------";

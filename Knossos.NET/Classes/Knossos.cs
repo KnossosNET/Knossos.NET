@@ -765,24 +765,20 @@ namespace Knossos.NET
                         {
                             if (!File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
                             {
-                                var assets = Avalonia.AvaloniaLocator.Current.GetService<IAssetLoader>();
-                                if (assets != null)
+                                if (SysInfo.CpuArch == "X86")
                                 {
-                                    if (SysInfo.CpuArch == "X86")
+                                    using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
                                     {
-                                        using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
-                                        {
-                                            assets.Open(new Uri("avares://Knossos.NET/Assets/utils/KSapi_x86.exe")).CopyTo(fileStream);
-                                            fileStream.Close();
-                                        }
+                                        AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/KSapi_x86.exe")).CopyTo(fileStream);
+                                        fileStream.Close();
                                     }
-                                    else
+                                }
+                                else
+                                {
+                                    using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
                                     {
-                                        using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
-                                        {
-                                            assets.Open(new Uri("avares://Knossos.NET/Assets/utils/KSapi.exe")).CopyTo(fileStream);
-                                            fileStream.Close();
-                                        }
+                                        AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/KSapi.exe")).CopyTo(fileStream);
+                                        fileStream.Close();
                                     }
                                 }
                             }

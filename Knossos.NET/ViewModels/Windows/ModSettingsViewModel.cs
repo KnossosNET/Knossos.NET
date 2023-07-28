@@ -207,7 +207,7 @@ namespace Knossos.NET.ViewModels
 
 
         /* UI */
-        private void SaveSettingsCommand()
+        internal void SaveSettingsCommand()
         {
             if(modJson!= null)
             {
@@ -280,7 +280,12 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void ConfigureBuildCommand(bool ignoreUserSettings)
+        internal void ConfigureBuildCommand()
+        {
+            ConfigureBuild(false);
+        }
+
+        private void ConfigureBuild(bool ignoreUserSettings)
         {
             if (modJson == null)
                 return;
@@ -328,17 +333,17 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void ResetSettingsCommand()
+        internal void ResetSettingsCommand()
         {
             CustomDependencies = false;
             FsoPicker = new FsoBuildPickerViewModel(null);
             FsoFlags = null;
-            ConfigureBuildCommand(true);
+            ConfigureBuild(true);
             DepItems.Clear();
             CreateDependencyItems(true);
         }
 
-        private void CustomDependenciesClick()
+        internal void CustomDependenciesClick()
         {
 
             if (CustomDependencies)
@@ -355,12 +360,12 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void AddDependencyCommand()
+        internal void AddDependencyCommand()
         {
             DepItems.Add(new DependencyItemViewModel(this));
         }
 
-        private async void CompressCommand()
+        internal async void CompressCommand()
         {
             var cancel = false;
             if(modJson!.devMode)
@@ -416,7 +421,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private async void DecompressCommand()
+        internal async void DecompressCommand()
         {
             if (modJson != null && modJson.fullPath != string.Empty)
             {

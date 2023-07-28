@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Avalonia.Platform.Storage;
 
 namespace Knossos.NET.ViewModels
 {
@@ -56,7 +57,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private async void InstallFS2Command()
+        internal async void InstallFS2Command()
         {
             if(Knossos.GetKnossosLibraryPath() == null)
             {
@@ -201,79 +202,75 @@ namespace Knossos.NET.ViewModels
                     fs2Mod.SaveJson();
                     try
                     {
-                        var assets = Avalonia.AvaloniaLocator.Current.GetService<IAssetLoader>();
-                        if (assets != null)
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_tile.png"))
                         {
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_tile.png"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_tile.png")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_banner.png"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_banner.png")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_0.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_0.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_1.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_1.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_2.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_2.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_3.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_3.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_4.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_4.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_5.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_5.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_6.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_6.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_7.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_7.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_8.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_8.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_9.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_9.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_10.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_10.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
-                            using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_11.jpg"))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_11.jpg")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_tile.png")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_banner.png"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_banner.png")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_0.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_0.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_1.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_1.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_2.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_2.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_3.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_3.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_4.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_4.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_5.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_5.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_6.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_6.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_7.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_7.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_8.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_8.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_9.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_9.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_10.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_10.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
+                        }
+                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_11.jpg"))
+                        {
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_11.jpg")).CopyTo(fileStream);
+                            fileStream.Close();
                         }
                     }
                     catch { }
@@ -295,88 +292,85 @@ namespace Knossos.NET.ViewModels
             });
         }
 
-        private async void LoadGoGExeCommand()
+        internal async void LoadGoGExeCommand()
         {
-            var dialog = new OpenFileDialog();
-            dialog.AllowMultiple = false;
-            var result = await dialog.ShowAsync(MainWindow.instance!);
+            FilePickerOpenOptions options = new FilePickerOpenOptions();
+            options.AllowMultiple = false;
+            options.Title = "Select your Freespace 2 gog .exe installer file";
+            var result = await MainWindow.instance!.StorageProvider.OpenFilePickerAsync(options);
 
-            if (result != null)
+            if (result != null && result.Count > 0)
             {
                 CanInstall = false;
                 gogExe = null;
                 try
                 {
-                    var assets = Avalonia.AvaloniaLocator.Current.GetService<IAssetLoader>();
-                    if (assets != null)
+                    string innoPath = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar;
+                    if (SysInfo.IsWindows)
                     {
-                        string innoPath = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar;
-                        if (SysInfo.IsWindows)
+                        innoPath += "innoextract.exe";
+                        using (var fileStream = File.Create(innoPath))
                         {
-                            innoPath += "innoextract.exe";
-                            using (var fileStream = File.Create(innoPath))
-                            {
-                                assets.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.exe")).CopyTo(fileStream);
-                                fileStream.Close();
-                            }
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.exe")).CopyTo(fileStream);
+                            fileStream.Close();
                         }
-                        else
-                        {
-                            if (SysInfo.IsLinux)
-                            {
-                                if (SysInfo.CpuArch == "X64")
-                                {
-                                    innoPath += "innoextract.x64";
-                                    using (var fileStream = File.Create(innoPath))
-                                    {
-                                        assets.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.x64")).CopyTo(fileStream);
-                                        fileStream.Close();
-                                        SysInfo.Chmod(innoPath,"+x");
-                                    }
-                                }
-                                if (SysInfo.CpuArch == "X86")
-                                {
-                                    innoPath += "innoextract.x86";
-                                    using (var fileStream = File.Create(innoPath))
-                                    {
-                                        assets.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.x86")).CopyTo(fileStream);
-                                        fileStream.Close();
-                                        SysInfo.Chmod(innoPath, "+x");
-                                    }
-                                }
-                            }
-                        }
-
-                        var cmd = new Process();
-                        var file = new FileInfo(result[0]);
-                        gogExe = file.FullName;
-                        cmd.StartInfo.FileName = innoPath;
-                        cmd.StartInfo.Arguments = file.FullName + " -l -g";
-                        cmd.StartInfo.UseShellExecute = false;
-                        cmd.StartInfo.CreateNoWindow = true;
-                        cmd.StartInfo.RedirectStandardOutput = true;
-                        cmd.StartInfo.RedirectStandardInput = true;
-                        cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
-                        cmd.Start();
-                        var innoOutput = cmd.StandardOutput.ReadToEnd().ToLower();
-                        cmd.WaitForExit();
-                        cmd.Dispose();
-                        int count = 0;
-                        foreach (var reqFileName in required)
-                        {
-                            if (innoOutput.Contains(reqFileName))
-                                count++;
-                        }
-
-                        if (count != 9)
-                        {
-                            //Missing files
-                            gogExe = null;
-                            await MessageBox.Show(MainWindow.instance!, "Unable to find all the required Freespace 2 files in gog exe.", "Files not found", MessageBox.MessageBoxButtons.OK);
-                            return;
-                        }
-                        CanInstall = true;
                     }
+                    else
+                    {
+                        if (SysInfo.IsLinux)
+                        {
+                            if (SysInfo.CpuArch == "X64")
+                            {
+                                innoPath += "innoextract.x64";
+                                using (var fileStream = File.Create(innoPath))
+                                {
+                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.x64")).CopyTo(fileStream);
+                                    fileStream.Close();
+                                    SysInfo.Chmod(innoPath,"+x");
+                                }
+                            }
+                            if (SysInfo.CpuArch == "X86")
+                            {
+                                innoPath += "innoextract.x86";
+                                using (var fileStream = File.Create(innoPath))
+                                {
+                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.x86")).CopyTo(fileStream);
+                                    fileStream.Close();
+                                    SysInfo.Chmod(innoPath, "+x");
+                                }
+                            }
+                        }
+                    }
+
+                    var cmd = new Process();
+                    var file = new FileInfo(result[0].Path.AbsolutePath.ToString());
+                    gogExe = file.FullName;
+                    cmd.StartInfo.FileName = innoPath;
+                    cmd.StartInfo.Arguments = file.FullName + " -l -g";
+                    cmd.StartInfo.UseShellExecute = false;
+                    cmd.StartInfo.CreateNoWindow = true;
+                    cmd.StartInfo.RedirectStandardOutput = true;
+                    cmd.StartInfo.RedirectStandardInput = true;
+                    cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
+                    cmd.Start();
+                    var innoOutput = cmd.StandardOutput.ReadToEnd().ToLower();
+                    cmd.WaitForExit();
+                    cmd.Dispose();
+                    int count = 0;
+                    foreach (var reqFileName in required)
+                    {
+                        if (innoOutput.Contains(reqFileName))
+                            count++;
+                    }
+
+                    if (count != 9)
+                    {
+                        //Missing files
+                        gogExe = null;
+                        await MessageBox.Show(MainWindow.instance!, "Unable to find all the required Freespace 2 files in gog exe.", "Files not found", MessageBox.MessageBoxButtons.OK);
+                        return;
+                    }
+                    CanInstall = true;
                 }catch(Exception ex)
                 {
                     Log.Add(Log.LogSeverity.Error, "Fs2InstallerViewModel.LoadGoGExeCommand()", ex);
@@ -384,16 +378,18 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private async void LoadFolderCommand()
+        internal async void LoadFolderCommand()
         {
-            var dialog = new OpenFolderDialog();
-            var result = await dialog.ShowAsync(MainWindow.instance!);
+            FolderPickerOpenOptions options = new FolderPickerOpenOptions();
+            options.AllowMultiple = false;
+            options.Title = "Select your Freespace 2 retail folder";
+            var result = await MainWindow.instance!.StorageProvider.OpenFolderPickerAsync(options);
 
-            if (result != null)
+            if (result != null && result.Count > 0)
             {
                 CanInstall = false;
                 gogExe = null;
-                ProcessFolder(result);
+                ProcessFolder(result[0].Path.AbsolutePath.ToString());
             }
         }
 

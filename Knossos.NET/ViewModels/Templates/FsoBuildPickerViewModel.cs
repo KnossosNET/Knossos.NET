@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
@@ -115,7 +116,7 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                return (FsoBuild)BuildItems[BuildSelectedIndex].Content;
+                return (FsoBuild)BuildItems[BuildSelectedIndex].Content!;
             }
         }
 
@@ -260,7 +261,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private async void OpenFileCommand()
+        internal async void OpenFileCommand()
         {
             var path = await GetPath();
             if(path != null)
@@ -287,14 +288,14 @@ namespace Knossos.NET.ViewModels
         {
             if (MainWindow.instance != null)
             {
-                OpenFileDialog dialog = new OpenFileDialog();
-                dialog.AllowMultiple = false;
+                FilePickerOpenOptions options = new FilePickerOpenOptions();
+                options.AllowMultiple = false;
+                options.Title = "Select the FSO executable file";
+                var result = await MainWindow.instance.StorageProvider.OpenFilePickerAsync(options);
 
-                var result = await dialog.ShowAsync(MainWindow.instance);
-
-                if (result != null)
+                if (result != null && result.Count > 0)
                 {
-                    var file = new FileInfo(result[0]);
+                    var file = new FileInfo(result[0].Path.AbsolutePath.ToString());
                     return file.FullName;
                 }
             }

@@ -17,6 +17,6 @@
 			<CheckBox IsChecked="{Binding HideCustom}" Grid.Column="2" Margin="10,0,0,0">Hide Custom builds</CheckBox>
 			<Button Command="{Binding OpenFileCommand}" Grid.Column="3" Margin="10,0,0,0">Browse</Button>
 		</Grid>
-		<ComboBox Items="{Binding BuildItems}" SelectedIndex="{Binding BuildSelectedIndex}" Margin="5" HorizontalAlignment="Stretch"></ComboBox>
+		<ComboBox ItemsSource="{Binding BuildItems}" SelectedIndex="{Binding BuildSelectedIndex}" Margin="5" HorizontalAlignment="Stretch"></ComboBox>
 	</StackPanel>
 </UserControl>

@@ -60,11 +60,15 @@ namespace Knossos.NET
 
         public async static void WriteToConsole(string data)
         {
-            await Dispatcher.UIThread.InvokeAsync(() => Knossos.WriteToUIConsole(data), DispatcherPriority.Background);
-            if (Debugger.IsAttached)
+            try
             {
-                System.Diagnostics.Debug.WriteLine(data);
+                await Dispatcher.UIThread.InvokeAsync(() => Knossos.WriteToUIConsole(data), DispatcherPriority.Background);
+                if (Debugger.IsAttached)
+                {
+                    System.Diagnostics.Debug.WriteLine(data);
+                }
             }
+            catch { }
         }
 
         private static async Task WaitForFileAccess(string filename)

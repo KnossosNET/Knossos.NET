@@ -57,11 +57,7 @@ namespace Knossos.NET.ViewModels
             Name = "default test string very long";
             ModVersion = "1.0.0";
             ID = "test";
-            var assets = Avalonia.AvaloniaLocator.Current.GetService<IAssetLoader>();
-            if (assets != null)
-            {
-                Image = new Bitmap(assets.Open(new Uri("avares://Knossos.NET/Assets/NebulaDefault.png")));
-            }
+            Image = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/NebulaDefault.png")));
         }
 
         public ModCardViewModel(Mod modJson)
@@ -189,45 +185,45 @@ namespace Knossos.NET.ViewModels
         }
 
         /* Button Commands */
-        private void ButtonCommandPlay()
+        internal void ButtonCommandPlay()
         {
             Knossos.PlayMod(modVersions[activeVersionIndex],FsoExecType.Release);
         }
 
-        private void ButtonCommandFred2()
+        internal void ButtonCommandFred2()
         {
             Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2);
         }
 
-        private void ButtonCommandDebug()
+        internal void ButtonCommandDebug()
         {
             Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Debug);
         }
 
-        private void ButtonCommandQtFred() 
+        internal void ButtonCommandQtFred() 
         {
             Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.QtFred);
         }
 
-        private async void ButtonCommandUpdate()
+        internal async void ButtonCommandUpdate()
         {
             var dialog = new ModInstallView();
             dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex]);
-            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
+            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
         }
 
-        private async void ButtonCommandModify()
+        internal async void ButtonCommandModify()
         {
             var dialog = new ModInstallView();
             dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex], modVersions[activeVersionIndex].version);
-            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
+            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
         }
 
-        private async void ButtonCommandInstall()
+        internal async void ButtonCommandInstall()
         {
             var dialog = new ModInstallView();
             dialog.DataContext = new ModInstallViewModel(modVersions[0]);
-            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
+            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
         }
 
         public void InstallingMod(CancellationTokenSource cancelToken)
@@ -254,7 +250,7 @@ namespace Knossos.NET.ViewModels
             TaskViewModel.Instance?.CancelAllInstallTaskWithID(modVersions[activeVersionIndex].id, modVersions[activeVersionIndex].version);
         }
 
-        private async void ButtonCommandDelete()
+        internal async void ButtonCommandDelete()
         {
             if (!modVersions[activeVersionIndex].devMode)
             {
@@ -280,17 +276,17 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void ButtonCommandGoPage2()
+        internal void ButtonCommandGoPage2()
         {
             ButtonPage1 = false;
         }
 
-        private void ButtonCommandGoPage1()
+        internal void ButtonCommandGoPage1()
         {
             ButtonPage1 = true;
         }
 
-        private async void ButtonCommandDetails()
+        internal async void ButtonCommandDetails()
         {
             if (MainWindow.instance != null)
             {
@@ -301,7 +297,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private async void ButtonCommandSettings()
+        internal async void ButtonCommandSettings()
         {
             if (MainWindow.instance != null)
             {
@@ -315,11 +311,7 @@ namespace Knossos.NET.ViewModels
         private void LoadImage()
         {
             Image?.Dispose();
-            var assets = Avalonia.AvaloniaLocator.Current.GetService<IAssetLoader>();
-            if (assets != null)
-            {
-                Image = new Bitmap(assets.Open(new Uri("avares://Knossos.NET/Assets/NebulaDefault.png")));
-            }
+            Image = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/NebulaDefault.png")));
 
             try
             {

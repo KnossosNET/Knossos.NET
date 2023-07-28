@@ -17,7 +17,7 @@
 		</StackPanel>
 		<StackPanel Margin="5" Grid.Row="1">
 			<Button Command="{Binding RefreshData}">Refresh Game List</Button>
-			<TreeView Margin="10,0,0,0"  Items="{Binding ActiveGames}">
+			<TreeView Margin="10,0,0,0"  ItemsSource="{Binding ActiveGames}">
 				<TreeView.Styles>
 					<Style Selector="TreeViewItem">
 						<Setter Property="IsExpanded" Value="True" />

@@ -39,18 +39,18 @@
 			</WrapPanel>
 			</Grid>
 			<ScrollViewer Grid.Row="1">
-				<ItemsPresenter Items="{Binding Mods}" VirtualizationMode="Simple">
-					<ItemsPresenter.ItemTemplate>
+				<ItemsControl ItemsSource="{Binding Mods}">
+					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<v:ModCardView Margin="5" Content="{Binding}"/>
 						</DataTemplate>
-					</ItemsPresenter.ItemTemplate>
-					<ItemsPresenter.ItemsPanel>
+					</ItemsControl.ItemTemplate>
+					<ItemsControl.ItemsPanel>
 						<ItemsPanelTemplate>
 							<WrapPanel />
 						</ItemsPanelTemplate>
-					</ItemsPresenter.ItemsPanel>
-				</ItemsPresenter>
+					</ItemsControl.ItemsPanel>
+				</ItemsControl>
 			</ScrollViewer>
 		</Grid>
 	</Border>

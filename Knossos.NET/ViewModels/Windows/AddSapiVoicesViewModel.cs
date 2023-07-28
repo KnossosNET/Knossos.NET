@@ -8,7 +8,7 @@ namespace Knossos.NET.ViewModels
     public partial class AddSapiVoicesViewModel : ViewModelBase
     {
 
-        private void OpenSpeechSettings()
+        internal void OpenSpeechSettings()
         {
             var speech = new Process();
             speech.StartInfo.FileName = "ms-settings:speech";
@@ -16,7 +16,7 @@ namespace Knossos.NET.ViewModels
             speech.Start();
         }
 
-        private void CopyKeys()
+        internal void CopyKeys()
         {
             try
             {

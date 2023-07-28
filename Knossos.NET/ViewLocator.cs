@@ -7,22 +7,29 @@ namespace Knossos.NET
 {
     public class ViewLocator : IDataTemplate
     {
-        public IControl Build(object data)
+        public Control Build(object? data)
         {
-            var name = data.GetType().FullName!.Replace("ViewModel", "View");
-            var type = Type.GetType(name);
-
-            if (type != null)
+            if (data != null)
             {
-                return (Control)Activator.CreateInstance(type)!;
+                var name = data.GetType().FullName!.Replace("ViewModel", "View");
+                var type = Type.GetType(name);
+
+                if (type != null)
+                {
+                    return (Control)Activator.CreateInstance(type)!;
+                }
+                else
+                {
+                    return new TextBlock { Text = "Not Found: " + name };
+                }
             }
             else
             {
-                return new TextBlock { Text = "Not Found: " + name };
+                return new TextBlock { Text = "Not Found" };
             }
         }
 
-        public bool Match(object data)
+        public bool Match(object? data)
         {
             return data is ViewModelBase;
         }

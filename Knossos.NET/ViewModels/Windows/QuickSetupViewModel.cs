@@ -104,13 +104,13 @@ namespace Knossos.NET.ViewModels
             });
         }
 
-        private void GoBackCommand()
+        internal void GoBackCommand()
         {
             pageNumber--;
             SetActivePage();
         }
 
-        private void ContinueCommand()
+        internal void ContinueCommand()
         {
             pageNumber++;
             SetActivePage();

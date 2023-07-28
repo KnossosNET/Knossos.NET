@@ -239,7 +239,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void VerifyCommand()
+        internal void VerifyCommand()
         {
             if(SelectedMod != null)
             {
@@ -253,7 +253,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void InstallMod(Window window)
+        internal void InstallMod(object window)
         {
             foreach (var mod in ModInstallList)
             {
@@ -261,7 +261,9 @@ namespace Knossos.NET.ViewModels
                     TaskViewModel.Instance!.InstallMod(mod);
             }
             ModInstallList.Clear();
-            window.Close();
+
+            var w = (Window)window;
+            w.Close();
         }
     }
 }

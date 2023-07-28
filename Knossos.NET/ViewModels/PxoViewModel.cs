@@ -61,7 +61,7 @@ namespace Knossos.NET.ViewModels
             Instance = this;
         }
 
-        private void OpenPXOWeb()
+        internal void OpenPXOWeb()
         {
             Knossos.OpenBrowserURL(@"https://pxo.nottheeye.com/");
         }

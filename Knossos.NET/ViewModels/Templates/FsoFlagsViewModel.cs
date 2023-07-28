@@ -89,7 +89,7 @@ namespace Knossos.NET.ViewModels
             this.view = view;
         }
 
-        private void ToggleFlag()
+        internal void ToggleFlag()
         {
             if(!Enabled)
             {

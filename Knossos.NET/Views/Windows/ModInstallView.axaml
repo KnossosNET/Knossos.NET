@@ -22,7 +22,7 @@
 		<Label IsVisible="{Binding !DataLoaded}" Grid.Row="0" Margin="0,20,0,0" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center">Loading data from repo...</Label>
 		<StackPanel IsVisible="{Binding DataLoaded}" Margin="0,20,0,0" Grid.Row="0">
 			<TextBlock Text="{Binding Name}" IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center"></TextBlock>
-			<ComboBox Items="{Binding ModVersions}" SelectedItem="{Binding SelectedMod}" SelectedIndex="{Binding SelectedIndex}"  IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="22" HorizontalAlignment="Center">
+			<ComboBox ItemsSource="{Binding ModVersions}" SelectedItem="{Binding SelectedMod}" SelectedIndex="{Binding SelectedIndex}"  IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="22" HorizontalAlignment="Center">
 				<ComboBox.ItemTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding version}" />
@@ -32,7 +32,7 @@
 			<TextBox IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="Green"> This version is installed, you can add optional packages</TextBox>
 			<Button Command="{Binding VerifyCommand}" Margin="5" IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="White" Background="DarkOrange">Verify</Button>
 		</StackPanel>
-		<TreeView IsVisible="{Binding DataLoaded}" Grid.Row="1" Margin="30" Items="{Binding ModInstallList}"  HorizontalAlignment="Center">
+		<TreeView IsVisible="{Binding DataLoaded}" Grid.Row="1" Margin="30" ItemsSource="{Binding ModInstallList}"  HorizontalAlignment="Center">
 			<TreeView.Styles>
 				<Style Selector="TreeViewItem">
 					<Setter Property="IsExpanded" Value="True" />
