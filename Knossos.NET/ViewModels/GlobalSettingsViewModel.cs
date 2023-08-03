@@ -71,6 +71,10 @@ namespace Knossos.NET.ViewModels
         private CompressionSettings modCompression = CompressionSettings.Manual;
         [ObservableProperty]
         private int compressionMaxParallelism = 4;
+        [ObservableProperty]
+        private bool checkUpdates = true;
+        [ObservableProperty]
+        private bool autoUpdate = false;
 
         /*VIDEO*/
         [ObservableProperty]
@@ -237,6 +241,8 @@ namespace Knossos.NET.ViewModels
 
             ModCompression = Knossos.globalSettings.modCompression;
             CompressionMaxParallelism = Knossos.globalSettings.compressionMaxParallelism;
+            CheckUpdates = Knossos.globalSettings.checkUpdate;
+            AutoUpdate = Knossos.globalSettings.autoUpdate;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -765,6 +771,12 @@ namespace Knossos.NET.ViewModels
 
             Knossos.globalSettings.modCompression = ModCompression;
             Knossos.globalSettings.compressionMaxParallelism = CompressionMaxParallelism;
+            Knossos.globalSettings.checkUpdate = CheckUpdates;
+            if(!CheckUpdates)
+            {
+                AutoUpdate = false;
+            }
+            Knossos.globalSettings.autoUpdate = AutoUpdate;
 
             /* VIDEO */
             //Resolution

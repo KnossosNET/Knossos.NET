@@ -122,5 +122,16 @@ namespace Knossos.NET
 
             return String.Format("{0:0.##} {1}", dblSByte, suffix[i]);
         }
+
+        public static string GetOSNameString()
+        {
+            if (isWindows)
+                return "Windows";
+            if (isLinux)
+                return "Linux";
+            if (isMacOS)
+                return "MacOS";
+            return "Unknown";
+        }
     }
 }

@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="1500"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="2000"
              x:Class="Knossos.NET.Views.GlobalSettingsView"
 			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
 			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
@@ -59,9 +59,11 @@
 								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX2}">AVX2</CheckBox>
 							</WrapPanel>
 						</Grid>
-						<!-- Force SSE2 -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5" IsVisible="{Binding IsAVX}">
-							<CheckBox Grid.Column="0" ToolTip.Tip="If available, Knossos will run SSE2 FSO builds instead of AVX ones." IsChecked="{Binding ForceSSE2}" Width="200">Force SSE2 Builds</CheckBox>
+						<!-- Force SSE2 and AutoUpdates -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5" >
+							<CheckBox IsVisible="{Binding IsAVX}" Grid.Column="0" ToolTip.Tip="If available, Knossos will force to run SSE2 FSO builds instead of AVX ones." IsChecked="{Binding ForceSSE2}" Width="200">Force SSE2 Builds</CheckBox>
+							<CheckBox IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="1" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for avalible updates at the start.">Check for updates at startup</CheckBox>
+							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="2" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted whiout any user input.">Auto Update</CheckBox>
 						</Grid>
 						<!-- SubTasks -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">

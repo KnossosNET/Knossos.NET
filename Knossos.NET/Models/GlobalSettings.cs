@@ -57,6 +57,10 @@ namespace Knossos.NET.Models
         public CompressionSettings modCompression { get; set; } = CompressionSettings.Manual;
         [JsonPropertyName("compression_max_parallelism")]
         public int compressionMaxParallelism { get; set; } = 4;
+        [JsonPropertyName("auto_update")]
+        public bool autoUpdate { get; set; } = false;
+        [JsonPropertyName("check_updates")]
+        public bool checkUpdate { get; set; } = true;
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 
@@ -471,6 +475,8 @@ namespace Knossos.NET.Models
                         mirrorBlacklist = tempSettings.mirrorBlacklist;
                         modCompression = tempSettings.modCompression;
                         compressionMaxParallelism = tempSettings.compressionMaxParallelism;
+                        autoUpdate = tempSettings.autoUpdate;
+                        checkUpdate = tempSettings.checkUpdate;
 
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");

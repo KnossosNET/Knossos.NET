@@ -13,6 +13,8 @@ namespace Knossos.NET.ViewModels
 
         /* UI Bindings, use the uppercase version, otherwise changes will not register */
         [ObservableProperty]
+        private string appTitle = "Knossos.NET v" + Knossos.AppVersion;
+        [ObservableProperty]
         private ModListViewModel installedModsView = new ModListViewModel(false);
         [ObservableProperty]
         private ModListViewModel nebulaModsView = new ModListViewModel(true);

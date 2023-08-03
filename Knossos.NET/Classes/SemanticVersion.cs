@@ -210,5 +210,17 @@ namespace Knossos.NET.Classes
                 return false; 
             }
         }
+
+        public override string ToString()
+        {
+            if(prerelease != null)
+            {
+                return major + "." + minor + "." + revision + "-" + prerelease;
+            }
+            else
+            {
+                return major + "." + minor + "." + revision;
+            }
+        }
     }
 }

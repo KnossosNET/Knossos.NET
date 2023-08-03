@@ -36,7 +36,7 @@ namespace Knossos.NET.Views
         }
 
         //Messagebox is not thread safe!
-        public static Task<MessageBoxResult> Show(Window parent, string text, string title, MessageBoxButtons buttons)
+        public static Task<MessageBoxResult> Show(Window? parent, string text, string title, MessageBoxButtons buttons)
         {
             var msgbox = new MessageBox()
             {

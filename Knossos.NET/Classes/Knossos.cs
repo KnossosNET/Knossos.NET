@@ -13,11 +13,15 @@ using System.Xml.Linq;
 using Avalonia.Platform;
 using Avalonia;
 using VP.NET;
+using SharpCompress.Archives;
+using SharpCompress.Readers;
+using SharpCompress.Common;
 
 namespace Knossos.NET
 {
     public static class Knossos
     {
+        public static readonly string AppVersion = "0.0.10";
         private static List<Mod> installedMods = new List<Mod>();
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();
         public static GlobalSettings globalSettings = new GlobalSettings();
@@ -60,6 +64,14 @@ namespace Knossos.NET
             //Load knossos config
             globalSettings.Load();
 
+            //Check for updates
+            if(globalSettings.checkUpdate)
+            {
+                await CheckKnetUpdates();
+                await Task.Delay(300);
+                CleanUpdateFiles();
+            }
+
             //Load base path from knossos legacy
             if (globalSettings.basePath == null)
             {
@@ -70,6 +82,185 @@ namespace Knossos.NET
 
             if (globalSettings.basePath == null)
                 OpenQuickSetup();
+        }
+        private static void CleanUpdateFiles()
+        {
+            try
+            {
+                if(File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update.zip"))
+                    File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update.zip");
+            }
+            catch { }
+            try
+            {
+                var appDirPath = System.AppDomain.CurrentDomain.BaseDirectory;
+                var oldFiles = System.IO.Directory.GetFiles(appDirPath, "*.old");
+                foreach (string f in oldFiles)
+                {
+                    File.Delete(f);
+                }
+            }
+            catch { }
+        }
+
+        private static async Task CheckKnetUpdates()
+        {
+            try
+            {
+                var latest = await GitHubApi.GetLastRelease();
+                if (latest != null && latest.tag_name != null)
+                {
+                    if (SemanticVersion.Compare(AppVersion, latest.tag_name.ToLower().Replace("v", "").Trim()) <= -1)
+                    {
+                        if (latest.assets != null)
+                        {
+                            GitHubReleaseAsset? releaseAsset = null;
+                            foreach (GitHubReleaseAsset a in latest.assets)
+                            {
+                                if(a.name != null && ( a.name.ToLower().Contains(".zip") || a.name.ToLower().Contains(".7z")))
+                                {
+                                    if(a.name.ToLower().Contains(SysInfo.GetOSNameString().ToLower()))
+                                    {
+                                        if (a.name.ToLower().Contains(SysInfo.CpuArch.ToLower()) && ( SysInfo.CpuArch != "Arm" || SysInfo.CpuArch == "Arm" && !a.name.ToLower().Contains("arm64")))
+                                        {
+                                            releaseAsset = a;
+                                            continue;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (releaseAsset != null && releaseAsset.browser_download_url != null)
+                            {
+                                if (!globalSettings.autoUpdate)
+                                {
+                                    var result = await MessageBox.Show(null, "Knossos.NET " + latest.tag_name + ":\n" + latest.body + "\n\n\nIf you continue Knossos.NET will be re-started after download.", "An update is avalible", MessageBox.MessageBoxButtons.ContinueCancel);
+                                    if(result != MessageBox.MessageBoxResult.Continue)
+                                    {
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    await Task.Delay(500);
+                                }
+                                var download = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance!.AddFileDownloadTask(releaseAsset.browser_download_url, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update.zip", "Downloading "+latest.tag_name+" "+releaseAsset.name, true, "This is a Knossos.NET update"), DispatcherPriority.Background);
+                                if (download != null && download == true)
+                                {
+                                    //Rename files in app folder
+                                    var appDirPath = System.AppDomain.CurrentDomain.BaseDirectory;
+                                    var execName = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
+                                    File.Move(execName!, execName + ".old", true);
+                                    if (SysInfo.IsWindows)
+                                    {
+                                        try
+                                        {
+                                            File.Move(Path.Combine(appDirPath,"av_libglesv2.dll"), Path.Combine(appDirPath, "av_libglesv2.dll.old"), true);
+                                        }
+                                        catch { }
+                                        try
+                                        {
+                                            File.Move(Path.Combine(appDirPath, "libSkiaSharp.dll"), Path.Combine(appDirPath, "libSkiaSharp.dll.old"), true);
+                                        }
+                                        catch { }
+                                        try
+                                        {
+                                            File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.dll"), Path.Combine(appDirPath, "libHarfBuzzSharp.dll.old"), true);
+                                        }
+                                        catch { }
+                                    } 
+                                    if(SysInfo.IsLinux)
+                                    {
+                                        try
+                                        {
+                                            File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.so"), Path.Combine(appDirPath, "libHarfBuzzSharp.so.old"), true);
+                                        }
+                                        catch { }
+                                        try
+                                        {
+                                            File.Move(Path.Combine(appDirPath, "libSkiaSharp.so"), Path.Combine(appDirPath, "libSkiaSharp.so.old"), true);
+                                        }
+                                        catch { }
+                                    }
+                                    if(SysInfo.IsMacOS)
+                                    {
+                                        try
+                                        {
+                                            File.Move(Path.Combine(appDirPath, "libAvaloniaNative.dylib"), Path.Combine(appDirPath, "libAvaloniaNative.dylib.old"), true);
+                                        }
+                                        catch { }
+                                        try
+                                        {
+                                            File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.dylib"), Path.Combine(appDirPath, "libHarfBuzzSharp.dylib.old"), true);
+                                        }
+                                        catch { }
+                                        try
+                                        {
+                                            File.Move(Path.Combine(appDirPath, "libSkiaSharp.dylib"), Path.Combine(appDirPath, "libSkiaSharp.dylib.old"), true);
+                                        }
+                                        catch { }
+                                    }
+
+                                    //Decompress new files
+                                    using (var archive = ArchiveFactory.Open(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update.zip"))
+                                    {
+                                        try
+                                        {
+                                            var reader = archive.ExtractAllEntries();
+                                            while (reader.MoveToNextEntry())
+                                            {
+                                                if (!reader.Entry.IsDirectory)
+                                                {
+                                                    reader.WriteEntryToDirectory(appDirPath!, new ExtractionOptions() { ExtractFullPath = false, Overwrite = true });
+                                                }
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
+                                        }
+
+                                        //Start again
+                                        try
+                                        {
+                                            if(SysInfo.IsMacOS || SysInfo.IsLinux)
+                                            {
+                                                SysInfo.Chmod(Path.Combine(appDirPath, execName!),"+x");
+                                            }
+                                            Process p = new Process();
+                                            p.StartInfo.FileName = Path.Combine(appDirPath, execName!);
+                                            p.Start();
+                                        }
+                                        catch (Exception ex)
+                                        { 
+                                            Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
+                                        }
+
+                                        //Close App
+                                        MainWindow.instance!.Close();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Log.Add(Log.LogSeverity.Warning, "Knossos.CheckKnetUpdates()", "Unable to find a matching OS and cpu arch build in the latest Github release, update has been skipped. CPU Arch:"+ SysInfo.CpuArch + " OS: "+ SysInfo.GetOSNameString());
+                            }
+                        }
+                        else
+                        {
+                            Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", "Last version from Github has a null asset array.");
+                        }
+                    }
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", "Get latest version from github resulted in null or tag_name being null.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
+            }
         }
 
         public static void OpenQuickSetup()
