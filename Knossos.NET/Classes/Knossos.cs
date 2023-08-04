@@ -311,7 +311,7 @@ namespace Knossos.NET
             return globalSettings.basePath;
         }
 
-        public static async void PlayMod(Mod mod, FsoExecType fsoExecType)
+        public static async void PlayMod(Mod mod, FsoExecType fsoExecType, bool standaloneServer = false, int standalonePort = 0)
         {
             if (TaskViewModel.Instance!.IsSafeState() == false)
             {
@@ -439,7 +439,19 @@ namespace Knossos.NET
                             {
                                 modFlag += mod.folderName + Path.DirectorySeparatorChar + pkg.folder;
                             }
-                            
+                        }
+
+                        //If standalone the multi.cfg will be on mod root\data to avoid uploading it to nebula
+                        if (standaloneServer)
+                        {
+                            if (modFlag.Length > 0)
+                            {
+                                modFlag += "," + mod.folderName;
+                            }
+                            else
+                            {
+                                modFlag += mod.folderName;
+                            }
                         }
                     }
                     else
@@ -636,10 +648,16 @@ namespace Knossos.NET
                 {
                     if (s.Trim().Length > 0)
                     {
-                        cmdline += " -" + s.Trim();
+                        if(!standaloneServer || standaloneServer && standalonePort == 0 || standaloneServer && standalonePort != 0 && !s.Contains("-port"))
+                            cmdline += " -" + s.Trim();
                     }
 
                 }
+            }
+
+            if (standaloneServer && standalonePort > 0)
+            {
+                cmdline += " -port " + standalonePort;
             }
 
             if (globalCmd != null)
@@ -700,6 +718,11 @@ namespace Knossos.NET
                 }
             }
 
+            if(standaloneServer)
+            {
+                cmdline += " -standalone";
+            }
+
             if (modFlag.Length > 0)
             {
                 cmdline += " -mod " + modFlag;
@@ -716,16 +739,19 @@ namespace Knossos.NET
                 }
 
                 //In Windows enable the High DPI aware
-                if (SysInfo.IsWindows)
+                try
                 {
-                    using var dpiProccess = new Process();
-                    dpiProccess.StartInfo.FileName = "REG";
-                    dpiProccess.StartInfo.Arguments = "ADD \"HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers\" /V \""+execPath+"\" /T REG_SZ /D HIGHDPIAWARE /F";
-                    dpiProccess.StartInfo.UseShellExecute = false;
-                    dpiProccess.StartInfo.Verb = "runas";
-                    dpiProccess.Start();
-                    dpiProccess.WaitForExit();
-                }
+                    if (SysInfo.IsWindows)
+                    {
+                        using var dpiProccess = new Process();
+                        dpiProccess.StartInfo.FileName = "REG";
+                        dpiProccess.StartInfo.Arguments = "ADD \"HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers\" /V \"" + execPath + "\" /T REG_SZ /D HIGHDPIAWARE /F";
+                        dpiProccess.StartInfo.UseShellExecute = false;
+                        dpiProccess.StartInfo.Verb = "runas";
+                        dpiProccess.Start();
+                        dpiProccess.WaitForExit();
+                    }
+                }catch { }
 
                 //LAUNCH!! FINALLY!
                 using var fso = new Process();

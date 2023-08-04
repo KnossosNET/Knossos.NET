@@ -1,0 +1,63 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="900"
+        x:Class="Knossos.NET.Views.Windows.ServerCreatorView"
+		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+		Icon="/Assets/knossos-icon.ico"
+		WindowStartupLocation="CenterOwner"
+		SizeToContent="WidthAndHeight"
+        Title="PXO Standalone Server Creator">
+	
+	<Design.DataContext>
+		<vm:ServerCreatorViewModel/>
+	</Design.DataContext>
+
+	<ScrollViewer Background="#18191A">
+		<StackPanel>
+			<Label HorizontalAlignment="Center" FontWeight="Bold" FontSize="22">Select a mod</Label>
+			<ComboBox MinWidth="400" HorizontalAlignment="Center" SelectedIndex="{Binding ModIndex}" ItemsSource="{Binding ListOfMods}"></ComboBox>
+			
+			<Grid Margin="15" HorizontalAlignment="Center" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,Auto">
+				<Label Grid.Row="0" FontWeight="Bold" FontSize="18">Server Name</Label>
+				<TextBox Text="{Binding Name}" MinWidth="200" Grid.Row="0" Grid.Column="1"></TextBox>
+				
+				<Label Grid.Row="1" FontWeight="Bold" FontSize="18">Server Password</Label>
+				<TextBox Margin="0,5,0,5" Text="{Binding Password}" MinWidth="200" Grid.Row="1" Grid.Column="1"></TextBox>
+				
+				<Label Grid.Row="2" Grid.Column="0" FontWeight="Bold" FontSize="18">Use PXO?</Label>
+				<CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding UsePxo}"></CheckBox>
+
+				<Label IsVisible="{Binding UsePxo}" Grid.Row="3" Grid.Column="0" FontWeight="Bold" FontSize="18">PXO Channel</Label>
+				<TextBox IsVisible="{Binding UsePxo}" Text="{Binding PxoChannel}" MinWidth="200" Grid.Row="3" Grid.Column="1"></TextBox>
+
+				<Label Grid.Row="4" Grid.Column="0" FontWeight="Bold" FontSize="18">Server Port</Label>
+				<NumericUpDown Minimum="0" Margin="0,5,0,5" Grid.Row="4" Grid.Column="1" Value="{Binding Port}"></NumericUpDown>
+
+				<Label Grid.Row="5" Grid.Column="0" FontWeight="Bold" FontSize="18">Ban List</Label>
+				<ScrollViewer Grid.Row="5" Grid.Column="1" MaxHeight="150">
+					<TextBox TextWrapping="Wrap"  AcceptsReturn="True" Text="{Binding BanList}" MinWidth="200" Height="150" ></TextBox>
+				</ScrollViewer>
+				<Label Grid.Row="6" Grid.Column="1">*One Callsign per line</Label>
+				<Label Grid.Row="7" Grid.Column="0" FontWeight="Bold" FontSize="18">Extra options</Label>
+				<ScrollViewer Margin="0,5,0,5" Grid.Row="7" Grid.Column="1" MaxHeight="150">
+					<TextBox TextWrapping="Wrap"  AcceptsReturn="True" Text="{Binding ExtraOptions}" MinWidth="200" Height="150" ></TextBox>
+				</ScrollViewer>
+				<Label Grid.Row="8" Grid.Column="1">*One Option per line</Label>
+			</Grid>
+			<WrapPanel HorizontalAlignment="Center">
+				<Button Command="{Binding SaveCFG}" Margin="5" FontWeight="Bold">Save Data</Button>
+				<Button Command="{Binding OpenCFG}" Margin="5" FontWeight="Bold">Manually Edit CFG</Button>
+				<Button Command="{Binding OpenModSettings}" Margin="5" FontWeight="Bold">Mod Settings</Button>
+			</WrapPanel>
+			<Button Command="{Binding LaunchServer}" FontWeight="Bold" HorizontalAlignment="Center">Create Server</Button>
+			<Label Margin="5" HorizontalAlignment="Center">Build type</Label>
+			<WrapPanel HorizontalAlignment="Center">
+				<Label VerticalAlignment="Center">Release</Label>
+				<Slider Value="{Binding BuildType}" Width="100" Minimum="0" Maximum="1" ></Slider>
+				<Label VerticalAlignment="Center">Debug</Label>
+			</WrapPanel>
+		</StackPanel>
+	</ScrollViewer>
+</Window>

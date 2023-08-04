@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="1000"
 			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
 			 x:Class="Knossos.NET.Views.PxoView">
 	
@@ -10,44 +10,62 @@
 		<vm:PxoViewModel/>
 	</Design.DataContext>
 
-	<Grid RowDefinitions="Auto,*,Auto">
-		<StackPanel>
-			<TextBlock Margin="10" FontSize="24" TextWrapping="Wrap">PXO is the Freespace 2 Open Multiplayer system</TextBlock>
-			<TextBlock Margin="10" TextWrapping="Wrap">Multiplayer games are listed here by using the PXO Api. You can refresh the list by pressing the button below. There is a small hourly limit on refreshes.</TextBlock>
+	<ScrollViewer>
+		<StackPanel Margin="5">
+			<TextBlock FontWeight="Bold" FontSize="24" TextWrapping="Wrap">PXO is the Freespace 2 Open Multiplayer System</TextBlock>
+			<TextBlock TextWrapping="Wrap">Current ongoing Multiplayer games are listed here. There is a small hourly limit on list refreshes.</TextBlock>
+		
+			<Grid ColumnDefinitions="*,Auto" Margin="5">
+					<StackPanel Grid.Column="1" MaxWidth="200">
+						<TextBlock  TextWrapping="Wrap">To play FSO Multiplayer you will first need to register a PXO account here:</TextBlock>
+						<Button Command="{Binding OpenPXOWeb}">https://pxo.nottheeye.com/</Button>
+						<TextBlock TextWrapping="Wrap">And then input the "Game Credentials" below and save*</TextBlock>
+						<Label>Login:</Label>
+						<TextBox Text="{Binding Login}"></TextBox>
+						<Label>Password:</Label>
+						<TextBox PasswordChar="*" Text="{Binding Password}"></TextBox>
+						<Button Command="{Binding SavePXOCredentials}" Margin="5" HorizontalAlignment="Center">Save Data</Button>
+						<TextBlock TextWrapping="Wrap">*You can also do this ingame by pressing (F2), then going to "Multi", enable PXO and input the data in the "login" and "password" fields.</TextBlock>
+						<TextBlock Margin="0,10,0,0" TextWrapping="Wrap">Now you can create a multiplayer pilot in-game and join the multiplayer lobby.</TextBlock>
+						<StackPanel Margin="0,30,0,0">
+							<TextBlock HorizontalAlignment="Center" FontWeight="Bold" FontSize="20">Standalone Servers</TextBlock>
+							<TextBlock TextWrapping="Wrap">You can create a dedicated multiplayer server were other people can join in and play.</TextBlock>
+							<Button Command="{Binding OpenServerCreator}" Margin="5" HorizontalAlignment="Center">Open Server Creator</Button>
+						</StackPanel>
+					</StackPanel>
+			
+				<StackPanel Margin="5" Grid.Column="0">
+
+					<Button Command="{Binding RefreshData}">Refresh Game List</Button>
+					<TreeView Margin="10,0,0,0"  ItemsSource="{Binding ActiveGames}">
+						<TreeView.Styles>
+							<Style Selector="TreeViewItem">
+								<Setter Property="IsExpanded" Value="True" />
+							</Style>
+						</TreeView.Styles>
+						<TreeView.DataTemplates>
+							<TreeDataTemplate DataType="vm:PxoGamesActive" ItemsSource="{Binding Servers}">
+								<TextBlock FontWeight="Bold" Text="{Binding Game}" />
+							</TreeDataTemplate>
+							<DataTemplate DataType="vm:PxoServer">
+								<WrapPanel>
+									<TextBlock Text="{Binding Game.Name}" Width="300" />
+									<TextBlock Text="{Binding Game.NumPlayers}" Width="15" />
+									<TextBlock Text="/ "/>
+									<TextBlock Text="{Binding Game.MaxPlayers}" Width="15" />
+									<TextBlock Margin="10,0,0,0" Text="{Binding Game.Mode}" Width="100"/>
+									<TextBlock Text="{Binding Game.Type}" Width="100"/>
+									<TextBlock Text="{Binding Game.State}" Width="100"/>
+									<TextBlock Text="{Binding Game.Mission}" Width="150"/>
+									<TextBlock Text="{Binding Game.Channel}" Width="80"/>
+									<TextBlock Text="{Binding Probe}"  />
+								</WrapPanel>
+							</DataTemplate>
+						</TreeView.DataTemplates>
+					</TreeView>
+				</StackPanel>
+		
+			</Grid>
 		</StackPanel>
-		<StackPanel Margin="5" Grid.Row="1">
-			<Button Command="{Binding RefreshData}">Refresh Game List</Button>
-			<TreeView Margin="10,0,0,0"  ItemsSource="{Binding ActiveGames}">
-				<TreeView.Styles>
-					<Style Selector="TreeViewItem">
-						<Setter Property="IsExpanded" Value="True" />
-					</Style>
-				</TreeView.Styles>
-				<TreeView.DataTemplates>
-					<TreeDataTemplate DataType="vm:PxoGamesActive" ItemsSource="{Binding Servers}">
-						<TextBlock FontWeight="Bold" Text="{Binding Game}" />
-					</TreeDataTemplate>
-					<DataTemplate DataType="vm:PxoServer">
-						<WrapPanel>
-							<TextBlock Text="{Binding Game.Name}" Width="300" />
-							<TextBlock Text="{Binding Game.NumPlayers}" Width="15" />
-							<TextBlock Text="/ "/>
-							<TextBlock Text="{Binding Game.MaxPlayers}" Width="15" />
-							<TextBlock Margin="10,0,0,0" Text="{Binding Game.Mode}" Width="100"/>
-							<TextBlock Text="{Binding Game.Type}" Width="100"/>
-							<TextBlock Text="{Binding Game.State}" Width="100"/>
-							<TextBlock Text="{Binding Game.Mission}" Width="150"/>
-							<TextBlock Text="{Binding Game.Channel}" Width="80"/>
-							<TextBlock Text="{Binding Probe}"  />
-						</WrapPanel>
-					</DataTemplate>
-				</TreeView.DataTemplates>
-			</TreeView>
-		</StackPanel>
-		<StackPanel Grid.Row="2" Margin="10,20,0,30">
-			<TextBlock>To play FSO Multiplayer you will first need to register a PXO account here</TextBlock>
-			<Button Command="{Binding OpenPXOWeb}">https://pxo.nottheeye.com/</Button>
-			<TextBlock>And then input the PXO account login number and password in the multiplayer configuration in-game.</TextBlock>
-		</StackPanel>
-	</Grid>
+	</ScrollViewer>
 </UserControl>

@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using Knossos.NET.Views.Windows;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -54,7 +55,12 @@ namespace Knossos.NET.ViewModels
         private bool initialLoadDone = false;
 
         [ObservableProperty]
-        private List<PxoGamesActive> activeGames = new List<PxoGamesActive>();
+        internal List<PxoGamesActive> activeGames = new List<PxoGamesActive>();
+
+        [ObservableProperty]
+        internal string login = string.Empty;
+        [ObservableProperty]
+        internal string password = string.Empty;
 
         public PxoViewModel()
         {
@@ -68,10 +74,50 @@ namespace Knossos.NET.ViewModels
 
         public void InitialLoad()
         {
+            Login = Knossos.globalSettings.pxoLogin;
+            Password = Knossos.globalSettings.pxoPassword;
             if (!initialLoadDone)
             {
                 RefreshData();
                 initialLoadDone = true;
+            }
+        }
+
+        internal async void SavePXOCredentials()
+        {
+            Login = Login.Replace(" ","");
+            Password = Password.Replace(" ", "");
+            if (Login == string.Empty || Password == string.Empty)
+            {
+                await MessageBox.Show(MainWindow.instance!, "The PXO Login and Password cant be empty.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                return;
+            }
+
+            if (!Login.All(char.IsDigit) || Login.Length > 8)
+            {
+                await MessageBox.Show(MainWindow.instance!, "The PXO Login can only contain digits and have a max length of 8.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                return;
+            }
+
+            if (Password.All(char.IsDigit) || !Password.All(char.IsLower) || Password.Length != 12)
+            {
+                await MessageBox.Show(MainWindow.instance!, "The PXO Password can only contain 12 lowercase letters.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                return;
+            }
+
+            Knossos.globalSettings.pxoLogin = Login;
+            Knossos.globalSettings.pxoPassword = Password;
+            Knossos.globalSettings.WriteFS2IniValues();
+        }
+
+        internal async void OpenServerCreator()
+        {
+            if (MainWindow.instance != null)
+            {
+                var dialog = new ServerCreatorView();
+                dialog.DataContext = new ServerCreatorViewModel();
+
+                await dialog.ShowDialog<ServerCreatorView?>(MainWindow.instance);
             }
         }
 

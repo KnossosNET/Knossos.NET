@@ -141,6 +141,10 @@ namespace Knossos.NET.Models
         public string fs2Lang { get; set; } = "English";
         [JsonIgnore]
         public uint multiPort { get; set; } = 7808;
+        [JsonIgnore]
+        public string pxoLogin { get; set; } = "";
+        [JsonIgnore]
+        public string pxoPassword { get; set; } = "";
 
         [JsonPropertyName("hide_build_rc")]
         public bool hideBuildRC { get; set; } = true;
@@ -438,6 +442,16 @@ namespace Knossos.NET.Models
                 {
                     mouseSensitivity = uint.Parse(data["Input"]["MouseSensitivity"]);
                 }
+
+                //PXO
+                if (!string.IsNullOrEmpty(data["PXO"]["Login"]))
+                {
+                    pxoLogin = data["PXO"]["Login"];
+                }
+                if (!string.IsNullOrEmpty(data["PXO"]["Password"]))
+                {
+                    pxoPassword = data["PXO"]["Password"];
+                }
             }
             catch(Exception ex)
             {
@@ -642,7 +656,11 @@ namespace Knossos.NET.Models
                 data["Input"]["JoystickDeadZone"] = joystickDeadZone.ToString();
                 data["Input"]["JoystickSensitivity"] = joystickSensitivity.ToString();
                 data["Input"]["MouseSensitivity"] = mouseSensitivity.ToString();
-                if(iniWatcher!= null)
+
+                data["PXO"]["Login"] = pxoLogin;
+                data["PXO"]["Password"] = pxoPassword;
+
+                if (iniWatcher!= null)
                     iniWatcher.EnableRaisingEvents = false;
                 parser.WriteFile(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini", data, new UTF8Encoding(false));
                 if(iniWatcher!= null)
