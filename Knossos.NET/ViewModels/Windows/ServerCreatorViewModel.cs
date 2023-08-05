@@ -43,7 +43,7 @@ namespace Knossos.NET.ViewModels
         internal string banList = string.Empty;
 
         [ObservableProperty]
-        internal string pxoChannel = "Eleh";
+        internal string pxoChannel = "#Eleh";
 
         [ObservableProperty]
         internal bool usePxo = false;
@@ -69,7 +69,7 @@ namespace Knossos.NET.ViewModels
             Name = Password = null;
             UsePxo = NoVoice = false;
             Port = BuildType = 0;
-            PxoChannel = "Eleh";
+            PxoChannel = "#Eleh";
             try
             {
                 if (ModIndex >= 0)
