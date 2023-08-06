@@ -2343,6 +2343,7 @@ namespace Knossos.NET.ViewModels
             try
             {
                 bool isJson = false;
+                Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.Download()", "Downloading file: " + downloadUrl);
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
                 HttpClientHandler handler = new HttpClientHandler();
                 handler.AllowAutoRedirect = true;
