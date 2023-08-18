@@ -29,60 +29,154 @@ namespace Knossos.NET
         public static bool flagDataLoaded = false;
         private static object? ttsObject = null;
 
-        public static async void StartUp()
-        {            
-            //See if the data folder works
+        public static async void StartUp(bool isQuickLaunch)
+        {
             try
             {
-                if (!Directory.Exists(SysInfo.GetKnossosDataFolderPath()))
+                //See if the data folder works
+                try
                 {
-                    Directory.CreateDirectory(SysInfo.GetKnossosDataFolderPath());
+                    if (!Directory.Exists(SysInfo.GetKnossosDataFolderPath()))
+                    {
+                        Directory.CreateDirectory(SysInfo.GetKnossosDataFolderPath());
+                    }
+                    else
+                    {
+                        // Test if we can write to the data directory
+                        using (StreamWriter writer = new StreamWriter(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "test.txt"))
+                        {
+                            writer.WriteLine("test");
+                        }
+                        File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "test.txt");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "Knossos.StartUp()", ex);
+                    if (MainWindow.instance != null)
+                    {
+                        await MessageBox.Show(MainWindow.instance, "Unable to write to KnossosNET data folder.", "KnossosNET Error", MessageBox.MessageBoxButtons.OK);
+                    }
+                }
+
+                Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "=== KnossosNET Start ===");
+
+                //Load language files
+                Lang.LoadFiles();
+
+                //Load knossos config
+                globalSettings.Load();
+
+                //Check for updates
+                if (globalSettings.checkUpdate && !isQuickLaunch)
+                {
+                    await CheckKnetUpdates();
+                    await Task.Delay(300);
+                    CleanUpdateFiles();
+                }
+
+                //Load base path from knossos legacy
+                if (globalSettings.basePath == null)
+                {
+                    globalSettings.basePath = SysInfo.GetBasePathFromKnossosLegacy();
+                }
+
+                LoadBasePath(isQuickLaunch);
+
+                if (globalSettings.basePath == null && !isQuickLaunch)
+                    OpenQuickSetup();
+
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Knossos.StartUp", ex);
+            }
+        }
+
+        private static async Task QuickLaunch()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            string modid = string.Empty;
+            string modver = string.Empty;
+            bool saveID = false;
+            bool saveVer = false;
+
+            foreach (var arg in args)
+            {
+                Log.Add(Log.LogSeverity.Information, "Knossos.StartUp", "Knet Cmdline Arg: " + arg);
+                if (saveID)
+                {
+                    saveID = false;
+                    modid = arg;
+                }
+                if (saveVer)
+                {
+                    saveVer = false;
+                    modver = arg;
+                }
+                if (arg.ToLower() == "-playmod")
+                {
+                    saveID = true;
+                }
+                if (arg.ToLower() == "-version")
+                {
+                    saveVer = true;
+                }
+            }
+
+            if(modid != string.Empty)
+            {
+                if(modver != string.Empty)
+                {
+                    var mod = GetInstalledMod(modid, modver);
+                    if(mod != null)
+                    {
+                        PlayMod(mod, FsoExecType.Release);
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Knossos.QuickLaunch", "Quick launch was used but the modid and modver was not found. Used modid: "+modid + " modver: "+modver);
+                    }
                 }
                 else
                 {
-                    // Test if we can write to the data directory
-                    using (StreamWriter writer = new StreamWriter(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "test.txt"))
+                    var modlist = GetInstalledModList(modid);
+                    if(modlist != null && modlist.Count() > 0)
                     {
-                        writer.WriteLine("test");
+                        Mod? mod = null;
+                        if (modlist.Count() > 1)
+                        {
+                            foreach (var m in modlist)
+                            {
+                                if (mod == null || SemanticVersion.Compare(m.version, mod.version) > 0)
+                                {
+                                    mod = m;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            mod = modlist[0];
+                        }
+
+                        if(mod != null)
+                        {
+                            PlayMod(mod, FsoExecType.Release);
+                        }
                     }
-                    File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "test.txt");
-                }
-            }catch(Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error,"Knossos.StartUp()",ex);
-                if (MainWindow.instance != null)
-                {
-                    await MessageBox.Show(MainWindow.instance, "Unable to write to KnossosNET data folder." , "KnossosNET Error", MessageBox.MessageBoxButtons.OK);
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Knossos.QuickLaunch", "Quick launch was used but the modid was not found. Used modid: " + modid);
+                    }
                 }
             }
-
-            Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "=== KnossosNET Start ===");
-
-            //Load language files
-            Lang.LoadFiles();
-
-            //Load knossos config
-            globalSettings.Load();
-
-            //Check for updates
-            if(globalSettings.checkUpdate)
+            else
             {
-                await CheckKnetUpdates();
-                await Task.Delay(300);
-                CleanUpdateFiles();
+                Log.Add(Log.LogSeverity.Error, "Knossos.QuickLaunch", "Quick launch was used but the modid was not detected.");
             }
-
-            //Load base path from knossos legacy
-            if (globalSettings.basePath == null)
-            {
-                globalSettings.basePath = SysInfo.GetBasePathFromKnossosLegacy();
-            }
-
-            LoadBasePath();
-
-            if (globalSettings.basePath == null)
-                OpenQuickSetup();
+            await Task.Delay(2000);
+            MainWindow.instance!.Close();
         }
+
         private static void CleanUpdateFiles()
         {
             try
@@ -202,42 +296,104 @@ namespace Knossos.NET
                                     }
 
                                     //Decompress new files
-                                    using (var archive = ArchiveFactory.Open(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update.zip"))
+                                    try
                                     {
-                                        try
+                                        using (var archive = ArchiveFactory.Open(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update.zip"))
                                         {
-                                            var reader = archive.ExtractAllEntries();
-                                            while (reader.MoveToNextEntry())
+                                            try
                                             {
-                                                if (!reader.Entry.IsDirectory)
+                                                var reader = archive.ExtractAllEntries();
+                                                while (reader.MoveToNextEntry())
                                                 {
-                                                    reader.WriteEntryToDirectory(appDirPath!, new ExtractionOptions() { ExtractFullPath = false, Overwrite = true });
+                                                    if (!reader.Entry.IsDirectory)
+                                                    {
+                                                        reader.WriteEntryToDirectory(appDirPath!, new ExtractionOptions() { ExtractFullPath = false, Overwrite = true });
+                                                    }
                                                 }
                                             }
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
-                                        }
+                                            catch (Exception ex)
+                                            {
+                                                Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
+                                            }
 
-                                        //Start again
+                                            //Start again
+                                            try
+                                            {
+                                                if (SysInfo.IsMacOS || SysInfo.IsLinux)
+                                                {
+                                                    SysInfo.Chmod(Path.Combine(appDirPath, execName!), "+x");
+                                                }
+                                                Process p = new Process();
+                                                p.StartInfo.FileName = Path.Combine(appDirPath, execName!);
+                                                p.Start();
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
+                                            }
+
+                                            //Close App
+                                            MainWindow.instance!.Close();
+                                        }
+                                    }catch(Exception ex)
+                                    {
+                                        //Rollback
                                         try
                                         {
-                                            if(SysInfo.IsMacOS || SysInfo.IsLinux)
+                                            File.Move(execName + ".old", execName!, true);
+                                        }
+                                        catch { }
+                                        if (SysInfo.IsWindows)
+                                        {
+                                            try
                                             {
-                                                SysInfo.Chmod(Path.Combine(appDirPath, execName!),"+x");
+                                                File.Move(Path.Combine(appDirPath, "av_libglesv2.dll.old"), Path.Combine(appDirPath, "av_libglesv2.dll"), true);
                                             }
-                                            Process p = new Process();
-                                            p.StartInfo.FileName = Path.Combine(appDirPath, execName!);
-                                            p.Start();
+                                            catch { }
+                                            try
+                                            {
+                                                File.Move(Path.Combine(appDirPath, "libSkiaSharp.dll.old"), Path.Combine(appDirPath, "libSkiaSharp.dll"), true);
+                                            }
+                                            catch { }
+                                            try
+                                            {
+                                                File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.dll.old"), Path.Combine(appDirPath, "libHarfBuzzSharp.dll"), true);
+                                            }
+                                            catch { }
                                         }
-                                        catch (Exception ex)
-                                        { 
-                                            Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
+                                        if (SysInfo.IsLinux)
+                                        {
+                                            try
+                                            {
+                                                File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.so.old"), Path.Combine(appDirPath, "libHarfBuzzSharp.so"), true);
+                                            }
+                                            catch { }
+                                            try
+                                            {
+                                                File.Move(Path.Combine(appDirPath, "libSkiaSharp.so.old"), Path.Combine(appDirPath, "libSkiaSharp.so"), true);
+                                            }
+                                            catch { }
                                         }
-
-                                        //Close App
-                                        MainWindow.instance!.Close();
+                                        if (SysInfo.IsMacOS)
+                                        {
+                                            try
+                                            {
+                                                File.Move(Path.Combine(appDirPath, "libAvaloniaNative.dylib.old"), Path.Combine(appDirPath, "libAvaloniaNative.dylib"), true);
+                                            }
+                                            catch { }
+                                            try
+                                            {
+                                                File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.dylib.old"), Path.Combine(appDirPath, "libHarfBuzzSharp.dylib"), true);
+                                            }
+                                            catch { }
+                                            try
+                                            {
+                                                File.Move(Path.Combine(appDirPath, "libSkiaSharp.dylib.old"), Path.Combine(appDirPath, "libSkiaSharp.dylib"), true);
+                                            }
+                                            catch { }
+                                        }
+                                        await MessageBox.Show(MainWindow.instance, "Error during update file decompression. Update was cancelled.", "Decompression failed", MessageBox.MessageBoxButtons.OK);
+                                        Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
                                     }
                                 }
                             }
@@ -288,21 +444,28 @@ namespace Knossos.NET
             });
         }
 
-        public async static void LoadBasePath()
+        public async static void LoadBasePath(bool isQuickLaunch = false)
         {
             if (globalSettings.basePath != null)
             {
-                await FolderSearchRecursive(globalSettings.basePath);
+                await FolderSearchRecursive(globalSettings.basePath, isQuickLaunch);
 
-                //Red border for mod with missing deps
-                MainWindowViewModel.Instance?.RunDependenciesCheck();
+                if (!isQuickLaunch)
+                {
+                    //Red border for mod with missing deps
+                    MainWindowViewModel.Instance?.RunDependenciesCheck();
 
-                //Load config options to view, must be done after loading the fso builds due to flag data
-                MainWindowViewModel.Instance?.GlobalSettingsLoadData();
+                    //Load config options to view, must be done after loading the fso builds due to flag data
+                    MainWindowViewModel.Instance?.GlobalSettingsLoadData();
 
-                //Enter the nebula
-                //Note: this has to be done after scanning the local folder
-                await Task.Run(() => { Nebula.Trinity(); });
+                    //Enter the nebula
+                    //Note: this has to be done after scanning the local folder
+                    await Task.Run(() => { Nebula.Trinity(); });
+                }
+                else
+                {
+                    await QuickLaunch();
+                }
             }
         }
 
@@ -818,7 +981,7 @@ namespace Knossos.NET
             }
         }
 
-        private static async Task FolderSearchRecursive(string path, int folderLevel=0)
+        private static async Task FolderSearchRecursive(string path, bool isQuickLaunch, int folderLevel=0)
         {
             try
             {
@@ -829,7 +992,7 @@ namespace Knossos.NET
                 {
                     foreach (DirectoryInfo dir in arrDir)
                     {
-                        await FolderSearchRecursive(dir.ToString() + Path.DirectorySeparatorChar, folderLevel + 1);
+                        await FolderSearchRecursive(dir.ToString() + Path.DirectorySeparatorChar, isQuickLaunch, folderLevel + 1);
                     }
                 }
 
@@ -857,13 +1020,15 @@ namespace Knossos.NET
                                         Log.Add(Log.LogSeverity.Information, "Knossos.FolderSearchRecursive", "Found FS2 Root Pack!");
                                     }
                                 }
-                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(modJson), DispatcherPriority.Background);
+                                if(!isQuickLaunch)
+                                    await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(modJson), DispatcherPriority.Background);
                                 break;
 
                             case "engine":
                                 var build = new FsoBuild(modJson);
                                 engineBuilds.Add(build);
-                                await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(build), DispatcherPriority.Background);
+                                if(!isQuickLaunch)
+                                    await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(build), DispatcherPriority.Background);
                                 break;
                         }
                     }

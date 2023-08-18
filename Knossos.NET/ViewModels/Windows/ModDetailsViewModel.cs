@@ -1,5 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using BBcodes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
@@ -8,11 +10,41 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Knossos.NET.ViewModels
 {
+    public class ScreenshotItem
+    {
+        public Bitmap image { get; set; }
+        public bool video { get; set; } = false;
+
+        public string url { get; set; }
+
+        public ScreenshotItem(Bitmap image, bool isVideo = false)
+        {
+            this.image = image;
+            this.video = isVideo;
+            this.url = string.Empty;
+        }
+
+        internal void OpenVideo(object url)
+        {
+            try
+            {
+                Knossos.OpenBrowserURL((string)url);
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "ScreenshotItem.OpenVideo", ex);
+            }
+        }
+    }
+
     public partial class ModDetailsViewModel : ViewModelBase
     {
         private List<Mod> modVersions = new List<Mod>();
@@ -37,6 +69,10 @@ namespace Knossos.NET.ViewModels
         private bool isPlayingTTS = false;
         [ObservableProperty]
         private bool ttsAvalible = true;
+        [ObservableProperty]
+        private bool hasBanner = false;
+        [ObservableProperty]
+        private ObservableCollection<ScreenshotItem> screenshots = new ObservableCollection<ScreenshotItem>();
         private ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
         private int itemSelectedIndex = 0;
@@ -107,7 +143,9 @@ namespace Knossos.NET.ViewModels
                 await Task.Delay(delay);
             }
             IsPlayingTTS = true;
-            Knossos.Tts(Regex.Replace(modVersions[ItemSelectedIndex].description!, @" ?\[.*?\]", string.Empty),null, null, CompletedCallback);
+            var cleanDescriptionString = Regex.Replace(modVersions[ItemSelectedIndex].description!, @" ?\[.*?\]", string.Empty);
+            cleanDescriptionString = Regex.Replace(cleanDescriptionString, @" ?\<.*?\>", string.Empty);
+            Knossos.Tts(cleanDescriptionString, null, null, CompletedCallback);
         }
 
         private bool CompletedCallback()
@@ -118,30 +156,44 @@ namespace Knossos.NET.ViewModels
 
         private void LoadVersion(int index)
         {
-            Name = modVersions[index].title;
-            LastUpdated = modVersions[index].lastUpdate;
-            Description = modVersions[index].description;
-            Released = modVersions[index].firstRelease;
-            IsInstalled = modVersions[index].installed;
-            if (modVersions[index].releaseThread != null)
+            try
             {
-                ForumAvalible = true;
+                Name = modVersions[index].title;
+                LastUpdated = modVersions[index].lastUpdate;
+                if (modVersions[index].description != null)
+                {
+                    var html = BBCode.ConvertToHtml(modVersions[index].description!, BBCode.BasicRules);
+                    Description = "<body style=\"overflow: hidden;\"><span style=\"white-space: pre-line;color:white;overflow: hidden;\">" + html + "</span></body>";
+                    //Log.WriteToConsole(html);
+                }
+                Released = modVersions[index].firstRelease;
+                IsInstalled = modVersions[index].installed;
+                if (modVersions[index].releaseThread != null)
+                {
+                    ForumAvalible = true;
+                }
+                else
+                {
+                    ForumAvalible = false;
+                }
+                LoadBanner(index);
+                LoadScreenshots(index);
+                modCard?.SwitchModVersion(index);
             }
-            else
+            catch (Exception ex)
             {
-                ForumAvalible = false;
+                Log.Add(Log.LogSeverity.Error, "ModDetailsViewModel.LoadVersion()", ex);
             }
-            LoadImage(index);
-            modCard?.SwitchModVersion(index);
         }
 
-        private void LoadImage(int selectedIndex)
+        private void LoadBanner(int selectedIndex)
         {
             try
             {
                 if (!string.IsNullOrEmpty(modVersions[selectedIndex].banner))
                 {
-                    if(System.IO.File.Exists(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner))
+                    HasBanner = true;
+                    if (System.IO.File.Exists(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner))
                     {
                         Banner = new Bitmap(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner);
                     }
@@ -150,32 +202,167 @@ namespace Knossos.NET.ViewModels
                         var url = modVersions[selectedIndex].banner;
                         if (url != null && url.ToLower().Contains("http"))
                         {
+                            Banner?.Dispose();
+                            Banner = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/loading.png")));
                             DownloadImage(url);
+                        }
+                    }
+                }
+                else
+                {
+                    HasBanner = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Warning, "ModDetailsViewModel.LoadImage", ex);
+            }
+        }
+
+        private void LoadScreenshots(int selectedIndex)
+        {
+            try
+            {
+                Screenshots.Clear();
+                //Add Videos
+                if(modVersions[selectedIndex].videos != null && modVersions[selectedIndex].screenshots!.Count() > 0)
+                {
+                    foreach (var vid in modVersions[selectedIndex].videos!)
+                    {
+                        try
+                        {
+                            DownloadVideoThumbnail(vid);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Warning, "ModDetailsViewModel.LoadScreenshots", ex);
+                        }
+                    }
+                }
+
+                if (modVersions[selectedIndex].screenshots != null && modVersions[selectedIndex].screenshots!.Count() > 0 )
+                {
+                    foreach (var scn in modVersions[selectedIndex].screenshots!)
+                    {
+                        try
+                        {
+                            if (System.IO.File.Exists(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + scn))
+                            {
+                                var bitmap = new Bitmap(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + scn);
+                                var item = new ScreenshotItem(bitmap);
+                                Screenshots.Add(item);
+                            }
+                            else
+                            {
+                                if (scn.ToLower().Contains("http"))
+                                {
+                                    DownloadImage(scn, true);
+                                }
+                            }
+                        }catch (Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Warning, "ModDetailsViewModel.LoadScreenshots", ex);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                Log.Add(Log.LogSeverity.Warning, "ModCardViewModel.LoadImage", ex);
+                Log.Add(Log.LogSeverity.Warning, "ModDetailsViewModel.LoadScreenshots", ex);
             }
         }
 
-        private async void DownloadImage(string url)
+        private async void DownloadImage(string url, bool screenshoot = false)
         {
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
+                    client.Timeout = TimeSpan.FromSeconds(5);
                     HttpResponseMessage response = await client.GetAsync(url);
                     byte[] content = await response.Content.ReadAsByteArrayAsync();
                     Stream stream = new MemoryStream(content);
-                    Banner = new Avalonia.Media.Imaging.Bitmap(stream);
+                    if (!screenshoot)
+                        Banner = new Bitmap(stream);
+                    else
+                    {
+                        var item = new ScreenshotItem(new Bitmap(stream));
+                        Screenshots.Add(item);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Log.Add(Log.LogSeverity.Warning, "ModCardViewModel.DownloadImage", ex);
+                Log.Add(Log.LogSeverity.Warning, "ModDetailsViewModel.DownloadImage", ex);
+            }
+        }
+
+        private async void DownloadVideoThumbnail(string url)
+        {
+            try
+            {
+                var imageUrl = string.Empty;
+
+                if (url.ToLower().Contains("youtu"))
+                {
+                    string? id = GetYouTubeVideoId(new Uri(url));
+                    if(id != null)
+                        imageUrl = "https://img.youtube.com/vi/" + id + "/hqdefault.jpg";
+                }
+
+
+                if (imageUrl != string.Empty)
+                {
+                    using (HttpClient client = new HttpClient())
+                    {
+                        client.Timeout = TimeSpan.FromSeconds(5);
+                        HttpResponseMessage response = await client.GetAsync(imageUrl);
+                        byte[] content = await response.Content.ReadAsByteArrayAsync();
+                        Stream stream = new MemoryStream(content);
+                        var item = new ScreenshotItem(new Bitmap(stream), true);
+                        item.url = url;
+                        Screenshots.Add(item);
+                    }
+                }
+                else
+                {
+                    var item = new ScreenshotItem(new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/loading.png"))), true);
+                    item.url = url;
+                    Screenshots.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                var item = new ScreenshotItem(new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/loading.png"))), true);
+                item.url = url;
+                Screenshots.Add(item);
+                Log.Add(Log.LogSeverity.Warning, "ModDetailsViewModel.DownloadVideoThumbnail", ex);
+            }
+        }
+
+        private string? GetYouTubeVideoId(Uri uri)
+        {
+            var query = HttpUtility.ParseQueryString(uri.Query);
+
+            if (query.AllKeys.Contains("v"))
+            {
+                return Regex.Match(query["v"]!, @"^[a-zA-Z0-9_-]{11}$").Value;
+            }
+            else if (query.AllKeys.Contains("u"))
+            {
+                return Regex.Match(query["u"]!, @"/watch\?v=([a-zA-Z0-9_-]{11})").Groups[1].Value;
+            }
+            else
+            {
+                var last = uri.Segments.Last().Replace("/", "");
+                if (Regex.IsMatch(last, @"^v=[a-zA-Z0-9_-]{11}$"))
+                    return last.Replace("v=", "");
+
+                string[] segments = uri.Segments;
+                if (segments.Length > 2 && segments[segments.Length - 2] != "v/" && segments[segments.Length - 2] != "watch/")
+                    return "";
+
+                return Regex.Match(last, @"^[a-zA-Z0-9_-]{11}$").Value;
             }
         }
 

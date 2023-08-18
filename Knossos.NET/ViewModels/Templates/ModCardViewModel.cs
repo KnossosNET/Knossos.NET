@@ -82,12 +82,16 @@ namespace Knossos.NET.ViewModels
             {
                 if (modJson.description.Length > 500)
                 {
-                    Tooltip = Regex.Replace(modJson.description.Substring(0, 500) + "\n...", @" ?\[.*?\]", string.Empty);
+                    var cleanDescriptionString = Regex.Replace(modJson.description.Substring(0, 500) + "\n...", @" ?\[.*?\]", string.Empty);
+                    cleanDescriptionString = Regex.Replace(cleanDescriptionString, @" ?\<.*?\>", string.Empty);
+                    Tooltip = cleanDescriptionString;
 
                 }
                 else
                 {
-                    Tooltip = Regex.Replace(modJson.description, @" ?\[.*?\]", string.Empty);
+                    var cleanDescriptionString = Regex.Replace(modJson.description, @" ?\[.*?\]", string.Empty);
+                    cleanDescriptionString = Regex.Replace(cleanDescriptionString, @" ?\<.*?\>", string.Empty);
+                    Tooltip = cleanDescriptionString;
                 }
             }
 

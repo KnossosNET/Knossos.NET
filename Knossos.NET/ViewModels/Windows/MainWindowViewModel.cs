@@ -61,7 +61,16 @@ namespace Knossos.NET.ViewModels
         public MainWindowViewModel()
         {
             Instance = this;
-            Knossos.StartUp();
+            string[] args = Environment.GetCommandLineArgs();
+            bool isQuickLaunch = false;
+            foreach (var arg in args)
+            {
+                if (arg.ToLower() == "-playmod")
+                {
+                    isQuickLaunch = true;
+                }
+            }
+            Knossos.StartUp(isQuickLaunch);
         }
 
         /* External Commands */

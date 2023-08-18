@@ -21,6 +21,7 @@ namespace Knossos.NET.Models
             {
                 try
                 {
+                    client.Timeout = TimeSpan.FromSeconds(10);
                     client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("product", "1"));
                     HttpResponseMessage response = await client.GetAsync(GitHubRepoURL + "/releases/latest");
                     var json = await response.Content.ReadAsStringAsync();

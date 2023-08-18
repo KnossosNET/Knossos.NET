@@ -130,7 +130,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool ttsMulti = true;
         [ObservableProperty]
-        private bool ttsDescription = true;
+        private bool ttsDescription = false;
         [ObservableProperty]
         private int ttsVolume = 100;
         [ObservableProperty]

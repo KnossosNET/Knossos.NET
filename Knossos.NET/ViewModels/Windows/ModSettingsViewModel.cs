@@ -39,6 +39,8 @@ namespace Knossos.NET.ViewModels
         private bool compressed = false;
         [ObservableProperty]
         private bool isDevMode = false;
+        [ObservableProperty]
+        private string quickLaunch = "";
 
         public ModSettingsViewModel()
         {
@@ -47,7 +49,10 @@ namespace Knossos.NET.ViewModels
 
         public ModSettingsViewModel(Mod modJson, ModCardViewModel? modCard=null)
         {
-            //this.mainWindowViewModel = mainWindowViewModel;
+            try
+            {
+                QuickLaunch = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName + " -playmod " + modJson.id + " -version " + modJson.version;
+            }catch { }
             this.modJson = modJson;
             modCardViewModel = modCard;
             isDevMode = modJson.devMode;

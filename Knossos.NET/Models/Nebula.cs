@@ -329,6 +329,7 @@ namespace Knossos.NET.Models
                 Log.Add(Log.LogSeverity.Information, "Nebula.GetRepoEtag()", "Getting repo.json etag.");
                 using (HttpClient client = new HttpClient())
                 {
+                    client.Timeout = TimeSpan.FromSeconds(10);
                     var result = await client.GetAsync(repoUrl, HttpCompletionOption.ResponseHeadersRead);
                     newEtag = result.Headers?.ETag?.ToString().Replace("\"", "");
                 }

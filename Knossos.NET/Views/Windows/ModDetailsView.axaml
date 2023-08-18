@@ -6,6 +6,7 @@
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="1000"
              x:Class="Knossos.NET.Views.ModDetailsView"
 			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+			 xmlns:HtmlRenderer="clr-namespace:TheArtOfDev.HtmlRenderer.Avalonia;assembly=Avalonia.HtmlRenderer"
 			 Icon="/Assets/knossos-icon.ico"
 			 Width="1070"
 			 WindowStartupLocation="CenterOwner"
@@ -16,10 +17,12 @@
 		<vm:ModDetailsViewModel/>
 	</Design.DataContext>
 
-	<Grid Background="#18191A" ZIndex="0" RowDefinitions="Auto,Auto,*" >
+	<ScrollViewer Background="#18191A">
+	<Grid RowDefinitions="Auto,Auto,*,Auto">
 		<StackPanel Grid.Row="0" Margin="25">
-			<Image Source="{Binding Banner}" HorizontalAlignment="Stretch" MaxHeight="300"></Image>
+			<Image Source="{Binding Banner}" HorizontalAlignment="Stretch" Height="300" IsVisible="{Binding HasBanner}"></Image>
 			<Label Content="{Binding Name}" FontWeight="Bold" FontSize="24" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
+			
 			<!--Buttons and Mod info-->
 			<Grid IsVisible="{Binding IsInstalled}" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto" HorizontalAlignment="Center" Margin="0,10,0,0">
 				<WrapPanel Grid.Row="0" Grid.Column="0">
@@ -33,23 +36,19 @@
 					<Button Command="{Binding ButtonCommandForum}" Content="Forum" IsVisible="{Binding ForumAvalible}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="LightCoral" Margin="5" Width="100" ></Button>
 					<Button IsVisible="{Binding !devMode}" Command="{Binding ButtonCommandDelete, Mode=OneWay}" CommandParameter="{Binding ElementName=DetailsWindow}" Content="Delete" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="5" Width="100" ></Button>
 				</WrapPanel>
-				<Separator Width="50" Grid.Column="2"></Separator>
-				<Label Content="Version" Grid.Column="3" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
-				<ComboBox SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="5" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
+				<Label Content="Version" Grid.Column="3" Margin="20,0,20,0" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
+				<ComboBox SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="20,5,20,0" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
 				<Label Content="Released" Grid.Column="4" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding Released}" Grid.Column="4" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="Last Updated" Grid.Column="5" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding LastUpdated}" Grid.Column="5" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 			</Grid>
+			
 			<!--Nebula View-->
 			<Grid IsVisible="{Binding !IsInstalled}" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto" HorizontalAlignment="Center" Margin="0,10,0,0">
-				<WrapPanel Grid.Row="0" Grid.Column="0">
-
-				</WrapPanel>
 				<WrapPanel Grid.Row="1" Grid.Column="0">
 					<Button Command="{Binding ButtonCommandForum}" Content="Forum" IsVisible="{Binding ForumAvalible}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="LightCoral" Margin="5" Width="100" ></Button>
 				</WrapPanel>
-				<Separator Width="50" Grid.Column="2"></Separator>
 				<Label Content="Newerest Version" Grid.Column="3" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<ComboBox IsEnabled="False" SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="5" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
 				<Label Content="Released" Grid.Column="4" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
@@ -57,15 +56,45 @@
 				<Label Content="Last Updated" Grid.Column="5" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding LastUpdated}" Grid.Column="5" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 			</Grid>
+			
 		</StackPanel>
+
+		<!--TTS Panel-->
 		<WrapPanel Grid.Row="1" HorizontalAlignment="Center" IsVisible="{Binding TtsAvalible}">
 			<Button IsVisible="{Binding IsPlayingTTS}" Background="Black" Command="{Binding StopTts}">Stop</Button>
 			<Button IsVisible="{Binding !IsPlayingTTS}" Margin="5,0,0,0" Background="Black" Command="{Binding PlayDescriptionCommand}">Read Description</Button>
 		</WrapPanel>
-		
-		<ScrollViewer Grid.Row="2" Margin="25">
-			<TextPresenter Text="{Binding Description}" TextAlignment="Center" TextWrapping="Wrap"></TextPresenter>
+
+		<!--Description-->
+		<ScrollViewer MinHeight="200" Grid.Row="2" Margin="20">
+			<HtmlRenderer:HtmlPanel Text="{Binding Description}" Background="Transparent" Margin="10"/>
 		</ScrollViewer>
+
+		<!--Screenshoots/Video-->
+		<Grid MaxWidth="1600" ColumnDefinitions="Auto,*,Auto" Grid.Row="3" Margin="20" IsVisible="{Binding Screenshots.Count}">
+			<Button Name="left" Grid.Column="0" VerticalAlignment="Center" Padding="10,20" Margin="4">
+				<Path Data="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" Fill="Black"/>
+			</Button>
+			<Carousel Name="carousel" Grid.Column="1" ItemsSource="{Binding Screenshots}">
+				<Carousel.PageTransition>
+					<PageSlide Duration="0.25" Orientation="Horizontal" />
+				</Carousel.PageTransition>
+				<Carousel.DataTemplates>
+					<DataTemplate DataType="vm:ScreenshotItem">
+						<Grid>
+							<Image ZIndex="0" Source="{Binding image}"/>
+							<Button IsVisible="{Binding video}" ZIndex="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" Command="{Binding OpenVideo}" CommandParameter="{Binding url}"  >
+								<Image HorizontalAlignment="Center" VerticalAlignment="Center" Height="125" Width="125" Source="/Assets/play-button.png"/>
+							</Button>
+						</Grid>
+					</DataTemplate>
+				</Carousel.DataTemplates>
+			</Carousel>
+			<Button Name="right" Grid.Column="2" VerticalAlignment="Center" Padding="10,20" Margin="4">
+				<Path Data="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" Fill="Black"/>
+			</Button>
+		</Grid>
 	</Grid>
+	</ScrollViewer>
 </Window>
  

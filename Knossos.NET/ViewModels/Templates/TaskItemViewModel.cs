@@ -2348,7 +2348,7 @@ namespace Knossos.NET.ViewModels
                 HttpClientHandler handler = new HttpClientHandler();
                 handler.AllowAutoRedirect = true;
                 handler.AutomaticDecompression = DecompressionMethods.GZip;
-                using HttpClient httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromDays(1) };
+                using HttpClient httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(15) };
                 if (downloadUrl.ToString().ToLower().Contains(".json"))
                 {
                     httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
@@ -2366,6 +2366,7 @@ namespace Knossos.NET.ViewModels
                         if (s == "Accept-Encoding")
                         {
                             var c = new HttpClient();
+                            c.Timeout = TimeSpan.FromSeconds(10);
                             var r = await c.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
                             totalBytes = r.Content.Headers.ContentLength;
                             r.Dispose(); c.Dispose();

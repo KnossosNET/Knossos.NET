@@ -15,14 +15,22 @@ https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.14-wind
 -Working in Windows and Linux<br />
 -Mod compression support<br />
 -MacOS version is untested<br />
--PxoAPI implementation is very basic and WIP<br />
--Mod details is still missing features<br />
+<br /><br />
+**Quick Launch Cmdline:**<br />
+KnossosNET supports direct mod launch by adding a cmdline argument, this will open the launcher, and will launch FSO to play a mod with all the current settings and configurations.<br />
+Example:<br />
+<br />
+KnossosNET.exe -playmod <mod-id> -version <mod-version> (optional)<br />
+<br />
+If no version is given (KnossosNET.exe -playmod <mod-id>) the highest version of the mod will be launched.<br />
+The "Mod Settings" window displays the cmdline to play that mod directly via quick launch.<br />
+
 <br /><br />
 **CmdLine priority explained:**<br />
 On KnossosNET there are multiples sources of cmdline arguments that are eventually joined into a single one to launch the game, repeating arguments are not allowed.<br />
 The priority works in this order.<br />
 <br />
-SystemCMD(Settings) > Global CMD > User/Mod CMD
+SystemCMD(Global Settings) > Global CMD > User/Mod CMD
 <br />
 <br />
 **Dev Enviroment:**<br />
@@ -37,10 +45,11 @@ SystemCMD(Settings) > Global CMD > User/Mod CMD
 <br />
 <br />
 **Current NuGet Packages:**<br />
--Avalonia 11.0.1<br />
--Avalonia.Desktop 11.0.1<br />
--Avalonia.Diagnostics 11.0.1<br />
--Avalonia.Themes.Fluent 11.0.1<br />
+-Avalonia 11.0.3<br />
+-Avalonia.Desktop 11.0.3<br />
+-Avalonia.Diagnostics 11.0.3<br />
+-Avalonia.Themes.Fluent 11.0.3<br />
+-Avalonia.HtmlRenderer 11.0.0<br />
 -CommunityToolkit.Mvvm 8.2.1<br />
 -ini-parser-netstandard 2.5.2<br />
 -SharpCompress 0.33.0
