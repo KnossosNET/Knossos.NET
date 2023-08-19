@@ -52,8 +52,10 @@
 							<!--Normal-->
 							<StackPanel IsVisible="{Binding !devMode}">
 								<Button Command="{Binding ButtonCommandPlay}" Content="Play" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,5,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandUpdate}" Content="Update/Modify" IsVisible="{Binding UpdateAvalible}" FontWeight="Bold" FontSize="11" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Blue" Margin="0,2,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandModify}" Content="Modify" IsVisible="{Binding !UpdateAvalible}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkCyan" Margin="0,5,0,0" Width="100" ></Button>
+								<StackPanel IsVisible="{Binding !IsLocalMod}">
+									<Button Command="{Binding ButtonCommandUpdate}" Content="Update/Modify" IsVisible="{Binding UpdateAvalible}" FontWeight="Bold" FontSize="11" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Blue" Margin="0,2,0,0" Width="100" ></Button>
+									<Button Command="{Binding ButtonCommandModify}" Content="Modify" IsVisible="{Binding !UpdateAvalible}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkCyan" Margin="0,5,0,0" Width="100" ></Button>
+								</StackPanel>
 								<Button Command="{Binding ButtonCommandDetails}" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkGray" Margin="0,2,0,0" Width="100" ></Button>
 								<Button Command="{Binding ButtonCommandSettings}" Content="Settings" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Crimson" Margin="0,2,0,0" Width="100" ></Button>
 							</StackPanel>

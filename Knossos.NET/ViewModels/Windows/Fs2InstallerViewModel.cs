@@ -175,7 +175,7 @@ namespace Knossos.NET.ViewModels
                     fs2Mod.installed = true;
                     fs2Mod.id = "FS2";
                     fs2Mod.title = "Retail FS2";
-                    fs2Mod.type = "tc";
+                    fs2Mod.type = ModType.tc;
                     fs2Mod.parent = "FS2";
                     fs2Mod.version = "1.20.0";
                     fs2Mod.stability = "stable"; //wut?

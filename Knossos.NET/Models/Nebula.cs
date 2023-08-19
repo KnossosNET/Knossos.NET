@@ -23,7 +23,8 @@ namespace Knossos.NET.Models
     {
         //https://cf.fsnebula.org/storage/repo.json
         //https://dl.fsnebula.org/storage/repo.json
-        private static readonly string repoUrl = @"https://aigaion.feralhosting.com/discovery/nebula/repo.json";
+        //https://aigaion.feralhosting.com/discovery/nebula/repo.json
+        private static readonly string repoUrl = @"https://fsnebula.org/storage/repo.json";
         private static readonly bool listFS2Override = false;
         private static CancellationTokenSource? cancellationToken = null;
         public static bool repoLoaded = false;
@@ -148,7 +149,7 @@ namespace Knossos.NET.Models
                         }
                         if (mod != null && !mod.isPrivate)
                         {
-                            if (mod.type == "engine")
+                            if (mod.type == ModType.engine)
                             {
                                 //This is already installed?
                                 var isInstalled = Knossos.GetInstalledBuildsList(mod.id)?.Where(b => b.version == mod.version);
@@ -157,7 +158,7 @@ namespace Knossos.NET.Models
                                     await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod)), DispatcherPriority.Background);
                                 }
                             }
-                            if (mod.type == "tc" || mod.type == "mod" && ( listFS2Override || ( mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound) ) )
+                            if (mod.type == ModType.tc || mod.type == ModType.mod && ( listFS2Override || ( mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound) ) )
                             {
                                 //This is already installed?
                                 var isInstalled = Knossos.GetInstalledModList(mod.id);

@@ -328,7 +328,7 @@ namespace Knossos.NET.ViewModels
                     mod.id = buildId;
                     mod.title = BuildName;
                     mod.description = BuildName;
-                    mod.type = "engine";
+                    mod.type = ModType.engine;
                     mod.stability = "stable";
                     mod.modFlag.Add(buildId);
                     mod.version = BuildVersion;

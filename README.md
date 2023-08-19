@@ -5,9 +5,11 @@
 This project is intended to create a multi platform launcher for Freespace 2 Open using .NET 6.0 and AvaloniaUI<br />
 <br />
 <br />
-**Runtime Requierement:**<br />
-.Net 6.0.14<br />
+
+**Runtime Requirement:**<br />
+.Net 6.0.14 (newer 6.0.x versions also work)<br />
 https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.14-windows-x64-installer<br />
+
 <br /><br />
 **The current status:**<br />
 <br />
@@ -15,15 +17,22 @@ https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.14-wind
 -Working in Windows and Linux<br />
 -Mod compression support<br />
 -MacOS version is untested<br />
+
 <br /><br />
 **Quick Launch Cmdline:**<br />
-KnossosNET supports direct mod launch by adding a cmdline argument, this will open the launcher, and will launch FSO to play a mod with all the current settings and configurations.<br />
+KnossosNET supports direct mod launch by adding a cmdline argument, this will open the launcher, and will launch FSO to play a mod with all the current settings and configurations, and close the launcher.<br />
 Example:<br />
 <br />
-KnossosNET.exe -playmod <mod-id> -version <mod-version> (optional)<br />
+KnossosNET.exe -playmod mod-id -version mod-version (optional)<br />
 <br />
-If no version is given (KnossosNET.exe -playmod <mod-id>) the highest version of the mod will be launched.<br />
+If no version is given (KnossosNET.exe -playmod mod-id) the highest version of the mod will be launched.<br />
 The "Mod Settings" window displays the cmdline to play that mod directly via quick launch.<br />
+
+<br /><br />
+**mod.ini support:**<br />
+Using legacy mod.ini files for mod folders is also supported, and some additional keys were added to extend support. mod.ini can be used to attempt to load an old mod or to manually add a mod to the launcher whiout having to write a mod.json file. The folder still has to be placed in the correct path inside the library as with any other mod.<br />
+Details on how Knet handles mod.ini and the new keys can be found here:<br />
+https://wiki.hard-light.net/index.php/Mod.ini
 
 <br /><br />
 **CmdLine priority explained:**<br />
@@ -33,17 +42,20 @@ The priority works in this order.<br />
 SystemCMD(Global Settings) > Global CMD > User/Mod CMD
 <br />
 <br />
+
 **Dev Enviroment:**<br />
 -MSVC 2022<br />
 -.NET 6.0.406 SDK https://dotnet.microsoft.com/en-us/download/dotnet/6.0<br />
 -Avalonia Extension for Visual Studio https://marketplace.visualstudio.com/items?itemName=AvaloniaTeam.AvaloniaVS<br />
 <br />
 <br />
+
 **Included Libs:**<br />
 -VP.NET<br />
 -IonKiwi.lz4 (modified for LZ41 support)<br />
 <br />
 <br />
+
 **Current NuGet Packages:**<br />
 -Avalonia 11.0.3<br />
 -Avalonia.Desktop 11.0.3<br />

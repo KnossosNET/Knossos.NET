@@ -8,9 +8,27 @@ using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Text;
 using System.Threading.Tasks;
+using IniParser;
+using System.Reflection.PortableExecutable;
 
 namespace Knossos.NET.Models
 {
+    public enum ModType
+    {
+        mod,
+        tc,
+        engine,
+        tool,
+        ext,
+        modlegacy
+    }
+
+    public enum ModSource
+    {
+        nebula,
+        local
+    }
+
     /*
         The "mod class" variables math the json properties for the mod.json file that is located at the root of the mod folder.
         In order to maintain compatibility with other launchers all properties saved in the mod.json file must be
@@ -20,6 +38,13 @@ namespace Knossos.NET.Models
 
     public class Mod
     {
+        /*
+            Knet only, this defines the source of the mod and defines some behaviours
+            Ex: A local mod cant be modified and is not added the nebula tab when deleted
+        */
+        [JsonPropertyName("mod_source")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public ModSource modSource { get; set; } = ModSource.nebula;
         public bool installed { get; set; } = false;
         public string id { get; set; } = string.Empty; // required, internal *unique* identifier, should be URL friendly, never shown to the user
         public string title { get; set; } = string.Empty; // required, a UTF-8 compatible string, displayed to the user
@@ -28,7 +53,8 @@ namespace Knossos.NET.Models
             contains executables (engine / tool) or is a Total Conversion(tc). 
             ext is not yet finished.
         */
-        public string? type { get; set; } // "<mod|tc|engine|tool|ext>",  Folder Structure: <Knossos>\TC\MOD-VER, <Knossos>\TC\TC-VER, <Knossos>\bin\ENGINE-VER, <Knossos>\FS2(TC)\<Retail fs2> + <MOD-VER FOLDERS>
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public ModType? type { get; set; } // "<mod|tc|engine|tool|ext>",  Folder Structure: <Knossos>\TC\MOD-VER, <Knossos>\TC\TC-VER, <Knossos>\bin\ENGINE-VER, <Knossos>\FS2(TC)\<Retail fs2> + <MOD-VER FOLDERS>
         public string? parent { get; set; } // null if type=tc and tc name if type=mod. Examples TC: FS2, Wing_commander_saga, Solaris, etc. 
         public string version { get; set; } = "0.0.0"; // required, http://semver.org/
         [JsonPropertyName("_private")]
@@ -73,15 +99,22 @@ namespace Knossos.NET.Models
         {
         }
 
-        public Mod(string modPath, string folderName)
+        public Mod(string modPath, string folderName, ModType? type = null)
         {
-            ParseJson(modPath);
-            if(type != "engine")
-            {
-                modSettings.Load(modPath);
-            }
             this.fullPath = modPath;
             this.folderName = folderName;
+            if (type == ModType.modlegacy)
+            {
+                ParseIni(modPath);
+            }
+            else
+            {
+                ParseJson(modPath);
+            }
+            if (type != ModType.engine)
+            {
+                modSettings.Load(fullPath);
+            }
         }
 
         public override string ToString()
@@ -314,6 +347,153 @@ namespace Knossos.NET.Models
             }
         }
 
+        private void ParseIni(string modPath)
+        {
+            try
+            {
+                var iniParser = new FileIniDataParser();
+                var iniFile = iniParser.ReadFile(modPath + Path.DirectorySeparatorChar + "mod.ini");
+                var dir = new DirectoryInfo(modPath);
+                
+                if(dir.Name.Contains(" "))
+                {
+                    try
+                    {
+                        Log.Add(Log.LogSeverity.Warning, "Mod.ParseIni", "Local Mod Folder: " + dir.Name + ". Contains spaces in the folder name, this is not supported Knet will attempt to rename it to: " + dir.Name.Replace(" ", "_"));
+                        dir.MoveTo(dir.Parent!.FullName+Path.DirectorySeparatorChar+dir.Name.Replace(" ", "_"));
+                        fullPath = dir.FullName;
+                        folderName = dir.Name;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Mod.ParseIni", ex);
+                        Log.Add(Log.LogSeverity.Error, "Mod.ParseIni", "An error has ocurred while renaming the folder, this is not going to work. Mod "+ dir.Name);
+                    }
+                }
+
+                installed = true;
+                isPrivate = false;
+                devMode = false;
+                modSource = ModSource.local;
+
+                if (iniFile["mod"]["type"] != null && iniFile["mod"]["type"].Replace(";", "") == "tc")
+                {
+                    type = ModType.tc;
+                    parent = null;
+                }
+                else
+                {
+                    type = ModType.mod;
+                    parent = iniFile["mod"]["parent"] != null ? iniFile["mod"]["parent"].Replace(";", "") : dir.Parent != null ? dir.Parent.Name : null;
+                }
+
+                
+                id = iniFile["mod"]["id"] != null ? iniFile["mod"]["id"].Replace(";", "") : dir.Name.Replace(" ", "_");
+
+                version = iniFile["mod"]["version"] != null ? iniFile["mod"]["version"].Replace(";", "") : "1.0.0-" + dir.Name.Replace(" ", "").Replace("-",".");
+
+                title = iniFile["launcher"]["modname"] != null ? iniFile["launcher"]["modname"].Replace(";", "") : dir.Name;
+
+                notes = iniFile["launcher"]["notes"];
+
+                description = notes != null ? iniFile["launcher"]["infotext"] + "\n\n" + notes : iniFile["launcher"]["infotext"];
+
+                if (description != null)
+                    description = description.Replace(";", "");
+
+                logo = iniFile["launcher"]["image255x112"];
+
+                tile = iniFile["mod"]["tile"] != null ? iniFile["mod"]["tile"].Replace(";", "") : logo != null? logo : iniFile["launcher"]["image182x80"];
+
+                if(tile != null)
+                {
+                    tile = tile.Replace(";","");
+                }
+
+                banner = iniFile["mod"]["banner"] != null ? iniFile["mod"]["banner"].Replace(";", "") : tile;
+
+                releaseThread = iniFile["launcher"]["forum"];
+
+                packages = new List<ModPackage>();
+                modFlag = new List<string>();
+                modFlag.Add(id);
+                var pkg = new ModPackage();
+                pkg.name = "Core";
+                pkg.status = "required";
+                pkg.folder = "core";
+                var deps = new List<ModDependency>();
+                bool fsoDepAdded = false;
+
+                if (iniFile["mod"]["dependencylist"] != null)
+                {
+                    var parts = iniFile["mod"]["dependencylist"].Replace(";", "").Split(",");
+                    
+                    foreach(var part in parts)
+                    {
+                        var dep = new ModDependency();
+                        if (part.Contains("|"))
+                        {
+                            dep.version = part.Split("|")[1].Trim();
+                            dep.id = part.Split("|")[0].Trim();
+                        }
+                        else
+                        {
+                            dep.version = null;
+                            dep.id = part.Trim();
+                        }
+                        if(dep.id == "FSO")
+                            fsoDepAdded = true;
+                        deps.Add(dep);
+                        modFlag.Add(dep.id);
+                    }
+                }
+                else
+                {
+                    var primaryList = iniFile["multimod"]["primarylist"];
+                    var secondaryList = iniFile["multimod"]["secondarylist"] != null ? iniFile["multimod"]["secondarylist"] : iniFile["multimod"]["secondrylist"];
+
+                    if (primaryList != null && primaryList.ToLower().Contains("mediavps") || secondaryList != null && secondaryList.ToLower().Contains("mediavps"))
+                    {
+                        var mvp = new ModDependency();
+                        mvp.version = null;
+                        mvp.id = "MVPS";
+                        deps.Add(mvp);
+                        modFlag.Add("MVPS");
+                    }
+                    if (primaryList != null && primaryList.ToLower().Contains("fsport_mediavps") || secondaryList != null && secondaryList.ToLower().Contains("fsport_mediavps"))
+                    {
+                        var portmvp = new ModDependency();
+                        portmvp.version = null;
+                        portmvp.id = "fsport-mediavps";
+                        deps.Add(portmvp);
+                        modFlag.Add("fsport-mediavps");
+                    }
+                    if (primaryList != null && primaryList.ToLower().Contains("fsport") || secondaryList != null && secondaryList.ToLower().Contains("fsport"))
+                    {
+                        var port = new ModDependency();
+                        port.version = null;
+                        port.id = "fsport";
+                        deps.Add(port);
+                        modFlag.Add("fsport");
+                    }
+                }
+
+                if(!fsoDepAdded)
+                {
+                    var fso = new ModDependency();
+                    fso.version = null;
+                    fso.id = "FSO";
+                    deps.Add(fso);
+                }
+                pkg.dependencies = deps.ToArray();
+                packages.Add(pkg);
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "ModJson.ParseIni", ex);
+            }
+        }
+
         public void ReLoadJson()
         {
             ParseJson(fullPath);
@@ -447,7 +627,7 @@ namespace Knossos.NET.Models
                     }
                     else
                     {
-                        if (mod.type == "engine")
+                        if (mod.type == ModType.engine)
                         {
                             var stabilityV = FsoBuild.GetFsoStability(validMod.stability, validMod.id);
                             var stabilityM = FsoBuild.GetFsoStability(mod.stability, mod.id);

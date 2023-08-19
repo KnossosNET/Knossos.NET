@@ -102,7 +102,7 @@ namespace Knossos.NET.ViewModels
                 return;
             }
 
-            if (mod.type == "engine")
+            if (mod.type == ModType.engine)
             {
                 //If this is a engine build call the UI element to do the build install process instead
                 FsoBuildsViewModel.Instance?.RelayInstallBuild(mod);
@@ -120,7 +120,7 @@ namespace Knossos.NET.ViewModels
 
         public async Task CompressMod(Mod mod)
         {
-            if (mod.type == "engine")
+            if (mod.type == ModType.engine)
             {
                 //If this is a engine build do nothing
             }
@@ -139,7 +139,7 @@ namespace Knossos.NET.ViewModels
 
         public async Task DecompressMod(Mod mod)
         {
-            if (mod.type == "engine")
+            if (mod.type == ModType.engine)
             {
                 //If this is a engine build do nothing
             }

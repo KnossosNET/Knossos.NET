@@ -21,7 +21,7 @@ namespace Knossos.NET
 {
     public static class Knossos
     {
-        public static readonly string AppVersion = "0.0.10";
+        public static readonly string AppVersion = "0.1.0";
         private static List<Mod> installedMods = new List<Mod>();
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();
         public static GlobalSettings globalSettings = new GlobalSettings();
@@ -675,25 +675,25 @@ namespace Knossos.NET
             var rootPath = string.Empty;
 
             /* Others TCs: WCS, Solaris, etc */
-            if (mod.type == "tc" && mod.parent == null)
+            if (mod.type == ModType.tc && mod.parent == null)
             {
                 rootPath = mod.fullPath.Replace(mod.folderName+Path.DirectorySeparatorChar,"");
             }
             else
             {
                 /* Most likely FS2 Retail only */
-                if (mod.type == "tc" && mod.parent != null || mod.parent == mod.id)
+                if (mod.type == ModType.tc && mod.parent != null || mod.parent == mod.id)
                 {
                     rootPath = mod.fullPath;
                 }
                 else
                 {
                     /* Regular mods */
-                    if(mod.type == "mod" && mod.parent != null)
+                    if(mod.type == ModType.mod && mod.parent != null)
                     {
                         foreach(var installedMod in installedMods) 
                         { 
-                            if(installedMod.type == "tc" && installedMod.id == mod.parent)
+                            if(installedMod.type == ModType.tc && installedMod.id == mod.parent)
                             {
                                 if (installedMod.parent != null)
                                 {
@@ -1009,10 +1009,10 @@ namespace Knossos.NET
                         var modJson = new Mod(path,di.Name);
                         switch (modJson.type)
                         {
-                            case "tc":
-                            case "mod": 
+                            case ModType.tc:
+                            case ModType.mod: 
                                 installedMods.Add(modJson);
-                                if (modJson.id == "FS2" && modJson.type == "tc" && modJson.parent == "FS2")
+                                if (modJson.id == "FS2" && modJson.type == ModType.tc && modJson.parent == "FS2")
                                 {
                                     if (File.Exists(modJson.fullPath + Path.DirectorySeparatorChar + "root_fs2.vp") || File.Exists(modJson.fullPath + Path.DirectorySeparatorChar + "root_fs2.vpc"))
                                     {
@@ -1024,7 +1024,7 @@ namespace Knossos.NET
                                     await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(modJson), DispatcherPriority.Background);
                                 break;
 
-                            case "engine":
+                            case ModType.engine:
                                 var build = new FsoBuild(modJson);
                                 engineBuilds.Add(build);
                                 if(!isQuickLaunch)
@@ -1037,6 +1037,12 @@ namespace Knossos.NET
                         /* Likely if json parsing fails */
                         Log.Add(Log.LogSeverity.Error, "Knossos.ModSearchRecursive", ex);
                     }
+                }
+                else if(File.Exists(path + Path.DirectorySeparatorChar + "mod.ini"))
+                {
+                    var modLegacy = new Mod(path, di.Name, ModType.modlegacy);
+                    installedMods.Add(modLegacy);
+                    await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(modLegacy), DispatcherPriority.Background);
                 }
             }catch (Exception ex)
             {

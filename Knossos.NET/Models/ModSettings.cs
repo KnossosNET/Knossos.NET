@@ -70,7 +70,7 @@ namespace Knossos.NET.Models
                 }
                 else
                 {
-                    Log.Add(Log.LogSeverity.Information, "ModSettings.Load()", "File mod_settings.json " + filePath + " does not exist.");
+                    //Log.Add(Log.LogSeverity.Information, "ModSettings.Load()", "File mod_settings.json " + filePath + " does not exist.");
                 }
             }
             catch (Exception ex)

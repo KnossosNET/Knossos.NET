@@ -49,6 +49,8 @@ namespace Knossos.NET.ViewModels
         private bool isInstalling = false;
         [ObservableProperty]
         private bool buttonPage1 = true;
+        [ObservableProperty]
+        private bool isLocalMod = false;
 
 
         /* Should only be used by the editor preview */
@@ -67,6 +69,10 @@ namespace Knossos.NET.ViewModels
             modVersions.Add(modJson);
             Name = modJson.title;
             ModVersion = modJson.version;
+            if(modJson.modSource == ModSource.local)
+            {
+                isLocalMod = true;
+            }
             ID = modJson.id;
             if (ID == "FS2")
             {
@@ -170,6 +176,14 @@ namespace Knossos.NET.ViewModels
                         Tooltip = Regex.Replace(modVersions[newIndex].description!, @" ?\[.*?\]", string.Empty);
                     }
                 }
+                if (modVersions[newIndex].modSource == ModSource.local)
+                {
+                    IsLocalMod = true;
+                }
+                else
+                {
+                    IsLocalMod = false;
+                }
                 LoadImage();
                 CheckDependencyActiveVersion();
             }
@@ -264,7 +278,10 @@ namespace Knossos.NET.ViewModels
                     if (result == MessageBox.MessageBoxResult.OK)
                     {
                         modVersions[modVersions.Count - 1].installed = false;
-                        MainWindowViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
+                        if (!IsLocalMod)
+                        {
+                            MainWindowViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
+                        }
                         Knossos.RemoveMod(modVersions[activeVersionIndex].id);
                         MainWindowViewModel.Instance?.RunDependenciesCheck();
                     }

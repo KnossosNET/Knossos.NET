@@ -1373,13 +1373,13 @@ namespace Knossos.NET.ViewModels
                     List<ModFile> files = new List<ModFile>();
                     string modFolder = mod.id + "-" + mod.version;
                     string rootPack = string.Empty;
-                    if(mod.type == "tc" && mod.parent == null)
+                    if(mod.type == ModType.tc && mod.parent == null)
                     {
                         rootPack = mod.id;
                     }
                     else
                     {
-                        if(mod.type == "mod" && mod.parent != null)
+                        if(mod.type == ModType.mod && mod.parent != null)
                         {
                             rootPack = mod.parent;
                         }
