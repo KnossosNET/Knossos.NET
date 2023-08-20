@@ -32,7 +32,7 @@ The "Mod Settings" window displays the cmdline to play that mod directly via qui
 **mod.ini support:**<br />
 Using legacy mod.ini files for mod folders is also supported, and some additional keys were added to extend support. mod.ini can be used to attempt to load an old mod or to manually add a mod to the launcher whiout having to write a mod.json file. The folder still has to be placed in the correct path inside the library as with any other mod.<br />
 Details on how Knet handles mod.ini and the new keys can be found here:<br />
-https://wiki.hard-light.net/index.php/Mod.ini
+https://wiki.hard-light.net/index.php/Mod.ini#KnossosNET_Support
 
 <br /><br />
 **CmdLine priority explained:**<br />

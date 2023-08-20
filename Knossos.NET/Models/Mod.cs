@@ -414,6 +414,12 @@ namespace Knossos.NET.Models
 
                 releaseThread = iniFile["launcher"]["forum"];
 
+                cmdline = iniFile["mod"]["cmdline"];
+                if(cmdline != null)
+                {
+                    cmdline = cmdline.Replace(";", "");
+                }
+
                 packages = new List<ModPackage>();
                 modFlag = new List<string>();
                 modFlag.Add(id);
