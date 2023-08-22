@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
@@ -225,7 +226,7 @@ namespace Knossos.NET.ViewModels
             {
                 Screenshots.Clear();
                 //Add Videos
-                if(modVersions[selectedIndex].videos != null && modVersions[selectedIndex].screenshots!.Count() > 0)
+                if(modVersions[selectedIndex].videos != null && modVersions[selectedIndex].screenshots!.Length > 0)
                 {
                     foreach (var vid in modVersions[selectedIndex].videos!)
                     {
@@ -240,7 +241,7 @@ namespace Knossos.NET.ViewModels
                     }
                 }
 
-                if (modVersions[selectedIndex].screenshots != null && modVersions[selectedIndex].screenshots!.Count() > 0 )
+                if (modVersions[selectedIndex].screenshots != null && modVersions[selectedIndex].screenshots!.Length > 0 )
                 {
                     foreach (var scn in modVersions[selectedIndex].screenshots!)
                     {

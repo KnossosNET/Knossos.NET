@@ -9,7 +9,8 @@
 			 Icon="/Assets/knossos-icon.ico"
 			 WindowStartupLocation="CenterScreen"
 			 Title="{Binding Title}" 
-			 SizeToContent="WidthAndHeight"
+			 SizeToContent="Width"
+			 Height="750"
 			 CanResize="True">
 
 	<Design.DataContext>

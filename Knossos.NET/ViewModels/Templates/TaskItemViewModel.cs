@@ -1872,7 +1872,11 @@ namespace Knossos.NET.ViewModels
 
                             //Download
                             var fileTask = new TaskItemViewModel();
-                            TaskList.Insert(0, fileTask);
+                            try
+                            {
+                                TaskList.Insert(0, fileTask);
+                            }
+                            catch { }
                             if (file.dest == null)
                             {
                                 file.dest = string.Empty;
@@ -1930,7 +1934,11 @@ namespace Knossos.NET.ViewModels
 
                             //Decompress
                             var decompressTask = new TaskItemViewModel();
-                            TaskList.Insert(0, decompressTask);
+                            try
+                            {
+                                TaskList.Insert(0, decompressTask);
+                            }
+                            catch { }
                             var decompResult = await decompressTask.DecompressNebulaFile(fileFullPath, file.filename, modPath + Path.DirectorySeparatorChar + file.dest, cancellationTokenSource);
                             if (!decompResult)
                             {

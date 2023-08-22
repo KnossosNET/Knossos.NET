@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IniParser;
 using System.Reflection.PortableExecutable;
+using System.Linq;
 
 namespace Knossos.NET.Models
 {
@@ -143,9 +144,9 @@ namespace Knossos.NET.Models
             The package list will only contain the missing packages if a valid
             semantic version is found, but it is missing packages.
         */
-        public List<ModDependency> GetMissingDependenciesList()
+        public List<ModDependency> GetMissingDependenciesList(bool overrideSettings = false,bool filterdeps = false)
         {
-            var dependencies = GetModDependencyList();
+            var dependencies = GetModDependencyList(overrideSettings, filterdeps);
             List<ModDependency> missingDependencyList = new List<ModDependency>();
 
             if (dependencies != null)
@@ -248,10 +249,13 @@ namespace Knossos.NET.Models
             Returns null if the mod has no dependencies or packages.
             Takes into account user settings, if any.
         */
-        public List<ModDependency>? GetModDependencyList(bool overrideSettings = false)
+        public List<ModDependency>? GetModDependencyList(bool overrideSettings = false, bool filterDependencies = false)
         {
             if(modSettings.customDependencies != null && overrideSettings == false)
             {
+                if (filterDependencies)
+                    return FilterDependencies(modSettings.customDependencies);
+
                 return modSettings.customDependencies;
             }
             else
@@ -269,11 +273,142 @@ namespace Knossos.NET.Models
                     }
 
                     if (dependencies.Count > 0)
+                    {
+                        if(filterDependencies)
+                            return FilterDependencies(dependencies);
+
                         return dependencies;
+                    }
                 }
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Filter the dependencies
+        /// Only pass each mod ID one time
+        /// if an ID repeats multiple times it must be resolved into one, except in case of conflict
+        /// in case of conflict both are passed as this is not a critical stop in knet
+        /// Version=null means "any" so others must decide if a version is specified
+        /// </summary>
+        /// <param name="unFilteredDepList"></param>
+        /// <returns>List<ModDependency></returns>
+        /// TODO: Can can be done a lot better and clearer using LINQ groups.
+        private List<ModDependency> FilterDependencies(List<ModDependency> unFilteredDepList)
+        {
+            try
+            {
+                List<ModDependency> temp = new List<ModDependency>();
+                //Stage 1 Eliminate duplicates
+                foreach (var dep in unFilteredDepList)
+                {
+                    if (temp.FirstOrDefault(d => d.id == dep.id && d.version == dep.version) == null)
+                    {
+                        temp.Add(dep);
+                    }
+                }
+                //Stage 2 
+                //if multiple ids remains resolve them into one, in case of conflict pass both
+                var processedIds = new List<string>();
+                foreach (var dep in temp.ToList())
+                {
+                    if (processedIds.IndexOf(dep.id) == -1)
+                    {
+                        processedIds.Add(dep.id);
+                        var sameid = temp.Where(d => d.id == dep.id);
+                        if (sameid != null && sameid.Count() > 1)
+                        {
+                            List<ModDependency> equal = new List<ModDependency>();
+                            List<ModDependency> equalOrHigher = new List<ModDependency>();
+                            List<ModDependency> revisions = new List<ModDependency>();
+                            //Version posibilities are:
+                            //  null      -> any is fine, this does not decides anything
+                            //  "4.6.7"   -> equal to version, they must be compared to the other two types
+                            //  ">=4.6.7" -> all versions over this are fine
+                            //  "~4.6.1"  -> A revision equal or higher inside this minor version
+                            foreach (var d in sameid.ToList())
+                            {
+                                //Null dosent matter and we have one that is not null so remove it
+                                if (d.version == null)
+                                {
+                                    temp.Remove(d);
+                                }
+                                else
+                                {
+                                    if (d.version.Contains(">="))
+                                    {
+                                        equalOrHigher.Add(d);
+                                    }
+                                    else
+                                    {
+                                        if (d.version.Contains("~"))
+                                        {
+                                            revisions.Add(d);
+                                        }
+                                        else
+                                        {
+                                            equal.Add(d);
+                                        }
+                                    }
+                                }
+                            }
+                            //Equal determine if equalOrhigher or revisions are included here, if so remove them
+                            foreach (var eq in equal)
+                            {
+                                equalOrHigher.ForEach(eqOrHigh =>
+                                {
+                                    if (SemanticVersion.SastifiesDependency(eqOrHigh.version, eq.version))
+                                    {
+                                        temp.Remove(eqOrHigh);
+                                    }
+                                });
+                                revisions.ForEach(revs =>
+                                {
+                                    if (SemanticVersion.SastifiesDependency(revs.version, eq.version))
+                                    {
+                                        temp.Remove(revs);
+                                    }
+                                });
+                            }
+                            //Revisions determine if >= or other revisions are included in them, if so remove them
+                            foreach (var revs in revisions)
+                            {
+                                equalOrHigher.ForEach(eqOrHigh =>
+                                {
+                                    if (SemanticVersion.SastifiesDependency(eqOrHigh.version, revs.version!.Replace("~", "")))
+                                    {
+                                        temp.Remove(eqOrHigh);
+                                    }
+                                });
+                                revisions.ForEach(otherrev =>
+                                {
+                                    if (otherrev != revs && SemanticVersion.SastifiesDependency(revs.version, otherrev.version!.Replace("~", "")))
+                                    {
+                                        temp.Remove(otherrev);
+                                    }
+                                });
+                            }
+                            //Equal or Higher at this point if anything left it can only be other equal or higher, remove the ones that are not incluided on others
+                            foreach (var eqOrHigher in equalOrHigher)
+                            {
+                                equalOrHigher.ForEach(otherEqOrHigher =>
+                                {
+                                    if (otherEqOrHigher != eqOrHigher && SemanticVersion.SastifiesDependency(eqOrHigher.version, otherEqOrHigher.version!.Replace(">=", "")))
+                                    {
+                                        temp.Remove(eqOrHigher);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+                return temp;
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error,"Mod.FilterDependencies()",ex);
+                return unFilteredDepList;
+            }
         }
 
         /*

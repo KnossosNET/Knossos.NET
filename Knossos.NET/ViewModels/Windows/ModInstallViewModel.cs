@@ -144,7 +144,7 @@ namespace Knossos.NET.ViewModels
 
         private async Task ProcessMod(Mod mod, List<Mod> allMods)
         {
-            var dependencies = mod.GetMissingDependenciesList();
+            var dependencies = mod.GetMissingDependenciesList(false,true);
             AddModToList(mod);
             foreach (var dep in dependencies)
             {

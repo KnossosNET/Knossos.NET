@@ -21,7 +21,7 @@ namespace Knossos.NET
 {
     public static class Knossos
     {
-        public static readonly string AppVersion = "0.1.0";
+        public static readonly string AppVersion = "0.1.1-Beta";
         private static List<Mod> installedMods = new List<Mod>();
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();
         public static GlobalSettings globalSettings = new GlobalSettings();
@@ -486,7 +486,7 @@ namespace Knossos.NET
             Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Launching Mod: " + mod.folderName);
 
             /* Check the dependencies and stop if there are unresolved ones */
-            var missingDeps = mod.GetMissingDependenciesList();
+            var missingDeps = mod.GetMissingDependenciesList(false,true);
             var errorMsg = string.Empty;
 
             foreach (var dependency in missingDeps.ToList())
@@ -538,7 +538,7 @@ namespace Knossos.NET
             FsoBuild? fsoBuild = null;
 
             /* Resolve Dependencies should be all valid at this point */
-            var dependencyList = mod.GetModDependencyList();
+            var dependencyList = mod.GetModDependencyList(false,true);
             bool hasBuildDependency = false;
             if (dependencyList != null)
             {
@@ -553,14 +553,35 @@ namespace Knossos.NET
                     {
                         /* 
                             It has to be the engine dependency, "SelectMod" does not select engine builds
-                            Do not do this if there is a user selected mod-especific or global build
+                            Do not do this if there is a user selected mod-especific build
                         */
-                        //TODO: What if there are more than one engine build in dependency list? Im not sure what to do in that case.
                         if (fsoBuild == null && mod.modSettings.customBuildId == null)
                         {
                             hasBuildDependency = true;
                             fsoBuild = dep.SelectBuild();
                         }
+                    }
+                }
+
+                /* Check if there is a dependency conflicts (if more than one dependency with the same ID exist at this point) */
+                var queryConflict = dependencyList.GroupBy(x => x.id).Where(g => g.Count() > 1).ToList();
+                if (queryConflict.Count() > 0)
+                {
+                    var outputString = "There is a dependency conflict for this mod: " + mod + " Knet will try to adjust but the mod may present issues or not work at all. \nThis may be be resolved manually using custom dependencies for this mod.\n";
+                    foreach (var conflictGroup in queryConflict)
+                    {
+                        foreach (var conflictDep in conflictGroup)
+                        {
+                            var pkg = mod.packages.FirstOrDefault(pkg => pkg.dependencies != null && pkg.dependencies.Contains(conflictDep));
+                            outputString += "\n\nPackage: "+ (pkg != null? pkg.name : "") +"\nDependency Id: " + conflictDep.id + " Version: " + conflictDep.version; 
+                        }
+                    }
+                    Log.Add(Log.LogSeverity.Warning, "Knossos.PlayMod()", outputString);
+                    if (MainWindow.instance != null)
+                    {
+                        var result = await MessageBox.Show(MainWindow.instance, outputString, "Dependency Conflict!", MessageBox.MessageBoxButtons.ContinueCancel);
+                        if (result != MessageBox.MessageBoxResult.Continue)
+                            return;
                     }
                 }
             }

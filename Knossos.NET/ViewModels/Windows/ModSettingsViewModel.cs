@@ -237,7 +237,8 @@ namespace Knossos.NET.ViewModels
                             var isBuild = Knossos.GetInstalledBuildsList(dep.id);
                             if(isBuild.Count==0)
                             {
-                                modJson.modSettings.customModFlags.Add(dep.id);
+                                if(modJson.modSettings.customModFlags.IndexOf(dep.id) == -1)
+                                    modJson.modSettings.customModFlags.Add(dep.id);
                             }
                         }
                     }
