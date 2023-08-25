@@ -48,10 +48,12 @@
 			<TabItem Header="Debug">
 				<Grid RowDefinitions="Auto,*">
 					<WrapPanel Grid.Row="0" Margin="5">
-						<Button Margin="5" Command="{Binding OpenLog}">View Logfile</Button>
-						<Button Margin="5" Command="{Binding OpenSettings}">View Settings File</Button>
-						<Button Margin="5" Command="{Binding OpenFS2Log}">View fs2_open.log</Button>
-						<Button Margin="5" Command="{Binding OpenFS2Ini}">View fs2_open.ini</Button>
+						<Button Margin="5" Background="DarkGreen" Command="{Binding OpenLog}">View Logfile</Button>
+						<Button Margin="5" Background="DarkGreen" Command="{Binding OpenSettings}">View Settings File</Button>
+						<Button Margin="5" Background="DarkGreen" Command="{Binding OpenFS2Ini}">View fs2_open.ini</Button>
+						<Button Margin="5" Background="DarkGreen" Command="{Binding OpenFS2Log}">View fs2_open.log</Button>
+						<Button Margin="5" Background="DarkRed" Command="{Binding UploadFS2Log}">Upload fs2_open.log</Button>
+						<Button Margin="5" Background="DarkRed" Command="{Binding UploadKnossosConsole}">Upload Knossos Console</Button>
 					</WrapPanel>
 					<TextBox Grid.Row="1" Text="{Binding UiConsoleOutput}" IsReadOnly="True"></TextBox>
 				</Grid>

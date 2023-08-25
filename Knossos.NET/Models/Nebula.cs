@@ -21,19 +21,20 @@ namespace Knossos.NET.Models
     */
     public static class Nebula
     {
-        //https://cf.fsnebula.org/storage/repo.json
-        //https://dl.fsnebula.org/storage/repo.json
-        //https://aigaion.feralhosting.com/discovery/nebula/repo.json
-        private static readonly string repoUrl = @"https://fsnebula.org/storage/repo.json";
-        private static readonly bool listFS2Override = false;
-        private static CancellationTokenSource? cancellationToken = null;
-        public static bool repoLoaded = false;
-
         private struct NebulaSettings
         {
             public string? etag { get; set; }
         }
 
+        //https://cf.fsnebula.org/storage/repo.json
+        //https://dl.fsnebula.org/storage/repo.json
+        //https://aigaion.feralhosting.com/discovery/nebula/repo.json
+        private static readonly string repoUrl = @"https://fsnebula.org/storage/repo.json";
+        private static readonly string apiURL = @"https://api.fsnebula.org/api/1/";
+        private static readonly string nebulaURL = @"https://fsnebula.org/";
+        private static readonly bool listFS2Override = false;
+        private static CancellationTokenSource? cancellationToken = null;
+        public static bool repoLoaded = false;
         private static NebulaSettings settings = new NebulaSettings();
 
         public static async void Trinity()
@@ -366,5 +367,90 @@ namespace Knossos.NET.Models
                 Log.Add(Log.LogSeverity.Error, "Nebula.SaveSettings()", ex);
             }
         }
+
+        /* Nebula API handling starts here */
+        #region NebulaApi
+        public struct ApiReply
+        {
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+            public bool result { get; set; }
+
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+            public string id { get; set; }
+        }
+
+        private enum ApiMethod
+        {
+            POST,
+            PUT,
+            GET
+        }
+
+        private static async Task<ApiReply?> ApiCall(string resourceUrl, Dictionary<string, string> keyValues, ApiMethod method = ApiMethod.POST) 
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(30);
+                    switch (method)
+                    {
+                        case ApiMethod.POST:
+                            {
+                                using (FormUrlEncodedContent content = new FormUrlEncodedContent(keyValues))
+                                {
+                                    var response = await client.PostAsync(apiURL + resourceUrl, content);
+                                    if (response.IsSuccessStatusCode)
+                                    {
+                                        var json = await response.Content.ReadAsStringAsync();
+                                        var reply = JsonSerializer.Deserialize<ApiReply>(json);
+                                        if (reply.result)
+                                            return reply;
+
+                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api call: " + response.StatusCode + "\n" + json);
+                                    }
+                                    else
+                                    {
+                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api call: " + response.StatusCode);
+                                    }
+                                }
+                            } break;
+                        case ApiMethod.PUT:
+                            {
+                                throw new NotImplementedException();
+                            }
+                        case ApiMethod.GET:
+                            {
+                                throw new NotImplementedException();
+                            }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", ex);
+            }
+            return null;
+        }
+
+        public static async Task<bool> UploadLog(string logString)
+        {
+            try
+            {
+                var reply = await ApiCall("log/upload", new Dictionary<string, string> { { "log", logString } });
+                if (reply.HasValue)
+                {
+                    Log.Add(Log.LogSeverity.Information, "Nebula.UploadLog", "Uploaded log file to Nebula: " + nebulaURL + "log/" + reply.Value.id);
+                    Knossos.OpenBrowserURL(nebulaURL + "log/" + reply.Value.id);
+                    return true;
+                }
+            }
+            catch(Exception ex) 
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.UploadLog", ex);
+            }
+            return false;
+        }
+        #endregion
     }
 }

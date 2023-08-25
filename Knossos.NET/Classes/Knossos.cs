@@ -59,7 +59,7 @@ namespace Knossos.NET
                     }
                 }
 
-                Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "=== KnossosNET Start ===");
+                Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "=== KnossosNET v" + AppVersion + " Start ===");
 
                 //Load language files
                 Lang.LoadFiles();

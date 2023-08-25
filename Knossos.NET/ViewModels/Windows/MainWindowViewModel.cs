@@ -217,5 +217,55 @@ namespace Knossos.NET.ViewModels
                     MessageBox.Show(MainWindow.instance, "Log File " + SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
+
+        internal async void UploadFS2Log()
+        {
+            if (File.Exists(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log"))
+            {
+                try
+                {
+                    var logString = File.ReadAllText(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log",System.Text.Encoding.UTF8);
+                    if(logString.Trim() != string.Empty)
+                    {
+                        var status = await Nebula.UploadLog(logString);
+                        if(!status)
+                        {
+                            if (MainWindow.instance != null)
+                                await MessageBox.Show(MainWindow.instance, "An error has ocurred while uploading the log file, check the log below.", "Upload log error", MessageBox.MessageBoxButtons.OK);
+                        }
+                    }
+                    else
+                    {
+                        if (MainWindow.instance != null)
+                            await MessageBox.Show(MainWindow.instance, "The log file is empty.", "Error", MessageBox.MessageBoxButtons.OK);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.UploadFS2Log", ex);
+                }
+            }
+            else
+            {
+                if (MainWindow.instance != null)
+                    await MessageBox.Show(MainWindow.instance, "Log File " + SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+            }
+        }
+        internal async void UploadKnossosConsole()
+        {
+            try
+            {
+                var status = await Nebula.UploadLog(UiConsoleOutput);
+                if (!status)
+                {
+                    if (MainWindow.instance != null)
+                        await MessageBox.Show(MainWindow.instance, "An error has ocurred while uploading the console output, check the log below.", "Upload error", MessageBox.MessageBoxButtons.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.UploadKnossosConsole", ex);
+            }
+        }
     }
 }
