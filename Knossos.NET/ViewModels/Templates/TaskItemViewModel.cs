@@ -1289,7 +1289,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null)
+        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false)
         {
             string? modPath = null;
             Mod? installed = null;
@@ -1328,6 +1328,7 @@ namespace Knossos.NET.ViewModels
                         }
                     }
 
+                    compressMod = manualCompress;
                     //Todo add mod fso version checking
                     if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.Always)
                     {
@@ -1353,6 +1354,7 @@ namespace Knossos.NET.ViewModels
                     if (installed != null) 
                     {
                         Name = "Modify " + mod.ToString();
+                        compressMod = installed.modSettings.isCompressed;
                     }
 
                     Info = "Starting";

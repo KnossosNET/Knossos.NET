@@ -91,7 +91,7 @@ namespace Knossos.NET.ViewModels
             return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson);
         }
 
-        public async void InstallMod(Mod mod, List<ModPackage>? reinstallPkgs = null)
+        public async void InstallMod(Mod mod, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false)
         {
             if (Knossos.GetKnossosLibraryPath() == null)
             {
@@ -113,7 +113,7 @@ namespace Knossos.NET.ViewModels
                 var newTask = new TaskItemViewModel();
                 TaskList.Add(newTask);
                 taskQueue.Enqueue(newTask);
-                await newTask.InstallMod(mod, cancelSource, reinstallPkgs);
+                await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress);
                 cancelSource.Dispose();
             }
         }

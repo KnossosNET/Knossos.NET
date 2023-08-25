@@ -33,6 +33,10 @@ namespace Knossos.NET.ViewModels
         ObservableCollection<Mod> modInstallList = new ObservableCollection<Mod>();
         [ObservableProperty]
         private bool isInstalled = false;
+        [ObservableProperty]
+        private bool compress = false;
+        [ObservableProperty]
+        private bool compressVisible = Knossos.globalSettings.modCompression == CompressionSettings.Manual? true : false; 
 
         private Mod? selectedMod;
 
@@ -96,7 +100,8 @@ namespace Knossos.NET.ViewModels
         {
             ModInstallList.Clear();
             DataLoaded = false;
-            List<Mod> allMods;
+            Compress = false;
+            List <Mod> allMods;
             if(SelectedMod != null && !SelectedMod.GetMissingDependenciesList().Any())
             {
                 allMods = ModVersions.ToList();
@@ -132,6 +137,7 @@ namespace Knossos.NET.ViewModels
                 }
                 SelectedMod.isEnabled=false;
                 SelectedMod.isSelected = true;
+                Compress=SelectedMod.modSettings.isCompressed;
                 Name = SelectedMod.title;
                 Version = SelectedMod.version;
                 await ProcessMod(SelectedMod,allMods);
@@ -258,7 +264,7 @@ namespace Knossos.NET.ViewModels
             foreach (var mod in ModInstallList)
             {
                 if(mod.isSelected)
-                    TaskViewModel.Instance!.InstallMod(mod);
+                    TaskViewModel.Instance!.InstallMod(mod, null, Compress);
             }
             ModInstallList.Clear();
 
