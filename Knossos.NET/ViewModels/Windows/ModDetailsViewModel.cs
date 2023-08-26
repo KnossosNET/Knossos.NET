@@ -73,6 +73,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool hasBanner = false;
         [ObservableProperty]
+        private bool isLocalMod = false;
+        [ObservableProperty]
         private ObservableCollection<ScreenshotItem> screenshots = new ObservableCollection<ScreenshotItem>();
         private ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
@@ -160,6 +162,7 @@ namespace Knossos.NET.ViewModels
             try
             {
                 Name = modVersions[index].title;
+                IsLocalMod = modVersions[index].modSource == ModSource.local? true : false;
                 LastUpdated = modVersions[index].lastUpdate;
                 if (modVersions[index].description != null)
                 {
@@ -464,6 +467,14 @@ namespace Knossos.NET.ViewModels
             {
                 Knossos.OpenBrowserURL(url);
             }
+        }
+
+        internal async void ButtonCommandReport()
+        {
+            var dialog = new ReportModView();
+            dialog.DataContext = new ReportModViewModel(modVersions[ItemSelectedIndex]);
+
+            await dialog.ShowDialog<ReportModView?>(MainWindow.instance!);
         }
     }
 }

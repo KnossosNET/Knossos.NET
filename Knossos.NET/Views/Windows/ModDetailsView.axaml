@@ -29,6 +29,7 @@
 					<Button Command="{Binding ButtonCommandPlay}" Content="Play" Grid.Column="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="5" Width="100" ></Button>
 					<Button Command="{Binding ButtonCommandFred2}" Content="Fred2" Grid.Column="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkOrange" Margin="5" Width="100" ></Button>
 					<Button Command="{Binding ButtonCommandSettings}" Content="Settings" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="5" Width="100" ></Button>
+					<Button IsVisible="{Binding !IsLocalMod}" Command="{Binding ButtonCommandReport}" Content="Report" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="5" Width="100" ></Button>
 				</WrapPanel>
 				<WrapPanel Grid.Row="1" Grid.Column="0">
 					<Button Command="{Binding ButtonCommandPlayDebug}" Content="Debug" Grid.Column="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Gray" Margin="5" Width="100" ></Button>

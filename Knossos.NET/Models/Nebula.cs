@@ -370,7 +370,7 @@ namespace Knossos.NET.Models
 
         /* Nebula API handling starts here */
         #region NebulaApi
-        public struct ApiReply
+        private struct ApiReply
         {
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public bool result { get; set; }
@@ -407,11 +407,11 @@ namespace Knossos.NET.Models
                                         if (reply.result)
                                             return reply;
 
-                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api call: " + response.StatusCode + "\n" + json);
+                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode + "\n" + json);
                                     }
                                     else
                                     {
-                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api call: " + response.StatusCode);
+                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode);
                                     }
                                 }
                             } break;
@@ -448,6 +448,30 @@ namespace Knossos.NET.Models
             catch(Exception ex) 
             {
                 Log.Add(Log.LogSeverity.Error, "Nebula.UploadLog", ex);
+            }
+            return false;
+        }
+
+        public static async Task<bool> ReportMod(Mod mod, string reason)
+        {
+            try
+            {
+                var data = new Dictionary<string, string>()
+                {
+                    { "mid", mod.id },
+                    { "version", mod.version },
+                    { "message", reason }
+                };
+                var reply = await ApiCall("mod/release/report", data);
+                if (reply.HasValue)
+                {
+                    Log.Add(Log.LogSeverity.Information, "Nebula.ReportMod", "Reported Mod: " + mod + " to fsnebula successfully.");
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.ReportMod", ex);
             }
             return false;
         }
