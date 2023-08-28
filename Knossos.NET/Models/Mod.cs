@@ -474,6 +474,7 @@ namespace Knossos.NET.Models
                 devMode = tempMod.devMode;
                 customBuild = tempMod.customBuild;
                 packages = tempMod.packages;
+                modSource = tempMod.modSource;
                 tempMod = null;
             }
             catch (Exception ex)

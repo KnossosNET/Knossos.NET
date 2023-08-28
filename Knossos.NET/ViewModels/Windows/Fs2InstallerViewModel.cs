@@ -51,7 +51,7 @@ namespace Knossos.NET.ViewModels
 
         public Fs2InstallerViewModel() 
         { 
-            if(SysInfo.IsWindows || SysInfo.IsLinux && ( SysInfo.CpuArch == "X64" || SysInfo.CpuArch == "X86"))
+            if(SysInfo.IsWindows || SysInfo.IsMacOS || SysInfo.IsLinux && ( SysInfo.CpuArch == "X64" || SysInfo.CpuArch == "X86" || SysInfo.CpuArch == "Arm64"))
             {
                 InnoExtractIsAvalible = true;
             }
@@ -88,6 +88,17 @@ namespace Knossos.NET.ViewModels
                             if (SysInfo.CpuArch == "X86")
                             {
                                 innoPath += "innoextract.x86";
+                            }
+                            if (SysInfo.CpuArch == "Arm64")
+                            {
+                                innoPath += "innoextract.arm64";
+                            }
+                        }
+                        else
+                        {
+                            if(SysInfo.IsMacOS)
+                            {
+                                innoPath += "innoextract.mac64";
                             }
                         }
                     }
@@ -199,6 +210,7 @@ namespace Knossos.NET.ViewModels
                     fs2Dep.version = ">=3.8.1";
                     fs2Pkg.dependencies = new ModDependency[] { fs2Dep };
                     fs2Mod.packages.Add(fs2Pkg);
+                    fs2Mod.modSource = ModSource.local;
                     fs2Mod.SaveJson();
                     try
                     {
@@ -306,6 +318,14 @@ namespace Knossos.NET.ViewModels
                 try
                 {
                     string innoPath = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar;
+
+                    /*Copy Innoextract License file*/
+                    using (var fileStream = File.Create(innoPath + Path.DirectorySeparatorChar + "innoextract.license"))
+                    {
+                        AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.license")).CopyTo(fileStream);
+                        fileStream.Close();
+                    }
+
                     if (SysInfo.IsWindows)
                     {
                         innoPath += "innoextract.exe";
@@ -335,6 +355,29 @@ namespace Knossos.NET.ViewModels
                                 using (var fileStream = File.Create(innoPath))
                                 {
                                     AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.x86")).CopyTo(fileStream);
+                                    fileStream.Close();
+                                    SysInfo.Chmod(innoPath, "+x");
+                                }
+                            }
+                            if (SysInfo.CpuArch == "Arm64")
+                            {
+                                innoPath += "innoextract.arm64";
+                                using (var fileStream = File.Create(innoPath))
+                                {
+                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.arm64")).CopyTo(fileStream);
+                                    fileStream.Close();
+                                    SysInfo.Chmod(innoPath, "+x");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if(SysInfo.IsMacOS)
+                            {
+                                innoPath += "innoextract.mac64";
+                                using (var fileStream = File.Create(innoPath))
+                                {
+                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.mac64")).CopyTo(fileStream);
                                     fileStream.Close();
                                     SysInfo.Chmod(innoPath, "+x");
                                 }
