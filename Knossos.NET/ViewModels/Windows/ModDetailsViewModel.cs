@@ -126,7 +126,7 @@ namespace Knossos.NET.ViewModels
 
             if(Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts) 
             {
-                PlayDescription(200);
+                //PlayDescription(200);
             }
             else
             {

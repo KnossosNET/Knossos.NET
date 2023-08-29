@@ -116,7 +116,7 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public bool ttsMulti { get; set; } = true;
         [JsonPropertyName("tts_description")]
-        public bool ttsDescription { get; set; } = false;
+        public bool ttsDescription { get; set; } = true;
         [JsonIgnore]
         public int ttsVolume { get; set; } = 100;
 
