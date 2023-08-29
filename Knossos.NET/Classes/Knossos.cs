@@ -1178,7 +1178,7 @@ namespace Knossos.NET
                                 {
                                     using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
                                     {
-                                        AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/KSapi_x86.exe")).CopyTo(fileStream);
+                                        AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/win/KSapi_x86.exe")).CopyTo(fileStream);
                                         fileStream.Close();
                                     }
                                 }
@@ -1186,7 +1186,7 @@ namespace Knossos.NET
                                 {
                                     using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
                                     {
-                                        AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/KSapi.exe")).CopyTo(fileStream);
+                                        AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/win/KSapi.exe")).CopyTo(fileStream);
                                         fileStream.Close();
                                     }
                                 }

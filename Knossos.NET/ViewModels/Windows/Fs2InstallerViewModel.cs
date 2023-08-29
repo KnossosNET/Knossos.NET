@@ -331,7 +331,7 @@ namespace Knossos.NET.ViewModels
                         innoPath += "innoextract.exe";
                         using (var fileStream = File.Create(innoPath))
                         {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.exe")).CopyTo(fileStream);
+                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/win/innoextract.exe")).CopyTo(fileStream);
                             fileStream.Close();
                         }
                     }
@@ -344,19 +344,9 @@ namespace Knossos.NET.ViewModels
                                 innoPath += "innoextract.x64";
                                 using (var fileStream = File.Create(innoPath))
                                 {
-                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.x64")).CopyTo(fileStream);
+                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/linux-x64/innoextract.x64")).CopyTo(fileStream);
                                     fileStream.Close();
                                     SysInfo.Chmod(innoPath,"+x");
-                                }
-                            }
-                            if (SysInfo.CpuArch == "X86")
-                            {
-                                innoPath += "innoextract.x86";
-                                using (var fileStream = File.Create(innoPath))
-                                {
-                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.x86")).CopyTo(fileStream);
-                                    fileStream.Close();
-                                    SysInfo.Chmod(innoPath, "+x");
                                 }
                             }
                             if (SysInfo.CpuArch == "Arm64")
@@ -364,7 +354,7 @@ namespace Knossos.NET.ViewModels
                                 innoPath += "innoextract.arm64";
                                 using (var fileStream = File.Create(innoPath))
                                 {
-                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.arm64")).CopyTo(fileStream);
+                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/linux-arm64/innoextract.arm64")).CopyTo(fileStream);
                                     fileStream.Close();
                                     SysInfo.Chmod(innoPath, "+x");
                                 }
@@ -377,7 +367,7 @@ namespace Knossos.NET.ViewModels
                                 innoPath += "innoextract.mac64";
                                 using (var fileStream = File.Create(innoPath))
                                 {
-                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/innoextract.mac64")).CopyTo(fileStream);
+                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/osx/innoextract.mac64")).CopyTo(fileStream);
                                     fileStream.Close();
                                     SysInfo.Chmod(innoPath, "+x");
                                 }

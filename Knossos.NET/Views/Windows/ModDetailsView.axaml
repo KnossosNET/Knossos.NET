@@ -85,7 +85,7 @@
 						<Grid>
 							<Image ZIndex="0" Source="{Binding image}"/>
 							<Button IsVisible="{Binding video}" ZIndex="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" Command="{Binding OpenVideo}" CommandParameter="{Binding url}"  >
-								<Image HorizontalAlignment="Center" VerticalAlignment="Center" Height="125" Width="125" Source="/Assets/play-button.png"/>
+								<Image HorizontalAlignment="Center" VerticalAlignment="Center" Height="125" Width="125" Source="/Assets/general/play-button.png"/>
 							</Button>
 						</Grid>
 					</DataTemplate>

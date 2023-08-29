@@ -10,7 +10,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
     <AvaloniaXaml Remove="Libs\**" />
     <Compile Remove="Libs\**" />
     <EmbeddedResource Remove="Libs\**" />
@@ -21,7 +20,24 @@
     <None Remove="Views\Windows\ModDetailsView.axaml~RF2bc1dec5.TMP" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Include="Assets\*" />
+	<AvaloniaResource Include="Assets\general\**" />
+	<AvaloniaResource Include="Assets\fs2_res\**" />
+	<AvaloniaResource Include="Assets\utils\*" />
     <Content Include="Assets\knossos-icon.ico" />
+  </ItemGroup>
+  <!--https://learn.microsoft.com/en-us/dotnet/core/rid-catalog-->
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('win'))">
+    <AvaloniaResource Include="Assets\utils\win\**" />
+  </ItemGroup>
+  <ItemGroup Condition="$(RuntimeIdentifier.Equals('linux-arm64'))">
+    <AvaloniaResource Include="Assets\utils\linux-arm64\**" />
+  </ItemGroup>
+  <ItemGroup Condition="$(RuntimeIdentifier.Equals('linux-x64'))">
+    <AvaloniaResource Include="Assets\utils\linux-x64\**" />
+  </ItemGroup>
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('osx'))">
+    <AvaloniaResource Include="Assets\utils\osx\**" />
   </ItemGroup>
   <ItemGroup>
     <!--This helps with theme dll-s trimming.
@@ -59,62 +75,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Assets\utils\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\VP.NET\VP.NET.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <AvaloniaResource Update="Assets\fs2_res\kn_banner.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_0.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_1.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_10.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_11.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_2.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_3.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_4.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_5.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_6.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_7.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_8.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_screen_9.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\fs2_res\kn_tile.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\utils\innoextract.exe">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\utils\innoextract.x64">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Update="Assets\utils\innoextract.x86">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </AvaloniaResource>
   </ItemGroup>
 </Project>

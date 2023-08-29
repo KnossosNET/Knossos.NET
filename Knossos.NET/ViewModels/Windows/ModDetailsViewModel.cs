@@ -207,7 +207,7 @@ namespace Knossos.NET.ViewModels
                         if (url != null && url.ToLower().Contains("http"))
                         {
                             Banner?.Dispose();
-                            Banner = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/loading.png")));
+                            Banner = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/loading.png")));
                             DownloadImage(url);
                         }
                     }
@@ -330,14 +330,14 @@ namespace Knossos.NET.ViewModels
                 }
                 else
                 {
-                    var item = new ScreenshotItem(new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/loading.png"))), true);
+                    var item = new ScreenshotItem(new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/loading.png"))), true);
                     item.url = url;
                     Screenshots.Add(item);
                 }
             }
             catch (Exception ex)
             {
-                var item = new ScreenshotItem(new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/loading.png"))), true);
+                var item = new ScreenshotItem(new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/loading.png"))), true);
                 item.url = url;
                 Screenshots.Add(item);
                 Log.Add(Log.LogSeverity.Warning, "ModDetailsViewModel.DownloadVideoThumbnail", ex);

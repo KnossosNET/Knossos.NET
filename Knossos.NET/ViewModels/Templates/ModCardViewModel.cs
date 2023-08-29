@@ -59,7 +59,7 @@ namespace Knossos.NET.ViewModels
             Name = "default test string very long";
             ModVersion = "1.0.0";
             ID = "test";
-            Image = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/NebulaDefault.png")));
+            Image = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
         }
 
         public ModCardViewModel(Mod modJson)
@@ -332,7 +332,7 @@ namespace Knossos.NET.ViewModels
         private void LoadImage()
         {
             Image?.Dispose();
-            Image = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/NebulaDefault.png")));
+            Image = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
 
             try
             {
