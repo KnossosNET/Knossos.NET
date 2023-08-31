@@ -26,6 +26,9 @@
 	<AvaloniaResource Include="Assets\utils\*" />
     <Content Include="Assets\knossos-icon.ico" />
   </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' != 'Release'"> 
+	<AvaloniaResource Include="Assets\**" />
+  </ItemGroup> 
   <!--https://learn.microsoft.com/en-us/dotnet/core/rid-catalog-->
   <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('win'))">
     <AvaloniaResource Include="Assets\utils\win\**" />
