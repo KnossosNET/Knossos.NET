@@ -28,7 +28,7 @@ namespace Knossos.NET.ViewModels
 
         private readonly string[] optional =
         {
-            "movies_fs2.vp" , "multi-mission-pack.vp", "multi-voice-pack.vp", "bastion.ogg", "colossus.ogg",
+            "hud_1.hcf", "hud_2.hcf", "hud_3.hcf", "movies_fs2.vp", "multi-mission-pack.vp", "multi-voice-pack.vp", "bastion.ogg", "colossus.ogg",
             "endpart1.ogg", "endprt2a.ogg", "endprt2b.ogg", "intro.ogg", "mono1.ogg", "mono2.ogg", "mono3.ogg", "mono4.ogg", "bastion.mve",
             "colossus.mve", "endpart1.mve", "endprt2a.mve", "endprt2b.mve", "intro.mve", "mono1.mve", "mono2.mve", "mono3.mve", "mono4.mve"
         };
@@ -165,6 +165,7 @@ namespace Knossos.NET.ViewModels
                     IsInstalling = true; 
                     ProgressMax = filePaths.Count();
                     Directory.CreateDirectory(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "movies");
+                    Directory.CreateDirectory(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "players");
                     foreach (string file in filePaths)
                     {
                         var parts = file.Split(Path.DirectorySeparatorChar);
@@ -175,7 +176,14 @@ namespace Knossos.NET.ViewModels
                         }
                         else
                         {
-                            File.Copy(file, Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "movies" + Path.DirectorySeparatorChar + parts[parts.Count() - 1]);
+                            if (parts[parts.Count() - 1].ToLower().Contains(".hcf"))
+                            {
+                                File.Copy(file, Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "players" + Path.DirectorySeparatorChar + parts[parts.Count() - 1]);
+                            }
+                            else
+                            {
+                                File.Copy(file, Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "movies" + Path.DirectorySeparatorChar + parts[parts.Count() - 1]);
+                            }
                         }
                         ProgressCurrent++;
                     }
