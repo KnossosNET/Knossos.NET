@@ -21,14 +21,28 @@ namespace Knossos.NET.Models
     */
     public static class Nebula
     {
+        private class NewerModVersionsData
+        {
+            public string Id { get; set; } = string.Empty;
+            public string Version { get; set; } = string.Empty;
+        }
+
         private struct NebulaSettings
         {
             public string? etag { get; set; }
+            public List<NewerModVersionsData> NewerModsVersions { get; set; } 
+
+            public NebulaSettings()
+            {
+                etag = null;
+                NewerModsVersions = new List<NewerModVersionsData>();
+            }
         }
 
         //https://cf.fsnebula.org/storage/repo.json
         //https://dl.fsnebula.org/storage/repo.json
         //https://aigaion.feralhosting.com/discovery/nebula/repo.json
+        //https://fsnebula.org/storage/repo.json"
         private static readonly string repoUrl = @"https://fsnebula.org/storage/repo.json";
         private static readonly string apiURL = @"https://api.fsnebula.org/api/1/";
         private static readonly string nebulaURL = @"https://fsnebula.org/";
@@ -66,6 +80,7 @@ namespace Knossos.NET.Models
             }
             try
             {
+                bool displayUpdates = settings.NewerModsVersions.Any() ? true : false;
                 var webEtag = await GetRepoEtag();
                 if (!File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json") || settings.etag != webEtag)
                 {
@@ -103,13 +118,27 @@ namespace Knossos.NET.Models
                     //No update is needed
                     await Dispatcher.UIThread.InvokeAsync(() => TaskViewModel.Instance!.AddMessageTask("Nebula: repo.json is up to date!"), DispatcherPriority.Background);
                     Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "repo.json is up to date!");
+                    displayUpdates = false;
                 }
                 if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
                 {
                     throw new TaskCanceledException();
                 }
-                await ParseRepoJson();
-            }catch(TaskCanceledException)
+                var updates = await ParseRepoJson();
+                if(updates != null && updates.Any())
+                {
+                    SaveSettings();
+                    if(displayUpdates)
+                    {
+                        try
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskViewModel.Instance!.AddDisplayUpdatesTask(updates), DispatcherPriority.Background);
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch(TaskCanceledException)
             {
                 if (cancellationToken != null)
                 {
@@ -119,7 +148,45 @@ namespace Knossos.NET.Models
             }
         }
 
-        private static async Task ParseRepoJson()
+        private static bool IsModUpdate(Mod mod)
+        {
+            try
+            {
+                string id = mod.id;
+                if (mod.type == ModType.engine)
+                {
+                    if (mod.stability == "rc")
+                    {
+                        id += "_RC";
+                    }
+                    else if (mod.stability == "nightly")
+                    {
+                        id += "_nightly";
+                    }
+                }
+                var exist = settings.NewerModsVersions.FirstOrDefault(m => m.Id == id);
+                if (exist != null)
+                {
+                    if (SemanticVersion.Compare(exist.Version, mod.version) < 0)
+                    {
+                        exist.Version = mod.version;
+                        return true;
+                    }
+                }
+                else
+                {
+                    settings.NewerModsVersions.Add(new NewerModVersionsData { Id = id, Version = mod.version });
+                    mod.isNewMod = true;
+                    return true;
+                }
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.IsModUpdate()", ex);
+            }
+            return false;
+        }
+
+        private static async Task<List<Mod>?> ParseRepoJson()
         {
             try
             {
@@ -140,9 +207,14 @@ namespace Knossos.NET.Models
                     JsonSerializerOptions serializerOptions = new JsonSerializerOptions();
                     var mods = JsonSerializer.DeserializeAsyncEnumerable<Mod?>(fileStream);
 
+                    var updates = new List<Mod>();
                     Mod? lastMod = null;
                     await foreach (Mod? mod in mods)
                     {
+                        if(mod != null && IsModUpdate(mod))
+                        {
+                            updates.Add(mod);
+                        }
                         if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
                         {
                             fileStream.Close();
@@ -150,6 +222,7 @@ namespace Knossos.NET.Models
                         }
                         if (mod != null && !mod.isPrivate)
                         {
+                            
                             if (mod.type == ModType.engine)
                             {
                                 //This is already installed?
@@ -204,6 +277,7 @@ namespace Knossos.NET.Models
                         cancellationToken.Dispose();
                         cancellationToken = null;
                     }
+                    return updates;
                 }
             }
             catch(TaskCanceledException)
@@ -223,7 +297,7 @@ namespace Knossos.NET.Models
                     cancellationToken = null;
                 }
             }
-            return;
+            return null;
         }
 
         public static void CancelOperations()
@@ -319,6 +393,10 @@ namespace Knossos.NET.Models
             {
                 Log.WriteToConsole("repo.json is in use. Waiting for file access...");
                 await Task.Delay(500);
+                if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
+                {
+                    return;
+                }
                 await WaitForFileAccess(filename);
             }
         }

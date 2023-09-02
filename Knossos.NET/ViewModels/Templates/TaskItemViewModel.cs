@@ -22,6 +22,7 @@ using System.Reflection.PortableExecutable;
 using VP.NET;
 using System.Text;
 using System.Text.Encodings;
+using Avalonia.Media;
 
 namespace Knossos.NET.ViewModels
 {
@@ -57,10 +58,15 @@ namespace Knossos.NET.ViewModels
         private string currentMirror = string.Empty;
         [ObservableProperty]
         private string pauseButtonText = "Pause";
+        [ObservableProperty]
+        private IBrush textColor = Brushes.White;
+        [ObservableProperty]
+        private bool isTextTask = false;
 
-
+        /* If this task contains subtasks, the subtasks must be added here, from the UIthread */
         [ObservableProperty]
         public ObservableCollection<TaskItemViewModel> taskList = new ObservableCollection<TaskItemViewModel>();
+        /* If this task contains subtasks it must be added to this single item list, from the UIthread */
         [ObservableProperty]
         public ObservableCollection<TaskItemViewModel> taskRoot = new ObservableCollection<TaskItemViewModel>();
 
@@ -74,7 +80,7 @@ namespace Knossos.NET.ViewModels
         { 
         }
 
-        public void ShowMsg(string msg, string? tooltip)
+        public void DisplayUpdates(List<Mod> updatedMods)
         {
             try
             {
@@ -82,11 +88,97 @@ namespace Knossos.NET.ViewModels
                 {
                     TaskIsSet = true;
                     IsCompleted = true;
+                    IsTextTask = true;
+                    var newMods = updatedMods.Where(x => x.isNewMod && x.type == ModType.mod);
+                    var newTCs = updatedMods.Where(x => x.isNewMod && x.type == ModType.tc);
+                    var newEngine = updatedMods.Where(x => x.type == ModType.engine);
+                    var updateMods = updatedMods.Where(x => !x.isNewMod && x.type != ModType.engine);
+
+                    Name = "Repo Changes:";
+                    if(newMods != null && newMods.Any()) 
+                    {
+                        Name += " New Mods: " + newMods.Count();
+                        foreach (var nm in newMods)
+                        {
+                            var newTask = new TaskItemViewModel();
+                            newTask.ShowMsg("Mod Released!   " + nm, null, Brushes.Green);
+                            Dispatcher.UIThread.InvokeAsync( () =>
+                            {
+                                TaskList.Add(newTask);
+                            });
+                        }
+                    }
+                    if (newTCs != null && newTCs.Any())
+                    {
+                        Name += " TCs: " + newTCs.Count();
+                        foreach (var nTc in newTCs)
+                        {
+                            var newTask = new TaskItemViewModel();
+                            newTask.ShowMsg("Total Conversion Released!  " + nTc, null, Brushes.Green);
+                            Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                TaskList.Add(newTask);
+                            });
+                        }
+                    }
+                    if (newEngine != null && newEngine.Any())
+                    {
+                        Name += " Engine Builds: " + newEngine.Count();
+                        foreach (var ne in newEngine)
+                        {
+
+                            var newTask = new TaskItemViewModel();
+                            newTask.ShowMsg("Engine Build Released!  " + ne, null, Brushes.Yellow);
+                            Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                TaskList.Add(newTask);
+                            });
+                        }
+                    }
+                    if (updateMods != null && updateMods.Any())
+                    {
+                        Name += " Mod Updates: " + updateMods.Count();
+                        foreach (var nm in updateMods)
+                        {
+                            var newTask = new TaskItemViewModel();
+                            newTask.ShowMsg("Mod Update Released!  " + nm, null, Brushes.LightBlue);
+                            Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                TaskList.Add(newTask);
+                            });
+                        }
+                    }
+                    Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.DisplayUpdates()", ex);
+            }
+        }
+
+        public void ShowMsg(string msg, string? tooltip, IBrush? textColor = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    IsCompleted = true;
+                    IsTextTask = true;
                     Name = msg;
                     if (tooltip != null)
                     {
                         Tooltip = tooltip.Trim();
                         TooltipVisible = true;
+                    }
+                    if(textColor != null)
+                    {
+                        TextColor = textColor;
                     }
                 }
                 else
@@ -639,7 +731,11 @@ namespace Knossos.NET.ViewModels
                         await Dispatcher.UIThread.InvokeAsync(async () =>
                         {
                             var fileTask = new TaskItemViewModel();
-                            TaskList.Insert(0, fileTask);
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                TaskList.Insert(0, fileTask);
+                            });
+                            
                             Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
 
                             var result = await fileTask.CompressLosseFiles(allFilesInDataFolder, skipped, cancellationTokenSource);
@@ -658,7 +754,10 @@ namespace Knossos.NET.ViewModels
                         await Dispatcher.UIThread.InvokeAsync(async () =>
                         {
                             var vpTask = new TaskItemViewModel();
-                            TaskList.Insert(0, vpTask);
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                TaskList.Insert(0, vpTask);
+                            });
                             Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                             await vpTask.CompressVP(new FileInfo(file), cancellationTokenSource);
                             ProgressCurrent++;
@@ -756,7 +855,7 @@ namespace Knossos.NET.ViewModels
                     CancelButtonVisible = true;
                     Name = "Decompressing mod: " + mod.title + " " + mod.version;
                     ShowProgressText = false;
-                    TaskRoot.Add(this);
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
                     ProgressBarMin = 0;
                     ProgressCurrent = 0;
                     Info = "In Queue";
@@ -812,7 +911,7 @@ namespace Knossos.NET.ViewModels
                         await Dispatcher.UIThread.InvokeAsync(async () =>
                         {
                             var fileTask = new TaskItemViewModel();
-                            TaskList.Insert(0, fileTask);
+                            await Dispatcher.UIThread.InvokeAsync(() => { TaskList.Insert(0, fileTask); });
                             Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
 
                             var result = await fileTask.DecompressLosseFiles(allFilesInDataFolder, skipped, cancellationTokenSource);
@@ -831,7 +930,7 @@ namespace Knossos.NET.ViewModels
                         await Dispatcher.UIThread.InvokeAsync(async () =>
                         {
                             var vpTask = new TaskItemViewModel();
-                            TaskList.Insert(0, vpTask);
+                            await Dispatcher.UIThread.InvokeAsync(() => { TaskList.Insert(0, vpTask); });
                             Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                             await vpTask.DecompressVP(new FileInfo(file), cancellationTokenSource);
                             ProgressCurrent++;
@@ -1085,7 +1184,7 @@ namespace Knossos.NET.ViewModels
                     CancelButtonVisible = true;
                     Name = "Verifying " + mod.ToString();
                     ShowProgressText = false;
-                    TaskRoot.Add(this);
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
                     Info = "In Queue";
 
                     //Wait in Queue
@@ -1311,7 +1410,7 @@ namespace Knossos.NET.ViewModels
                     CancelButtonVisible = true;
                     Name = "Downloading " + mod.ToString();
                     ShowProgressText = false;
-                    TaskRoot.Add(this);
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
                     Info = "In Queue";
                     bool compressMod = false;
 
@@ -1484,7 +1583,7 @@ namespace Knossos.NET.ViewModels
 
                         //Download
                         var fileTask = new TaskItemViewModel();
-                        TaskList.Insert(0, fileTask);
+                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, fileTask));
                         if (file.dest == null)
                         {
                             file.dest = string.Empty;
@@ -1541,7 +1640,7 @@ namespace Knossos.NET.ViewModels
 
                         //Decompress
                         var decompressTask = new TaskItemViewModel();
-                        TaskList.Insert(0, decompressTask);
+                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, decompressTask));
                         var decompResult = await decompressTask.DecompressNebulaFile(fileFullPath, file.filename, modPath + Path.DirectorySeparatorChar + file.dest, cancellationTokenSource);
                         if (!decompResult)
                         {
@@ -1573,7 +1672,7 @@ namespace Knossos.NET.ViewModels
                     if (!string.IsNullOrEmpty(mod.tile) && installed == null)
                     {
                         var tileTask = new TaskItemViewModel();
-                        TaskList.Insert(0, tileTask);
+                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
                         await tileTask.DownloadFile(mod.tile, modPath + Path.DirectorySeparatorChar + "kn_tile.png", "Downloading tile image", false, null, cancellationTokenSource);
                         mod.tile = "kn_tile.png";
                     }
@@ -1588,7 +1687,7 @@ namespace Knossos.NET.ViewModels
                     if (!string.IsNullOrEmpty(mod.banner) && installed == null)
                     {
                         var bannerTask = new TaskItemViewModel();
-                        TaskList.Insert(0, bannerTask);
+                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
                         await bannerTask.DownloadFile(mod.banner, modPath + Path.DirectorySeparatorChar + "kn_banner.png", "Downloading banner image", false, null, cancellationTokenSource);
                         mod.banner = "kn_banner.png";
                     }
@@ -1773,7 +1872,7 @@ namespace Knossos.NET.ViewModels
                     CancelButtonVisible = true;
                     Name = "Downloading " + build.ToString();
                     ShowProgressText = false;
-                    TaskRoot.Add(this);
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
                     Info = "In Queue";
 
                     //Wait in Queue
@@ -1874,11 +1973,7 @@ namespace Knossos.NET.ViewModels
 
                             //Download
                             var fileTask = new TaskItemViewModel();
-                            try
-                            {
-                                TaskList.Insert(0, fileTask);
-                            }
-                            catch { }
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, fileTask));
                             if (file.dest == null)
                             {
                                 file.dest = string.Empty;
@@ -1936,11 +2031,7 @@ namespace Knossos.NET.ViewModels
 
                             //Decompress
                             var decompressTask = new TaskItemViewModel();
-                            try
-                            {
-                                TaskList.Insert(0, decompressTask);
-                            }
-                            catch { }
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, decompressTask));
                             var decompResult = await decompressTask.DecompressNebulaFile(fileFullPath, file.filename, modPath + Path.DirectorySeparatorChar + file.dest, cancellationTokenSource);
                             if (!decompResult)
                             {
@@ -1970,7 +2061,7 @@ namespace Knossos.NET.ViewModels
                         if (!string.IsNullOrEmpty(modJson.tile))
                         {
                             var tileTask = new TaskItemViewModel();
-                            TaskList.Insert(0, tileTask);
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
                             await tileTask.DownloadFile(modJson.tile, modPath + Path.DirectorySeparatorChar + "kn_tile.png", "Downloading tile image", false, null, cancellationTokenSource);
                             modJson.tile = "kn_tile.png";
                         }
@@ -1985,7 +2076,7 @@ namespace Knossos.NET.ViewModels
                         if (!string.IsNullOrEmpty(modJson.banner))
                         {
                             var bannerTask = new TaskItemViewModel();
-                            TaskList.Insert(0, bannerTask);
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
                             await bannerTask.DownloadFile(modJson.banner, modPath + Path.DirectorySeparatorChar + "kn_banner.png", "Downloading banner image", false, null, cancellationTokenSource);
                             modJson.banner = "kn_banner.png";
                         }

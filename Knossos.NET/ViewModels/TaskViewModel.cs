@@ -64,6 +64,13 @@ namespace Knossos.NET.ViewModels
             newTask.ShowMsg(msg, tooltip);
         }
 
+        public void AddDisplayUpdatesTask(List<Mod> updatedMods)
+        {
+            var newTask = new TaskItemViewModel();
+            TaskList.Add(newTask);
+            newTask.DisplayUpdates(updatedMods);
+        }
+
         public void CleanCommand()
         {
             for (int i = TaskList.Count - 1; i >= 0; i--)

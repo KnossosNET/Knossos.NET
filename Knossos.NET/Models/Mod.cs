@@ -95,6 +95,8 @@ namespace Knossos.NET.Models
         public bool isSelected { get; set; } = false;
         [JsonIgnore]
         public bool isEnabled { get; set; } = false;
+        [JsonIgnore]
+        public bool isNewMod { get; set; } = false;
 
         public Mod()
         {
