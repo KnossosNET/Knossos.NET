@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="450"
         x:Class="Knossos.NET.Views.QuickSetupView"
+		x:Name="QSWindow"
 		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
 		Icon="/Assets/knossos-icon.ico"
 		Topmost="True"
@@ -81,8 +82,9 @@
 		
 		<!--Navigation-->
 		<WrapPanel Grid.Row="1" HorizontalAlignment="Center">
-			<Button Command="{Binding GoBackCommand}" IsEnabled="{Binding CanGoBack}" Margin="5" Background="Black">Back</Button>
-			<Button Command="{Binding ContinueCommand}" IsEnabled="{Binding CanContinue}" Margin="5" Background="Black">Next</Button>
+			<Button Command="{Binding GoBackCommand}" IsVisible="{Binding CanGoBack}" Margin="5" Background="Black">Back</Button>
+			<Button Command="{Binding ContinueCommand}" IsVisible="{Binding CanContinue}" Margin="5" Background="Black">Next</Button>
+			<Button Command="{Binding Finish, Mode=OneWay}" CommandParameter="{Binding ElementName=QSWindow}" IsVisible="{Binding !CanContinue}" Margin="5" Background="Black">Finish</Button>
 		</WrapPanel>
 	</Grid>
 	</ScrollViewer>

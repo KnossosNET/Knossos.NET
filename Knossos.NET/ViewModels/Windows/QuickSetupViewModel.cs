@@ -116,6 +116,12 @@ namespace Knossos.NET.ViewModels
             SetActivePage();
         }
 
+        internal void Finish(object window)
+        {
+            var w = (Window)window;
+            w.Close();
+        }
+
         private void SetActivePage()
         {
             switch(pageNumber)

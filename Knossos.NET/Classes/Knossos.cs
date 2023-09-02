@@ -21,7 +21,7 @@ namespace Knossos.NET
 {
     public static class Knossos
     {
-        public static readonly string AppVersion = "0.1.2";
+        public static readonly string AppVersion = "0.1.3";
         private static List<Mod> installedMods = new List<Mod>();
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();
         public static GlobalSettings globalSettings = new GlobalSettings();
