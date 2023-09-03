@@ -83,8 +83,8 @@
 		<!--Navigation-->
 		<WrapPanel Grid.Row="1" HorizontalAlignment="Center">
 			<Button Command="{Binding GoBackCommand}" IsVisible="{Binding CanGoBack}" Margin="5" Background="Black">Back</Button>
-			<Button Command="{Binding ContinueCommand}" IsVisible="{Binding CanContinue}" Margin="5" Background="Black">Next</Button>
-			<Button Command="{Binding Finish, Mode=OneWay}" CommandParameter="{Binding ElementName=QSWindow}" IsVisible="{Binding !CanContinue}" Margin="5" Background="Black">Finish</Button>
+			<Button Command="{Binding ContinueCommand}" IsEnabled="{Binding CanContinue}" IsVisible="{Binding !LastPage}" Margin="5" Background="Black">Next</Button>
+			<Button Command="{Binding Finish, Mode=OneWay}" CommandParameter="{Binding ElementName=QSWindow}" IsVisible="{Binding LastPage}" Margin="5" Background="Black">Finish</Button>
 		</WrapPanel>
 	</Grid>
 	</ScrollViewer>

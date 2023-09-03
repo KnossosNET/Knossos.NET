@@ -20,6 +20,8 @@ namespace Knossos.NET.ViewModels
         private bool canGoBack = false;
         [ObservableProperty]
         private bool canContinue = true;
+        [ObservableProperty]
+        private bool lastPage = false;
 
         [ObservableProperty]
         private string? libraryPath = null;
@@ -126,12 +128,12 @@ namespace Knossos.NET.ViewModels
         {
             switch(pageNumber)
             {
-                case 1: CanGoBack = false; CanContinue = true; Page1 = true; Page2 = false; break;
-                case 2: CanGoBack = true; CanContinue = false; Page1 = false; Page2 = true; Page3 = false; EnterPage2(); break;
-                case 3: CanGoBack = true; CanContinue = false; Page2 = false; Page3 = true; Page4 = false; EnterPage3(); break;
-                case 4: CanGoBack = true; CanContinue = true; Page3 = false; Page4 = true; Page5 = false; break;
-                case 5: CanGoBack = true; CanContinue = true; Page4 = false; Page5 = true; Page6 = false; break;
-                case 6: CanGoBack = true; CanContinue = false; Page5 = false; Page6 = true; break;
+                case 1: CanGoBack = false; CanContinue = true; Page1 = true; Page2 = false; LastPage = false;  break;
+                case 2: CanGoBack = true; CanContinue = false; Page1 = false; Page2 = true; Page3 = false; EnterPage2(); LastPage = false;  break;
+                case 3: CanGoBack = true; CanContinue = false; Page2 = false; Page3 = true; Page4 = false; EnterPage3(); LastPage = false;  break;
+                case 4: CanGoBack = true; CanContinue = true; Page3 = false; Page4 = true; Page5 = false; LastPage = false; break;
+                case 5: CanGoBack = true; CanContinue = true; Page4 = false; Page5 = true; Page6 = false; LastPage = false; break;
+                case 6: CanGoBack = true; CanContinue = false; Page5 = false; Page6 = true; LastPage = true; break;
             }
         }
     }
