@@ -100,7 +100,7 @@ namespace Knossos.NET.Models
                 }
                 else
                 {
-                    Log.Add(Log.LogSeverity.Error, "ModSettings.Save()", "A mod tried to save mod_settings.json to a null filePath, this happens if you try to Save() whiout calling Load() first.");
+                    Log.Add(Log.LogSeverity.Error, "ModSettings.Save()", "A mod tried to save mod_settings.json to a null filePath, this happens if you try to Save() without calling Load() first.");
                 }
             }
             catch (Exception ex)

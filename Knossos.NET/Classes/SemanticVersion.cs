@@ -4,7 +4,7 @@ namespace Knossos.NET.Classes
 {
     /*
         Helper class to handle semantic versions used by FSO and Knossos.
-        Just the basics needed to do comparisons whiout having to include 
+        Just the basics needed to do comparisons without having to include 
         a 3rd party library for this.
     */
     public class SemanticVersion
