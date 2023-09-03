@@ -55,7 +55,7 @@
 		<!--Page4-->
 		<StackPanel IsVisible="{Binding Page4}" Grid.Row="0" >
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center">Freespace 2 Retail</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">In order to have access to Freespace 1 and 2 content and visual improvements you need to install Freespace 2 Retail in Knossos. Whiout this any content that needs the full Freespace 2 retail files will not be displayed on the Nebula tab.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">In order to have access to Freespace 1 and 2 content and visual improvements you need to install Freespace 2 Retail in Knossos. without this any content that needs the full Freespace 2 retail files will not be displayed on the Nebula tab.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">To install Freespace 2 go to the "Settings" tab and open the "FS2 Retail Installer" the button is on the "Knossos Settings" section. Then follow the instructions there. If you already have FS2 installed this button is not avalible.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">This step is optional and you can continue at any time</TextBlock>
 		</StackPanel>

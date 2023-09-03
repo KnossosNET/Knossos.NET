@@ -63,7 +63,7 @@
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5" >
 							<CheckBox IsVisible="{Binding IsAVX}" Grid.Column="0" ToolTip.Tip="If available, Knossos will force to run SSE2 FSO builds instead of AVX ones." IsChecked="{Binding ForceSSE2}" Width="200">Force SSE2 Builds</CheckBox>
 							<CheckBox IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="1" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for avalible updates at the start.">Check for updates at startup</CheckBox>
-							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="2" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted whiout any user input.">Auto Update</CheckBox>
+							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="2" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input.">Auto Update</CheckBox>
 						</Grid>
 						<!-- SubTasks -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
