@@ -68,8 +68,9 @@ namespace Knossos.NET.ViewModels
             Mods.Clear();
         }
 
-        public void RunDependencyCheck()
+        public void RunModStatusChecks()
         {
+            Mods.ForEach(m => m.RefreshSpecialIcons());
             Mods.ForEach(m => m.CheckDependencyActiveVersion());
         }
 

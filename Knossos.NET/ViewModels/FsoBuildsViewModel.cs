@@ -139,7 +139,7 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 Knossos.RemoveBuild(build);
-                MainWindowViewModel.Instance?.RunDependenciesCheck();
+                MainWindowViewModel.Instance?.RunModStatusChecks();
             }
             catch(Exception ex)
             {

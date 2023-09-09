@@ -42,7 +42,25 @@ namespace Knossos.NET.Models
 
         public ModSettings()
         {
+        }
 
+        /// <summary>
+        /// Check for non default values in ModSettings
+        /// </summary>
+        /// <returns>Returns false if user made changes or true if is default config</returns>
+        public bool IsDefaultConfig()
+        {
+            if (customDependencies != null && customDependencies.Any() ||
+                customModFlags != null && customModFlags.Any() ||
+                customBuildId != null ||
+                customBuildVersion != null ||
+                customBuildExec != null ||
+                customCmdLine != null
+                )
+            {
+                return false;
+            }
+            return true;
         }
 
         public void Load(string fullPath)

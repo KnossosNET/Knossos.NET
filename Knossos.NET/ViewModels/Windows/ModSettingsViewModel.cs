@@ -282,6 +282,7 @@ namespace Knossos.NET.ViewModels
                 if(modCardViewModel != null)
                 {
                     modCardViewModel.CheckDependencyActiveVersion();
+                    modCardViewModel.RefreshSpecialIcons();
                 }
             }
         }

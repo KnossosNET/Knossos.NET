@@ -453,7 +453,7 @@ namespace Knossos.NET
                 if (!isQuickLaunch)
                 {
                     //Red border for mod with missing deps
-                    MainWindowViewModel.Instance?.RunDependenciesCheck();
+                    MainWindowViewModel.Instance?.RunModStatusChecks();
 
                     //Load config options to view, must be done after loading the fso builds due to flag data
                     MainWindowViewModel.Instance?.GlobalSettingsLoadData();

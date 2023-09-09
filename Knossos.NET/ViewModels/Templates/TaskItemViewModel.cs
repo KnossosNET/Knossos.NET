@@ -1749,7 +1749,7 @@ namespace Knossos.NET.ViewModels
                         Knossos.AddMod(mod);
                         await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(mod), DispatcherPriority.Background);
                         await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id, false), DispatcherPriority.Background);
-                        MainWindowViewModel.Instance?.RunDependenciesCheck();
+                        MainWindowViewModel.Instance?.RunModStatusChecks();
                     }
 
                     /*
@@ -2106,7 +2106,7 @@ namespace Knossos.NET.ViewModels
                         CancelButtonVisible = false;
 
                         //Re-run Dependencies checks 
-                        MainWindowViewModel.Instance?.RunDependenciesCheck();
+                        MainWindowViewModel.Instance?.RunModStatusChecks();
 
                         /*
                             Always Dequeue, always check for check size and verify that the first is this TaskItemViewModel object

@@ -51,6 +51,8 @@ namespace Knossos.NET.ViewModels
         private bool buttonPage1 = true;
         [ObservableProperty]
         private bool isLocalMod = false;
+        [ObservableProperty]
+        private bool isCustomConfig = false;
 
 
         /* Should only be used by the editor preview */
@@ -186,6 +188,7 @@ namespace Knossos.NET.ViewModels
                 }
                 LoadImage();
                 CheckDependencyActiveVersion();
+                RefreshSpecialIcons();
             }
         }
 
@@ -200,6 +203,11 @@ namespace Knossos.NET.ViewModels
             {
                 BorderColor = Brushes.Black;
             }
+        }
+
+        public void RefreshSpecialIcons()
+        {
+            IsCustomConfig = !modVersions[activeVersionIndex].modSettings.IsDefaultConfig();
         }
 
         /* Button Commands */
@@ -283,7 +291,7 @@ namespace Knossos.NET.ViewModels
                             MainWindowViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
                         }
                         Knossos.RemoveMod(modVersions[activeVersionIndex].id);
-                        MainWindowViewModel.Instance?.RunDependenciesCheck();
+                        MainWindowViewModel.Instance?.RunModStatusChecks();
                     }
                 }
                 else

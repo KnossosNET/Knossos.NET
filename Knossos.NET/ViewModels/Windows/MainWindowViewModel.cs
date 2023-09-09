@@ -74,9 +74,9 @@ namespace Knossos.NET.ViewModels
         }
 
         /* External Commands */
-        public void RunDependenciesCheck()
+        public void RunModStatusChecks()
         {
-            InstalledModsView.RunDependencyCheck();
+            InstalledModsView.RunModStatusChecks();
         }
 
         public void ClearViews()

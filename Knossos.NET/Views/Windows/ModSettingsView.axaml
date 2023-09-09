@@ -44,7 +44,7 @@
 						<!--Dependencies Settings-->
 						<StackPanel>
 							<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">MOD DEPENDENCIES</Label>
-							<CheckBox Command="{Binding CustomDependenciesClick}" IsChecked="{Binding CustomDependencies}" Margin="5,0,0,0">Enable custom mod dependencies</CheckBox>
+							<CheckBox Command="{Binding CustomDependenciesClick}" IsChecked="{Binding CustomDependencies}" Margin="5,0,0,0" ToolTip.Tip="Changing mod dependencies may cause problems, uncheck this box to reset back to defaults if you encounter problems.">Enable custom mod dependencies</CheckBox>
 							<Button Command="{Binding AddDependencyCommand}" IsVisible="{Binding CustomDependencies}" FontWeight="Bold" FontSize="18" Background="Black" Foreground="White" Margin="5">+</Button>
 							<ListBox ItemsSource="{Binding DepItems}">
 								<ListBox.ItemTemplate>

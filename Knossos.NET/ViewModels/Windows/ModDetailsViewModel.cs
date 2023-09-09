@@ -425,7 +425,7 @@ namespace Knossos.NET.ViewModels
                             Knossos.RemoveMod(delete);
                             ItemSelectedIndex = modVersions.Count - 1;
                             VersionItems.Remove(verDel);
-                            MainWindowViewModel.Instance?.RunDependenciesCheck();
+                            MainWindowViewModel.Instance?.RunModStatusChecks();
                         }
                     }
                     else
@@ -440,7 +440,7 @@ namespace Knossos.NET.ViewModels
                                 MainWindowViewModel.Instance?.AddNebulaMod(modVersions[0]);
                             }
                             Knossos.RemoveMod(modVersions[0].id);
-                            MainWindowViewModel.Instance?.RunDependenciesCheck();
+                            MainWindowViewModel.Instance?.RunModStatusChecks();
                             if (window != null)
                             {
                                 var w = (ModDetailsView)window;
