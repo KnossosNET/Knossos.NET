@@ -2448,11 +2448,11 @@ namespace Knossos.NET.ViewModels
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
                 HttpClientHandler handler = new HttpClientHandler();
                 handler.AllowAutoRedirect = true;
-                handler.AutomaticDecompression = DecompressionMethods.GZip;
+                handler.AutomaticDecompression = DecompressionMethods.All;
                 using HttpClient httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(15) };
                 if (downloadUrl.ToString().ToLower().Contains(".json"))
                 {
-                    httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
+                    httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "br, gzip, deflate");
                     isJson = true;
                 }
                 using var response = await httpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
