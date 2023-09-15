@@ -4,14 +4,44 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Knossos.NET.Views.DeveloperModsView"
+			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
 			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
 
 	<Design.DataContext>
 		<vm:DeveloperModsViewModel/>
 	</Design.DataContext>
 
-	<StackPanel>
-		<Label>Mod Dev Not Implemented!</Label>
-	</StackPanel>
-	
+	<Border BorderBrush="Transparent" BorderThickness="2" CornerRadius="2" Margin="5">
+		<TabControl>
+			<TabItem Header="Mods">
+				<SplitView Margin="0,0,0,5" IsPaneOpen="True" DisplayMode="Inline" OpenPaneLength="400">
+					<SplitView.Pane>
+						<ListBox ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}">
+							<ListBox.ItemTemplate>
+								<DataTemplate>
+									<WrapPanel>
+										<Label FontWeight="Bold" Content="["/>
+										<Label FontWeight="Bold" Content="{Binding type}"/>
+										<Label FontWeight="Bold" Content="]"/>
+										<Label Content="{Binding title}"/>
+									</WrapPanel>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+					</SplitView.Pane>
+
+					<v:DevModEditorView Content="{Binding ModEditor}"/>
+					
+				</SplitView>
+			</TabItem>
+
+			<TabItem Header="Modding Tools">
+
+			</TabItem>
+
+			<TabItem Header="Nebula">
+
+			</TabItem>
+		</TabControl>
+	</Border>
 </UserControl>

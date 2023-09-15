@@ -21,7 +21,7 @@ namespace Knossos.NET
 {
     public static class Knossos
     {
-        public static readonly string AppVersion = "0.1.3";
+        public static readonly string AppVersion = "0.2.0-Alpha";
         private static List<Mod> installedMods = new List<Mod>();
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();
         public static GlobalSettings globalSettings = new GlobalSettings();
@@ -1051,6 +1051,10 @@ namespace Knossos.NET
                                 if(!isQuickLaunch)
                                     await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(build), DispatcherPriority.Background);
                                 break;
+                        }
+                        if(modJson.devMode)
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddDevMod(modJson), DispatcherPriority.Background);
                         }
                     }
                     catch (Exception ex)

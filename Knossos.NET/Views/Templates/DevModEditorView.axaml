@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.DevModEditorView"			 
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+
+	<Design.DataContext>
+		<vm:DevModEditorViewModel/>
+	</Design.DataContext>
+	
+	<ScrollViewer>
+
+		<WrapPanel>
+
+			<StackPanel Width="200">
+				<Label Content="{Binding Name}"></Label>
+			</StackPanel>
+		
+			<TabControl>
+			
+				<TabItem Header="Details">
+					
+				</TabItem>
+			
+				<TabItem Header="Packages">
+
+				</TabItem>
+
+				<TabItem Header="FSO Settings">
+
+				</TabItem>
+			
+				<TabItem Header="Members">
+
+				</TabItem>
+			
+			</TabControl>
+
+		</WrapPanel>
+		
+	</ScrollViewer>
+	
+</UserControl>
