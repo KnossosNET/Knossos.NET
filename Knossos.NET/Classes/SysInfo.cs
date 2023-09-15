@@ -133,5 +133,48 @@ namespace Knossos.NET
                 return "MacOS";
             return "Unknown";
         }
+
+        public static void OpenBrowserURL(string url)
+        {
+            try
+            {
+                if (SysInfo.IsWindows)
+                {
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}"));
+                }
+                else if (SysInfo.IsLinux)
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (SysInfo.IsMacOS)
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Sysinfo.OpenBrowser()", ex);
+            }
+        }
+
+        public static void OpenFolder(string path)
+        {
+            try
+            {
+                Process.Start(new System.Diagnostics.ProcessStartInfo()
+                {
+                    FileName = path,
+                    UseShellExecute = true,
+                    Verb = "open"
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Sysinfo.OpenFolder()", ex);
+            }
+        }
     }
 }

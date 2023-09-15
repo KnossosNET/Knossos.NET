@@ -38,7 +38,7 @@ namespace Knossos.NET.ViewModels
                     {
                         if(ModEditor == null)
                             ModEditor = new DevModEditorViewModel();
-                        ModEditor.LoadMod(Mods[selectedIndex]);
+                        ModEditor.StartModEditor(Mods[selectedIndex]);
                     }
                 }
             }
@@ -58,7 +58,8 @@ namespace Knossos.NET.ViewModels
                 var exist = Mods.FirstOrDefault(m => m.id == mod.id);
                 if (exist == null)
                 {
-                    Mods.Add(mod);
+                    if(mod.modSource == ModSource.nebula)
+                        Mods.Add(mod);
                 }
                 else
                 {

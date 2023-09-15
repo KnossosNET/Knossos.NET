@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.DevModVersionsView"			 
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+	
+	<Design.DataContext>
+		<vm:DeveloperModsViewModel/>
+	</Design.DataContext>
+
+	<Grid RowDefinitions="Auto,*, Auto, Auto">
+		<WrapPanel Grid.Row="0" Margin="10" HorizontalAlignment="Center">
+			<Button Background="DarkCyan" FontWeight="Bold" >New Version</Button>
+			<Button Background="DarkOrange" FontWeight="Bold" Margin="20,0,0,0">Modify/Install versions from Nebula</Button>
+			<Button Background="Red" FontWeight="Bold" Margin="20,0,0,0">Delete Mod</Button>
+		</WrapPanel>
+		<ListBox Margin="10,0,10,10" Grid.Row="1" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}" HorizontalAlignment="Stretch" >
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<WrapPanel>
+						<Label Margin="20,0,0,0" IsVisible="{Binding !isPrivate}" VerticalAlignment="Center" FontWeight="Bold" Content="Public" Foreground="Cyan"/>
+						<Label Margin="20,0,0,0" IsVisible="{Binding isPrivate}" VerticalAlignment="Center" FontWeight="Bold" Content="Private" Foreground="Red"/>
+						<Label Margin="20,0,0,0" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Content="{Binding version}"/>
+						<Label IsVisible="{Binding inNebula}" Margin="20,0,0,0" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Foreground="DarkCyan" Content="Uploaded to Nebula"/>
+					</WrapPanel>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+		<Label Grid.Row="2" HorizontalAlignment="Center">Actions for Active Version</Label>
+		<WrapPanel Grid.Row="3" Margin="10" HorizontalAlignment="Center">
+			<Button Background="DarkGreen" FontWeight="Bold">Upload to Nebula</Button>
+			<Button Background="#8E3C23" Margin="20,0,0,0" FontWeight="Bold">Create playtest</Button>
+			<Button Background="DarkCyan" FontWeight="Bold" Margin="20,0,0,0">Make it private</Button>
+			<Button Background="Red" FontWeight="Bold" Margin="20,0,0,0">Delete from Nebula</Button>
+			<Button Background="Red" FontWeight="Bold" Margin="20,0,0,0">Delete Locally</Button>
+		</WrapPanel>
+	</Grid>
+	
+</UserControl>

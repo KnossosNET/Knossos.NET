@@ -1076,32 +1076,6 @@ namespace Knossos.NET
             }
         }
 
-        public static void OpenBrowserURL(string url)
-        {
-            try
-            {
-                if (SysInfo.IsWindows)
-                {
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}"));
-                }
-                else if (SysInfo.IsLinux)
-                {
-                    Process.Start("xdg-open", url);
-                }
-                else if (SysInfo.IsMacOS)
-                {
-                    Process.Start("open", url);
-                }
-                else
-                {
-                }
-            }
-            catch(Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error,"Knossos.OpenBrowser()",ex);
-            }
-        }
-
         public static void WriteToUIConsole(string message)
         {
             MainWindowViewModel.Instance?.WriteToUIConsole(message);

@@ -257,9 +257,14 @@ namespace Knossos.NET.Models
                                     bool update = true;
                                     foreach(var intMod in isInstalled)
                                     {
-                                        if(SemanticVersion.Compare(intMod.version, mod.version) >= 0)
+                                        int result = SemanticVersion.Compare(intMod.version, mod.version);
+                                        if (result >= 0)
                                         {
                                             update = false;
+                                            if(result == 0)
+                                            {
+                                                intMod.inNebula = true;
+                                            }
                                         }
                                     }
                                     if(update)
@@ -519,7 +524,7 @@ namespace Knossos.NET.Models
                 if (reply.HasValue)
                 {
                     Log.Add(Log.LogSeverity.Information, "Nebula.UploadLog", "Uploaded log file to Nebula: " + nebulaURL + "log/" + reply.Value.id);
-                    Knossos.OpenBrowserURL(nebulaURL + "log/" + reply.Value.id);
+                    SysInfo.OpenBrowserURL(nebulaURL + "log/" + reply.Value.id);
                     return true;
                 }
             }

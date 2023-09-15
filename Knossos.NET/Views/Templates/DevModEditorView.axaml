@@ -2,8 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Knossos.NET.Views.DevModEditorView"			 
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="650"
+             x:Class="Knossos.NET.Views.DevModEditorView"
+			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
 			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
 
 	<Design.DataContext>
@@ -14,14 +15,34 @@
 
 		<WrapPanel>
 
-			<StackPanel Width="200">
-				<Label Content="{Binding Name}"></Label>
+			<StackPanel Width="250">
+				<TextBlock HorizontalAlignment="Center" Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextWrapping="Wrap" Margin="0"></TextBlock>
+				<Image HorizontalAlignment="Center" Margin="10" Source="{Binding Image}" Width="150" Height="225"></Image>
+				<TextBlock HorizontalAlignment="Center" Text="Active Version" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
+				<TextBlock HorizontalAlignment="Center" Text="{Binding Version}" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
+				<StackPanel Margin="10" HorizontalAlignment="Center">
+					<Button Command="{Binding PlayMod}" CommandParameter="release" Background="#52971D" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Play</Button>
+					<Button Command="{Binding PlayMod}" CommandParameter="fred2" Background="#FFC847" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Fred2</Button>
+					<Button Command="{Binding PlayMod}" CommandParameter="qtfred" Background="DarkCyan" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >QtFred</Button>
+					<Button Command="{Binding PlayMod}" CommandParameter="debug" Background="#8D2FFD" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Debug</Button>
+					<Button Command="{Binding PlayMod}" CommandParameter="fred2debug" Background="#8E1C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Fred2 Debug</Button>
+					<Button Command="{Binding OpenFolder}" Background="#8E3C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Open Folder</Button>
+				</StackPanel>
+				<StackPanel IsVisible="true" Margin="10,10,10,10" HorizontalAlignment="Center">
+					<TextBlock HorizontalAlignment="Center" Text="Tools" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
+					<ComboBox Width="240"></ComboBox>
+					<Button Command="{Binding OpenTool}" HorizontalAlignment="Center" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black">Open</Button>
+				</StackPanel>
 			</StackPanel>
 		
 			<TabControl>
 			
+				<TabItem Header="Versions">
+					<v:DevModVersionsView Content="{Binding VersionsView}"/>
+				</TabItem>
+
 				<TabItem Header="Details">
-					
+
 				</TabItem>
 			
 				<TabItem Header="Packages">

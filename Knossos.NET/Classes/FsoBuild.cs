@@ -65,6 +65,7 @@ namespace Knossos.NET.Models
         public string? directExec = null;
         public bool isInstalled = true;
         public bool devMode = false;
+        public Mod? modData; 
         /*
          Direct Exe
          */
@@ -127,6 +128,10 @@ namespace Knossos.NET.Models
             id = modJson.id;
             title = modJson.title;
             devMode = modJson.devMode;
+            if(devMode)
+            {
+                modData = modJson;
+            }
             description = modJson.description;
             version = modJson.version;
             folderPath = modJson.fullPath;

@@ -97,6 +97,8 @@ namespace Knossos.NET.Models
         public bool isEnabled { get; set; } = false;
         [JsonIgnore]
         public bool isNewMod { get; set; } = false;
+        [JsonIgnore]
+        public bool inNebula { get; set; } = false;
 
         public Mod()
         {
