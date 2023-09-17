@@ -68,6 +68,10 @@ namespace Knossos.NET.ViewModels
                         Mods.Remove(exist);
                         Mods.Add(mod);
                     }
+                    if (ModEditor != null && ModEditor.ActiveVersion.id == mod.id)
+                    {
+                        ModEditor.AddModToList(mod);
+                    }
                 }
             }catch (Exception ex)
             {

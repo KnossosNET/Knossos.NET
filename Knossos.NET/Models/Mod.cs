@@ -671,6 +671,15 @@ namespace Knossos.NET.Models
                 Log.Add(Log.LogSeverity.Error, "ModJson.SaveJson", ex);
             }
         }
+
+        /* 
+         * To use with the List .Sort()
+        */
+        public static int CompareVersion(Mod mod1, Mod mod2)
+        {
+            //inverted
+            return SemanticVersion.Compare(mod1.version, mod2.version);
+        }
     }
 
     public class ModPackage
@@ -895,7 +904,7 @@ namespace Knossos.NET.Models
         }
     }
 
-public class ModFile
+    public class ModFile
     {
         public string? filename { get; set; }
         public string? dest { get; set; } // "<destination path>"

@@ -30,15 +30,23 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool dataLoaded = false;
         [ObservableProperty]
-        ObservableCollection<Mod> modInstallList = new ObservableCollection<Mod>();
+        private ObservableCollection<Mod> modInstallList = new ObservableCollection<Mod>();
         [ObservableProperty]
         private bool isInstalled = false;
         [ObservableProperty]
         private bool compress = false;
         [ObservableProperty]
-        private bool compressVisible = Knossos.globalSettings.modCompression == CompressionSettings.Manual? true : false; 
+        private bool compressVisible = Knossos.globalSettings.modCompression == CompressionSettings.Manual? true : false;
+        [ObservableProperty]
+        private bool canSelectDevMode = true;
+        [ObservableProperty]
+        private bool installInDevMode = false;
 
         private Mod? selectedMod;
+        [ObservableProperty]
+        private bool loggedToNebula = Nebula.userIsLoggedIn;
+        [ObservableProperty]
+        private bool forceDevMode = false;
 
         private Mod? SelectedMod
         {
@@ -57,9 +65,12 @@ namespace Knossos.NET.ViewModels
         {
         }
 
-        public ModInstallViewModel(Mod modJson, string? preSelectedVersion = null)
+        public ModInstallViewModel(Mod modJson, string? preSelectedVersion = null, bool forceDevModeOn = false)
         {
             Title = "Installing: " + modJson.title;
+            CanSelectDevMode = !forceDevModeOn;
+            InstallInDevMode = forceDevModeOn;
+            forceDevMode = forceDevModeOn;
             InitialLoad(modJson.id, preSelectedVersion);
         }
 
@@ -129,11 +140,23 @@ namespace Knossos.NET.ViewModels
                             }
                         }
                     }
-
+                    InstallInDevMode = installed.devMode;
+                    CanSelectDevMode = false;
                 }
                 else
                 {
                     IsInstalled = false;
+
+                    if(ForceDevMode)
+                    {
+                        CanSelectDevMode = false;
+                        InstallInDevMode = true;
+                    }
+                    else
+                    {
+                        CanSelectDevMode = true;
+                        InstallInDevMode = false;
+                    }
                 }
                 SelectedMod.isEnabled=false;
                 SelectedMod.isSelected = true;
@@ -263,6 +286,8 @@ namespace Knossos.NET.ViewModels
         {
             foreach (var mod in ModInstallList)
             {
+                if (mod == SelectedMod)
+                    mod.devMode = InstallInDevMode;
                 if(mod.isSelected)
                     TaskViewModel.Instance!.InstallMod(mod, null, Compress);
             }

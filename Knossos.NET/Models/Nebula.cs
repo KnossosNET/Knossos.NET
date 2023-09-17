@@ -50,6 +50,7 @@ namespace Knossos.NET.Models
         private static CancellationTokenSource? cancellationToken = null;
         public static bool repoLoaded = false;
         private static NebulaSettings settings = new NebulaSettings();
+        public static bool userIsLoggedIn = false;
 
         public static async void Trinity()
         {

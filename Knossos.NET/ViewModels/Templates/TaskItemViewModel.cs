@@ -23,6 +23,7 @@ using VP.NET;
 using System.Text;
 using System.Text.Encodings;
 using Avalonia.Media;
+using System.Text.RegularExpressions;
 
 namespace Knossos.NET.ViewModels
 {
@@ -79,6 +80,94 @@ namespace Knossos.NET.ViewModels
         public TaskItemViewModel() 
         { 
         }
+
+        private async Task<bool> ExtractVP(FileInfo vpFile, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 1;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    if (cancelSource != null)
+                    {
+                        cancellationTokenSource = cancelSource;
+                    }
+                    else
+                    {
+                        cancellationTokenSource = new CancellationTokenSource();
+                    }
+                    CancelButtonVisible = false;
+                    Name = "Extracting: " + vpFile.Name;
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.ExtractVP()", "Starting to extractVP VP file: " + vpFile.Name);
+
+                    await Task.Run(async () => {
+                        var vp = new VPContainer();
+                        await vp.LoadVP(vpFile.FullName);
+                        await vp.ExtractVpAsync(vpFile.Directory!.FullName,extractCallback);
+                    });
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        try
+                        {
+                            File.Delete(vpFile.FullName);
+                        }
+                        catch { }
+                        throw new TaskCanceledException();
+                    }
+                    File.Delete(vpFile.FullName);
+                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.ExtractVP()", "ExtractVP VP finished: " + vpFile.Name + " Processed Files: " + ProgressBarMax);
+                    Info = "";
+                    IsCompleted = true;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                /*
+                    Task cancel requested by user
+                */
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.ExtractVP()", ex);
+                return false;
+            }
+        }
+
 
         public void DisplayUpdates(List<Mod> updatedMods)
         {
@@ -638,6 +727,22 @@ namespace Knossos.NET.ViewModels
         }
 
         private async void compressionCallback(string filename, int maxFiles)
+        {
+            if (filename != string.Empty)
+            {
+                ProgressCurrent++;
+            }
+            else
+            {
+                ProgressCurrent = 0;
+            }
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                ProgressBarMax = maxFiles;
+                Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+            });
+        }
+
+        private async void extractCallback(string filename, int _, int maxFiles)
         {
             if (filename != string.Empty)
             {
@@ -1392,6 +1497,7 @@ namespace Knossos.NET.ViewModels
         {
             string? modPath = null;
             Mod? installed = null;
+            
             try
             {
                 if (!TaskIsSet)
@@ -1427,22 +1533,26 @@ namespace Knossos.NET.ViewModels
                         }
                     }
 
-                    compressMod = manualCompress;
-                    //Todo add mod fso version checking
-                    if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.Always)
+                    if (!mod.devMode) //Do not compress dev mode mods
                     {
-                        compressMod = true;
-                    }
-                    if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.ModSupport)
-                    {
-                        try
+                        compressMod = manualCompress;
+                        //Todo add mod fso version checking
+                        if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.Always)
                         {
-                            var fso = mod.GetDependency("FSO");
-                            if (fso != null && (fso.version == null || fso.version.Contains(">=") || SemanticVersion.Compare(fso.version.Replace(">=", "").Replace("<", "").Replace(">", "").Trim(), VPCompression.MinimumFSOVersion) > 0))
-                                compressMod = true;
-                        }catch (Exception ex)
+                            compressMod = true;
+                        }
+                        if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.ModSupport)
                         {
-                            Log.Add(Log.LogSeverity.Error,"Knossos.PlayMod()", ex);
+                            try
+                            {
+                                var fso = mod.GetDependency("FSO");
+                                if (fso != null && (fso.version == null || fso.version.Contains(">=") || SemanticVersion.Compare(fso.version.Replace(">=", "").Replace("<", "").Replace(">", "").Trim(), VPCompression.MinimumFSOVersion) > 0))
+                                    compressMod = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", ex);
+                            }
                         }
                     }
 
@@ -1469,6 +1579,7 @@ namespace Knossos.NET.ViewModels
                          (Download, Decompression, Download banner/tile images)
                         -+1 task if we have to compress
                         -If the mod is installeds there is no need to download the baners and title image again so -2 to max tasks
+                        -If devmode and file is a vp it needs to be decompressed +1 to max tasks
                     */
 
                     List<ModFile> files = new List<ModFile>();
@@ -1492,6 +1603,7 @@ namespace Knossos.NET.ViewModels
                     }
 
                     modPath = Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar +rootPack + Path.DirectorySeparatorChar + modFolder;
+                    int vPExtractionNeeded = 0;
                     for (int i = mod.packages.Count - 1; i >= 0; i--)
                     {
                         bool alreadyInstalled = false;
@@ -1509,9 +1621,22 @@ namespace Knossos.NET.ViewModels
                                 }
                             }
                         }
-                        if (mod.packages[i].isSelected && !alreadyInstalled)
+                        
+                        if (mod.packages[i].isSelected && !alreadyInstalled || !alreadyInstalled && mod.devMode)
                         {
-                            files.AddRange(mod.packages[i].files!);
+                            if (mod.packages[i].files != null)
+                            {
+                                if (mod.devMode)
+                                {
+                                    foreach (var file in mod.packages[i].files!)
+                                    {
+                                        file.dest = mod.packages[i].name + Path.DirectorySeparatorChar + file.dest;
+                                        if (mod.packages[i].isVp)
+                                            vPExtractionNeeded++;
+                                    }
+                                }
+                                files.AddRange(mod.packages[i].files!);
+                            }
                         }
                         else
                         {
@@ -1546,7 +1671,8 @@ namespace Knossos.NET.ViewModels
                     ProgressBarMin = 0;
                     ProgressCurrent = 0;
                     ProgressBarMax = installed == null ? (files.Count * 2) + 2 : (files.Count * 2);
-                    if(compressMod)
+                    ProgressBarMax += vPExtractionNeeded;
+                    if (compressMod)
                     {
                         ProgressBarMax += 1;
                     }
@@ -1650,6 +1776,11 @@ namespace Knossos.NET.ViewModels
                         File.Delete(fileFullPath);
                         ++ProgressCurrent;
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
                     });
                     files.Clear();
 
@@ -1702,6 +1833,7 @@ namespace Knossos.NET.ViewModels
                     mod.fullPath = modPath + Path.DirectorySeparatorChar;
                     mod.folderName = modFolder;
                     mod.installed = true;
+                    mod.inNebula = true;
 
                     if (installed == null)
                     {
@@ -1736,6 +1868,24 @@ namespace Knossos.NET.ViewModels
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                     }
 
+                    //ExtractVPs if needed
+                    if (mod.devMode)
+                    {
+                        var vpFiles = Directory.GetFiles(modPath, "*.*", SearchOption.AllDirectories).Where(file => Regex.IsMatch(file.ToLower(), @"^.+\.(vp|vpc)$"));
+                        await Parallel.ForEachAsync(vpFiles, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks }, async (vp, token) =>
+                        {
+                            var extractTask = new TaskItemViewModel();
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, extractTask));
+                            var extractResult = await extractTask.ExtractVP(new FileInfo(vp), cancellationTokenSource);
+                            if (!extractResult)
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Error while extracting vp file " + vp);
+                            }
+                            ++ProgressCurrent;
+                            Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+                        });
+                    }
+
                     try
                     {
                         File.Delete(mod.fullPath + Path.DirectorySeparatorChar + "knossos_net_download.token");
@@ -1749,6 +1899,10 @@ namespace Knossos.NET.ViewModels
                         Knossos.AddMod(mod);
                         await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(mod), DispatcherPriority.Background);
                         await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id, false), DispatcherPriority.Background);
+                        if (mod.devMode)
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddDevMod(mod), DispatcherPriority.Background);
+                        }
                         MainWindowViewModel.Instance?.RunModStatusChecks();
                     }
 
@@ -2091,6 +2245,7 @@ namespace Knossos.NET.ViewModels
                         modJson.fullPath = modPath + Path.DirectorySeparatorChar;
                         modJson.folderName = modFolder;
                         modJson.installed = true;
+                        modJson.inNebula = true;
                         modJson.SaveJson();
                         try
                         {
@@ -2102,6 +2257,10 @@ namespace Knossos.NET.ViewModels
                         }
                         FsoBuild newBuild = new FsoBuild(modJson);
                         Knossos.AddBuild(newBuild);
+                        if (modJson.devMode)
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddDevMod(modJson), DispatcherPriority.Background);
+                        }
                         IsCompleted = true;
                         CancelButtonVisible = false;
 

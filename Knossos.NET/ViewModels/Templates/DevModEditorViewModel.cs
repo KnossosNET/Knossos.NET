@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
@@ -47,6 +48,15 @@ namespace Knossos.NET.ViewModels
             return mods;
         }
 
+        public void AddModToList(Mod newMod)
+        {
+            var currentActive = ActiveVersion;
+            mods.Add(newMod);
+            mods.Sort(Mod.CompareVersion);
+            ChangeActiveVersion(currentActive);
+            VersionsView = new DevModVersionsViewModel(this);
+        }
+
         public void ChangeActiveVersion(Mod mod)
         {
             index = mods.IndexOf(mod);
@@ -77,10 +87,12 @@ namespace Knossos.NET.ViewModels
                     case ModType.tool:
                         break;
                 }
+                //Sort by version
+                mods.Sort(Mod.CompareVersion);
                 //Filter and determine best active version
                 foreach (var m in mods.ToList())
                 {
-                    if (!m.devMode || m.modSource != ModSource.nebula)
+                    if (m.modSource != ModSource.nebula)
                     {
                         mods.Remove(m);
                     }

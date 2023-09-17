@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
+using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -50,6 +51,25 @@ namespace Knossos.NET.ViewModels
                 {
                     selectedIndex = mods.IndexOf(m);
                 }
+            }
+        }
+
+        /* Button Commands */
+
+        internal async void LoadVersionsFromNebula()
+        {
+            try
+            {
+                if (editor != null)
+                {
+                    var dialog = new ModInstallView();
+                    dialog.DataContext = new ModInstallViewModel(editor.ActiveVersion, editor.ActiveVersion.version, true);
+                    await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "DevModVersionsViewModel.LoadVersionsFromNebula()", ex);
             }
         }
     }
