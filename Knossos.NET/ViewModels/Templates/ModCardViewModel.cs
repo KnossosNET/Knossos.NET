@@ -28,6 +28,17 @@ namespace Knossos.NET.ViewModels
         private bool devMode { get; set; } = false;
         public string ID { get; set; }
 
+        public Mod? ActiveVersion 
+        {
+            get
+            {
+                if (modVersions.Count() > activeVersionIndex)
+                    return modVersions[activeVersionIndex];
+                else
+                    return null;
+            }
+        }
+
         /* UI Bindings */
         [ObservableProperty]
         private string? name;

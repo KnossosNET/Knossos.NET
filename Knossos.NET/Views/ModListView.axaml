@@ -15,6 +15,18 @@
 		<Grid RowDefinitions="Auto,*">
 			<Grid Grid.Row="0">
 			<WrapPanel Margin="10" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
+				<Button Background="Black" ToolTip.Tip="Sort by" Margin="0,0,5,0" HorizontalAlignment="Right">
+					<Image Height="20" Width="20" Source="/Assets/general/sort-icon.png"/>
+					<Button.Flyout>
+						<Flyout Placement="Bottom">
+							<StackPanel>
+								<Button Command="{Binding ChangeSort}" CommandParameter="name" Width="150" Background="Transparent">Sort by Name</Button>
+								<Button Command="{Binding ChangeSort}" CommandParameter="update" Width="150" Background="Transparent">Sort by Update date</Button>
+								<Button Command="{Binding ChangeSort}" CommandParameter="release" Width="150" Background="Transparent">Sort by Release date</Button>
+							</StackPanel>
+						</Flyout>
+					</Button.Flyout>
+				</Button>
 				<TextBox Text="{Binding Search}" Width="300"></TextBox>
 			</WrapPanel>
 			<WrapPanel Margin="10" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">
