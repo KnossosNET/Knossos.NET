@@ -31,6 +31,9 @@ namespace Knossos.NET.Classes
                 }
                 else
                 {
+                    if(version.Contains("+"))
+                        version = version.Replace("+", "-");
+
                     string[] parts = version.Replace(" ", "").Split('-')[0].Split('.');
 
                     if (parts.Length == 3)
