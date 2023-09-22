@@ -83,6 +83,7 @@ namespace Knossos.NET.ViewModels
 
         public async Task<bool> CreateModVersion(Mod oldMod, string newVersion, CancellationTokenSource? cancelSource = null)
         {
+            var newDir = string.Empty;
             try
             {
                 if (!TaskIsSet)
@@ -91,11 +92,11 @@ namespace Knossos.NET.ViewModels
                     ProgressBarMax = 1;
                     ProgressCurrent = 0;
                     ShowProgressText = false;
-                    CancelButtonVisible = false;
+                    CancelButtonVisible = true;
                     Name = "Creating Mod Version: " + oldMod.title + " " + newVersion;
                     var currentDir = new DirectoryInfo(oldMod.fullPath);
                     var parentDir = currentDir.Parent;
-                    var newDir = parentDir!.FullName + Path.DirectorySeparatorChar + oldMod.id + "-" + newVersion;
+                    newDir = parentDir!.FullName + Path.DirectorySeparatorChar + oldMod.id + "-" + newVersion;
 
                     if (cancelSource != null)
                     {
@@ -113,11 +114,21 @@ namespace Knossos.NET.ViewModels
 
                     ProgressBarMax = Directory.GetFiles(currentDir.FullName, "*", SearchOption.AllDirectories).Length;
 
+                    Directory.CreateDirectory(newDir);
+
+                    using (StreamWriter writer = new StreamWriter(newDir + Path.DirectorySeparatorChar + "knossos_net_download.token"))
+                    {
+                        writer.WriteLine("Warning: This token indicates an incomplete folder copy. If this token is present on the next Knet startup this folder WILL BE DELETED.");
+                    }
+
                     await SysInfo.CopyDirectory(currentDir.FullName, newDir, true, cancellationTokenSource, copyCallback);
+
+                    File.Delete(newDir + Path.DirectorySeparatorChar + "knossos_net_download.token");
 
                     var newMod = new Mod(newDir, oldMod.id + "-" + newVersion);
                     newMod.version = newVersion;
                     newMod.SaveJson();
+
                     if (newMod.type == ModType.engine)
                     {
                         var build = new FsoBuild(newMod);
@@ -134,6 +145,7 @@ namespace Knossos.NET.ViewModels
 
                     Info = "";
                     IsCompleted = true;
+                    CancelButtonVisible = false;
                     ProgressCurrent = ProgressBarMax;
                     return true;
                 }
@@ -156,6 +168,11 @@ namespace Knossos.NET.ViewModels
                 {
                     cancellationTokenSource?.Dispose();
                 }
+                try
+                {
+                    Directory.Delete(newDir, true);
+                }
+                catch { }
                 return false;
             }
             catch (Exception ex)
@@ -170,6 +187,11 @@ namespace Knossos.NET.ViewModels
                     cancellationTokenSource?.Dispose();
                 }
                 Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.CreateModVersion()", ex);
+                try
+                {
+                    Directory.Delete(newDir, true);
+                }
+                catch { }
                 return false;
             }
         }
@@ -830,7 +852,11 @@ namespace Knossos.NET.ViewModels
                 ProgressCurrent = 0;
             }
             await Dispatcher.UIThread.InvokeAsync(() => {
-                Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                try 
+                {
+                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                }
+                catch { }
             });
         }
 
@@ -845,8 +871,11 @@ namespace Knossos.NET.ViewModels
                 ProgressCurrent = 0;
             }
             await Dispatcher.UIThread.InvokeAsync(() => {
-                ProgressBarMax = maxFiles;
-                Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                try
+                {
+                    ProgressBarMax = maxFiles;
+                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                }catch { }
             });
         }
 
@@ -861,8 +890,12 @@ namespace Knossos.NET.ViewModels
                 ProgressCurrent = 0;
             }
             await Dispatcher.UIThread.InvokeAsync(() => {
-                ProgressBarMax = maxFiles;
-                Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                try
+                {
+                    ProgressBarMax = maxFiles;
+                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                }
+                catch { }
             });
         }
 
