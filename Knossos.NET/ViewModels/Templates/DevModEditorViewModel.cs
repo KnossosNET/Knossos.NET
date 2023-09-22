@@ -30,6 +30,9 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         public string version = string.Empty;
         [ObservableProperty]
+        public bool isEngineBuild = false;
+
+        [ObservableProperty]
         private Bitmap? image;
 
         private List<Mod> mods = new List<Mod>();
@@ -72,6 +75,7 @@ namespace Knossos.NET.ViewModels
                 mods.Clear();
                 Image?.Dispose();
                 VersionsView = null;
+                IsEngineBuild = false;
                 Image = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
                 index = 0;
                 //Get all installed mods with this ID
@@ -83,6 +87,7 @@ namespace Knossos.NET.ViewModels
                         break;
                     case ModType.engine:
                         var builds = Knossos.GetInstalledBuildsList(mod.id);
+                        IsEngineBuild = true;
                         break;
                     case ModType.tool:
                         break;

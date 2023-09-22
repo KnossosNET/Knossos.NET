@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
+using System.Threading;
 
 namespace Knossos.NET
 {
@@ -175,6 +176,48 @@ namespace Knossos.NET
             {
                 Log.Add(Log.LogSeverity.Error, "Sysinfo.OpenFolder()", ex);
             }
+        }
+
+        public static async Task CopyDirectory(string sourceDir, string destinationDir, bool recursive, CancellationTokenSource cancelSource, Action<string>? progressCallback = null)
+        {
+            await Task.Run(async () => {
+                var dir = new DirectoryInfo(sourceDir);
+
+                if (!dir.Exists)
+                    throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+
+                DirectoryInfo[] dirs = dir.GetDirectories();
+
+                Directory.CreateDirectory(destinationDir);
+
+                foreach (FileInfo file in dir.GetFiles())
+                {
+                    if (cancelSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+                    string targetFilePath = Path.Combine(destinationDir, file.Name);
+                    if (progressCallback != null)
+                    {
+                        progressCallback(file.Name);
+                    }
+                    file.CopyTo(targetFilePath);
+                }
+
+                if (recursive)
+                {
+                    foreach (DirectoryInfo subDir in dirs)
+                    {
+                        if (cancelSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+
+                        string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+                        await CopyDirectory(subDir.FullName, newDestinationDir, true, cancelSource, progressCallback);
+                    }
+                }
+            });
         }
     }
 }

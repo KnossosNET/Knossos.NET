@@ -81,6 +81,99 @@ namespace Knossos.NET.ViewModels
         { 
         }
 
+        public async Task<bool> CreateModVersion(Mod oldMod, string newVersion, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 1;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    Name = "Creating Mod Version: " + oldMod.title + " " + newVersion;
+                    var currentDir = new DirectoryInfo(oldMod.fullPath);
+                    var parentDir = currentDir.Parent;
+                    var newDir = parentDir!.FullName + Path.DirectorySeparatorChar + oldMod.id + "-" + newVersion;
+
+                    if (cancelSource != null)
+                    {
+                        cancellationTokenSource = cancelSource;
+                    }
+                    else
+                    {
+                        cancellationTokenSource = new CancellationTokenSource();
+                    }
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    ProgressBarMax = Directory.GetFiles(currentDir.FullName, "*", SearchOption.AllDirectories).Length;
+
+                    await SysInfo.CopyDirectory(currentDir.FullName, newDir, true, cancellationTokenSource, copyCallback);
+
+                    var newMod = new Mod(newDir, oldMod.id + "-" + newVersion);
+                    newMod.version = newVersion;
+                    newMod.SaveJson();
+                    if (newMod.type == ModType.engine)
+                    {
+                        var build = new FsoBuild(newMod);
+                        await Dispatcher.UIThread.InvokeAsync(() => Knossos.AddBuild(build));
+                        await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance!.AddBuildToUi(build));
+                    }
+                    else
+                    {
+                        await Dispatcher.UIThread.InvokeAsync(() => Knossos.AddMod(newMod));
+                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddInstalledMod(newMod));
+                        
+                    }
+                    await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddDevMod(newMod));
+
+                    Info = "";
+                    IsCompleted = true;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                /*
+                    Task cancel requested by user
+                */
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.CreateModVersion()", ex);
+                return false;
+            }
+        }
+
         private async Task<bool> ExtractVP(FileInfo vpFile, CancellationTokenSource? cancelSource = null)
         {
             try
@@ -724,6 +817,21 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.CompressVP()", ex);
                 return false;
             }
+        }
+
+        private async void copyCallback(string filename)
+        {
+            if (filename != string.Empty)
+            {
+                ProgressCurrent++;
+            }
+            else
+            {
+                ProgressCurrent = 0;
+            }
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+            });
         }
 
         private async void compressionCallback(string filename, int maxFiles)

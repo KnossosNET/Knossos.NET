@@ -45,7 +45,6 @@ namespace Knossos.NET.ViewModels
         }
 
 
-
         public DeveloperModsViewModel()
         {
             
@@ -65,8 +64,7 @@ namespace Knossos.NET.ViewModels
                 {
                     if (SemanticVersion.Compare(exist.version, mod.version) < 1)
                     {
-                        Mods.Remove(exist);
-                        Mods.Add(mod);
+                        exist = mod;
                     }
                     if (ModEditor != null && ModEditor.ActiveVersion.id == mod.id)
                     {

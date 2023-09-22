@@ -12,7 +12,20 @@
 
 	<Grid RowDefinitions="Auto,*, Auto, Auto">
 		<WrapPanel Grid.Row="0" Margin="10" HorizontalAlignment="Center">
-			<Button Background="DarkCyan" FontWeight="Bold" >New Version</Button>
+			<Button Background="DarkCyan" FontWeight="Bold" Content="New Version" x:Name="CreateVersion">
+				<Button.Flyout>
+					<Flyout>
+						<StackPanel>
+							<Label HorizontalAlignment="Center" Margin="2" FontWeight="Bold">Current Version</Label>
+							<Label HorizontalAlignment="Center" Margin="2" Content="{Binding CurrentVersion}"></Label>
+							<Label HorizontalAlignment="Center" Margin="2" FontWeight="Bold">New Version</Label>
+							<TextBox ToolTip.Tip="Examples:&#x0a;1.0.5 -> Patch/Bugfix&#x0a;1.1.0 -> Minor update&#x0a;2.0.0 -> Major update&#x0a;1.3.4-ABC -> Pre-Release version" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="2" MinWidth="150" Text="{Binding NewVersion}"></TextBox>
+							<Label>The current selected version will be copied to the new version folder.</Label>
+							<Button Command="{Binding CreateNewVersion}" CommandParameter="{Binding ElementName=CreateVersion}"  Width="75" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Background="DarkGreen">Create</Button>
+						</StackPanel>
+					</Flyout>
+				</Button.Flyout>
+			</Button>
 			<Button Command="{Binding LoadVersionsFromNebula}" Background="DarkOrange" FontWeight="Bold" Margin="20,0,0,0">Install or Modify</Button>
 			<Button Background="Red" FontWeight="Bold" Margin="20,0,0,0">Delete Mod</Button>
 		</WrapPanel>

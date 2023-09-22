@@ -13,14 +13,14 @@
 	
 	<ScrollViewer>
 
-		<WrapPanel>
-
-			<StackPanel Width="250">
+		<Grid ColumnDefinitions="Auto,*">
+			<StackPanel Width="250" Grid.Column="0">
 				<TextBlock HorizontalAlignment="Center" Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextWrapping="Wrap" Margin="0"></TextBlock>
 				<Image HorizontalAlignment="Center" Margin="10" Source="{Binding Image}" Width="150" Height="225"></Image>
 				<TextBlock HorizontalAlignment="Center" Text="Active Version" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
 				<TextBlock HorizontalAlignment="Center" Text="{Binding Version}" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
-				<StackPanel Margin="10" HorizontalAlignment="Center">
+				<!--MODS-->
+				<StackPanel Margin="10" HorizontalAlignment="Center" IsVisible="{Binding !IsEngineBuild}">
 					<Button Command="{Binding PlayMod}" CommandParameter="release" Background="#52971D" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Play</Button>
 					<Button Command="{Binding PlayMod}" CommandParameter="fred2" Background="#FFC847" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Fred2</Button>
 					<Button Command="{Binding PlayMod}" CommandParameter="qtfred" Background="DarkCyan" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >QtFred</Button>
@@ -28,6 +28,11 @@
 					<Button Command="{Binding PlayMod}" CommandParameter="fred2debug" Background="#8E1C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Fred2 Debug</Button>
 					<Button Command="{Binding OpenFolder}" Background="#8E3C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Open Folder</Button>
 				</StackPanel>
+				<!--Engine Builds-->
+				<StackPanel Margin="10" HorizontalAlignment="Center" IsVisible="{Binding IsEngineBuild}">
+					<Button Command="{Binding OpenFolder}" Background="#8E3C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Open Folder</Button>
+				</StackPanel>
+				<!--Tools-->
 				<StackPanel IsVisible="true" Margin="10,10,10,10" HorizontalAlignment="Center">
 					<TextBlock HorizontalAlignment="Center" Text="Tools" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
 					<ComboBox Width="240"></ComboBox>
@@ -35,7 +40,7 @@
 				</StackPanel>
 			</StackPanel>
 		
-			<TabControl>
+			<TabControl Grid.Column="1">
 			
 				<TabItem Header="Versions">
 					<v:DevModVersionsView Content="{Binding VersionsView}"/>
@@ -59,7 +64,7 @@
 			
 			</TabControl>
 
-		</WrapPanel>
+		</Grid>
 		
 	</ScrollViewer>
 	

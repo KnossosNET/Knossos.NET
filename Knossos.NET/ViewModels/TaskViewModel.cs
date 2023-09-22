@@ -172,5 +172,15 @@ namespace Knossos.NET.ViewModels
             await newTask.VerifyMod(mod, cancelSource);
             cancelSource.Dispose();
         }
+
+        public async void CreateModVersion(Mod oldMod, string newVersion)
+        {
+            var cancelSource = new CancellationTokenSource();
+            var newTask = new TaskItemViewModel();
+            TaskList.Add(newTask);
+            taskQueue.Enqueue(newTask);
+            await newTask.CreateModVersion(oldMod, newVersion, cancelSource);
+            cancelSource.Dispose();
+        }
     }
 }
