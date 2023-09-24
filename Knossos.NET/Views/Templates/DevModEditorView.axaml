@@ -51,7 +51,7 @@
 				</TabItem>
 			
 				<TabItem Header="Packages">
-
+					<v:DevModPkgMgrView Content="{Binding PkgMgrView}"/>
 				</TabItem>
 
 				<TabItem Header="FSO Settings">

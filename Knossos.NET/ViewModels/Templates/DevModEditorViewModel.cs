@@ -4,7 +4,6 @@ using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,13 +16,14 @@ namespace Knossos.NET.ViewModels
     public partial class DevModEditorViewModel : ViewModelBase
     {
         public DevModEditorViewModel() 
-        { 
+        {
 
         }
 
         [ObservableProperty]
         public DevModVersionsViewModel? versionsView;
-
+        [ObservableProperty]
+        public DevModPkgMgrViewModel? pkgMgrView;
 
         [ObservableProperty]
         public string name = string.Empty;
@@ -57,13 +57,15 @@ namespace Knossos.NET.ViewModels
             mods.Add(newMod);
             mods.Sort(Mod.CompareVersion);
             ChangeActiveVersion(currentActive);
-            VersionsView = new DevModVersionsViewModel(this);
         }
 
         public void ChangeActiveVersion(Mod mod)
         {
-            index = mods.IndexOf(mod);
-            LoadActiveVersion();
+            if (mod != ActiveVersion)
+            {
+                index = mods.IndexOf(mod);
+                LoadActiveVersion();
+            }
         }
 
         public void StartModEditor(Mod mod)
@@ -75,6 +77,7 @@ namespace Knossos.NET.ViewModels
                 mods.Clear();
                 Image?.Dispose();
                 VersionsView = null;
+                PkgMgrView = null;
                 IsEngineBuild = false;
                 Image = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
                 index = 0;
@@ -111,8 +114,6 @@ namespace Knossos.NET.ViewModels
                 }
                 //Load Mod to UI
                 LoadActiveVersion();
-                //Templated Elements
-                VersionsView = new DevModVersionsViewModel(this);
             }
             catch(Exception ex)
             {
@@ -127,12 +128,14 @@ namespace Knossos.NET.ViewModels
                 var mod = ActiveVersion;
                 Name = mod.title;
                 Version = mod.version;
-                
                 if (!string.IsNullOrEmpty(mod.tile) && File.Exists(mod.fullPath + Path.DirectorySeparatorChar + mod.tile))
                 {
                     Image?.Dispose();
                     Image = new Bitmap(mod.fullPath + Path.DirectorySeparatorChar + mod.tile);
                 }
+                //Templated Elements
+                PkgMgrView = new DevModPkgMgrViewModel(this);
+                VersionsView = new DevModVersionsViewModel(this);
             }
             catch (Exception ex)
             {

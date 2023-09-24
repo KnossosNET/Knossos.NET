@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.DevModPkgMgrView"
+			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+
+	<Design.DataContext>
+		<vm:DevModPkgMgrViewModel/>
+	</Design.DataContext>
+
+	<StackPanel>
+		<Label FontWeight="Bold" FontSize="14" Margin="5">Packages and Dependencies</Label>
+		<ListBox ItemsSource="{Binding EditorPackageItems}">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<StackPanel>
+						<Label Content="{Binding Package.name}"></Label>
+						<ListBox ItemsSource="{Binding DependencyItems}">
+							<ListBox.ItemTemplate>
+								<DataTemplate>
+									<Grid ColumnDefinitions="*,Auto,Auto">
+										<ComboBox SelectedIndex="{Binding ModSelectedIndex}" ItemsSource="{Binding ModItems}" Grid.Column="0" HorizontalAlignment="Stretch" Margin="2" FontWeight="Bold" FontSize="18" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
+										<ComboBox SelectedIndex="{Binding VersionTypeIndex}" Grid.Column="1" MinWidth="75" Margin="2" FontWeight="Bold" FontSize="18" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black">
+											<ComboBoxItem ToolTip.Tip="Only the selected version">==</ComboBoxItem>
+											<ComboBoxItem ToolTip.Tip="Higher or equal than the selected version">>=</ComboBoxItem>
+											<ComboBoxItem ToolTip.Tip="Same minor version, revision equal or better:&#x0a;Dependency: ~1.5.2&#x0a;1.5.1 ->Not Valid&#x0a;1.5.6 -> Valid&#x0a;1.6.0 -> Not valid">~</ComboBoxItem>
+										</ComboBox>
+										<ComboBox SelectedIndex="{Binding VersionSelectedIndex}" ItemsSource="{Binding VersionItems}" Grid.Column="2" MinWidth="150" Margin="2" FontWeight="Bold" FontSize="18" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
+									</Grid>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+					</StackPanel>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+
+		<Label FontWeight="Bold" FontSize="14" Margin="5">ModFlag</Label>
+		<ListBox ItemsSource="{Binding EditorFlagItems}">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<WrapPanel>
+						<Button Command="{Binding FlagUP}" Background="Black">↑</Button>
+						<Button Command="{Binding FlagDown}" Background="Black">↓</Button>
+						<Label IsVisible="{Binding !IsThisMod}" Content="{Binding FlagName}"></Label>
+						<Label IsVisible="{Binding IsThisMod}" Foreground="Yellow" Content="{Binding FlagName}"></Label>
+					</WrapPanel>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+	</StackPanel>
+	
+</UserControl>
