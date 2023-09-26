@@ -3,11 +3,14 @@ using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
+using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static Knossos.NET.ViewModels.DevModPkgMgrViewModel;
 
@@ -15,6 +18,7 @@ namespace Knossos.NET.ViewModels
 {
     public partial class DevModPkgMgrViewModel : ViewModelBase
     {
+        /*********************************************DEPENDENCY ITEM************************************************************/
         public partial class EditorDependencyItem : ObservableObject
         {
             public ModDependency Dependency { get; set; }
@@ -182,11 +186,55 @@ namespace Knossos.NET.ViewModels
                     }
                 }
             }
+
+            internal void DeleteDependency()
+            {
+                EditorPackageItem.DeleteDependency(this);
+            }
+
+            public ModDependency? GetDependency()
+            {
+                try
+                {
+                    var depId = ModItems[ModSelectedIndex].Tag as string;
+                    var depVersion = VersionItems[VersionSelectedIndex].Content as string;
+
+                    if(depId != "-1" && depId != null)
+                    {
+                        Dependency.id = depId;
+                        var versionType = VersionTypeIndex == 0 ? "==" : VersionSelectedIndex == 1 ? ">=" : "~";
+                        Dependency.version = depVersion != "Any" ? versionType+depVersion : null;
+                        Dependency.packages = null;
+                        return Dependency;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }catch(Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "EditorDependencyItem.GetDependency()", ex);
+                    return Dependency;
+                }
+            }
         }
 
+        /*************************************************** PACKAGE ITEM ***********************************************************/
         public partial class EditorPackageItem : ObservableObject
         {
             public ModPackage Package { get; set; }
+
+            [ObservableProperty]
+            private int packageStatusIndex = 0;
+
+            [ObservableProperty]
+            private string packageNotes = string.Empty;
+
+            [ObservableProperty]
+            private bool isEnabled = true;
+
+            [ObservableProperty]
+            private bool packVP = false;
 
             [ObservableProperty]
             private ObservableCollection<EditorDependencyItem> dependencyItems = new ObservableCollection<EditorDependencyItem>();
@@ -197,16 +245,114 @@ namespace Knossos.NET.ViewModels
             {
                 Package = pkg;
                 PkgMgr = pkgmgr;
-                if(pkg.dependencies != null)
+                IsEnabled = pkg.isEnabled;
+                PackVP = pkg.isVp;
+                PackageNotes = pkg.notes != null? pkg.notes : string.Empty;
+                if (pkg.dependencies != null)
                 {
                     foreach(var dep in pkg.dependencies)
                     {
                         DependencyItems.Add(new EditorDependencyItem(dep, this));
                     }
                 }
+                switch(pkg.status)
+                {
+                    case "required": PackageStatusIndex = 0;
+                        break;
+                    case "recommended": PackageStatusIndex = 1;
+                        break; ;
+                    case "optional": PackageStatusIndex = 2; 
+                        break;
+                }
+            }
+
+            public ModPackage GetPackage() 
+            { 
+                Package.isEnabled = IsEnabled;
+                Package.isVp = PackVP;
+                Package.notes = PackageNotes;
+                switch (PackageStatusIndex)
+                {
+                    case 0:
+                        Package.status = "required";
+                        break;
+                    case 1:
+                        Package.status = "recommended";
+                        break; ;
+                    case 2:
+                        Package.status = "optional";
+                        break;
+                }
+                if(DependencyItems.Any())
+                {
+                    var deps = new List<ModDependency>();
+                    foreach (var dep in DependencyItems)
+                    {
+                        var newDep = dep.GetDependency();
+                        if(newDep != null)
+                            deps.Add(newDep);
+                    }
+                    Package.dependencies = deps.ToArray();
+                }
+                else
+                {
+                    Package.dependencies = null;
+                }
+                return Package;
+            }
+
+            public void DeleteDependency(EditorDependencyItem dependency)
+            {
+                try
+                {
+                    DependencyItems.Remove(dependency);
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "EditorPackageItem.DeleteDependency()", ex);
+                }
+            }
+
+            internal void DeletePkg()
+            {
+                try
+                {
+                    PkgMgr.DeletePkg(this);
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "EditorPackageItem.DeletePkg()", ex);
+                }
+            }
+
+            internal void AddDependency()
+            {
+                try
+                {
+                    DependencyItems.Add(new EditorDependencyItem(new ModDependency(), this));
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "EditorPackageItem.AddDependency()", ex);
+                }
+            }
+
+            internal void OpenFolder()
+            {
+                try
+                {
+                    if(PkgMgr.editor != null)
+                        SysInfo.OpenFolder(PkgMgr.editor.ActiveVersion.fullPath + Path.DirectorySeparatorChar + Package.folder);
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "EditorPackageItem.OpenFolder()", ex);
+                }
             }
         }
 
+
+        /************************************************************ FLAG ITEM *********************************************************************/
         public class EditorFlagItem
         {
             public string Flag { get; set; }
@@ -215,7 +361,7 @@ namespace Knossos.NET.ViewModels
 
             private DevModPkgMgrViewModel PkgMgr { get; set; }
 
-            bool IsThisMod { get; set; }
+            public bool IsThisMod { get; set; }
 
             public EditorFlagItem(string flag, DevModPkgMgrViewModel pkgmgr, bool thisMod)
             {
@@ -251,11 +397,34 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /**************************************************** PACKAGE MANAGER *************************************************************/
+
         private DevModEditorViewModel? editor;
         [ObservableProperty]
         private ObservableCollection<EditorFlagItem> editorFlagItems = new ObservableCollection<EditorFlagItem>();
         [ObservableProperty]
         private ObservableCollection<EditorPackageItem> editorPackageItems = new ObservableCollection<EditorPackageItem>();
+
+        private string newPackageName = string.Empty;
+
+        private string NewPackageName
+        {
+            get
+            {
+                return newPackageName;
+            }
+            set
+            {
+                if (value != newPackageName)
+                {
+                    SetProperty(ref newPackageName, Regex.Replace(value, "[^a-zA-Z0-9-__ ]+", "", RegexOptions.Compiled));
+                    NewPackageFolder = newPackageName.Replace(" ","_");
+                }
+            }
+        }
+
+        [ObservableProperty]
+        private string newPackageFolder = string.Empty;
 
         public DevModPkgMgrViewModel()
         {
@@ -276,6 +445,113 @@ namespace Knossos.NET.ViewModels
         }
 
         /* Button Commands */
+        internal void Save()
+        {
+            if (editor == null)
+                return;
+            var newPkgs = new List<ModPackage>();
+            //Get all listed packages with updated data
+            foreach (EditorPackageItem pkg in EditorPackageItems)
+            {
+                var newPkg = pkg.GetPackage();
+                newPkgs.Add(newPkg);
+                if (newPkg.dependencies != null)
+                {
+                    //Check if we need to add new mods ids to the flag list
+                    foreach (ModDependency dep in newPkg.dependencies)
+                    {
+                        //Discard FSO builds
+                        var deps = Knossos.GetInstalledBuildsList(dep.id);
+                        if (!deps.Any())
+                        {
+                            var isAdded = EditorFlagItems.FirstOrDefault(f => f.Flag == dep.id);
+                            if (isAdded == null)
+                            {
+                                EditorFlagItems.Add(new EditorFlagItem(dep.id, this, false));
+                            }
+                        }
+                    }
+                }
+            }
+            //Check all mod flags to see if we need to remove one and re-create array
+            var flagList = new List<string>();
+            foreach (EditorFlagItem item in EditorFlagItems.ToList())
+            {
+                if (!item.IsThisMod)
+                {
+                    bool found = false;
+                    foreach (var pkg in newPkgs)
+                    {
+                        if (pkg.dependencies != null)
+                        {
+                            foreach (var dep in pkg.dependencies)
+                            {
+                                if (dep.id == item.Flag)
+                                    found = true;
+                            }
+                        }
+                    }
+                    if (!found)
+                    {
+                        EditorFlagItems.Remove(item);
+                    }
+                    else
+                    {
+                        flagList.Add(item.Flag);
+                    }
+                }
+                else
+                {
+                    flagList.Add(item.Flag);
+                }
+            }
+            //Update mod
+            editor.ActiveVersion.packages = newPkgs;
+            editor.ActiveVersion.modFlag = flagList;
+            editor.ActiveVersion.SaveJson();
+        }
+        internal void CreatePackage()
+        {
+            try
+            {
+                if (NewPackageFolder.Trim() != string.Empty && NewPackageName.Trim() != string.Empty)
+                {
+                    Directory.CreateDirectory(editor!.ActiveVersion.fullPath + Path.DirectorySeparatorChar + NewPackageFolder + Path.DirectorySeparatorChar + "data");
+                    var newPkg = new ModPackage();
+                    newPkg.folder = NewPackageFolder;
+                    newPkg.name = NewPackageName;
+                    EditorPackageItems.Add(new EditorPackageItem(newPkg, this));
+                    NewPackageName = string.Empty;
+                    NewPackageFolder = string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "DevModPkgMgrViewModel.CreatePackage()", ex);
+            }
+        }
+
+        internal async void DeletePkg(EditorPackageItem editorPackageItem)
+        {
+            try
+            {
+                if (editor != null)
+                {
+                    var folderPath = editor.ActiveVersion.fullPath + Path.DirectorySeparatorChar + editorPackageItem.Package.folder;
+                    var resp = await MessageBox.Show(MainWindow.instance!, "This will delete the package: " + editorPackageItem.Package.name + " and ALL FILES on this folder: " + folderPath + " of the mod and version " + editor.ActiveVersion + "\n Do you really want to do this? This action cannot be undone.","Confirm package deletion",MessageBox.MessageBoxButtons.YesNo);
+                    if(resp == MessageBox.MessageBoxResult.Yes)
+                    {
+                        Directory.Delete(folderPath,true);
+                        EditorPackageItems.Remove(editorPackageItem);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "DevModPkgMgrViewModel.DeletePkg()", ex);
+            }
+        }
+
         internal void FlagUP(EditorFlagItem flagItem)
         {
             int index = EditorFlagItems.IndexOf(flagItem);

@@ -136,7 +136,10 @@ namespace Knossos.NET.Models
             notes = null;
             foreach (ModPackage pkg in packages)
             {
-                pkg.notes = null;
+                if (!devMode)
+                {
+                    pkg.notes = null;
+                }
                 pkg.filelist = null;
                 pkg.files = null;
                 pkg.checkNotes = null;
@@ -710,11 +713,11 @@ namespace Knossos.NET.Models
         [JsonPropertyName("check_notes")]
         public string? checkNotes { get; set; }
 
-        /* Added for Internal use Only */
+        /* Knet Only */
         [JsonIgnore]
         public bool isSelected { get; set; } = false;
-        [JsonIgnore]
-        public bool isEnabled { get; set; } = false;
+
+        public bool isEnabled { get; set; } = true;
     }
 
     public class ModDependency
