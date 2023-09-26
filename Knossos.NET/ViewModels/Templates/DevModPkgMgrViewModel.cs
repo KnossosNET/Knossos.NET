@@ -7,6 +7,7 @@ using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
@@ -24,7 +25,27 @@ namespace Knossos.NET.ViewModels
             public ModDependency Dependency { get; set; }
 
             [ObservableProperty]
+            private List<ModPackage> packages = new List<ModPackage>();
+
+            [ObservableProperty]
+            private bool displayPackages = false;
+
             private int versionSelectedIndex = 0;
+            private int VersionSelectedIndex
+            {
+                get
+                {
+                    return versionSelectedIndex;
+                }
+                set
+                {
+                    if(versionSelectedIndex != value)
+                    {
+                        SetProperty(ref versionSelectedIndex, value);
+                        FillPackages();
+                    }
+                }
+            }
 
             [ObservableProperty]
             private int versionTypeIndex = 0;
@@ -40,14 +61,13 @@ namespace Knossos.NET.ViewModels
                 {
                     if (modSelectedIndex != value)
                     {
-                        modSelectedIndex = value;
+                        SetProperty(ref modSelectedIndex, value);
                         VersionItems.Clear();
                         FillAllVersions();
                         VersionSelectedIndex = 1;
                     }
                 }
             }
-
 
             private ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
@@ -103,6 +123,7 @@ namespace Knossos.NET.ViewModels
                 {
                     VersionSelectedIndex = 0;
                 }
+                FillPackages();
             }
 
             private void FillModList()
@@ -157,6 +178,7 @@ namespace Knossos.NET.ViewModels
 
                     var anyVer = new ComboBoxItem();
                     anyVer.Content = "Any";
+                    anyVer.DataContext = null;
                     VersionItems.Add(anyVer);
 
 
@@ -167,6 +189,7 @@ namespace Knossos.NET.ViewModels
                         {
                             var itemVer = new ComboBoxItem();
                             itemVer.Content = mod.version;
+                            itemVer.DataContext = mod;
                             VersionItems.Add(itemVer);
                         }
                     }
@@ -180,10 +203,45 @@ namespace Knossos.NET.ViewModels
                             {
                                 var itemVer = new ComboBoxItem();
                                 itemVer.Content = build.version;
+                                itemVer.DataContext = build;
                                 VersionItems.Add(itemVer);
                             }
                         }
                     }
+                }
+            }
+
+            private void FillPackages()
+            {
+                try
+                {
+                    Packages.Clear();
+                    DisplayPackages = false;
+                    var moditem = VersionItems[VersionSelectedIndex].DataContext as Mod;
+                    if (moditem != null && (moditem.type == ModType.mod || moditem.type == ModType.tc))
+                    {
+                        foreach (var pkg in moditem.packages)
+                        {
+                            var displayPkg = new ModPackage();
+                            displayPkg.name = pkg.name;
+                            //Pre-selected for required 
+                            displayPkg.isSelected = pkg.status == "required" ? true : false;
+                            //Only allow to select/deselect non required packages
+                            displayPkg.isEnabled = !displayPkg.isSelected;
+                            //Mark previusly enabled packages as enabled
+                            if (Dependency.packages != null && Dependency.id == moditem.id && Dependency.packages.IndexOf(pkg.name) != -1)
+                            {
+                                displayPkg.isSelected = true;
+                            }
+                            Packages.Add(displayPkg);
+                            DisplayPackages = true;
+                        }
+                    }
+                    if(Packages.Count() > 1)
+                        Packages = Packages.OrderByDescending(x => x.isEnabled).ToList();
+                }catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "EditorDependencyItem.FillPackages()", ex);
                 }
             }
 
@@ -202,9 +260,15 @@ namespace Knossos.NET.ViewModels
                     if(depId != "-1" && depId != null)
                     {
                         Dependency.id = depId;
-                        var versionType = VersionTypeIndex == 0 ? "==" : VersionSelectedIndex == 1 ? ">=" : "~";
+                        var versionType = VersionTypeIndex == 0 ? string.Empty : VersionSelectedIndex == 1 ? ">=" : "~";
                         Dependency.version = depVersion != "Any" ? versionType+depVersion : null;
-                        Dependency.packages = null;
+                        var newPkgs = new List<string>();
+                        foreach (var pkg in Packages)
+                        {
+                            if (pkg.isSelected && pkg.isEnabled)
+                                newPkgs.Add(pkg.name);
+                        }
+                        Dependency.packages = newPkgs;
                         return Dependency;
                     }
                     else

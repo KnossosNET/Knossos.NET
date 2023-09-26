@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Knossos.NET
 {

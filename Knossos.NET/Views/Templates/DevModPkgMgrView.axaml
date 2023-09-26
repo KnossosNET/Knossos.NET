@@ -64,7 +64,7 @@
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
 									<!--Pkg Dependency Item-->
-									<Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+									<Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto">
 										<Label Margin="30,0,0,0" Grid.Column="0" FontSize="18" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">&#x21B3;</Label>
 										<ComboBox SelectedIndex="{Binding ModSelectedIndex}" ItemsSource="{Binding ModItems}" Grid.Column="1" HorizontalAlignment="Stretch" Margin="5,2,2,2" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
 										<ComboBox SelectedIndex="{Binding VersionTypeIndex}" Grid.Column="2" MinWidth="75" Margin="2" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black">
@@ -73,7 +73,24 @@
 											<ComboBoxItem ToolTip.Tip="Same minor version, revision equal or better:&#x0a;Dependency: ~1.5.2&#x0a;1.5.1 ->Not Valid&#x0a;1.5.6 -> Valid&#x0a;1.6.0 -> Not valid">~</ComboBoxItem>
 										</ComboBox>
 										<ComboBox SelectedIndex="{Binding VersionSelectedIndex}" ItemsSource="{Binding VersionItems}" Grid.Column="3" MinWidth="150" Margin="2" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
-										<Button Command="{Binding DeleteDependency}" Grid.Column="4" Margin="10,0,0,0" Background="Red" ToolTip.Tip="Remove this dependency" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">X</Button>
+										<!--Packages-->
+										<Button IsVisible="{Binding DisplayPackages}" Grid.Column="4" Margin="5,0,2,0" Content="Packages" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+											<Button.Flyout>
+												<Flyout Placement="Left">
+													<ScrollViewer MaxHeight="400">
+														<ListBox MinWidth="300" ItemsSource="{Binding Packages}" Margin="8,0,0,0">
+															<ListBox.ItemTemplate>
+																<DataTemplate>
+																	<CheckBox IsEnabled="{Binding isEnabled}" IsChecked="{Binding isSelected}" Content="{Binding name}"></CheckBox>
+																</DataTemplate>
+															</ListBox.ItemTemplate>
+														</ListBox>
+													</ScrollViewer>
+												</Flyout>
+											</Button.Flyout>
+										</Button>
+										<!--End Packages-->
+										<Button Command="{Binding DeleteDependency}" Grid.Column="5" Margin="10,0,0,0" Background="Red" ToolTip.Tip="Remove this dependency" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">X</Button>
 									</Grid>
 									<!-- End Pkg Dependency Item-->
 								</DataTemplate>
