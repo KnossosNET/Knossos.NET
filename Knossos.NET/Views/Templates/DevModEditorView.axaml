@@ -50,11 +50,14 @@
 
 				</TabItem>
 			
-				<TabItem Header="Packages">
-					<v:DevModPkgMgrView Content="{Binding PkgMgrView}"/>
+				<TabItem Header="Packages" >
+					<StackPanel>
+						<v:DevModPkgMgrView IsVisible="{Binding !IsEngineBuild}" Content="{Binding PkgMgrView}"/>
+						<v:DevBuildPkgMgrView IsVisible="{Binding IsEngineBuild}" Content="{Binding PkgMgrView}"/>
+					</StackPanel>
 				</TabItem>
 
-				<TabItem Header="FSO Settings">
+				<TabItem Header="FSO Settings" IsVisible="{Binding !IsEngineBuild}">
 
 				</TabItem>
 			

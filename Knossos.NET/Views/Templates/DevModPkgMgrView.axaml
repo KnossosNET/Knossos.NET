@@ -37,8 +37,8 @@
 		<ListBox ItemsSource="{Binding EditorPackageItems}" Margin="8,0,0,0">
 			<ListBox.ItemTemplate>
 				<DataTemplate>
+					<!--Package Item-->
 					<StackPanel>
-						<!--Package Item-->
 						<WrapPanel>
 							<CheckBox ToolTip.Tip="If package is enabled or disabled. Disabled packages are not used when playing." IsChecked="{Binding IsEnabled}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></CheckBox>
 							<Label MinWidth="250" FontWeight="Bold" FontSize="18" Content="{Binding Package.name}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
@@ -97,8 +97,8 @@
 							</ItemsControl.ItemTemplate>
 						</ItemsControl>
 						<!--End Pkg Dependency List-->
-					<!--End Package Item-->	
 					</StackPanel>
+					<!--End Package Item-->
 				</DataTemplate>
 			</ListBox.ItemTemplate>
 		</ListBox>

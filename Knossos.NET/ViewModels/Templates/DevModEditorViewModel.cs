@@ -24,7 +24,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         public DevModVersionsViewModel? versionsView;
         [ObservableProperty]
-        public DevModPkgMgrViewModel? pkgMgrView;
+        public object? pkgMgrView;
 
         [ObservableProperty]
         public string name = string.Empty;
@@ -91,6 +91,11 @@ namespace Knossos.NET.ViewModels
                         break;
                     case ModType.engine:
                         var builds = Knossos.GetInstalledBuildsList(mod.id);
+                        foreach(var b in builds)
+                        {
+                            if(b.modData != null)
+                                mods.Add(b.modData);
+                        }
                         IsEngineBuild = true;
                         break;
                     case ModType.tool:
@@ -135,12 +140,19 @@ namespace Knossos.NET.ViewModels
                     Image = new Bitmap(mod.fullPath + Path.DirectorySeparatorChar + mod.tile);
                 }
                 //Templated Elements
-                PkgMgrView = new DevModPkgMgrViewModel(this);
+                if (IsEngineBuild)
+                {
+                    PkgMgrView = new DevBuildPkgMgrViewModel(this);
+                }
+                else
+                {
+                    PkgMgrView = new DevModPkgMgrViewModel(this);
+                }
                 VersionsView = new DevModVersionsViewModel(this);
             }
             catch (Exception ex)
             {
-                Log.Add(Log.LogSeverity.Error, "DevModEditorViewModel.LoadMod()", ex);
+                Log.Add(Log.LogSeverity.Error, "DevModEditorViewModel.LoadActiveVersion()", ex);
             }
         }
 

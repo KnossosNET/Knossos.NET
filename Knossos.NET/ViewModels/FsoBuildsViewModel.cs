@@ -60,6 +60,34 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        public void UpdateBuildUI(FsoBuild build)
+        {
+            switch (build.stability)
+            {
+                case FsoStability.Stable:
+                    var previous = StableItems.FirstOrDefault(b => b.build != null && b.build.id == build.id && b.build.version == build.version);
+                    if(previous != null)
+                        StableItems.Remove(previous);
+                    break;
+                case FsoStability.RC:
+                    var previousRc = RcItems.FirstOrDefault(b => b.build != null && b.build.id == build.id && b.build.version == build.version);
+                    if(previousRc != null)
+                        RcItems.Remove(previousRc);
+                    break;
+                case FsoStability.Nightly:
+                    var previousNL = NightlyItems.FirstOrDefault(b => b.build != null && b.build.id == build.id && b.build.version == build.version);
+                    if(previousNL != null)
+                        NightlyItems.Remove(previousNL);
+                    break;
+                case FsoStability.Custom:
+                    var previousCu = CustomItems.FirstOrDefault(b => b.build != null && b.build.id == build.id && b.build.version == build.version);
+                    if(previousCu != null)
+                        CustomItems.Remove(previousCu);
+                    break;
+            }
+            AddBuildToUi(build);
+        }
+
         public void AddBuildToUi(FsoBuild build)
         {
             switch(build.stability)

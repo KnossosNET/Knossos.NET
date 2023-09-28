@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.DevBuildPkgMgrView"
+			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+
+	<Design.DataContext>
+		<vm:DevBuildPkgMgrViewModel/>
+	</Design.DataContext>
+
+	<StackPanel>
+		<Label FontWeight="Bold" FontSize="20" Margin="5">Packages</Label>
+		<WrapPanel>
+			<Button Margin="8,0,0,5" Content="+Package">
+				<Button.Flyout>
+					<Flyout>
+						<StackPanel HorizontalAlignment="Center">
+							<WrapPanel>
+								<Label Width="150">New Package Name: </Label>
+								<TextBox Text="{Binding NewPackageName}" MinWidth="200"></TextBox>
+							</WrapPanel>
+							<WrapPanel>
+								<Label Width="150">Folder Name: </Label>
+								<Label Content="{Binding NewPackageFolder}" MinWidth="200"></Label>
+							</WrapPanel>
+							<Button HorizontalAlignment="Center" Command="{Binding CreatePackage}">Create Package</Button>
+						</StackPanel>
+					</Flyout>
+				</Button.Flyout>
+			</Button>
+			<Button Command="{Binding Save}" Margin="8,0,0,5" Background="Green">Save Changes</Button>
+		</WrapPanel>
+		<!--Package List-->
+		<ListBox ItemsSource="{Binding EditorPackageItems}" Margin="8,0,0,0">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<!--Package Item-->
+					<StackPanel>
+						<WrapPanel>
+							<Label MinWidth="150" FontWeight="Bold" FontSize="18" Content="{Binding Package.name}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
+							<Button Command="{Binding OpenFolder}" Margin="10,0,0,0">Open Folder</Button>
+							<Button Command="{Binding AddExecutable}" Margin="10,0,0,0">+Executable</Button>
+							<ComboBox Margin="10,0,0,0" ItemsSource="{Binding Os}" SelectedIndex="{Binding PackageOsIndex}" MinWidth="100" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Background="White" Foreground="Black"></ComboBox>
+							<ComboBox Margin="10,0,0,0" ItemsSource="{Binding Arch}" SelectedIndex="{Binding PackageArchIndex}" MinWidth="100" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Background="White" Foreground="Black"></ComboBox>
+							<Button Margin="10,0,0,0" Content="Notes">
+								<Button.Flyout>
+									<Flyout>
+										<TextBox Text="{Binding PackageNotes}" Width="250" MinHeight="100" TextWrapping="Wrap"></TextBox>
+									</Flyout>
+								</Button.Flyout>
+							</Button>
+							<Button Command="{Binding DeletePkg}" Margin="20,0,0,0" Background="Red" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">Delete</Button>
+						</WrapPanel>
+						<!--Pkg Executable List-->
+						<ItemsControl ItemsSource="{Binding Executables}" Margin="0,5,0,0">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<!--Pkg Dependency Item-->
+									<Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+										<Label Margin="30,0,0,0" Grid.Column="0" FontSize="18" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">&#x21B3;</Label>
+										<Label Content="{Binding File}" Grid.Column="1" HorizontalAlignment="Stretch" Margin="5,2,2,2" FontWeight="Bold" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" FontSize="16" Background="White" Foreground="Black"></Label>
+										<Button Command="{Binding ChangeExecutable}" Grid.Column="2" Margin="5,0,5,0" ToolTip.Tip="Change this executable" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">Change</Button>
+										<ComboBox SelectedIndex="{Binding LabelSelectedIndex}" ItemsSource="{Binding Labels}" Grid.Column="3" MinWidth="150" Margin="2" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Top" HorizontalContentAlignment="Left" Background="White" Foreground="Black"></ComboBox>
+										<Button Command="{Binding DeleteExecutable}" Grid.Column="4" Margin="10,0,0,0" Background="Red" ToolTip.Tip="Remove this executable" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">X</Button>
+									</Grid>
+									<!-- End Pkg Dependency Item-->
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+						<!--End Pkg Executable List-->
+					</StackPanel>
+					<!--End Package Item-->
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+	</StackPanel>
+
+</UserControl>

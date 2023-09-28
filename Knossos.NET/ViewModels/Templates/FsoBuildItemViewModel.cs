@@ -10,7 +10,7 @@ namespace Knossos.NET.ViewModels
 {
     public partial class FsoBuildItemViewModel : ViewModelBase
     {
-        private FsoBuild? build;
+        public FsoBuild? build;
         private FsoBuildsViewModel? buildsView;
         public CancellationTokenSource? cancellationTokenSource = null;
         [ObservableProperty]
