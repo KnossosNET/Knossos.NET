@@ -58,7 +58,7 @@
 				</TabItem>
 
 				<TabItem Header="FSO Settings" IsVisible="{Binding !IsEngineBuild}">
-
+					<v:DevModFsoSettingsView Content="{Binding FsoSettingsView}"/>
 				</TabItem>
 			
 				<TabItem Header="Members">

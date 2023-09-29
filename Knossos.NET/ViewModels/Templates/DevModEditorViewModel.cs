@@ -25,6 +25,8 @@ namespace Knossos.NET.ViewModels
         public DevModVersionsViewModel? versionsView;
         [ObservableProperty]
         public object? pkgMgrView;
+        [ObservableProperty]
+        public DevModFsoSettingsViewModel? fsoSettingsView;
 
         [ObservableProperty]
         public string name = string.Empty;
@@ -79,6 +81,7 @@ namespace Knossos.NET.ViewModels
                 Image?.Dispose();
                 VersionsView = null;
                 PkgMgrView = null;
+                FsoSettingsView = null;
                 IsEngineBuild = false;
                 Image = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
                 index = 0;
@@ -147,6 +150,7 @@ namespace Knossos.NET.ViewModels
                 else
                 {
                     PkgMgrView = new DevModPkgMgrViewModel(this);
+                    FsoSettingsView = new DevModFsoSettingsViewModel(this);
                 }
                 VersionsView = new DevModVersionsViewModel(this);
             }
