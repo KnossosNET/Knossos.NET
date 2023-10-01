@@ -47,7 +47,7 @@
 				</TabItem>
 
 				<TabItem Header="Details">
-
+					<v:DevModDetailsView Content="{Binding DetailsView}"/>
 				</TabItem>
 			
 				<TabItem Header="Packages" >
