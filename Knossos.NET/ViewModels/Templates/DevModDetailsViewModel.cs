@@ -7,9 +7,11 @@ using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Pipelines;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +20,64 @@ namespace Knossos.NET.ViewModels
 {
     public partial class DevModDetailsViewModel : ViewModelBase
     {
+        /******************************************************************************************/
+        public partial class DevModScreenshot : ObservableObject
+        {
+            DevModDetailsViewModel detailsView;
+            [ObservableProperty]
+            public Bitmap? bitmap;
+            public string path;
+
+            public DevModScreenshot(string modPath, string path, DevModDetailsViewModel detailsView)
+            {
+                this.detailsView = detailsView;
+                this.path = path;
+                try
+                {
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        if (!path.ToLower().Contains("http"))
+                        {
+                            Bitmap = new Bitmap(modPath + Path.DirectorySeparatorChar + path);
+                        }
+                        else
+                        {
+                            Task.Run(async () => {
+                                using (HttpClient client = new HttpClient())
+                                {
+                                    HttpResponseMessage response = await client.GetAsync(path);
+                                    byte[] content = await response.Content.ReadAsByteArrayAsync();
+                                    using (Stream stream = new MemoryStream(content))
+                                    {
+                                        Bitmap = new Bitmap(stream);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "DevModScreenshot.Constructor", ex);
+                }
+            }
+
+            internal void ScUp()
+            {
+                detailsView.ScUp(this);
+            }
+
+            internal void ScDown()
+            {
+                detailsView.ScDown(this);
+            }
+
+            internal void ScDel()
+            {
+                detailsView.ScDel(this);
+            }
+        }
+        /******************************************************************************************/
         private DevModEditorViewModel? editor;
         [ObservableProperty]
         private string modName = string.Empty;
@@ -41,6 +101,8 @@ namespace Knossos.NET.ViewModels
         private Bitmap? bannerImage;
         [ObservableProperty]
         private string? bannerImagePath;
+        [ObservableProperty]
+        private ObservableCollection<DevModScreenshot> screenshots = new ObservableCollection<DevModScreenshot>();
 
         public DevModDetailsViewModel() 
         { 
@@ -63,6 +125,13 @@ namespace Knossos.NET.ViewModels
             LoadTileImage();
             BannerImagePath = editor.ActiveVersion.banner;
             LoadBannerImage();
+            if(editor.ActiveVersion.screenshots != null)
+            {
+                foreach(var sc in editor.ActiveVersion.screenshots)
+                {
+                    Screenshots.Add(new DevModScreenshot(editor.ActiveVersion.fullPath, sc,this));
+                }
+            }
         }
 
         internal void Save()
@@ -78,13 +147,32 @@ namespace Knossos.NET.ViewModels
                 }
                 editor.ActiveVersion.tile = TileImagePath;
                 editor.ActiveVersion.banner = BannerImagePath;
+                if (Screenshots.Any())
+                {
+                    var scList = new List<string>();
+                    foreach(var sc in Screenshots)
+                    {
+                        scList.Add(sc.path);
+                    }
+                    editor.ActiveVersion.screenshots = scList.ToArray();
+                }
+                else
+                {
+                    editor.ActiveVersion.screenshots = null;
+                }
                 editor.ActiveVersion.SaveJson();
             }
         }
 
-        internal void OpenDescriptionEditor()
+        internal async void OpenDescriptionEditor()
         {
-
+            if (MainWindow.instance != null && editor != null)
+            {
+                var dialog = new DevModDescriptionEditorView();
+                dialog.DataContext = new DevModDescriptionEditorViewModel(editor);
+                await dialog.ShowDialog<DevModDescriptionEditorView?>(MainWindow.instance);
+                ModDescription = editor.ActiveVersion.description != null ? editor.ActiveVersion.description : string.Empty;
+            }
         }
 
         internal async void ChangeTileImage()
@@ -94,6 +182,9 @@ namespace Knossos.NET.ViewModels
                 //get file
                 FilePickerOpenOptions options = new FilePickerOpenOptions();
                 options.AllowMultiple = false;
+                options.FileTypeFilter = new List<FilePickerFileType> {
+                    new("Image files (*.jpg, *.png)") { Patterns = new[] { "*.png", "*.jpg", "*.jpeg" } }
+                };
 
                 var result = await MainWindow.instance!.StorageProvider.OpenFilePickerAsync(options);
 
@@ -146,6 +237,9 @@ namespace Knossos.NET.ViewModels
                 //get file
                 FilePickerOpenOptions options = new FilePickerOpenOptions();
                 options.AllowMultiple = false;
+                options.FileTypeFilter = new List<FilePickerFileType> {
+                    new("Image files (*.jpg, *.png)") { Patterns = new[] { "*.png", "*.jpg", "*.jpeg" } }
+                };
 
                 var result = await MainWindow.instance!.StorageProvider.OpenFilePickerAsync(options);
 
@@ -258,6 +352,76 @@ namespace Knossos.NET.ViewModels
             {
                 Log.Add(Log.LogSeverity.Error, "DevModDetailsViewModel.LoadTileImage", ex);
             }
+        }
+
+        internal async void NewScreenShot()
+        {
+            try
+            {
+                //get file
+                FilePickerOpenOptions options = new FilePickerOpenOptions();
+                options.AllowMultiple = false;
+                options.FileTypeFilter = new List<FilePickerFileType> {
+                    new("Image files (*.jpg, *.png)") { Patterns = new[] { "*.png", "*.jpg", "*.jpeg" } }
+                };
+
+                var result = await MainWindow.instance!.StorageProvider.OpenFilePickerAsync(options);
+
+                if (editor != null && result != null && result.Count > 0)
+                {
+                    var filepath = result[0].Path.LocalPath.ToString();
+
+                    //Get File Hash (new filename)
+                    using (FileStream? file = new FileStream(filepath, FileMode.Open, FileAccess.Read))
+                    {
+                        var filename = string.Empty;
+                        using (SHA256 checksum = SHA256.Create())
+                        {
+                            filename = BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty);
+                        }
+                        //Copy to new location
+                        Directory.CreateDirectory(Path.Combine(editor.ActiveVersion.fullPath, "kn_images"));
+
+                        var extension = Path.GetExtension(filepath);
+
+                        using (FileStream? dest = new FileStream(editor.ActiveVersion.fullPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + filename + extension, FileMode.Create, FileAccess.ReadWrite))
+                        {
+                            file.Position = 0;
+                            await file.CopyToAsync(dest);
+                            dest.Close();
+                        }
+                        file.Close();
+                        Screenshots.Add(new DevModScreenshot(editor.ActiveVersion.fullPath,"kn_images" + Path.DirectorySeparatorChar + filename + extension,this));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "DevModDetailsViewModel.NewScreenShot", ex);
+            }
+        }
+
+        internal void ScUp(DevModScreenshot sc)
+        {
+            int index = Screenshots.IndexOf(sc);
+            if (index > 0)
+            {
+                Screenshots.Move(index, index - 1);
+            }
+        }
+
+        internal void ScDown(DevModScreenshot sc)
+        {
+            int index = Screenshots.IndexOf(sc);
+            if (index + 1 < Screenshots.Count())
+            {
+                Screenshots.Move(index, index + 1);
+            }
+        }
+
+        internal void ScDel(DevModScreenshot sc)
+        {
+            Screenshots.Remove(sc);
         }
     }
 }
