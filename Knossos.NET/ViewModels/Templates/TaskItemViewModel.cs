@@ -1716,7 +1716,7 @@ namespace Knossos.NET.ViewModels
                         -Create all folders
                         -Create the download token on the root of the mod.
                         -Set all the data needed here, number of tasks, etc for the progress bar and info
-                        -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 2
+                        -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 1
                          (Download, Decompression, Download banner/tile images)
                         -+1 task if we have to compress
                         -If the mod is installeds there is no need to download the baners and title image again so -2 to max tasks
@@ -1811,7 +1811,7 @@ namespace Knossos.NET.ViewModels
 
                     ProgressBarMin = 0;
                     ProgressCurrent = 0;
-                    ProgressBarMax = installed == null ? (files.Count * 2) + 2 : (files.Count * 2);
+                    ProgressBarMax = installed == null ? (files.Count * 2) + 1 : (files.Count * 2);
                     ProgressBarMax += vPExtractionNeeded;
                     if (compressMod)
                     {
@@ -1941,32 +1941,56 @@ namespace Knossos.NET.ViewModels
                         throw new TaskCanceledException();
                     }
 
+                    //Download Tile image
                     if (!string.IsNullOrEmpty(mod.tile) && installed == null)
                     {
+                        Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         var tileTask = new TaskItemViewModel();
                         await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
-                        await tileTask.DownloadFile(mod.tile, modPath + Path.DirectorySeparatorChar + "kn_tile.png", "Downloading tile image", false, null, cancellationTokenSource);
-                        mod.tile = "kn_tile.png";
+                        var uri = new Uri(mod.tile);
+                        await tileTask.DownloadFile(mod.tile, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading tile image", false, null, cancellationTokenSource);
+                        mod.tile = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                     }
-                    ++ProgressCurrent;
-                    Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
                         throw new TaskCanceledException();
                     }
 
+                    //Download Banner
                     if (!string.IsNullOrEmpty(mod.banner) && installed == null)
                     {
+                        Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         var bannerTask = new TaskItemViewModel();
                         await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
-                        await bannerTask.DownloadFile(mod.banner, modPath + Path.DirectorySeparatorChar + "kn_banner.png", "Downloading banner image", false, null, cancellationTokenSource);
-                        mod.banner = "kn_banner.png";
+                        var uri = new Uri(mod.banner);
+                        await bannerTask.DownloadFile(mod.banner, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading banner image", false, null, cancellationTokenSource);
+                        mod.banner = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                     }
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
                         throw new TaskCanceledException();
+                    }
+
+                    //Download Screenshots
+                    if (mod.screenshots != null && mod.screenshots.Any() && installed == null)
+                    {
+                        Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
+                        var scList = new List<string>();
+                        foreach (var sc in mod.screenshots)
+                        {
+                            if (cancellationTokenSource.IsCancellationRequested)
+                            {
+                                throw new TaskCanceledException();
+                            }
+                            var scTask = new TaskItemViewModel();
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));
+                            var uri = new Uri(sc);
+                            await scTask.DownloadFile(sc, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading screenshot", false, null, cancellationTokenSource);
+                            scList.Add("kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath));
+                        }
+                        mod.screenshots = scList.ToArray();
                     }
 
                     ++ProgressCurrent;
@@ -2203,7 +2227,7 @@ namespace Knossos.NET.ViewModels
                             -Create all folders
                             -Create the download token on the root of the mod.
                             -Set all the data needed here, number of tasks, etc for the progress bar and info
-                            -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 2
+                            -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 1
                              (Download, Decompression, Download banner/tile images)
                         */
                         List<ModFile> files = new List<ModFile>();
@@ -2238,7 +2262,7 @@ namespace Knossos.NET.ViewModels
 
                         ProgressBarMin = 0;
                         sender.ProgressBarCurrent = ProgressCurrent = 0;
-                        sender.ProgressBarMax = ProgressBarMax = (files.Count * 2) + 2;
+                        sender.ProgressBarMax = ProgressBarMax = (files.Count * 2) + 1;
                         Info = "Tasks: 0/" + ProgressBarMax;
 
                         try
@@ -2355,13 +2379,13 @@ namespace Knossos.NET.ViewModels
 
                         if (!string.IsNullOrEmpty(modJson.tile))
                         {
+                            Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                             var tileTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
-                            await tileTask.DownloadFile(modJson.tile, modPath + Path.DirectorySeparatorChar + "kn_tile.png", "Downloading tile image", false, null, cancellationTokenSource);
-                            modJson.tile = "kn_tile.png";
+                            var uri = new Uri(modJson.tile);
+                            await tileTask.DownloadFile(modJson.tile, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading tile image", false, null, cancellationTokenSource);
+                            modJson.tile = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                         }
-                        sender.ProgressBarCurrent = ++ProgressCurrent;
-                        Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
 
                         if (cancellationTokenSource.IsCancellationRequested)
                         {
@@ -2370,10 +2394,12 @@ namespace Knossos.NET.ViewModels
 
                         if (!string.IsNullOrEmpty(modJson.banner))
                         {
+                            Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                             var bannerTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
-                            await bannerTask.DownloadFile(modJson.banner, modPath + Path.DirectorySeparatorChar + "kn_banner.png", "Downloading banner image", false, null, cancellationTokenSource);
-                            modJson.banner = "kn_banner.png";
+                            var uri = new Uri(modJson.banner);
+                            await bannerTask.DownloadFile(modJson.banner, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading banner image", false, null, cancellationTokenSource);
+                            modJson.banner = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                         }
 
                         if (cancellationTokenSource.IsCancellationRequested)
@@ -2381,6 +2407,32 @@ namespace Knossos.NET.ViewModels
                             throw new TaskCanceledException();
                         }
 
+                        //Download Screenshots
+                        if (modJson.screenshots != null && modJson.screenshots.Any())
+                        {
+                            Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
+                            var scList = new List<string>();
+                            foreach (var sc in modJson.screenshots)
+                            {
+                                if (cancellationTokenSource.IsCancellationRequested)
+                                {
+                                    throw new TaskCanceledException();
+                                }
+                                var scTask = new TaskItemViewModel();
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));
+                                var uri = new Uri(sc);
+                                await scTask.DownloadFile(sc, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading screenshot", false, null, cancellationTokenSource);
+                                scList.Add("kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath));
+                            }
+                            modJson.screenshots = scList.ToArray();
+                        }
+
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+
+                        /**/
                         sender.ProgressBarCurrent = ++ProgressCurrent;
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                         modJson.fullPath = modPath + Path.DirectorySeparatorChar;
