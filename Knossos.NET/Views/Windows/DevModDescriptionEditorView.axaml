@@ -6,14 +6,35 @@
         x:Class="Knossos.NET.Views.DevModDescriptionEditorView"
 		Icon="/Assets/knossos-icon.ico"
 		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+		xmlns:HtmlRenderer="clr-namespace:TheArtOfDev.HtmlRenderer.Avalonia;assembly=Avalonia.HtmlRenderer"
         Title="Mod Description Editor"
-	    SizeToContent="WidthAndHeight"
+	    SizeToContent="Manual"
+		MinHeight="500"
+		MinWidth="500"
 		WindowStartupLocation="CenterOwner"
 	    CanResize="True">
 	
 	<Design.DataContext>
-		<vm:AddSapiVoicesViewModel/>
+		<vm:DevModDescriptionEditorViewModel/>
 	</Design.DataContext>
-	
-	Welcome to Avalonia!
+
+	<ScrollViewer Background="#18191A">
+		<Grid RowDefinitions="Auto,*">
+			<StackPanel Grid.Row="0" Margin="5">
+				<WrapPanel>
+					<Button FontWeight="Black" Command="{Binding ToolBar}" CommandParameter="[b]Bold Text[/b]" ToolTip.Tip="[b]Bold Text[/b]">B</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[u]Underline Text[/u]" ToolTip.Tip="[u]Underline Text[/u]">U</Button>
+					<Button FontStyle="Italic" Command="{Binding ToolBar}" CommandParameter="[i]Italic Text[/i]" ToolTip.Tip="[i]Italic Text[/i]">I</Button>
+				</WrapPanel>
+			</StackPanel>
+			<Grid Margin="6" ColumnDefinitions="*,*" Grid.Row="1">
+				<Label Grid.Column="0" Foreground="Gray" HorizontalContentAlignment="Left" Margin="-5,-15,0,0">Plain Text</Label>
+				<TextBox x:Name="TextInput" IsUndoEnabled="True" AcceptsReturn="True" AcceptsTab="True" Margin="0,5,0,0" Grid.Column="0" MinWidth="300" MinHeight="300" TextWrapping="Wrap" Text="{Binding Description}"></TextBox>
+				<Label Grid.Column="1" Foreground="Gray" HorizontalContentAlignment="Right" Margin="-5,-15,0,0">BBCode/HTML Preview</Label>
+				<Border Margin="0,5,0,0" Grid.Column="1" BorderBrush="Gray" BorderThickness="2" CornerRadius="2">
+					<HtmlRenderer:HtmlPanel Background="Transparent" Text="{Binding DescriptionHtml}"/>
+				</Border>
+			</Grid>
+		</Grid>
+	</ScrollViewer>
 </Window>

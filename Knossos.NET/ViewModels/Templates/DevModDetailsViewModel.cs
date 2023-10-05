@@ -169,10 +169,15 @@ namespace Knossos.NET.ViewModels
             if (MainWindow.instance != null && editor != null)
             {
                 var dialog = new DevModDescriptionEditorView();
-                dialog.DataContext = new DevModDescriptionEditorViewModel(editor);
+                dialog.DataContext = new DevModDescriptionEditorViewModel(this, ModDescription);
+                dialog.BindTextBox();
                 await dialog.ShowDialog<DevModDescriptionEditorView?>(MainWindow.instance);
-                ModDescription = editor.ActiveVersion.description != null ? editor.ActiveVersion.description : string.Empty;
             }
+        }
+
+        public void UpdateDescription(string description)
+        {
+            ModDescription = description;
         }
 
         internal async void ChangeTileImage()
