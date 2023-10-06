@@ -16,18 +16,21 @@
 			<TabItem Header="Mods">
 				<SplitView Margin="0,0,0,5" IsPaneOpen="True" DisplayMode="Inline" OpenPaneLength="400">
 					<SplitView.Pane>
-						<ListBox ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}">
-							<ListBox.ItemTemplate>
-								<DataTemplate>
-									<WrapPanel>
-										<Label FontWeight="Bold" Content="["/>
-										<Label FontWeight="Bold" Content="{Binding type}"/>
-										<Label FontWeight="Bold" Content="]"/>
-										<Label Content="{Binding title}"/>
-									</WrapPanel>
-								</DataTemplate>
-							</ListBox.ItemTemplate>
-						</ListBox>
+						<Grid RowDefinitions="*,Auto">
+							<ListBox Grid.Row="0" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}">
+								<ListBox.ItemTemplate>
+									<DataTemplate>
+										<WrapPanel>
+											<Label FontWeight="Bold" Content="["/>
+											<Label FontWeight="Bold" Content="{Binding type}"/>
+											<Label FontWeight="Bold" Content="]"/>
+											<Label Content="{Binding title}"/>
+										</WrapPanel>
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+							<Button Command="{Binding CreateMod}" Grid.Row="1" Background="DarkOliveGreen" HorizontalAlignment="Center">Create New Mod</Button>
+						</Grid>
 					</SplitView.Pane>
 
 					<v:DevModEditorView Content="{Binding ModEditor}"/>

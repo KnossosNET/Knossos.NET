@@ -16,7 +16,7 @@ public partial class DevModDescriptionEditorView : Window
 
     public void BindTextBox()
     {
-        var textbox = this.FindControl<TextBox>("TextInput");
+        var textbox = this.FindControl<TextBox>("PlainText");
         if (DataContext != null)
         {
             var vm = DataContext as DevModDescriptionEditorViewModel;

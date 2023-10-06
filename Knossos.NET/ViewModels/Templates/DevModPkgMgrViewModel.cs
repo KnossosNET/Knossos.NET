@@ -580,6 +580,11 @@ namespace Knossos.NET.ViewModels
             {
                 if (NewPackageFolder.Trim() != string.Empty && NewPackageName.Trim() != string.Empty)
                 {
+                    if(NewPackageFolder.ToLower() == "kn_images" || NewPackageFolder.ToLower() == "kn_upload")
+                    {
+                        MessageBox.Show(MainWindow.instance, NewPackageName + " is a reserved package folder name and cant be used", "Error creating new package", MessageBox.MessageBoxButtons.OK);
+                        return;
+                    }
                     Directory.CreateDirectory(editor!.ActiveVersion.fullPath + Path.DirectorySeparatorChar + NewPackageFolder + Path.DirectorySeparatorChar + "data");
                     var newPkg = new ModPackage();
                     newPkg.folder = NewPackageFolder;

@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="500"
+        x:Class="Knossos.NET.Views.DevModCreateNewView"
+		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+        Title="Create New Mod"
+		SizeToContent="WidthAndHeight"
+		Icon="/Assets/knossos-icon.ico"
+		WindowStartupLocation="CenterOwner"
+		CanResize="True">
+	<Design.DataContext>
+		<vm:DevModCreateNewViewModel/>
+	</Design.DataContext>
+
+	<ScrollViewer Background="#18191A" Width="500" Height="500">
+		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
+			<!--NAME-->
+			<Label Grid.Row="0" Grid.Column="0" Margin="5" FontWeight="Bold" FontSize="18">Name</Label>
+			<TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ModName}" Margin="5"></TextBox>
+			<!--ID-->
+			<Label Grid.Row="1" Grid.Column="0" Margin="5" FontWeight="Bold" FontSize="18">ID</Label>
+			<TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ModId}" Margin="5"></TextBox>
+			<!--Type-->
+			<Label Grid.Row="2" Grid.Column="0" Margin="5" FontWeight="Bold" FontSize="18">Type</Label>
+			<TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ModType}" Margin="5"></TextBox>
+			<!--Parent-->
+			<Label Grid.Row="3" Grid.Column="0" Margin="5" FontWeight="Bold" FontSize="18">Parent</Label>
+			<TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ModParent}" Margin="5"></TextBox>
+		</Grid>
+	</ScrollViewer>
+	
+</Window>

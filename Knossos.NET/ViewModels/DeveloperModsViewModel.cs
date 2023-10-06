@@ -76,5 +76,14 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Error, "DeveloperModsViewModel.AddMod()", ex);
             }
         }
+
+        /* Buttons */
+
+        internal async void CreateMod()
+        {
+            var dialog = new DevModCreateNewView();
+            dialog.DataContext = new DevModCreateNewViewModel();
+            await dialog.ShowDialog<DevModCreateNewView?>(MainWindow.instance!);
+        }
     }
 }

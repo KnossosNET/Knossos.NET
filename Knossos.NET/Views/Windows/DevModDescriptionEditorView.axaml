@@ -49,7 +49,7 @@
 			<ScrollViewer Grid.Row="1">
 				<Grid Margin="6" ColumnDefinitions="*,*">
 					<Label Grid.Column="0" Foreground="Gray" HorizontalContentAlignment="Left" Margin="-5,-15,0,0">Plain Text</Label>
-					<TextBox x:Name="TextInput" IsUndoEnabled="True" AcceptsReturn="True" AcceptsTab="True" Margin="0,5,0,0" Grid.Column="0" MinWidth="300" MinHeight="300" TextWrapping="Wrap" Text="{Binding Description}"></TextBox>
+					<TextBox x:Name="PlainText" IsUndoEnabled="True" AcceptsReturn="True" AcceptsTab="True" Margin="0,5,0,0" Grid.Column="0" MinWidth="300" MinHeight="300" TextWrapping="Wrap" Text="{Binding Description}"></TextBox>
 					<Label Grid.Column="1" Foreground="Gray" HorizontalContentAlignment="Right" Margin="-5,-15,0,0">BBCode/HTML Preview</Label>
 					<Border Margin="0,5,0,0" Grid.Column="1" BorderBrush="Gray" BorderThickness="2" CornerRadius="2">
 						<HtmlRenderer:HtmlPanel Background="Transparent" Text="{Binding DescriptionHtml}"/>
