@@ -25,8 +25,15 @@ namespace Knossos.NET.ViewModels
                 if(value != description)
                 {
                     SetProperty(ref description, value);
-                    var html = BBCode.ConvertToHtml(Description, BBCode.BasicRules);
-                    DescriptionHtml = "<body style=\"overflow: hidden;\"><span style=\"white-space: pre-line;color:white;overflow: hidden;\">" + html + "</span></body>";
+                    try
+                    {
+                        var html = BBCode.ConvertToHtml(Description, BBCode.BasicRules);
+                        DescriptionHtml = "<body style=\"overflow: hidden;\"><span style=\"white-space: pre-line;color:white;overflow: hidden;\">" + html + "</span></body>";
+                    }
+                    catch (Exception ex) 
+                    {
+                        Log.Add(Log.LogSeverity.Error, "DevModDescriptionEditorViewModel.Description", ex);
+                    }
                 }
             }
         }
