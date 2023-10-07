@@ -1049,7 +1049,7 @@ namespace Knossos.NET.ViewModels
 
                                         if (!reader.Entry.IsDirectory)
                                         {
-                                            reader.WriteEntryToDirectory(dest, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                                            reader.WriteEntryToDirectory(dest, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true, WriteSymbolicLink = (source, target) => { File.CreateSymbolicLink(source, target); } });
                                         }
                                         if (cancellationTokenSource!.IsCancellationRequested)
                                         {
