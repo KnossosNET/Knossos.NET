@@ -107,6 +107,7 @@ namespace Knossos.NET.Models
         public bool enableTts { get; set; } = true;
         [JsonIgnore]
         public int? ttsVoice { get; set; } = null;
+        public string? ttsVoiceName { get; set; } = null;
         [JsonIgnore]
         public bool ttsTechroom { get; set; } = true;
         [JsonIgnore]
@@ -491,6 +492,7 @@ namespace Knossos.NET.Models
                         compressionMaxParallelism = tempSettings.compressionMaxParallelism;
                         autoUpdate = tempSettings.autoUpdate;
                         checkUpdate = tempSettings.checkUpdate;
+                        ttsVoiceName = tempSettings.ttsVoiceName;
 
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");

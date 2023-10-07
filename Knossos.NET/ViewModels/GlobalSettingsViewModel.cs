@@ -851,6 +851,10 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.ttsDescription = TtsDescription;
             Knossos.globalSettings.ttsVoice = VoiceSelectedIndex;
             Knossos.globalSettings.ttsVolume = TtsVolume;
+            if (VoiceSelectedIndex >= 0 && VoiceItems.Count() > VoiceSelectedIndex && VoiceItems[VoiceSelectedIndex].Tag != null)
+            {
+                Knossos.globalSettings.ttsVoiceName = VoiceItems[VoiceSelectedIndex].Tag!.ToString();
+            }
 
             /* JOYSTICKS */
             if (Joy1SelectedIndex + 1 <= Joystick1Items.Count && Joy1SelectedIndex != -1)
@@ -921,8 +925,13 @@ namespace Knossos.NET.ViewModels
         {
             if (VoiceSelectedIndex != -1)
             {
+                string? voice_name = null;
+                if (VoiceSelectedIndex >= 0 && VoiceItems.Count() > VoiceSelectedIndex && VoiceItems[VoiceSelectedIndex].Tag != null)
+                {
+                    voice_name = VoiceItems[VoiceSelectedIndex].Tag!.ToString();
+                }
                 PlayingTTS = true;
-                Knossos.Tts("Developed in a joint operation by the Vasudan and Terran governments, the GTF Ulysses is an excellent all-around fighter. It offers superior maneuverability and a high top speed.", VoiceSelectedIndex, TtsVolume, TTSCompletedCallback);
+                Knossos.Tts("Developed in a joint operation by the Vasudan and Terran governments, the GTF Ulysses is an excellent all-around fighter. It offers superior maneuverability and a high top speed.", VoiceSelectedIndex, voice_name, TtsVolume, TTSCompletedCallback);
             }
         }
 
