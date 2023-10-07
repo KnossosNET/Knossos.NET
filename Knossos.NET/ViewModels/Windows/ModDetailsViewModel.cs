@@ -148,7 +148,7 @@ namespace Knossos.NET.ViewModels
             IsPlayingTTS = true;
             var cleanDescriptionString = Regex.Replace(modVersions[ItemSelectedIndex].description!, @" ?\[.*?\]", string.Empty);
             cleanDescriptionString = Regex.Replace(cleanDescriptionString, @" ?\<.*?\>", string.Empty);
-            Knossos.Tts(cleanDescriptionString, null, null, CompletedCallback);
+            Knossos.Tts(cleanDescriptionString, null, null, null, CompletedCallback);
         }
 
         private bool CompletedCallback()
