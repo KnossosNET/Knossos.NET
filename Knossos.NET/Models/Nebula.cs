@@ -349,6 +349,18 @@ namespace Knossos.NET.Models
             return null;
         }
 
+        public static bool IsModIdInNebula(string id)
+        {
+            //Use the mod list used for newer version
+            //TODO: Maybe the nebula api has something for this?
+            var exist = settings.NewerModsVersions.FirstOrDefault(x => x.Id.ToLower() == id.ToLower());
+            if ( exist != null )
+            {
+                return true;
+            }
+            return false;
+        }
+
         public static async Task<List<Mod>> GetAllModsWithID(string? id)
         {
             var modList = new List<Mod>();
