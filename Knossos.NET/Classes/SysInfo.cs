@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -224,12 +225,28 @@ namespace Knossos.NET
 
         public static string DIYStringEncryption(string unencryptedString)
         {
-            return unencryptedString;
+            try
+            {
+                var stringBytes = Encoding.UTF8.GetBytes(unencryptedString);
+                return Convert.ToBase64String(stringBytes);
+            }catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Sysinfo.DIYStringEncryption()", ex);
+                return unencryptedString;
+            }
         }
 
         public static string DIYStringDecryption(string encryptedString)
         {
-            return encryptedString;
+            try
+            {
+                var base64Bytes = Convert.FromBase64String(encryptedString);
+                return Encoding.UTF8.GetString(base64Bytes);
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Sysinfo.DIYStringDecryption()", ex);
+                return encryptedString;
+            }
         }
 
         public static bool IsValidEmail(string email)
