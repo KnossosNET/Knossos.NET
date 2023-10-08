@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.NebulaLoginView"    
+	         xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+	<Design.DataContext>
+		<vm:NebulaLoginViewModel/>
+	</Design.DataContext>
+
+	<ScrollViewer Background="Transparent">
+		<StackPanel Background="Transparent" HorizontalAlignment="Center">
+			<Label Content="{Binding Title}" HorizontalContentAlignment="Center" FontWeight="Black" FontSize="24"/>
+			<TextBox Text="{Binding UserName}" Watermark="Username" Width="300" Margin="5"></TextBox>
+			<TextBox Text="{Binding UserPass}" Watermark="Password" PasswordChar="*" Width="300" Margin="5"></TextBox>
+			<TextBox IsVisible="{Binding RegisterNewUser}" Text="{Binding UserEmail}" Watermark="Email" Width="300" Margin="5"></TextBox>
+			<Label IsVisible="{Binding UserLoggedIn}" HorizontalAlignment="Center" Foreground="Green" FontSize="14">Logged In!</Label>
+			<Button IsVisible="{Binding UserLoggedIn}" Command="{Binding LogOff}" Background="Red" HorizontalAlignment="Center">Logout</Button>
+			<WrapPanel HorizontalAlignment="Center" IsVisible="{Binding !UserLoggedIn}">
+				<Button IsVisible="{Binding !RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding Reset}" Margin="5" Background="Red">Reset Password</Button>
+				<Button IsVisible="{Binding !RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding SwitchToRegister}" Margin="5" Background="DarkBlue">Create new user</Button>
+				<Button IsVisible="{Binding !RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding LogIn}" Margin="5" Background="Green">Login</Button>
+				<Button IsVisible="{Binding RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding SwitchToLogin}" Margin="5" Background="Red">Cancel</Button>
+				<Button IsVisible="{Binding RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding Register}" Margin="5" Background="Green">Register</Button>
+			</WrapPanel>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

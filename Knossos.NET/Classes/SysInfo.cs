@@ -42,26 +42,26 @@ namespace Knossos.NET
 
         public static string GetKnossosDataFolderPath()
         {
-            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)+ Path.DirectorySeparatorChar +"KnossosNET";
+            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + "KnossosNET";
         }
 
         public static string GetFSODataFolderPath()
         {
-            if(fsoPrefPath != string.Empty)
+            if (fsoPrefPath != string.Empty)
             {
                 return fsoPrefPath;
             }
             else
             {
-                return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar +"HardLightProductions" + Path.DirectorySeparatorChar + "FreeSpaceOpen";
+                return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + "HardLightProductions" + Path.DirectorySeparatorChar + "FreeSpaceOpen";
             }
-            
+
         }
 
         public static void SetFSODataFolderPath(string path)
         {
             //FSO responds with this if there is no ini
-            if(path != @".\")
+            if (path != @".\")
                 fsoPrefPath = path;
         }
 
@@ -82,8 +82,8 @@ namespace Knossos.NET
                     jsonFile.Close();
                     return jsonObject.base_path;
                 }
-            } 
-            catch(Exception ex) 
+            }
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Sysinfo.GetBasePathFromKnossosLegacy", ex);
             }
@@ -181,7 +181,8 @@ namespace Knossos.NET
 
         public static async Task CopyDirectory(string sourceDir, string destinationDir, bool recursive, CancellationTokenSource cancelSource, Action<string>? progressCallback = null)
         {
-            await Task.Run(async () => {
+            await Task.Run(async () =>
+            {
                 var dir = new DirectoryInfo(sourceDir);
 
                 if (!dir.Exists)
@@ -219,6 +220,35 @@ namespace Knossos.NET
                     }
                 }
             });
+        }
+
+        public static string DIYStringEncryption(string unencryptedString)
+        {
+            return unencryptedString;
+        }
+
+        public static string DIYStringDecryption(string encryptedString)
+        {
+            return encryptedString;
+        }
+
+        public static bool IsValidEmail(string email)
+        {
+            var trimmedEmail = email.Trim();
+
+            if (trimmedEmail.EndsWith("."))
+            {
+                return false;
+            }
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == trimmedEmail;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

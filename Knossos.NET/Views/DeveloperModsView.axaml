@@ -12,7 +12,7 @@
 	</Design.DataContext>
 
 	<Border BorderBrush="Transparent" BorderThickness="2" CornerRadius="2" Margin="5">
-		<TabControl>
+		<TabControl SelectedIndex="{Binding TabIndex}">
 			<TabItem Header="Mods">
 				<SplitView Margin="0,0,0,5" IsPaneOpen="True" DisplayMode="Inline" OpenPaneLength="400">
 					<SplitView.Pane>
@@ -43,7 +43,7 @@
 			</TabItem>
 
 			<TabItem Header="Nebula">
-
+				<v:NebulaLoginView Content="{Binding NebulaLoginVM}"/>
 			</TabItem>
 		</TabControl>
 	</Border>

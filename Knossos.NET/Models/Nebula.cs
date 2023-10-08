@@ -13,6 +13,8 @@ using Avalonia.Threading;
 using System.Collections.Generic;
 using Knossos.NET.Classes;
 using System.Threading;
+using System.ComponentModel;
+using System.Net.Http.Headers;
 
 namespace Knossos.NET.Models
 {
@@ -30,11 +32,18 @@ namespace Knossos.NET.Models
         private struct NebulaSettings
         {
             public string? etag { get; set; }
-            public List<NewerModVersionsData> NewerModsVersions { get; set; } 
+            public string? user { get; set; }
+            public string? pass { get; set; }
+            public bool logged { get; set; }
+            public List<NewerModVersionsData> NewerModsVersions { get; set; }
+            
 
             public NebulaSettings()
             {
                 etag = null;
+                user = null;
+                pass = null;
+                logged = false;
                 NewerModsVersions = new List<NewerModVersionsData>();
             }
         }
@@ -50,7 +59,10 @@ namespace Knossos.NET.Models
         private static CancellationTokenSource? cancellationToken = null;
         public static bool repoLoaded = false;
         private static NebulaSettings settings = new NebulaSettings();
-        public static bool userIsLoggedIn = false;
+        private static string? apiUserToken = null;
+        public static bool userIsLoggedIn { get { return settings.logged; } }
+        public static string? userName { get { return settings.user; } }
+        public static string? userPass { get { return settings.pass != null ? SysInfo.DIYStringDecryption(settings.pass) : null; } }
 
         public static async void Trinity()
         {
@@ -401,6 +413,10 @@ namespace Knossos.NET.Models
         {
             try
             {
+                if(!File.Exists(filename))
+                {
+                    return;
+                }
                 using (FileStream inputStream = File.Open(filename, FileMode.Open, FileAccess.Read))
                 {
                     inputStream.Close();
@@ -441,10 +457,11 @@ namespace Knossos.NET.Models
             }
         }
 
-        public static void SaveSettings()
+        public static async void SaveSettings()
         {
             try
             {
+                await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "nebula.json");
                 var encoderSettings = new TextEncoderSettings();
                 encoderSettings.AllowRange(UnicodeRanges.All);
 
@@ -473,6 +490,12 @@ namespace Knossos.NET.Models
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public string id { get; set; }
+
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+            public string token { get; set; }
+
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+            public string reason { get; set; }
         }
 
         private enum ApiMethod
@@ -482,12 +505,25 @@ namespace Knossos.NET.Models
             GET
         }
 
-        private static async Task<ApiReply?> ApiCall(string resourceUrl, Dictionary<string, string> keyValues, ApiMethod method = ApiMethod.POST) 
+        private static async Task<ApiReply?> ApiCall(string resourceUrl, Dictionary<string, string> keyValues, bool needsLogIn = false, ApiMethod method = ApiMethod.POST) 
         {
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
+                    if (needsLogIn)
+                    {
+                        if (apiUserToken == null)
+                        {
+                            await Login();
+                            if (apiUserToken == null)
+                            {
+                                Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "An api call that needed a login token was requested, but we were unable to log into the nebula service.");
+                                return null;
+                            }
+                        }
+                        client.DefaultRequestHeaders.Add("X-KN-TOKEN", apiUserToken);
+                    }
                     client.Timeout = TimeSpan.FromSeconds(30);
                     switch (method)
                     {
@@ -499,16 +535,16 @@ namespace Knossos.NET.Models
                                     if (response.IsSuccessStatusCode)
                                     {
                                         var json = await response.Content.ReadAsStringAsync();
-                                        var reply = JsonSerializer.Deserialize<ApiReply>(json);
-                                        if (reply.result)
-                                            return reply;
+                                        if (json != null) 
+                                        { 
+                                            var reply = JsonSerializer.Deserialize<ApiReply>(json);
+                                            if (!reply.result)
+                                                Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode + "\n" + json);
 
-                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode + "\n" + json);
+                                            return reply;
+                                        }
                                     }
-                                    else
-                                    {
-                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode);
-                                    }
+                                    Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode);
                                 }
                             } break;
                         case ApiMethod.PUT:
@@ -558,7 +594,7 @@ namespace Knossos.NET.Models
                     { "version", mod.version },
                     { "message", reason }
                 };
-                var reply = await ApiCall("mod/release/report", data);
+                var reply = await ApiCall("mod/release/report", data, true);
                 if (reply.HasValue)
                 {
                     Log.Add(Log.LogSeverity.Information, "Nebula.ReportMod", "Reported Mod: " + mod + " to fsnebula successfully.");
@@ -570,6 +606,133 @@ namespace Knossos.NET.Models
                 Log.Add(Log.LogSeverity.Error, "Nebula.ReportMod", ex);
             }
             return false;
+        }
+
+        public static async Task<bool> Login(string? user = null, string? password = null)
+        {
+            try
+            {
+                if(apiUserToken != null)
+                {
+                    //Already logged in
+                    return true;
+                }
+                if(user == null)
+                    user = settings.user;
+                if (password == null && settings.pass != null)
+                    password = SysInfo.DIYStringDecryption(settings.pass);
+
+                if(string.IsNullOrEmpty(user) || string.IsNullOrEmpty(password))
+                {
+                    Log.Add(Log.LogSeverity.Warning, "Nebula.Login", "User or Password was null or empty.");
+                    return false;
+                }
+
+                var data = new Dictionary<string, string>()
+                {
+                    { "user", user },
+                    { "password", password }
+                };
+                var reply = await ApiCall("login", data);
+                if (!reply.HasValue || string.IsNullOrEmpty(reply.Value.token))
+                {
+                    Log.Add(Log.LogSeverity.Warning, "Nebula.Login", "Nebula login failed.");
+                    settings.logged = false;
+                    apiUserToken = null;
+                    SaveSettings();
+                    return false;
+                }
+                else
+                {
+                    var encryptedPassword = SysInfo.DIYStringEncryption(password);
+                    if (settings.user != user || settings.pass != encryptedPassword || !settings.logged)
+                    {
+                        settings.user = user;
+                        settings.pass = encryptedPassword;
+                        settings.logged = true;
+                        SaveSettings();
+                    }
+                    apiUserToken = reply.Value.token;
+                    Log.Add(Log.LogSeverity.Information, "Nebula.Login", "Login successful, we got a token!");
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.Login", ex);
+            }
+            return false;
+        }
+
+        public static async Task<string> Register(string user, string password, string email)
+        {
+            try
+            {
+                var data = new Dictionary<string, string>()
+                {
+                    { "name", user },
+                    { "password", password },
+                    { "email", email }
+                };
+                var reply = await ApiCall("register", data);
+                if (reply.HasValue)
+                {
+                    if( reply.Value.result )
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.Register", "Registered new user to nebula.");
+                        return "ok";
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.Register", "Error registering new user to nebula. Reason: "+ reply.Value.reason);
+                        return reply.Value.reason;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.Register", ex);
+            }
+            return "unknown error";
+        }
+
+        public static async Task<string> Reset(string user)
+        {
+            try
+            {
+                var data = new Dictionary<string, string>()
+                {
+                    { "user", user }
+                };
+                var reply = await ApiCall("reset_password", data);
+                if (reply.HasValue)
+                {
+                    if (reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.Reset", "Requested password reset to nebula for username: "+user);
+                        return "ok";
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.Reset", "Error requesting password reset. Reason: " + reply.Value.reason);
+                        return reply.Value.reason;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.Reset", ex);
+            }
+            return "unknown error";
+        }
+
+        public static void LogOff()
+        {
+            settings.logged = false;
+            apiUserToken = null;
+            settings.user = null;
+            settings.pass = null;
+            SaveSettings();
         }
         #endregion
     }

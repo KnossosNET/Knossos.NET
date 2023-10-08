@@ -17,7 +17,32 @@ namespace Knossos.NET.ViewModels
         private ObservableCollection<Mod> mods = new ObservableCollection<Mod>();
         [ObservableProperty]
         private DevModEditorViewModel? modEditor;
-        
+        [ObservableProperty]
+        private NebulaLoginViewModel nebulaLoginVM = new NebulaLoginViewModel();
+
+        private int tabIndex = 0;
+        private int TabIndex
+        {
+            get => tabIndex;
+            set
+            {
+                if (value != tabIndex)
+                {
+                    this.SetProperty(ref tabIndex, value);
+                    if (tabIndex == 0) //MODS
+                    {
+                    }
+                    if (tabIndex == 1) //Tools
+                    {
+                    }
+                    if (tabIndex == 2) //Nebula Login
+                    {
+                        NebulaLoginVM.UpdateUI();
+                    }
+                }
+            }
+        }
+
         private int selectedIndex = -1;
         private int SelectedIndex
         {

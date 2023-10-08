@@ -471,6 +471,11 @@ namespace Knossos.NET.ViewModels
 
         internal async void ButtonCommandReport()
         {
+            if (!Nebula.userIsLoggedIn)
+            {
+                await MessageBox.Show(MainWindow.instance!, "You need to be logged to Nebula (in the Develop tab) to upload a report.", "Nebula loggin needed", MessageBox.MessageBoxButtons.OK);
+                return;
+            }
             var dialog = new ReportModView();
             dialog.DataContext = new ReportModViewModel(modVersions[ItemSelectedIndex]);
 
