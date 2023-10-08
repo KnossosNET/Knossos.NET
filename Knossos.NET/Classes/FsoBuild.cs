@@ -38,10 +38,10 @@ namespace Knossos.NET.Models
 
     public enum FsoExecEnvironment
     {
-        Unknown,
         Windows,
         Linux,
-        Mac
+        MacOSX,
+        Unknown
     }
 
     public enum FsoStability
@@ -65,6 +65,7 @@ namespace Knossos.NET.Models
         public string? directExec = null;
         public bool isInstalled = true;
         public bool devMode = false;
+        public Mod? modData;
         /*
          Direct Exe
          */
@@ -127,6 +128,10 @@ namespace Knossos.NET.Models
             id = modJson.id;
             title = modJson.title;
             devMode = modJson.devMode;
+            if (devMode)
+            {
+                modData = modJson;
+            }
             description = modJson.description;
             version = modJson.version;
             folderPath = modJson.fullPath;
@@ -241,7 +246,6 @@ namespace Knossos.NET.Models
             return null;
         }
 
-
         private void LoadExecutables(Mod modJson)
         {
             if (modJson.packages != null)
@@ -283,25 +287,6 @@ namespace Knossos.NET.Models
         public static ModProperties FillProperties(string environment)
         {
             var properties = new ModProperties();
-            if((environment.ToLower().Contains("x86") || environment.ToLower().Contains("x86_64") ) && !environment.ToLower().Contains("avx"))
-            {
-                properties.sse2 = true;
-            }
-            if ((environment.ToLower().Contains("x86") || environment.ToLower().Contains("x86_64")) && environment.ToLower().Contains("avx"))
-            {
-                if(environment.ToLower().Contains("avx2"))
-                {
-                    properties.avx2 = true;
-                }
-                else
-                {
-                    properties.avx = true;
-                }
-            }
-            if (environment.ToLower().Contains("x86_64"))
-            {
-                properties.x64 = true;
-            }
             if (environment.ToLower().Contains("arm64"))
             {
                 properties.arm64 = true;
@@ -310,13 +295,36 @@ namespace Knossos.NET.Models
             {
                 properties.arm32 = true;
             }
+
+            if (!environment.ToLower().Contains("arm32") && !environment.ToLower().Contains("arm64"))
+            {
+                if (!environment.ToLower().Contains("avx"))
+                {
+                    properties.sse2 = true;
+                }
+                if (environment.ToLower().Contains("x86_64") || environment.ToLower().Contains("x64"))
+                {
+                    properties.x64 = true;
+                }
+                if (environment.ToLower().Contains("avx2"))
+                {
+                    properties.avx2 = true;
+                }
+                else
+                {
+                    if (environment.ToLower().Contains("avx"))
+                    {
+                        properties.avx = true;
+                    }
+                }
+            }
             return properties;
         }
 
         /*
             Determine the operating system this build file is compiled for 
         */
-        private FsoExecEnvironment GetExecEnvironment(string? enviroment)
+        public static FsoExecEnvironment GetExecEnvironment(string? enviroment)
         {
             if (enviroment == null)
             {
@@ -329,7 +337,7 @@ namespace Knossos.NET.Models
             if (enviroment.ToLower().Contains("linux"))
                 return FsoExecEnvironment.Linux;
             if (enviroment.ToLower().Contains("mac"))
-                return FsoExecEnvironment.Mac;
+                return FsoExecEnvironment.MacOSX;
 
             Log.Add(Log.LogSeverity.Information, "FsoBuild.GetExecEnvironment", "Unable to determine the proper build enviroment. Env: " + enviroment);
             return FsoExecEnvironment.Unknown;
@@ -338,7 +346,7 @@ namespace Knossos.NET.Models
         /*
             Determine the CPU arch this build file is compiled for
         */
-        private FsoExecArch GetExecArch(ModProperties? properties)
+        public static FsoExecArch GetExecArch(ModProperties? properties)
         {
             if (properties == null || properties.other)
                 return FsoExecArch.other;
@@ -372,31 +380,34 @@ namespace Knossos.NET.Models
         /*
           If label is null, then is Release.
         */
-        private FsoExecType GetExecType(string? label)
+        public static FsoExecType GetExecType(string? label)
         {
             if (label == null)
                 return FsoExecType.Release;
 
-            switch (label)
+            switch (label.ToLower())
             {
-                case "FastDebug":
-                case "Rollback Build": 
-                case "Fast Debug": return FsoExecType.Debug;
+                case "release": return FsoExecType.Release;
 
-                case "Fred FastDebug":
-                case "FRED Fast Debug":
-                case "FRED Debug":
-                case "FRED2 Debug": return FsoExecType.Fred2Debug;
+                case "debug":
+                case "fastdebug":
+                case "rollback build":
+                case "fast debug": return FsoExecType.Debug;
 
-                case "FRED":
-                case "FRED2": return FsoExecType.Fred2;
+                case "fred fastdebug":
+                case "fred fast debug":
+                case "fred debug":
+                case "fred2debug":
+                case "fred2 debug": return FsoExecType.Fred2Debug;
 
-                case "QTFred FastDebug":
-                case "QtFRED Debug": return FsoExecType.QtFredDebug;
+                case "fred":
+                case "fred2": return FsoExecType.Fred2;
 
-                case "QTFred":
-                case "QtFRED": return FsoExecType.QtFred;
+                case "qtfred fastdebug":
+                case "qtfreddebug":
+                case "qtfred debug": return FsoExecType.QtFredDebug;
 
+                case "qtfred": return FsoExecType.QtFred;
 
                 default:
                     Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetExecType", "Unable to determine FSO Exec Type. Label: " + label);
@@ -503,7 +514,7 @@ namespace Knossos.NET.Models
                 return 0;
             }
 
-            if (env == FsoExecEnvironment.Windows && !SysInfo.IsWindows || env == FsoExecEnvironment.Linux && !SysInfo.IsLinux || env == FsoExecEnvironment.Mac && !SysInfo.IsMacOS)
+            if (env == FsoExecEnvironment.Windows && !SysInfo.IsWindows || env == FsoExecEnvironment.Linux && !SysInfo.IsLinux || env == FsoExecEnvironment.MacOSX && !SysInfo.IsMacOS)
             {
                 if (modpath != string.Empty)
                     Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + modpath + filename + " is not valid for this OS. Detected: " + env);
