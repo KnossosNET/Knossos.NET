@@ -383,6 +383,10 @@ namespace Knossos.NET.Models
         {
             try
             {
+                if (!File.Exists(filename))
+                {
+                    return;
+                }
                 using (FileStream inputStream = File.Open(filename, FileMode.Open, FileAccess.Read))
                 {
                     inputStream.Close();
@@ -423,10 +427,11 @@ namespace Knossos.NET.Models
             }
         }
 
-        public static void SaveSettings()
+        public static async void SaveSettings()
         {
             try
             {
+                await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "nebula.json");
                 var encoderSettings = new TextEncoderSettings();
                 encoderSettings.AllowRange(UnicodeRanges.All);
 
