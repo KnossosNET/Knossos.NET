@@ -361,14 +361,18 @@ namespace Knossos.NET.Models
             return null;
         }
 
-        public static bool IsModIdInNebula(string id)
+        public static async Task<bool> IsModIdInNebula(string id)
         {
-            //Use the mod list used for newer version
-            //TODO: Maybe the nebula api has something for this?
+            //Use the mod list used for newer versions
             var exist = settings.NewerModsVersions.FirstOrDefault(x => x.Id.ToLower() == id.ToLower());
             if ( exist != null )
             {
                 return true;
+            }
+            //If we are logged in check using the api
+            if( userIsLoggedIn )
+            {
+                return !await CheckID(id);
             }
             return false;
         }
@@ -733,6 +737,43 @@ namespace Knossos.NET.Models
             settings.user = null;
             settings.pass = null;
             SaveSettings();
+        }
+
+        /// <summary>
+        /// Checks if the MODID is avalible in Nebula
+        /// (Needs to be logged in)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="title"></param>
+        /// <returns>
+        /// true if MODID is avalible, false if it is already in use
+        /// </returns>
+        public static async Task<bool> CheckID(string id, string title = "None")
+        {
+            try
+            {
+                var data = new Dictionary<string, string>()
+                {
+                    { "id", id },
+                    { "title", title }
+                };
+                //TODO: A potencially huge problem, for Nebula, modid is case sensitive!
+                var reply = await ApiCall("mod/check_id", data, true);
+                if (reply.HasValue)
+                {
+                    Log.Add(Log.LogSeverity.Information, "Nebula.CheckID", "Check Mod ID:" + id +" is avalible in Nebula: " + reply.Value.result);
+                    return reply.Value.result;
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.CheckID", "Unable to check mod in in Nebula.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.CheckID", ex);
+            }
+            return false;
         }
         #endregion
     }

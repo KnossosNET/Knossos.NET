@@ -42,6 +42,10 @@ namespace Knossos.NET.ViewModels
         private ObservableCollection<ComboBoxItem> parentComboBoxItems = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
         private int parentSelectedIndex = -1;
+        private bool LoggedInNebula
+        {
+            get { return Nebula.userIsLoggedIn; }
+        }
 
         public DevModCreateNewViewModel() 
         {
@@ -72,41 +76,41 @@ namespace Knossos.NET.ViewModels
             TypeSelectedIndex = 0;
         }
 
-        private bool Verify()
+        private async Task<bool> Verify()
         {
             //Is library set?
             if(Knossos.GetKnossosLibraryPath() == null )
             {
-                MessageBox.Show(MainWindow.instance, "Knossos library path is not set. Go to the settings tab and set the Knossos libreary location.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Knossos library path is not set. Go to the settings tab and set the Knossos libreary location.", "Validation error", MessageBox.MessageBoxButtons.OK);
                 return false;
             }
             //Version
             var sm = new SemanticVersion(ModVersion);
             if(sm == null || sm.ToString() == "0.0.0")
             {
-                MessageBox.Show(MainWindow.instance, ModVersion + " is not a valid semantic version", "Validation error",MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, ModVersion + " is not a valid semantic version", "Validation error",MessageBox.MessageBoxButtons.OK);
                 return false;
             }
             //Name
             if(ModName.Replace(" ", "").Length <= 1)
             {
-                MessageBox.Show(MainWindow.instance, "Mod name cant be empty or a single character: "+ModName, "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Mod name cant be empty or a single character: "+ModName, "Validation error", MessageBox.MessageBoxButtons.OK);
                 return false;
             }
             //ID
             if (ModId.Replace(" ", "").Length <= 2)
             {
-                MessageBox.Show(MainWindow.instance, "Mod id cant be empty or be less than 3 characters: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Mod id cant be empty or be less than 3 characters: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
                 return false;
             }
-            if (Nebula.IsModIdInNebula(ModId))
+            if (await Nebula.IsModIdInNebula(ModId))
             {
-                MessageBox.Show(MainWindow.instance, "Mod id already exist in Nebula: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Mod id already exist in Nebula: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
                 return false;
             }
             if (Knossos.GetInstalledModList(ModId).Any() || Knossos.GetInstalledBuildsList(ModId).Any())
             {
-                MessageBox.Show(MainWindow.instance, "Mod id already exist locally: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Mod id already exist locally: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
                 return false;
             }
             //If modtype = Mod it has to have a parent mod
@@ -116,13 +120,13 @@ namespace Knossos.NET.ViewModels
                 {
                     if (ParentComboBoxItems[ParentSelectedIndex].DataContext == null)
                     {
-                        MessageBox.Show(MainWindow.instance, "Mod type: MOD requires to select a parent mod.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(MainWindow.instance, "Mod type: MOD requires to select a parent mod.", "Validation error", MessageBox.MessageBoxButtons.OK);
                         return false;
                     }
                 }
                 else
                 {
-                    MessageBox.Show(MainWindow.instance, "Mod type: MOD requires to select a parent mod.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance, "Mod type: MOD requires to select a parent mod.", "Validation error", MessageBox.MessageBoxButtons.OK);
                     return false;
                 }
             }
@@ -135,7 +139,7 @@ namespace Knossos.NET.ViewModels
                 {
                     if(Directory.Exists(parent.fullPath+Path.DirectorySeparatorChar+ModId+"-"+ModVersion) || File.Exists(parent.fullPath + Path.DirectorySeparatorChar + ModId + "-" + ModVersion))
                     {
-                        MessageBox.Show(MainWindow.instance, "Folder or File already exists: "+ parent.fullPath + Path.DirectorySeparatorChar + ModId + "-" + ModVersion, "Validation error", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(MainWindow.instance, "Folder or File already exists: "+ parent.fullPath + Path.DirectorySeparatorChar + ModId + "-" + ModVersion, "Validation error", MessageBox.MessageBoxButtons.OK);
                         return false;
                     }
                 }
@@ -146,7 +150,7 @@ namespace Knossos.NET.ViewModels
                     {
                         if (Directory.Exists(parentParentFolder.FullName + Path.DirectorySeparatorChar + ModId + "-" + ModVersion) || File.Exists(parentParentFolder.FullName + Path.DirectorySeparatorChar + ModId + "-" + ModVersion))
                         {
-                            MessageBox.Show(MainWindow.instance, "Folder or File already exists: " + parentParentFolder.FullName + Path.DirectorySeparatorChar + ModId + "-" + ModVersion, "Validation error", MessageBox.MessageBoxButtons.OK);
+                            await MessageBox.Show(MainWindow.instance, "Folder or File already exists: " + parentParentFolder.FullName + Path.DirectorySeparatorChar + ModId + "-" + ModVersion, "Validation error", MessageBox.MessageBoxButtons.OK);
                             return false;
                         }
                     }
@@ -162,7 +166,7 @@ namespace Knossos.NET.ViewModels
                 {
                     if(Directory.Exists(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + ModId ) || File.Exists(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + ModId))
                     {
-                        MessageBox.Show(MainWindow.instance, "Folder or File already exists: " + Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(MainWindow.instance, "Folder or File already exists: " + Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
                         return false;
                     }
                 }
@@ -171,7 +175,7 @@ namespace Knossos.NET.ViewModels
                     //FSO Build
                     if (Directory.Exists(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + ModId + "-" + ModVersion) || File.Exists(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + ModId + "-" + ModVersion))
                     {
-                        MessageBox.Show(MainWindow.instance, "Folder or File already exists: " + Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + ModId + "-" + ModVersion, "Validation error", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(MainWindow.instance, "Folder or File already exists: " + Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + ModId + "-" + ModVersion, "Validation error", MessageBox.MessageBoxButtons.OK);
                         return false;
                     }
                 }
@@ -179,11 +183,11 @@ namespace Knossos.NET.ViewModels
             return true;
         }
 
-        internal void CreateMod(object window)
+        internal async void CreateMod(object window)
         {
             try
             {
-                if (!Verify())
+                if (!await Verify())
                     return;
 
                 //Create folder
