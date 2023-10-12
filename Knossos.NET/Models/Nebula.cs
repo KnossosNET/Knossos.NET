@@ -15,6 +15,7 @@ using Knossos.NET.Classes;
 using System.Threading;
 using System.ComponentModel;
 using System.Net.Http.Headers;
+using System.Collections;
 
 namespace Knossos.NET.Models
 {
@@ -63,6 +64,7 @@ namespace Knossos.NET.Models
         public static bool userIsLoggedIn { get { return settings.logged; } }
         public static string? userName { get { return settings.user; } }
         public static string? userPass { get { return settings.pass != null ? SysInfo.DIYStringDecryption(settings.pass) : null; } }
+        private static Mod[]? privateMods;
 
         public static async void Trinity()
         {
@@ -150,6 +152,14 @@ namespace Knossos.NET.Models
                         catch { }
                     }
                 }
+                if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
+                {
+                    throw new TaskCanceledException();
+                }
+                if (userIsLoggedIn)
+                {
+                    await LoadPrivateMods(cancellationToken);
+                }
             }
             catch(TaskCanceledException)
             {
@@ -158,6 +168,78 @@ namespace Knossos.NET.Models
                     cancellationToken.Dispose();
                     cancellationToken = null;
                 }
+            }
+        }
+
+        private static async Task LoadPrivateMods(CancellationTokenSource? cancellationToken)
+        {
+            try
+            {
+                privateMods = await GetPrivateMods();
+                if (privateMods != null && privateMods.Any())
+                {
+                    Mod? lastMod = null;
+                    foreach (var mod in privateMods)
+                    {
+                        if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                        if (mod.type == ModType.engine)
+                        {
+                            //This is already installed?
+                            var isInstalled = Knossos.GetInstalledBuildsList(mod.id)?.Where(b => b.version == mod.version);
+                            if (isInstalled == null || isInstalled.Count() == 0)
+                            {
+                                await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod)), DispatcherPriority.Background);
+                            }
+                        }
+                        if (mod.type == ModType.tc || mod.type == ModType.mod && (listFS2Override || (mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound)))
+                        {
+                            //This is already installed?
+                            var isInstalled = Knossos.GetInstalledModList(mod.id);
+                            if (isInstalled == null || isInstalled.Count() == 0)
+                            {
+                                if (lastMod == null || lastMod.id == mod.id)
+                                {
+                                    lastMod = mod;
+                                }
+                                else
+                                {
+                                    if (lastMod.id != mod.id)
+                                    {
+                                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddNebulaMod(lastMod), DispatcherPriority.Background);
+                                        lastMod = mod;
+                                    }
+                                }
+
+                            }
+                            else
+                            {
+                                bool update = true;
+                                foreach (var intMod in isInstalled)
+                                {
+                                    int result = SemanticVersion.Compare(intMod.version, mod.version);
+                                    if (result >= 0)
+                                    {
+                                        update = false;
+                                        if (result == 0)
+                                        {
+                                            intMod.inNebula = true;
+                                        }
+                                    }
+                                }
+                                if (update)
+                                {
+                                    MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id);
+                                }
+                            }
+                        }
+                    }
+                }
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.LoadPrivateMods()", ex);
             }
         }
 
@@ -235,7 +317,6 @@ namespace Knossos.NET.Models
                         }
                         if (mod != null && !mod.isPrivate)
                         {
-                            
                             if (mod.type == ModType.engine)
                             {
                                 //This is already installed?
@@ -328,6 +409,16 @@ namespace Knossos.NET.Models
 
         public static async Task<Mod?> GetModData(string id, string version)
         {
+            if(privateMods != null && privateMods.Any())
+            {
+                foreach (Mod mod in privateMods)
+                {
+                    if (mod != null && mod.id == id && mod.version == version)
+                    {
+                        return mod;
+                    }
+                }
+            }
             await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
             using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json", FileMode.Open, FileAccess.ReadWrite))
             {
@@ -354,7 +445,7 @@ namespace Knossos.NET.Models
                 }
                 catch (Exception ex)
                 {
-                    Log.Add(Log.LogSeverity.Error, "Nebula.ParseRepoJson()", ex);
+                    Log.Add(Log.LogSeverity.Error, "Nebula.GetModData()", ex);
                 }
                 fileStream.Close();
             }
@@ -380,6 +471,16 @@ namespace Knossos.NET.Models
         public static async Task<List<Mod>> GetAllModsWithID(string? id)
         {
             var modList = new List<Mod>();
+            if (privateMods != null && privateMods.Any())
+            {
+                foreach (Mod mod in privateMods)
+                {
+                    if (mod != null && (mod.id == id || id == null))
+                    {
+                        modList.Add(mod);
+                    }
+                }
+            }
             await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
             using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json", FileMode.Open, FileAccess.ReadWrite))
             {
@@ -500,6 +601,9 @@ namespace Knossos.NET.Models
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public string reason { get; set; }
+
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+            public object[] mods { get; set; }
         }
 
         private enum ApiMethod
@@ -509,7 +613,7 @@ namespace Knossos.NET.Models
             GET
         }
 
-        private static async Task<ApiReply?> ApiCall(string resourceUrl, Dictionary<string, string> keyValues, bool needsLogIn = false, ApiMethod method = ApiMethod.POST) 
+        private static async Task<ApiReply?> ApiCall(string resourceUrl, Dictionary<string, string>? keyValues, bool needsLogIn = false, int timeoutSeconds = 30, ApiMethod method = ApiMethod.POST) 
         {
             try
             {
@@ -528,37 +632,54 @@ namespace Knossos.NET.Models
                         }
                         client.DefaultRequestHeaders.Add("X-KN-TOKEN", apiUserToken);
                     }
-                    client.Timeout = TimeSpan.FromSeconds(30);
+                    client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
                     switch (method)
                     {
                         case ApiMethod.POST:
+                        {
+                            if(keyValues == null)
                             {
-                                using (FormUrlEncodedContent content = new FormUrlEncodedContent(keyValues))
+                                throw new ArgumentNullException(nameof(keyValues));
+                            }
+                            using (FormUrlEncodedContent content = new FormUrlEncodedContent(keyValues))
+                            {
+                                var response = await client.PostAsync(apiURL + resourceUrl, content);
+                                if (response.IsSuccessStatusCode)
                                 {
-                                    var response = await client.PostAsync(apiURL + resourceUrl, content);
-                                    if (response.IsSuccessStatusCode)
-                                    {
-                                        var json = await response.Content.ReadAsStringAsync();
-                                        if (json != null) 
-                                        { 
-                                            var reply = JsonSerializer.Deserialize<ApiReply>(json);
-                                            if (!reply.result)
-                                                Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode + "\n" + json);
+                                    var json = await response.Content.ReadAsStringAsync();
+                                    if (json != null) 
+                                    { 
+                                        var reply = JsonSerializer.Deserialize<ApiReply>(json);
+                                        if (!reply.result)
+                                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode + "\n" + json);
 
-                                            return reply;
-                                        }
+                                        return reply;
                                     }
-                                    Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode);
                                 }
-                            } break;
+                                Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode);
+                            }
+                        } break;
                         case ApiMethod.PUT:
-                            {
-                                throw new NotImplementedException();
-                            }
+                        {
+                            throw new NotImplementedException();
+                        }
                         case ApiMethod.GET:
+                        {
+                            var response = await client.GetAsync(apiURL + resourceUrl);
+                            if (response.IsSuccessStatusCode)
                             {
-                                throw new NotImplementedException();
+                                var json = await response.Content.ReadAsStringAsync();
+                                if (json != null) 
+                                { 
+                                    var reply = JsonSerializer.Deserialize<ApiReply>(json);
+                                    if (!reply.result)
+                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode + "\n" + json);
+
+                                    return reply;
+                                }
                             }
+                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode);
+                        } break;
                     }
                 }
             }
@@ -774,6 +895,100 @@ namespace Knossos.NET.Models
                 Log.Add(Log.LogSeverity.Error, "Nebula.CheckID", ex);
             }
             return false;
+        }
+
+        /// <summary>
+        /// Checks if the user has write permissions to a modid
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>true if user has write access, false if not or not logged in</returns>
+        public static async Task<bool> IsModEditable(string id)
+        {
+            try
+            {
+                var data = new Dictionary<string, string>()
+                {
+                    { "mid", id }
+                };
+
+                var reply = await ApiCall("mod/is_editable", data, true);
+                if (reply.HasValue)
+                {
+                    Log.Add(Log.LogSeverity.Information, "Nebula.IsModEditable", "Is mod id:" + id + " editable? " + reply.Value.result);
+                    return reply.Value.result;
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.IsModEditable", "Unable to check if mod is editable.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.IsModEditable", ex);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Get an array of mods that the user has write access to.
+        /// </summary>
+        /// <returns>An array of Mods or null</returns>
+        public static async Task<string[]?> GetEditableModIDs()
+        {
+            try
+            {
+                var reply = await ApiCall("mod/editable", null, true, 30, ApiMethod.GET);
+                if (reply.HasValue)
+                {
+                    if (reply.Value.mods != null && reply.Value.mods.Any())
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.GetEditableMods", "Editable mod in Nebula: " + string.Join(", ", reply.Value.mods));
+                        return reply.Value.mods.Select(s => s.ToString()).ToArray()!;
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.GetEditableMods", "Returned an empty array.");
+                    }
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.GetEditableMods", "Unable to check editable mod list.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.GetEditableMods", ex);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Get an array of private mods that the user has access to.
+        /// </summary>
+        /// <returns>An array of mods</returns>
+        public static async Task<Mod[]?> GetPrivateMods()
+        {
+            try
+            {
+                var reply = await ApiCall("mod/list_private", null, true, 30, ApiMethod.GET);
+                if (reply.Value.mods != null && reply.Value.mods.Any())
+                {
+                    foreach(Mod mod in reply.Value.mods)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.GetPrivateMods", "Private mod in Nebula with access: " + mod);
+                    }
+                    return reply.Value.mods.Select(s => (Mod)s).ToArray()!;
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Information, "Nebula.GetPrivateMods", "Returned an empty array.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.GetPrivateMods", ex);
+            }
+            return null;
         }
         #endregion
     }
