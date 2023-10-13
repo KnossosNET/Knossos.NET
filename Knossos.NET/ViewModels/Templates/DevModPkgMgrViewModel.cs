@@ -7,6 +7,7 @@ using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Runtime.Intrinsics.Arm;
@@ -301,6 +302,9 @@ namespace Knossos.NET.ViewModels
             private bool packVP = false;
 
             [ObservableProperty]
+            private string diskSpace = string.Empty;
+
+            [ObservableProperty]
             private ObservableCollection<EditorDependencyItem> dependencyItems = new ObservableCollection<EditorDependencyItem>();
 
             private DevModPkgMgrViewModel PkgMgr { get; set; }
@@ -328,10 +332,35 @@ namespace Knossos.NET.ViewModels
                     case "optional": PackageStatusIndex = 2; 
                         break;
                 }
+
+                UpdateFolderSize();
+            }
+
+            private void UpdateFolderSize()
+            {
+                DiskSpace = "";
+                Task.Run(() => {
+                    try
+                    {
+                        if (PkgMgr.editor != null)
+                        {
+                            if (Directory.Exists(PkgMgr.editor.ActiveVersion.fullPath + Path.DirectorySeparatorChar + Package.folder))
+                            {
+                                long sizeInBytes = Directory.EnumerateFiles(PkgMgr.editor.ActiveVersion.fullPath + Path.DirectorySeparatorChar + Package.folder, "*", SearchOption.AllDirectories).Sum(fileInfo => new FileInfo(fileInfo).Length);
+                                DiskSpace = SysInfo.FormatBytes(sizeInBytes);
+                            }
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        Log.Add(Log.LogSeverity.Warning, "EditorPackageItem.UpdateFolderSize", ex);
+                    }
+                });
             }
 
             public ModPackage GetPackage() 
-            { 
+            {
+                UpdateFolderSize();
                 Package.isEnabled = IsEnabled;
                 Package.isVp = PackVP;
                 Package.notes = PackageNotes;
