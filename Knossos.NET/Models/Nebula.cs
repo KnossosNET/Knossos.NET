@@ -604,6 +604,9 @@ namespace Knossos.NET.Models
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public object[] mods { get; set; }
+
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+            public ModMember[] members { get; set; }
         }
 
         private enum ApiMethod
@@ -987,6 +990,54 @@ namespace Knossos.NET.Models
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Nebula.GetPrivateMods", ex);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets all members in a mod
+        /// Needs to be logged in
+        /// </summary>
+        /// <param name="modid"></param>
+        /// <returns>An ModMember[] array or null if failed.</returns>
+        public static async Task<ModMember[]?> GetTeamMembers(string modid)
+        {
+            try
+            {
+                var data = new Dictionary<string, string>()
+                {
+                    { "mid", modid }
+                };
+
+                var reply = await ApiCall("mod/team/fetch", data, true);
+                if (reply.HasValue)
+                {
+                    if (reply.Value.result)
+                    {
+                        if(reply.Value.members != null)
+                        {
+                            var members = string.Empty;
+                            foreach (var item in reply.Value.members)
+                            {
+                                members += item.user + "("+item.role.ToString()+") ";
+                            }
+                            Log.Add(Log.LogSeverity.Information, "Nebula.GetTeamMembers", "Mod id: " + modid + " members: " + members);
+                        }
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.GetTeamMembers", "Error while getting mod members: " + reply.Value.reason);
+                    }
+                    return reply.Value.members;
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.GetTeamMembers", "Unable to check if mod team members.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.GetTeamMembers", ex);
             }
             return null;
         }

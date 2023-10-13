@@ -30,6 +30,14 @@ namespace Knossos.NET.Models
         local
     }
 
+    public enum ModMemberRole
+    {
+        Owner = 0,
+        Manager = 1,
+        Uploader = 2,
+        Tester = 3
+    }
+
     /*
         The "mod class" variables math the json properties for the mod.json file that is located at the root of the mod folder.
         In order to maintain compatibility with other launchers all properties saved in the mod.json file must be
@@ -99,6 +107,8 @@ namespace Knossos.NET.Models
         public bool isNewMod { get; set; } = false;
         [JsonIgnore]
         public bool inNebula { get; set; } = false;
+        [JsonIgnore]
+        public List<ModMember>? members { get; set; } = null;
 
         public Mod()
         {
@@ -683,6 +693,12 @@ namespace Knossos.NET.Models
             //inverted
             return SemanticVersion.Compare(mod1.version, mod2.version);
         }
+    }
+
+    public class ModMember
+    {
+        public ModMemberRole role { get; set; }
+        public string user { get; set; } = string.Empty;
     }
 
     public class ModPackage
