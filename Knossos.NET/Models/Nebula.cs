@@ -16,6 +16,8 @@ using System.Threading;
 using System.ComponentModel;
 using System.Net.Http.Headers;
 using System.Collections;
+using System.Drawing;
+using System.Security.Cryptography;
 
 namespace Knossos.NET.Models
 {
@@ -607,6 +609,12 @@ namespace Knossos.NET.Models
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public ModMember[] members { get; set; }
+
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+            public object[] finished_parts { get; set; }
+
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+            public bool done { get; set; }
         }
 
         private enum ApiMethod
@@ -616,7 +624,7 @@ namespace Knossos.NET.Models
             GET
         }
 
-        private static async Task<ApiReply?> ApiCall(string resourceUrl, Dictionary<string, string>? keyValues, bool needsLogIn = false, int timeoutSeconds = 30, ApiMethod method = ApiMethod.POST) 
+        private static async Task<ApiReply?> ApiCall(string resourceUrl, MultipartFormDataContent? data, bool needsLogIn = false, int timeoutSeconds = 30, ApiMethod method = ApiMethod.POST)
         {
             try
             {
@@ -639,50 +647,50 @@ namespace Knossos.NET.Models
                     switch (method)
                     {
                         case ApiMethod.POST:
-                        {
-                            if(keyValues == null)
                             {
-                                throw new ArgumentNullException(nameof(keyValues));
-                            }
-                            using (FormUrlEncodedContent content = new FormUrlEncodedContent(keyValues))
-                            {
-                                var response = await client.PostAsync(apiURL + resourceUrl, content);
+                                if (data == null)
+                                {
+                                    throw new ArgumentNullException(nameof(data));
+                                }
+                                var response = await client.PostAsync(apiURL + resourceUrl, data);
+                                data.Dispose();
                                 if (response.IsSuccessStatusCode)
                                 {
-                                    var json = await response.Content.ReadAsStringAsync();
-                                    if (json != null) 
-                                    { 
-                                        var reply = JsonSerializer.Deserialize<ApiReply>(json);
+                                    var jsonReply = await response.Content.ReadAsStringAsync();
+                                    if (jsonReply != null)
+                                    {
+                                        var reply = JsonSerializer.Deserialize<ApiReply>(jsonReply);
                                         if (!reply.result)
-                                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode + "\n" + json);
+                                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode + "\n" + data);
 
                                         return reply;
                                     }
                                 }
                                 Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode);
                             }
-                        } break;
+                            break;
                         case ApiMethod.PUT:
-                        {
-                            throw new NotImplementedException();
-                        }
-                        case ApiMethod.GET:
-                        {
-                            var response = await client.GetAsync(apiURL + resourceUrl);
-                            if (response.IsSuccessStatusCode)
                             {
-                                var json = await response.Content.ReadAsStringAsync();
-                                if (json != null) 
-                                { 
-                                    var reply = JsonSerializer.Deserialize<ApiReply>(json);
-                                    if (!reply.result)
-                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode + "\n" + json);
-
-                                    return reply;
-                                }
+                                throw new NotImplementedException();
                             }
-                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode);
-                        } break;
+                        case ApiMethod.GET:
+                            {
+                                var response = await client.GetAsync(apiURL + resourceUrl);
+                                if (response.IsSuccessStatusCode)
+                                {
+                                    var json = await response.Content.ReadAsStringAsync();
+                                    if (json != null)
+                                    {
+                                        var reply = JsonSerializer.Deserialize<ApiReply>(json);
+                                        if (!reply.result)
+                                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode + "\n" + json);
+
+                                        return reply;
+                                    }
+                                }
+                                Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode);
+                            }
+                            break;
                     }
                 }
             }
@@ -697,7 +705,11 @@ namespace Knossos.NET.Models
         {
             try
             {
-                var reply = await ApiCall("log/upload", new Dictionary<string, string> { { "log", logString } });
+                var data = new MultipartFormDataContent()
+                {
+                    { new StringContent(logString), "log" }
+                };
+                var reply = await ApiCall("log/upload", data);
                 if (reply.HasValue)
                 {
                     Log.Add(Log.LogSeverity.Information, "Nebula.UploadLog", "Uploaded log file to Nebula: " + nebulaURL + "log/" + reply.Value.id);
@@ -716,11 +728,11 @@ namespace Knossos.NET.Models
         {
             try
             {
-                var data = new Dictionary<string, string>()
+                var data = new MultipartFormDataContent()
                 {
-                    { "mid", mod.id },
-                    { "version", mod.version },
-                    { "message", reason }
+                    { new StringContent(mod.id), "mid" },
+                    { new StringContent(mod.version), "version" },
+                    { new StringContent(reason), "message" }
                 };
                 var reply = await ApiCall("mod/release/report", data, true);
                 if (reply.HasValue)
@@ -756,10 +768,10 @@ namespace Knossos.NET.Models
                     return false;
                 }
 
-                var data = new Dictionary<string, string>()
+                var data = new MultipartFormDataContent()
                 {
-                    { "user", user },
-                    { "password", password }
+                    { new StringContent(user), "user" },
+                    { new StringContent(password), "password" }
                 };
                 var reply = await ApiCall("login", data);
                 if (!reply.HasValue || string.IsNullOrEmpty(reply.Value.token))
@@ -796,11 +808,11 @@ namespace Knossos.NET.Models
         {
             try
             {
-                var data = new Dictionary<string, string>()
+                var data = new MultipartFormDataContent()
                 {
-                    { "name", user },
-                    { "password", password },
-                    { "email", email }
+                    { new StringContent(user), "name" },
+                    { new StringContent(password), "password" },
+                    { new StringContent(email), "email" }
                 };
                 var reply = await ApiCall("register", data);
                 if (reply.HasValue)
@@ -828,9 +840,9 @@ namespace Knossos.NET.Models
         {
             try
             {
-                var data = new Dictionary<string, string>()
+                var data = new MultipartFormDataContent()
                 {
-                    { "user", user }
+                    { new StringContent(user), "user" }
                 };
                 var reply = await ApiCall("reset_password", data);
                 if (reply.HasValue)
@@ -876,10 +888,10 @@ namespace Knossos.NET.Models
         {
             try
             {
-                var data = new Dictionary<string, string>()
+                var data = new MultipartFormDataContent()
                 {
-                    { "id", id },
-                    { "title", title }
+                    { new StringContent(id), "id" },
+                    { new StringContent(title), "title" }
                 };
                 //TODO: A potencially huge problem, for Nebula, modid is case sensitive!
                 var reply = await ApiCall("mod/check_id", data, true);
@@ -909,9 +921,9 @@ namespace Knossos.NET.Models
         {
             try
             {
-                var data = new Dictionary<string, string>()
+                var data = new MultipartFormDataContent()
                 {
-                    { "mid", id }
+                    { new StringContent(id), "mid" }
                 };
 
                 var reply = await ApiCall("mod/is_editable", data, true);
@@ -1004,9 +1016,9 @@ namespace Knossos.NET.Models
         {
             try
             {
-                var data = new Dictionary<string, string>()
+                var data = new MultipartFormDataContent()
                 {
-                    { "mid", modid }
+                    { new StringContent(modid), "mid" }
                 };
 
                 var reply = await ApiCall("mod/team/fetch", data, true);
@@ -1053,10 +1065,10 @@ namespace Knossos.NET.Models
             try
             {
                 var newMembers = JsonSerializer.Serialize(members);
-                var data = new Dictionary<string, string>()
+                var data = new MultipartFormDataContent()
                 {
-                    { "mid", modid },
-                    { "members", newMembers }
+                    { new StringContent(modid), "mid" },
+                    { new StringContent(newMembers), "members" }
                 };
 
                 var reply = await ApiCall("mod/team/update", data, true);
@@ -1085,16 +1097,22 @@ namespace Knossos.NET.Models
             return null;
         }
 
+        /// <summary>
+        /// Deletes a given Mod Version release from Nebula
+        /// Needs to be logged in and have write permissions
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <returns>returns "ok" if successfull, a reason if we were unable to delete the mod version or null if the call failed</returns>
         public static async Task<string?> DeleteModVersion(Mod mod)
         {
             try
             {
-                var data = new Dictionary<string, string>()
+                var data = new MultipartFormDataContent()
                 {
-                    { "mid", mod.id },
-                    { "version", mod.version }
+                    { new StringContent(mod.id), "mid" },
+                    { new StringContent(mod.version), "version" }
                 };
-
+               
                 var reply = await ApiCall("mod/release/delete", data, true);
                 if (reply.HasValue)
                 {
