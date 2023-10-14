@@ -1041,6 +1041,85 @@ namespace Knossos.NET.Models
             }
             return null;
         }
+
+        /// <summary>
+        /// Updates mod team members, the entire list must be passed here, owner included.
+        /// </summary>
+        /// <param name="modid"></param>
+        /// <param name="members"></param>
+        /// <returns>"ok" if successfull, a reason if we were unable to update members or null if the call failed</returns>
+        public static async Task<string?> UpdateTeamMembers(string modid, ModMember[] members)
+        {
+            try
+            {
+                var newMembers = JsonSerializer.Serialize(members);
+                var data = new Dictionary<string, string>()
+                {
+                    { "mid", modid },
+                    { "members", newMembers }
+                };
+
+                var reply = await ApiCall("mod/team/update", data, true);
+                if (reply.HasValue)
+                {
+                    if (reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.UpdateTeamMembers", "Updated mod members for mod: " + modid + " New Members: "+ newMembers);
+                        return "ok";
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.UpdateTeamMembers", "Error while updating mod members: " + reply.Value.reason + " Passed members: " + newMembers);
+                        return reply.Value.reason;
+                    }
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.UpdateTeamMembers", "Unable to update mod team members.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.UpdateTeamMembers", ex);
+            }
+            return null;
+        }
+
+        public static async Task<string?> DeleteModVersion(Mod mod)
+        {
+            try
+            {
+                var data = new Dictionary<string, string>()
+                {
+                    { "mid", mod.id },
+                    { "version", mod.version }
+                };
+
+                var reply = await ApiCall("mod/release/delete", data, true);
+                if (reply.HasValue)
+                {
+                    if (reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.DeleteModVersion", "Deleted mod/version : " + mod + " from Nebula.");
+                        return "ok";
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.DeleteModVersion", "Error while deleting mod/version: " + mod + " Reason: " + reply.Value.reason);
+                        return reply.Value.reason;
+                    }
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.DeleteModVersion", "Unable to delete mod version. ");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.DeleteModVersion", ex);
+            }
+            return null;
+        }
         #endregion
     }
 }
