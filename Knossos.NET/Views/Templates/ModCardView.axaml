@@ -72,14 +72,14 @@
 							<!--Normal-->
 							<StackPanel IsVisible="{Binding !devMode}">
 								<Button Command="{Binding ButtonCommandFred2}" Content="Fred2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkOrange" Margin="0,2,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandDebug}" Content="Fso Debug" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,2,0,0" Width="100" ></Button>
+								<Button Command="{Binding ButtonCommandDebug}" Content="FSO Debug" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,2,0,0" Width="100" ></Button>
 								<Button Command="{Binding ButtonCommandQtFred}" Content="QtFred" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Purple" Margin="0,2,0,0" Width="100" ></Button>
 								<Button Command="{Binding ButtonCommandDelete}" Content="Delete" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,2,0,0" Width="100" ></Button>
 							</StackPanel>
 							<!--DevMode-->
 							<StackPanel IsVisible="{Binding devMode}">
 								<Button Command="{Binding ButtonCommandDetails}" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkGray" Margin="0,2,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandDebug}" Content="Fso Debug" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,2,0,0" Width="100" ></Button>
+								<Button Command="{Binding ButtonCommandDebug}" Content="FSO Debug" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,2,0,0" Width="100" ></Button>
 							</StackPanel>
 						</StackPanel>
 						<!--Row of Icons-->
