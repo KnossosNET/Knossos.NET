@@ -702,7 +702,7 @@ namespace Knossos.NET.ViewModels
 
                 if (result != null && result.Count > 0)
                 {
-                    Knossos.globalSettings.basePath = result[0].Path.AbsolutePath.ToString();
+                    Knossos.globalSettings.basePath = result[0].Path.LocalPath.ToString();
                     Knossos.globalSettings.Save();
                     Knossos.ResetBasePath();
                     LoadData();

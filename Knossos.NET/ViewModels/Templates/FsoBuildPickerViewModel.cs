@@ -295,7 +295,7 @@ namespace Knossos.NET.ViewModels
 
                 if (result != null && result.Count > 0)
                 {
-                    var file = new FileInfo(result[0].Path.AbsolutePath.ToString());
+                    var file = new FileInfo(result[0].Path.LocalPath.ToString());
                     return file.FullName;
                 }
             }
