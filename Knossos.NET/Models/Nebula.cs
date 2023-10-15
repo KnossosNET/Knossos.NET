@@ -18,6 +18,8 @@ using System.Net.Http.Headers;
 using System.Collections;
 using System.Drawing;
 using System.Security.Cryptography;
+using System.Runtime.InteropServices;
+using Avalonia.Controls;
 
 namespace Knossos.NET.Models
 {
@@ -39,7 +41,7 @@ namespace Knossos.NET.Models
             public string? pass { get; set; }
             public bool logged { get; set; }
             public List<NewerModVersionsData> NewerModsVersions { get; set; }
-            
+
 
             public NebulaSettings()
             {
@@ -104,7 +106,7 @@ namespace Knossos.NET.Models
                     //Download the repo.json
                     if (TaskViewModel.Instance != null)
                     {
-                        var result = await Dispatcher.UIThread.InvokeAsync(async()=>await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", "Downloading repo.json", true, "The repo.json file contains info on all the mods available in Nebula, without this you will not be able to install new mods or engine builds"), DispatcherPriority.Background);
+                        var result = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", "Downloading repo.json", true, "The repo.json file contains info on all the mods available in Nebula, without this you will not be able to install new mods or engine builds"), DispatcherPriority.Background);
                         if (cancellationToken!.IsCancellationRequested)
                         {
                             throw new TaskCanceledException();
@@ -142,10 +144,10 @@ namespace Knossos.NET.Models
                     throw new TaskCanceledException();
                 }
                 var updates = await ParseRepoJson();
-                if(updates != null && updates.Any())
+                if (updates != null && updates.Any())
                 {
                     SaveSettings();
-                    if(displayUpdates)
+                    if (displayUpdates)
                     {
                         try
                         {
@@ -162,8 +164,15 @@ namespace Knossos.NET.Models
                 {
                     await LoadPrivateMods(cancellationToken);
                 }
+
+                using (var mu = new MultipartUploader("H:\\R1_Ships.7z", null, writeConsole))
+                {
+                    var result = await mu.Upload();
+                    result = result;
+                }
+                
             }
-            catch(TaskCanceledException)
+            catch (TaskCanceledException)
             {
                 if (cancellationToken != null)
                 {
@@ -171,6 +180,11 @@ namespace Knossos.NET.Models
                     cancellationToken = null;
                 }
             }
+        }
+
+        public static void writeConsole(string s)
+        {
+            Log.WriteToConsole(s);
         }
 
         private static async Task LoadPrivateMods(CancellationTokenSource? cancellationToken)
@@ -239,7 +253,7 @@ namespace Knossos.NET.Models
                         }
                     }
                 }
-            }catch(Exception ex)
+            } catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Nebula.LoadPrivateMods()", ex);
             }
@@ -276,7 +290,7 @@ namespace Knossos.NET.Models
                     mod.isNewMod = true;
                     return true;
                 }
-            }catch(Exception ex)
+            } catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Nebula.IsModUpdate()", ex);
             }
@@ -308,7 +322,7 @@ namespace Knossos.NET.Models
                     Mod? lastMod = null;
                     await foreach (Mod? mod in mods)
                     {
-                        if(mod != null && IsModUpdate(mod))
+                        if (mod != null && IsModUpdate(mod))
                         {
                             updates.Add(mod);
                         }
@@ -328,13 +342,13 @@ namespace Knossos.NET.Models
                                     await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod)), DispatcherPriority.Background);
                                 }
                             }
-                            if (mod.type == ModType.tc || mod.type == ModType.mod && ( listFS2Override || ( mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound) ) )
+                            if (mod.type == ModType.tc || mod.type == ModType.mod && (listFS2Override || (mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound)))
                             {
                                 //This is already installed?
                                 var isInstalled = Knossos.GetInstalledModList(mod.id);
                                 if (isInstalled == null || isInstalled.Count() == 0)
                                 {
-                                    if(lastMod == null || lastMod.id == mod.id)
+                                    if (lastMod == null || lastMod.id == mod.id)
                                     {
                                         lastMod = mod;
                                     }
@@ -346,24 +360,24 @@ namespace Knossos.NET.Models
                                             lastMod = mod;
                                         }
                                     }
-                                    
+
                                 }
                                 else
                                 {
                                     bool update = true;
-                                    foreach(var intMod in isInstalled)
+                                    foreach (var intMod in isInstalled)
                                     {
                                         int result = SemanticVersion.Compare(intMod.version, mod.version);
                                         if (result >= 0)
                                         {
                                             update = false;
-                                            if(result == 0)
+                                            if (result == 0)
                                             {
                                                 intMod.inNebula = true;
                                             }
                                         }
                                     }
-                                    if(update)
+                                    if (update)
                                     {
                                         MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id);
                                     }
@@ -373,7 +387,7 @@ namespace Knossos.NET.Models
                     }
                     fileStream.Close();
                     repoLoaded = true;
-                    if(cancellationToken != null)
+                    if (cancellationToken != null)
                     {
                         cancellationToken.Dispose();
                         cancellationToken = null;
@@ -381,7 +395,7 @@ namespace Knossos.NET.Models
                     return updates;
                 }
             }
-            catch(TaskCanceledException)
+            catch (TaskCanceledException)
             {
                 if (cancellationToken != null)
                 {
@@ -389,7 +403,7 @@ namespace Knossos.NET.Models
                     cancellationToken = null;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Nebula.ParseRepoJson()", ex);
                 if (cancellationToken != null)
@@ -403,7 +417,7 @@ namespace Knossos.NET.Models
 
         public static void CancelOperations()
         {
-            if(cancellationToken != null)
+            if (cancellationToken != null)
             {
                 cancellationToken.Cancel();
             }
@@ -411,7 +425,7 @@ namespace Knossos.NET.Models
 
         public static async Task<Mod?> GetModData(string id, string version)
         {
-            if(privateMods != null && privateMods.Any())
+            if (privateMods != null && privateMods.Any())
             {
                 foreach (Mod mod in privateMods)
                 {
@@ -458,12 +472,12 @@ namespace Knossos.NET.Models
         {
             //Use the mod list used for newer versions
             var exist = settings.NewerModsVersions.FirstOrDefault(x => x.Id.ToLower() == id.ToLower());
-            if ( exist != null )
+            if (exist != null)
             {
                 return true;
             }
             //If we are logged in check using the api
-            if( userIsLoggedIn )
+            if (userIsLoggedIn)
             {
                 return !await CheckID(id);
             }
@@ -512,7 +526,7 @@ namespace Knossos.NET.Models
                 }
                 fileStream.Close();
                 return modList;
-                
+
             }
         }
 
@@ -520,7 +534,7 @@ namespace Knossos.NET.Models
         {
             try
             {
-                if(!File.Exists(filename))
+                if (!File.Exists(filename))
                 {
                     return;
                 }
@@ -554,10 +568,10 @@ namespace Knossos.NET.Models
                     var result = await client.GetAsync(repoUrl, HttpCompletionOption.ResponseHeadersRead);
                     newEtag = result.Headers?.ETag?.ToString().Replace("\"", "");
                 }
-                Log.Add(Log.LogSeverity.Information, "Nebula.GetRepoEtag()", "repo.json etag: "+ newEtag);
+                Log.Add(Log.LogSeverity.Information, "Nebula.GetRepoEtag()", "repo.json etag: " + newEtag);
                 return newEtag;
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Nebula.GetRepoEtag()", ex);
                 return null;
@@ -611,7 +625,7 @@ namespace Knossos.NET.Models
             public ModMember[] members { get; set; }
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-            public object[] finished_parts { get; set; }
+            public int[] finished_parts { get; set; }
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public bool done { get; set; }
@@ -657,6 +671,12 @@ namespace Knossos.NET.Models
                                 if (response.IsSuccessStatusCode)
                                 {
                                     var jsonReply = await response.Content.ReadAsStringAsync();
+                                    if (jsonReply == "OK") // multiupload/part hack
+                                    {
+                                        var reply = new ApiReply();
+                                        reply.result = true;
+                                        return reply;
+                                    }
                                     if (jsonReply != null)
                                     {
                                         var reply = JsonSerializer.Deserialize<ApiReply>(jsonReply);
@@ -717,7 +737,7 @@ namespace Knossos.NET.Models
                     return true;
                 }
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Nebula.UploadLog", ex);
             }
@@ -752,17 +772,17 @@ namespace Knossos.NET.Models
         {
             try
             {
-                if(apiUserToken != null)
+                if (apiUserToken != null)
                 {
                     //Already logged in
                     return true;
                 }
-                if(user == null)
+                if (user == null)
                     user = settings.user;
                 if (password == null && settings.pass != null)
                     password = SysInfo.DIYStringDecryption(settings.pass);
 
-                if(string.IsNullOrEmpty(user) || string.IsNullOrEmpty(password))
+                if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(password))
                 {
                     Log.Add(Log.LogSeverity.Warning, "Nebula.Login", "User or Password was null or empty.");
                     return false;
@@ -817,14 +837,14 @@ namespace Knossos.NET.Models
                 var reply = await ApiCall("register", data);
                 if (reply.HasValue)
                 {
-                    if( reply.Value.result )
+                    if (reply.Value.result)
                     {
                         Log.Add(Log.LogSeverity.Information, "Nebula.Register", "Registered new user to nebula.");
                         return "ok";
                     }
                     else
                     {
-                        Log.Add(Log.LogSeverity.Information, "Nebula.Register", "Error registering new user to nebula. Reason: "+ reply.Value.reason);
+                        Log.Add(Log.LogSeverity.Information, "Nebula.Register", "Error registering new user to nebula. Reason: " + reply.Value.reason);
                         return reply.Value.reason;
                     }
                 }
@@ -849,7 +869,7 @@ namespace Knossos.NET.Models
                 {
                     if (reply.Value.result)
                     {
-                        Log.Add(Log.LogSeverity.Information, "Nebula.Reset", "Requested password reset to nebula for username: "+user);
+                        Log.Add(Log.LogSeverity.Information, "Nebula.Reset", "Requested password reset to nebula for username: " + user);
                         return "ok";
                     }
                     else
@@ -897,7 +917,7 @@ namespace Knossos.NET.Models
                 var reply = await ApiCall("mod/check_id", data, true);
                 if (reply.HasValue)
                 {
-                    Log.Add(Log.LogSeverity.Information, "Nebula.CheckID", "Check Mod ID:" + id +" is avalible in Nebula: " + reply.Value.result);
+                    Log.Add(Log.LogSeverity.Information, "Nebula.CheckID", "Check Mod ID:" + id + " is avalible in Nebula: " + reply.Value.result);
                     return reply.Value.result;
                 }
                 else
@@ -988,7 +1008,7 @@ namespace Knossos.NET.Models
                 var reply = await ApiCall("mod/list_private", null, true, 30, ApiMethod.GET);
                 if (reply.Value.mods != null && reply.Value.mods.Any())
                 {
-                    foreach(Mod mod in reply.Value.mods)
+                    foreach (Mod mod in reply.Value.mods)
                     {
                         Log.Add(Log.LogSeverity.Information, "Nebula.GetPrivateMods", "Private mod in Nebula with access: " + mod);
                     }
@@ -1026,12 +1046,12 @@ namespace Knossos.NET.Models
                 {
                     if (reply.Value.result)
                     {
-                        if(reply.Value.members != null)
+                        if (reply.Value.members != null)
                         {
                             var members = string.Empty;
                             foreach (var item in reply.Value.members)
                             {
-                                members += item.user + "("+item.role.ToString()+") ";
+                                members += item.user + "(" + item.role.ToString() + ") ";
                             }
                             Log.Add(Log.LogSeverity.Information, "Nebula.GetTeamMembers", "Mod id: " + modid + " members: " + members);
                         }
@@ -1076,7 +1096,7 @@ namespace Knossos.NET.Models
                 {
                     if (reply.Value.result)
                     {
-                        Log.Add(Log.LogSeverity.Information, "Nebula.UpdateTeamMembers", "Updated mod members for mod: " + modid + " New Members: "+ newMembers);
+                        Log.Add(Log.LogSeverity.Information, "Nebula.UpdateTeamMembers", "Updated mod members for mod: " + modid + " New Members: " + newMembers);
                         return "ok";
                     }
                     else
@@ -1112,7 +1132,7 @@ namespace Knossos.NET.Models
                     { new StringContent(mod.id), "mid" },
                     { new StringContent(mod.version), "version" }
                 };
-               
+
                 var reply = await ApiCall("mod/release/delete", data, true);
                 if (reply.HasValue)
                 {
@@ -1151,7 +1171,7 @@ namespace Knossos.NET.Models
         {
             try
             {
-                if(checksum == null && contentChecksum == null)
+                if (checksum == null && contentChecksum == null)
                     throw new ArgumentNullException(nameof(checksum) + " " + nameof(contentChecksum));
 
                 var data = new MultipartFormDataContent();
@@ -1207,7 +1227,7 @@ namespace Knossos.NET.Models
                         checksumString = BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty).ToLower();
                     }
 
-                    if(await IsFileUploaded(checksumString))
+                    if (await IsFileUploaded(checksumString))
                     {
                         //Already uploaded
                         return true;
@@ -1229,7 +1249,7 @@ namespace Knossos.NET.Models
                         var reply = await ApiCall("upload/file", data, true);
                         if (reply.HasValue)
                         {
-                            if(reply.Value.result)
+                            if (reply.Value.result)
                             {
                                 Log.Add(Log.LogSeverity.Information, "Nebula.UploadImage", "File: " + path + " uploaded to Nebula with checksum: " + checksumString);
                             }
@@ -1252,6 +1272,388 @@ namespace Knossos.NET.Models
             }
             return false;
         }
+
+        /* Multipart Uploader */
+        #region MultiPartUploader
+        public class MultipartUploader : IDisposable
+        {
+            private bool disposedValue;
+            private static readonly int maxUploadParallelism = 3;
+            private static readonly int maxUploadRetries = 3;
+            private static readonly long partMaxSize = 10485760;
+            private List<FilePart> fileParts = new List<FilePart>();
+            private CancellationTokenSource cancellationTokenSource;
+            private FileStream fs;
+            private Action<string>? progressCallback;
+            private string? fileChecksum;
+            private Queue<object> readQueue = new Queue<object>();
+            private long fileLenght = 0;
+            private bool completed = false;
+            private bool verified = false;
+
+            public MultipartUploader(string filePath, CancellationTokenSource? cancellationTokenSource, Action<string>? progressCallback)
+            {
+                this.progressCallback = progressCallback;
+                if (cancellationTokenSource != null)
+                {
+                    this.cancellationTokenSource = cancellationTokenSource;
+                }
+                else
+                {
+                    this.cancellationTokenSource = new CancellationTokenSource();
+                }
+                fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                fs.Seek(0, SeekOrigin.Begin);
+                fileLenght = fs.Length;
+                var partIdx = 0;
+                while(partIdx * partMaxSize < fs.Length)
+                {
+                    var partLengh = fs.Length - ( partIdx * partMaxSize ) < partMaxSize ? fs.Length - (partIdx * partMaxSize) : partMaxSize;
+                    fileParts.Add(new FilePart(this, partIdx, partIdx * partMaxSize, partLengh));
+                    partIdx++;
+                }
+            }
+
+            public async Task<bool> Upload()
+            {
+                if (cancellationTokenSource.IsCancellationRequested)
+                    throw new TaskCanceledException();
+
+                if (progressCallback != null)
+                    progressCallback.Invoke("Starting Checkup...");
+
+                var start = await Start();
+
+                if(!start)
+                {
+                    if(progressCallback != null)
+                        progressCallback.Invoke("Error while getting starting response.");
+                    return false;
+                }
+                
+                //Upload was completed previously?
+                if(completed)
+                {
+                    if (progressCallback != null)
+                        progressCallback.Invoke("Already uploaded.");
+                    return true;
+                }
+
+                await Parallel.ForEachAsync(fileParts, new ParallelOptions { MaxDegreeOfParallelism = maxUploadParallelism }, async (part, token) =>
+                {
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+                    if (progressCallback != null)
+                        progressCallback.Invoke("Uploading part id: " + part.GetID());
+                    var partCompleted = false;
+                    var attempt = 1;
+                    do
+                    {
+                        var result = await part.Upload();
+                        if(result)
+                        {
+                            if (progressCallback != null)
+                                progressCallback.Invoke("Verifying part id: " + part.GetID());
+                            partCompleted = await part.Verify();
+                        }
+                    } 
+                    while ( partCompleted != true && attempt++ <= maxUploadRetries);
+
+                    if (partCompleted)
+                    {
+                        if (progressCallback != null)
+                            progressCallback.Invoke("Part uploaded. ID: " + part.GetID());
+                    }
+                    else
+                    {
+                        cancellationTokenSource.Cancel();
+                    }
+                });
+
+                completed = true;
+
+                if (progressCallback != null)
+                    progressCallback.Invoke("Verifying Upload...");
+
+                if (cancellationTokenSource.IsCancellationRequested)
+                    throw new TaskCanceledException();
+
+                verified = await Finish();
+
+                if (progressCallback != null)
+                    progressCallback.Invoke("Verify: " + verified);
+
+                return verified;
+            }
+
+            private async Task<bool> Finish()
+            {
+                var data = new MultipartFormDataContent()
+                {
+                    { new StringContent(fileChecksum!), "id" },
+                    { new StringContent(fileChecksum!), "checksum" },
+                    { new StringContent("None"), "content_checksum" },
+                    { new StringContent("None"), "vp_checksum" }
+                };
+
+                var reply = await ApiCall("multiupload/finish", data, true);
+                if (reply.HasValue)
+                {
+                    if (!reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "MultipartUploader.Finish", "Unable to multi part upload process to Nebula. Reason: " + reply.Value.reason);
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Information, "MultipartUploader.Finish", "Multiupload: File uploaded to Nebula! " + fs.Name);
+                    }
+                    completed = reply.Value.result;
+                    return reply.Value.result;
+                }
+                return false;
+            }
+
+            private async Task<bool> Start()
+            {
+                await GetChecksum();
+                var data = new MultipartFormDataContent()
+                {
+                    { new StringContent(fileChecksum!), "id" },
+                    { new StringContent(fileLenght.ToString()), "size" },
+                    { new StringContent(fileParts.Count().ToString()), "parts" }
+                };
+
+                var reply = await ApiCall("multiupload/start", data, true);
+                if (reply.HasValue)
+                {
+                    if (!reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "MultipartUploader.Start", "Unable to multi part upload process to Nebula. Reason: " + reply.Value.reason);
+                    }
+                    completed = reply.Value.done;
+                    if(!completed && reply.Value.finished_parts != null)
+                    {
+                        foreach(var finished in reply.Value.finished_parts)
+                        {
+                            foreach (var part in fileParts.ToList())
+                            {
+                                if(part.GetID() == finished)
+                                {
+                                    fileParts.Remove(part);
+                                    Log.Add(Log.LogSeverity.Information, "MultipartUploader.Start", "Removing part id " + part.GetID() + " because it was already uploaded.");
+                                }
+                            }
+                        }
+                    }
+                    return reply.Value.result;
+                }
+                return false;
+            }
+
+            internal async Task<byte[]> ReadBytes(long offset, long length)
+            {
+                var queueObject = new object();
+                readQueue.Enqueue(queueObject);
+                while(readQueue.Peek() != queueObject)
+                {
+                    await Task.Delay(100);
+                }
+                fs.Seek(offset, SeekOrigin.Begin);
+                var buffer = new byte[length];
+                var numberReadBytes = await fs.ReadAsync(buffer, 0, buffer.Length);
+                readQueue.Dequeue();
+                if (numberReadBytes != length)
+                    throw new Exception(" We wanted to read " + length + " bytes, but we read " + buffer.Length + " bytes.");
+                return buffer;
+            }
+
+            internal async Task<string?> GetChecksum()
+            {
+                if(fileChecksum != null)
+                {
+                    return fileChecksum;
+                }
+                else
+                {
+                    var queueObject = new object();
+                    readQueue.Enqueue(queueObject);
+                    while (readQueue.Peek() != queueObject)
+                    {
+                        await Task.Delay(100);
+                    }
+                    using (SHA256 sha256 = SHA256.Create())
+                    {
+                        fs.Seek(0, SeekOrigin.Begin);
+                        fileChecksum = BitConverter.ToString(await sha256.ComputeHashAsync(fs)).Replace("-", String.Empty).ToLower();
+                        readQueue.Dequeue();
+                        return fileChecksum;
+                    }
+                }
+            }
+
+            public void Dispose()
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!disposedValue)
+                {
+                    if (disposing)
+                    {
+                        fs.Close();
+                        fs.Dispose();
+                    }
+
+                    disposedValue = true;
+                }
+            }
+        }
+
+        private class FilePart
+        {
+            private MultipartUploader uploader;
+            private string? fileID;
+            private byte[]? partBytes;
+            private string? partChecksum;
+            private long fileOffset;
+            private long partLength;
+            private int partIndex = 0;
+            private bool verified = false;
+            private bool completed = false;
+
+            public FilePart(MultipartUploader uploader, int partID, long offset, long partLength)
+            {
+                this.partIndex = partID;
+                this.uploader = uploader;
+                this.partLength = partLength;
+                fileOffset = offset;
+            }
+
+            private async Task ReadData()
+            {
+                if (partBytes == null)
+                {
+                    partBytes = await uploader.ReadBytes(fileOffset, partLength);
+                    if(partBytes.Length != partLength)
+                        throw new Exception("Expected to read " + partLength + " bytes, but we read " + partBytes.Length + " instead.");
+                }
+            }
+
+            public async Task<bool> Upload()
+            {
+                completed = false;
+                if(fileID == null)
+                {
+                    fileID = await uploader.GetChecksum();
+                }
+
+                if (fileID != null)
+                {
+                    await ReadData();
+
+                    if (partBytes != null)
+                    {
+                        var data = new MultipartFormDataContent()
+                        {
+                            { new StringContent(fileID), "id" },
+                            { new StringContent(partIndex.ToString()), "part" },
+                            { new ByteArrayContent(partBytes, 0, partBytes.Length), "file", "upload" }
+                        };
+
+                        var reply = await ApiCall("multiupload/part", data, true);
+                        if (reply.HasValue)
+                        {
+                            if (!reply.Value.result)
+                            {
+                                Log.Add(Log.LogSeverity.Error, "FilePart.Upload", "Unable to upload file part to Nebula. Reason: " + reply.Value.reason);
+                            }
+                            completed = reply.Value.result;
+                            return reply.Value.result;
+                        }
+                    }
+                }
+                Log.Add(Log.LogSeverity.Error, "FilePart.Upload", "Unable upload file part.");
+                return false;
+            }
+
+            public int GetID()
+            {
+                return partIndex;
+            }
+
+            public async Task<bool> Verify()
+            {
+                if (!completed)
+                    return false;
+                if (fileID == null)
+                    fileID = await uploader.GetChecksum();
+
+                await GetChecksum();
+                if (fileID != null && partChecksum != null)
+                {
+                    var data = new MultipartFormDataContent()
+                    {
+                        { new StringContent(fileID), "id" },
+                        { new StringContent(partIndex.ToString()), "part" },
+                        { new StringContent(partChecksum), "checksum" },
+                    };
+
+                    var reply = await ApiCall("multiupload/verify_part", data, true);
+                    if (reply.HasValue)
+                    {
+                        if (!reply.Value.result)
+                        {
+                            Log.Add(Log.LogSeverity.Error, "FilePart.Verify", "Unable to verify file part. Reason: " + reply.Value.reason);
+                        }
+                        verified = reply.Value.result;
+                        return reply.Value.result;
+                    }
+                }
+                Log.Add(Log.LogSeverity.Error, "FilePart.Verify", "Unable to verify file part.");
+                return false;
+            }
+
+            public async Task<string> GetChecksum()
+            {
+                if(partChecksum == null)
+                {
+                    if(partBytes == null)
+                    {
+                        await ReadData();
+                    }
+                }
+                else
+                {
+                    return partChecksum;
+                }
+                if (partBytes != null)
+                {
+                    using (SHA256 sha256 = SHA256.Create())
+                    {
+                        partChecksum = BitConverter.ToString(sha256.ComputeHash(partBytes)).Replace("-", String.Empty).ToLower();
+                        return partChecksum;
+                    }
+                }
+                else
+                {
+                    throw new Exception("The byte array was null while attemping to generate a sha256 hash.");
+                }
+            }
+
+            public bool IsCompleted()
+            {
+                return completed;
+            }
+
+            public bool IsVerified()
+            { 
+                return verified; 
+            }
+        }
+        #endregion
         #endregion
     }
 }
