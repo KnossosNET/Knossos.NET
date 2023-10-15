@@ -128,6 +128,22 @@ namespace Knossos.NET.Models
         }
 
         /*
+            Clear all the data that is not needed for normal operation
+            (so everything not needed to play or view details/settings)
+        */
+        public void ClearUnusedData()
+        {
+            notes = null;
+            foreach (ModPackage pkg in packages)
+            {
+                pkg.notes = null;
+                pkg.filelist = null;
+                pkg.files = null;
+                pkg.checkNotes = null;
+            }
+        }
+
+        /*
             Returns of List of <ModDependency> with unsastified dependencies.
             The package list will only contain the missing packages if a valid
             semantic version is found, but it is missing packages.

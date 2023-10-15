@@ -1305,6 +1305,7 @@ namespace Knossos.NET.ViewModels
                     if (!reinstall.Any())
                     {
                         Info = "PASSED";
+                        mod.ClearUnusedData();
                     }
                     else
                     {
@@ -1347,6 +1348,7 @@ namespace Knossos.NET.ViewModels
                 }
                 await Task.Delay(2000); //give time for child tasks to cancel first
                 Info = "Task Cancelled";
+                mod.ClearUnusedData();
                 //Only dispose the token if it was created locally
                 if (cancelSource == null)
                 {
@@ -1375,6 +1377,7 @@ namespace Knossos.NET.ViewModels
 
                 await Task.Delay(2000); //give time for child tasks to cancel first
                 Info = "Task Failed";
+                mod.ClearUnusedData();
                 //Only dispose the token if it was created locally
                 if (cancelSource == null)
                 {
@@ -1712,6 +1715,7 @@ namespace Knossos.NET.ViewModels
                             installed.packages.AddRange(mod.packages);
                         }
                         installed.SaveJson();
+                        mod.ClearUnusedData();
                     }
 
                     //We have to compress?
