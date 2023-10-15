@@ -163,14 +163,7 @@ namespace Knossos.NET.Models
                 if (userIsLoggedIn)
                 {
                     await LoadPrivateMods(cancellationToken);
-                }
-
-                using (var mu = new MultipartUploader("H:\\R1_Ships.7z", null, writeConsole))
-                {
-                    var result = await mu.Upload();
-                    result = result;
-                }
-                
+                } 
             }
             catch (TaskCanceledException)
             {
@@ -180,11 +173,6 @@ namespace Knossos.NET.Models
                     cancellationToken = null;
                 }
             }
-        }
-
-        public static void writeConsole(string s)
-        {
-            Log.WriteToConsole(s);
         }
 
         private static async Task LoadPrivateMods(CancellationTokenSource? cancellationToken)
