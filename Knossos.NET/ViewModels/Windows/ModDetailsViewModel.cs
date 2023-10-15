@@ -175,13 +175,17 @@ namespace Knossos.NET.ViewModels
             return true;
         }
 
-        private void LoadVersion(int index)
+        private async void LoadVersion(int index)
         {
             try
             {
                 Name = modVersions[index].title;
                 IsLocalMod = modVersions[index].modSource == ModSource.local? true : false;
                 LastUpdated = modVersions[index].lastUpdate;
+                if(!IsLocalMod && !modVersions[index].installed)
+                {
+                    await modVersions[index].LoadFulLNebulaData();
+                }
                 if (modVersions[index].description != null)
                 {
                     var html = BBCode.ConvertToHtml(modVersions[index].description!, BBCode.BasicRules);
