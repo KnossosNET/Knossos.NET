@@ -102,6 +102,10 @@ namespace Knossos.NET.ViewModels
             DataLoaded = false;
             Compress = false;
             List <Mod> allMods;
+            if(SelectedMod != null)
+            {
+                await SelectedMod.LoadFulLNebulaData();
+            }
             if(SelectedMod != null && !SelectedMod.GetMissingDependenciesList().Any())
             {
                 allMods = ModVersions.ToList();
@@ -172,6 +176,7 @@ namespace Knossos.NET.ViewModels
                             }
                         }
                     }
+                    await modDep.LoadFulLNebulaData();
                     await ProcessMod(modDep, allMods);
                 }
             }

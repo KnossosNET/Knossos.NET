@@ -3,6 +3,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using BBcodes;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
@@ -105,6 +106,23 @@ namespace Knossos.NET.ViewModels
         /* Only used in preview */
         public ModDetailsViewModel()
         {
+        }
+
+        public ModDetailsViewModel(Mod modJson)
+        {
+            this.modVersions = new List<Mod>() { modJson };
+            this.modCard = null;
+            ItemSelectedIndex = 0;
+            LoadVersion(0);
+            devMode = modJson.devMode;
+            if (Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts)
+            {
+                //PlayDescription(200);
+            }
+            else
+            {
+                TtsAvalible = false;
+            }
         }
 
         public ModDetailsViewModel(List<Mod> modVersions, int selectedIndex, ModCardViewModel modCard)
