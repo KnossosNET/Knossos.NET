@@ -1138,6 +1138,120 @@ namespace Knossos.NET.Models
             }
             return null;
         }
+
+        /// <summary>
+        /// Checks if a file is already uploaded to Nebula
+        /// Checksum or contentChecksum must be provided
+        /// TODO: Find out the difference
+        /// </summary>
+        /// <param name="checksum"></param>
+        /// <param name="contentChecksum"></param>
+        /// <returns>true if it exist, false otherwise</returns>
+        public static async Task<bool> IsFileUploaded(string? checksum = null, string? contentChecksum = null)
+        {
+            try
+            {
+                if(checksum == null && contentChecksum == null)
+                    throw new ArgumentNullException(nameof(checksum) + " " + nameof(contentChecksum));
+
+                var data = new MultipartFormDataContent();
+                if (checksum != null)
+                {
+                    data.Add(new StringContent(checksum), "checksum");
+                }
+                else
+                {
+                    data.Add(new StringContent(contentChecksum!), "content_checksum");
+                }
+
+                var reply = await ApiCall("upload/check", data, true);
+                if (reply.HasValue)
+                {
+                    Log.Add(Log.LogSeverity.Information, "Nebula.IsFileUploaded", "Is file: " + checksum + contentChecksum + " uploaded? " + reply.Value.result);
+                    return reply.Value.result;
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.IsFileUploaded", "Unable to check if a file is uploaded");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.IsFileUploaded", ex);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Uploads an image file to Nebula
+        /// It also checks if the image is already uploaded
+        /// 10MB max limit
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>true if the operation was successfull, false otherwise</returns>
+        public static async Task<bool> UploadImage(string path)
+        {
+            try
+            {
+                if (!File.Exists(path))
+                    throw new Exception("File " + path + " dosent exist.");
+
+                using (FileStream? file = new FileStream(path, FileMode.Open, FileAccess.Read))
+                {
+                    if (file.Length > 10485760)
+                        throw new Exception("File " + path + " is over the 10MB limit.");
+
+                    var checksumString = string.Empty;
+                    using (SHA256 checksum = SHA256.Create())
+                    {
+                        checksumString = BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty).ToLower();
+                    }
+
+                    if(await IsFileUploaded(checksumString))
+                    {
+                        //Already uploaded
+                        return true;
+                    }
+
+                    file.Seek(0, SeekOrigin.Begin);
+
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        file.CopyTo(ms);
+                        var imgBytes = ms.ToArray();
+
+                        var data = new MultipartFormDataContent()
+                        {
+                            { new StringContent(checksumString), "checksum" },
+                            { new ByteArrayContent(imgBytes, 0, imgBytes.Length), "file", "upload" }
+                        };
+
+                        var reply = await ApiCall("upload/file", data, true);
+                        if (reply.HasValue)
+                        {
+                            if(reply.Value.result)
+                            {
+                                Log.Add(Log.LogSeverity.Information, "Nebula.UploadImage", "File: " + path + " uploaded to Nebula with checksum: " + checksumString);
+                            }
+                            else
+                            {
+                                Log.Add(Log.LogSeverity.Error, "Nebula.UploadImage", "Unable to upload File: " + path + " to Nebula. Reason: " + reply.Value.reason);
+                            }
+                            return reply.Value.result;
+                        }
+                        else
+                        {
+                            Log.Add(Log.LogSeverity.Error, "Nebula.UploadImage", "Unable upload image file: " + path);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.UploadImage", ex);
+            }
+            return false;
+        }
         #endregion
     }
 }

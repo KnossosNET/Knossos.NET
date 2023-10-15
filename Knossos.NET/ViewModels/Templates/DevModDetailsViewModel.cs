@@ -203,7 +203,7 @@ namespace Knossos.NET.ViewModels
                         var filename = string.Empty;
                         using (SHA256 checksum = SHA256.Create())
                         {
-                            filename = BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty);
+                            filename = BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty).ToLower();
                         }
                         //Copy to new location
                         Directory.CreateDirectory(Path.Combine(editor.ActiveVersion.fullPath, "kn_images"));
@@ -258,7 +258,7 @@ namespace Knossos.NET.ViewModels
                         var filename = string.Empty;
                         using (SHA256 checksum = SHA256.Create())
                         {
-                            filename = BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty);
+                            filename = BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty).ToLower();
                         }
                         //Copy to new location
                         Directory.CreateDirectory(Path.Combine(editor.ActiveVersion.fullPath, "kn_images"));
@@ -382,7 +382,7 @@ namespace Knossos.NET.ViewModels
                         var filename = string.Empty;
                         using (SHA256 checksum = SHA256.Create())
                         {
-                            filename = BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty);
+                            filename = BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty).ToLower();
                         }
                         //Copy to new location
                         Directory.CreateDirectory(Path.Combine(editor.ActiveVersion.fullPath, "kn_images"));
