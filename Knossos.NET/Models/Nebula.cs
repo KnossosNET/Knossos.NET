@@ -238,17 +238,14 @@ namespace Knossos.NET.Models
                                 var isInstalled = Knossos.GetInstalledModList(mod.id);
                                 if (isInstalled == null || isInstalled.Count() == 0)
                                 {
-                                    if(lastMod == null || lastMod.id == mod.id)
+                                    if(lastMod != null && lastMod.id == mod.id)
                                     {
                                         lastMod = mod;
                                     }
                                     else
                                     {
-                                        if (lastMod.id != mod.id)
-                                        {
-                                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddNebulaMod(lastMod), DispatcherPriority.Background);
-                                            lastMod = mod;
-                                        }
+                                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddNebulaMod(mod), DispatcherPriority.Background);
+                                        lastMod = mod;
                                     }
                                     
                                 }
