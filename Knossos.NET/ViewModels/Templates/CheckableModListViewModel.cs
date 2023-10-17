@@ -34,7 +34,7 @@ namespace Knossos.NET.ViewModels
         {
             modJson.ClearUnusedData();
             mod = modJson;
-            ModName = modJson.title;
+            ModName = modJson.ToString();
             ModChecked = true;
             ModCheckEnabled = true;
         }
