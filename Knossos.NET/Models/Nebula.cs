@@ -1310,7 +1310,8 @@ namespace Knossos.NET.Models
         {
             try
             {
-                var reply = await ApiCall("mod/create", new StringContent(JsonSerializer.Serialize(mod), Encoding.UTF8, "application/json"), true);
+                var json = JsonSerializer.Serialize(mod);
+                var reply = await ApiCall("mod/create", new StringContent(json, Encoding.UTF8, "application/json"), true);
                 if (reply.HasValue)
                 {
                     if (reply.Value.result)
@@ -1337,6 +1338,42 @@ namespace Knossos.NET.Models
         }
 
         /// <summary>
+        /// This updates mod tile image and title
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <returns>"ok" if successfull</returns>
+        public static async Task<string?> UpdateMod(Mod mod)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(mod);
+                var reply = await ApiCall("mod/update", new StringContent(json, Encoding.UTF8, "application/json"), true);
+                if (reply.HasValue)
+                {
+                    if (reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.UpdateMod", "UpdateMod: " + mod + " OK!");
+                        return "ok";
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.UpdateMod", "UpdateMod: " + mod + " error. Reason: " + reply.Value.reason);
+                        return reply.Value.reason;
+                    }
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.UpdateMod", "Unable to update a mod. ");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.UpdateMod", ex);
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Releases mod to Nebula (this is also a metadata update)
         /// </summary>
         /// <param name="mod"></param>
@@ -1345,7 +1382,8 @@ namespace Knossos.NET.Models
         {
             try
             {
-                var reply = await ApiCall("mod/release", new StringContent(JsonSerializer.Serialize(mod), Encoding.UTF8, "application/json"), true);
+                var json = JsonSerializer.Serialize(mod);
+                var reply = await ApiCall("mod/release", new StringContent(json, Encoding.UTF8, "application/json"), true, 300);
                 if (reply.HasValue)
                 {
                     if (reply.Value.result)

@@ -307,19 +307,24 @@ namespace Knossos.NET.ViewModels
                     var cleanMod = new Mod();
                     cleanMod.id = mod.id;
                     cleanMod.title = mod.title;
+                    cleanMod.firstRelease = mod.firstRelease;
+                    cleanMod.tile = mod.tile;
+
+                    //Update title and tile image
+                    await Nebula.UpdateMod(cleanMod);
+
                     cleanMod.type = mod.type;
                     cleanMod.parent = mod.parent;
                     cleanMod.cmdline = mod.cmdline == null ? "" : mod.cmdline;
                     cleanMod.description = mod.description;
                     cleanMod.version = mod.version;
-                    cleanMod.firstRelease = mod.firstRelease;
                     cleanMod.lastUpdate = mod.lastUpdate;
                     cleanMod.isPrivate = mod.isPrivate;
                     cleanMod.videos = mod.videos == null ? new string[0] : mod.videos;
                     cleanMod.packages = mod.packages;
                     cleanMod.stability = mod.stability;
                     cleanMod.releaseThread = mod.releaseThread;
-                    cleanMod.tile = mod.tile;
+                    cleanMod.modFlag = mod.modFlag;
                     cleanMod.banner = mod.banner == null ? "" : mod.banner;
                     cleanMod.screenshots = mod.screenshots == null ? new string[0] : mod.screenshots;
                     cleanMod.attachments = new string[0];
@@ -525,6 +530,7 @@ namespace Knossos.NET.ViewModels
                     var cleanMod = new Mod();
                     cleanMod.id = mod.id;
                     cleanMod.type = mod.type;
+                    cleanMod.title = mod.title;
                     cleanMod.parent = mod.parent;
                     cleanMod.isPrivate = true;
                     var result = await Nebula.CreateMod(cleanMod);
@@ -826,7 +832,7 @@ namespace Knossos.NET.ViewModels
                     {
                         throw new TaskCanceledException();
                     }
-                    modFile.urls = new string[1] { checksumZip };
+                    modFile.urls = null;
                     pkg.files = files.ToArray();
                     pkg.filelist = filelist.ToArray();
                     if(pkg.executables == null)
