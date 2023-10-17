@@ -45,6 +45,7 @@
 								<CheckBox Margin="40,0,0,0" IsEnabled="False" IsChecked="{Binding Fs2RootPack}">FS2 Root Pack</CheckBox>
 								<Button Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Background="Black" Margin="10,0,0,0">FS2 Retail Installer</Button>
 								<Button Command="{Binding QuickSetupCommand}" Background="Black" Margin="5,0,0,0">Quick Setup Guide</Button>
+								<Button Command="{Binding CleanupLibraryCommand}" Background="Black" Margin="5,0,0,0">Remove Unused Dependencies</Button>
 							</WrapPanel>
 						</Grid>
 						<!-- Sys Info -->

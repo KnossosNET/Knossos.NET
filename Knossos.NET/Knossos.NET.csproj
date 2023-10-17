@@ -18,6 +18,14 @@
     <None Remove="ViewModels\ModCardViewModel.cs~RF423e49e6.TMP" />
     <None Remove="ViewModels\Windows\ModInstallViewModel.cs~RF3e55a24c.TMP" />
     <None Remove="Views\Windows\ModDetailsView.axaml~RF2bc1dec5.TMP" />
+    <Compile Update="Views\Windows\CleanupKnossosLibraryView.axaml.cs">
+      <DependentUpon>CleanupKnossosLibraryView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Templates\CheckableModListView.axaml.cs">
+      <DependentUpon>CheckableModListView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\*" />

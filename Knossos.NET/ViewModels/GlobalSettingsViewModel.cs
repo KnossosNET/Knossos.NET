@@ -982,5 +982,16 @@ namespace Knossos.NET.ViewModels
         {
             Knossos.OpenQuickSetup();
         }
+        
+        internal async void CleanupLibraryCommand()
+        {
+            if (MainWindow.instance != null)
+            {
+                var dialog = new CleanupKnossosLibraryView();
+                dialog.DataContext = new CleanupKnossosLibraryViewModel();
+
+                await dialog.ShowDialog<CleanupKnossosLibraryView?>(MainWindow.instance);
+            }
+        }
     }
 }
