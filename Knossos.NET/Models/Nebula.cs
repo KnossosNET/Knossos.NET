@@ -20,6 +20,7 @@ using System.Drawing;
 using System.Security.Cryptography;
 using System.Runtime.InteropServices;
 using Avalonia.Controls;
+using System.Reflection;
 
 namespace Knossos.NET.Models
 {
@@ -467,7 +468,7 @@ namespace Knossos.NET.Models
             //If we are logged in check using the api
             if (userIsLoggedIn)
             {
-                return !await CheckID(id);
+                return !await CheckIDAvalible(id);
             }
             return false;
         }
@@ -626,7 +627,7 @@ namespace Knossos.NET.Models
             GET
         }
 
-        private static async Task<ApiReply?> ApiCall(string resourceUrl, MultipartFormDataContent? data, bool needsLogIn = false, int timeoutSeconds = 30, ApiMethod method = ApiMethod.POST)
+        private static async Task<ApiReply?> ApiCall(string resourceUrl, HttpContent? data, bool needsLogIn = false, int timeoutSeconds = 30, ApiMethod method = ApiMethod.POST)
         {
             try
             {
@@ -892,7 +893,7 @@ namespace Knossos.NET.Models
         /// <returns>
         /// true if MODID is avalible, false if it is already in use
         /// </returns>
-        public static async Task<bool> CheckID(string id, string title = "None")
+        public static async Task<bool> CheckIDAvalible(string id, string title = "None")
         {
             try
             {
@@ -1196,8 +1197,8 @@ namespace Knossos.NET.Models
         /// 10MB max limit
         /// </summary>
         /// <param name="path"></param>
-        /// <returns>true if the operation was successfull, false otherwise</returns>
-        public static async Task<bool> UploadImage(string path)
+        /// <returns>returns the file hash if successfull or null if failed</returns>
+        public static async Task<string?> UploadImage(string path)
         {
             try
             {
@@ -1209,19 +1210,16 @@ namespace Knossos.NET.Models
                     if (file.Length > 10485760)
                         throw new Exception("File " + path + " is over the 10MB limit.");
 
-                    var checksumString = string.Empty;
-                    using (SHA256 checksum = SHA256.Create())
-                    {
-                        checksumString = BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty).ToLower();
-                    }
+                    var checksumString = await SysInfo.GetFileHash(path);
+
+                    if (checksumString == null)
+                        return null;
 
                     if (await IsFileUploaded(checksumString))
                     {
                         //Already uploaded
-                        return true;
+                        return checksumString;
                     }
-
-                    file.Seek(0, SeekOrigin.Begin);
 
                     using (MemoryStream ms = new MemoryStream())
                     {
@@ -1240,12 +1238,12 @@ namespace Knossos.NET.Models
                             if (reply.Value.result)
                             {
                                 Log.Add(Log.LogSeverity.Information, "Nebula.UploadImage", "File: " + path + " uploaded to Nebula with checksum: " + checksumString);
+                                return checksumString;
                             }
                             else
                             {
                                 Log.Add(Log.LogSeverity.Error, "Nebula.UploadImage", "Unable to upload File: " + path + " to Nebula. Reason: " + reply.Value.reason);
                             }
-                            return reply.Value.result;
                         }
                         else
                         {
@@ -1258,17 +1256,129 @@ namespace Knossos.NET.Models
             {
                 Log.Add(Log.LogSeverity.Error, "Nebula.UploadImage", ex);
             }
-            return false;
+            return null;
+        }
+
+        /// <summary>
+        /// Does a metadata check to Nebula
+        /// attachments, screenshoots and banner must be clear
+        /// (thats is what old-knossos does)
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <returns>
+        /// "ok" if successfull, a reason if it finds a problem, and null if modid is not found(api call returns 404 in that case) or any other problem
+        /// "duplicated version" if version is already uploaded
+        /// </returns>
+        public static async Task<string?> PreflightCheck(Mod mod)
+        {
+            try
+            {
+                var reply = await ApiCall("mod/release/preflight", new StringContent(JsonSerializer.Serialize(mod), Encoding.UTF8, "application/json"), true);
+                if (reply.HasValue)
+                {
+                    if (reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.PreflightCheck", "PreflightCheck: " + mod + " OK!");
+                        return "ok";
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.PreflightCheck", "PreflightCheck: " + mod + " error. Reason: " + reply.Value.reason);
+                        return reply.Value.reason;
+                    }
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.PreflightCheck", "Unable to do a preflight check. ");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.PreflightCheck", ex);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Creates a new mod in Nebula (if mod id does not exist)
+        /// tile image hash must be included here too if set
+        /// Only id, title, type, parent, tile, first_release fields
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <returns>"ok" if successfull, a reason if it fails (maybe), null if api call fails</returns>
+        public static async Task<string?> CreateMod(Mod mod)
+        {
+            try
+            {
+                var reply = await ApiCall("mod/create", new StringContent(JsonSerializer.Serialize(mod), Encoding.UTF8, "application/json"), true);
+                if (reply.HasValue)
+                {
+                    if (reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.CreateMod", "CreateMod: " + mod + " OK!");
+                        return "ok";
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.CreateMod", "CreateMod: " + mod + " error. Reason: " + reply.Value.reason);
+                        return reply.Value.reason;
+                    }
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.CreateMod", "Unable to do create a new mod. ");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.CreateMod", ex);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Releases mod to Nebula (this is also a metadata update)
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <returns>"ok" if successfull, a reason if it fails (maybe), and null if modid is not found(api call returns 404 in that case) or any other problem</returns>
+        public static async Task<string?> ReleaseMod(Mod mod)
+        {
+            try
+            {
+                var reply = await ApiCall("mod/release", new StringContent(JsonSerializer.Serialize(mod), Encoding.UTF8, "application/json"), true);
+                if (reply.HasValue)
+                {
+                    if (reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.ReleaseMod", "ReleaseMod: " + mod + " OK!");
+                        return "ok";
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.ReleaseMod", "ReleaseMod: " + mod + " error. Reason: " + reply.Value.reason);
+                        return reply.Value.reason;
+                    }
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.ReleaseMod", "Unable to do release mod. ");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.ReleaseMod", ex);
+            }
+            return null;
         }
 
         /* Multipart Uploader */
         #region MultiPartUploader
         public class MultipartUploader : IDisposable
         {
-            private bool disposedValue;
+            private bool disposedValue = false;
             private static readonly int maxUploadParallelism = 3;
             private static readonly int maxUploadRetries = 3;
-            private static readonly long partMaxSize = 10485760;
+            private static readonly long partMaxSize = 10485760; //10MB
             private List<FilePart> fileParts = new List<FilePart>();
             private CancellationTokenSource cancellationTokenSource;
             private FileStream fs;
@@ -1304,6 +1414,9 @@ namespace Knossos.NET.Models
 
             public async Task<bool> Upload()
             {
+                if (disposedValue)
+                    throw new ObjectDisposedException(nameof(fs));
+
                 if (cancellationTokenSource.IsCancellationRequested)
                     throw new TaskCanceledException();
 
@@ -1371,6 +1484,7 @@ namespace Knossos.NET.Models
                 if (progressCallback != null)
                     progressCallback.Invoke("Verify: " + verified);
 
+                fs.Close();
                 return verified;
             }
 
@@ -1440,6 +1554,9 @@ namespace Knossos.NET.Models
 
             internal async Task<byte[]> ReadBytes(long offset, long length)
             {
+                if (disposedValue)
+                    throw new ObjectDisposedException(nameof(fs));
+
                 var queueObject = new object();
                 readQueue.Enqueue(queueObject);
                 while(readQueue.Peek() != queueObject)
@@ -1463,6 +1580,9 @@ namespace Knossos.NET.Models
                 }
                 else
                 {
+                    if (disposedValue)
+                        throw new ObjectDisposedException(nameof(fs));
+
                     var queueObject = new object();
                     readQueue.Enqueue(queueObject);
                     while (readQueue.Peek() != queueObject)
@@ -1491,7 +1611,6 @@ namespace Knossos.NET.Models
                 {
                     if (disposing)
                     {
-                        fs.Close();
                         fs.Dispose();
                     }
 

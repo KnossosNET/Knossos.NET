@@ -250,6 +250,7 @@ namespace Knossos.NET.ViewModels
                         mod.stability = "stable";
                         break;
                 }
+                mod.modFlag.Add(mod.id);
                 mod.SaveJson();
                 if(mod.type == ModType.engine)
                 {

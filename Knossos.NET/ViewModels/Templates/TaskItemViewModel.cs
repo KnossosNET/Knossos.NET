@@ -27,6 +27,98 @@ using System.Text.RegularExpressions;
 
 namespace Knossos.NET.ViewModels
 {
+    /*
+        //New Task Method Example
+        public async Task<bool> NewTaskExample(CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true; //a task can only do one thing, when a method is called this defines what this task will do, this ensures no other operation is done by mistake
+                    ProgressBarMax = 1; // 0 = no progress bar, anything else to display progress bar, you can set this at any time
+                    ProgressCurrent = 0; //if you need a progress bar you can set this at any time
+                    ShowProgressText = false; //If the progress bar must display ProgressCurrent / ProgressBarMax on top of the bar
+                    CancelButtonVisible = true; //you want the user to be able to manually cancel this task?
+                    IsTextTask = false; // Set to True if you want simple "show my text" task. This will not display the "task completed" text.
+                    IsFileDownloadTask = true; //This enables pause/resume buttons for file download on this task
+                    Name = ""; //Display name
+
+                    //We need a cancel token, if it is not provided one must be created
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested) //this task was cancelled? you may want to check this multiple times
+                        throw new TaskCanceledException();
+
+                    Info = ""; //This display Text on the TaskView, if the task has a progress bar this text is display to the right of it, otherwise to the right of "name".
+                    TextColor =  Brushes.White; //Info text color
+
+                    //If to need your task to create subtasks
+                    //Add this task to the task root (you can do it at any point, only do it once)
+                    Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this)); //important! do it from the ui thread
+
+                    //Create and add all subtask to the task list
+                    var newTask = new TaskItemViewModel();
+                    newTask.NewTaskExample(cancellationTokenSource); //pass the cancel token
+                    Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(newTask)); //important! do it from the ui thread
+
+                    IsCompleted = true; //once we completed the task this must be set to true
+                    CancelButtonVisible = false; //once we completed the task this must be set to true
+                    ProgressCurrent = ProgressBarMax; //a recomended step at the end in case your task had a progress bar
+                    return true; //on task completion return true
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                //If you need to do a task specific stuff on cancel resquest do it here
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                //If you need to do a task specific stuff do it here
+                return false;
+            }
+        }
+    */
+
     public partial class TaskItemViewModel : ViewModelBase
     {
         [ObservableProperty]
@@ -79,6 +171,889 @@ namespace Knossos.NET.ViewModels
 
         public TaskItemViewModel() 
         { 
+        }
+
+        private async Task<string> PreFlightCheck(Mod mod, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 0;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    Name = "Pre-flight Check";
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    var cleanMod = new Mod();
+                    cleanMod.id = mod.id;
+                    cleanMod.title = mod.title;
+                    cleanMod.type = mod.type;
+                    cleanMod.parent = mod.parent;
+                    cleanMod.cmdline = mod.cmdline;
+                    cleanMod.description = mod.description;
+                    cleanMod.version = mod.version;
+                    cleanMod.firstRelease = mod.firstRelease;
+                    cleanMod.lastUpdate = mod.lastUpdate;
+                    cleanMod.isPrivate = mod.isPrivate;
+                    cleanMod.videos = mod.videos;
+                    cleanMod.packages = mod.packages;
+                    cleanMod.stability = mod.stability;
+                    cleanMod.releaseThread = mod.releaseThread;
+                    cleanMod.tile = string.Empty;
+                    cleanMod.banner = string.Empty;
+                    cleanMod.screenshots = new string[0];
+                    cleanMod.attachments = new string[0];
+
+                    var result = await Nebula.PreflightCheck(cleanMod);
+                    if (result == null || ( result != "ok" && result.ToLower() != "duplicated version"))
+                    {
+                        if (result != null)
+                        {
+                            Info = "Preflight check failed. Reason: " + result;
+                        }
+                        else
+                        {
+                            Info = "Preflight check failed for unknown reasons.";
+                            throw new TaskCanceledException();
+                        }
+                    }
+                    Info = result;
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return result;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return "fail";
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                return "fail";
+            }
+        }
+
+        private async Task<string> UploadMetaData(Mod mod, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 0;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    Name = "Release Mod";
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    var cleanMod = new Mod();
+                    cleanMod.id = mod.id;
+                    cleanMod.title = mod.title;
+                    cleanMod.type = mod.type;
+                    cleanMod.parent = mod.parent;
+                    cleanMod.cmdline = mod.cmdline == null ? "" : mod.cmdline;
+                    cleanMod.description = mod.description;
+                    cleanMod.version = mod.version;
+                    cleanMod.firstRelease = mod.firstRelease;
+                    cleanMod.lastUpdate = mod.lastUpdate;
+                    cleanMod.isPrivate = mod.isPrivate;
+                    cleanMod.videos = mod.videos == null ? new string[0] : mod.videos;
+                    cleanMod.packages = mod.packages;
+                    cleanMod.stability = mod.stability;
+                    cleanMod.releaseThread = mod.releaseThread;
+                    cleanMod.tile = mod.tile;
+                    cleanMod.banner = mod.banner == null ? "" : mod.banner;
+                    cleanMod.screenshots = mod.screenshots == null ? new string[0] : mod.screenshots;
+                    cleanMod.attachments = new string[0];
+                    cleanMod.members = new List<ModMember>();
+                    cleanMod.notes = mod.notes == null ? "" : mod.notes;
+
+                    var result = await Nebula.ReleaseMod(cleanMod);
+                    if (result == null || result != "ok")
+                    {
+                        if (result != null)
+                        {
+                            Info = "Release Mod failed. Reason: " + result;
+                        }
+                        else
+                        {
+                            Info = "Release Mod failed for unknown reasons.";
+                            throw new TaskCanceledException();
+                        }
+                    }
+                    Info = result;
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return result;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return "fail";
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                return "fail";
+            }
+        }
+
+        private async Task<bool> UploadModImages(Mod mod, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 2;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    Name = "Uploading Mod Images";
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    //Screenshots
+                    if (mod.screenshots != null && mod.screenshots.Any())
+                    {
+                        ProgressBarMax += mod.screenshots.Length;
+                        var list = new List<string>();
+                        var i = 1;
+                        foreach (var sc in mod.screenshots)
+                        {
+                            Info = "Screenshot Image " + i + " / " + mod.screenshots.Length;
+                            var cks = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + sc);
+                            if (cks != null)
+                            {
+                                list.Add(cks);
+                            }
+                            ProgressCurrent++;
+                        }
+                        mod.screenshots = list.ToArray();
+                    }
+                    //Tile
+                    if (!string.IsNullOrEmpty(mod.tile))
+                    {
+                        Info = "Tile Image";
+                        mod.tile = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + mod.tile);
+                    }
+                    ProgressCurrent++;
+                    //Banner
+                    if (!string.IsNullOrEmpty(mod.tile))
+                    {
+                        Info = "Banner Image";
+                        mod.banner = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + mod.banner);
+                    }
+                    ProgressCurrent++;
+
+                    Info = "OK";
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                return false;
+            }
+        }
+
+        private async Task<bool> CreateModNebula(Mod mod, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 0; 
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false; 
+                    Name = "Creating mod on Nebula Database";
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested) 
+                        throw new TaskCanceledException();
+
+                    var cleanMod = new Mod();
+                    cleanMod.id = mod.id;
+                    cleanMod.type = mod.type;
+                    cleanMod.parent = mod.parent;
+                    cleanMod.isPrivate = true;
+                    var result = await Nebula.CreateMod(cleanMod);
+                    if (result == null || result != "ok")
+                    {
+                        if (result != null)
+                        {
+                            Info = "Create mod fail. Reason: " + result;
+                        }
+                        else
+                        {
+                            Info = "Create mod failed for unknown reasons.";
+                        }
+                        throw new TaskCanceledException();
+                    }
+                    Info = "Done";
+                    IsCompleted = true;
+                    CancelButtonVisible = false; 
+                    ProgressCurrent = ProgressBarMax; 
+                    return true; 
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                return false;
+            }
+        }
+
+        private async Task<bool> UploadModPkg(ModPackage pkg, string modFullPath, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 0;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    Name = "Uploading: "+pkg.name;
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    var zipPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + pkg.folder + ".7z";
+                    if (!File.Exists(zipPath))
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    var multi = new Nebula.MultipartUploader(zipPath, cancellationTokenSource, null);
+                    if (!await multi.Upload())
+                    { 
+                        throw new TaskCanceledException();
+                    }
+
+                    Info = "OK";
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                return false;
+            }
+        }
+
+        private async Task<bool> PrepareModPkg(ModPackage pkg, string modFullPath, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 0;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    Name = "Prepare Pkg: "+pkg.name;
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    //Create VP if needed
+                    //Create filelist
+                    //Filename, archive(7z), orig_name, checksum
+                    //Compress with 7z
+                    //Clear files.urls
+                    //Fill file.filename, file.checksum, file.dest, file.filesize
+
+                    if (!Directory.Exists(modFullPath + Path.DirectorySeparatorChar + pkg.folder))
+                    {
+                        Info = "Fail - No Dir";
+                        IsCompleted = true;
+                        CancelButtonVisible = false;
+                        ProgressCurrent = ProgressBarMax;
+                        Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.PrepareModPkg()", "Package folder: " + modFullPath + Path.DirectorySeparatorChar + pkg.folder + " does not exist.");
+                        throw new TaskCanceledException();
+                    }
+
+                    var allfiles = Directory.GetFiles(modFullPath + Path.DirectorySeparatorChar + pkg.folder, "*.*", SearchOption.AllDirectories);
+                    if (!allfiles.Any())
+                    {
+                        Info = "Fail - No Files";
+                        IsCompleted = true;
+                        CancelButtonVisible = false;
+                        ProgressCurrent = ProgressBarMax;
+                        Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.PrepareModPkg()", "Package folder: " + modFullPath + Path.DirectorySeparatorChar + pkg.folder + " is empty.");
+                        throw new TaskCanceledException();
+                    }
+
+
+                    var zipPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + pkg.folder + ".7z";
+                    if(File.Exists(zipPath))
+                    {
+                        File.Delete(zipPath);
+                    }
+
+                    var filelist = new List<ModFilelist>();
+                    var modFile = new ModFile();
+                    var files = new List<ModFile>() { modFile };
+
+                    if (pkg.isVp)
+                    {
+                        Info = "Creating VP";
+                        var vpPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps" + Path.DirectorySeparatorChar + pkg.name + ".vp";
+                        Directory.CreateDirectory(modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps");
+                        if(File.Exists(vpPath))
+                        {
+                            File.Delete(vpPath);
+                        }
+                        var vp = new VPContainer();
+                        vp.AddFolderToRoot(modFullPath + Path.DirectorySeparatorChar + pkg.folder);
+                        vp.DisableCompression();
+                        await vp.SaveAsAsync(vpPath, compressionCallback, cancellationTokenSource);
+                        Info = "Get VP Checksum";
+                        var checksumVP = await SysInfo.GetFileHash(vpPath);
+                        if( checksumVP != null )
+                        {
+                            Info = "Compressing package";
+                            var compressor = new SevenZipConsoleWrapper();
+                            if(!await compressor.CompressFile(vpPath, modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps", zipPath))
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
+                                throw new TaskCanceledException();
+                            }
+                            var fl = new ModFilelist();
+                            fl.archive = pkg.folder + ".7z";
+                            fl.filename = fl.origName = pkg.folder + ".vp";
+                            fl.checksum = new string[2] { "sha256", checksumVP };
+                            filelist.Add(fl);
+                        }
+                        else
+                        {
+                            throw new TaskCanceledException();
+                        }
+                        
+                    }
+                    else
+                    {
+                        Info = "Adding files";
+                        foreach (var file in allfiles)
+                        {
+                            var relativePath = Path.GetRelativePath(modFullPath + Path.DirectorySeparatorChar + pkg.folder, file).Replace(@"\", @"/");
+                            var checksum = await SysInfo.GetFileHash(file);
+                            if (checksum != null)
+                            {
+                                var fl = new ModFilelist();
+                                fl.archive = pkg.folder + ".7z";
+                                fl.filename = fl.origName = relativePath;
+                                fl.checksum = new string[2] { "sha256", checksum };
+                                filelist.Add(fl);
+                            }
+                            else
+                            {
+                                throw new TaskCanceledException();
+                            }
+                        }
+                        Info = "Compressing package";
+                        var compressor = new SevenZipConsoleWrapper();
+                        if (!await compressor.CompressFolder(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
+                        {
+                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
+                            throw new TaskCanceledException();
+                        }
+                    }
+
+                    Info = "Getting Hash";
+                    /*
+                     * TODO: it is unclear to me, at this moment, why this would be needed since 7z should extract with fullpath.
+                     * Using the pkg as work folder. 
+                     * FSO builds seems to use it.
+                     *
+                    */
+                    modFile.dest = "";
+                    var checksumZip = await SysInfo.GetFileHash(zipPath);
+                    if (checksumZip != null)
+                    {
+                        var fi = new FileInfo(zipPath);
+                        modFile.filesize = fi.Length;
+                        modFile.filename = pkg.folder + ".7z";
+                        modFile.checksum = new string[2] { "sha256", checksumZip };
+                    }
+                    else
+                    {
+                        throw new TaskCanceledException();
+                    }
+                    modFile.urls = new string[1] { checksumZip };
+                    pkg.files = files.ToArray();
+                    pkg.filelist = filelist.ToArray();
+                    if(pkg.executables == null)
+                    {
+                        pkg.executables = new List<ModExecutable>();
+                    }
+                    Info = "OK";
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> UploadModVersion(Mod mod, bool isNewMod, bool metaOnly, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 100;
+                    ProgressCurrent = 0; 
+                    ShowProgressText = true;
+                    CancelButtonVisible = true;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    Name = "Uploading " + mod;
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    //If we are doing only meta skip to the end
+                    if (!metaOnly)
+                    {
+                        if (isNewMod)
+                        {
+                            Info = "Create Mod";
+                            if (cancellationTokenSource.IsCancellationRequested)
+                                throw new TaskCanceledException();
+                            var create = new TaskItemViewModel();
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(create));
+                            await create.CreateModNebula(mod, cancellationTokenSource);
+                            //If fails it should trigger cancel no need to check the return
+                        }
+
+                        if (cancellationTokenSource.IsCancellationRequested)
+                            throw new TaskCanceledException();
+
+                        //At this point the mod id exist and we should have write access
+
+                        /*
+                            UPLOAD PROCESS:
+                            1) Do pre_flight API call, im guessing that if the mod version is already uploaded Nebula will report that here somehow. YES: "duplicated version"
+                            2) Upload mod tile image(check if already uploaded), get checksum and import it on modjson.
+                            3) Upload banner image and screenshoots(check if already uploaded), get checksum and import it on modjson.
+                            4) If package = vp create a vp in mod\kn_upload\vps\{ packagename}.vp(No Compression)
+                            5) 7z all packages folders and vp file and place them in kn_upload\{ packagename}.7z
+                            6) Wipe and re - generate data in package.files and filelist. "files" is for the 7z file we are uploading to nebula. "filelist" is for all files inside the package folder(folder or vp)
+                            7) Use multipartuploader to upload all packages(will auto-skip if already uploaded)
+                            8) Api Call to "mod/release" with the mod meta(full json)
+                        */
+
+                        //Preflight check
+                        Info = "PreFlight Check";
+                        var newTask = new TaskItemViewModel();
+                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(newTask));
+                        var preFlightCheck = await newTask.PreFlightCheck(mod, cancellationTokenSource);
+
+                        if (cancellationTokenSource.IsCancellationRequested)
+                            throw new TaskCanceledException();
+
+                        //At this point preflight check was valid otherwise it would trigger a cancel, only check if it is a duplicated version, if it is skip to meta
+                        if (preFlightCheck == "ok")
+                        {
+                            //We are good. Im leaving image upload for meta stage
+                            Info = "Prepare Packages";
+                            Directory.CreateDirectory(mod.fullPath + Path.DirectorySeparatorChar + "kn_upload");
+                            //Prepare packages, update data on mod
+                            await Parallel.ForEachAsync(mod.packages, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (pkg, token) =>
+                            {
+                                var newTask = new TaskItemViewModel();
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(newTask));
+                                await newTask.PrepareModPkg(pkg, mod.fullPath, cancellationTokenSource);
+                                if (cancellationTokenSource.IsCancellationRequested)
+                                    throw new TaskCanceledException();
+                            });
+
+                            Info = "Upload Packages";
+                            //Upload Packages
+                            await Parallel.ForEachAsync(mod.packages, new ParallelOptions { MaxDegreeOfParallelism = 1 }, async (pkg, token) =>
+                            {
+                                var newTask = new TaskItemViewModel();
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(newTask));
+                                await newTask.UploadModPkg(pkg, mod.fullPath, cancellationTokenSource);
+                                if (cancellationTokenSource.IsCancellationRequested)
+                                    throw new TaskCanceledException();
+                            });
+                        }
+                    }
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    //Meta Stage
+                    Info = "Upload Images";
+                    //I need to save the original data for tile, banner and screenshots in order not to override local paths
+                    var origTile = mod.tile;
+                    var origBanner = mod.banner;
+                    var origScreenshots = mod.screenshots != null ? mod.screenshots.ToArray() : null;
+
+                    var imgs = new TaskItemViewModel();
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(imgs));
+                    await imgs.UploadModImages(mod,cancellationTokenSource);
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    //Meta
+                    Info = "Upload Metadata";
+                    var meta = new TaskItemViewModel();
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(meta));
+                    await meta.UploadMetaData(mod, cancellationTokenSource);
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    //Restore paths & save
+                    mod.tile = origTile;
+                    mod.banner = origBanner;
+                    mod.screenshots = origScreenshots;
+                    mod.SaveJson();
+
+                    Info = "Upload Complete!";
+
+                    //Completed
+                    IsCompleted = true; 
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                return false;
+            }
         }
 
         public async Task<bool> CreateModVersion(Mod oldMod, string newVersion, CancellationTokenSource? cancelSource = null)

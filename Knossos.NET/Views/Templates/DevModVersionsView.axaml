@@ -43,7 +43,7 @@
 		</ListBox>
 		<Label Grid.Row="2" HorizontalAlignment="Center">Actions for Active Version</Label>
 		<WrapPanel Grid.Row="3" Margin="10" HorizontalAlignment="Center">
-			<Button Background="DarkGreen" FontWeight="Bold">Upload to Nebula</Button>
+			<Button Command="{Binding UploadMod}" Background="DarkGreen" FontWeight="Bold">Upload to Nebula</Button>
 			<Button Background="#8E3C23" Margin="20,0,0,0" FontWeight="Bold">Create playtest</Button>
 			<Button Background="DarkCyan" FontWeight="Bold" Margin="20,0,0,0">Make it private</Button>
 			<Button Background="Red" FontWeight="Bold" Margin="20,0,0,0">Delete from Nebula</Button>

@@ -36,6 +36,12 @@ namespace Knossos.NET
             return await Run(cmdline + destFile, sourceFolder);
         }
 
+        public async Task<bool> CompressFile(string filepath, string workingFolder, string destFile)
+        {
+            string cmdline = "a -t7z -m0=lzma2 -md=64M -mx=9 -ms=on -bsp1 -y ";
+            return await Run(cmdline + destFile + " " + filepath, workingFolder);
+        }
+
         public async Task<bool> VerifyFile(string file)
         {
             string cmdline = "t ";

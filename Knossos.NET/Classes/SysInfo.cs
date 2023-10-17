@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Knossos.NET.Models;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 namespace Knossos.NET
 {
@@ -266,6 +268,32 @@ namespace Knossos.NET
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Returns a complete file hash string in a format compatible with Nebula
+        /// (sha256, lowercase)
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <param name="method"></param>
+        /// <returns>hash string or null if failed</returns>
+        public static async Task<string?> GetFileHash(string fullPath)
+        {
+            try
+            {
+                using (FileStream? file = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
+                {
+                    using (SHA256 checksum = SHA256.Create())
+                    {
+                        return BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty).ToLower();
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "SysInfo.GetFileHash()", ex);
+            }
+            return null;
         }
     }
 }
