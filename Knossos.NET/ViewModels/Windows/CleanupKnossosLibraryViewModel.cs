@@ -66,17 +66,14 @@ namespace Knossos.NET.ViewModels
                         var dependencyList = toRemove.GetModDependencyList(false, true) ?? Enumerable.Empty<ModDependency>().Union(toRemove.GetModDependencyList(true, true) ?? Enumerable.Empty<ModDependency>()).Distinct();
                         var dependencyModList = new Collection<Mod>();
                         
-                        Console.Write("Mod: " + toRemove.id + " " + toRemove.version + " Dep:");
                         foreach (var dep in dependencyList)
                         {
                             var depMod = dep.SelectMod();
                             if (depMod != null)
                             {
                                 dependencyModList.Add(depMod);
-                                Console.Write(depMod.id + " " + depMod.version + ";");
                             }
                         }
-                        Console.WriteLine();
                         
                         modDependencies.Add(toRemove, dependencyModList);
                     }
@@ -90,7 +87,9 @@ namespace Knossos.NET.ViewModels
                             
                             foreach (var dep in modDependencies[mod.Key])
                             {
-                                dependencyViews.Add(modViewModels[dep]);
+                                //If this mod depends on any other mod we could be removing, make sure that we don't remove the dependency if we don't remove this mod
+                                if (modViewModels.ContainsKey(dep))
+                                    dependencyViews.Add(modViewModels[dep]);
                             }
                             
                             mod.Value.onModCheckChangedHandler = (modChanged, modChecked) =>
@@ -112,6 +111,7 @@ namespace Knossos.NET.ViewModels
 
         internal void Cleanup()
         {
+            /*TODO: Make async (depends on async-capable Knossos.RemoveMod())*/
             foreach (var modView in DeletableMods)
             {
                 if (!modView.ModChecked)
