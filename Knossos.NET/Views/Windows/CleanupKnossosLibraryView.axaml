@@ -24,5 +24,6 @@
 				</DataTemplate>
 			</ListBox.ItemTemplate>
 		</ListBox>
+		<Button Command="{Binding Cleanup}" Margin="10">Delete Selected Mods</Button>
 	</StackPanel>
 </Window>

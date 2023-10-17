@@ -14,6 +14,7 @@ namespace Knossos.NET.Views
         protected override void OnOpened(EventArgs e)
         {
             base.OnOpened(e);
+            ((CleanupKnossosLibraryViewModel)DataContext!).OnRequestClose += (s, ev) => Close();
             ((CleanupKnossosLibraryViewModel)DataContext!).LoadRemovableMods();
         }
     }

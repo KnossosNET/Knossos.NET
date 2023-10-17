@@ -1,28 +1,12 @@
-﻿using Avalonia;
-using Avalonia.Platform;
-using Avalonia.Media.Imaging;
-using System;
-using Knossos.NET.Models;
-using Avalonia.Media;
+﻿using Knossos.NET.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.Generic;
-using Knossos.NET.Classes;
-using Knossos.NET.Views;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Avalonia.Controls;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Linq;
-using Avalonia.Threading;
 
 namespace Knossos.NET.ViewModels
 {
     public partial class CheckableModListViewModel : ViewModelBase
     {
         /* General Mod variables */
-        private Mod? mod { get; set; }
+        public Mod? mod { get; set; }
         private bool modCheckedBackup;
         
         public delegate void OnModCheckChanged(Mod mod, bool modChecked);

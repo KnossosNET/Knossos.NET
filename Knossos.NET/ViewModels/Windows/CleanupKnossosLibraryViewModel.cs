@@ -1,10 +1,7 @@
 using Avalonia.Threading;
-using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Knossos.NET.Classes;
@@ -16,6 +13,8 @@ namespace Knossos.NET.ViewModels
     {
         private ObservableCollection<CheckableModListViewModel> DeletableMods { get; set; } = new ObservableCollection<CheckableModListViewModel>();
         
+        public event EventHandler? OnRequestClose;
+
         public async void LoadRemovableMods()
         { 
             await Task.Run(async () => 
@@ -109,6 +108,23 @@ namespace Knossos.NET.ViewModels
                     Log.Add(Log.LogSeverity.Error, "CleanupKnossosLibraryViewModel.LoadRemovableMods", ex);
                 }
             });
+        }
+
+        internal void Cleanup()
+        {
+            foreach (var modView in DeletableMods)
+            {
+                if (!modView.ModChecked)
+                    continue;
+
+                var mod = modView.mod;
+                if (mod == null)
+                    continue;
+
+                Knossos.RemoveMod(mod);
+            }
+            MainWindowViewModel.Instance?.RunModStatusChecks();
+            OnRequestClose?.Invoke(this, EventArgs.Empty);
         }
     }
 }
