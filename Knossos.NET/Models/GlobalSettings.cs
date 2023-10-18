@@ -74,9 +74,11 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public int textureFilter { get; set; } = 1;
         [JsonIgnore]
-        public int shadowQuality { get; set; } = 2;
+        public int shadowQuality { get; set; } = 0;
         [JsonIgnore]
-        public int aaPreset { get; set; } = 6;
+        public int aaPreset { get; set; } = 4;
+        [JsonIgnore]
+        public int msaaPreset { get; set; } = 0;
         [JsonIgnore]
         public bool enableSoftParticles { get; set; } = true;
         [JsonIgnore]
@@ -397,6 +399,11 @@ namespace Knossos.NET.Models
                     aaPreset = int.Parse(data["Graphics"]["AAMode"]);
                 }
 
+                if (!string.IsNullOrEmpty(data["Graphics"]["MSAAMode"]))
+                {
+                    msaaPreset = int.Parse(data["Graphics"]["MSAAMode"]);
+                }
+
                 if (!string.IsNullOrEmpty(data["Graphics"]["SoftParticles"]))
                 {
                     enableSoftParticles = bool.Parse(data["Graphics"]["SoftParticles"]);
@@ -614,6 +621,7 @@ namespace Knossos.NET.Models
                 }
                 data["Graphics"]["Shadows"] = shadowQuality.ToString();
                 data["Graphics"]["AAMode"] = aaPreset.ToString();
+                data["Graphics"]["MSAAMode"] = msaaPreset.ToString();
                 data["Graphics"]["WindowMode"] = windowMode.ToString();
                 data["Graphics"]["Display"] = displayIndex.ToString();
                 data["Graphics"]["TextureFilter"] = textureFilter.ToString();
@@ -747,7 +755,15 @@ namespace Knossos.NET.Models
                     }
                 }
             }
-            if(enableSoftParticles)
+            if (msaaPreset > 0)
+            {
+                switch (msaaPreset)
+                {
+                    case 1: cmd += "-msaa 4"; break;
+                    case 2: cmd += "-msaa 8"; break;
+                }
+            }
+                if (enableSoftParticles)
             {
                 cmd += "-soft_particles";
             }

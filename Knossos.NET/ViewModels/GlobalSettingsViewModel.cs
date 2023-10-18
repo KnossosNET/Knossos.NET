@@ -85,9 +85,11 @@ namespace Knossos.NET.ViewModels
         private int textureSelectedIndex = 0;
         private ObservableCollection<ComboBoxItem> ResolutionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
-        private int shadowQualitySelectedIndex = 2;
+        private int shadowQualitySelectedIndex = 0;
         [ObservableProperty]
-        private int aaSelectedIndex = 6;
+        private int aaSelectedIndex = 5;
+        [ObservableProperty]
+        private int msaaSelectedIndex = 0;
         [ObservableProperty]
         private bool enableSoftParticles = true;
         [ObservableProperty]
@@ -305,6 +307,8 @@ namespace Knossos.NET.ViewModels
             ShadowQualitySelectedIndex = Knossos.globalSettings.shadowQuality;
             //AA
             AaSelectedIndex = Knossos.globalSettings.aaPreset;
+            //MSAA
+            MsaaSelectedIndex = Knossos.globalSettings.msaaPreset;
             //SoftParticles
             EnableSoftParticles = Knossos.globalSettings.enableSoftParticles;
             //WindowMode
@@ -804,6 +808,8 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.shadowQuality = ShadowQualitySelectedIndex;
             //AA
             Knossos.globalSettings.aaPreset = AaSelectedIndex;
+            //MSAA
+            Knossos.globalSettings.msaaPreset = MsaaSelectedIndex;
             //SoftParticles
             Knossos.globalSettings.enableSoftParticles = EnableSoftParticles;
             //WindowMode
