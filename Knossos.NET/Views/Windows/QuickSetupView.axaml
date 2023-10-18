@@ -32,7 +32,7 @@
 		<!--Page2-->
 		<StackPanel IsVisible="{Binding Page2}" Grid.Row="0" >
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center" >Setting up the library folder</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">First, you must set a library folder. Go to the "Settings" tab and inside the "Knossos Settings" section click on Browse and choose or create a folder for Knossos to use. It is highly recommended to set this as an empty folder in a location with a large amount of available storage.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">First, you must set a library folder. Go to the "Settings" tab and inside the "Knossos Settings" section click on "Browse" and choose or create a folder for Knossos to use. It is highly recommended to set this as an empty folder in a location with a large amount of available storage. Once you have set the folder be sure to click the "Save" button in the "Settings" tab. </TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">The Knossos library folder is where all game and mod data will be saved to. Make sure you always have space available on this drive before installing a new mod or update.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">Current Library Folder</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center" Text="{Binding LibraryPath}"></TextBlock>
@@ -57,7 +57,7 @@
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center">Freespace 2 Retail</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">In order to have access to Freespace 1 and 2 content and visual improvements you need to install Freespace 2 Retail in Knossos. without this any content that needs the full Freespace 2 retail files will not be displayed on the "Nebula" tab.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">To install Freespace 2 go to the "Settings" tab and open the "FS2 Retail Installer" button under the "Knossos Settings" section. Then follow the instructions there. If you already have FS2 installed this button is not avalible.</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">This step is optional and you can continue at any time</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">This step is optional and you can continue at any time.</TextBlock>
 		</StackPanel>
 
 		<!--Page5-->
@@ -70,13 +70,13 @@
 			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">-Silent Threat: Reborn (fan made replacement and improvement of the original Silent Threat FS1 expansion. The story elements happen after the main FS1 story and before FS2.)</TextBlock>
 			<TextBlock Margin="20,20,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">If you dont have the retail FS2 installed into Knossos you can still play total conversion mods, which are mods that are compeltely standalone and do not depend on any of the Freespace content:</TextBlock>
 			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">There are some great options, such as: Wing Commander Saga, Dispora, Solaris and more.</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">This step is optional and you can continue at any time</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">This step is optional and you can continue at any time.</TextBlock>
 		</StackPanel>
 
 		<!--Page6-->
 		<StackPanel IsVisible="{Binding Page6}" Grid.Row="0" >
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center">Finishing</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Finally, before launching a mod go to the "Settings" tab and configure video and audio settings, as well as any joysticks you may have installed.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Finally, before launching a mod go to the "Settings" tab and configure video and audio settings, as well as any joysticks you may have installed. Always remember to click "Save" after changing any values.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">It is recommended to run in windowed mode at the same resolution as your desktop resolution. There is no need to enable the borderless mode, as windowed mode is already borderless at native resolution.</TextBlock>
 		</StackPanel>
 		
