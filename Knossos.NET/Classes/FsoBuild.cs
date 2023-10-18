@@ -613,10 +613,10 @@ namespace Knossos.NET.Models
                         switch (SysInfo.CpuArch)
                         {
                             case "X64":
-                                score += SysInfo.CpuAVX ? 40 : 0;
+                                score += 40;
                                 break;
                             case "X86":
-                                score += SysInfo.CpuAVX ? 80 : 0;
+                                score += 80;
                                 break;
                             case "Arm64":
                                 score += 30; 
@@ -747,7 +747,7 @@ namespace Knossos.NET.Models
                             case "X64":
                                 break;
                             case "X86":
-                                score += SysInfo.CpuAVX ? 80 : 0;
+                                score += 80;
                                 break;
                             case "Arm64":
                                 break;
