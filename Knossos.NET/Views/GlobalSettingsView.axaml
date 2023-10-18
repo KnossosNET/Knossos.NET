@@ -168,7 +168,7 @@
 						</Grid>
 						<!-- AA Filter -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<Label Grid.Column="0" Width="200" VerticalAlignment="Center">Anti-Aliasing</Label>
+							<Label Grid.Column="0" Width="200" VerticalAlignment="Center">Post-processing Anti-Aliasing</Label>
 							<ComboBox Tag="-aa_preset" SelectedIndex="{Binding AaSelectedIndex}" Grid.Column="1" IsEnabled="{Binding EnableAA}" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
 								<ComboBoxItem Tag="1">FXAA Low</ComboBoxItem>
@@ -180,6 +180,15 @@
 								<ComboBoxItem Tag="7">SMAA Ultra</ComboBoxItem>
 							</ComboBox>
 						</Grid>
+            <!-- SMAA Filter -->
+            <Grid ColumnDefinitions="Auto,Auto" Margin="5">
+              <Label Grid.Column="0" Width="200" VerticalAlignment="Center">Extra Multisample Anti-Aliasing</Label>
+              <ComboBox  ToolTip.Tip="High performance impact, especially at Ultra" Tag="-msaa" SelectedIndex="{Binding MsaaSelectedIndex}" Grid.Column="1" IsEnabled="{Binding EnableMSAA}" Width="150" Margin="10,0,0,0">
+                <ComboBoxItem Tag="0">Disabled</ComboBoxItem>
+                <ComboBoxItem Tag="4">High</ComboBoxItem>
+                <ComboBoxItem Tag="8">Ultra</ComboBoxItem>
+              </ComboBox>
+            </Grid>
 						<!-- Enable soft particles -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<CheckBox Tag="-soft_particles" Grid.Column="0" IsChecked="{Binding EnableSoftParticles}" Width="200">Enable soft particles</CheckBox>
