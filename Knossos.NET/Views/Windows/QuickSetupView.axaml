@@ -48,7 +48,7 @@
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Go to the "Engine" tab, select "Stable builds" and download the newest stable, it should be always the top one on the list.</TextBlock>
 				<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">Waiting for a FSO build to finish download to continue</TextBlock>
 				<TextBlock IsVisible="{Binding CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">Engine build detected!</TextBlock>
-				<TextBlock IsVisible="{Binding CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Keep in mind that some mods may download and run on diferent versions of the FSO engine. This is because some mods cannot run on newer builds or they require a specific FSO build version. You can always change the FSO build used by a mod by opening the "Mod Settings" on the mod card, but keep in mind not all mods can run on all engine builds.</TextBlock>
+				<TextBlock IsVisible="{Binding CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Keep in mind that some mods may download and run on different versions of the FSO engine. This is because some mods cannot run on newer builds or they require a specific FSO build version. You can always change the FSO build used by a mod by opening the "Mod Settings" on the mod card, but keep in mind not all mods can run on all engine builds.</TextBlock>
 			</StackPanel>
 		</StackPanel>
 
@@ -56,7 +56,7 @@
 		<StackPanel IsVisible="{Binding Page4}" Grid.Row="0" >
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center">Freespace 2 Retail</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">In order to have access to Freespace 1 and 2 content and visual improvements you need to install Freespace 2 Retail in Knossos. without this any content that needs the full Freespace 2 retail files will not be displayed on the "Nebula" tab.</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">To install Freespace 2 go to the "Settings" tab and open the "FS2 Retail Installer" button under the "Knossos Settings" section. Then follow the instructions there. If you already have FS2 installed this button is not avalible.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">To install Freespace 2 go to the "Settings" tab and open the "FS2 Retail Installer" button under the "Knossos Settings" section. Then follow the instructions there. If you already have FS2 installed this button is not available.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">This step is optional and you can continue at any time.</TextBlock>
 		</StackPanel>
 
@@ -68,8 +68,8 @@
 			<TextBlock Margin="20,0,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">-Freespace Upgrade MediaVPs (this is the Freespace 2 visual improvements mod and it is also used by most, if not all, other FS related mods. This mod has optional visual improvements components (like MV_AdvancedX) and it is recommended to select them all during install.)</TextBlock>
 			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">-FreeSpace Port MediaVPs (Visual improvements for the Freespace 1 port, this will also install the Freespace 1 port mod, which gives you access to the full Freespace 1 missions and story)</TextBlock>
 			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">-Silent Threat: Reborn (fan made replacement and improvement of the original Silent Threat FS1 expansion. The story elements happen after the main FS1 story and before FS2.)</TextBlock>
-			<TextBlock Margin="20,20,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">If you dont have the retail FS2 installed into Knossos you can still play total conversion mods, which are mods that are compeltely standalone and do not depend on any of the Freespace content:</TextBlock>
-			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">There are some great options, such as: Wing Commander Saga, Dispora, Solaris and more.</TextBlock>
+			<TextBlock Margin="20,20,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">If you do not have the retail FS2 installed into Knossos you can still play total conversion mods, which are mods that are compeltely standalone and do not depend on any of the Freespace content:</TextBlock>
+			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">There are some great options, such as: Wing Commander Saga, Diaspora, Solaris and more.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">This step is optional and you can continue at any time.</TextBlock>
 		</StackPanel>
 
