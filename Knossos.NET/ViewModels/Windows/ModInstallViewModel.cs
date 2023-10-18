@@ -151,35 +151,40 @@ namespace Knossos.NET.ViewModels
             GC.Collect();
         }
 
-
-        private async Task ProcessMod(Mod mod, List<Mod> allMods)
+        private async Task ProcessMod(Mod mod, List<Mod> allMods, List<Mod>? processed = null)
         {
-            var dependencies = mod.GetMissingDependenciesList(false,true);
+            if (processed == null)
+                processed = new List<Mod>();
+            var dependencies = mod.GetMissingDependenciesList(false, true);
             AddModToList(mod);
-            foreach (var dep in dependencies)
+            await Parallel.ForEachAsync(dependencies, new ParallelOptions { MaxDegreeOfParallelism = 2 }, async (dep, token) =>
             {
-                var modDep = await dep.SelectModNebula(allMods);
-                if (modDep != null)
-                { 
-                    modDep.isEnabled = true;
-                    modDep.isSelected = true;
-                    foreach (var pkg in modDep.packages)
+                if (processed.IndexOf(mod) == -1)
+                {
+                    processed.Add(mod);
+                    var modDep = await dep.SelectModNebula(allMods);
+                    if (modDep != null)
                     {
-                        if (dep != null && dep.packages != null)
+                        modDep.isEnabled = true;
+                        modDep.isSelected = true;
+                        Parallel.ForEach(modDep.packages, (pkg, token) =>
                         {
-                            foreach (var depPkg in dep.packages)
+                            if (dep != null && dep.packages != null)
                             {
-                                if (depPkg == pkg.name)
+                                foreach (var depPkg in dep.packages)
                                 {
-                                    pkg.status = "required";
+                                    if (depPkg == pkg.name)
+                                    {
+                                        pkg.status = "required";
+                                    }
                                 }
                             }
-                        }
+                        });
+                        await modDep.LoadFulLNebulaData();
+                        await ProcessMod(modDep, allMods, processed);
                     }
-                    await modDep.LoadFulLNebulaData();
-                    await ProcessMod(modDep, allMods);
                 }
-            }
+            });
         }
 
         private void AddModToList(Mod mod)
