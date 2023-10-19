@@ -53,6 +53,18 @@ namespace Knossos.NET.ViewModels
                     if (cancellationTokenSource.IsCancellationRequested) //this task was cancelled? you may want to check this multiple times
                         throw new TaskCanceledException();
 
+                    //Wait in Queue. Important!!! Only for main tasks that need to wait in queue that are created in TaskViewModel.cs
+                    //And only if it needs to actually wait in the queue, some you dont need to do this for, ex: show a text msg.
+                    //Do not do this for internal/subtasks as it will loop here forever
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                    {
+                        await Task.Delay(1000);
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                    }
+
                     Info = ""; //This display Text on the TaskView, if the task has a progress bar this text is display to the right of it, otherwise to the right of "name".
                     TextColor =  Brushes.White; //Info text color
 
@@ -68,6 +80,13 @@ namespace Knossos.NET.ViewModels
                     IsCompleted = true; //once we completed the task this must be set to true
                     CancelButtonVisible = false; //once we completed the task this must be set to true
                     ProgressCurrent = ProgressBarMax; //a recomended step at the end in case your task had a progress bar
+
+                    //Dequeue. Important: Only if this is not a Subtask!!! If this task did not wait in a queue dont do this it will loop here forever
+                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                    {
+                        TaskViewModel.Instance!.taskQueue.Dequeue();
+                    }
+
                     return true; //on task completion return true
                 }
                 else
@@ -93,6 +112,15 @@ namespace Knossos.NET.ViewModels
                     cancellationTokenSource?.Cancel();
                 }
                 //If you need to do a task specific stuff on cancel resquest do it here
+                //Dequeue. Important: Only if this is not a Subtask!!! If this task did not wait in a queue dont do this it will loop here forever
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
+                }
                 return false;
             }
             catch (Exception ex)
@@ -114,6 +142,15 @@ namespace Knossos.NET.ViewModels
                 }
                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
                 //If you need to do a task specific stuff do it here
+                //Dequeue. Important: Only if this is not a Subtask!!! If this task did not wait in a queue dont do this it will loop here forever
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
+                }
                 return false;
             }
         }
@@ -276,12 +313,12 @@ namespace Knossos.NET.ViewModels
                     //Call cancel task on the parent object
                     cancellationTokenSource?.Cancel();
                 }
-                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PreFlightCheck()", ex);
                 return "fail";
             }
         }
 
-        private async Task<string> UploadMetaData(Mod mod, CancellationTokenSource? cancelSource = null)
+        private async Task<string> ReleaseMod(Mod mod, bool metaUpdate,CancellationTokenSource? cancelSource = null)
         {
             try
             {
@@ -331,7 +368,17 @@ namespace Knossos.NET.ViewModels
                     cleanMod.members = new List<ModMember>();
                     cleanMod.notes = mod.notes == null ? "" : mod.notes;
 
-                    var result = await Nebula.ReleaseMod(cleanMod);
+                    string? result;
+
+                    if (!metaUpdate)
+                    {
+                        result = await Nebula.ReleaseMod(cleanMod);
+                    }
+                    else
+                    {
+                        result = await Nebula.UpdateMetaData(cleanMod);
+                    }
+
                     if (result == null || result != "ok")
                     {
                         if (result != null)
@@ -391,7 +438,7 @@ namespace Knossos.NET.ViewModels
                     //Call cancel task on the parent object
                     cancellationTokenSource?.Cancel();
                 }
-                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.ReleaseMod()", ex);
                 return "fail";
             }
         }
@@ -499,7 +546,7 @@ namespace Knossos.NET.ViewModels
                     //Call cancel task on the parent object
                     cancellationTokenSource?.Cancel();
                 }
-                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.UploadModImages()", ex);
                 return false;
             }
         }
@@ -593,7 +640,7 @@ namespace Knossos.NET.ViewModels
                     //Call cancel task on the parent object
                     cancellationTokenSource?.Cancel();
                 }
-                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.CreateModNebula()", ex);
                 return false;
             }
         }
@@ -605,7 +652,7 @@ namespace Knossos.NET.ViewModels
                 if (!TaskIsSet)
                 {
                     TaskIsSet = true;
-                    ProgressBarMax = 0;
+                    ProgressBarMax = 100;
                     ProgressCurrent = 0;
                     ShowProgressText = false;
                     CancelButtonVisible = false;
@@ -627,7 +674,7 @@ namespace Knossos.NET.ViewModels
                         throw new TaskCanceledException();
                     }
 
-                    var multi = new Nebula.MultipartUploader(zipPath, cancellationTokenSource, null);
+                    var multi = new Nebula.MultipartUploader(zipPath, cancellationTokenSource, multiuploaderCallback);
                     if (!await multi.Upload())
                     { 
                         throw new TaskCanceledException();
@@ -680,7 +727,7 @@ namespace Knossos.NET.ViewModels
                     //Call cancel task on the parent object
                     cancellationTokenSource?.Cancel();
                 }
-                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.UploadModPkg()", ex);
                 return false;
             }
         }
@@ -721,7 +768,7 @@ namespace Knossos.NET.ViewModels
                         IsCompleted = true;
                         CancelButtonVisible = false;
                         ProgressCurrent = ProgressBarMax;
-                        Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.PrepareModPkg()", "Package folder: " + modFullPath + Path.DirectorySeparatorChar + pkg.folder + " does not exist.");
+                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Package folder: " + modFullPath + Path.DirectorySeparatorChar + pkg.folder + " does not exist.");
                         throw new TaskCanceledException();
                     }
 
@@ -732,7 +779,7 @@ namespace Knossos.NET.ViewModels
                         IsCompleted = true;
                         CancelButtonVisible = false;
                         ProgressCurrent = ProgressBarMax;
-                        Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.PrepareModPkg()", "Package folder: " + modFullPath + Path.DirectorySeparatorChar + pkg.folder + " is empty.");
+                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Package folder: " + modFullPath + Path.DirectorySeparatorChar + pkg.folder + " is empty.");
                         throw new TaskCanceledException();
                     }
 
@@ -744,12 +791,14 @@ namespace Knossos.NET.ViewModels
                     }
 
                     var filelist = new List<ModFilelist>();
-                    var modFile = new ModFile();
-                    var files = new List<ModFile>() { modFile };
+                    var pkgFile = new ModFile();
+                    var files = new List<ModFile>() { pkgFile };
 
                     if (pkg.isVp)
                     {
                         Info = "Creating VP";
+                        ProgressBarMax = 100;
+                        ProgressCurrent = 0;
                         var vpPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps" + Path.DirectorySeparatorChar + pkg.name + ".vp";
                         Directory.CreateDirectory(modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps");
                         if(File.Exists(vpPath))
@@ -764,8 +813,10 @@ namespace Knossos.NET.ViewModels
                         var checksumVP = await SysInfo.GetFileHash(vpPath);
                         if( checksumVP != null )
                         {
-                            Info = "Compressing package";
-                            var compressor = new SevenZipConsoleWrapper();
+                            Info = "Compressing (7z)";
+                            ProgressBarMax = 100;
+                            ProgressCurrent = 0;
+                            var compressor = new SevenZipConsoleWrapper(sevenZipCallback);
                             if(!await compressor.CompressFile(vpPath, modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps", zipPath))
                             {
                                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
@@ -803,8 +854,10 @@ namespace Knossos.NET.ViewModels
                                 throw new TaskCanceledException();
                             }
                         }
-                        Info = "Compressing package";
-                        var compressor = new SevenZipConsoleWrapper();
+                        Info = "Compressing (7z)";
+                        ProgressBarMax = 100;
+                        ProgressCurrent = 0;
+                        var compressor = new SevenZipConsoleWrapper(sevenZipCallback);
                         if (!await compressor.CompressFolder(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
                         {
                             Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
@@ -819,20 +872,20 @@ namespace Knossos.NET.ViewModels
                      * FSO builds seems to use it.
                      *
                     */
-                    modFile.dest = "";
+                    pkgFile.dest = "";
                     var checksumZip = await SysInfo.GetFileHash(zipPath);
                     if (checksumZip != null)
                     {
                         var fi = new FileInfo(zipPath);
-                        modFile.filesize = fi.Length;
-                        modFile.filename = pkg.folder + ".7z";
-                        modFile.checksum = new string[2] { "sha256", checksumZip };
+                        pkgFile.filesize = fi.Length;
+                        pkgFile.filename = pkg.folder + ".7z";
+                        pkgFile.checksum = new string[2] { "sha256", checksumZip };
                     }
                     else
                     {
                         throw new TaskCanceledException();
                     }
-                    modFile.urls = null;
+                    pkgFile.urls = null;
                     pkg.files = files.ToArray();
                     pkg.filelist = filelist.ToArray();
                     if(pkg.executables == null)
@@ -886,7 +939,7 @@ namespace Knossos.NET.ViewModels
                     //Call cancel task on the parent object
                     cancellationTokenSource?.Cancel();
                 }
-                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", ex);
                 return false;
             }
         }
@@ -898,9 +951,9 @@ namespace Knossos.NET.ViewModels
                 if (!TaskIsSet)
                 {
                     TaskIsSet = true;
-                    ProgressBarMax = 100;
+                    ProgressBarMax = 5;
                     ProgressCurrent = 0; 
-                    ShowProgressText = true;
+                    ShowProgressText = false;
                     CancelButtonVisible = true;
                     IsTextTask = false;
                     IsFileDownloadTask = false;
@@ -912,9 +965,21 @@ namespace Knossos.NET.ViewModels
                     else
                         cancellationTokenSource = new CancellationTokenSource();
 
+                    //Wait in Queue
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                    {
+                        await Task.Delay(1000);
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                    }
+
                     //If we are doing only meta skip to the end
                     if (!metaOnly)
                     {
+                        ProgressBarMax += mod.packages.Count() * 2;
+
                         if (isNewMod)
                         {
                             Info = "Create Mod";
@@ -925,6 +990,8 @@ namespace Knossos.NET.ViewModels
                             await create.CreateModNebula(mod, cancellationTokenSource);
                             //If fails it should trigger cancel no need to check the return
                         }
+
+                        ProgressCurrent++;
 
                         if (cancellationTokenSource.IsCancellationRequested)
                             throw new TaskCanceledException();
@@ -949,6 +1016,8 @@ namespace Knossos.NET.ViewModels
                         await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(newTask));
                         var preFlightCheck = await newTask.PreFlightCheck(mod, cancellationTokenSource);
 
+                        ProgressCurrent++;
+
                         if (cancellationTokenSource.IsCancellationRequested)
                             throw new TaskCanceledException();
 
@@ -964,6 +1033,7 @@ namespace Knossos.NET.ViewModels
                                 var newTask = new TaskItemViewModel();
                                 await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(newTask));
                                 await newTask.PrepareModPkg(pkg, mod.fullPath, cancellationTokenSource);
+                                ProgressCurrent++;
                                 if (cancellationTokenSource.IsCancellationRequested)
                                     throw new TaskCanceledException();
                             });
@@ -975,10 +1045,23 @@ namespace Knossos.NET.ViewModels
                                 var newTask = new TaskItemViewModel();
                                 await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(newTask));
                                 await newTask.UploadModPkg(pkg, mod.fullPath, cancellationTokenSource);
+                                ProgressCurrent++;
                                 if (cancellationTokenSource.IsCancellationRequested)
                                     throw new TaskCanceledException();
                             });
                         }
+                        else
+                        {
+                            if (preFlightCheck == "duplicated version")
+                            {
+                                ProgressBarMax -= mod.packages.Count() * 2;
+                                metaOnly = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ProgressBarMax--;
                     }
 
                     if (cancellationTokenSource.IsCancellationRequested)
@@ -995,6 +1078,8 @@ namespace Knossos.NET.ViewModels
                     await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(imgs));
                     await imgs.UploadModImages(mod,cancellationTokenSource);
 
+                    ProgressCurrent++;
+
                     if (cancellationTokenSource.IsCancellationRequested)
                         throw new TaskCanceledException();
 
@@ -1002,7 +1087,9 @@ namespace Knossos.NET.ViewModels
                     Info = "Upload Metadata";
                     var meta = new TaskItemViewModel();
                     await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(meta));
-                    await meta.UploadMetaData(mod, cancellationTokenSource);
+                    await meta.ReleaseMod(mod, metaOnly, cancellationTokenSource);
+
+                    ProgressCurrent++;
 
                     if (cancellationTokenSource.IsCancellationRequested)
                         throw new TaskCanceledException();
@@ -1013,12 +1100,20 @@ namespace Knossos.NET.ViewModels
                     mod.screenshots = origScreenshots;
                     mod.SaveJson();
 
+                    ProgressCurrent++;
+
                     Info = "Upload Complete!";
 
                     //Completed
                     IsCompleted = true; 
                     CancelButtonVisible = false;
                     ProgressCurrent = ProgressBarMax;
+
+                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                    {
+                        TaskViewModel.Instance!.taskQueue.Dequeue();
+                    }
+
                     return true;
                 }
                 else
@@ -1037,6 +1132,14 @@ namespace Knossos.NET.ViewModels
                 if (cancelSource == null)
                 {
                     cancellationTokenSource?.Dispose();
+                }
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
                 }
                 return false;
             }
@@ -1057,7 +1160,15 @@ namespace Knossos.NET.ViewModels
                     //Call cancel task on the parent object
                     cancellationTokenSource?.Cancel();
                 }
-                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.UploadModVersion()", ex);
                 return false;
             }
         }
@@ -1820,6 +1931,30 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.CompressVP()", ex);
                 return false;
             }
+        }
+
+        private async void multiuploaderCallback(string text, int currentPart, int maxParts)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    ProgressBarMax = maxParts;
+                    ProgressCurrent = currentPart;
+                    Info = text;
+                }
+                catch { }
+            });
+        }
+
+        private async void sevenZipCallback(string percentage)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    ProgressCurrent = int.Parse(percentage);
+                }
+                catch { }
+            });
         }
 
         private async void copyCallback(string filename)

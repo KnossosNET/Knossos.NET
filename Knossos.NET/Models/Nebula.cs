@@ -675,6 +675,18 @@ namespace Knossos.NET.Models
                                         return reply;
                                     }
                                 }
+                                else
+                                {
+                                    /* Upload Mod Timeout Hack */
+                                    if(response.StatusCode.ToString() == "GatewayTimeout" && resourceUrl == "mod/release")
+                                    {
+                                        Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "During mod release upload a GatewayTimeout was recieved. This is a known issue with Nebula and while Knet handles this" +
+                                            " as a success there is not an actual way to know if the upload was really successfull.");
+                                        var reply = new ApiReply();
+                                        reply.result = true;
+                                        return reply;
+                                    }
+                                }
                                 Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode);
                             }
                             break;
@@ -1374,7 +1386,7 @@ namespace Knossos.NET.Models
         }
 
         /// <summary>
-        /// Releases mod to Nebula (this is also a metadata update)
+        /// Releases mod to Nebula
         /// </summary>
         /// <param name="mod"></param>
         /// <returns>"ok" if successfull, a reason if it fails (maybe), and null if modid is not found(api call returns 404 in that case) or any other problem</returns>
@@ -1409,6 +1421,42 @@ namespace Knossos.NET.Models
             return null;
         }
 
+        /// <summary>
+        /// Updates Released mod metadata
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <returns>"ok" if successfull, a reason if it fails (maybe), and null if modid is not found(api call returns 404 in that case) or any other problem</returns>
+        public static async Task<string?> UpdateMetaData(Mod mod)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(mod);
+                var reply = await ApiCall("mod/release/update", new StringContent(json, Encoding.UTF8, "application/json"), true, 300);
+                if (reply.HasValue)
+                {
+                    if (reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.UpdateMetaData", "UpdateMetaData: " + mod + " OK!");
+                        return "ok";
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.UpdateMetaData", "UpdateMetaData: " + mod + " error. Reason: " + reply.Value.reason);
+                        return reply.Value.reason;
+                    }
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "Nebula.UpdateMetaData", "Unable to update mod meta data. ");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.UpdateMetaData", ex);
+            }
+            return null;
+        }
+
         /* Multipart Uploader */
         #region MultiPartUploader
         public class MultipartUploader : IDisposable
@@ -1420,14 +1468,14 @@ namespace Knossos.NET.Models
             private List<FilePart> fileParts = new List<FilePart>();
             private CancellationTokenSource cancellationTokenSource;
             private FileStream fs;
-            private Action<string>? progressCallback;
+            private Action<string, int, int>? progressCallback;
             private string? fileChecksum;
             private Queue<object> readQueue = new Queue<object>();
             private long fileLenght = 0;
             private bool completed = false;
             private bool verified = false;
 
-            public MultipartUploader(string filePath, CancellationTokenSource? cancellationTokenSource, Action<string>? progressCallback)
+            public MultipartUploader(string filePath, CancellationTokenSource? cancellationTokenSource, Action<string, int, int>? progressCallback)
             {
                 this.progressCallback = progressCallback;
                 if (cancellationTokenSource != null)
@@ -1459,14 +1507,17 @@ namespace Knossos.NET.Models
                     throw new TaskCanceledException();
 
                 if (progressCallback != null)
-                    progressCallback.Invoke("Starting Checkup...");
+                    progressCallback.Invoke("Starting Checkup...", 0, fileParts.Count());
 
                 var start = await Start();
 
-                if(!start)
+                int maxProgress = fileParts.Count();
+                int progress = 0;
+
+                if (!start)
                 {
                     if(progressCallback != null)
-                        progressCallback.Invoke("Error while getting starting response.");
+                        progressCallback.Invoke("Error while getting starting response.", 0, maxProgress);
                     return false;
                 }
                 
@@ -1474,7 +1525,7 @@ namespace Knossos.NET.Models
                 if(completed)
                 {
                     if (progressCallback != null)
-                        progressCallback.Invoke("Already uploaded.");
+                        progressCallback.Invoke("Already uploaded.", 1, 1);
                     return true;
                 }
 
@@ -1483,7 +1534,7 @@ namespace Knossos.NET.Models
                     if (cancellationTokenSource.IsCancellationRequested)
                         throw new TaskCanceledException();
                     if (progressCallback != null)
-                        progressCallback.Invoke("Uploading part id: " + part.GetID());
+                        progressCallback.Invoke("Part: " + progress + " / " + maxProgress, progress, maxProgress);
                     var partCompleted = false;
                     var attempt = 1;
                     do
@@ -1491,8 +1542,6 @@ namespace Knossos.NET.Models
                         var result = await part.Upload();
                         if(result)
                         {
-                            if (progressCallback != null)
-                                progressCallback.Invoke("Verifying part id: " + part.GetID());
                             partCompleted = await part.Verify();
                         }
                     } 
@@ -1500,8 +1549,9 @@ namespace Knossos.NET.Models
 
                     if (partCompleted)
                     {
+                        progress++;
                         if (progressCallback != null)
-                            progressCallback.Invoke("Part uploaded. ID: " + part.GetID());
+                            progressCallback.Invoke("Part: " + progress + " / " + maxProgress, progress, maxProgress);
                     }
                     else
                     {
@@ -1512,7 +1562,7 @@ namespace Knossos.NET.Models
                 completed = true;
 
                 if (progressCallback != null)
-                    progressCallback.Invoke("Verifying Upload...");
+                    progressCallback.Invoke("Verifying Upload...", maxProgress, maxProgress);
 
                 if (cancellationTokenSource.IsCancellationRequested)
                     throw new TaskCanceledException();
@@ -1520,7 +1570,7 @@ namespace Knossos.NET.Models
                 verified = await Finish();
 
                 if (progressCallback != null)
-                    progressCallback.Invoke("Verify: " + verified);
+                    progressCallback.Invoke("Verify: " + verified, maxProgress, maxProgress);
 
                 fs.Close();
                 return verified;
