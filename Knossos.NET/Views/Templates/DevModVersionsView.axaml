@@ -11,7 +11,7 @@
 	</Design.DataContext>
 
 	<Grid RowDefinitions="Auto,*, Auto, Auto">
-		<WrapPanel Grid.Row="0" Margin="10" HorizontalAlignment="Center">
+		<WrapPanel IsEnabled="{Binding ButtonsEnabled}" Grid.Row="0" Margin="10" HorizontalAlignment="Center">
 			<Button Background="DarkCyan" FontWeight="Bold" Content="New Version" x:Name="CreateVersion">
 				<Button.Flyout>
 					<Flyout>
@@ -21,15 +21,15 @@
 							<Label HorizontalAlignment="Center" Margin="2" FontWeight="Bold">New Version</Label>
 							<TextBox ToolTip.Tip="Examples:&#x0a;1.0.5 -> Patch/Bugfix&#x0a;1.1.0 -> Minor update&#x0a;2.0.0 -> Major update&#x0a;1.3.4-ABC -> Pre-Release version" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="2" MinWidth="150" Text="{Binding NewVersion}"></TextBox>
 							<Label>The current selected version will be copied to the new version folder.</Label>
-							<Button Command="{Binding CreateNewVersion}" CommandParameter="{Binding ElementName=CreateVersion}"  Width="75" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Background="DarkGreen">Create</Button>
+							<Button IsEnabled="{Binding ButtonsEnabled}" Command="{Binding CreateNewVersion}" CommandParameter="{Binding ElementName=CreateVersion}"  Width="75" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Background="DarkGreen">Create</Button>
 						</StackPanel>
 					</Flyout>
 				</Button.Flyout>
 			</Button>
 			<Button Command="{Binding LoadVersionsFromNebula}" Background="DarkOrange" FontWeight="Bold" Margin="20,0,0,0">Install or Modify</Button>
-			<Button Background="Red" FontWeight="Bold" Margin="20,0,0,0">Delete Mod</Button>
+			<Button Command="{Binding DeleteAll}" Background="Red" FontWeight="Bold" Margin="20,0,0,0">Delete Mod</Button>
 		</WrapPanel>
-		<ListBox Margin="10,0,10,10" Grid.Row="1" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}" HorizontalAlignment="Stretch" >
+		<ListBox IsEnabled="{Binding ButtonsEnabled}" Margin="10,0,10,10" Grid.Row="1" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}" HorizontalAlignment="Stretch" >
 			<ListBox.ItemTemplate>
 				<DataTemplate>
 					<WrapPanel>
@@ -42,12 +42,11 @@
 			</ListBox.ItemTemplate>
 		</ListBox>
 		<Label Grid.Row="2" HorizontalAlignment="Center">Actions for Active Version</Label>
-		<WrapPanel Grid.Row="3" Margin="10" HorizontalAlignment="Center">
-			<Button Command="{Binding UploadMod}" Background="DarkGreen" FontWeight="Bold">Upload to Nebula</Button>
-			<Button Background="#8E3C23" Margin="20,0,0,0" FontWeight="Bold">Create playtest</Button>
-			<Button Background="DarkCyan" FontWeight="Bold" Margin="20,0,0,0">Make it private</Button>
-			<Button Background="Red" FontWeight="Bold" Margin="20,0,0,0">Delete from Nebula</Button>
-			<Button Background="Red" FontWeight="Bold" Margin="20,0,0,0">Delete Locally</Button>
+		<WrapPanel Grid.Row="3" Margin="10" HorizontalAlignment="Center" IsEnabled="{Binding ButtonsEnabled}">
+			<Button Command="{Binding UploadMod}" Background="DarkGreen" FontWeight="Bold" Margin="0,5,5,5">Upload to Nebula</Button>
+			<Button Command="{Binding ChangeVisibility}" Background="DarkCyan" Content="{Binding VisibilityButtonText}" FontWeight="Bold" Margin="20,5,5,5"/>
+			<Button Command="{Binding DeleteNebula}" Background="Red" FontWeight="Bold" Margin="20,5,5,5">Delete from Nebula</Button>
+			<Button Command="{Binding DeleteLocally}" Background="Red" FontWeight="Bold" Margin="20,5,5,5">Delete Locally</Button>
 		</WrapPanel>
 	</Grid>
 	

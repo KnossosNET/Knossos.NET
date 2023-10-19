@@ -36,6 +36,22 @@ namespace Knossos.NET
             return await Run(cmdline + destFile, sourceFolder);
         }
 
+        /// <summary>
+        /// Compresses a folder into a .tar.gz file, copies over symblinks as links
+        /// Important: Do not pass any extension in the destFile, the extension ".tar.gz" is added here
+        /// </summary>
+        /// <param name="sourceFolder"></param>
+        /// <param name="destFile"></param>
+        /// <returns>true if successfull, false otherwise</returns>
+        public async Task<bool> CompressFolderTarGz(string sourceFolder, string destFile)
+        {
+            string cmdline = "a -snh -snl -y ";
+            var r = await Run(cmdline + destFile + ".tar", sourceFolder);
+            if (r)
+                return await Run("a -y " + destFile + ".tar.gz" + " " + destFile + ".tar", sourceFolder);
+            return r;
+        }
+
         public async Task<bool> CompressFile(string filepath, string workingFolder, string destFile)
         {
             string cmdline = "a -t7z -m0=lzma2 -md=64M -mx=9 -ms=on -bsp1 -y ";

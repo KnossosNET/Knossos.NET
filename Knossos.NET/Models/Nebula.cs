@@ -164,7 +164,7 @@ namespace Knossos.NET.Models
                 if (userIsLoggedIn)
                 {
                     await LoadPrivateMods(cancellationToken);
-                } 
+                }
             }
             catch (TaskCanceledException)
             {
@@ -608,7 +608,7 @@ namespace Knossos.NET.Models
             public string reason { get; set; }
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-            public object[] mods { get; set; }
+            public Mod[] mods { get; set; }
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public ModMember[] members { get; set; }
@@ -677,11 +677,11 @@ namespace Knossos.NET.Models
                                 }
                                 else
                                 {
-                                    /* Upload Mod Timeout Hack */
-                                    if(response.StatusCode.ToString() == "GatewayTimeout" && resourceUrl == "mod/release")
+                                    /* Upload/Update/delete Mod Timeout Hack */
+                                    if(response.StatusCode.ToString() == "GatewayTimeout" && (resourceUrl == "mod/release" || resourceUrl == "mod/release/update" || resourceUrl == "mod/release/delete"))
                                     {
-                                        Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "During mod release upload a GatewayTimeout was recieved. This is a known issue with Nebula and while Knet handles this" +
-                                            " as a success there is not an actual way to know if the upload was really successfull.");
+                                        Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "During mod/release request a GatewayTimeout was recieved. This is a known issue with Nebula and while Knet handles this" +
+                                            " as a success there is not an actual way to know if the api call was really successfull.");
                                         var reply = new ApiReply();
                                         reply.result = true;
                                         return reply;
@@ -965,6 +965,7 @@ namespace Knossos.NET.Models
             return false;
         }
 
+        /* Disabled due to a conflict in the return type of "mods" and we are not using it anyway
         /// <summary>
         /// Get an array of mods that the user has write access to.
         /// </summary>
@@ -997,6 +998,7 @@ namespace Knossos.NET.Models
             }
             return null;
         }
+        */
 
         /// <summary>
         /// Get an array of private mods that the user has access to.
@@ -1013,7 +1015,7 @@ namespace Knossos.NET.Models
                     {
                         Log.Add(Log.LogSeverity.Information, "Nebula.GetPrivateMods", "Private mod in Nebula with access: " + mod);
                     }
-                    return reply.Value.mods.Select(s => (Mod)s).ToArray()!;
+                    return reply.Value.mods;
                 }
                 else
                 {
@@ -1134,7 +1136,7 @@ namespace Knossos.NET.Models
                     { new StringContent(mod.version), "version" }
                 };
 
-                var reply = await ApiCall("mod/release/delete", data, true);
+                var reply = await ApiCall("mod/release/delete", data, true, 300);
                 if (reply.HasValue)
                 {
                     if (reply.Value.result)

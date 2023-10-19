@@ -345,6 +345,58 @@ namespace Knossos.NET.Models
             return properties;
         }
 
+        /// <summary>
+        /// Determines if the current environment string is valid to download in the current system
+        /// Used to determine witch packages to install for each build
+        /// </summary>
+        /// <param name="enviroment"></param>
+        /// <returns>true if valid, false otherwise</returns>
+        public static bool IsEnviromentStringValidInstall(string? enviroment)
+        {
+            if (enviroment == null || enviroment.Trim() == string.Empty)
+            {
+                return false;
+            }
+
+            if (enviroment.ToLower().Contains("windows") && !SysInfo.IsWindows || enviroment.ToLower().Contains("linux") && !SysInfo.IsLinux || enviroment.ToLower().Contains("macosx") && !SysInfo.IsMacOS)
+            {
+                return false;
+            }
+
+            if (enviroment.ToLower().Contains("avx2") && !SysInfo.CpuAVX2 || enviroment.ToLower().Contains("avx") && !SysInfo.CpuAVX)
+            {
+                return false;
+            }
+
+            if (enviroment.ToLower().Contains("x86_64") && SysInfo.CpuArch == "X64")
+            {
+                return true;
+            }
+            if (enviroment.ToLower().Contains("arm64") && SysInfo.CpuArch == "Arm64")
+            {
+                return true;
+            }
+            if (enviroment.ToLower().Contains("arm32") && (SysInfo.CpuArch == "Armv6" || SysInfo.CpuArch == "Arm"))
+            {
+                return true;
+            }
+            if (SysInfo.CpuArch == "X86" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
+            {
+                return true;
+            }
+            if (SysInfo.CpuArch == "X64" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
+            {
+                return true;
+            }
+
+            if (SysInfo.CpuArch == "Arm64" && (SysInfo.IsMacOS || SysInfo.IsWindows) && !enviroment.ToLower().Contains("arm32") && !enviroment.ToLower().Contains("avx"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         /*
             Determine the operating system this build file is compiled for 
         */

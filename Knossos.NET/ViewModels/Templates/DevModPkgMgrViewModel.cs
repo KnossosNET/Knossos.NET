@@ -218,24 +218,27 @@ namespace Knossos.NET.ViewModels
                 {
                     Packages.Clear();
                     DisplayPackages = false;
-                    var moditem = VersionItems[VersionSelectedIndex].DataContext as Mod;
-                    if (moditem != null && (moditem.type == ModType.mod || moditem.type == ModType.tc))
+                    if (VersionItems.Count > VersionSelectedIndex && VersionSelectedIndex != -1)
                     {
-                        foreach (var pkg in moditem.packages)
+                        var moditem = VersionItems[VersionSelectedIndex].DataContext as Mod;
+                        if (moditem != null && (moditem.type == ModType.mod || moditem.type == ModType.tc))
                         {
-                            var displayPkg = new ModPackage();
-                            displayPkg.name = pkg.name;
-                            //Pre-selected for required 
-                            displayPkg.isSelected = pkg.status == "required" ? true : false;
-                            //Only allow to select/deselect non required packages
-                            displayPkg.isEnabled = !displayPkg.isSelected;
-                            //Mark previusly enabled packages as enabled
-                            if (Dependency.packages != null && Dependency.id == moditem.id && Dependency.packages.IndexOf(pkg.name) != -1)
+                            foreach (var pkg in moditem.packages)
                             {
-                                displayPkg.isSelected = true;
+                                var displayPkg = new ModPackage();
+                                displayPkg.name = pkg.name;
+                                //Pre-selected for required 
+                                displayPkg.isSelected = pkg.status == "required" ? true : false;
+                                //Only allow to select/deselect non required packages
+                                displayPkg.isEnabled = !displayPkg.isSelected;
+                                //Mark previusly enabled packages as enabled
+                                if (Dependency.packages != null && Dependency.id == moditem.id && Dependency.packages.IndexOf(pkg.name) != -1)
+                                {
+                                    displayPkg.isSelected = true;
+                                }
+                                Packages.Add(displayPkg);
+                                DisplayPackages = true;
                             }
-                            Packages.Add(displayPkg);
-                            DisplayPackages = true;
                         }
                     }
                     if(Packages.Count() > 1)

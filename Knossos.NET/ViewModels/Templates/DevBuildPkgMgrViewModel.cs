@@ -75,7 +75,7 @@ namespace Knossos.NET.ViewModels
 
                     if (result != null && result.Count > 0)
                     {
-                        File = Path.GetRelativePath(editorPackageItem.PkgMgr.editor!.ActiveVersion.fullPath, result[0].Path.LocalPath.ToString()).Replace(@"\", @"/");
+                        File = Path.GetRelativePath(Path.Combine(editorPackageItem.PkgMgr.editor!.ActiveVersion.fullPath, editorPackageItem.Package.folder != null ? editorPackageItem.Package.folder : ""), result[0].Path.LocalPath.ToString()).Replace(@"\", @"/");
                     }
                 }
                 catch (Exception ex)
@@ -280,7 +280,7 @@ namespace Knossos.NET.ViewModels
                     {
                         var newFile = result[0].Path.LocalPath.ToString();
                         var newExec = new ModExecutable();
-                        newExec.file = Path.GetRelativePath(PkgMgr.editor!.ActiveVersion.fullPath, newFile).Replace(@"\",@"/");
+                        newExec.file = Path.GetRelativePath(Path.Combine(PkgMgr.editor!.ActiveVersion.fullPath, Package.folder != null ? Package.folder : "" ), newFile).Replace(@"\",@"/");
                         Executables.Add(new PackageExecItem(newExec, this));
                     }
                 }catch(Exception ex)
@@ -367,7 +367,9 @@ namespace Knossos.NET.ViewModels
             {
                 if (NewPackageFolder.Trim() != string.Empty && NewPackageName.Trim() != string.Empty)
                 {
-                    Directory.CreateDirectory(editor!.ActiveVersion.fullPath + Path.DirectorySeparatorChar + NewPackageFolder + Path.DirectorySeparatorChar + NewPackageName);
+                    Directory.CreateDirectory(editor!.ActiveVersion.fullPath + Path.DirectorySeparatorChar + NewPackageFolder + Path.DirectorySeparatorChar + NewPackageFolder);
+                    File.Create(editor!.ActiveVersion.fullPath + Path.DirectorySeparatorChar + NewPackageFolder + Path.DirectorySeparatorChar + "do_not_copy_the_build_files_here").Close();
+                    File.Create(editor!.ActiveVersion.fullPath + Path.DirectorySeparatorChar + NewPackageFolder + Path.DirectorySeparatorChar + NewPackageFolder + Path.DirectorySeparatorChar + "copy_the_build_files_here").Close();
                     var newPkg = new ModPackage();
                     newPkg.folder = NewPackageFolder;
                     newPkg.name = NewPackageName;

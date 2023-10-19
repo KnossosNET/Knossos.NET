@@ -13,6 +13,7 @@ namespace Knossos.NET.ViewModels
 {
     public partial class DeveloperModsViewModel : ViewModelBase
     {
+        public static DeveloperModsViewModel? Instance;
         [ObservableProperty]
         private ObservableCollection<Mod> mods = new ObservableCollection<Mod>();
         [ObservableProperty]
@@ -52,7 +53,7 @@ namespace Knossos.NET.ViewModels
             }
             set
             {
-                if (selectedIndex != value)
+                if (selectedIndex != value || ModEditor == null)
                 {
                     if (value >= 0)
                         selectedIndex = value;
@@ -72,7 +73,28 @@ namespace Knossos.NET.ViewModels
 
         public DeveloperModsViewModel()
         {
-            
+            Instance = this;
+        }
+
+        public void CloseEditor()
+        {
+            ModEditor = null;
+            if (Mods.Count > 0)
+            {
+                SelectedIndex = 0;
+            }
+            else
+            {
+                SelectedIndex = -1;
+            }
+            GC.Collect();
+        }
+
+        public void DeleteMod(string modid)
+        {
+            var mod = Mods.FirstOrDefault(m=>m.id == modid);
+            if(mod != null)
+                Mods.Remove(mod);
         }
 
         public void AddMod(Mod mod)

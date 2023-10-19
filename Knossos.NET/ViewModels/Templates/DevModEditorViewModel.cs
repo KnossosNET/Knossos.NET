@@ -1,6 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
@@ -71,6 +72,40 @@ namespace Knossos.NET.ViewModels
                 index = mods.IndexOf(mod);
                 LoadActiveVersion();
             }
+        }
+
+        public void DeleteActiveVersion()
+        {
+            int currentIndex = index;
+            string id = ActiveVersion.id;
+            Knossos.RemoveMod(ActiveVersion);
+            mods.Remove(ActiveVersion);
+            if (mods.Any())
+            {
+                if (currentIndex > 0)
+                {
+                    index--;
+                }
+                else
+                {
+                    index = 0;
+                }
+                LoadActiveVersion();
+            }
+            else
+            {
+                //Delete mod from view and close editor
+                DeveloperModsViewModel.Instance!.DeleteMod(id);
+                DeveloperModsViewModel.Instance!.CloseEditor();
+            }
+        }
+
+        public void DeleteAllVersions()
+        {
+            //Delete mod from view and close editor
+            Knossos.RemoveMod(ActiveVersion.id);
+            DeveloperModsViewModel.Instance!.DeleteMod(ActiveVersion.id);
+            DeveloperModsViewModel.Instance!.CloseEditor();
         }
 
         public void StartModEditor(Mod mod)

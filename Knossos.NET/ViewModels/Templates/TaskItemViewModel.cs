@@ -56,6 +56,7 @@ namespace Knossos.NET.ViewModels
                     //Wait in Queue. Important!!! Only for main tasks that need to wait in queue that are created in TaskViewModel.cs
                     //And only if it needs to actually wait in the queue, some you dont need to do this for, ex: show a text msg.
                     //Do not do this for internal/subtasks as it will loop here forever
+                    Info = "In Queue";
                     while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
                     {
                         await Task.Delay(1000);
@@ -196,7 +197,7 @@ namespace Knossos.NET.ViewModels
         /* If this task contains subtasks, the subtasks must be added here, from the UIthread */
         [ObservableProperty]
         public ObservableCollection<TaskItemViewModel> taskList = new ObservableCollection<TaskItemViewModel>();
-        /* If this task contains subtasks it must be added to this single item list, from the UIthread */
+        /* If this task contains subtasks (this) object must be added to this single item list, from the UIthread */
         [ObservableProperty]
         public ObservableCollection<TaskItemViewModel> taskRoot = new ObservableCollection<TaskItemViewModel>();
 
@@ -331,7 +332,11 @@ namespace Knossos.NET.ViewModels
                     CancelButtonVisible = false;
                     IsTextTask = false;
                     IsFileDownloadTask = false;
-                    Name = "Release Mod";
+
+                    if (metaUpdate)
+                        Name = "Metadata Update";
+                    else
+                        Name = "Release Mod";
 
                     if (cancelSource != null)
                         cancellationTokenSource = cancelSource;
@@ -346,6 +351,7 @@ namespace Knossos.NET.ViewModels
                     cleanMod.title = mod.title;
                     cleanMod.firstRelease = mod.firstRelease;
                     cleanMod.tile = mod.tile;
+                    cleanMod.version = mod.version;
 
                     //Update title and tile image
                     await Nebula.UpdateMod(cleanMod);
@@ -353,8 +359,7 @@ namespace Knossos.NET.ViewModels
                     cleanMod.type = mod.type;
                     cleanMod.parent = mod.parent;
                     cleanMod.cmdline = mod.cmdline == null ? "" : mod.cmdline;
-                    cleanMod.description = mod.description;
-                    cleanMod.version = mod.version;
+                    cleanMod.description = mod.description == null ? "" : mod.description;
                     cleanMod.lastUpdate = mod.lastUpdate;
                     cleanMod.isPrivate = mod.isPrivate;
                     cleanMod.videos = mod.videos == null ? new string[0] : mod.videos;
@@ -669,6 +674,10 @@ namespace Knossos.NET.ViewModels
                         throw new TaskCanceledException();
 
                     var zipPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + pkg.folder + ".7z";
+                    if (pkg.environment != null && pkg.environment.ToLower().Contains("macos"))
+                    {
+                        zipPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + pkg.folder + ".tar.gz";
+                    }
                     if (!File.Exists(zipPath))
                     {
                         throw new TaskCanceledException();
@@ -679,7 +688,7 @@ namespace Knossos.NET.ViewModels
                     { 
                         throw new TaskCanceledException();
                     }
-
+                    await Task.Delay(300);
                     Info = "OK";
                     IsCompleted = true;
                     CancelButtonVisible = false;
@@ -761,6 +770,7 @@ namespace Knossos.NET.ViewModels
                     //Compress with 7z
                     //Clear files.urls
                     //Fill file.filename, file.checksum, file.dest, file.filesize
+                    //Note: MacOSX builds must be compressed as tar.gz keeping symblinks as links
 
                     if (!Directory.Exists(modFullPath + Path.DirectorySeparatorChar + pkg.folder))
                     {
@@ -785,7 +795,11 @@ namespace Knossos.NET.ViewModels
 
 
                     var zipPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + pkg.folder + ".7z";
-                    if(File.Exists(zipPath))
+                    if (pkg.environment != null && pkg.environment.ToLower().Contains("macos"))
+                    {
+                        zipPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + pkg.folder;
+                    }
+                    if (File.Exists(zipPath))
                     {
                         File.Delete(zipPath);
                     }
@@ -839,29 +853,48 @@ namespace Knossos.NET.ViewModels
                         Info = "Adding files";
                         foreach (var file in allfiles)
                         {
-                            var relativePath = Path.GetRelativePath(modFullPath + Path.DirectorySeparatorChar + pkg.folder, file).Replace(@"\", @"/");
-                            var checksum = await SysInfo.GetFileHash(file);
-                            if (checksum != null)
+                            //Do not add symblinks
+                            var fi = new FileInfo(file);
+                            if (fi.LinkTarget == null)
                             {
-                                var fl = new ModFilelist();
-                                fl.archive = pkg.folder + ".7z";
-                                fl.filename = fl.origName = relativePath;
-                                fl.checksum = new string[2] { "sha256", checksum };
-                                filelist.Add(fl);
-                            }
-                            else
-                            {
-                                throw new TaskCanceledException();
+                                var relativePath = Path.GetRelativePath(modFullPath + Path.DirectorySeparatorChar + pkg.folder, file).Replace(@"\", @"/");
+                                var checksum = await SysInfo.GetFileHash(file);
+                                if (checksum != null)
+                                {
+                                    var fl = new ModFilelist();
+                                    fl.archive = pkg.folder + ".7z";
+                                    fl.filename = fl.origName = relativePath;
+                                    fl.checksum = new string[2] { "sha256", checksum };
+                                    filelist.Add(fl);
+                                }
+                                else
+                                {
+                                    throw new TaskCanceledException();
+                                }
                             }
                         }
-                        Info = "Compressing (7z)";
+
                         ProgressBarMax = 100;
                         ProgressCurrent = 0;
                         var compressor = new SevenZipConsoleWrapper(sevenZipCallback);
-                        if (!await compressor.CompressFolder(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
+                        if (pkg.environment != null && pkg.environment.ToLower().Contains("macos"))
                         {
-                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
-                            throw new TaskCanceledException();
+                            Info = "Compressing (.tar.gz)";
+                            if (!await compressor.CompressFolderTarGz(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
+                                throw new TaskCanceledException();
+                            }
+                            zipPath += ".tar.gz";
+                        }
+                        else
+                        {
+                            Info = "Compressing (7z)";
+                            if (!await compressor.CompressFolder(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
+                                throw new TaskCanceledException();
+                            }
                         }
                     }
 
@@ -891,6 +924,10 @@ namespace Knossos.NET.ViewModels
                     if(pkg.executables == null)
                     {
                         pkg.executables = new List<ModExecutable>();
+                    }
+                    if(pkg.dependencies == null)
+                    {
+                        pkg.dependencies = new ModDependency[0];
                     }
                     Info = "OK";
                     IsCompleted = true;
@@ -957,6 +994,7 @@ namespace Knossos.NET.ViewModels
                     CancelButtonVisible = true;
                     IsTextTask = false;
                     IsFileDownloadTask = false;
+                    Info = "In Queue";
                     Name = "Uploading " + mod;
                     await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
 
@@ -974,7 +1012,7 @@ namespace Knossos.NET.ViewModels
                             throw new TaskCanceledException();
                         }
                     }
-
+                    Info = "";
                     //If we are doing only meta skip to the end
                     if (!metaOnly)
                     {
@@ -986,7 +1024,7 @@ namespace Knossos.NET.ViewModels
                             if (cancellationTokenSource.IsCancellationRequested)
                                 throw new TaskCanceledException();
                             var create = new TaskItemViewModel();
-                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(create));
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, create));
                             await create.CreateModNebula(mod, cancellationTokenSource);
                             //If fails it should trigger cancel no need to check the return
                         }
@@ -1013,7 +1051,7 @@ namespace Knossos.NET.ViewModels
                         //Preflight check
                         Info = "PreFlight Check";
                         var newTask = new TaskItemViewModel();
-                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(newTask));
+                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, newTask));
                         var preFlightCheck = await newTask.PreFlightCheck(mod, cancellationTokenSource);
 
                         ProgressCurrent++;
@@ -1030,8 +1068,10 @@ namespace Knossos.NET.ViewModels
                             //Prepare packages, update data on mod
                             await Parallel.ForEachAsync(mod.packages, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (pkg, token) =>
                             {
+                                if (mod.type != ModType.mod && mod.type != ModType.tc) //Just to be sure
+                                    pkg.isVp = false;
                                 var newTask = new TaskItemViewModel();
-                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(newTask));
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, newTask));
                                 await newTask.PrepareModPkg(pkg, mod.fullPath, cancellationTokenSource);
                                 ProgressCurrent++;
                                 if (cancellationTokenSource.IsCancellationRequested)
@@ -1043,7 +1083,7 @@ namespace Knossos.NET.ViewModels
                             await Parallel.ForEachAsync(mod.packages, new ParallelOptions { MaxDegreeOfParallelism = 1 }, async (pkg, token) =>
                             {
                                 var newTask = new TaskItemViewModel();
-                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(newTask));
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, newTask));
                                 await newTask.UploadModPkg(pkg, mod.fullPath, cancellationTokenSource);
                                 ProgressCurrent++;
                                 if (cancellationTokenSource.IsCancellationRequested)
@@ -1075,7 +1115,7 @@ namespace Knossos.NET.ViewModels
                     var origScreenshots = mod.screenshots != null ? mod.screenshots.ToArray() : null;
 
                     var imgs = new TaskItemViewModel();
-                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(imgs));
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, imgs));
                     await imgs.UploadModImages(mod,cancellationTokenSource);
 
                     ProgressCurrent++;
@@ -1086,7 +1126,7 @@ namespace Knossos.NET.ViewModels
                     //Meta
                     Info = "Upload Metadata";
                     var meta = new TaskItemViewModel();
-                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(meta));
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, meta));
                     await meta.ReleaseMod(mod, metaOnly, cancellationTokenSource);
 
                     ProgressCurrent++;
@@ -1102,12 +1142,22 @@ namespace Knossos.NET.ViewModels
 
                     ProgressCurrent++;
 
-                    Info = "Upload Complete!";
+                    if (!metaOnly)
+                        Info = "Upload Complete!";
+                    else
+                        Info = "Metadata Updated!";
 
                     //Completed
                     IsCompleted = true; 
                     CancelButtonVisible = false;
                     ProgressCurrent = ProgressBarMax;
+
+                    //Delete kn_upload folder?
+                    try
+                    {
+                        //Directory.Delete(mod.fullPath + Path.DirectorySeparatorChar + "kn_upload");
+                    }
+                    catch { }
 
                     if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                     {
@@ -1375,7 +1425,6 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-
         public void DisplayUpdates(List<Mod> updatedMods)
         {
             try
@@ -1612,7 +1661,6 @@ namespace Knossos.NET.ViewModels
                 return false;
             }
         }
-
 
         private async Task<bool> CompressLosseFiles(List<string> filePaths, int alreadySkipped, CancellationTokenSource? cancelSource = null)
         {
@@ -1931,88 +1979,6 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.CompressVP()", ex);
                 return false;
             }
-        }
-
-        private async void multiuploaderCallback(string text, int currentPart, int maxParts)
-        {
-            await Dispatcher.UIThread.InvokeAsync(() => {
-                try
-                {
-                    ProgressBarMax = maxParts;
-                    ProgressCurrent = currentPart;
-                    Info = text;
-                }
-                catch { }
-            });
-        }
-
-        private async void sevenZipCallback(string percentage)
-        {
-            await Dispatcher.UIThread.InvokeAsync(() => {
-                try
-                {
-                    ProgressCurrent = int.Parse(percentage);
-                }
-                catch { }
-            });
-        }
-
-        private async void copyCallback(string filename)
-        {
-            if (filename != string.Empty)
-            {
-                ProgressCurrent++;
-            }
-            else
-            {
-                ProgressCurrent = 0;
-            }
-            await Dispatcher.UIThread.InvokeAsync(() => {
-                try 
-                {
-                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
-                }
-                catch { }
-            });
-        }
-
-        private async void compressionCallback(string filename, int maxFiles)
-        {
-            if (filename != string.Empty)
-            {
-                ProgressCurrent++;
-            }
-            else
-            {
-                ProgressCurrent = 0;
-            }
-            await Dispatcher.UIThread.InvokeAsync(() => {
-                try
-                {
-                    ProgressBarMax = maxFiles;
-                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
-                }catch { }
-            });
-        }
-
-        private async void extractCallback(string filename, int _, int maxFiles)
-        {
-            if (filename != string.Empty)
-            {
-                ProgressCurrent++;
-            }
-            else
-            {
-                ProgressCurrent = 0;
-            }
-            await Dispatcher.UIThread.InvokeAsync(() => {
-                try
-                {
-                    ProgressBarMax = maxFiles;
-                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
-                }
-                catch { }
-            });
         }
 
         public async Task<bool> CompressMod(Mod mod, CancellationTokenSource? cancelSource = null, bool isSubTask = false)
@@ -3351,7 +3317,7 @@ namespace Knossos.NET.ViewModels
                         modPath = Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "bin"+ Path.DirectorySeparatorChar + modFolder;
                         for (int i = modJson.packages.Count - 1; i >= 0; i--)
                         {
-                            if (IsEnviromentStringValid(modJson.packages[i].environment))
+                            if (FsoBuild.IsEnviromentStringValidInstall(modJson.packages[i].environment))
                             {
                                 files.AddRange(modJson.packages[i].files!);
                                 foreach (ModExecutable exec in modJson.packages[i].executables!)
@@ -3682,22 +3648,6 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal void RestartDownloadCommand()
-        {
-            restartDownload = true;
-            if (pauseDownload)
-                PauseDownloadCommand();
-        }
-
-        internal void PauseDownloadCommand()
-        {
-            pauseDownload = !pauseDownload;
-            if (pauseDownload)
-                PauseButtonText = "Resume";
-            else
-                PauseButtonText = "Pause";
-        }
-
         public async Task<bool?> DownloadFile(string url, string dest, string msg, bool showStopButton, string? tooltip, CancellationTokenSource? cancelSource = null)
         {
             string[] mirrors = { url };
@@ -3805,62 +3755,6 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.DownloadFile()", ex);
                 return false;
             }
-        }
-
-        public void CancelTaskCommand()
-        {
-            if (!IsCompleted)
-            {
-                cancellationTokenSource?.Cancel();
-                IsCancelled = true;
-            }
-        }
-
-
-        private bool IsEnviromentStringValid(string? enviroment)
-        {
-            if(enviroment == null || enviroment.Trim() == string.Empty)
-            { 
-                return false; 
-            }
-
-            if(enviroment.ToLower().Contains("windows") && !SysInfo.IsWindows || enviroment.ToLower().Contains("linux") && !SysInfo.IsLinux || enviroment.ToLower().Contains("macosx") && !SysInfo.IsMacOS)
-            {
-                return false;
-            }
-
-            if (enviroment.ToLower().Contains("avx2") && !SysInfo.CpuAVX2 || enviroment.ToLower().Contains("avx") && !SysInfo.CpuAVX)
-            {
-                return false;
-            }
-
-            if (enviroment.ToLower().Contains("x86_64") && SysInfo.CpuArch == "X64")
-            {
-                return true;
-            }
-            if (enviroment.ToLower().Contains("arm64") && SysInfo.CpuArch == "Arm64")
-            {
-                return true;
-            }
-            if (enviroment.ToLower().Contains("arm32") && (SysInfo.CpuArch == "Armv6" || SysInfo.CpuArch == "Arm"))
-            {
-                return true;
-            }
-            if(SysInfo.CpuArch == "X86" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
-            {
-                return true;
-            }
-            if (SysInfo.CpuArch == "X64" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
-            {
-                return true;
-            }
-
-            if (SysInfo.CpuArch == "Arm64" && (SysInfo.IsMacOS || SysInfo.IsWindows) && !enviroment.ToLower().Contains("arm32") && !enviroment.ToLower().Contains("avx"))
-            {
-                return true;
-            }
-
-            return false;
         }
 
         private async Task<bool> Download(string[] downloadMirrors, string destinationFilePath, Func<long?, long, string, double?, bool> progressChanged)
@@ -4018,6 +3912,116 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.Download", ex);
                 return false;
             }
+        }
+
+        /* Progress Callbacks */
+        private async void multiuploaderCallback(string text, int currentPart, int maxParts)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    ProgressBarMax = maxParts;
+                    ProgressCurrent = currentPart;
+                    Info = text;
+                }
+                catch { }
+            });
+        }
+
+        private async void sevenZipCallback(string percentage)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    ProgressCurrent = int.Parse(percentage);
+                }
+                catch { }
+            });
+        }
+
+        private async void copyCallback(string filename)
+        {
+            if (filename != string.Empty)
+            {
+                ProgressCurrent++;
+            }
+            else
+            {
+                ProgressCurrent = 0;
+            }
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                }
+                catch { }
+            });
+        }
+
+        private async void compressionCallback(string filename, int maxFiles)
+        {
+            if (filename != string.Empty)
+            {
+                ProgressCurrent++;
+            }
+            else
+            {
+                ProgressCurrent = 0;
+            }
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    ProgressBarMax = maxFiles;
+                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                }
+                catch { }
+            });
+        }
+
+        private async void extractCallback(string filename, int _, int maxFiles)
+        {
+            if (filename != string.Empty)
+            {
+                ProgressCurrent++;
+            }
+            else
+            {
+                ProgressCurrent = 0;
+            }
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    ProgressBarMax = maxFiles;
+                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                }
+                catch { }
+            });
+        }
+
+        /* Button Commands */
+        public void CancelTaskCommand()
+        {
+            if (!IsCompleted)
+            {
+                cancellationTokenSource?.Cancel();
+                IsCancelled = true;
+            }
+        }
+
+        internal void PauseDownloadCommand()
+        {
+            pauseDownload = !pauseDownload;
+            if (pauseDownload)
+                PauseButtonText = "Resume";
+            else
+                PauseButtonText = "Pause";
+        }
+
+        internal void RestartDownloadCommand()
+        {
+            restartDownload = true;
+            if (pauseDownload)
+                PauseDownloadCommand();
         }
     }
 }
