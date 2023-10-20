@@ -1,8 +1,10 @@
 ﻿using Avalonia.Threading;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -190,6 +192,16 @@ namespace Knossos.NET.ViewModels
             TaskList.Add(newTask);
             taskQueue.Enqueue(newTask);
             await newTask.UploadModVersion(mod, isNewMod, metadataonly, cancelSource);
+            cancelSource.Dispose();
+        }
+
+        public async void DownloadTool(Tool tool, Tool? updateFrom, Action<bool> finishedCallback)
+        {
+            var cancelSource = new CancellationTokenSource();
+            var newTask = new TaskItemViewModel();
+            TaskList.Add(newTask);
+            taskQueue.Enqueue(newTask);
+            await newTask.InstallTool(tool, updateFrom, finishedCallback, cancelSource);
             cancelSource.Dispose();
         }
     }

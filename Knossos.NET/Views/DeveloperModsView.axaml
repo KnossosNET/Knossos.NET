@@ -39,7 +39,7 @@
 			</TabItem>
 
 			<TabItem Header="Modding Tools">
-
+				<v:DevToolManagerView Content="{Binding DevToolManager}"/>
 			</TabItem>
 
 			<TabItem Header="Nebula">

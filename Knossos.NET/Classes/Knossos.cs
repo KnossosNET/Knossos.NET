@@ -22,8 +22,10 @@ namespace Knossos.NET
     public static class Knossos
     {
         public static readonly string AppVersion = "0.2.0-Alpha";
+        public readonly static string ToolRepoURL = "https://raw.githubusercontent.com/Shivansps/Knet-Tool-Repo/main/knet_tools.json";
         private static List<Mod> installedMods = new List<Mod>();
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();
+        private static List<Tool> modTools = new List<Tool>();
         public static GlobalSettings globalSettings = new GlobalSettings();
         public static bool retailFs2RootFound = false;
         public static bool flagDataLoaded = false;
@@ -1023,6 +1025,10 @@ namespace Knossos.NET
                     Log.Add(Log.LogSeverity.Warning, "Knossos.FolderSearchRecursive()", "Deleting incomplete download found at "+path);
                     Directory.Delete(path, true);
                 }
+                else if (File.Exists(path + Path.DirectorySeparatorChar + "tool.json"))
+                {
+                    Knossos.AddTool(new Tool(path));
+                }
                 else if (File.Exists(path + Path.DirectorySeparatorChar + "mod.json"))
                 {
                     try
@@ -1221,6 +1227,21 @@ namespace Knossos.NET
                 if (callBack != null)
                     callBack();
             }
+        }
+
+        public static void RemoveTool(Tool tool)
+        {
+            modTools.Remove(tool);
+        }
+
+        public static void AddTool(Tool tool)
+        {
+            modTools.Add(tool);
+        }
+
+        public static List<Tool> GetTools()
+        {
+            return modTools;
         }
     }
 }

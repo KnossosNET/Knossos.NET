@@ -104,6 +104,11 @@ namespace Knossos.NET.ViewModels
                 await MessageBox.Show(MainWindow.instance, "Mod id cant be empty or be less than 3 characters: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
                 return false;
             }
+            if (ModId.ToLower() == "tools" || ModId.ToLower() == "fso")
+            {
+                await MessageBox.Show(MainWindow.instance, "Mod id: " + ModId+" is a reserved value", "Validation error", MessageBox.MessageBoxButtons.OK);
+                return false;
+            }
             if (await Nebula.IsModIdInNebula(ModId))
             {
                 await MessageBox.Show(MainWindow.instance, "Mod id already exist in Nebula: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);

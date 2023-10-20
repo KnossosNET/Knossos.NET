@@ -20,6 +20,8 @@ namespace Knossos.NET.ViewModels
         private DevModEditorViewModel? modEditor;
         [ObservableProperty]
         private NebulaLoginViewModel nebulaLoginVM = new NebulaLoginViewModel();
+        [ObservableProperty]
+        private DevToolManagerViewModel devToolManager = new DevToolManagerViewModel();
 
         private int tabIndex = 0;
         private int TabIndex
@@ -35,6 +37,7 @@ namespace Knossos.NET.ViewModels
                     }
                     if (tabIndex == 1) //Tools
                     {
+                        DevToolManager.LoadTools();
                     }
                     if (tabIndex == 2) //Nebula Login
                     {

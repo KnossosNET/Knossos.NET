@@ -1,4 +1,5 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Controls;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -7,11 +8,13 @@ using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Knossos.NET.ViewModels.DevToolManagerViewModel;
 
 namespace Knossos.NET.ViewModels
 {
@@ -30,6 +33,10 @@ namespace Knossos.NET.ViewModels
         public DevModFsoSettingsViewModel? fsoSettingsView;
         [ObservableProperty]
         public DevModDetailsViewModel? detailsView;
+        [ObservableProperty]
+        private ObservableCollection<ComboBoxItem> toolItems = new ObservableCollection<ComboBoxItem>();
+        [ObservableProperty]
+        private int toolIndex = 0;
 
         [ObservableProperty]
         public string name = string.Empty;
@@ -39,7 +46,7 @@ namespace Knossos.NET.ViewModels
         public bool isEngineBuild = false;
 
         [ObservableProperty]
-        private Bitmap? image;
+        private Bitmap? modImage;
 
         private List<Mod> mods = new List<Mod>();
         private int index = 0;
@@ -115,13 +122,14 @@ namespace Knossos.NET.ViewModels
                 //Clean old data
                 Name = Version = string.Empty;
                 mods.Clear();
-                Image?.Dispose();
+                ModImage?.Dispose();
                 VersionsView = null;
                 PkgMgrView = null;
                 FsoSettingsView = null;
                 DetailsView = null;
                 IsEngineBuild = false;
-                Image = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
+                LoadTools();
+                ModImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
                 index = 0;
                 //Get all installed mods with this ID
                 switch (mod.type)
@@ -177,8 +185,8 @@ namespace Knossos.NET.ViewModels
                 Version = mod.version;
                 if (!string.IsNullOrEmpty(mod.tile) && File.Exists(mod.fullPath + Path.DirectorySeparatorChar + mod.tile))
                 {
-                    Image?.Dispose();
-                    Image = new Bitmap(mod.fullPath + Path.DirectorySeparatorChar + mod.tile);
+                    ModImage?.Dispose();
+                    ModImage = new Bitmap(mod.fullPath + Path.DirectorySeparatorChar + mod.tile);
                 }
                 //Templated Elements
                 if (IsEngineBuild)
@@ -222,8 +230,17 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-            
-            }catch(Exception ex)
+                var selected = ToolItems.FirstOrDefault(x => x.IsSelected);
+                if (selected != null)
+                {
+                    var tool = selected.DataContext as Tool;
+                    if (tool != null)
+                    {
+                        tool.Open(ActiveVersion.fullPath);
+                    }
+                }
+            }
+            catch(Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "DevModEditorViewModel.OpenTool()", ex);
             }
@@ -238,6 +255,58 @@ namespace Knossos.NET.ViewModels
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "DevModEditorViewModel.OpenFolder()", ex);
+            }
+        }
+
+        private void LoadTools()
+        {
+            try
+            {
+                ToolItems.Clear();
+                ToolIndex = -1;
+                var tools = Knossos.GetTools();
+                foreach (var tool in tools)
+                {
+                    var item = new ComboBoxItem();
+                    item.DataContext = tool;
+                    item.Content = tool.name;
+                    InsertToolInOrder(item);
+                }
+                if (ToolItems.Any())
+                {
+                    ToolIndex = 0;
+                    var first = ToolItems.First();
+                    first.IsSelected = true;
+                }
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "DevModEditorViewModel.LoadTools", ex);
+            }
+        }
+
+        private void InsertToolInOrder(ComboBoxItem item)
+        {
+            try
+            {
+                int i;
+                for (i = 0; i < ToolItems.Count; i++)
+                {
+                    var toolInList = ToolItems[i].DataContext as Tool;
+                    var tool = item.DataContext as Tool;
+
+                    if (toolInList!.isFavorite == tool!.isFavorite && String.Compare(toolInList!.name, tool.name) > 0)
+                    {
+                        break;
+                    }
+                    if (!toolInList!.isFavorite && tool.isFavorite)
+                    {
+                        break;
+                    }
+                }
+                ToolItems.Insert(i, item);
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "DevModEditorViewModel.InsertToolInOrder", ex);
             }
         }
     }
