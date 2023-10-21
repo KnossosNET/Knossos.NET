@@ -70,6 +70,7 @@ namespace Knossos.NET.Models
         public static string? userName { get { return settings.user; } }
         public static string? userPass { get { return settings.pass != null ? SysInfo.DIYStringDecryption(settings.pass) : null; } }
         private static Mod[]? privateMods;
+        private static string[]? editableIds;
 
         public static async void Trinity()
         {
@@ -608,7 +609,7 @@ namespace Knossos.NET.Models
             public string reason { get; set; }
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-            public Mod[] mods { get; set; }
+            public JsonElement[] mods { get; set; }
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public ModMember[] members { get; set; }
@@ -965,22 +966,27 @@ namespace Knossos.NET.Models
             return false;
         }
 
-        /* Disabled due to a conflict in the return type of "mods" and we are not using it anyway
         /// <summary>
         /// Get an array of mods that the user has write access to.
+        /// Only loaded once per session
         /// </summary>
         /// <returns>An array of Mods or null</returns>
         public static async Task<string[]?> GetEditableModIDs()
         {
             try
             {
+                if(editableIds != null)
+                    return editableIds;
+
                 var reply = await ApiCall("mod/editable", null, true, 30, ApiMethod.GET);
                 if (reply.HasValue)
-                {
+                { 
                     if (reply.Value.mods != null && reply.Value.mods.Any())
                     {
-                        Log.Add(Log.LogSeverity.Information, "Nebula.GetEditableMods", "Editable mod in Nebula: " + string.Join(", ", reply.Value.mods));
-                        return reply.Value.mods.Select(s => s.ToString()).ToArray()!;
+                        var ids = reply.Value.mods.Select(x => x.Deserialize<string>()!).ToArray()!;
+                        Log.Add(Log.LogSeverity.Information, "Nebula.GetEditableMods", "Editable mods in Nebula: " + string.Join(", ", ids));
+                        editableIds = ids;
+                        return ids;
                     }
                     else
                     {
@@ -998,7 +1004,6 @@ namespace Knossos.NET.Models
             }
             return null;
         }
-        */
 
         /// <summary>
         /// Get an array of private mods that the user has access to.
@@ -1011,11 +1016,12 @@ namespace Knossos.NET.Models
                 var reply = await ApiCall("mod/list_private", null, true, 30, ApiMethod.GET);
                 if (reply.Value.mods != null && reply.Value.mods.Any())
                 {
-                    foreach (Mod mod in reply.Value.mods)
+                    var mods = reply.Value.mods.Select(x => x.Deserialize<Mod>()!).ToArray()!;
+                    foreach (var mod in mods)
                     {
                         Log.Add(Log.LogSeverity.Information, "Nebula.GetPrivateMods", "Private mod in Nebula with access: " + mod);
                     }
-                    return reply.Value.mods;
+                    return mods;
                 }
                 else
                 {

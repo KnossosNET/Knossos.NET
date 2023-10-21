@@ -24,6 +24,8 @@
 				<Button IsVisible="{Binding RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding SwitchToLogin}" Margin="5" Background="Red">Cancel</Button>
 				<Button IsVisible="{Binding RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding Register}" Margin="5" Background="Green">Register</Button>
 			</WrapPanel>
+			<Label HorizontalAlignment="Center" IsVisible="{Binding UserLoggedIn}" Margin="20" FontSize="20">Mods IDs you have write access to</Label>
+			<TextBox Background="Transparent" IsReadOnly="True" IsVisible="{Binding UserLoggedIn}" TextWrapping="Wrap" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Text="{Binding EditableIDs}"></TextBox>
 		</StackPanel>
 	</ScrollViewer>
 </UserControl>

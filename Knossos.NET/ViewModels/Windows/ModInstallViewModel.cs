@@ -44,7 +44,7 @@ namespace Knossos.NET.ViewModels
 
         private Mod? selectedMod;
         [ObservableProperty]
-        private bool loggedToNebula = Nebula.userIsLoggedIn;
+        private bool hasWriteAccess = false;
         [ObservableProperty]
         private bool forceDevMode = false;
 
@@ -76,7 +76,15 @@ namespace Knossos.NET.ViewModels
 
         private async void InitialLoad(string id, string? preSelectedVersion = null)
         {
-            ModVersions=await Nebula.GetAllModsWithID(id);
+            if (Nebula.userIsLoggedIn)
+            {
+                var ids = await Nebula.GetEditableModIDs();
+                if (ids != null && ids.Any() && ids.FirstOrDefault(x => x == id) != null)
+                {
+                    HasWriteAccess = true;
+                }
+            }
+            ModVersions =await Nebula.GetAllModsWithID(id);
             if(ModVersions.Any())
             {
                 if(preSelectedVersion == null)
