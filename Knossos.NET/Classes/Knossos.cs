@@ -851,7 +851,7 @@ namespace Knossos.NET
                     if (s.Trim().Contains(" "))
                     {
                         var param = s.Trim().Split(' ')[0];
-                        if (!cmdline.Contains(param))
+                        if (!cmdline.Contains("-"+param+" "))
                         {
                             if (s.Trim().Length > 0)
                             {
@@ -861,7 +861,7 @@ namespace Knossos.NET
                     }
                     else
                     {
-                        if (!cmdline.Contains(s.Trim()))
+                        if (!cmdline.Contains("-" + s.Trim()))
                         {
                             if (s.Trim().Length > 0)
                             {
@@ -880,7 +880,7 @@ namespace Knossos.NET
                     if (s.Trim().Contains(" "))
                     {
                         var param = s.Trim().Split(' ')[0];
-                        if (!cmdline.Contains(param))
+                        if (!cmdline.Contains("-" + param + " "))
                         {
                             if (s.Trim().Length > 0)
                             {
@@ -890,7 +890,7 @@ namespace Knossos.NET
                     }
                     else
                     {
-                        if (!cmdline.Contains(s.Trim()))
+                        if (!cmdline.Contains("-" + s.Trim()))
                         {
                             if (s.Trim().Length > 0)
                             {
