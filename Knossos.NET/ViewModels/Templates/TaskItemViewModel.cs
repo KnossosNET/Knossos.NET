@@ -1041,11 +1041,13 @@ namespace Knossos.NET.ViewModels
                             Info = "Compressing (7z)";
                             ProgressBarMax = 100;
                             ProgressCurrent = 0;
-                            var compressor = new SevenZipConsoleWrapper(sevenZipCallback);
-                            if(!await compressor.CompressFile(vpPath, modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps", zipPath))
+                            using (var compressor = new SevenZipConsoleWrapper(sevenZipCallback, cancellationTokenSource))
                             {
-                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
-                                throw new TaskCanceledException();
+                                if (!await compressor.CompressFile(vpPath, modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps", zipPath))
+                                {
+                                    Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
+                                    throw new TaskCanceledException();
+                                }
                             }
                             var fl = new ModFilelist();
                             fl.archive = pkg.folder + ".7z";
@@ -1087,24 +1089,26 @@ namespace Knossos.NET.ViewModels
 
                         ProgressBarMax = 100;
                         ProgressCurrent = 0;
-                        var compressor = new SevenZipConsoleWrapper(sevenZipCallback);
-                        if (pkg.environment != null && pkg.environment.ToLower().Contains("macos"))
+                        using (var compressor = new SevenZipConsoleWrapper(sevenZipCallback, cancellationTokenSource))
                         {
-                            Info = "Compressing (.tar.gz)";
-                            if (!await compressor.CompressFolderTarGz(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
+                            if (pkg.environment != null && pkg.environment.ToLower().Contains("macos"))
                             {
-                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
-                                throw new TaskCanceledException();
+                                Info = "Compressing (.tar.gz)";
+                                if (!await compressor.CompressFolderTarGz(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
+                                {
+                                    Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
+                                    throw new TaskCanceledException();
+                                }
+                                zipPath += ".tar.gz";
                             }
-                            zipPath += ".tar.gz";
-                        }
-                        else
-                        {
-                            Info = "Compressing (7z)";
-                            if (!await compressor.CompressFolder(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
+                            else
                             {
-                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
-                                throw new TaskCanceledException();
+                                Info = "Compressing (7z)";
+                                if (!await compressor.CompressFolder(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
+                                {
+                                    Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
+                                    throw new TaskCanceledException();
+                                }
                             }
                         }
                     }

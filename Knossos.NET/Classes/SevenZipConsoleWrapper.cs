@@ -3,22 +3,26 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Knossos.NET
 {
-    public class SevenZipConsoleWrapper
+    public class SevenZipConsoleWrapper : IDisposable
     {
+        private bool disposed = false;
         public string versionString = string.Empty;
         private string pathToConsoleExecutable;
         private Action<string>? progressCallback;
         private Process? process;
         private bool completedSuccessfully = false;
+        private CancellationTokenSource? cancelSource;
 
-        public SevenZipConsoleWrapper(Action<string>? progressCallback = null) 
+        public SevenZipConsoleWrapper(Action<string>? progressCallback = null, CancellationTokenSource? cancelSource = null) 
         {
             this.pathToConsoleExecutable = UnpackExec();
             this.progressCallback = progressCallback;
+            this.cancelSource = cancelSource;
 
             if(File.Exists(pathToConsoleExecutable))
             {
@@ -30,8 +34,18 @@ namespace Knossos.NET
             }
         }
 
+        /// <summary>
+        /// Compress a folder into a .7z file with max LZMA2 compression
+        /// destFile must be pass with the ".7z" extension.
+        /// </summary>
+        /// <param name="sourceFolder"></param>
+        /// <param name="destFile"></param>
+        /// <returns>true if successfull, false otherwise</returns>
+        /// <exception cref="ObjectDisposedException"></exception>
         public async Task<bool> CompressFolder(string sourceFolder, string destFile)
         {
+            if (disposed)
+                throw new ObjectDisposedException("This object was already disposed.");
             string cmdline = "a -t7z -m0=lzma2 -md=64M -mx=9 -ms=on -bsp1 -y ";
             return await Run(cmdline + destFile, sourceFolder);
         }
@@ -43,23 +57,45 @@ namespace Knossos.NET
         /// <param name="sourceFolder"></param>
         /// <param name="destFile"></param>
         /// <returns>true if successfull, false otherwise</returns>
+        /// <exception cref="ObjectDisposedException"></exception>
         public async Task<bool> CompressFolderTarGz(string sourceFolder, string destFile)
         {
+            if (disposed)
+                throw new ObjectDisposedException("This object was already disposed.");
             string cmdline = "a -snh -snl -y ";
             var r = await Run(cmdline + destFile + ".tar", sourceFolder);
             if (r)
-                return await Run("a -y " + destFile + ".tar.gz" + " " + destFile + ".tar", sourceFolder);
+                return await Run("a -mx=8 -bsp1 -y " + destFile + ".tar.gz" + " " + destFile + ".tar", sourceFolder);
             return r;
         }
 
+        /// <summary>
+        /// Compress a file into a .7z file with max LZMA2 compression
+        /// destFile must be pass with the ".7z" extension.
+        /// </summary>
+        /// <param name="sourceFolder"></param>
+        /// <param name="destFile"></param>
+        /// <returns>true if successfull, false otherwise</returns>
+        /// <exception cref="ObjectDisposedException"></exception>
         public async Task<bool> CompressFile(string filepath, string workingFolder, string destFile)
         {
+            if (disposed)
+                throw new ObjectDisposedException("This object was already disposed.");
             string cmdline = "a -t7z -m0=lzma2 -md=64M -mx=9 -ms=on -bsp1 -y ";
             return await Run(cmdline + destFile + " " + filepath, workingFolder);
         }
 
+        /// <summary>
+        /// Test a compressed file integrity
+        /// </summary>
+        /// <param name="sourceFolder"></param>
+        /// <param name="destFile"></param>
+        /// <returns>true if successfull, false otherwise</returns>
+        /// <exception cref="ObjectDisposedException"></exception>
         public async Task<bool> VerifyFile(string file)
         {
+            if (disposed)
+                throw new ObjectDisposedException("This object was already disposed.");
             string cmdline = "t ";
             return await Run(cmdline + file);
         }
@@ -175,7 +211,6 @@ namespace Knossos.NET
                 completedSuccessfully = false;
                 using (process = new Process())
                 {
-                    process = new Process();
                     process.StartInfo.FileName = pathToConsoleExecutable;
                     process.StartInfo.Arguments = cmdline;
                     process.StartInfo.WorkingDirectory = workingFolder;
@@ -201,6 +236,9 @@ namespace Knossos.NET
 
         private void CmdOutput(object sender, DataReceivedEventArgs e)
         {
+            if (cancelSource != null && cancelSource.IsCancellationRequested)
+                KillProcess();
+
             if (e.Data != null)
             {
                 if (versionString == string.Empty && e.Data.Contains("7-Zip"))
@@ -234,6 +272,30 @@ namespace Knossos.NET
             {
                 Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.CmdOutput", e.Data);
             }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            if (disposing && process != null)
+            {
+                try
+                {
+                    process.Kill();
+                }
+                catch { }
+                process.Dispose();
+            }
+
+            disposed = true;
         }
     }
 }
