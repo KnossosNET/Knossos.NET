@@ -853,7 +853,7 @@ namespace Knossos.NET
                     if (s.Trim().Contains(" "))
                     {
                         var param = s.Trim().Split(' ')[0];
-                        if (!cmdline.Contains(param))
+                        if (!cmdline.Contains("-"+param+" "))
                         {
                             if (s.Trim().Length > 0)
                             {
@@ -863,7 +863,7 @@ namespace Knossos.NET
                     }
                     else
                     {
-                        if (!cmdline.Contains(s.Trim()))
+                        if (!cmdline.Contains("-" + s.Trim()))
                         {
                             if (s.Trim().Length > 0)
                             {
@@ -882,7 +882,7 @@ namespace Knossos.NET
                     if (s.Trim().Contains(" "))
                     {
                         var param = s.Trim().Split(' ')[0];
-                        if (!cmdline.Contains(param))
+                        if (!cmdline.Contains("-" + param + " "))
                         {
                             if (s.Trim().Length > 0)
                             {
@@ -892,7 +892,7 @@ namespace Knossos.NET
                     }
                     else
                     {
-                        if (!cmdline.Contains(s.Trim()))
+                        if (!cmdline.Contains("-" + s.Trim()))
                         {
                             if (s.Trim().Length > 0)
                             {
@@ -1140,7 +1140,7 @@ namespace Knossos.NET
             }
         }
 
-        public async static void Tts(string text, int? voice_index = null, int? volume = null, Func<bool>? callBack = null)
+        public async static void Tts(string text, int? voice_index = null, string? voice_name = null, int? volume = null, Func<bool>? callBack = null)
         {
             try
             {
@@ -1211,9 +1211,47 @@ namespace Knossos.NET
                     }
                     if(SysInfo.IsMacOS)
                     {
-                        //unimplemented
-                        if (callBack != null)
-                            await Dispatcher.UIThread.InvokeAsync(() => callBack(), DispatcherPriority.Background);
+                        if (ttsObject != null)
+                        {
+                            var sp = (Process)ttsObject;
+                            sp.Kill();
+                            ttsObject = null;
+                        }
+                        if (text != string.Empty)
+                        {
+                            await Task.Run(async () =>
+                            {
+                                if (text.Length > 7500)
+                                {
+                                    text = text.Substring(0, 7500);
+                                }
+                                await Task.Delay(300);
+                                string args = "";
+                                string? voice = globalSettings.ttsVoiceName;
+                                if (voice_name != null)
+                                {
+                                    voice = voice_name;
+                                }
+                                if (voice != null && voice != string.Empty)
+                                {
+                                    args = $"-v \"{voice}\"";
+                                }
+                                var vol = globalSettings.ttsVolume;
+                                if (volume.HasValue)
+                                    vol = volume.Value;
+                                using var ttsProcess = new Process();
+                                ttsProcess.StartInfo.FileName = "say";
+                                ttsProcess.StartInfo.Arguments = $"{args} \"[[volm {vol / 100.0}]] {text}\"";
+                                ttsProcess.StartInfo.UseShellExecute = false;
+                                ttsProcess.StartInfo.CreateNoWindow = true;
+                                ttsObject = ttsProcess;
+                                ttsProcess.Start();
+                                ttsProcess.WaitForExit();
+                                ttsObject = null;
+                                if (callBack != null)
+                                    await Dispatcher.UIThread.InvokeAsync(() => callBack(), DispatcherPriority.Background);
+                            });
+                        }
                     }
                 }
                 else

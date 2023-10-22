@@ -3,6 +3,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using BBcodes;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
@@ -107,6 +108,23 @@ namespace Knossos.NET.ViewModels
         {
         }
 
+        public ModDetailsViewModel(Mod modJson)
+        {
+            this.modVersions = new List<Mod>() { modJson };
+            this.modCard = null;
+            ItemSelectedIndex = 0;
+            LoadVersion(0);
+            devMode = modJson.devMode;
+            if (Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts)
+            {
+                //PlayDescription(200);
+            }
+            else
+            {
+                TtsAvalible = false;
+            }
+        }
+
         public ModDetailsViewModel(List<Mod> modVersions, int selectedIndex, ModCardViewModel modCard)
         {
             this.modVersions = modVersions;
@@ -148,7 +166,7 @@ namespace Knossos.NET.ViewModels
             IsPlayingTTS = true;
             var cleanDescriptionString = Regex.Replace(modVersions[ItemSelectedIndex].description!, @" ?\[.*?\]", string.Empty);
             cleanDescriptionString = Regex.Replace(cleanDescriptionString, @" ?\<.*?\>", string.Empty);
-            Knossos.Tts(cleanDescriptionString, null, null, CompletedCallback);
+            Knossos.Tts(cleanDescriptionString, null, null, null, CompletedCallback);
         }
 
         private bool CompletedCallback()
@@ -157,13 +175,17 @@ namespace Knossos.NET.ViewModels
             return true;
         }
 
-        private void LoadVersion(int index)
+        private async void LoadVersion(int index)
         {
             try
             {
                 Name = modVersions[index].title;
                 IsLocalMod = modVersions[index].modSource == ModSource.local? true : false;
                 LastUpdated = modVersions[index].lastUpdate;
+                if(!IsLocalMod && !modVersions[index].installed)
+                {
+                    await modVersions[index].LoadFulLNebulaData();
+                }
                 if (modVersions[index].description != null)
                 {
                     var html = BBCode.ConvertToHtml(modVersions[index].description!, BBCode.BasicRules);

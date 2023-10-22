@@ -384,7 +384,7 @@ namespace Knossos.NET.ViewModels
                     }
 
                     var cmd = new Process();
-                    var file = new FileInfo(result[0].Path.AbsolutePath.ToString());
+                    var file = new FileInfo(result[0].Path.LocalPath.ToString());
                     gogExe = file.FullName;
                     cmd.StartInfo.FileName = innoPath;
                     cmd.StartInfo.Arguments = file.FullName + " -l -g";
@@ -430,51 +430,57 @@ namespace Knossos.NET.ViewModels
             {
                 CanInstall = false;
                 gogExe = null;
-                ProcessFolder(result[0].Path.AbsolutePath.ToString());
+                ProcessFolder(result[0].Path.LocalPath.ToString());
             }
         }
 
         private async void ProcessFolder(string path)
         {
-            var fileArray = Directory.GetFiles(path, "*.vp").ToList();
-            filePaths.Clear();
-
-            if (fileArray.Any())
+            try
             {
-                try
-                {
-                    fileArray.AddRange(Directory.GetFiles(path + Path.DirectorySeparatorChar + "data", "*.*", SearchOption.AllDirectories).ToList());
-                    fileArray.AddRange(Directory.GetFiles(path + Path.DirectorySeparatorChar + "data2", "*.*", SearchOption.AllDirectories).ToList());
-                    fileArray.AddRange(Directory.GetFiles(path + Path.DirectorySeparatorChar + "data3", "*.*", SearchOption.AllDirectories).ToList());
-                }
-                catch { }
+                var fileArray = Directory.GetFiles(path, "*.vp").ToList();
+                filePaths.Clear();
 
-                foreach (var reqFileName in required)
+                if (fileArray.Any())
                 {
-                    var file = fileArray.FirstOrDefault(f => f.ToLower().Contains(reqFileName));
-                    if (file != null)
+                    try
                     {
-                        filePaths.Add(file);
+                        fileArray.AddRange(Directory.GetFiles(path + Path.DirectorySeparatorChar + "data", "*.*", SearchOption.AllDirectories).ToList());
+                        fileArray.AddRange(Directory.GetFiles(path + Path.DirectorySeparatorChar + "data2", "*.*", SearchOption.AllDirectories).ToList());
+                        fileArray.AddRange(Directory.GetFiles(path + Path.DirectorySeparatorChar + "data3", "*.*", SearchOption.AllDirectories).ToList());
                     }
-                }
+                    catch { }
 
-                if (filePaths.Count() != 9)
-                {
-                    //Missing files
-                    await MessageBox.Show(MainWindow.instance!, "Unable to find all the required Freespace 2 files in this directory.", "Files not found", MessageBox.MessageBoxButtons.OK);
-                    return;
-                }
-
-                foreach (var otnFileName in optional)
-                {
-                    var file = fileArray.FirstOrDefault(f => f.ToLower().Contains(otnFileName));
-                    if (file != null)
+                    foreach (var reqFileName in required)
                     {
-                        filePaths.Add(file);
+                        var file = fileArray.FirstOrDefault(f => f.ToLower().Contains(reqFileName));
+                        if (file != null)
+                        {
+                            filePaths.Add(file);
+                        }
                     }
-                }
 
-                CanInstall = true;
+                    if (filePaths.Count() != 9)
+                    {
+                        //Missing files
+                        await MessageBox.Show(MainWindow.instance!, "Unable to find all the required Freespace 2 files in this directory.", "Files not found", MessageBox.MessageBoxButtons.OK);
+                        return;
+                    }
+
+                    foreach (var otnFileName in optional)
+                    {
+                        var file = fileArray.FirstOrDefault(f => f.ToLower().Contains(otnFileName));
+                        if (file != null)
+                        {
+                            filePaths.Add(file);
+                        }
+                    }
+
+                    CanInstall = true;
+                }
+            }catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Fs2InstallerViewModel.ProcessFolder()", ex);
             }
         }
     }

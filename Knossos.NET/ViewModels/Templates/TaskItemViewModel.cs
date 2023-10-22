@@ -2592,7 +2592,7 @@ namespace Knossos.NET.ViewModels
 
                                         if (!reader.Entry.IsDirectory)
                                         {
-                                            reader.WriteEntryToDirectory(dest, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                                            reader.WriteEntryToDirectory(dest, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true, WriteSymbolicLink = (source, target) => { File.CreateSymbolicLink(source, target); } });
                                         }
                                         if (cancellationTokenSource!.IsCancellationRequested)
                                         {
@@ -3309,7 +3309,7 @@ namespace Knossos.NET.ViewModels
                             installed.packages.AddRange(mod.packages);
                         }
                         installed.SaveJson();
-                        installed.ClearUnusedData();
+                        mod.ClearUnusedData();
                     }
 
                     //We have to compress?

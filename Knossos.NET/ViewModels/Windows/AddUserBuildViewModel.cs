@@ -210,7 +210,7 @@ namespace Knossos.NET.ViewModels
                 options.Title = "Select the folder containing the FSO execs files";
                 var result = await MainWindow.instance.StorageProvider.OpenFolderPickerAsync(options);
                 if (result != null && result.Count > 0)
-                    return result[0].Path.AbsolutePath.ToString();
+                    return result[0].Path.LocalPath.ToString();
                 else
                     return null;
             }
@@ -302,7 +302,7 @@ namespace Knossos.NET.ViewModels
 
                 if (result != null && result.Count > 0)
                 {
-                    var file = new FileInfo(result[0].Path.AbsolutePath.ToString());
+                    var file = new FileInfo(result[0].Path.LocalPath.ToString());
                     return file.Name;
                 }
             }

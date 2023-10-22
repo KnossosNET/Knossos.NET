@@ -85,9 +85,11 @@ namespace Knossos.NET.ViewModels
         private int textureSelectedIndex = 0;
         private ObservableCollection<ComboBoxItem> ResolutionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
-        private int shadowQualitySelectedIndex = 2;
+        private int shadowQualitySelectedIndex = 0;
         [ObservableProperty]
-        private int aaSelectedIndex = 6;
+        private int aaSelectedIndex = 5;
+        [ObservableProperty]
+        private int msaaSelectedIndex = 0;
         [ObservableProperty]
         private bool enableSoftParticles = true;
         [ObservableProperty]
@@ -305,6 +307,8 @@ namespace Knossos.NET.ViewModels
             ShadowQualitySelectedIndex = Knossos.globalSettings.shadowQuality;
             //AA
             AaSelectedIndex = Knossos.globalSettings.aaPreset;
+            //MSAA
+            MsaaSelectedIndex = Knossos.globalSettings.msaaPreset;
             //SoftParticles
             EnableSoftParticles = Knossos.globalSettings.enableSoftParticles;
             //WindowMode
@@ -702,7 +706,7 @@ namespace Knossos.NET.ViewModels
 
                 if (result != null && result.Count > 0)
                 {
-                    Knossos.globalSettings.basePath = result[0].Path.AbsolutePath.ToString();
+                    Knossos.globalSettings.basePath = result[0].Path.LocalPath.ToString();
                     Knossos.globalSettings.Save();
                     Knossos.ResetBasePath();
                     LoadData();
@@ -804,6 +808,8 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.shadowQuality = ShadowQualitySelectedIndex;
             //AA
             Knossos.globalSettings.aaPreset = AaSelectedIndex;
+            //MSAA
+            Knossos.globalSettings.msaaPreset = MsaaSelectedIndex;
             //SoftParticles
             Knossos.globalSettings.enableSoftParticles = EnableSoftParticles;
             //WindowMode
@@ -851,6 +857,10 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.ttsDescription = TtsDescription;
             Knossos.globalSettings.ttsVoice = VoiceSelectedIndex;
             Knossos.globalSettings.ttsVolume = TtsVolume;
+            if (VoiceSelectedIndex >= 0 && VoiceItems.Count() > VoiceSelectedIndex && VoiceItems[VoiceSelectedIndex].Tag != null)
+            {
+                Knossos.globalSettings.ttsVoiceName = VoiceItems[VoiceSelectedIndex].Tag!.ToString();
+            }
 
             /* JOYSTICKS */
             if (Joy1SelectedIndex + 1 <= Joystick1Items.Count && Joy1SelectedIndex != -1)
@@ -921,8 +931,13 @@ namespace Knossos.NET.ViewModels
         {
             if (VoiceSelectedIndex != -1)
             {
+                string? voice_name = null;
+                if (VoiceSelectedIndex >= 0 && VoiceItems.Count() > VoiceSelectedIndex && VoiceItems[VoiceSelectedIndex].Tag != null)
+                {
+                    voice_name = VoiceItems[VoiceSelectedIndex].Tag!.ToString();
+                }
                 PlayingTTS = true;
-                Knossos.Tts("Developed in a joint operation by the Vasudan and Terran governments, the GTF Ulysses is an excellent all-around fighter. It offers superior maneuverability and a high top speed.", VoiceSelectedIndex, TtsVolume, TTSCompletedCallback);
+                Knossos.Tts("Developed in a joint operation by the Vasudan and Terran governments, the GTF Ulysses is an excellent all-around fighter. It offers superior maneuverability and a high top speed.", VoiceSelectedIndex, voice_name, TtsVolume, TTSCompletedCallback);
             }
         }
 
@@ -972,6 +987,17 @@ namespace Knossos.NET.ViewModels
         internal void QuickSetupCommand()
         {
             Knossos.OpenQuickSetup();
+        }
+        
+        internal async void CleanupLibraryCommand()
+        {
+            if (MainWindow.instance != null)
+            {
+                var dialog = new CleanupKnossosLibraryView();
+                dialog.DataContext = new CleanupKnossosLibraryViewModel();
+
+                await dialog.ShowDialog<CleanupKnossosLibraryView?>(MainWindow.instance);
+            }
         }
     }
 }

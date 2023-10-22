@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,10 +16,19 @@ namespace Knossos.NET.ViewModels
 {
     public partial class ModListViewModel : ViewModelBase
     {
+        enum SortType
+        {
+            name,
+            release,
+            update
+        }
+
         [ObservableProperty]
         private bool isNebulaView = false;
 
         private string search  = string.Empty;
+
+        private SortType sortType = SortType.name;
 
         private string Search
         {
@@ -76,15 +86,18 @@ namespace Knossos.NET.ViewModels
 
         public void AddMod(Mod modJson)
         {
-            var modCard = FindModCard(modJson.id);
+            var modCard = Mods.FirstOrDefault(m => m.ID == modJson.id);
             if (modCard == null)
             {
                 int i;
                 for (i = 0; i < Mods.Count; i++)
                 {
-                    if (String.Compare(Mods[i].Name, modJson.title) > 0)
+                    if (Mods[i].ActiveVersion != null)
                     {
-                        break;
+                        if(CompareMods(Mods[i].ActiveVersion!,modJson) > 0)
+                        {
+                            break;
+                        }
                     }
                 }
                 Mods.Insert(i, new ModCardViewModel(modJson));
@@ -95,9 +108,89 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        internal void ChangeSort(object sort)
+        {
+            try
+            {
+                SortType newSort = (SortType)Enum.Parse(typeof(SortType), (string)sort);
+                if (newSort != sortType)
+                {
+                    sortType = newSort;
+                    var tempList = Mods.ToList();
+                    tempList.Sort(CompareMods);
+                    for (int i = 0; i < tempList.Count; i++)
+                    {
+                        Mods.Move(Mods.IndexOf(tempList[i]), i);
+                    }
+                }
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "ModListViewModel.ChangeSort()", ex);
+            }
+        }
+
+        private int CompareMods(ModCardViewModel x, ModCardViewModel y)
+        {
+            if (x.ActiveVersion != null && y.ActiveVersion != null)
+                return CompareMods(x.ActiveVersion, y.ActiveVersion);
+            else
+                return 0;
+        }
+
+        private int CompareMods(Mod modA,Mod modB)
+        {
+            try
+            {
+                switch (sortType)
+                {
+                    case SortType.name:
+                        return String.Compare(modA.title, modB.title);
+                    case SortType.release:
+                        if (modA.firstRelease == modB.firstRelease)
+                            return 0;
+                        if (modA.firstRelease != null && modB.firstRelease != null)
+                        {
+                            if (DateTime.Parse(modA.firstRelease, CultureInfo.InvariantCulture) < DateTime.Parse(modB.firstRelease, CultureInfo.InvariantCulture))
+                                return 1;
+                            else
+                                return -1;
+                        }
+                        else
+                        {
+                            if (modA.firstRelease == null)
+                                return -1;
+                            else
+                                return 1;
+                        }
+                    case SortType.update:
+                        if (modA.lastUpdate == modB.lastUpdate)
+                            return 0;
+                        if (modA.lastUpdate != null && modB.lastUpdate != null)
+                        {
+                            if (DateTime.Parse(modA.lastUpdate, CultureInfo.InvariantCulture) < DateTime.Parse(modB.lastUpdate, CultureInfo.InvariantCulture))
+                                return 1;
+                            else
+                                return -1;
+                        }
+                        else
+                        {
+                            if (modA.lastUpdate == null)
+                                return 1;
+                            else
+                                return -1;
+                        }
+                    default: return 0;
+                }
+            }catch(Exception ex)
+            { 
+                Log.Add(Log.LogSeverity.Warning, "ModListViewModel.CompareMods()",ex.Message);
+                return 0; 
+            }
+        }
+
         public void UpdateIsAvalible(string id,bool value)
         {
-            var modCard = FindModCard(id);
+            var modCard = Mods.FirstOrDefault(m => m.ID == id);
             if (modCard != null)
             {
                 modCard.UpdateIsAvalible(value);
@@ -106,7 +199,7 @@ namespace Knossos.NET.ViewModels
 
         public void SetInstalling(string id, CancellationTokenSource cancelToken)
         {
-            var modCard = FindModCard(id);
+            var modCard = Mods.FirstOrDefault(m => m.ID == id);
             if (modCard != null)
             {
                 modCard.InstallingMod(cancelToken);
@@ -115,7 +208,7 @@ namespace Knossos.NET.ViewModels
 
         public void RemoveMod(string id)
         {
-            var modCard = FindModCard(id);
+            var modCard = Mods.FirstOrDefault(m => m.ID == id);
             if (modCard != null)
             {
                 Mods.Remove(modCard);
@@ -124,21 +217,11 @@ namespace Knossos.NET.ViewModels
 
         public void CancelModInstall(string id)
         {
-            var modCard = FindModCard(id);
+            var modCard = Mods.FirstOrDefault(m => m.ID == id);
             if (modCard != null)
             {
                 modCard.CancelInstall();
             }
-        }
-
-        private ModCardViewModel? FindModCard(string modId) 
-        {
-            foreach (var mod in Mods)
-            {
-                if(mod.ID == modId)
-                    return mod;
-            }
-            return null;
         }
     }
 }

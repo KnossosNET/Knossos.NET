@@ -13,10 +13,9 @@ https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.14-wind
 <br /><br />
 **The current status:**<br />
 <br />
--Version 0.1.0 - Most of the user functions are in, except for dev mode<br />
--Working in Windows and Linux<br />
+-Version 0.1.3 - Most of the user functions are in, except for dev mode<br />
+-Working in Windows, Mac and Linux<br />
 -Mod compression support<br />
--MacOS version is untested<br />
 
 <br /><br />
 **Quick Launch Cmdline:**<br />

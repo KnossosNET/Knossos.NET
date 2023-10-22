@@ -25,18 +25,18 @@
 		<!--Page1-->
 		<StackPanel IsVisible="{Binding Page1}" Grid.Row="0">
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center" >Welcome To Knossos.NET</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center" >This quick setup guide will help you go trought the basics of the initial configuration of the launcher. If you already know how to configure the launcher you can close this window.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center" >This quick setup guide will help you go through the basics of configuring the Knossos launcher for the first time. If you already know how to configure the launcher you can close this window.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center" >If you ever need to reopen this guide, there is a button for it inside the "Settings" tab.</TextBlock>
 		</StackPanel>
 		
 		<!--Page2-->
 		<StackPanel IsVisible="{Binding Page2}" Grid.Row="0" >
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center" >Setting up the library folder</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Before being able to do anything to need to assign this folder, Go to the "Settings" tab and inside the "Knossos Settings" section click on Browse and choose or create a folder for Knossos to use. It is highly recommended this to be a empty folder in case of new installs.</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">The Knossos library folder is were all game and mod data will be saved to, make sure you always have space available on this drive before installing a new mod or update.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">First, you must set a library folder. Go to the "Settings" tab and inside the "Knossos Settings" section click on "Browse" and choose or create a folder for Knossos to use. It is highly recommended to set this as an empty folder in a location with a large amount of available storage. Once you have set the folder be sure to click the "Save" button in the "Settings" tab. </TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">The Knossos library folder is where all game and mod data will be saved to. Make sure you always have space available on this drive before installing a new mod or update.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">Current Library Folder</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center" Text="{Binding LibraryPath}"></TextBlock>
-			<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Go to the "Settings" tab and set the library folder to continue</TextBlock>
+			<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Go to the "Settings" tab and set the library folder to continue.</TextBlock>
 		</StackPanel>
 		
 		<!--Page3-->
@@ -44,40 +44,40 @@
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center">Download a FSO engine build</TextBlock>
 			<TextBlock IsVisible="{Binding !RepoDownloaded}" Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">Waiting for repo.json to finish download to continue</TextBlock>
 			<StackPanel IsVisible="{Binding RepoDownloaded}">
-				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Now you need a game engine build, these are known as "FSO Builds", this is what the mods runs on and Knossos also uses it to get system data. This is why you are not going to be able to set most of the settings at the "Settings" tab before having downloaded a FSO build. </TextBlock>
+				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Now you need a game engine build, which are known as "FSO Builds". These builds are what mods run on, and Knossos also uses it to get and display system data. This is why you are not going to be able to set most of the settings in the "Settings" tab before having downloaded a FSO build. </TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Go to the "Engine" tab, select "Stable builds" and download the newest stable, it should be always the top one on the list.</TextBlock>
 				<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">Waiting for a FSO build to finish download to continue</TextBlock>
 				<TextBlock IsVisible="{Binding CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">Engine build detected!</TextBlock>
-				<TextBlock IsVisible="{Binding CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Keep in mind that some mods may download and run on diferent versions of the FSO engine, this is because some mods cant run on newer builds or maybe because they need a specific version. You can always change the FSO build used by a mod by opening the "Mod Settings" on the mod card, but keep in mind not all mods can run on all engine builds.</TextBlock>
+				<TextBlock IsVisible="{Binding CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Keep in mind that some mods may download and run on different versions of the FSO engine. This is because some mods cannot run on newer builds or they require a specific FSO build version. You can always change the FSO build used by a mod by opening the "Mod Settings" on the mod card, but keep in mind not all mods can run on all engine builds.</TextBlock>
 			</StackPanel>
 		</StackPanel>
 
 		<!--Page4-->
 		<StackPanel IsVisible="{Binding Page4}" Grid.Row="0" >
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center">Freespace 2 Retail</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">In order to have access to Freespace 1 and 2 content and visual improvements you need to install Freespace 2 Retail in Knossos. without this any content that needs the full Freespace 2 retail files will not be displayed on the Nebula tab.</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">To install Freespace 2 go to the "Settings" tab and open the "FS2 Retail Installer" the button is on the "Knossos Settings" section. Then follow the instructions there. If you already have FS2 installed this button is not avalible.</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">This step is optional and you can continue at any time</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">In order to have access to Freespace 1 and 2 content and visual improvements you need to install Freespace 2 Retail in Knossos. without this any content that needs the full Freespace 2 retail files will not be displayed on the "Nebula" tab.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">To install Freespace 2 go to the "Settings" tab and open the "FS2 Retail Installer" button under the "Knossos Settings" section. Then follow the instructions there. If you already have FS2 installed this button is not available.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">This step is optional and you can continue at any time.</TextBlock>
 		</StackPanel>
 
 		<!--Page5-->
 		<StackPanel IsVisible="{Binding Page5}" Grid.Row="0"  >
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center">Installing mods</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">The "Home" tab is were all your installed mods are displayed. If you have installed Freespace 2 Retail, the FS2 retail mod card you be already be added to your "Home" tab, but if play this you will be playing Freespace 2 in its original 1999 glory and if you are here you are probably looking for the visual improvements right? So lets get to it!</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Go to the "Nebula" tab, this list is populated after the repo.json is downloaded, these are the mods you will probably want to install for the visual improvements and Freespace story:</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">The "Home" tab is were all your installed mods are displayed. If you have installed Freespace 2 Retail, the FS2 retail mod card will already be added to your "Home" tab, but if click "Play" you will be playing Freespace 2 in its original 1999 glory. If you are here you then you are probably looking for the visual improvements right? So lets download and install those!</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Go to the "Nebula" tab. This list is populated after the "repo.json" is downloaded and these are the mods you will probably want to install for the visual improvements and Freespace story:</TextBlock>
 			<TextBlock Margin="20,0,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">-Freespace Upgrade MediaVPs (this is the Freespace 2 visual improvements mod and it is also used by most, if not all, other FS related mods. This mod has optional visual improvements components (like MV_AdvancedX) and it is recommended to select them all during install.)</TextBlock>
-			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">-FreeSpace Port MediaVPs (Visual improvements for the Freespace 1 port, this will also install the Freespace 1 port mod what gives you access to the full Freespace 1 missions and story)</TextBlock>
-			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">-Silent Threat: Reborn (fan made replacement and improvement of the original Silent Threat FS1 expansion. The story elements happens after the main FS1 story and before FS2.)</TextBlock>
-			<TextBlock Margin="20,20,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">If you dont have the retail fs2 installed into knossos you can still player total conversion mods, there are mods are compeltely standalone and do not depends on any of the Freespace content:</TextBlock>
-			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">There are some great options here like: Wing Commander Saga, Dispora, Solaris and more.</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">This step is optional and you can continue at any time</TextBlock>
+			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">-FreeSpace Port MediaVPs (Visual improvements for the Freespace 1 port, this will also install the Freespace 1 port mod, which gives you access to the full Freespace 1 missions and story)</TextBlock>
+			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">-Silent Threat: Reborn (fan made replacement and improvement of the original Silent Threat FS1 expansion. The story elements happen after the main FS1 story and before FS2.)</TextBlock>
+			<TextBlock Margin="20,20,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">If you do not have the retail FS2 installed into Knossos you can still play total conversion mods, which are mods that are compeltely standalone and do not depend on any of the Freespace content:</TextBlock>
+			<TextBlock Margin="20,5,0,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">There are some great options, such as: Wing Commander Saga, Diaspora, Solaris and more.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center">This step is optional and you can continue at any time.</TextBlock>
 		</StackPanel>
 
 		<!--Page6-->
 		<StackPanel IsVisible="{Binding Page6}" Grid.Row="0" >
 			<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Center">Finishing</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Finally, before launching a mod go to the "Settings" tab and configure video and audio settings, as well as any joysticks you may have installed.</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">It is recommended to run in windowed mode at the same resolution as your desktop resolution, no need to enable the borderless mode, as windowed mode is already borderless at native resolution.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">Finally, before launching a mod go to the "Settings" tab and configure video and audio settings, as well as any joysticks you may have installed. Always remember to click "Save" after changing any values.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Center">It is recommended to run in windowed mode at the same resolution as your desktop resolution. There is no need to enable the borderless mode, as windowed mode is already borderless at native resolution.</TextBlock>
 		</StackPanel>
 		
 		<!--Navigation-->

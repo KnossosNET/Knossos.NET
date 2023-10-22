@@ -41,11 +41,12 @@ namespace Knossos.NET
                     try
                     {
                         await WaitForFileAccess(LogFilePath);
-                        using (var writer = new StreamWriter(LogFilePath,true))
+                        using (var writer = new StreamWriter(LogFilePath, true))
                         {
                             writer.WriteLine(logString, Encoding.UTF8);
                         }
-                    }catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         WriteToConsole(ex.Message);
                     }

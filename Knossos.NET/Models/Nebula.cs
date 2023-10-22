@@ -58,7 +58,7 @@ namespace Knossos.NET.Models
         //https://dl.fsnebula.org/storage/repo.json
         //https://aigaion.feralhosting.com/discovery/nebula/repo.json
         //https://fsnebula.org/storage/repo.json"
-        private static readonly string repoUrl = @"https://fsnebula.org/storage/repo.json";
+        private static readonly string repoUrl = @"https://fsnebula.org/storage/repo_minimal.json";
         private static readonly string apiURL = @"https://api.fsnebula.org/api/1/";
         private static readonly string nebulaURL = @"https://fsnebula.org/";
         private static readonly bool listFS2Override = false;
@@ -103,12 +103,13 @@ namespace Knossos.NET.Models
             {
                 bool displayUpdates = settings.NewerModsVersions.Any() ? true : false;
                 var webEtag = await GetRepoEtag();
-                if (!File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json") || settings.etag != webEtag)
+                if (!File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json") || settings.etag != webEtag)
                 {
-                    //Download the repo.json
+                    //Download the repo_minimal.json
                     if (TaskViewModel.Instance != null)
                     {
-                        var result = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", "Downloading repo.json", true, "The repo.json file contains info on all the mods available in Nebula, without this you will not be able to install new mods or engine builds"), DispatcherPriority.Background);
+                        var result = await Dispatcher.UIThread.InvokeAsync(async()=>await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal_temp.json", "Downloading repo_minimal.json", true, "The repo_minimal.json file contains info on all the mods available in Nebula, without this you will not be able to install new mods or engine builds"), DispatcherPriority.Background);
+
                         if (cancellationToken!.IsCancellationRequested)
                         {
                             throw new TaskCanceledException();
@@ -117,8 +118,8 @@ namespace Knossos.NET.Models
                         {
                             try
                             {
-                                File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
-                                File.Move(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_temp.json", SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
+                                File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json");
+                                File.Move(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal_temp.json", SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json");
                                 settings.etag = webEtag;
                                 SaveSettings();
                             }
@@ -137,8 +138,8 @@ namespace Knossos.NET.Models
                 else
                 {
                     //No update is needed
-                    await Dispatcher.UIThread.InvokeAsync(() => TaskViewModel.Instance!.AddMessageTask("Nebula: repo.json is up to date!"), DispatcherPriority.Background);
-                    Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "repo.json is up to date!");
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskViewModel.Instance!.AddMessageTask("Nebula: repo_minimal.json is up to date!"), DispatcherPriority.Background);
+                    Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "repo_minimal.json is up to date!");
                     displayUpdates = false;
                 }
                 if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
@@ -291,12 +292,12 @@ namespace Knossos.NET.Models
         {
             try
             {
-                await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
+                await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json");
                 if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
                 {
                     throw new TaskCanceledException();
                 }
-                using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json", FileMode.Open, FileAccess.ReadWrite))
+                using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json", FileMode.Open, FileAccess.ReadWrite))
                 {
                     fileStream.Seek(-1, SeekOrigin.End);
                     if (fileStream.ReadByte() == '}')
@@ -338,17 +339,14 @@ namespace Knossos.NET.Models
                                 var isInstalled = Knossos.GetInstalledModList(mod.id);
                                 if (isInstalled == null || isInstalled.Count() == 0)
                                 {
-                                    if (lastMod == null || lastMod.id == mod.id)
+                                    if(lastMod != null && lastMod.id == mod.id)
                                     {
                                         lastMod = mod;
                                     }
                                     else
                                     {
-                                        if (lastMod.id != mod.id)
-                                        {
-                                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddNebulaMod(lastMod), DispatcherPriority.Background);
-                                            lastMod = mod;
-                                        }
+                                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddNebulaMod(mod), DispatcherPriority.Background);
+                                        lastMod = mod;
                                     }
 
                                 }
@@ -487,8 +485,8 @@ namespace Knossos.NET.Models
                     }
                 }
             }
-            await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
-            using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json", FileMode.Open, FileAccess.ReadWrite))
+            await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json");
+            using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json", FileMode.Open, FileAccess.ReadWrite))
             {
                 try
                 {
@@ -536,7 +534,7 @@ namespace Knossos.NET.Models
             }
             catch (IOException)
             {
-                Log.WriteToConsole("repo.json is in use. Waiting for file access...");
+                Log.WriteToConsole("repo_minimal.json is in use. Waiting for file access...");
                 await Task.Delay(500);
                 if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
                 {
@@ -551,14 +549,15 @@ namespace Knossos.NET.Models
             try
             {
                 string? newEtag = null;
-                Log.Add(Log.LogSeverity.Information, "Nebula.GetRepoEtag()", "Getting repo.json etag.");
+                Log.Add(Log.LogSeverity.Information, "Nebula.GetRepoEtag()", "Getting repo_minimal.json etag.");
                 using (HttpClient client = new HttpClient())
                 {
                     client.Timeout = TimeSpan.FromSeconds(10);
                     var result = await client.GetAsync(repoUrl, HttpCompletionOption.ResponseHeadersRead);
                     newEtag = result.Headers?.ETag?.ToString().Replace("\"", "");
                 }
-                Log.Add(Log.LogSeverity.Information, "Nebula.GetRepoEtag()", "repo.json etag: " + newEtag);
+
+                Log.Add(Log.LogSeverity.Information, "Nebula.GetRepoEtag()", "repo_minimal.json etag: " + newEtag);
                 return newEtag;
             }
             catch (Exception ex)
@@ -619,6 +618,9 @@ namespace Knossos.NET.Models
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public bool done { get; set; }
+          
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+            public Mod mod { get; set; }
         }
 
         private enum ApiMethod
@@ -719,6 +721,31 @@ namespace Knossos.NET.Models
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", ex);
+            }
+            return null;
+        }
+
+        public static async Task<Mod?> GetModData(string modid, string version)
+        {
+            try
+            {
+                var reply = await ApiCall("mod/json/"+modid+"/"+version, null, ApiMethod.GET);
+
+                if (reply.HasValue)
+                {
+                    if (reply.Value.result)
+                    {
+                        return reply.Value.mod;
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.GetModJson", "Unable to get mod json data. ID: " + modid + " Version: " + version + " Reason: " + reply.Value.reason);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.GetModJson", ex);
             }
             return null;
         }

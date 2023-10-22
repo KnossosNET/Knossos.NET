@@ -10,7 +10,8 @@ namespace Knossos.NET.ViewModels
 {
     public partial class FsoBuildItemViewModel : ViewModelBase
     {
-        public FsoBuild? build;
+        private FsoBuild? build;
+        private Mod? modJson;
         private FsoBuildsViewModel? buildsView;
         public CancellationTokenSource? cancellationTokenSource = null;
         [ObservableProperty]
@@ -65,49 +66,85 @@ namespace Knossos.NET.ViewModels
             this.build = build;
             buildsView = view;
             title = build.ToString();
-            date = build.date;
-            isInstalled = build.isInstalled;
-            if(build.stability == FsoStability.Custom)
+            UpdataDisplayData(build);
+        }
+
+        private void UpdataDisplayData(FsoBuild build, bool skipInstalledCheck = false)
+        {
+            Date = build.date;
+            IsInstalled = build.isInstalled;
+            IsValid = false;
+            if (build.stability == FsoStability.Custom)
             {
                 Tooltip = build.description;
             }
 
             IsDevMode = build.devMode;
-            if(IsDevMode)
+            if (IsDevMode)
             {
                 BackgroundColor = Brushes.DimGray;
             }
 
-            foreach(var exe in build.executables)
+            if (IsInstalled || skipInstalledCheck)
             {
-                if(exe.isValid)
+                foreach (var exe in build.executables)
                 {
-                    isValid = true;
-                    switch(exe.type)
+                    if (exe.isValid)
                     {
-                        case FsoExecType.Release: release = true; break;
-                        case FsoExecType.Debug: debug = true; break;
-                        case FsoExecType.Fred2Debug:
-                        case FsoExecType.Fred2: fred2 = true; break;
-                        case FsoExecType.QtFredDebug:
-                        case FsoExecType.QtFred: qtfred = true; break;
-                    }
-                    
-                    switch(exe.arch)
-                    {
-                        case FsoExecArch.x86: x86 = true; break;
-                        case FsoExecArch.x64: x64 = true; break;
-                        case FsoExecArch.x86_avx2: avx2 = true; x86 = true; break;
-                        case FsoExecArch.x64_avx2: avx2 = true; x64 = true; break;
-                        case FsoExecArch.x86_avx: avx = true; x86 = true; break;
-                        case FsoExecArch.x64_avx: avx = true; x64 = true; break;
-                        case FsoExecArch.arm32: arm32 = true; break;
-                        case FsoExecArch.arm64: arm64 = true; break;
+                        IsValid = true;
+                        switch (exe.type)
+                        {
+                            case FsoExecType.Release: Release = true; break;
+                            case FsoExecType.Debug: Debug = true; break;
+                            case FsoExecType.Fred2Debug:
+                            case FsoExecType.Fred2: Fred2 = true; break;
+                            case FsoExecType.QtFredDebug:
+                            case FsoExecType.QtFred: Qtfred = true; break;
+                        }
+
+                        switch (exe.arch)
+                        {
+                            case FsoExecArch.x86: X86 = true; break;
+                            case FsoExecArch.x64: X64 = true; break;
+                            case FsoExecArch.x86_avx2: Avx2 = true; X86 = true; break;
+                            case FsoExecArch.x64_avx2: Avx2 = true; X64 = true; break;
+                            case FsoExecArch.x86_avx: Avx = true; X86 = true; break;
+                            case FsoExecArch.x64_avx: Avx = true; X64 = true; break;
+                            case FsoExecArch.arm32: Arm32 = true; break;
+                            case FsoExecArch.arm64: Arm64 = true; break;
+                        }
                     }
                 }
             }
-            if(build.folderPath != string.Empty)
-                tooltip = build.folderPath;
+            else
+            {
+                IsValid = true;
+            }
+
+            if (build.folderPath != string.Empty)
+                Tooltip = build.folderPath;
+        }
+
+        internal async void ViewBuildDetails()
+        {
+            if (build != null)
+            {
+                if (modJson == null)
+                {
+                    modJson = await Nebula.GetModData(build.id, build.version);
+                }
+                if (MainWindow.instance != null && modJson != null)
+                {
+                    UpdataDisplayData(new FsoBuild(modJson), true);
+                    var dialog = new ModDetailsView();
+                    dialog.DataContext = new ModDetailsViewModel(modJson);
+                    await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
+                }
+                else
+                {
+                    await MessageBox.Show(MainWindow.instance, "An error has ocurred while trying to display build details.", "Modjson is null", MessageBox.MessageBoxButtons.OKCancel);
+                }
+            }
         }
 
         internal async void DeleteBuildCommand()
@@ -169,18 +206,45 @@ namespace Knossos.NET.ViewModels
                 var result = await MessageBox.Show(MainWindow.instance, "This will download and install the FSO Build: " + build?.ToString() + ". Do you want to continue?", "Install FSO engine build", MessageBox.MessageBoxButtons.YesNo);
                 if (result == MessageBox.MessageBoxResult.Yes)
                 {
-                    IsDownloading = true;
-                    cancellationTokenSource = new CancellationTokenSource();
-                    FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!,this)!;
-                    if (newBuild != null)
+                    if (build != null)
                     {
-                        //Install completed
-                        IsInstalled = true;
-                        build = newBuild;
+                        if (modJson == null)
+                        {
+                            modJson = await Nebula.GetModData(build.id, build.version);
+                        }
+                        //Check compatibility
+                        if (modJson != null)
+                        {
+                            var tempBuild = new FsoBuild(modJson);
+                            UpdataDisplayData(tempBuild,true);
+                            if (tempBuild != null)
+                            {
+                                if (IsValid)
+                                {
+                                    IsDownloading = true;
+                                    cancellationTokenSource = new CancellationTokenSource();
+                                    FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, modJson)!;
+                                    if (newBuild != null)
+                                    {
+                                        //Install completed
+                                        IsInstalled = true;
+                                        build = newBuild;
+                                    }
+                                    IsDownloading = false;
+                                    cancellationTokenSource?.Dispose();
+                                    cancellationTokenSource = null;
+                                }
+                                else
+                                {
+                                    await MessageBox.Show(MainWindow.instance, "This build does not have any executables compatible with your operating system or CPU arch.", "Build is not valid for this computer", MessageBox.MessageBoxButtons.OK);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            await MessageBox.Show(MainWindow.instance, "There was an error while getting build data, check the logs.", "Get modjson failed", MessageBox.MessageBoxButtons.OK);
+                        }
                     }
-                    IsDownloading = false;
-                    cancellationTokenSource?.Dispose();
-                    cancellationTokenSource = null;
                 }
             }
         }

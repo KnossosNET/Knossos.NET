@@ -66,6 +66,7 @@ namespace Knossos.NET.Models
         public bool isInstalled = true;
         public bool devMode = false;
         public Mod? modData; 
+      
         /*
          Direct Exe
          */
@@ -269,7 +270,6 @@ namespace Knossos.NET.Models
             return null;
         }
 
-
         private void LoadExecutables(Mod modJson)
         {
             if (modJson.packages != null)
@@ -462,18 +462,18 @@ namespace Knossos.NET.Models
                 return FsoExecType.Release;
 
             switch (label.ToLower())
-            {        
+            {
                 case "release": return FsoExecType.Release;
 
                 case "debug":
                 case "fastdebug":
-                case "rollback build": 
+                case "rollback build":
                 case "fast debug": return FsoExecType.Debug;
 
                 case "fred fastdebug":
                 case "fred fast debug":
                 case "fred debug":
-                case "fred2debug": 
+                case "fred2debug":
                 case "fred2 debug": return FsoExecType.Fred2Debug;
 
                 case "fred":
@@ -722,10 +722,10 @@ namespace Knossos.NET.Models
                         switch (SysInfo.CpuArch)
                         {
                             case "X64":
-                                score += SysInfo.CpuAVX ? 40 : 0;
+                                score += 40;
                                 break;
                             case "X86":
-                                score += SysInfo.CpuAVX ? 80 : 0;
+                                score += 80;
                                 break;
                             case "Arm64":
                                 score += 30; 
@@ -856,7 +856,7 @@ namespace Knossos.NET.Models
                             case "X64":
                                 break;
                             case "X86":
-                                score += SysInfo.CpuAVX ? 80 : 0;
+                                score += 80;
                                 break;
                             case "Arm64":
                                 break;

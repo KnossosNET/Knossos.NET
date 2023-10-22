@@ -109,6 +109,8 @@ namespace Knossos.NET.Models
         public bool inNebula { get; set; } = false;
         [JsonIgnore]
         public List<ModMember>? members { get; set; } = null;
+        [JsonIgnore]
+        public bool fullDataLoaded { get; set; } = false;
 
         public Mod()
         {
@@ -685,6 +687,40 @@ namespace Knossos.NET.Models
             }
         }
 
+        public async Task LoadFulLNebulaData()
+        {
+            if(!installed && !fullDataLoaded)
+            {
+                try
+                {
+                    Log.Add(Log.LogSeverity.Information, "Mod.LoadFulLNebulaData()", "Loading full Nebula data for mod: " + this);
+                    var newData = await Nebula.GetModData(id, version);
+                    if (newData != null)
+                    {
+                        fullDataLoaded = true;
+                        screenshots = newData.screenshots;
+                        description = newData.description;
+                        packages = newData.packages;
+                        banner = newData.banner;
+                        parent = newData.parent;
+                        isPrivate = newData.isPrivate;
+                        notes = newData.notes;
+                        releaseThread = newData.releaseThread;
+                        videos = newData.videos;
+                        attachments = newData.attachments;
+                        firstRelease = newData.firstRelease;
+                        lastUpdate = newData.lastUpdate;
+                        cmdline = newData.cmdline;
+                        modFlag = newData.modFlag;
+                        customBuild = newData.customBuild;
+                    }
+                }catch(Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "Mod.LoadFulLNebulaData", ex);
+                }
+            }
+        }
+      
         /* 
          * To use with the List .Sort()
         */
