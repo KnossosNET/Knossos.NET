@@ -10,9 +10,9 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using static Knossos.NET.ViewModels.DevToolManagerViewModel;
 using System.ComponentModel;
 using Avalonia.Media;
+using System.Net.Http;
 
 namespace Knossos.NET.ViewModels
 {
