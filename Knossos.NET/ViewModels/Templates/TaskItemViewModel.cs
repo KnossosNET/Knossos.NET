@@ -1469,6 +1469,16 @@ namespace Knossos.NET.ViewModels
                         throw new TaskCanceledException();
                     }
 
+                    //Wait in Queue
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                    {
+                        await Task.Delay(1000);
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                    }
+
                     ProgressBarMax = Directory.GetFiles(currentDir.FullName, "*", SearchOption.AllDirectories).Length;
 
                     Directory.CreateDirectory(newDir);
@@ -1504,6 +1514,16 @@ namespace Knossos.NET.ViewModels
                     IsCompleted = true;
                     CancelButtonVisible = false;
                     ProgressCurrent = ProgressBarMax;
+
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                    {
+                        await Task.Delay(500);
+                    }
+                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                    {
+                        TaskViewModel.Instance!.taskQueue.Dequeue();
+                    }
+
                     return true;
                 }
                 else
@@ -1530,6 +1550,15 @@ namespace Knossos.NET.ViewModels
                     Directory.Delete(newDir, true);
                 }
                 catch { }
+
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
+                }
                 return false;
             }
             catch (Exception ex)
@@ -1549,6 +1578,15 @@ namespace Knossos.NET.ViewModels
                     Directory.Delete(newDir, true);
                 }
                 catch { }
+
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
+                }
                 return false;
             }
         }
