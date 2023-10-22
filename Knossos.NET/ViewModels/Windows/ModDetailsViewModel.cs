@@ -52,6 +52,8 @@ namespace Knossos.NET.ViewModels
         private List<Mod> modVersions = new List<Mod>();
         private ModCardViewModel? modCard = null;
         private bool devMode { get; set; } = false;
+        [ObservableProperty]
+        private string owners = string.Empty;
         /* UI Variables */
         [ObservableProperty]
         private string name = string.Empty;
@@ -191,6 +193,14 @@ namespace Knossos.NET.ViewModels
                     var html = BBCode.ConvertToHtml(modVersions[index].description!, BBCode.BasicRules);
                     Description = "<body style=\"overflow: hidden;\"><span style=\"white-space: pre-line;color:white;overflow: hidden;\">" + html + "</span></body>";
                     //Log.WriteToConsole(html);
+                }
+                if (modVersions[index].owners != null && modVersions[index].owners!.Any()) 
+                {
+                    Owners = string.Join(", ", modVersions[index].owners!);
+                }
+                else
+                {
+                    Owners = string.Empty;
                 }
                 Released = modVersions[index].firstRelease;
                 IsInstalled = modVersions[index].installed;

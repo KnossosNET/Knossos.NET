@@ -24,7 +24,7 @@
 			<Label Content="{Binding Name}" FontWeight="Bold" FontSize="24" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 			
 			<!--Buttons and Mod info-->
-			<Grid IsVisible="{Binding IsInstalled}" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto" HorizontalAlignment="Center" Margin="0,10,0,0">
+			<Grid IsVisible="{Binding IsInstalled}" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto" HorizontalAlignment="Center" Margin="0,10,0,0">
 				<WrapPanel Grid.Row="0" Grid.Column="0">
 					<Button Command="{Binding ButtonCommandPlay}" Content="Play" Grid.Column="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="5" Width="100" ></Button>
 					<Button Command="{Binding ButtonCommandFred2}" Content="Fred2" Grid.Column="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkOrange" Margin="5" Width="100" ></Button>
@@ -43,10 +43,12 @@
 				<Label Content="{Binding Released}" Grid.Column="4" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="Last Updated" Grid.Column="5" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding LastUpdated}" Grid.Column="5" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
+				<Label Content="Owners" Grid.Column="6" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
+				<TextBlock Text="{Binding Owners}" TextWrapping="Wrap" Grid.Column="6" Grid.Row="1" FontWeight="Bold" FontSize="12" Foreground="White"/>
 			</Grid>
 			
 			<!--Nebula View-->
-			<Grid IsVisible="{Binding !IsInstalled}" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto" HorizontalAlignment="Center" Margin="0,10,0,0">
+			<Grid IsVisible="{Binding !IsInstalled}" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto" HorizontalAlignment="Center" Margin="0,10,0,0">
 				<WrapPanel Grid.Row="1" Grid.Column="0">
 					<Button Command="{Binding ButtonCommandForum}" Content="Forum" IsVisible="{Binding ForumAvalible}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="LightCoral" Margin="5" Width="100" ></Button>
 				</WrapPanel>
@@ -56,6 +58,8 @@
 				<Label Content="{Binding Released}" Grid.Column="4" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="Last Updated" Grid.Column="5" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding LastUpdated}" Grid.Column="5" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
+				<Label Content="Owners" Grid.Column="6" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
+				<TextBlock Text="{Binding Owners}" TextWrapping="Wrap" Grid.Column="6" Grid.Row="1" FontWeight="Bold" FontSize="12" Foreground="White"/>
 			</Grid>
 			
 		</StackPanel>

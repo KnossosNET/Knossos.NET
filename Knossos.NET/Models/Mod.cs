@@ -90,6 +90,7 @@ namespace Knossos.NET.Models
         public bool devMode { get; set; } = false; // User is mod owner?
         [JsonPropertyName("custom_build")]
         public string? customBuild { get; set; }
+        public string[]? owners { get; set; }
         public List<ModPackage> packages { get; set; } = new List<ModPackage>();
 
         /* Added for Internal use Only */
@@ -493,6 +494,7 @@ namespace Knossos.NET.Models
                 devMode = tempMod.devMode;
                 customBuild = tempMod.customBuild;
                 packages = tempMod.packages;
+                owners = tempMod.owners;
                 modSource = tempMod.modSource;
                 tempMod = null;
             }
@@ -713,6 +715,7 @@ namespace Knossos.NET.Models
                         cmdline = newData.cmdline;
                         modFlag = newData.modFlag;
                         customBuild = newData.customBuild;
+                        owners = newData.owners;
                     }
                 }catch(Exception ex)
                 {
