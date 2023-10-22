@@ -33,6 +33,7 @@ namespace Knossos.NET.ViewModels
             {
                 if (selectedIndex != value)
                 {
+                    SetProperty(ref selectedIndex, value);
                     selectedIndex = value;
                     newVersion = string.Empty;
                     if (selectedIndex < Mods.Count && selectedIndex >= 0 && editor != null)
@@ -83,15 +84,15 @@ namespace Knossos.NET.ViewModels
         public DevModVersionsViewModel(DevModEditorViewModel editor)
         {
             this.editor = editor;
-            mods = editor.GetModList();
-            foreach(var m in mods)
+            Mods = editor.GetModList();
+            foreach (var m in Mods)
             {
-                if(editor.ActiveVersion == m)
+                if (editor.ActiveVersion == m)
                 {
-                    selectedIndex = mods.IndexOf(m);
+                    selectedIndex = Mods.IndexOf(m);
                 }
             }
-            if(editor.ActiveVersion.isPrivate)
+            if (editor.ActiveVersion.isPrivate)
             {
                 VisibilityButtonText = "Make it public";
             }
@@ -175,7 +176,15 @@ namespace Knossos.NET.ViewModels
             if (button.Flyout != null)
                 button.Flyout.Hide();
 
-            TaskViewModel.Instance!.CreateModVersion(editor.ActiveVersion, NewVersion);
+            TaskViewModel.Instance!.CreateModVersion(editor.ActiveVersion, NewVersion, HackUpdateModList);
+        }
+
+        /// <summary>
+        /// Hack to force to update the list in the ui, since Mod class dosent implement observable object
+        /// </summary>
+        private void HackUpdateModList()
+        {
+            Mods = Mods.ToList();
         }
 
         internal async void UploadMod()
@@ -525,6 +534,7 @@ namespace Knossos.NET.ViewModels
                     VisibilityButtonText = "Make it private";
                 }
                 editor.ActiveVersion.SaveJson();
+                HackUpdateModList();
                 ButtonsEnabled = true;
             }
         }
