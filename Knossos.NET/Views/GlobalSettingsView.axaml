@@ -27,7 +27,7 @@
 				<!--KNOSSOS SETTINGS-->
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<Label FontWeight="Bold">Knossos Settings</Label>
+						<Label FontWeight="Bold" FontSize="18">Knossos Settings</Label>
 						<!-- Base Path -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="185">Library Path</TextBlock>
@@ -128,7 +128,7 @@
 				<!--VIDEO SETTINGS-->
 				<Border BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<Label FontWeight="Bold">Video Settings</Label>
+						<Label FontWeight="Bold" FontSize="18">Video Settings</Label>
 						<!-- Resolution -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Display Resolution</TextBlock>
@@ -184,23 +184,27 @@
             <!-- SMAA Filter -->
             <Grid ColumnDefinitions="Auto,Auto" Margin="5">
               <Label Grid.Column="0" Width="200" VerticalAlignment="Center">Extra Multisample Anti-Aliasing</Label>
-              <ComboBox  ToolTip.Tip="High performance impact, especially at Ultra" Tag="-msaa" SelectedIndex="{Binding MsaaSelectedIndex}" Grid.Column="1" IsEnabled="{Binding EnableMSAA}" Width="150" Margin="10,0,0,0">
+              <ComboBox ToolTip.Tip="High performance impact, especially at Ultra or at >= 4k resolution" Tag="-msaa" SelectedIndex="{Binding MsaaSelectedIndex}" Grid.Column="1" IsEnabled="{Binding EnableMSAA}" Width="150" Margin="10,0,0,0">
                 <ComboBoxItem Tag="0">Disabled</ComboBoxItem>
                 <ComboBoxItem Tag="4">High</ComboBoxItem>
                 <ComboBoxItem Tag="8">Ultra</ComboBoxItem>
               </ComboBox>
             </Grid>
-						<!-- Enable soft particles -->
+						<!-- Enable deferred lighting -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="-soft_particles" Grid.Column="0" IsChecked="{Binding EnableSoftParticles}" Width="200">Enable soft particles</CheckBox>
+							<CheckBox Tag="-no_deferred" Grid.Column="0" IsChecked="{Binding EnableDeferredLighting}" Width="200">Enable Deferred Lighting</CheckBox>
 						</Grid>
+            <!-- Enable soft particles -->
+            <Grid ColumnDefinitions="Auto,Auto" Margin="5">
+              <CheckBox Tag="-soft_particles" Grid.Column="0" IsChecked="{Binding EnableSoftParticles}" Width="200">Enable Soft Particles</CheckBox>
+            </Grid>
 						<!-- VSYNC -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="-no_vsync" Grid.Column="0" IsChecked="{Binding Vsync}" Width="200">VSync</CheckBox>
+							<CheckBox Tag="-no_vsync" Grid.Column="0" IsChecked="{Binding Vsync}" Width="200">Enable VSync</CheckBox>
 						</Grid>
 						<!-- Disable Post Processing -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="-no_post_process" Grid.Column="0" IsChecked="{Binding PostProcess}" Width="200">Post Processing</CheckBox>
+							<CheckBox Tag="-no_post_process" Grid.Column="0" IsChecked="{Binding PostProcess}" Width="200">Enable Post Processing</CheckBox>
 						</Grid>
 						<!-- FPS Cap -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
@@ -216,7 +220,7 @@
 				<!--Audio SETTINGS-->
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<Label FontWeight="Bold">Audio Settings</Label>
+						<Label FontWeight="Bold" FontSize="18">Audio Settings</Label>
 						<!-- Playback -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Playback Devices</TextBlock>
@@ -281,7 +285,7 @@
 				<!--INPUT SETTINGS-->
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<Label FontWeight="Bold">Input Settings</Label>
+						<Label FontWeight="Bold" FontSize="18">Input Settings</Label>
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mouse Sensitivity</TextBlock>
 							<Slider Grid.Column="1" Width="500" Value="{Binding MouseSensitivity}" Maximum="9" Minimum="0"></Slider>
@@ -324,7 +328,7 @@
 				<!--MOD SETTINGS-->
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<Label FontWeight="Bold">FSO Global Settings</Label>
+						<Label FontWeight="Bold" FontSize="18">FSO Global Settings</Label>
 						<!-- GLOBAL CMDLINE -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Cmdline</Label>

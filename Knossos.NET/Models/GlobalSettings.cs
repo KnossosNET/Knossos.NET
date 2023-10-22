@@ -82,6 +82,8 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public bool enableSoftParticles { get; set; } = true;
         [JsonIgnore]
+        public bool enableDeferredLighting { get; set; } = true;
+        [JsonIgnore]
         public int windowMode { get; set; } = 2;
         [JsonIgnore]
         public bool vsync { get; set; } = true;
@@ -399,14 +401,20 @@ namespace Knossos.NET.Models
                     aaPreset = int.Parse(data["Graphics"]["AAMode"]);
                 }
 
-                if (!string.IsNullOrEmpty(data["Graphics"]["MSAAMode"]))
+                if (!string.IsNullOrEmpty(data["Graphics"]["MSAASamples"]))
                 {
-                    msaaPreset = int.Parse(data["Graphics"]["MSAAMode"]);
+                    // recall MSAASamples is in intervals of 4 (0, 4, 8) so convert to preset level
+                    msaaPreset = int.Parse(data["Graphics"]["MSAASamples"]) / 4;
                 }
 
                 if (!string.IsNullOrEmpty(data["Graphics"]["SoftParticles"]))
                 {
                     enableSoftParticles = bool.Parse(data["Graphics"]["SoftParticles"]);
+                }
+
+                if (!string.IsNullOrEmpty(data["Graphics"]["DeferredLighting"]))
+                {
+                    enableDeferredLighting = bool.Parse(data["Graphics"]["DeferredLighting"]);
                 }
 
                 if (!string.IsNullOrEmpty(data["Graphics"]["VSync"]))
@@ -621,11 +629,12 @@ namespace Knossos.NET.Models
                 }
                 data["Graphics"]["Shadows"] = shadowQuality.ToString();
                 data["Graphics"]["AAMode"] = aaPreset.ToString();
-                data["Graphics"]["MSAAMode"] = msaaPreset.ToString();
+                data["Graphics"]["MSAASamples"] = (msaaPreset * 4).ToString(); // recall MSAASamples is in intervals of 4 (0, 4, 8) so convert to preset level
                 data["Graphics"]["WindowMode"] = windowMode.ToString();
                 data["Graphics"]["Display"] = displayIndex.ToString();
                 data["Graphics"]["TextureFilter"] = textureFilter.ToString();
                 data["Graphics"]["SoftParticles"] = enableSoftParticles.ToString().ToLower();
+                data["Graphics"]["DeferredLighting"] = enableDeferredLighting.ToString().ToLower();
                 data["Graphics"]["VSync"] = vsync.ToString().ToLower();
                 data["Graphics"]["PostProcessing"] = postProcess.ToString().ToLower();
 
@@ -763,11 +772,15 @@ namespace Knossos.NET.Models
                     case 2: cmd += "-msaa 8"; break;
                 }
             }
-                if (enableSoftParticles)
+            if (enableSoftParticles)
             {
                 cmd += "-soft_particles";
             }
-            switch(windowMode)
+            if (!enableDeferredLighting)
+            {
+                cmd += "-no_deferred";
+            }
+            switch (windowMode)
             {
                 case 0: cmd += "-window"; break;
                 case 1: cmd += "-fullscreen_window"; break;
