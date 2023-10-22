@@ -3392,7 +3392,7 @@ namespace Knossos.NET.ViewModels
                     }
                     catch {}
 
-                    //Remove Mod card, unmark update avalible, re-run dependencies checks
+                    //Remove Mod card, unmark update available, re-run dependencies checks
                     if (installed == null)
                     {
                         MainWindowViewModel.Instance?.NebulaModsView.RemoveMod(mod.id);

@@ -24,6 +24,6 @@
 		<TextBlock TextWrapping="Wrap" Margin="10">Your user must have admin rights in order to work.</TextBlock>
 		<Button Command="{Binding CopyKeys}" Margin="10,0,0,0">Copy Registry Keys</Button>
 		<TextBlock TextWrapping="Wrap" Margin="10">Thats it! Press "Reload Data" button on the settings tab to update the list of installed voices</TextBlock>
-		<TextBlock TextWrapping="Wrap" Margin="10">Note: if you install more voices after copying the registry keys, you will need to copy the registry keys again in order to be avalible for SAPI.</TextBlock>
+		<TextBlock TextWrapping="Wrap" Margin="10">Note: if you install more voices after copying the registry keys, you will need to copy the registry keys again in order to be available for SAPI.</TextBlock>
 	</StackPanel>
 </Window>

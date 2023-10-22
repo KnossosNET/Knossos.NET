@@ -891,13 +891,13 @@ namespace Knossos.NET.Models
         }
 
         /// <summary>
-        /// Checks if the MODID is avalible in Nebula
+        /// Checks if the MODID is available in Nebula
         /// (Needs to be logged in)
         /// </summary>
         /// <param name="id"></param>
         /// <param name="title"></param>
         /// <returns>
-        /// true if MODID is avalible, false if it is already in use
+        /// true if MODID is available, false if it is already in use
         /// </returns>
         public static async Task<bool> CheckIDAvalible(string id, string title = "None")
         {
@@ -912,7 +912,7 @@ namespace Knossos.NET.Models
                 var reply = await ApiCall("mod/check_id", data, true);
                 if (reply.HasValue)
                 {
-                    Log.Add(Log.LogSeverity.Information, "Nebula.CheckID", "Check Mod ID:" + id + " is avalible in Nebula: " + reply.Value.result);
+                    Log.Add(Log.LogSeverity.Information, "Nebula.CheckID", "Check Mod ID:" + id + " is available in Nebula: " + reply.Value.result);
                     return reply.Value.result;
                 }
                 else

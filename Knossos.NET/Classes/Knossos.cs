@@ -230,7 +230,7 @@ namespace Knossos.NET
                             {
                                 if (!globalSettings.autoUpdate)
                                 {
-                                    var result = await MessageBox.Show(null, "Knossos.NET " + latest.tag_name + ":\n" + latest.body + "\n\n\nIf you continue Knossos.NET will be re-started after download.", "An update is avalible", MessageBox.MessageBoxButtons.ContinueCancel);
+                                    var result = await MessageBox.Show(null, "Knossos.NET " + latest.tag_name + ":\n" + latest.body + "\n\n\nIf you continue Knossos.NET will be re-started after download.", "An update is available", MessageBox.MessageBoxButtons.ContinueCancel);
                                     if(result != MessageBox.MessageBoxResult.Continue)
                                     {
                                         return;
