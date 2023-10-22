@@ -33,9 +33,9 @@ namespace Knossos.NET.Models
     public enum ModMemberRole
     {
         Owner = 0,
-        Manager = 1,
-        Uploader = 2,
-        Tester = 3
+        Manager = 10,
+        Uploader = 20,
+        Tester = 30
     }
 
     /*

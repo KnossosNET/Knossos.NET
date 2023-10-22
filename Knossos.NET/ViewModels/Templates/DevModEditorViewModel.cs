@@ -14,7 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Knossos.NET.ViewModels.DevToolManagerViewModel;
 
 namespace Knossos.NET.ViewModels
 {
@@ -34,9 +33,31 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         public DevModDetailsViewModel? detailsView;
         [ObservableProperty]
+        public DevModMembersMgrViewModel? membersView;
+        [ObservableProperty]
         private ObservableCollection<ComboBoxItem> toolItems = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
         private int toolIndex = 0;
+
+        private int tabIndex = 0;
+        private int TabIndex
+        {
+            get => tabIndex;
+            set
+            {
+                if (value != tabIndex)
+                {
+                    this.SetProperty(ref tabIndex, value);
+                    if (tabIndex == 4) //Members
+                    {
+                        if(MembersView != null)
+                        {
+                            MembersView.UpdateUI();
+                        }
+                    }
+                }
+            }
+        }
 
         [ObservableProperty]
         public string name = string.Empty;
@@ -127,6 +148,7 @@ namespace Knossos.NET.ViewModels
                 PkgMgrView = null;
                 FsoSettingsView = null;
                 DetailsView = null;
+                MembersView = null;
                 IsEngineBuild = false;
                 LoadTools();
                 ModImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
@@ -200,6 +222,11 @@ namespace Knossos.NET.ViewModels
                 }
                 VersionsView = new DevModVersionsViewModel(this);
                 DetailsView = new DevModDetailsViewModel(this);
+                MembersView = new DevModMembersMgrViewModel(this);
+                if(TabIndex == 4) //members tab is open?
+                {
+                    MembersView.UpdateUI();
+                }
             }
             catch (Exception ex)
             {

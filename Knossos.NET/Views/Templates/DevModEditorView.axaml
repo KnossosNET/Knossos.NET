@@ -40,7 +40,7 @@
 				</StackPanel>
 			</StackPanel>
 		
-			<TabControl Grid.Column="1">
+			<TabControl SelectedIndex="{Binding TabIndex}" Grid.Column="1">
 			
 				<TabItem Header="Versions">
 					<v:DevModVersionsView Content="{Binding VersionsView}"/>
@@ -62,7 +62,7 @@
 				</TabItem>
 			
 				<TabItem Header="Members">
-
+					<v:DevModMembersMgrView Content="{Binding MembersView}"/>
 				</TabItem>
 			
 			</TabControl>

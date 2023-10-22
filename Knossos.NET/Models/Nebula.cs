@@ -1094,13 +1094,9 @@ namespace Knossos.NET.Models
             try
             {
                 var newMembers = JsonSerializer.Serialize(members);
-                var data = new MultipartFormDataContent()
-                {
-                    { new StringContent(modid), "mid" },
-                    { new StringContent(newMembers), "members" }
-                };
 
-                var reply = await ApiCall("mod/team/update", data, true);
+                var callString = "{\"mid\":\"" + modid + "\",\"members\": " + newMembers + "}";
+                var reply = await ApiCall("mod/team/update", new StringContent(callString, Encoding.UTF8, "application/json"), true);
                 if (reply.HasValue)
                 {
                     if (reply.Value.result)

@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.DevModMembersMgrView"
+	         xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+
+	<Design.DataContext>
+		<vm:DevModMembersMgrViewModel/>
+	</Design.DataContext>
+
+	<ScrollViewer Background="#422626">
+		<StackPanel IsEnabled="{Binding ButtonsEnabled}">
+			<WrapPanel IsVisible="{Binding !Loading}" Margin="20">
+				<Button Command="{Binding NewMember}" Content="Add Member"/>
+				<Button Command="{Binding Save}" Margin="20,0,0,0" Content="Save Changes"/>
+			</WrapPanel>
+			<Label IsVisible="{Binding Loading}" FontSize="32" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">Loading...</Label>
+			<ListBox IsVisible="{Binding !Loading}" SelectedIndex="{Binding RoleIndex}" ItemsSource="{Binding MemberItems}">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<Grid ColumnDefinitions="*,Auto,Auto">
+							<Label IsVisible="{Binding !IsEnabled}" ToolTip.Tip="You can not change your own permissions!" Margin="5" Grid.Column="0" FontSize="20" Content="{Binding ModMember.user}"/>
+							<TextBox ToolTip.Tip="User Nebula Username" IsReadOnly="{Binding IsReadOnly}" IsVisible="{Binding IsEnabled}" Margin="5" Grid.Column="0" FontSize="20" Text="{Binding ModMember.user}"/>
+							<ComboBox IsEnabled="{Binding IsEnabled}" ToolTip.Tip="User Access" Margin="5" Width="200" FontSize="20" HorizontalAlignment="Right" Grid.Column="1" SelectedIndex="{Binding RoleIndex}" ItemsSource="{Binding RoleItems}"/>
+							<Button IsEnabled="{Binding IsEnabled}" Margin="50,5,5,5" FontSize="20" ToolTip.Tip="Remove User" Command="{Binding Delete}" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Right" Content="X" Background="DarkRed"/>
+						</Grid>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+		</StackPanel>
+	</ScrollViewer>
+	
+</UserControl>
