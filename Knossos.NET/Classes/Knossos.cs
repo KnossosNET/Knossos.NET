@@ -21,7 +21,7 @@ namespace Knossos.NET
 {
     public static class Knossos
     {
-        public static readonly string AppVersion = "0.2.0-Alpha";
+        public static readonly string AppVersion = "0.2.0-Beta1";
         public readonly static string ToolRepoURL = "https://raw.githubusercontent.com/Shivansps/Knet-Tool-Repo/main/knet_tools.json";
         private static List<Mod> installedMods = new List<Mod>();
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();

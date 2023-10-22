@@ -411,51 +411,6 @@ namespace Knossos.NET.Models
             }
         }
 
-        public static async Task<Mod?> GetModData(string id, string version)
-        {
-            if (privateMods != null && privateMods.Any())
-            {
-                foreach (Mod mod in privateMods)
-                {
-                    if (mod != null && mod.id == id && mod.version == version)
-                    {
-                        return mod;
-                    }
-                }
-            }
-            await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json");
-            using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo.json", FileMode.Open, FileAccess.ReadWrite))
-            {
-                try
-                {
-                    fileStream.Seek(-1, SeekOrigin.End);
-                    if (fileStream.ReadByte() == '}')
-                    {
-                        fileStream.SetLength(fileStream.Length - 1);
-                    }
-                    fileStream.Seek(9, SeekOrigin.Begin);
-
-                    JsonSerializerOptions serializerOptions = new JsonSerializerOptions();
-                    var mods = JsonSerializer.DeserializeAsyncEnumerable<Mod?>(fileStream);
-
-                    await foreach (Mod? mod in mods)
-                    {
-                        if (mod != null && mod.id == id && mod.version == version)
-                        {
-                            fileStream.Close();
-                            return mod;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "Nebula.GetModData()", ex);
-                }
-                fileStream.Close();
-            }
-            return null;
-        }
-
         public static async Task<bool> IsModIdInNebula(string id)
         {
             //Use the mod list used for newer versions
@@ -729,7 +684,18 @@ namespace Knossos.NET.Models
         {
             try
             {
-                var reply = await ApiCall("mod/json/"+modid+"/"+version, null, ApiMethod.GET);
+                if (privateMods != null && privateMods.Any())
+                {
+                    foreach (Mod mod in privateMods)
+                    {
+                        if (mod != null && mod.id == modid && mod.version == version)
+                        {
+                            return mod;
+                        }
+                    }
+                }
+
+                var reply = await ApiCall("mod/json/"+modid+"/"+version, null, false, 30, ApiMethod.GET);
 
                 if (reply.HasValue)
                 {
