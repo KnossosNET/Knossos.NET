@@ -954,7 +954,7 @@ namespace Knossos.NET.ViewModels
 
         internal void GlobalCmdHelp()
         {
-            Knossos.OpenBrowserURL("https://wiki.hard-light.net/index.php/Command-Line_Reference");
+            SysInfo.OpenBrowserURL("https://wiki.hard-light.net/index.php/Command-Line_Reference");
         }
         internal void ReloadFlagData()
         {

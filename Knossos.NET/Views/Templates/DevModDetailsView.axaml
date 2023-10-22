@@ -1,0 +1,109 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="1450"
+             x:Class="Knossos.NET.Views.DevModDetailsView"
+			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+
+	<Design.DataContext>
+		<vm:DevModDetailsViewModel/>
+	</Design.DataContext>
+
+	<ScrollViewer>
+		<StackPanel Margin="50,5,0,0">
+			<!--NAME-->
+			<WrapPanel HorizontalAlignment="Left">
+				<Label Width="150" Margin="5" FontWeight="Bold" HorizontalContentAlignment="Right" FontSize="18">Name</Label>
+				<TextBox MinWidth="300" Text="{Binding ModName}" Margin="5"></TextBox>
+			</WrapPanel>
+			<!--ID-->
+			<WrapPanel HorizontalAlignment="Left">
+				<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">ID</Label>
+				<Label MinWidth="300" Content="{Binding ModId}" Margin="5"></Label>
+			</WrapPanel>
+			<!--Type-->
+			<WrapPanel HorizontalAlignment="Left">
+				<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">Type</Label>
+				<Label MinWidth="300" Content="{Binding ModType}" Margin="5"></Label>
+			</WrapPanel>
+			<!--Parent-->
+			<WrapPanel HorizontalAlignment="Left">
+				<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">Parent</Label>
+				<Label MinWidth="300" Content="{Binding ModParent}" Margin="5"></Label>
+			</WrapPanel>
+			<!--Description-->
+			<WrapPanel HorizontalAlignment="Left">
+				<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">Description</Label>
+				<StackPanel MinWidth="310" MaxWidth="600">
+					<TextBox TextWrapping="Wrap" Height="200" Text="{Binding ModDescription}" Margin="5"></TextBox>
+					<Button Command="{Binding OpenDescriptionEditor}" Margin="5">Open Editor</Button>
+				</StackPanel>
+			</WrapPanel>
+			<!--FORUM-->
+			<WrapPanel HorizontalAlignment="Left">
+				<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">Release Thread</Label>
+				<TextBox MinWidth="300" Text="{Binding ModForumLink}" Margin="5"></TextBox>
+			</WrapPanel>
+			<!--Videos-->
+			<WrapPanel HorizontalAlignment="Left">
+				<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">Youtube Videos</Label>
+				<StackPanel MinWidth="310">
+					<TextBox Height="125" Text="{Binding ModVideos}" Margin="5"></TextBox>
+					<Label Margin="5" Foreground="Yellow" FontSize="12">One link per line</Label>
+				</StackPanel>
+			</WrapPanel>
+			<!--Tile Image-->
+			<WrapPanel HorizontalAlignment="Left" Margin="10,0,0,10">
+				<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">Title Image</Label>
+				<StackPanel MinWidth="225" Margin="5">
+					<Border Width="152" Height="227" Margin="5" BorderBrush="Gray" CornerRadius="2" BorderThickness="1">
+						<Image Width="150" Height="225" Source="{Binding TileImage}"></Image>
+					</Border>
+					<Label HorizontalAlignment="Center" Foreground="Yellow" FontSize="12">This image should be 150×225 pixels large.</Label>
+				</StackPanel>
+				<StackPanel VerticalAlignment="Center">
+					<Button Command="{Binding ChangeTileImage}" Margin="5">Browse</Button>
+					<Button Command="{Binding RemoveTileImage}" Margin="5">Remove</Button>
+				</StackPanel>
+				
+			</WrapPanel>
+			<!--Banner Image-->
+			<WrapPanel HorizontalAlignment="Left">
+				<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">Banner Image</Label>
+				<StackPanel HorizontalAlignment="Left" MinWidth="300">
+					<Border Margin="45,5,5,5" BorderBrush="Gray" CornerRadius="2" BorderThickness="1">
+						<Image Width="535" Height="150" Source="{Binding BannerImage}"></Image>
+					</Border>
+					<Label HorizontalAlignment="Center" Margin="5" Foreground="Yellow" FontSize="12">This image should be 1070x300 pixels large.</Label>
+					<WrapPanel HorizontalAlignment="Center">
+						<Button Command="{Binding ChangeBannerImage}" Margin="5">Browse</Button>
+						<Button Command="{Binding RemoveBannerImage}" Margin="5">Remove</Button>
+					</WrapPanel>
+				</StackPanel>
+			</WrapPanel>
+			<!--Screenshoots-->
+			<WrapPanel HorizontalAlignment="Left">
+				<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">Screenshots</Label>
+				<StackPanel>
+					<Button Command="{Binding NewScreenShot}" Margin="5">Add</Button>
+					<ListBox ItemsSource="{Binding Screenshots}" Margin="5,0,0,0">
+						<ListBox.ItemTemplate>
+							<DataTemplate>
+								<WrapPanel>
+									<Button Command="{Binding ScUp}" Background="Black">↑</Button>
+									<Button Command="{Binding ScDown}" Background="Black">↓</Button>
+									<Button Command="{Binding ScDel}" Background="Red">X</Button>
+									<Image Margin="5,0,0,0" Width="320" Height="180" Source="{Binding Bitmap}"></Image>
+								</WrapPanel>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
+				</StackPanel>
+			</WrapPanel>
+			<Button Command="{Binding Save}" Background="Green" HorizontalAlignment="Center" Margin="5">Save Changes</Button>
+		</StackPanel>
+	</ScrollViewer>
+	
+</UserControl>

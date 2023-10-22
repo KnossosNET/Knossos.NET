@@ -22,6 +22,8 @@
 		<Label IsVisible="{Binding !DataLoaded}" Grid.Row="0" Margin="0,20,0,0" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center">Loading data from repo...</Label>
 		<StackPanel IsVisible="{Binding DataLoaded}" Margin="0,20,0,0" Grid.Row="0">
 			<TextBlock Text="{Binding Name}" IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center"></TextBlock>
+			<Label FontSize="16" Margin="5" IsVisible="{Binding HasWriteAccess}" Foreground="DarkGoldenrod" HorizontalAlignment="Center">You have write access to this mod.</Label>
+			<Label FontSize="16" Margin="5" IsVisible="{Binding ForceDevMode}" Foreground="DarkGoldenrod" HorizontalAlignment="Center">DevMode install is forced ON</Label>
 			<ComboBox ItemsSource="{Binding ModVersions}" SelectedItem="{Binding SelectedMod}" SelectedIndex="{Binding SelectedIndex}"  IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="22" HorizontalAlignment="Center">
 				<ComboBox.ItemTemplate>
 					<DataTemplate>
@@ -29,7 +31,7 @@
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
 			</ComboBox>
-			<TextBox IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="Green"> This version is installed, you can add optional packages</TextBox>
+			<Label IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="Green"> This version is installed, you can add optional packages</Label>
 			<Button Command="{Binding VerifyCommand}" Margin="5" IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="White" Background="DarkOrange">Verify</Button>
 		</StackPanel>
 		<TreeView IsVisible="{Binding DataLoaded}" Grid.Row="1" Margin="30" ItemsSource="{Binding ModInstallList}"  HorizontalAlignment="Center">
@@ -55,7 +57,10 @@
 		<Button IsVisible="{Binding DataLoaded}" Grid.Row="2" Command="{Binding InstallMod, Mode=OneWay}" CommandParameter="{Binding ElementName=InstallModWindow}" Background="Green" FontWeight="Bold" Width="150" HorizontalAlignment="Center" HorizontalContentAlignment="Center">Install</Button>
 		<StackPanel IsVisible="{Binding CompressVisible}" Grid.Row="3" HorizontalAlignment="Center">
 			<StackPanel IsVisible="{Binding !IsInstalled}">
-				<CheckBox IsVisible="{Binding DataLoaded}" IsChecked="{Binding Compress}" ToolTip.Tip="Compression mode is on Manual. If you compress the mods you are installing they will use less space on disk. But installing time is longer and the minimum FSO version to support mod compression is 23.2.0.">Compress mods during install</CheckBox>
+				<StackPanel IsVisible="{Binding DataLoaded}">
+					<CheckBox IsVisible="{Binding !InstallInDevMode}" IsChecked="{Binding Compress}" ToolTip.Tip="Compression mode is on Manual. If you compress the mods you are installing they will use less space on disk. But installing time is longer and the minimum FSO version to support mod compression is 23.2.0.">Compress mods during install</CheckBox>
+					<CheckBox IsVisible="{Binding HasWriteAccess}" IsChecked="{Binding InstallInDevMode}" IsEnabled="{Binding !ForceDevMode}" ToolTip.Tip="This is for mod developers ONLY, Enable only if you know what you are doing. If you enable this all packages for this mod will be installed regardless of your selection. if you for some reason have devmode on versions and non devmode versions for this mod and you are modifying a no devmode version this option will have no effect. Mod compression cant be enabled with this mode.">Install Mod in Developer Mode</CheckBox>
+				</StackPanel>
 			</StackPanel>
 		</StackPanel>
 	</Grid>

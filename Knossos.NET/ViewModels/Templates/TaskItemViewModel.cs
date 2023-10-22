@@ -23,9 +23,140 @@ using VP.NET;
 using System.Text;
 using System.Text.Encodings;
 using Avalonia.Media;
+using System.Text.RegularExpressions;
 
 namespace Knossos.NET.ViewModels
 {
+    /*
+        //New Task Method Example
+        public async Task<bool> NewTaskExample(CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true; //a task can only do one thing, when a method is called this defines what this task will do, this ensures no other operation is done by mistake
+                    ProgressBarMax = 1; // 0 = no progress bar, anything else to display progress bar, you can set this at any time
+                    ProgressCurrent = 0; //if you need a progress bar you can set this at any time
+                    ShowProgressText = false; //If the progress bar must display ProgressCurrent / ProgressBarMax on top of the bar
+                    CancelButtonVisible = true; //you want the user to be able to manually cancel this task?
+                    IsTextTask = false; // Set to True if you want simple "show my text" task. This will not display the "task completed" text.
+                    IsFileDownloadTask = true; //This enables pause/resume buttons for file download on this task
+                    Name = ""; //Display name
+
+                    //We need a cancel token, if it is not provided one must be created
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested) //this task was cancelled? you may want to check this multiple times
+                        throw new TaskCanceledException();
+
+                    //Wait in Queue. Important!!! Only for main tasks that need to wait in queue that are created in TaskViewModel.cs
+                    //And only if it needs to actually wait in the queue, some you dont need to do this for, ex: show a text msg.
+                    //Do not do this for internal/subtasks as it will loop here forever
+                    Info = "In Queue";
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                    {
+                        await Task.Delay(1000);
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                    }
+
+                    Info = ""; //This display Text on the TaskView, if the task has a progress bar this text is display to the right of it, otherwise to the right of "name".
+                    TextColor =  Brushes.White; //Info text color
+
+                    //If to need your task to create subtasks
+                    //Add this task to the task root (you can do it at any point, only do it once)
+                    Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this)); //important! do it from the ui thread
+
+                    //Create and add all subtask to the task list
+                    var newTask = new TaskItemViewModel();
+                    newTask.NewTaskExample(cancellationTokenSource); //pass the cancel token
+                    Dispatcher.UIThread.InvokeAsync(() => TaskList.Add(newTask)); //important! do it from the ui thread
+
+                    IsCompleted = true; //once we completed the task this must be set to true
+                    CancelButtonVisible = false; //once we completed the task this must be set to true
+                    ProgressCurrent = ProgressBarMax; //a recomended step at the end in case your task had a progress bar
+
+                    //Dequeue. Important: Only if this is not a Subtask!!! If this task did not wait in a queue dont do this it will loop here forever
+                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                    {
+                        TaskViewModel.Instance!.taskQueue.Dequeue();
+                    }
+
+                    return true; //on task completion return true
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                //If you need to do a task specific stuff on cancel resquest do it here
+                //Dequeue. Important: Only if this is not a Subtask!!! If this task did not wait in a queue dont do this it will loop here forever
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.NewTaskExample()", ex);
+                //If you need to do a task specific stuff do it here
+                //Dequeue. Important: Only if this is not a Subtask!!! If this task did not wait in a queue dont do this it will loop here forever
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
+                }
+                return false;
+            }
+        }
+    */
+
     public partial class TaskItemViewModel : ViewModelBase
     {
         [ObservableProperty]
@@ -66,7 +197,7 @@ namespace Knossos.NET.ViewModels
         /* If this task contains subtasks, the subtasks must be added here, from the UIthread */
         [ObservableProperty]
         public ObservableCollection<TaskItemViewModel> taskList = new ObservableCollection<TaskItemViewModel>();
-        /* If this task contains subtasks it must be added to this single item list, from the UIthread */
+        /* If this task contains subtasks (this) object must be added to this single item list, from the UIthread */
         [ObservableProperty]
         public ObservableCollection<TaskItemViewModel> taskRoot = new ObservableCollection<TaskItemViewModel>();
 
@@ -78,6 +209,1435 @@ namespace Knossos.NET.ViewModels
 
         public TaskItemViewModel() 
         { 
+        }
+
+        public async Task<bool> InstallTool(Tool tool, Tool? updateFrom, Action<bool> finishedCallback, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 2;
+                    ProgressCurrent = 0; 
+                    ShowProgressText = false; 
+                    CancelButtonVisible = true;
+                    IsTextTask = false;
+                    IsFileDownloadTask = true; 
+                    Name = "Install Tool: "+tool.name;
+                    if(updateFrom!= null)
+                    {
+                        Name = "Update Tool: " + tool.name;
+                    }
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested) 
+                        throw new TaskCanceledException();
+
+                    Info = "In Queue";
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                    {
+                        await Task.Delay(1000);
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                    }
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    var libPath = Knossos.GetKnossosLibraryPath();
+
+                    if (string.IsNullOrEmpty(libPath))
+                        throw new TaskCanceledException("Knossos library path is empty!");
+
+                    var toolPath = Path.Combine(libPath, "tools", tool.name);
+                    if(updateFrom != null)
+                    {
+                        toolPath += "_tool_update";
+                    }
+
+                    Directory.CreateDirectory(toolPath);
+
+                    try
+                    {
+                        File.Create(toolPath + Path.DirectorySeparatorChar + "knossos_net_download.token").Close();
+                    }
+                    catch { }
+
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
+
+                    //Download
+                    var fileTask = new TaskItemViewModel();
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, fileTask));
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+
+                    var url = tool.GetDownloadURL();
+
+                    if (url == null)
+                        throw new TaskCanceledException("Tool download URL was null.");
+
+                    var fileName = Path.GetFileName(url);
+                    var fileFullPath = toolPath + Path.DirectorySeparatorChar + fileName; 
+                    var result = await fileTask.DownloadFile(url, fileFullPath, "Downloading "+ fileName, false, null, cancellationTokenSource);
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    ProgressCurrent++;
+
+                    Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+
+                    //Decompress
+                    var decompressTask = new TaskItemViewModel();
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, decompressTask));
+                    var decompResult = await decompressTask.DecompressNebulaFile(fileFullPath, fileName, toolPath, cancellationTokenSource);
+                    if (!decompResult)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallTool()", "Error while decompressing the file " + fileFullPath);
+                        CancelTaskCommand();
+                    }
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    File.Delete(fileFullPath);
+
+                    Knossos.AddTool(tool);
+
+                    try
+                    {
+                        File.Delete(toolPath + Path.DirectorySeparatorChar + "knossos_net_download.token");
+                    }
+                    catch { }
+
+                    if (updateFrom != null)
+                    {
+                        updateFrom.Delete();
+                        await Task.Delay(300);
+                        var newPath = toolPath.Replace("_tool_update", "");
+                        Directory.Move(toolPath, newPath);
+                        tool.isFavorite = updateFrom.isFavorite;
+                        tool.SaveJson(newPath);
+                    }
+                    else
+                    {
+                        tool.SaveJson(toolPath);
+                    }
+
+                    ProgressCurrent++;
+
+                    Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+
+                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                    {
+                        TaskViewModel.Instance!.taskQueue.Dequeue();
+                    }
+
+                    finishedCallback.Invoke(true);
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
+                }
+                finishedCallback.Invoke(true);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallTool()", ex);
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
+                }
+                finishedCallback.Invoke(true);
+                return false;
+            }
+        }
+
+        private async Task<string> PreFlightCheck(Mod mod, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 0;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    Name = "Pre-flight Check";
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    var cleanMod = new Mod();
+                    cleanMod.id = mod.id;
+                    cleanMod.title = mod.title;
+                    cleanMod.type = mod.type;
+                    cleanMod.parent = mod.parent;
+                    cleanMod.cmdline = mod.cmdline;
+                    cleanMod.description = mod.description;
+                    cleanMod.version = mod.version;
+                    cleanMod.firstRelease = mod.firstRelease;
+                    cleanMod.lastUpdate = mod.lastUpdate;
+                    cleanMod.isPrivate = mod.isPrivate;
+                    cleanMod.videos = mod.videos;
+                    cleanMod.packages = mod.packages;
+                    cleanMod.stability = mod.stability;
+                    cleanMod.releaseThread = mod.releaseThread;
+                    cleanMod.tile = string.Empty;
+                    cleanMod.banner = string.Empty;
+                    cleanMod.screenshots = new string[0];
+                    cleanMod.attachments = new string[0];
+
+                    var result = await Nebula.PreflightCheck(cleanMod);
+                    if (result == null || ( result != "ok" && result.ToLower() != "duplicated version"))
+                    {
+                        if (result != null)
+                        {
+                            Info = "Preflight check failed. Reason: " + result;
+                        }
+                        else
+                        {
+                            Info = "Preflight check failed for unknown reasons.";
+                            throw new TaskCanceledException();
+                        }
+                    }
+                    Info = result;
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return result;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return "fail";
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PreFlightCheck()", ex);
+                return "fail";
+            }
+        }
+
+        private async Task<string> ReleaseMod(Mod mod, bool metaUpdate,CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 0;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+
+                    if (metaUpdate)
+                        Name = "Metadata Update";
+                    else
+                        Name = "Release Mod";
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    var cleanMod = new Mod();
+                    cleanMod.id = mod.id;
+                    cleanMod.title = mod.title;
+                    cleanMod.firstRelease = mod.firstRelease;
+                    cleanMod.tile = mod.tile;
+                    cleanMod.version = mod.version;
+
+                    //Update title and tile image
+                    await Nebula.UpdateMod(cleanMod);
+
+                    cleanMod.type = mod.type;
+                    cleanMod.parent = mod.parent;
+                    cleanMod.cmdline = mod.cmdline == null ? "" : mod.cmdline;
+                    cleanMod.description = mod.description == null ? "" : mod.description;
+                    cleanMod.lastUpdate = mod.lastUpdate;
+                    cleanMod.isPrivate = mod.isPrivate;
+                    cleanMod.videos = mod.videos == null ? new string[0] : mod.videos;
+                    cleanMod.packages = mod.packages;
+                    cleanMod.stability = mod.stability;
+                    cleanMod.releaseThread = mod.releaseThread;
+                    cleanMod.modFlag = mod.modFlag;
+                    cleanMod.banner = mod.banner == null ? "" : mod.banner;
+                    cleanMod.screenshots = mod.screenshots == null ? new string[0] : mod.screenshots;
+                    cleanMod.attachments = new string[0];
+                    cleanMod.members = new List<ModMember>();
+                    cleanMod.notes = mod.notes == null ? "" : mod.notes;
+
+                    string? result;
+
+                    if (!metaUpdate)
+                    {
+                        result = await Nebula.ReleaseMod(cleanMod);
+                    }
+                    else
+                    {
+                        result = await Nebula.UpdateMetaData(cleanMod);
+                    }
+
+                    if (result == null || result != "ok")
+                    {
+                        if (result != null)
+                        {
+                            Info = "Release Mod failed. Reason: " + result;
+                        }
+                        else
+                        {
+                            Info = "Release Mod failed for unknown reasons.";
+                            throw new TaskCanceledException();
+                        }
+                    }
+                    Info = result;
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return result;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return "fail";
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.ReleaseMod()", ex);
+                return "fail";
+            }
+        }
+
+        private async Task<bool> UploadModImages(Mod mod, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 2;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    Name = "Uploading Mod Images";
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    //Screenshots
+                    if (mod.screenshots != null && mod.screenshots.Any())
+                    {
+                        ProgressBarMax += mod.screenshots.Length;
+                        var list = new List<string>();
+                        var i = 1;
+                        foreach (var sc in mod.screenshots)
+                        {
+                            Info = "Screenshot Image " + i + " / " + mod.screenshots.Length;
+                            var cks = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + sc);
+                            if (cks != null)
+                            {
+                                list.Add(cks);
+                            }
+                            ProgressCurrent++;
+                        }
+                        mod.screenshots = list.ToArray();
+                    }
+                    //Tile
+                    if (!string.IsNullOrEmpty(mod.tile))
+                    {
+                        Info = "Tile Image";
+                        mod.tile = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + mod.tile);
+                    }
+                    ProgressCurrent++;
+                    //Banner
+                    if (!string.IsNullOrEmpty(mod.tile))
+                    {
+                        Info = "Banner Image";
+                        mod.banner = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + mod.banner);
+                    }
+                    ProgressCurrent++;
+
+                    Info = "OK";
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.UploadModImages()", ex);
+                return false;
+            }
+        }
+
+        private async Task<bool> CreateModNebula(Mod mod, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 0; 
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false; 
+                    Name = "Creating mod on Nebula Database";
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested) 
+                        throw new TaskCanceledException();
+
+                    var cleanMod = new Mod();
+                    cleanMod.id = mod.id;
+                    cleanMod.type = mod.type;
+                    cleanMod.title = mod.title;
+                    cleanMod.parent = mod.parent;
+                    cleanMod.isPrivate = true;
+                    var result = await Nebula.CreateMod(cleanMod);
+                    if (result == null || result != "ok")
+                    {
+                        if (result != null)
+                        {
+                            Info = "Create mod fail. Reason: " + result;
+                        }
+                        else
+                        {
+                            Info = "Create mod failed for unknown reasons.";
+                        }
+                        throw new TaskCanceledException();
+                    }
+                    Info = "Done";
+                    IsCompleted = true;
+                    CancelButtonVisible = false; 
+                    ProgressCurrent = ProgressBarMax; 
+                    return true; 
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.CreateModNebula()", ex);
+                return false;
+            }
+        }
+
+        private async Task<bool> UploadModPkg(ModPackage pkg, string modFullPath, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 100;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    Name = "Uploading: "+pkg.name;
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    var zipPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + pkg.folder + ".7z";
+                    if (pkg.environment != null && pkg.environment.ToLower().Contains("macos"))
+                    {
+                        zipPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + pkg.folder + ".tar.gz";
+                    }
+                    if (!File.Exists(zipPath))
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    var multi = new Nebula.MultipartUploader(zipPath, cancellationTokenSource, multiuploaderCallback);
+                    if (!await multi.Upload())
+                    { 
+                        throw new TaskCanceledException();
+                    }
+                    await Task.Delay(300);
+                    Info = "OK";
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.UploadModPkg()", ex);
+                return false;
+            }
+        }
+
+        private async Task<bool> PrepareModPkg(ModPackage pkg, string modFullPath, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 0;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    Name = "Prepare Pkg: "+pkg.name;
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    //Create VP if needed
+                    //Create filelist
+                    //Filename, archive(7z), orig_name, checksum
+                    //Compress with 7z
+                    //Clear files.urls
+                    //Fill file.filename, file.checksum, file.dest, file.filesize
+                    //Note: MacOSX builds must be compressed as tar.gz keeping symblinks as links
+
+                    if (!Directory.Exists(modFullPath + Path.DirectorySeparatorChar + pkg.folder))
+                    {
+                        Info = "Fail - No Dir";
+                        IsCompleted = true;
+                        CancelButtonVisible = false;
+                        ProgressCurrent = ProgressBarMax;
+                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Package folder: " + modFullPath + Path.DirectorySeparatorChar + pkg.folder + " does not exist.");
+                        throw new TaskCanceledException();
+                    }
+
+                    var allfiles = Directory.GetFiles(modFullPath + Path.DirectorySeparatorChar + pkg.folder, "*.*", SearchOption.AllDirectories);
+                    if (!allfiles.Any())
+                    {
+                        Info = "Fail - No Files";
+                        IsCompleted = true;
+                        CancelButtonVisible = false;
+                        ProgressCurrent = ProgressBarMax;
+                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Package folder: " + modFullPath + Path.DirectorySeparatorChar + pkg.folder + " is empty.");
+                        throw new TaskCanceledException();
+                    }
+
+
+                    var zipPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + pkg.folder + ".7z";
+                    if (pkg.environment != null && pkg.environment.ToLower().Contains("macos"))
+                    {
+                        zipPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + pkg.folder;
+                    }
+                    if (File.Exists(zipPath))
+                    {
+                        File.Delete(zipPath);
+                    }
+
+                    var filelist = new List<ModFilelist>();
+                    var pkgFile = new ModFile();
+                    var files = new List<ModFile>() { pkgFile };
+
+                    if (pkg.isVp)
+                    {
+                        Info = "Creating VP";
+                        ProgressBarMax = 100;
+                        ProgressCurrent = 0;
+                        var vpPath = modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps" + Path.DirectorySeparatorChar + pkg.name + ".vp";
+                        Directory.CreateDirectory(modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps");
+                        if(File.Exists(vpPath))
+                        {
+                            File.Delete(vpPath);
+                        }
+                        var vp = new VPContainer();
+                        vp.AddFolderToRoot(modFullPath + Path.DirectorySeparatorChar + pkg.folder);
+                        vp.DisableCompression();
+                        await vp.SaveAsAsync(vpPath, compressionCallback, cancellationTokenSource);
+                        Info = "Get VP Checksum";
+                        var checksumVP = await SysInfo.GetFileHash(vpPath);
+                        if( checksumVP != null )
+                        {
+                            Info = "Compressing (7z)";
+                            ProgressBarMax = 100;
+                            ProgressCurrent = 0;
+                            using (var compressor = new SevenZipConsoleWrapper(sevenZipCallback, cancellationTokenSource))
+                            {
+                                if (!await compressor.CompressFile(vpPath, modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps", zipPath))
+                                {
+                                    Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
+                                    throw new TaskCanceledException();
+                                }
+                            }
+                            var fl = new ModFilelist();
+                            fl.archive = pkg.folder + ".7z";
+                            fl.filename = fl.origName = pkg.folder + ".vp";
+                            fl.checksum = new string[2] { "sha256", checksumVP };
+                            filelist.Add(fl);
+                        }
+                        else
+                        {
+                            throw new TaskCanceledException();
+                        }
+                        
+                    }
+                    else
+                    {
+                        Info = "Adding files";
+                        foreach (var file in allfiles)
+                        {
+                            //Do not add symblinks
+                            var fi = new FileInfo(file);
+                            if (fi.LinkTarget == null)
+                            {
+                                var relativePath = Path.GetRelativePath(modFullPath + Path.DirectorySeparatorChar + pkg.folder, file).Replace(@"\", @"/");
+                                var checksum = await SysInfo.GetFileHash(file);
+                                if (checksum != null)
+                                {
+                                    var fl = new ModFilelist();
+                                    fl.archive = pkg.folder + ".7z";
+                                    fl.filename = fl.origName = relativePath;
+                                    fl.checksum = new string[2] { "sha256", checksum };
+                                    filelist.Add(fl);
+                                }
+                                else
+                                {
+                                    throw new TaskCanceledException();
+                                }
+                            }
+                        }
+
+                        ProgressBarMax = 100;
+                        ProgressCurrent = 0;
+                        using (var compressor = new SevenZipConsoleWrapper(sevenZipCallback, cancellationTokenSource))
+                        {
+                            if (pkg.environment != null && pkg.environment.ToLower().Contains("macos"))
+                            {
+                                Info = "Compressing (.tar.gz)";
+                                if (!await compressor.CompressFolderTarGz(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
+                                {
+                                    Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
+                                    throw new TaskCanceledException();
+                                }
+                                zipPath += ".tar.gz";
+                            }
+                            else
+                            {
+                                Info = "Compressing (7z)";
+                                if (!await compressor.CompressFolder(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
+                                {
+                                    Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
+                                    throw new TaskCanceledException();
+                                }
+                            }
+                        }
+                    }
+
+                    Info = "Getting Hash";
+                    /*
+                     * TODO: it is unclear to me, at this moment, why this would be needed since 7z should extract with fullpath.
+                     * Using the pkg as work folder. 
+                     * FSO builds seems to use it.
+                     *
+                    */
+                    pkgFile.dest = "";
+                    var checksumZip = await SysInfo.GetFileHash(zipPath);
+                    if (checksumZip != null)
+                    {
+                        var fi = new FileInfo(zipPath);
+                        pkgFile.filesize = fi.Length;
+                        pkgFile.filename = pkg.folder + ".7z";
+                        pkgFile.checksum = new string[2] { "sha256", checksumZip };
+                    }
+                    else
+                    {
+                        throw new TaskCanceledException();
+                    }
+                    pkgFile.urls = null;
+                    pkg.files = files.ToArray();
+                    pkg.filelist = filelist.ToArray();
+                    if(pkg.executables == null)
+                    {
+                        pkg.executables = new List<ModExecutable>();
+                    }
+                    if(pkg.dependencies == null)
+                    {
+                        pkg.dependencies = new ModDependency[0];
+                    }
+                    Info = "OK";
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> UploadModVersion(Mod mod, bool isNewMod, bool metaOnly, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 5;
+                    ProgressCurrent = 0; 
+                    ShowProgressText = false;
+                    CancelButtonVisible = true;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    Info = "In Queue";
+                    Name = "Uploading " + mod;
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    //Wait in Queue
+                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                    {
+                        await Task.Delay(1000);
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                    }
+                    Info = "";
+                    //If we are doing only meta skip to the end
+                    if (!metaOnly)
+                    {
+                        ProgressBarMax += mod.packages.Count() * 2;
+
+                        if (isNewMod)
+                        {
+                            Info = "Create Mod";
+                            if (cancellationTokenSource.IsCancellationRequested)
+                                throw new TaskCanceledException();
+                            var create = new TaskItemViewModel();
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, create));
+                            await create.CreateModNebula(mod, cancellationTokenSource);
+                            //If fails it should trigger cancel no need to check the return
+                        }
+
+                        ProgressCurrent++;
+
+                        if (cancellationTokenSource.IsCancellationRequested)
+                            throw new TaskCanceledException();
+
+                        //At this point the mod id exist and we should have write access
+
+                        /*
+                            UPLOAD PROCESS:
+                            1) Do pre_flight API call, im guessing that if the mod version is already uploaded Nebula will report that here somehow. YES: "duplicated version"
+                            2) Upload mod tile image(check if already uploaded), get checksum and import it on modjson.
+                            3) Upload banner image and screenshoots(check if already uploaded), get checksum and import it on modjson.
+                            4) If package = vp create a vp in mod\kn_upload\vps\{ packagename}.vp(No Compression)
+                            5) 7z all packages folders and vp file and place them in kn_upload\{ packagename}.7z
+                            6) Wipe and re - generate data in package.files and filelist. "files" is for the 7z file we are uploading to nebula. "filelist" is for all files inside the package folder(folder or vp)
+                            7) Use multipartuploader to upload all packages(will auto-skip if already uploaded)
+                            8) Api Call to "mod/release" with the mod meta(full json)
+                        */
+
+                        //Preflight check
+                        Info = "PreFlight Check";
+                        var newTask = new TaskItemViewModel();
+                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, newTask));
+                        var preFlightCheck = await newTask.PreFlightCheck(mod, cancellationTokenSource);
+
+                        ProgressCurrent++;
+
+                        if (cancellationTokenSource.IsCancellationRequested)
+                            throw new TaskCanceledException();
+
+                        //At this point preflight check was valid otherwise it would trigger a cancel, only check if it is a duplicated version, if it is skip to meta
+                        if (preFlightCheck == "ok")
+                        {
+                            //We are good. Im leaving image upload for meta stage
+                            Info = "Prepare Packages";
+                            Directory.CreateDirectory(mod.fullPath + Path.DirectorySeparatorChar + "kn_upload");
+                            //Prepare packages, update data on mod
+                            await Parallel.ForEachAsync(mod.packages, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (pkg, token) =>
+                            {
+                                if (mod.type != ModType.mod && mod.type != ModType.tc) //Just to be sure
+                                    pkg.isVp = false;
+                                var newTask = new TaskItemViewModel();
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, newTask));
+                                await newTask.PrepareModPkg(pkg, mod.fullPath, cancellationTokenSource);
+                                ProgressCurrent++;
+                                if (cancellationTokenSource.IsCancellationRequested)
+                                    throw new TaskCanceledException();
+                            });
+
+                            Info = "Upload Packages";
+                            //Upload Packages
+                            await Parallel.ForEachAsync(mod.packages, new ParallelOptions { MaxDegreeOfParallelism = 1 }, async (pkg, token) =>
+                            {
+                                var newTask = new TaskItemViewModel();
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, newTask));
+                                await newTask.UploadModPkg(pkg, mod.fullPath, cancellationTokenSource);
+                                ProgressCurrent++;
+                                if (cancellationTokenSource.IsCancellationRequested)
+                                    throw new TaskCanceledException();
+                            });
+                        }
+                        else
+                        {
+                            if (preFlightCheck == "duplicated version")
+                            {
+                                ProgressBarMax -= mod.packages.Count() * 2;
+                                metaOnly = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ProgressBarMax--;
+                    }
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    //Meta Stage
+                    Info = "Upload Images";
+                    //I need to save the original data for tile, banner and screenshots in order not to override local paths
+                    var origTile = mod.tile;
+                    var origBanner = mod.banner;
+                    var origScreenshots = mod.screenshots != null ? mod.screenshots.ToArray() : null;
+
+                    var imgs = new TaskItemViewModel();
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, imgs));
+                    await imgs.UploadModImages(mod,cancellationTokenSource);
+
+                    ProgressCurrent++;
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    //Meta
+                    Info = "Upload Metadata";
+                    var meta = new TaskItemViewModel();
+                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, meta));
+                    await meta.ReleaseMod(mod, metaOnly, cancellationTokenSource);
+
+                    ProgressCurrent++;
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                        throw new TaskCanceledException();
+
+                    //Restore paths & save
+                    mod.tile = origTile;
+                    mod.banner = origBanner;
+                    mod.screenshots = origScreenshots;
+                    mod.SaveJson();
+
+                    ProgressCurrent++;
+
+                    if (!metaOnly)
+                        Info = "Upload Complete!";
+                    else
+                        Info = "Metadata Updated!";
+
+                    //Completed
+                    IsCompleted = true; 
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+
+                    //Delete kn_upload folder?
+                    try
+                    {
+                        //Directory.Delete(mod.fullPath + Path.DirectorySeparatorChar + "kn_upload");
+                    }
+                    catch { }
+
+                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                    {
+                        TaskViewModel.Instance!.taskQueue.Dequeue();
+                    }
+
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                else
+                {
+                    //Call cancel task on the parent object
+                    cancellationTokenSource?.Cancel();
+                }
+                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                {
+                    await Task.Delay(500);
+                }
+                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
+                {
+                    TaskViewModel.Instance!.taskQueue.Dequeue();
+                }
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.UploadModVersion()", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> CreateModVersion(Mod oldMod, string newVersion, CancellationTokenSource? cancelSource = null)
+        {
+            var newDir = string.Empty;
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 1;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    CancelButtonVisible = true;
+                    Name = "Creating Mod Version: " + oldMod.title + " " + newVersion;
+                    var currentDir = new DirectoryInfo(oldMod.fullPath);
+                    var parentDir = currentDir.Parent;
+                    newDir = parentDir!.FullName + Path.DirectorySeparatorChar + oldMod.id + "-" + newVersion;
+
+                    if (cancelSource != null)
+                    {
+                        cancellationTokenSource = cancelSource;
+                    }
+                    else
+                    {
+                        cancellationTokenSource = new CancellationTokenSource();
+                    }
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    ProgressBarMax = Directory.GetFiles(currentDir.FullName, "*", SearchOption.AllDirectories).Length;
+
+                    Directory.CreateDirectory(newDir);
+
+                    using (StreamWriter writer = new StreamWriter(newDir + Path.DirectorySeparatorChar + "knossos_net_download.token"))
+                    {
+                        writer.WriteLine("Warning: This token indicates an incomplete folder copy. If this token is present on the next Knet startup this folder WILL BE DELETED.");
+                    }
+
+                    await SysInfo.CopyDirectory(currentDir.FullName, newDir, true, cancellationTokenSource, copyCallback);
+
+                    File.Delete(newDir + Path.DirectorySeparatorChar + "knossos_net_download.token");
+
+                    var newMod = new Mod(newDir, oldMod.id + "-" + newVersion);
+                    newMod.version = newVersion;
+                    newMod.SaveJson();
+
+                    if (newMod.type == ModType.engine)
+                    {
+                        var build = new FsoBuild(newMod);
+                        await Dispatcher.UIThread.InvokeAsync(() => Knossos.AddBuild(build));
+                        await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance!.AddBuildToUi(build));
+                    }
+                    else
+                    {
+                        await Dispatcher.UIThread.InvokeAsync(() => Knossos.AddMod(newMod));
+                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddInstalledMod(newMod));
+                        
+                    }
+                    await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddDevMod(newMod));
+
+                    Info = "";
+                    IsCompleted = true;
+                    CancelButtonVisible = false;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                /*
+                    Task cancel requested by user
+                */
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                try
+                {
+                    Directory.Delete(newDir, true);
+                }
+                catch { }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.CreateModVersion()", ex);
+                try
+                {
+                    Directory.Delete(newDir, true);
+                }
+                catch { }
+                return false;
+            }
+        }
+
+        private async Task<bool> ExtractVP(FileInfo vpFile, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 1;
+                    ProgressCurrent = 0;
+                    ShowProgressText = false;
+                    if (cancelSource != null)
+                    {
+                        cancellationTokenSource = cancelSource;
+                    }
+                    else
+                    {
+                        cancellationTokenSource = new CancellationTokenSource();
+                    }
+                    CancelButtonVisible = false;
+                    Name = "Extracting: " + vpFile.Name;
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.ExtractVP()", "Starting to extractVP VP file: " + vpFile.Name);
+
+                    await Task.Run(async () => {
+                        var vp = new VPContainer();
+                        await vp.LoadVP(vpFile.FullName);
+                        await vp.ExtractVpAsync(vpFile.Directory!.FullName,extractCallback);
+                    });
+
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        try
+                        {
+                            File.Delete(vpFile.FullName);
+                        }
+                        catch { }
+                        throw new TaskCanceledException();
+                    }
+                    File.Delete(vpFile.FullName);
+                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.ExtractVP()", "ExtractVP VP finished: " + vpFile.Name + " Processed Files: " + ProgressBarMax);
+                    Info = "";
+                    IsCompleted = true;
+                    ProgressCurrent = ProgressBarMax;
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                /*
+                    Task cancel requested by user
+                */
+                IsCompleted = false;
+                IsCancelled = true;
+                CancelButtonVisible = false;
+                Info = "Task Cancelled";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Task Failed";
+                //Only dispose the token if it was created locally
+                if (cancelSource == null)
+                {
+                    cancellationTokenSource?.Dispose();
+                }
+                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.ExtractVP()", ex);
+                return false;
+            }
         }
 
         public void DisplayUpdates(List<Mod> updatedMods)
@@ -316,7 +1876,6 @@ namespace Knossos.NET.ViewModels
                 return false;
             }
         }
-
 
         private async Task<bool> CompressLosseFiles(List<string> filePaths, int alreadySkipped, CancellationTokenSource? cancelSource = null)
         {
@@ -635,22 +2194,6 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.CompressVP()", ex);
                 return false;
             }
-        }
-
-        private async void compressionCallback(string filename, int maxFiles)
-        {
-            if (filename != string.Empty)
-            {
-                ProgressCurrent++;
-            }
-            else
-            {
-                ProgressCurrent = 0;
-            }
-            await Dispatcher.UIThread.InvokeAsync(() => {
-                ProgressBarMax = maxFiles;
-                Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
-            });
         }
 
         public async Task<bool> CompressMod(Mod mod, CancellationTokenSource? cancelSource = null, bool isSubTask = false)
@@ -1392,6 +2935,7 @@ namespace Knossos.NET.ViewModels
         {
             string? modPath = null;
             Mod? installed = null;
+            
             try
             {
                 if (!TaskIsSet)
@@ -1427,22 +2971,26 @@ namespace Knossos.NET.ViewModels
                         }
                     }
 
-                    compressMod = manualCompress;
-                    //Todo add mod fso version checking
-                    if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.Always)
+                    if (!mod.devMode) //Do not compress dev mode mods
                     {
-                        compressMod = true;
-                    }
-                    if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.ModSupport)
-                    {
-                        try
+                        compressMod = manualCompress;
+                        //Todo add mod fso version checking
+                        if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.Always)
                         {
-                            var fso = mod.GetDependency("FSO");
-                            if (fso != null && (fso.version == null || fso.version.Contains(">=") || SemanticVersion.Compare(fso.version.Replace(">=", "").Replace("<", "").Replace(">", "").Trim(), VPCompression.MinimumFSOVersion) > 0))
-                                compressMod = true;
-                        }catch (Exception ex)
+                            compressMod = true;
+                        }
+                        if (!mod.devMode && Knossos.globalSettings.modCompression == CompressionSettings.ModSupport)
                         {
-                            Log.Add(Log.LogSeverity.Error,"Knossos.PlayMod()", ex);
+                            try
+                            {
+                                var fso = mod.GetDependency("FSO");
+                                if (fso != null && (fso.version == null || fso.version.Contains(">=") || SemanticVersion.Compare(fso.version.Replace(">=", "").Replace("<", "").Replace(">", "").Trim(), VPCompression.MinimumFSOVersion) > 0))
+                                    compressMod = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", ex);
+                            }
                         }
                     }
 
@@ -1465,10 +3013,11 @@ namespace Knossos.NET.ViewModels
                         -Create all folders
                         -Create the download token on the root of the mod.
                         -Set all the data needed here, number of tasks, etc for the progress bar and info
-                        -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 2
+                        -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 1
                          (Download, Decompression, Download banner/tile images)
                         -+1 task if we have to compress
                         -If the mod is installeds there is no need to download the baners and title image again so -2 to max tasks
+                        -If devmode and file is a vp it needs to be decompressed +1 to max tasks
                     */
 
                     List<ModFile> files = new List<ModFile>();
@@ -1492,6 +3041,7 @@ namespace Knossos.NET.ViewModels
                     }
 
                     modPath = Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar +rootPack + Path.DirectorySeparatorChar + modFolder;
+                    int vPExtractionNeeded = 0;
                     for (int i = mod.packages.Count - 1; i >= 0; i--)
                     {
                         bool alreadyInstalled = false;
@@ -1509,9 +3059,22 @@ namespace Knossos.NET.ViewModels
                                 }
                             }
                         }
-                        if (mod.packages[i].isSelected && !alreadyInstalled)
+                        
+                        if (mod.packages[i].isSelected && !alreadyInstalled || !alreadyInstalled && mod.devMode)
                         {
-                            files.AddRange(mod.packages[i].files!);
+                            if (mod.packages[i].files != null)
+                            {
+                                if (mod.devMode)
+                                {
+                                    foreach (var file in mod.packages[i].files!)
+                                    {
+                                        file.dest = mod.packages[i].name + Path.DirectorySeparatorChar + file.dest;
+                                        if (mod.packages[i].isVp)
+                                            vPExtractionNeeded++;
+                                    }
+                                }
+                                files.AddRange(mod.packages[i].files!);
+                            }
                         }
                         else
                         {
@@ -1545,8 +3108,9 @@ namespace Knossos.NET.ViewModels
 
                     ProgressBarMin = 0;
                     ProgressCurrent = 0;
-                    ProgressBarMax = installed == null ? (files.Count * 2) + 2 : (files.Count * 2);
-                    if(compressMod)
+                    ProgressBarMax = installed == null ? (files.Count * 2) + 1 : (files.Count * 2);
+                    ProgressBarMax += vPExtractionNeeded;
+                    if (compressMod)
                     {
                         ProgressBarMax += 1;
                     }
@@ -1650,6 +3214,11 @@ namespace Knossos.NET.ViewModels
                         File.Delete(fileFullPath);
                         ++ProgressCurrent;
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
                     });
                     files.Clear();
 
@@ -1669,32 +3238,56 @@ namespace Knossos.NET.ViewModels
                         throw new TaskCanceledException();
                     }
 
+                    //Download Tile image
                     if (!string.IsNullOrEmpty(mod.tile) && installed == null)
                     {
+                        Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         var tileTask = new TaskItemViewModel();
                         await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
-                        await tileTask.DownloadFile(mod.tile, modPath + Path.DirectorySeparatorChar + "kn_tile.png", "Downloading tile image", false, null, cancellationTokenSource);
-                        mod.tile = "kn_tile.png";
+                        var uri = new Uri(mod.tile);
+                        await tileTask.DownloadFile(mod.tile, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading tile image", false, null, cancellationTokenSource);
+                        mod.tile = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                     }
-                    ++ProgressCurrent;
-                    Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
                         throw new TaskCanceledException();
                     }
 
+                    //Download Banner
                     if (!string.IsNullOrEmpty(mod.banner) && installed == null)
                     {
+                        Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         var bannerTask = new TaskItemViewModel();
                         await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
-                        await bannerTask.DownloadFile(mod.banner, modPath + Path.DirectorySeparatorChar + "kn_banner.png", "Downloading banner image", false, null, cancellationTokenSource);
-                        mod.banner = "kn_banner.png";
+                        var uri = new Uri(mod.banner);
+                        await bannerTask.DownloadFile(mod.banner, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading banner image", false, null, cancellationTokenSource);
+                        mod.banner = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                     }
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
                         throw new TaskCanceledException();
+                    }
+
+                    //Download Screenshots
+                    if (mod.screenshots != null && mod.screenshots.Any() && installed == null)
+                    {
+                        Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
+                        var scList = new List<string>();
+                        foreach (var sc in mod.screenshots)
+                        {
+                            if (cancellationTokenSource.IsCancellationRequested)
+                            {
+                                throw new TaskCanceledException();
+                            }
+                            var scTask = new TaskItemViewModel();
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));
+                            var uri = new Uri(sc);
+                            await scTask.DownloadFile(sc, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading screenshot", false, null, cancellationTokenSource);
+                            scList.Add("kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath));
+                        }
+                        mod.screenshots = scList.ToArray();
                     }
 
                     ++ProgressCurrent;
@@ -1702,6 +3295,7 @@ namespace Knossos.NET.ViewModels
                     mod.fullPath = modPath + Path.DirectorySeparatorChar;
                     mod.folderName = modFolder;
                     mod.installed = true;
+                    mod.inNebula = true;
 
                     if (installed == null)
                     {
@@ -1736,6 +3330,24 @@ namespace Knossos.NET.ViewModels
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                     }
 
+                    //ExtractVPs if needed
+                    if (mod.devMode)
+                    {
+                        var vpFiles = Directory.GetFiles(modPath, "*.*", SearchOption.AllDirectories).Where(file => Regex.IsMatch(file.ToLower(), @"^.+\.(vp|vpc)$"));
+                        await Parallel.ForEachAsync(vpFiles, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks }, async (vp, token) =>
+                        {
+                            var extractTask = new TaskItemViewModel();
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, extractTask));
+                            var extractResult = await extractTask.ExtractVP(new FileInfo(vp), cancellationTokenSource);
+                            if (!extractResult)
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Error while extracting vp file " + vp);
+                            }
+                            ++ProgressCurrent;
+                            Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+                        });
+                    }
+
                     try
                     {
                         File.Delete(mod.fullPath + Path.DirectorySeparatorChar + "knossos_net_download.token");
@@ -1749,6 +3361,10 @@ namespace Knossos.NET.ViewModels
                         Knossos.AddMod(mod);
                         await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(mod), DispatcherPriority.Background);
                         await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id, false), DispatcherPriority.Background);
+                        if (mod.devMode)
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddDevMod(mod), DispatcherPriority.Background);
+                        }
                         MainWindowViewModel.Instance?.RunModStatusChecks();
                     }
 
@@ -1908,7 +3524,7 @@ namespace Knossos.NET.ViewModels
                             -Create all folders
                             -Create the download token on the root of the mod.
                             -Set all the data needed here, number of tasks, etc for the progress bar and info
-                            -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 2
+                            -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 1
                              (Download, Decompression, Download banner/tile images)
                         */
                         List<ModFile> files = new List<ModFile>();
@@ -1916,7 +3532,7 @@ namespace Knossos.NET.ViewModels
                         modPath = Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "bin"+ Path.DirectorySeparatorChar + modFolder;
                         for (int i = modJson.packages.Count - 1; i >= 0; i--)
                         {
-                            if (IsEnviromentStringValid(modJson.packages[i].environment))
+                            if (FsoBuild.IsEnviromentStringValidInstall(modJson.packages[i].environment))
                             {
                                 files.AddRange(modJson.packages[i].files!);
                                 foreach (ModExecutable exec in modJson.packages[i].executables!)
@@ -1943,7 +3559,7 @@ namespace Knossos.NET.ViewModels
 
                         ProgressBarMin = 0;
                         sender.ProgressBarCurrent = ProgressCurrent = 0;
-                        sender.ProgressBarMax = ProgressBarMax = (files.Count * 2) + 2;
+                        sender.ProgressBarMax = ProgressBarMax = (files.Count * 2) + 1;
                         Info = "Tasks: 0/" + ProgressBarMax;
 
                         try
@@ -2060,13 +3676,13 @@ namespace Knossos.NET.ViewModels
 
                         if (!string.IsNullOrEmpty(modJson.tile))
                         {
+                            Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                             var tileTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
-                            await tileTask.DownloadFile(modJson.tile, modPath + Path.DirectorySeparatorChar + "kn_tile.png", "Downloading tile image", false, null, cancellationTokenSource);
-                            modJson.tile = "kn_tile.png";
+                            var uri = new Uri(modJson.tile);
+                            await tileTask.DownloadFile(modJson.tile, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading tile image", false, null, cancellationTokenSource);
+                            modJson.tile = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                         }
-                        sender.ProgressBarCurrent = ++ProgressCurrent;
-                        Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
 
                         if (cancellationTokenSource.IsCancellationRequested)
                         {
@@ -2075,10 +3691,12 @@ namespace Knossos.NET.ViewModels
 
                         if (!string.IsNullOrEmpty(modJson.banner))
                         {
+                            Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                             var bannerTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
-                            await bannerTask.DownloadFile(modJson.banner, modPath + Path.DirectorySeparatorChar + "kn_banner.png", "Downloading banner image", false, null, cancellationTokenSource);
-                            modJson.banner = "kn_banner.png";
+                            var uri = new Uri(modJson.banner);
+                            await bannerTask.DownloadFile(modJson.banner, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading banner image", false, null, cancellationTokenSource);
+                            modJson.banner = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                         }
 
                         if (cancellationTokenSource.IsCancellationRequested)
@@ -2086,11 +3704,38 @@ namespace Knossos.NET.ViewModels
                             throw new TaskCanceledException();
                         }
 
+                        //Download Screenshots
+                        if (modJson.screenshots != null && modJson.screenshots.Any())
+                        {
+                            Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
+                            var scList = new List<string>();
+                            foreach (var sc in modJson.screenshots)
+                            {
+                                if (cancellationTokenSource.IsCancellationRequested)
+                                {
+                                    throw new TaskCanceledException();
+                                }
+                                var scTask = new TaskItemViewModel();
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));
+                                var uri = new Uri(sc);
+                                await scTask.DownloadFile(sc, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading screenshot", false, null, cancellationTokenSource);
+                                scList.Add("kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath));
+                            }
+                            modJson.screenshots = scList.ToArray();
+                        }
+
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+
+                        /**/
                         sender.ProgressBarCurrent = ++ProgressCurrent;
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                         modJson.fullPath = modPath + Path.DirectorySeparatorChar;
                         modJson.folderName = modFolder;
                         modJson.installed = true;
+                        modJson.inNebula = true;
                         modJson.SaveJson();
                         try
                         {
@@ -2102,6 +3747,10 @@ namespace Knossos.NET.ViewModels
                         }
                         FsoBuild newBuild = new FsoBuild(modJson);
                         Knossos.AddBuild(newBuild);
+                        if (modJson.devMode)
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddDevMod(modJson), DispatcherPriority.Background);
+                        }
                         IsCompleted = true;
                         CancelButtonVisible = false;
 
@@ -2214,22 +3863,6 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal void RestartDownloadCommand()
-        {
-            restartDownload = true;
-            if (pauseDownload)
-                PauseDownloadCommand();
-        }
-
-        internal void PauseDownloadCommand()
-        {
-            pauseDownload = !pauseDownload;
-            if (pauseDownload)
-                PauseButtonText = "Resume";
-            else
-                PauseButtonText = "Pause";
-        }
-
         public async Task<bool?> DownloadFile(string url, string dest, string msg, bool showStopButton, string? tooltip, CancellationTokenSource? cancelSource = null)
         {
             string[] mirrors = { url };
@@ -2337,62 +3970,6 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.DownloadFile()", ex);
                 return false;
             }
-        }
-
-        public void CancelTaskCommand()
-        {
-            if (!IsCompleted)
-            {
-                cancellationTokenSource?.Cancel();
-                IsCancelled = true;
-            }
-        }
-
-
-        private bool IsEnviromentStringValid(string? enviroment)
-        {
-            if(enviroment == null || enviroment.Trim() == string.Empty)
-            { 
-                return false; 
-            }
-
-            if(enviroment.ToLower().Contains("windows") && !SysInfo.IsWindows || enviroment.ToLower().Contains("linux") && !SysInfo.IsLinux || enviroment.ToLower().Contains("macosx") && !SysInfo.IsMacOS)
-            {
-                return false;
-            }
-
-            if (enviroment.ToLower().Contains("avx2") && !SysInfo.CpuAVX2 || enviroment.ToLower().Contains("avx") && !SysInfo.CpuAVX)
-            {
-                return false;
-            }
-
-            if (enviroment.ToLower().Contains("x86_64") && SysInfo.CpuArch == "X64")
-            {
-                return true;
-            }
-            if (enviroment.ToLower().Contains("arm64") && SysInfo.CpuArch == "Arm64")
-            {
-                return true;
-            }
-            if (enviroment.ToLower().Contains("arm32") && (SysInfo.CpuArch == "Armv6" || SysInfo.CpuArch == "Arm"))
-            {
-                return true;
-            }
-            if(SysInfo.CpuArch == "X86" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
-            {
-                return true;
-            }
-            if (SysInfo.CpuArch == "X64" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
-            {
-                return true;
-            }
-
-            if (SysInfo.CpuArch == "Arm64" && (SysInfo.IsMacOS || SysInfo.IsWindows) && !enviroment.ToLower().Contains("arm32") && !enviroment.ToLower().Contains("avx"))
-            {
-                return true;
-            }
-
-            return false;
         }
 
         private async Task<bool> Download(string[] downloadMirrors, string destinationFilePath, Func<long?, long, string, double?, bool> progressChanged)
@@ -2550,6 +4127,116 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.Download", ex);
                 return false;
             }
+        }
+
+        /* Progress Callbacks */
+        private async void multiuploaderCallback(string text, int currentPart, int maxParts)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    ProgressBarMax = maxParts;
+                    ProgressCurrent = currentPart;
+                    Info = text;
+                }
+                catch { }
+            });
+        }
+
+        private async void sevenZipCallback(string percentage)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    ProgressCurrent = int.Parse(percentage);
+                }
+                catch { }
+            });
+        }
+
+        private async void copyCallback(string filename)
+        {
+            if (filename != string.Empty)
+            {
+                ProgressCurrent++;
+            }
+            else
+            {
+                ProgressCurrent = 0;
+            }
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                }
+                catch { }
+            });
+        }
+
+        private async void compressionCallback(string filename, int maxFiles)
+        {
+            if (filename != string.Empty)
+            {
+                ProgressCurrent++;
+            }
+            else
+            {
+                ProgressCurrent = 0;
+            }
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    ProgressBarMax = maxFiles;
+                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                }
+                catch { }
+            });
+        }
+
+        private async void extractCallback(string filename, int _, int maxFiles)
+        {
+            if (filename != string.Empty)
+            {
+                ProgressCurrent++;
+            }
+            else
+            {
+                ProgressCurrent = 0;
+            }
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                try
+                {
+                    ProgressBarMax = maxFiles;
+                    Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
+                }
+                catch { }
+            });
+        }
+
+        /* Button Commands */
+        public void CancelTaskCommand()
+        {
+            if (!IsCompleted)
+            {
+                cancellationTokenSource?.Cancel();
+                IsCancelled = true;
+            }
+        }
+
+        internal void PauseDownloadCommand()
+        {
+            pauseDownload = !pauseDownload;
+            if (pauseDownload)
+                PauseButtonText = "Resume";
+            else
+                PauseButtonText = "Pause";
+        }
+
+        internal void RestartDownloadCommand()
+        {
+            restartDownload = true;
+            if (pauseDownload)
+                PauseDownloadCommand();
         }
     }
 }

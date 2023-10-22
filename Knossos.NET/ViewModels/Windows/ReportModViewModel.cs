@@ -36,7 +36,7 @@ namespace Knossos.NET.ViewModels
                 var reply = await Nebula.ReportMod(mod, ReasonString);
                 if(reply)
                 {
-                    await MessageBox.Show(MainWindow.instance!, "Your report has been submitted to fsnebula", "Mod Report OK", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance!, "Your report has been submitted to fsnebula, we will act as soon as possible.", "Mod Report OK", MessageBox.MessageBoxButtons.OK);
                     var w = (Window)window;
                     w.Close();
                 }

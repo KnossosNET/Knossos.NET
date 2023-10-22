@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.DevModFsoSettingsView"
+			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
+			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+
+	<Design.DataContext>
+		<vm:DevModFsoSettingsViewModel/>
+	</Design.DataContext>
+
+	<ScrollViewer>
+		<StackPanel>
+			<Button Command="{Binding SaveSettingsCommand}" Background="Green" Margin="5">Save Changes</Button>
+			<!--FSO Build Settings -->
+			<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">FSO BUILD (DEV)</Label>
+			<v:FsoBuildPickerView Content="{Binding FsoPicker}"/>
+			<Label Foreground="Yellow">*This is only used locally, the FSO build setting on this tab is not uploaded to nebula.</Label>
+			<Label Foreground="Yellow" Margin="6,0,0,0">Use a package dependency to set the fso build version for players.</Label>
+			<Label Margin="0,50,0,0" FontWeight="Black" FontSize="20">Mod CmdLine</Label>
+			<TextBox Text="{Binding CmdLine}" IsVisible="{Binding !ConfigureBuildOpen}" Margin="5,20,0,0" FontSize="14"/>			
+			<Button IsVisible="{Binding !ConfigureBuildOpen}" Command="{Binding ConfigureBuild}" Margin="5" FontWeight="Bold" FontSize="18" Background="Black" Foreground="White">Open Flag Configuration</Button>
+			<v:FsoFlagsView Content="{Binding FsoFlags}"/>
+			<!--FSO Build END -->
+		</StackPanel>
+	</ScrollViewer>
+	
+</UserControl>

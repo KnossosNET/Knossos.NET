@@ -74,6 +74,11 @@ namespace Knossos.NET.ViewModels
         }
 
         /* External Commands */
+        public void AddDevMod(Mod devmod)
+        {
+            DeveloperModView.AddMod(devmod);
+        }
+
         public void RunModStatusChecks()
         {
             InstalledModsView.RunModStatusChecks();

@@ -1,0 +1,60 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Knossos.NET.Views.DevModDescriptionEditorView"
+		Icon="/Assets/knossos-icon.ico"
+		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+		xmlns:HtmlRenderer="clr-namespace:TheArtOfDev.HtmlRenderer.Avalonia;assembly=Avalonia.HtmlRenderer"
+        Title="Mod Description Editor"
+	    SizeToContent="Manual"
+		MinHeight="500"
+		MinWidth="500"
+		WindowStartupLocation="CenterOwner"
+	    CanResize="True">
+	
+	<Design.DataContext>
+		<vm:DevModDescriptionEditorViewModel/>
+	</Design.DataContext>
+	
+		<Grid RowDefinitions="Auto,*" Background="#18191A">
+			<StackPanel Grid.Row="0" Margin="5">
+				<WrapPanel>
+					<Button FontWeight="Black" Command="{Binding ToolBar}" CommandParameter="[b]Bold Text[/b]" ToolTip.Tip="[b]Bold Text[/b]">B</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[u]Underline Text[/u]" ToolTip.Tip="[u]Underline Text[/u]">U</Button>
+					<Button FontStyle="Italic" Command="{Binding ToolBar}" CommandParameter="[i]Italic Text[/i]" ToolTip.Tip="[i]Italic Text[/i]">I</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[s]Strikethrough Text[/s]" ToolTip.Tip="[s]Strikethrough Text[/s]">S</Button>
+					<Label VerticalContentAlignment="Center">-</Label>
+					<Button Command="{Binding ToolBar}" CommandParameter="[br]" ToolTip.Tip="Line Break [br]">NewLine</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[hr]" ToolTip.Tip="Horizontal Line [hr]">Line</Button>
+					<Label VerticalContentAlignment="Center">-</Label>
+					<Button Command="{Binding ToolBar}" CommandParameter="[list]&#x0a;	Element&#x0a;	Element&#x0a;	Element&#x0a;[/list]" ToolTip.Tip="Simple List:&#x0a;[list]&#x0a;	Element&#x0a;	Element&#x0a;	Element&#x0a;[/list]">SList</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[ul]&#x0a;[*]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[/ul]" ToolTip.Tip="Unordered List:&#x0a;[ul]&#x0a; [*] -> (HtmlRenderer bug workaround)&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;[/ul]">UList</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[ol]&#x0a;[*]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[/ol]" ToolTip.Tip="Ordered List:&#x0a;[ol]&#x0a; [*] -> (HtmlRenderer bug workaround)&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;[/ol]">OList</Button>
+					<Label VerticalContentAlignment="Center">-</Label>
+					<Button Command="{Binding ToolBar}" CommandParameter="[left]Align left[/left]" ToolTip.Tip="Align: Left &#x0a;[left][/left]">Left</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[center]Align center[/center]" ToolTip.Tip="Align: Center &#x0a;[center][/center]">Center</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[right]Align right[/right]" ToolTip.Tip="Align: Right &#x0a;[right][/right]">Right</Button>
+					<Label VerticalContentAlignment="Center">-</Label>
+					<Button Command="{Binding ToolBar}" CommandParameter="[color=yellow]Text Color[/color]" ToolTip.Tip="[color=yellow]Text Color[/color]&#x0a;[color=#eb4034]Text Hex Color[/color]">Color</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[size=16]Text Font Size[/size]" ToolTip.Tip="[size=16]Text Font Size[/size]">Size</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[font=Lucida Calligraphy]New Text Font[/font]&#x0a;[font=Comic Sans MS,24]New Text Font[/font]" ToolTip.Tip="Change text font:&#x0a;[font=Lucida Calligraphy]New Text Font[/font]&#x0a;[font=Comic Sans MS,24]New Text Font[/font]">Font</Button>
+					<Label VerticalContentAlignment="Center">-</Label>
+					<Button Command="{Binding ToolBar}" CommandParameter="[img]https://www.gstatic.com/webp/gallery/1.jpg[/img]&#x0a;[img=300x200]https://www.gstatic.com/webp/gallery/4.jpg[/img]" ToolTip.Tip="Images (externally linked only):&#x0a;[img]https://www.gstatic.com/webp/gallery/1.jpg[/img]&#x0a;With Size:&#x0a;[img=300x200]https://www.gstatic.com/webp/gallery/4.jpg[/img]">Image</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[quote]Quoted Text[/quote]&#x0a;[quote=Who said it]Quoted Text[/quote]" ToolTip.Tip="Quote:&#x0a;[quote]Text[/quote]&#x0a;With Reference:&#x0a;[quote=Who said it]Text[/quote]">Quote</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[url]https://www.hard-light.net/[/url]&#x0a;[url=https://www.hard-light.net/]Text For Hyperlink[/url]" ToolTip.Tip="HyperLinks&#x0a;Simple:&#x0a;[url]https://www.hard-light.net/[/url]&#x0a;Advanced:&#x0a;[url=https://www.hard-light.net/]Text For Hyperlink[/url]">URL</Button>
+				</WrapPanel>
+			</StackPanel>
+			<ScrollViewer Grid.Row="1">
+				<Grid Margin="6" ColumnDefinitions="*,*">
+					<Label Grid.Column="0" Foreground="Gray" HorizontalContentAlignment="Left" Margin="-5,-15,0,0">Plain Text</Label>
+					<TextBox x:Name="PlainText" IsUndoEnabled="True" AcceptsReturn="True" AcceptsTab="True" Margin="0,5,0,0" Grid.Column="0" MinWidth="300" MinHeight="300" TextWrapping="Wrap" Text="{Binding Description}"></TextBox>
+					<Label Grid.Column="1" Foreground="Gray" HorizontalContentAlignment="Right" Margin="-5,-15,0,0">BBCode/HTML Preview</Label>
+					<Border Margin="0,5,0,0" Grid.Column="1" BorderBrush="Gray" BorderThickness="2" CornerRadius="2">
+						<HtmlRenderer:HtmlPanel Background="Transparent" Text="{Binding DescriptionHtml}"/>
+					</Border>
+				</Grid>
+			</ScrollViewer>
+		</Grid>
+</Window>

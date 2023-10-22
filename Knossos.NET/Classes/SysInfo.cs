@@ -1,9 +1,14 @@
-﻿using System;
+﻿using Knossos.NET.Models;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
+using System.Text;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 namespace Knossos.NET
 {
@@ -40,26 +45,26 @@ namespace Knossos.NET
 
         public static string GetKnossosDataFolderPath()
         {
-            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)+ Path.DirectorySeparatorChar +"KnossosNET";
+            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + "KnossosNET";
         }
 
         public static string GetFSODataFolderPath()
         {
-            if(fsoPrefPath != string.Empty)
+            if (fsoPrefPath != string.Empty)
             {
                 return fsoPrefPath;
             }
             else
             {
-                return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar +"HardLightProductions" + Path.DirectorySeparatorChar + "FreeSpaceOpen";
+                return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + "HardLightProductions" + Path.DirectorySeparatorChar + "FreeSpaceOpen";
             }
-            
+
         }
 
         public static void SetFSODataFolderPath(string path)
         {
             //FSO responds with this if there is no ini
-            if(path != @".\")
+            if (path != @".\")
                 fsoPrefPath = path;
         }
 
@@ -80,8 +85,8 @@ namespace Knossos.NET
                     jsonFile.Close();
                     return jsonObject.base_path;
                 }
-            } 
-            catch(Exception ex) 
+            }
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Sysinfo.GetBasePathFromKnossosLegacy", ex);
             }
@@ -132,6 +137,163 @@ namespace Knossos.NET
             if (isMacOS)
                 return "MacOS";
             return "Unknown";
+        }
+
+        public static void OpenBrowserURL(string url)
+        {
+            try
+            {
+                if (SysInfo.IsWindows)
+                {
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}"));
+                }
+                else if (SysInfo.IsLinux)
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (SysInfo.IsMacOS)
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Sysinfo.OpenBrowser()", ex);
+            }
+        }
+
+        public static void OpenFolder(string path)
+        {
+            try
+            {
+                Process.Start(new System.Diagnostics.ProcessStartInfo()
+                {
+                    FileName = path,
+                    UseShellExecute = true,
+                    Verb = "open"
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Sysinfo.OpenFolder()", ex);
+            }
+        }
+
+        public static async Task CopyDirectory(string sourceDir, string destinationDir, bool recursive, CancellationTokenSource cancelSource, Action<string>? progressCallback = null)
+        {
+            await Task.Run(async () =>
+            {
+                var dir = new DirectoryInfo(sourceDir);
+
+                if (!dir.Exists)
+                    throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+
+                DirectoryInfo[] dirs = dir.GetDirectories();
+
+                Directory.CreateDirectory(destinationDir);
+
+                foreach (FileInfo file in dir.GetFiles())
+                {
+                    if (cancelSource.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+                    string targetFilePath = Path.Combine(destinationDir, file.Name);
+                    if (progressCallback != null)
+                    {
+                        progressCallback(file.Name);
+                    }
+                    file.CopyTo(targetFilePath);
+                }
+
+                if (recursive)
+                {
+                    foreach (DirectoryInfo subDir in dirs)
+                    {
+                        if (cancelSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+
+                        string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+                        await CopyDirectory(subDir.FullName, newDestinationDir, true, cancelSource, progressCallback);
+                    }
+                }
+            });
+        }
+
+        public static string DIYStringEncryption(string unencryptedString)
+        {
+            try
+            {
+                var stringBytes = Encoding.UTF8.GetBytes(unencryptedString);
+                return Convert.ToBase64String(stringBytes);
+            }catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Sysinfo.DIYStringEncryption()", ex);
+                return unencryptedString;
+            }
+        }
+
+        public static string DIYStringDecryption(string encryptedString)
+        {
+            try
+            {
+                var base64Bytes = Convert.FromBase64String(encryptedString);
+                return Encoding.UTF8.GetString(base64Bytes);
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Sysinfo.DIYStringDecryption()", ex);
+                return encryptedString;
+            }
+        }
+
+        public static bool IsValidEmail(string email)
+        {
+            var trimmedEmail = email.Trim();
+
+            if (trimmedEmail.EndsWith("."))
+            {
+                return false;
+            }
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == trimmedEmail;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Returns a complete file hash string in a format compatible with Nebula
+        /// (sha256, lowercase)
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <param name="method"></param>
+        /// <returns>hash string or null if failed</returns>
+        public static async Task<string?> GetFileHash(string fullPath)
+        {
+            try
+            {
+                using (FileStream? file = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
+                {
+                    using (SHA256 checksum = SHA256.Create())
+                    {
+                        return BitConverter.ToString(await checksum.ComputeHashAsync(file)).Replace("-", String.Empty).ToLower();
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "SysInfo.GetFileHash()", ex);
+            }
+            return null;
         }
     }
 }

@@ -65,7 +65,8 @@ namespace Knossos.NET.Models
         public string? directExec = null;
         public bool isInstalled = true;
         public bool devMode = false;
-        public Mod? modData;
+        public Mod? modData; 
+      
         /*
          Direct Exe
          */
@@ -128,6 +129,28 @@ namespace Knossos.NET.Models
             id = modJson.id;
             title = modJson.title;
             devMode = modJson.devMode;
+            if(devMode)
+            {
+                modData = modJson;
+            }
+            description = modJson.description;
+            version = modJson.version;
+            folderPath = modJson.fullPath;
+            stability = GetFsoStability(modJson.stability, modJson.id);
+            date = modJson.lastUpdate;
+            LoadExecutables(modJson);
+        }
+
+        public void UpdateBuildData(Mod modJson)
+        {
+            if (modJson.fullPath == string.Empty)
+            {
+                //This is a nebula build
+                isInstalled = false;
+            }
+            id = modJson.id;
+            title = modJson.title;
+            devMode = modJson.devMode;
             if (devMode)
             {
                 modData = modJson;
@@ -137,6 +160,7 @@ namespace Knossos.NET.Models
             folderPath = modJson.fullPath;
             stability = GetFsoStability(modJson.stability, modJson.id);
             date = modJson.lastUpdate;
+            executables.Clear();
             LoadExecutables(modJson);
         }
 
@@ -321,6 +345,58 @@ namespace Knossos.NET.Models
             return properties;
         }
 
+        /// <summary>
+        /// Determines if the current environment string is valid to download in the current system
+        /// Used to determine witch packages to install for each build
+        /// </summary>
+        /// <param name="enviroment"></param>
+        /// <returns>true if valid, false otherwise</returns>
+        public static bool IsEnviromentStringValidInstall(string? enviroment)
+        {
+            if (enviroment == null || enviroment.Trim() == string.Empty)
+            {
+                return false;
+            }
+
+            if (enviroment.ToLower().Contains("windows") && !SysInfo.IsWindows || enviroment.ToLower().Contains("linux") && !SysInfo.IsLinux || enviroment.ToLower().Contains("macosx") && !SysInfo.IsMacOS)
+            {
+                return false;
+            }
+
+            if (enviroment.ToLower().Contains("avx2") && !SysInfo.CpuAVX2 || enviroment.ToLower().Contains("avx") && !SysInfo.CpuAVX)
+            {
+                return false;
+            }
+
+            if (enviroment.ToLower().Contains("x86_64") && SysInfo.CpuArch == "X64")
+            {
+                return true;
+            }
+            if (enviroment.ToLower().Contains("arm64") && SysInfo.CpuArch == "Arm64")
+            {
+                return true;
+            }
+            if (enviroment.ToLower().Contains("arm32") && (SysInfo.CpuArch == "Armv6" || SysInfo.CpuArch == "Arm"))
+            {
+                return true;
+            }
+            if (SysInfo.CpuArch == "X86" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
+            {
+                return true;
+            }
+            if (SysInfo.CpuArch == "X64" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
+            {
+                return true;
+            }
+
+            if (SysInfo.CpuArch == "Arm64" && (SysInfo.IsMacOS || SysInfo.IsWindows) && !enviroment.ToLower().Contains("arm32") && !enviroment.ToLower().Contains("avx"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         /*
             Determine the operating system this build file is compiled for 
         */
@@ -415,6 +491,20 @@ namespace Knossos.NET.Models
             }
         }
 
+        public static string? GetLabelString(FsoExecType fsoExecType)
+        {
+            switch (fsoExecType)
+            {
+                case FsoExecType.Release: return null;
+                case FsoExecType.Debug: return "debug";
+                case FsoExecType.Fred2: return "fred2";
+                case FsoExecType.Fred2Debug: return "fred2 debug";
+                case FsoExecType.QtFred: return "qtfred";
+                case FsoExecType.QtFredDebug: return "qtfred debug";
+            }
+            return null;
+        }
+
         /* 
            Official FSO builds from nebula use "FSO" as id, only check stability on those.
            For all others the stability is "custom" since we cant really know.    
@@ -440,6 +530,25 @@ namespace Knossos.NET.Models
                     Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetFsoStability", "Unable to determine the proper build stability: " + stability);
                     return FsoStability.Stable;
             }
+        }
+
+        public static string GetEnviromentString(FsoExecArch arch, FsoExecEnvironment so)
+        {
+            string env = so.ToString().ToLower();
+
+            switch(arch)
+            {
+                case FsoExecArch.x86: env += " && x86"; break;
+                case FsoExecArch.x86_avx: env += " && x86 && avx"; break;
+                case FsoExecArch.x86_avx2: env += " && x86 && avx2"; break;
+                case FsoExecArch.x64: env += " && x86_64"; break;
+                case FsoExecArch.x64_avx: env += " && x86_64 && avx"; break;
+                case FsoExecArch.x64_avx2: env += " && x86_64 && avx2"; break;
+                case FsoExecArch.arm32: env += " && arm32"; break;
+                case FsoExecArch.arm64: env += " && arm64"; break;
+            }
+
+            return env;
         }
 
         public override string ToString()

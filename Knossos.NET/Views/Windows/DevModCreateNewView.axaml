@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="550" d:DesignHeight="330"
+        x:Class="Knossos.NET.Views.DevModCreateNewView"
+		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+        Title="Create New Mod"
+		x:Name="CreateModView"
+		SizeToContent="WidthAndHeight"
+		Icon="/Assets/knossos-icon.ico"
+		WindowStartupLocation="CenterOwner"
+		CanResize="False">
+	<Design.DataContext>
+		<vm:DevModCreateNewViewModel/>
+	</Design.DataContext>
+
+	<ScrollViewer Background="#18191A" Width="550" Height="330">
+		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+			<!--NAME-->
+			<Label Grid.Row="0" Grid.Column="0" Margin="5" FontWeight="Bold" FontSize="18">Name</Label>
+			<TextBox Watermark="Something Something Aftermath" Grid.Row="0" Grid.Column="1" Text="{Binding ModName}" Margin="5"></TextBox>
+			<!--ID-->
+			<Label Grid.Row="1" Grid.Column="0" Margin="5" FontWeight="Bold" FontSize="18">ID</Label>
+			<StackPanel Grid.Row="1" Grid.Column="1">
+				<TextBox  Text="{Binding ModId}" Margin="5"></TextBox>
+				<Label Margin="1,0,0,0" Foreground="Yellow">Only characters (a-z, A-Z), numbers (0-9) and underscores are allowed.</Label>
+			</StackPanel>
+			<!--Version-->
+			<Label Grid.Row="2" Grid.Column="0" Margin="5" FontWeight="Bold" FontSize="18">Version</Label>
+			<TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ModVersion}" Margin="5"></TextBox>
+			<!--Type-->
+			<Label Grid.Row="3" Grid.Column="0" Margin="5" FontWeight="Bold" FontSize="18">Type</Label>
+			<ComboBox Width="460" Grid.Row="3" Grid.Column="1" SelectedIndex="{Binding TypeSelectedIndex}" Margin="5">
+				<ComboBoxItem>MOD</ComboBoxItem>
+				<ComboBoxItem>Total Conversion</ComboBoxItem>
+				<ComboBoxItem>FSO Build</ComboBoxItem>
+			</ComboBox>
+			<!--Parent-->
+			<Label IsVisible="{Binding !TypeSelectedIndex}" Grid.Row="4" Grid.Column="0" Margin="5" FontWeight="Bold" FontSize="18">Parent</Label>
+			<ComboBox IsVisible="{Binding !TypeSelectedIndex}" Width="460" Grid.Row="4" SelectedIndex="{Binding ParentSelectedIndex}" Grid.Column="1" ItemsSource="{Binding ParentComboBoxItems}" Margin="5"></ComboBox>
+			<!--Button-->
+			<Button Command="{Binding CreateMod, Mode=OneWay}" CommandParameter="{Binding ElementName=CreateModView}" Grid.Row="5" HorizontalAlignment="Left" Margin="165,40,0,0" Grid.Column="1" Background="Green">Create</Button>
+			<Label Margin="-45,0,0,0" Grid.Column="1" Grid.Row="6" IsVisible="{Binding !LoggedInNebula}" Foreground="Yellow">You are not logged in to Nebula, mod ID avalibly cannot be properly verified.</Label>
+		</Grid>
+	</ScrollViewer>
+	
+</Window>

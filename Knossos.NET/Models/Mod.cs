@@ -30,6 +30,14 @@ namespace Knossos.NET.Models
         local
     }
 
+    public enum ModMemberRole
+    {
+        Owner = 0,
+        Manager = 10,
+        Uploader = 20,
+        Tester = 30
+    }
+
     /*
         The "mod class" variables math the json properties for the mod.json file that is located at the root of the mod folder.
         In order to maintain compatibility with other launchers all properties saved in the mod.json file must be
@@ -58,24 +66,24 @@ namespace Knossos.NET.Models
         public ModType? type { get; set; } // "<mod|tc|engine|tool|ext>",  Folder Structure: <Knossos>\TC\MOD-VER, <Knossos>\TC\TC-VER, <Knossos>\bin\ENGINE-VER, <Knossos>\FS2(TC)\<Retail fs2> + <MOD-VER FOLDERS>
         public string? parent { get; set; } // null if type=tc and tc name if type=mod. Examples TC: FS2, Wing_commander_saga, Solaris, etc. 
         public string version { get; set; } = "0.0.0"; // required, http://semver.org/
-        [JsonPropertyName("_private")]
+        [JsonPropertyName("private")]
         public bool isPrivate { get; set; } = false;
         public string? stability { get; set; } // "<stable|rc|nightly>"  default: stable. Only applies to type == engine. 
-        public string? description { get; set; } // optional, with optional html format, should match the mod.ini's description
-        public string? notes { get; set; } // optional, these will be displayed during the installation.
+        public string? description { get; set; } = string.Empty; // optional, with optional html format, should match the mod.ini's description
+        public string? notes { get; set; } = string.Empty; // optional, these will be displayed during the installation.
         public string? logo { get; set; } // "<path to image>", default: null. This the old mod.ini logo, legacy support only, 255×112.
         public string? tile { get; set; } // "<path to image>", optional, default: null, Used in the library view. 150×225. Under some unknown condition this can be a https url.
         public string? banner { get; set; } // "<path to image>", optional, default: null, Used in the mod detail view. 1070x300. Under some unknown condition this can be a https url.
         [JsonPropertyName("release_thread")]
         public string? releaseThread { get; set; } // optional url string, default: null, Will display a button in the details view which opens the given link
-        public string[]? videos { get; set; }  // optional, default: [], A list of video links (the links will be loaded in an iframe to display the videos in the mod details view)
-        public string[]? screenshots { get; set; } // optional, default: [], A list of images to be displayed in the mod details view.
-        public string[]? attachments { get; set; }
+        public string[]? videos { get; set; } = new string[0]; // optional, default: [], A list of video links (the links will be loaded in an iframe to display the videos in the mod details view)
+        public string[]? screenshots { get; set; } = new string[0];  // optional, default: [], A list of images to be displayed in the mod details view.
+        public string[]? attachments { get; set; } = new string[0];
         [JsonPropertyName("first_release")]
         public string? firstRelease { get; set; } // "YYYY-MM-DD", optional, default: null, the first release formatted in ISO 8601
         [JsonPropertyName("last_update")]
         public string? lastUpdate { get; set; } // "YYYY-MM-DD", optional, default: null, the latest update formatted in ISO 8601
-        public string? cmdline { get; set; } // optional, allows the modder to specify a default cmdline for this mod
+        public string? cmdline { get; set; } = string.Empty; // optional, allows the modder to specify a default cmdline for this mod
         [JsonPropertyName("mod_flag")]
         public List<string> modFlag { get; set; } = new List<string>(); //it should not be used directly, and instead use GetModFlagList()
         [JsonPropertyName("dev_mode")]
@@ -97,6 +105,10 @@ namespace Knossos.NET.Models
         public bool isEnabled { get; set; } = false;
         [JsonIgnore]
         public bool isNewMod { get; set; } = false;
+        [JsonIgnore]
+        public bool inNebula { get; set; } = false;
+        [JsonIgnore]
+        public List<ModMember>? members { get; set; } = null;
         [JsonIgnore]
         public bool fullDataLoaded { get; set; } = false;
 
@@ -136,7 +148,10 @@ namespace Knossos.NET.Models
             notes = null;
             foreach (ModPackage pkg in packages)
             {
-                pkg.notes = null;
+                if (!devMode)
+                {
+                    pkg.notes = null;
+                }
                 pkg.filelist = null;
                 pkg.files = null;
                 pkg.checkNotes = null;
@@ -705,12 +720,27 @@ namespace Knossos.NET.Models
                 }
             }
         }
+      
+        /* 
+         * To use with the List .Sort()
+        */
+        public static int CompareVersion(Mod mod1, Mod mod2)
+        {
+            //inverted
+            return SemanticVersion.Compare(mod1.version, mod2.version);
+        }
+    }
+
+    public class ModMember
+    {
+        public ModMemberRole role { get; set; }
+        public string user { get; set; } = string.Empty;
     }
 
     public class ModPackage
     {
         public string name { get; set; } = string.Empty; // required
-        public string? notes { get; set; } // optional
+        public string? notes { get; set; } = string.Empty; // optional
         /*
             optional, default: "recommended"
             A feature can be:
@@ -719,7 +749,7 @@ namespace Knossos.NET.Models
             - "optional" (not automatically selected, but user can add them during the install process)
         */
         public string? status { get; set; } // "<required|recommended|optional>"
-        public ModDependency[]? dependencies { get; set; }
+        public ModDependency[]? dependencies { get; set; } = new ModDependency[0];
         /*
             Knossos.Net will only take the "windows" value from here, i assume the other enviroments are called linux and mac until i can get confirmation.
             Im not sure why this exist at this point, the exec arch is indicated on Executable->Properties, so there should be no reason for having it here too.
@@ -729,17 +759,17 @@ namespace Knossos.NET.Models
         public string? folder { get; set; }
         [JsonPropertyName("is_vp")]
         public bool isVp { get; set; } // optional, whether Knossos should pack the files in a VP on upload, default: false
-        public ModFile[]? files { get; set; }
-        public ModFilelist[]? filelist { get; set; }
-        public List<ModExecutable>? executables { get; set; } // optional
+        public ModFile[]? files { get; set; } = new ModFile[0];
+        public ModFilelist[]? filelist { get; set; } = new ModFilelist[0];
+        public List<ModExecutable>? executables { get; set; } = new List<ModExecutable>();// optional
         [JsonPropertyName("check_notes")]
         public string? checkNotes { get; set; }
 
-        /* Added for Internal use Only */
+        /* Knet Only */
         [JsonIgnore]
         public bool isSelected { get; set; } = false;
-        [JsonIgnore]
-        public bool isEnabled { get; set; } = false;
+
+        public bool isEnabled { get; set; } = true;
     }
 
     public class ModDependency
@@ -929,12 +959,13 @@ namespace Knossos.NET.Models
         }
     }
 
-public class ModFile
+    public class ModFile
     {
         public string? filename { get; set; }
         public string? dest { get; set; } // "<destination path>"
         public string[]? checksum { get; set; } // sha256, value
         public Int64 filesize { get; set; } // Size in bytes
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string[]? urls { get; set; } // The URLs are full URLs (they contain the filename).
     }
 
