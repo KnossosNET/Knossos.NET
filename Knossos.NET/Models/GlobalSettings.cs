@@ -401,9 +401,10 @@ namespace Knossos.NET.Models
                     aaPreset = int.Parse(data["Graphics"]["AAMode"]);
                 }
 
-                if (!string.IsNullOrEmpty(data["Graphics"]["MSAAMode"]))
+                if (!string.IsNullOrEmpty(data["Graphics"]["MSAASamples"]))
                 {
-                    msaaPreset = int.Parse(data["Graphics"]["MSAAMode"]);
+                    // recall MSAASamples is in intervals of 4 (0, 4, 8) so convert to preset level
+                    msaaPreset = int.Parse(data["Graphics"]["MSAASamples"]) / 4;
                 }
 
                 if (!string.IsNullOrEmpty(data["Graphics"]["SoftParticles"]))
@@ -628,7 +629,7 @@ namespace Knossos.NET.Models
                 }
                 data["Graphics"]["Shadows"] = shadowQuality.ToString();
                 data["Graphics"]["AAMode"] = aaPreset.ToString();
-                data["Graphics"]["MSAAMode"] = msaaPreset.ToString();
+                data["Graphics"]["MSAASamples"] = (msaaPreset * 4).ToString(); // recall MSAASamples is in intervals of 4 (0, 4, 8) so convert to preset level
                 data["Graphics"]["WindowMode"] = windowMode.ToString();
                 data["Graphics"]["Display"] = displayIndex.ToString();
                 data["Graphics"]["TextureFilter"] = textureFilter.ToString();
