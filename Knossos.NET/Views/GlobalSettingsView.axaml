@@ -27,7 +27,7 @@
 				<!--KNOSSOS SETTINGS-->
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<Label FontWeight="Bold">Knossos Settings</Label>
+						<Label FontWeight="Bold" FontSize="18">Knossos Settings</Label>
 						<!-- Base Path -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="185">Library Path</TextBlock>
@@ -128,7 +128,7 @@
 				<!--VIDEO SETTINGS-->
 				<Border BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<Label FontWeight="Bold">Video Settings</Label>
+						<Label FontWeight="Bold" FontSize="18">Video Settings</Label>
 						<!-- Resolution -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Display Resolution</TextBlock>
@@ -184,7 +184,7 @@
             <!-- SMAA Filter -->
             <Grid ColumnDefinitions="Auto,Auto" Margin="5">
               <Label Grid.Column="0" Width="200" VerticalAlignment="Center">Extra Multisample Anti-Aliasing</Label>
-              <ComboBox  ToolTip.Tip="High performance impact, especially at Ultra or at >= 4k resolution" Tag="-msaa" SelectedIndex="{Binding MsaaSelectedIndex}" Grid.Column="1" IsEnabled="{Binding EnableMSAA}" Width="150" Margin="10,0,0,0">
+              <ComboBox ToolTip.Tip="High performance impact, especially at Ultra or at >= 4k resolution" Tag="-msaa" SelectedIndex="{Binding MsaaSelectedIndex}" Grid.Column="1" IsEnabled="{Binding EnableMSAA}" Width="150" Margin="10,0,0,0">
                 <ComboBoxItem Tag="0">Disabled</ComboBoxItem>
                 <ComboBoxItem Tag="4">High</ComboBoxItem>
                 <ComboBoxItem Tag="8">Ultra</ComboBoxItem>
@@ -220,7 +220,7 @@
 				<!--Audio SETTINGS-->
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<Label FontWeight="Bold">Audio Settings</Label>
+						<Label FontWeight="Bold" FontSize="18">Audio Settings</Label>
 						<!-- Playback -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Playback Devices</TextBlock>
@@ -285,7 +285,7 @@
 				<!--INPUT SETTINGS-->
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<Label FontWeight="Bold">Input Settings</Label>
+						<Label FontWeight="Bold" FontSize="18">Input Settings</Label>
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mouse Sensitivity</TextBlock>
 							<Slider Grid.Column="1" Width="500" Value="{Binding MouseSensitivity}" Maximum="9" Minimum="0"></Slider>
@@ -328,7 +328,7 @@
 				<!--MOD SETTINGS-->
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<Label FontWeight="Bold">FSO Global Settings</Label>
+						<Label FontWeight="Bold" FontSize="18">FSO Global Settings</Label>
 						<!-- GLOBAL CMDLINE -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Cmdline</Label>
