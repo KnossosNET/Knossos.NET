@@ -82,6 +82,8 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public bool enableSoftParticles { get; set; } = true;
         [JsonIgnore]
+        public bool enableDeferredLighting { get; set; } = true;
+        [JsonIgnore]
         public int windowMode { get; set; } = 2;
         [JsonIgnore]
         public bool vsync { get; set; } = true;
@@ -409,6 +411,11 @@ namespace Knossos.NET.Models
                     enableSoftParticles = bool.Parse(data["Graphics"]["SoftParticles"]);
                 }
 
+                if (!string.IsNullOrEmpty(data["Graphics"]["DeferredLighting"]))
+                {
+                    enableDeferredLighting = bool.Parse(data["Graphics"]["DeferredLighting"]);
+                }
+
                 if (!string.IsNullOrEmpty(data["Graphics"]["VSync"]))
                 {
                     vsync = bool.Parse(data["Graphics"]["VSync"]);
@@ -626,6 +633,7 @@ namespace Knossos.NET.Models
                 data["Graphics"]["Display"] = displayIndex.ToString();
                 data["Graphics"]["TextureFilter"] = textureFilter.ToString();
                 data["Graphics"]["SoftParticles"] = enableSoftParticles.ToString().ToLower();
+                data["Graphics"]["DeferredLighting"] = enableDeferredLighting.ToString().ToLower();
                 data["Graphics"]["VSync"] = vsync.ToString().ToLower();
                 data["Graphics"]["PostProcessing"] = postProcess.ToString().ToLower();
 
@@ -763,11 +771,15 @@ namespace Knossos.NET.Models
                     case 2: cmd += "-msaa 8"; break;
                 }
             }
-                if (enableSoftParticles)
+            if (enableSoftParticles)
             {
                 cmd += "-soft_particles";
             }
-            switch(windowMode)
+            if (!enableDeferredLighting)
+            {
+                cmd += "-no_deferred";
+            }
+            switch (windowMode)
             {
                 case 0: cmd += "-window"; break;
                 case 1: cmd += "-fullscreen_window"; break;

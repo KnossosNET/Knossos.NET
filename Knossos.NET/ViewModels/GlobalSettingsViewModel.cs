@@ -93,6 +93,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool enableSoftParticles = true;
         [ObservableProperty]
+        private bool enableDeferredLighting = true;
+        [ObservableProperty]
         private int windowMode = 2;
         [ObservableProperty]
         private bool vsync = true;
@@ -311,6 +313,8 @@ namespace Knossos.NET.ViewModels
             MsaaSelectedIndex = Knossos.globalSettings.msaaPreset;
             //SoftParticles
             EnableSoftParticles = Knossos.globalSettings.enableSoftParticles;
+            //DeferredLighting
+            EnableDeferredLighting = Knossos.globalSettings.enableDeferredLighting;
             //WindowMode
             WindowMode = Knossos.globalSettings.windowMode;
             //VSYNC
@@ -812,6 +816,8 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.msaaPreset = MsaaSelectedIndex;
             //SoftParticles
             Knossos.globalSettings.enableSoftParticles = EnableSoftParticles;
+            //DeferredLighting
+            Knossos.globalSettings.enableDeferredLighting = EnableDeferredLighting;
             //WindowMode
             Knossos.globalSettings.windowMode = WindowMode;
             //VSYNC

@@ -190,17 +190,21 @@
                 <ComboBoxItem Tag="8">Ultra</ComboBoxItem>
               </ComboBox>
             </Grid>
-						<!-- Enable soft particles -->
+						<!-- Enable deferred lighting -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="-soft_particles" Grid.Column="0" IsChecked="{Binding EnableSoftParticles}" Width="200">Enable soft particles</CheckBox>
+							<CheckBox Tag="-no_deferred" Grid.Column="0" IsChecked="{Binding EnableDeferredLighting}" Width="200">Enable Deferred Lighting</CheckBox>
 						</Grid>
+            <!-- Enable soft particles -->
+            <Grid ColumnDefinitions="Auto,Auto" Margin="5">
+              <CheckBox Tag="-soft_particles" Grid.Column="0" IsChecked="{Binding EnableSoftParticles}" Width="200">Enable Soft Particles</CheckBox>
+            </Grid>
 						<!-- VSYNC -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="-no_vsync" Grid.Column="0" IsChecked="{Binding Vsync}" Width="200">VSync</CheckBox>
+							<CheckBox Tag="-no_vsync" Grid.Column="0" IsChecked="{Binding Vsync}" Width="200">Enable VSync</CheckBox>
 						</Grid>
 						<!-- Disable Post Processing -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="-no_post_process" Grid.Column="0" IsChecked="{Binding PostProcess}" Width="200">Post Processing</CheckBox>
+							<CheckBox Tag="-no_post_process" Grid.Column="0" IsChecked="{Binding PostProcess}" Width="200">Enable Post Processing</CheckBox>
 						</Grid>
 						<!-- FPS Cap -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
