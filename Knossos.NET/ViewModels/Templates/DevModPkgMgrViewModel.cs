@@ -76,10 +76,15 @@ namespace Knossos.NET.ViewModels
 
             private EditorPackageItem EditorPackageItem { get; set; }
 
-            public EditorDependencyItem(ModDependency dep, EditorPackageItem pkgItem)
+            private string modID = string.Empty;
+            private string? modParent = null;
+
+            public EditorDependencyItem(ModDependency dep, EditorPackageItem pkgItem, string modId, string? modParent)
             {
                 Dependency = dep;
                 EditorPackageItem = pkgItem;
+                this.modID = modId;
+                this.modParent = modParent;
 
                 FillModList();
 
@@ -131,7 +136,7 @@ namespace Knossos.NET.ViewModels
             {
                 var mods = Knossos.GetInstalledModList(null);
                 var builds = Knossos.GetInstalledBuildsList(null);
-                var usedIds = new List<string>();
+                var usedIds = new List<string>() { modID };
 
                 var separator = new ComboBoxItem();
                 separator.Content = "--- Mods ---";
@@ -141,7 +146,7 @@ namespace Knossos.NET.ViewModels
 
                 foreach (var mod in mods)
                 {
-                    if (usedIds.IndexOf(mod.id) == -1 )
+                    if (usedIds.IndexOf(mod.id) == -1 && modParent != null && modParent == mod.parent)
                     {
                         var itemMod = new ComboBoxItem();
                         itemMod.Content = mod.title + "  [ "+ mod.id+" ]";
@@ -319,11 +324,11 @@ namespace Knossos.NET.ViewModels
                 IsEnabled = pkg.isEnabled;
                 PackVP = pkg.isVp;
                 PackageNotes = pkg.notes != null? pkg.notes : string.Empty;
-                if (pkg.dependencies != null)
+                if (pkg.dependencies != null && PkgMgr.editor != null)
                 {
                     foreach(var dep in pkg.dependencies)
                     {
-                        DependencyItems.Add(new EditorDependencyItem(dep, this));
+                        DependencyItems.Add(new EditorDependencyItem(dep, this, PkgMgr.editor.ActiveVersion.id, PkgMgr.editor.ActiveVersion.parent));
                     }
                 }
                 switch(pkg.status)
@@ -425,7 +430,8 @@ namespace Knossos.NET.ViewModels
             {
                 try
                 {
-                    DependencyItems.Add(new EditorDependencyItem(new ModDependency(), this));
+                    if(PkgMgr.editor != null)
+                        DependencyItems.Add(new EditorDependencyItem(new ModDependency(), this, PkgMgr.editor.ActiveVersion.id, PkgMgr.editor.ActiveVersion.parent));
                 }
                 catch (Exception ex)
                 {
@@ -495,7 +501,7 @@ namespace Knossos.NET.ViewModels
 
         /**************************************************** PACKAGE MANAGER *************************************************************/
 
-        private DevModEditorViewModel? editor;
+        public DevModEditorViewModel? editor;
         [ObservableProperty]
         private ObservableCollection<EditorFlagItem> editorFlagItems = new ObservableCollection<EditorFlagItem>();
         [ObservableProperty]
