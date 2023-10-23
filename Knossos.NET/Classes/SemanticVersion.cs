@@ -151,7 +151,7 @@ namespace Knossos.NET.Classes
         {
             try
             {
-                /* If dependencyversion is null it means any version will do and the mod will use the newerest installed version avalible */
+                /* If dependencyversion is null it means any version will do and the mod will use the newest installed version available */
                 if (dependencyVersion == null)
                 {
                     return true;

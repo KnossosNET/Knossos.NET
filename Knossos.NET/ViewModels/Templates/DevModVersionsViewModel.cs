@@ -431,7 +431,7 @@ namespace Knossos.NET.ViewModels
                         else
                         {
                             if (await MessageBox.Show(MainWindow.instance!, "The mod version you are uploading is set to 'PUBLIC'. " +
-                                "This means the mod will be avalible for everyone. Do you want to continue?", "Basic Check Warning", MessageBox.MessageBoxButtons.ContinueCancel) != MessageBox.MessageBoxResult.Continue)
+                                "This means the mod will be available for everyone. Do you want to continue?", "Basic Check Warning", MessageBox.MessageBoxButtons.ContinueCancel) != MessageBox.MessageBoxResult.Continue)
                             {
                                 ButtonsEnabled = true;
                                 return;

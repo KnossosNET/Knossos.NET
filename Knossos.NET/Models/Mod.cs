@@ -818,7 +818,7 @@ namespace Knossos.NET.Models
         }
 
         /*
-            Returns the best avalible mod on nebula that meets this dependency by semantic version, null if none.
+            Returns the best available mod on nebula that meets this dependency by semantic version, null if none.
             Takes an optional list with all mods, if passed it will use that list intead of checking the repo.json again
         */
         public async Task<Mod?> SelectModNebula(List<Mod>? mods = null)
