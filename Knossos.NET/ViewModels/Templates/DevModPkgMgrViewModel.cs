@@ -439,7 +439,7 @@ namespace Knossos.NET.ViewModels
                 }
             }
 
-            internal void OpenFolder()
+            internal void OpenPackageFolder()
             {
                 try
                 {
@@ -448,7 +448,7 @@ namespace Knossos.NET.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Log.Add(Log.LogSeverity.Error, "EditorPackageItem.OpenFolder()", ex);
+                    Log.Add(Log.LogSeverity.Error, "EditorPackageItem.OpenPackageFolder()", ex);
                 }
             }
         }

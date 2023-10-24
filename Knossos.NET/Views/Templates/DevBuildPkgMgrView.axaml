@@ -41,7 +41,7 @@
 					<StackPanel>
 						<WrapPanel>
 							<Label MinWidth="150" FontWeight="Bold" FontSize="18" Content="{Binding Package.name}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
-							<Button Command="{Binding OpenFolder}" Margin="10,0,0,0">Open Folder</Button>
+							<Button Command="{Binding OpenPackageFolder}" Margin="10,0,0,0">Open Folder</Button>
 							<Button Command="{Binding AddExecutable}" Margin="10,0,0,0">+Executable</Button>
 							<ComboBox Margin="10,0,0,0" ItemsSource="{Binding Os}" SelectedIndex="{Binding PackageOsIndex}" MinWidth="100" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Background="White" Foreground="Black"></ComboBox>
 							<ComboBox Margin="10,0,0,0" ItemsSource="{Binding Arch}" SelectedIndex="{Binding PackageArchIndex}" MinWidth="100" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Background="White" Foreground="Black"></ComboBox>

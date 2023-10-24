@@ -30,6 +30,7 @@
 				<TextBox Text="{Binding Search}" Width="300"></TextBox>
 			</WrapPanel>
 			<WrapPanel Margin="10" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">
+        <Button Background="Black" Command="{Binding OpenModFolder}" Content="Screenshots" ToolTip.Tip="View Color Codes" HorizontalAlignment="Right"></Button>
 				<Button Background="Black" IsVisible="{Binding !IsNebulaView}" Content="?" ToolTip.Tip="View Color Codes" HorizontalAlignment="Right">
 					<Button.Flyout>
 						<Flyout Placement="Left">

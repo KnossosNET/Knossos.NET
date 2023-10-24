@@ -273,7 +273,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal void OpenFolder()
+        internal void OpenModFolder()
         {
             try
             {
@@ -281,7 +281,7 @@ namespace Knossos.NET.ViewModels
             }
             catch (Exception ex)
             {
-                Log.Add(Log.LogSeverity.Error, "DevModEditorViewModel.OpenFolder()", ex);
+                Log.Add(Log.LogSeverity.Error, "DevModEditorViewModel.OpenModFolder()", ex);
             }
         }
 
