@@ -136,7 +136,7 @@
 								<ComboBoxItem Tag="32">32 Bit</ComboBoxItem>
 								<ComboBoxItem Tag="16" IsEnabled="{Binding Enable16BitColor}">16 bit</ComboBoxItem>
 							</ComboBox>
-							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding ResolutionSelectedIndex}" ItemsSource="{Binding ResolutionItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="300" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Resolution -->
@@ -224,13 +224,13 @@
 						<!-- Playback -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Playback Devices</TextBlock>
-							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding PlaybackSelectedIndex}" ItemsSource="{Binding PlaybackItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Capture -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Capture Devices</TextBlock>
-							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding CaptureSelectedIndex}" ItemsSource="{Binding CaptureItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Sample Rate -->
@@ -259,7 +259,7 @@
 						<CheckBox IsChecked="{Binding EnableTTS}" Margin="5">Enable TTS (Text to speech)</CheckBox>
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Voice</TextBlock>
-							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding VoiceSelectedIndex}" ItemsSource="{Binding VoiceItems}" IsEnabled="{Binding EnableTTS}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
 							<Grid Grid.Column="2" IsVisible="{Binding EnableTTS}">
 								<Button Command="{Binding TestVoiceCommand}" IsVisible="{Binding !PlayingTTS}" Margin="5,0,0,0" Background="Black" Foreground="White" >Test</Button>
@@ -286,40 +286,43 @@
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<Label FontWeight="Bold" FontSize="18">Input Settings</Label>
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mouse Sensitivity</TextBlock>
-							<Slider Grid.Column="1" Width="500" Value="{Binding MouseSensitivity}" Maximum="9" Minimum="0"></Slider>
-						</Grid>
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick Sensitivity</TextBlock>
-							<Slider Grid.Column="1" Width="500" Value="{Binding JoystickSensitivity}" Maximum="9" Minimum="0"></Slider>
-						</Grid>
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick Deadzone</TextBlock>
-							<Slider Grid.Column="1" Width="500"  Value="{Binding JoystickDeadZone}" Maximum="10" Minimum="0"></Slider>
-						</Grid>
+            <?ignore
+							<!--Mouse and Joystick settings are saved in the pilot file, these values only edit the new in-game options which are not used-->
+							<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+								<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mouse Sensitivity</TextBlock>
+								<Slider Grid.Column="1" Width="500" Value="{Binding MouseSensitivity}" Maximum="9" Minimum="0"></Slider>
+							</Grid>
+							<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+								<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick Sensitivity</TextBlock>
+								<Slider Grid.Column="1" Width="500" Value="{Binding JoystickSensitivity}" Maximum="9" Minimum="0"></Slider>
+							</Grid>
+							<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+								<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick Deadzone</TextBlock>
+								<Slider Grid.Column="1" Width="500"  Value="{Binding JoystickDeadZone}" Maximum="10" Minimum="0"></Slider>
+							</Grid>
+            ?>
 						<!-- Joy1 -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #0</TextBlock>
-							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox Grid.Column="1" SelectedIndex="{Binding Joy1SelectedIndex}" ItemsSource="{Binding Joystick1Items}" IsVisible="{Binding FlagDataLoaded}" Width="500" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Joy2 -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #1</TextBlock>
-							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding Joy2SelectedIndex}" ItemsSource="{Binding Joystick2Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Joy3 -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #2</TextBlock>
-							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding Joy3SelectedIndex}" ItemsSource="{Binding Joystick3Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Joy4 -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #3</TextBlock>
-							<TextBlock Text="First download a fso build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding Joy4SelectedIndex}" ItemsSource="{Binding Joystick4Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 					</StackPanel>
