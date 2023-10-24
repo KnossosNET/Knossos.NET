@@ -183,12 +183,6 @@ namespace Knossos.NET
         {
             try
             {
-                if(File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update.zip"))
-                    File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update.zip");
-            }
-            catch { }
-            try
-            {
                 var appDirPath = System.AppDomain.CurrentDomain.BaseDirectory;
                 var oldFiles = System.IO.Directory.GetFiles(appDirPath, "*.old");
                 foreach (string f in oldFiles)
@@ -213,7 +207,7 @@ namespace Knossos.NET
                             GitHubReleaseAsset? releaseAsset = null;
                             foreach (GitHubReleaseAsset a in latest.assets)
                             {
-                                if(a.name != null && ( a.name.ToLower().Contains(".zip") || a.name.ToLower().Contains(".7z")))
+                                if(a.name != null && ( a.name.ToLower().Contains(".zip") || a.name.ToLower().Contains(".7z") || a.name.ToLower().Contains(".tar.gz")))
                                 {
                                     if(a.name.ToLower().Contains(SysInfo.GetOSNameString().ToLower()))
                                     {
@@ -240,7 +234,8 @@ namespace Knossos.NET
                                 {
                                     await Task.Delay(500);
                                 }
-                                var download = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance!.AddFileDownloadTask(releaseAsset.browser_download_url, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update.zip", "Downloading "+latest.tag_name+" "+releaseAsset.name, true, "This is a Knossos.NET update"), DispatcherPriority.Background);
+                                var extension = Path.GetExtension(releaseAsset.browser_download_url);
+                                var download = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance!.AddFileDownloadTask(releaseAsset.browser_download_url, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension, "Downloading "+latest.tag_name+" "+releaseAsset.name, true, "This is a Knossos.NET update"), DispatcherPriority.Background);
                                 if (download != null && download == true)
                                 {
                                     //Rename files in app folder
@@ -300,7 +295,7 @@ namespace Knossos.NET
                                     //Decompress new files
                                     try
                                     {
-                                        using (var archive = ArchiveFactory.Open(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update.zip"))
+                                        using (var archive = ArchiveFactory.Open(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension))
                                         {
                                             try
                                             {
@@ -333,6 +328,14 @@ namespace Knossos.NET
                                             {
                                                 Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
                                             }
+
+                                            //Cleanup file
+                                            try
+                                            {
+                                                if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension))
+                                                    File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension);
+                                            }
+                                            catch { }
 
                                             //Close App
                                             MainWindow.instance!.Close();
