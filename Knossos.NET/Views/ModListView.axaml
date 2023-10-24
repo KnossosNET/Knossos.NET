@@ -30,8 +30,7 @@
 				<TextBox Text="{Binding Search}" Width="300"></TextBox>
 			</WrapPanel>
 			<WrapPanel Margin="10" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">
-        <Button Background="Black" Command="{Binding OpenModFolder}" Content="Screenshots" ToolTip.Tip="View Color Codes" HorizontalAlignment="Right"></Button>
-				<Button Background="Black" IsVisible="{Binding !IsNebulaView}" Content="?" ToolTip.Tip="View Color Codes" HorizontalAlignment="Right">
+				<Button Margin="0,0,10,0" Background="Black" IsVisible="{Binding !IsNebulaView}" Content="?" ToolTip.Tip="View Color Codes" HorizontalAlignment="Right">
 					<Button.Flyout>
 						<Flyout Placement="Left">
 							<WrapPanel>
@@ -48,6 +47,7 @@
 						</Flyout>
 					</Button.Flyout>
 				</Button>
+        <Button Background="Black" IsVisible="{Binding !IsNebulaView}" Command="{Binding OpenScreenshotsFolder}" Content="Screenshots" ToolTip.Tip="Open screenshots folder" HorizontalAlignment="Right"></Button>
 				<Button Background="Black" IsVisible="{Binding IsNebulaView}" Command="{Binding ReloadRepoCommand}">Reload Repo</Button>
 			</WrapPanel>
 			</Grid>

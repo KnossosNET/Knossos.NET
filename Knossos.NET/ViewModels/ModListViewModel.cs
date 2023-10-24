@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -105,6 +106,18 @@ namespace Knossos.NET.ViewModels
             else
             {
                 modCard.AddModVersion(modJson);
+            }
+        }
+
+        internal void OpenScreenshotsFolder()
+        {
+            try
+            {
+                SysInfo.OpenFolder(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "screenshots");
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.OpenScreenshotsFolder", ex);
             }
         }
 
