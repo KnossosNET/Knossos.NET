@@ -828,85 +828,22 @@ namespace Knossos.NET
             var systemCmd = Knossos.globalSettings.GetSystemCMD(fsoBuild)?.Split('-');
             var globalCmd = Knossos.globalSettings.globalCmdLine?.Split('-');
 
-            if (systemCmd != null)
+            if(!standaloneServer)
             {
-                foreach (var s in systemCmd)
+                if (!mod.modSettings.ignoreGlobalCmd)
                 {
-                    if (s.Trim().Length > 0)
-                    {
-                        if(!standaloneServer || standaloneServer && standalonePort == 0 || standaloneServer && standalonePort != 0 && !s.Contains("-port"))
-                            cmdline += " -" + s.Trim();
-                    }
-
+                    cmdline = CmdLineBuilder(cmdline, systemCmd);
+                    cmdline = CmdLineBuilder(cmdline, globalCmd);
                 }
+                cmdline = CmdLineBuilder(cmdline, modCmd);
             }
-
-            if (standaloneServer && standalonePort > 0)
-            {
-                cmdline += " -port " + standalonePort;
-            }
-
-            if (globalCmd != null)
-            {
-                foreach (var s in globalCmd)
-                {
-                    if (s.Trim().Contains(" "))
-                    {
-                        var param = s.Trim().Split(' ')[0];
-                        if (!cmdline.Contains("-"+param+" "))
-                        {
-                            if (s.Trim().Length > 0)
-                            {
-                                cmdline += " -" + s.Trim();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (!cmdline.Contains("-" + s.Trim()))
-                        {
-                            if (s.Trim().Length > 0)
-                            {
-                                cmdline += " -" + s.Trim();
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            if (modCmd != null)
-            {
-                foreach (var s in modCmd)
-                {
-                    if (s.Trim().Contains(" "))
-                    {
-                        var param = s.Trim().Split(' ')[0];
-                        if (!cmdline.Contains("-" + param + " "))
-                        {
-                            if (s.Trim().Length > 0)
-                            {
-                                cmdline += " -" + s.Trim();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (!cmdline.Contains("-" + s.Trim()))
-                        {
-                            if (s.Trim().Length > 0)
-                            {
-                                cmdline += " -" + s.Trim();
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            if(standaloneServer)
+            else
             {
                 cmdline += " -standalone";
+                if (standalonePort > 0)
+                {
+                    cmdline += " -port " + standalonePort;
+                }
             }
 
             if (modFlag.Length > 0)
@@ -951,6 +888,37 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", ex);
                 await MessageBox.Show(MainWindow.instance!, ex.Message, "Error launching fso", MessageBox.MessageBoxButtons.OK);
             }
+        }
+
+        private static string CmdLineBuilder(string cmdline, string[]? args)
+        {
+            try
+            {
+                if (args != null && args.Any())
+                {
+                    var addedArgs = new List<string>();
+                    foreach (var arg in cmdline.ToLower().Split('-'))
+                    {
+                        addedArgs.Add(arg.Split(' ')[0].Trim());
+                    }
+                    foreach (var arg in args)
+                    {
+                        var argName = arg.Trim().Split(' ')[0];
+                        if (!addedArgs.Contains(argName.ToLower()))
+                        {
+                            if (arg.Trim().Length > 0)
+                            {
+                                cmdline += " -" + arg.Trim();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Knossos.CmdLineBuilder()", ex);
+            }
+            return cmdline;
         }
 
         public static List<Mod> GetInstalledModList(string? id)

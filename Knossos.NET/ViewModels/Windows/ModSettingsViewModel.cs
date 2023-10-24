@@ -41,6 +41,8 @@ namespace Knossos.NET.ViewModels
         private bool isDevMode = false;
         [ObservableProperty]
         private string quickLaunch = "";
+        [ObservableProperty]
+        private bool ignoreGlobalCmd = false;
 
         public ModSettingsViewModel()
         {
@@ -57,7 +59,8 @@ namespace Knossos.NET.ViewModels
             modCardViewModel = modCard;
             isDevMode = modJson.devMode;
             compressed = modJson.modSettings.isCompressed;
-            if(Knossos.globalSettings.modCompression != CompressionSettings.Disabled && !modJson.modSettings.isCompressed)
+            ignoreGlobalCmd = modJson.modSettings.ignoreGlobalCmd;
+            if (Knossos.globalSettings.modCompression != CompressionSettings.Disabled && !modJson.modSettings.isCompressed)
             {
                 compressionAvalible = true;
             }
@@ -277,6 +280,9 @@ namespace Knossos.NET.ViewModels
                         modJson.modSettings.customCmdLine = FsoFlags.GetCmdLine();
                     }
                 }
+
+                modJson.modSettings.ignoreGlobalCmd = IgnoreGlobalCmd;
+
                 modJson.modSettings.Save();
                 Knossos.globalSettings.Save(false);
                 if(modCardViewModel != null)
