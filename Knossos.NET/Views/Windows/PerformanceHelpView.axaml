@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Knossos.NET.Views.PerformanceHelpView"
+		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+		Icon="/Assets/knossos-icon.ico"
+		WindowStartupLocation="CenterScreen"
+        Title="How to increase in-game performance" 
+		SizeToContent="WidthAndHeight" 
+		CanResize="False">
+	
+	<StackPanel MaxWidth="500" Background="#18191A">
+		<TextBlock Margin="10" TextWrapping="Wrap">If in-game performance is slow, ensure that "Extra Multi Sample Anti-Aliasing" and "Shadows" are disabled.</TextBlock>
+		<TextBlock TextWrapping="Wrap" Margin="10">If still slow, then disable "Deferred Lighting" and "Post-processing Anti-Aliasing".</TextBlock>
+		<TextBlock TextWrapping="Wrap" Margin="10">Always remember to click the "Save" button, too!</TextBlock>
+	</StackPanel>
+</Window>

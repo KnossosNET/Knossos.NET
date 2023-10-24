@@ -214,6 +214,7 @@
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<CheckBox Tag="-fps" Grid.Column="0" IsChecked="{Binding ShowFps}" Width="200">Display FPS</CheckBox>
 						</Grid>
+            <Button Command="{Binding OpenPerformanceHelp}" Background="Black" Content="Slow in-game performance?" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
 					</StackPanel>
 				</Border>
 
