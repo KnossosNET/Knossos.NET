@@ -967,6 +967,15 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.Load();
             LoadData();
         }
+        internal async void OpenPerformanceHelp()
+        {
+            if (MainWindow.instance != null)
+            {
+                var dialog = new PerformanceHelpView();
+
+                await dialog.ShowDialog<PerformanceHelpView?>(MainWindow.instance);
+            }
+        }
 
         internal async void OpenGetVoices()
         {
