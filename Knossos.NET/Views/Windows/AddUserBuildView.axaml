@@ -17,7 +17,7 @@
 
 	<StackPanel Background="#18191A">
 		<StackPanel IsEnabled="{Binding !CopyProgress}">
-			<Label>1) Click on the button and select the folders were the executables are located.</Label>
+			<Label>1) Click on the button and select the folders where the executables are located.</Label>
 			<Button Command="{Binding OpenFolderCommand}">Open Folder</Button>
 			<TextBlock TextWrapping="Wrap" Text="{Binding ScanResults}"></TextBlock>
 			<StackPanel Margin="0,15,0,0" IsVisible="{Binding Stage2}">

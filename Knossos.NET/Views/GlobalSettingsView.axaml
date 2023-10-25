@@ -246,7 +246,7 @@
 						</Grid>
 						<!-- Enable EFX -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="efx" Grid.Column="0" IsChecked="{Binding EnableEFX}" Width="200">Enable EFX</CheckBox>
+							<CheckBox Tag="efx" Grid.Column="0" IsChecked="{Binding EnableEFX}" Width="200" ToolTip.Tip="Enables in-mission sound effects to play with an extra sound environment filter set by the mission designer. By default, this filter adds a reverb effect.">Enable EFX</CheckBox>
 						</Grid>
 						<!-- Disable Audio -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">

@@ -42,7 +42,7 @@
 						<WrapPanel>
 							<CheckBox ToolTip.Tip="If package is enabled or disabled. Disabled packages are not used when playing." IsChecked="{Binding IsEnabled}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></CheckBox>
 							<Label MinWidth="250" FontWeight="Bold" FontSize="18" Content="{Binding Package.name}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
-							<Button Command="{Binding OpenFolder}" Margin="10,0,0,0">Open Folder</Button>
+							<Button Command="{Binding OpenPackageFolder}" Margin="10,0,0,0">Open Folder</Button>
 							<Button Command="{Binding AddDependency}" Margin="10,0,0,0">+Dependency</Button>
 							<Button Margin="10,0,0,0" Content="Notes">
 								<Button.Flyout>

@@ -26,11 +26,11 @@
 					<Button Command="{Binding PlayMod}" CommandParameter="qtfred" Background="DarkCyan" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >QtFred</Button>
 					<Button Command="{Binding PlayMod}" CommandParameter="debug" Background="#8D2FFD" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Debug</Button>
 					<Button Command="{Binding PlayMod}" CommandParameter="fred2debug" Background="#8E1C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Fred2 Debug</Button>
-					<Button Command="{Binding OpenFolder}" Background="#8E3C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Open Folder</Button>
+					<Button Command="{Binding OpenModFolder}" Background="#8E3C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Open Folder</Button>
 				</StackPanel>
 				<!--Engine Builds-->
 				<StackPanel Margin="10" HorizontalAlignment="Center" IsVisible="{Binding IsEngineBuild}">
-					<Button Command="{Binding OpenFolder}" Background="#8E3C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Open Folder</Button>
+					<Button Command="{Binding OpenModFolder}" Background="#8E3C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Open Folder</Button>
 				</StackPanel>
 				<!--Tools-->
 				<StackPanel IsVisible="true" Margin="10,10,10,10" HorizontalAlignment="Center">
