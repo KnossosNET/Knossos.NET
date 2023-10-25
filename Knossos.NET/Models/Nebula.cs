@@ -662,7 +662,12 @@ namespace Knossos.NET.Models
                                     {
                                         var reply = JsonSerializer.Deserialize<ApiReply>(json);
                                         if (!reply.result)
-                                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode + "\n" + json);
+                                        {
+                                            if(reply.reason == "mod_not_found")
+                                                Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "Api call returned: mod_not_found");
+                                            else
+                                                Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode + "\n" + json);
+                                        }
 
                                         return reply;
                                     }

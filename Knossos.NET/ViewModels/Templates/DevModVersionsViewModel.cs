@@ -206,7 +206,7 @@ namespace Knossos.NET.ViewModels
              *  WARNINGS:
              *  -(Always) Warn about the mod visibility before upload, for both private and public, and what it means. --done
              *  -if there is no tile image (for type != engine) or description. --done
-             *  -Metadata update only if already uploaded --TODO, maybe i can use the new api call to get a mod version to get this early
+             *  -Metadata update only if already uploaded --done
              *  
              *  UPLOAD PROCESS:
              *  A) Do pre_flight API call, im guessing that if the mod version is already uploaded Nebula will report that here somehow. YES: "duplicated version"
@@ -399,7 +399,7 @@ namespace Knossos.NET.ViewModels
 
                         //Warnings
                         //if there is no tile image (for type != engine) or description.
-                        if (string.IsNullOrEmpty(mod.description))
+                        if (string.IsNullOrEmpty(mod.description) && mod.type != ModType.engine)
                         {
                             if(await MessageBox.Show(MainWindow.instance!, "Your mod does not include a description, it is recomended you set a description for users. " +
                                 "This is only a warning and you can continue the upload if you want.", "Basic Check Warning", MessageBox.MessageBoxButtons.ContinueCancel) != MessageBox.MessageBoxResult.Continue)
@@ -408,7 +408,7 @@ namespace Knossos.NET.ViewModels
                                 return;
                             }  
                         }
-                        if (string.IsNullOrEmpty(mod.tile))
+                        if (string.IsNullOrEmpty(mod.tile) && mod.type != ModType.engine)
                         {
                             if (await MessageBox.Show(MainWindow.instance!, "Your mod does not include a tile image, it is recomended you set a tile image for users. " +
                                 "This is only a warning and you can continue the upload if you want.", "Basic Check Warning", MessageBox.MessageBoxButtons.ContinueCancel) != MessageBox.MessageBoxResult.Continue)
@@ -438,6 +438,20 @@ namespace Knossos.NET.ViewModels
                             }
                         }
 
+                        //Metadata update only if mod/version is already uploaded
+                        var metaUpdOnly = false;
+                        if(await Nebula.GetModData(mod.id,mod.version) != null)
+                        {
+                            metaUpdOnly = true;
+                            var res = await MessageBox.Show(MainWindow.instance!, "This mod and version '" + mod + "' is already uploaded to Nebula, if you continue only the metadata will be updated.", "Version already uploaded", MessageBox.MessageBoxButtons.ContinueCancel);
+                            if(res == MessageBox.MessageBoxResult.Cancel)
+                            {
+                                ButtonsEnabled = true;
+                                return;
+                            }
+                        }
+
+
                         //Add release date if new mod and last update
                         if (mod.firstRelease == null)
                         {
@@ -447,7 +461,7 @@ namespace Knossos.NET.ViewModels
 
                         //Basic check finish, create task
                         ButtonsEnabled = true;
-                        TaskViewModel.Instance!.UploadModVersion(mod, isNewMod);
+                        TaskViewModel.Instance!.UploadModVersion(mod, isNewMod, metaUpdOnly);
                     }
                 }
                 catch(Exception ex)
