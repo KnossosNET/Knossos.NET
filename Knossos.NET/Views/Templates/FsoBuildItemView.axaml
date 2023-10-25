@@ -10,7 +10,7 @@
 		<vm:FsoBuildsViewModel/>
 	</Design.DataContext>
 	<Border BorderBrush="Gray" BorderThickness="1">
-		<Grid Background="{Binding BackgroundColor}" ColumnDefinitions="Auto,Auto,Auto,*" ToolTip.Tip="{Binding Tooltip}">
+		<Grid Background="{Binding BackgroundColor}" ColumnDefinitions="Auto,Auto,Auto,*">
 			<Label FontWeight="Bold" Width="150" Grid.Column="0" Content="{Binding Date}" VerticalAlignment="Center"></Label>
 			<Label FontWeight="Bold" Width="300" Grid.Column="1" Content="{Binding Title}" VerticalAlignment="Center"></Label>
 		
@@ -51,7 +51,7 @@
 			</WrapPanel>
 
 			<WrapPanel IsEnabled="{Binding !IsDevMode}" IsVisible="{Binding !IsDownloading}" Grid.Column="3" Margin="30,0,0,0" HorizontalAlignment="Right">
-				<Button FontWeight="Bold" Background="DarkOrange"  Margin="0,0,10,0" Width="100" HorizontalContentAlignment="Center" Command="{Binding ViewBuildDetails}">Details</Button>
+				<Button IsVisible="{Binding IsDetailsButtonVisible}" FontWeight="Bold" Background="DarkOrange" Margin="0,0,10,0" Width="100" HorizontalContentAlignment="Center" Command="{Binding ViewBuildDetails}">Details</Button>
 				<Button FontWeight="Bold" IsVisible="{Binding IsInstalled}" Width="100" HorizontalContentAlignment="Center" Background="DarkRed" Command="{Binding DeleteBuildCommand}">Delete</Button>
 				<Button FontWeight="Bold" IsVisible="{Binding !IsInstalled}" Width="100" HorizontalContentAlignment="Center" IsEnabled="{Binding IsValid}" Background="DarkGreen" Command="{Binding DownloadBuildCommand}">Download</Button>
 			</WrapPanel>

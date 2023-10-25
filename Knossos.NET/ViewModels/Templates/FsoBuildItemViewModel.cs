@@ -39,8 +39,6 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool qtfred = false;
         [ObservableProperty]
-        private string? tooltip = null;
-        [ObservableProperty]
         private bool isValid = false;
         [ObservableProperty]
         private bool isInstalled = false;
@@ -54,6 +52,8 @@ namespace Knossos.NET.ViewModels
         private bool isDevMode = false;
         [ObservableProperty]
         private IBrush backgroundColor = Brushes.Black;
+        [ObservableProperty]
+        private bool isDetailsButtonVisible = true;
 
         public FsoBuildItemViewModel() 
         {
@@ -74,9 +74,14 @@ namespace Knossos.NET.ViewModels
             Date = build.date;
             IsInstalled = build.isInstalled;
             IsValid = false;
-            if (build.stability == FsoStability.Custom)
+            if (build.id == "FSO")
             {
-                Tooltip = build.description;
+                //No detail button on official FSO builds
+                IsDetailsButtonVisible = false;
+            }
+            else
+            {
+                IsDetailsButtonVisible = true;
             }
 
             IsDevMode = build.devMode;
@@ -120,9 +125,6 @@ namespace Knossos.NET.ViewModels
             {
                 IsValid = true;
             }
-
-            if (build.folderPath != string.Empty)
-                Tooltip = build.folderPath;
         }
 
         internal async void ViewBuildDetails()
