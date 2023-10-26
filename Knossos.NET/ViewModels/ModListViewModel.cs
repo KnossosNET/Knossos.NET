@@ -83,15 +83,20 @@ namespace Knossos.NET.ViewModels
 
         public async void OpenTab()
         {
-            IsTabOpen = true;
-            if (IsLoading)
+            if (!IsLoading && !IsTabOpen)
             {
-                await Task.Run(async ()  =>
+                await Dispatcher.UIThread.InvokeAsync(async ()  =>
                 {
                     await Task.Delay(100);
                     IsLoading = false;
+                    foreach (var m in Mods)
+                    {
+                        m.Visible = true;
+                        await Task.Delay(5);
+                    }
                 });
             }
+            IsTabOpen = true;
         }
 
         public void ReloadRepoCommand()
@@ -160,14 +165,19 @@ namespace Knossos.NET.ViewModels
                     modCard.AddModVersion(mod);
                 }
             }
-            await Task.Run(()=>
-            { 
-                Mods = newModCardList;
-                if (IsTabOpen)
+            newModCardList.ForEach(m=>m.Visible = false);
+            Mods = newModCardList;
+            if (IsTabOpen)
+            {
+                await Task.Delay(100);
+                IsLoading = false;
+                foreach (var m in Mods)
                 {
-                    IsLoading = false;
+                    m.Visible = true;
+                    await Task.Delay(5);
                 }
-            });
+            }
+            IsLoading = false;
         }
 
         internal void OpenScreenshotsFolder()
