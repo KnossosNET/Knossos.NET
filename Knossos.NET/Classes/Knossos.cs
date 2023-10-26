@@ -38,18 +38,18 @@ namespace Knossos.NET
                 //See if the data folder works
                 try
                 {
-                    if (!Directory.Exists(SysInfo.GetKnossosDataFolderPath()))
+                    if (!Directory.Exists(KnUtils.GetKnossosDataFolderPath()))
                     {
-                        Directory.CreateDirectory(SysInfo.GetKnossosDataFolderPath());
+                        Directory.CreateDirectory(KnUtils.GetKnossosDataFolderPath());
                     }
                     else
                     {
                         // Test if we can write to the data directory
-                        using (StreamWriter writer = new StreamWriter(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "test.txt"))
+                        using (StreamWriter writer = new StreamWriter(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "test.txt"))
                         {
                             writer.WriteLine("test");
                         }
-                        File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "test.txt");
+                        File.Delete(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "test.txt");
                     }
                 }
                 catch (Exception ex)
@@ -80,7 +80,7 @@ namespace Knossos.NET
                 //Load base path from knossos legacy
                 if (globalSettings.basePath == null)
                 {
-                    globalSettings.basePath = SysInfo.GetBasePathFromKnossosLegacy();
+                    globalSettings.basePath = KnUtils.GetBasePathFromKnossosLegacy();
                 }
 
                 LoadBasePath(isQuickLaunch);
@@ -209,9 +209,9 @@ namespace Knossos.NET
                             {
                                 if(a.name != null && ( a.name.ToLower().Contains(".zip") || a.name.ToLower().Contains(".7z") || a.name.ToLower().Contains(".tar.gz")))
                                 {
-                                    if(a.name.ToLower().Contains(SysInfo.GetOSNameString().ToLower()))
+                                    if(a.name.ToLower().Contains(KnUtils.GetOSNameString().ToLower()))
                                     {
-                                        if (a.name.ToLower().Contains(SysInfo.CpuArch.ToLower()) && ( SysInfo.CpuArch != "Arm" || SysInfo.CpuArch == "Arm" && !a.name.ToLower().Contains("arm64")))
+                                        if (a.name.ToLower().Contains(KnUtils.CpuArch.ToLower()) && ( KnUtils.CpuArch != "Arm" || KnUtils.CpuArch == "Arm" && !a.name.ToLower().Contains("arm64")))
                                         {
                                             releaseAsset = a;
                                             continue;
@@ -235,14 +235,14 @@ namespace Knossos.NET
                                     await Task.Delay(500);
                                 }
                                 var extension = Path.GetExtension(releaseAsset.browser_download_url);
-                                var download = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance!.AddFileDownloadTask(releaseAsset.browser_download_url, SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension, "Downloading "+latest.tag_name+" "+releaseAsset.name, true, "This is a Knossos.NET update"), DispatcherPriority.Background);
+                                var download = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance!.AddFileDownloadTask(releaseAsset.browser_download_url, KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension, "Downloading "+latest.tag_name+" "+releaseAsset.name, true, "This is a Knossos.NET update"), DispatcherPriority.Background);
                                 if (download != null && download == true)
                                 {
                                     //Rename files in app folder
                                     var appDirPath = System.AppDomain.CurrentDomain.BaseDirectory;
                                     var execName = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
                                     File.Move(execName!, execName + ".old", true);
-                                    if (SysInfo.IsWindows)
+                                    if (KnUtils.IsWindows)
                                     {
                                         try
                                         {
@@ -260,7 +260,7 @@ namespace Knossos.NET
                                         }
                                         catch { }
                                     } 
-                                    if(SysInfo.IsLinux)
+                                    if(KnUtils.IsLinux)
                                     {
                                         try
                                         {
@@ -273,7 +273,7 @@ namespace Knossos.NET
                                         }
                                         catch { }
                                     }
-                                    if(SysInfo.IsMacOS)
+                                    if(KnUtils.IsMacOS)
                                     {
                                         try
                                         {
@@ -295,7 +295,7 @@ namespace Knossos.NET
                                     //Decompress new files
                                     try
                                     {
-                                        using (var archive = ArchiveFactory.Open(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension))
+                                        using (var archive = ArchiveFactory.Open(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension))
                                         {
                                             try
                                             {
@@ -316,9 +316,9 @@ namespace Knossos.NET
                                             //Start again
                                             try
                                             {
-                                                if (SysInfo.IsMacOS || SysInfo.IsLinux)
+                                                if (KnUtils.IsMacOS || KnUtils.IsLinux)
                                                 {
-                                                    SysInfo.Chmod(Path.Combine(appDirPath, execName!), "+x");
+                                                    KnUtils.Chmod(Path.Combine(appDirPath, execName!), "+x");
                                                 }
                                                 Process p = new Process();
                                                 p.StartInfo.FileName = Path.Combine(appDirPath, execName!);
@@ -332,8 +332,8 @@ namespace Knossos.NET
                                             //Cleanup file
                                             try
                                             {
-                                                if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension))
-                                                    File.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension);
+                                                if (File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension))
+                                                    File.Delete(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension);
                                             }
                                             catch { }
 
@@ -348,7 +348,7 @@ namespace Knossos.NET
                                             File.Move(execName + ".old", execName!, true);
                                         }
                                         catch { }
-                                        if (SysInfo.IsWindows)
+                                        if (KnUtils.IsWindows)
                                         {
                                             try
                                             {
@@ -366,7 +366,7 @@ namespace Knossos.NET
                                             }
                                             catch { }
                                         }
-                                        if (SysInfo.IsLinux)
+                                        if (KnUtils.IsLinux)
                                         {
                                             try
                                             {
@@ -379,7 +379,7 @@ namespace Knossos.NET
                                             }
                                             catch { }
                                         }
-                                        if (SysInfo.IsMacOS)
+                                        if (KnUtils.IsMacOS)
                                         {
                                             try
                                             {
@@ -404,7 +404,7 @@ namespace Knossos.NET
                             }
                             else
                             {
-                                Log.Add(Log.LogSeverity.Warning, "Knossos.CheckKnetUpdates()", "Unable to find a matching OS and cpu arch build in the latest Github release, update has been skipped. CPU Arch:"+ SysInfo.CpuArch + " OS: "+ SysInfo.GetOSNameString());
+                                Log.Add(Log.LogSeverity.Warning, "Knossos.CheckKnetUpdates()", "Unable to find a matching OS and cpu arch build in the latest Github release, update has been skipped. CPU Arch:"+ KnUtils.CpuArch + " OS: "+ KnUtils.GetOSNameString());
                             }
                         }
                         else
@@ -859,15 +859,15 @@ namespace Knossos.NET
             try
             {
                 //In Linux make sure it is marked as executable
-                if (SysInfo.IsLinux || SysInfo.IsMacOS)
+                if (KnUtils.IsLinux || KnUtils.IsMacOS)
                 {
-                    SysInfo.Chmod(execPath, "+x");
+                    KnUtils.Chmod(execPath, "+x");
                 }
 
                 //In Windows enable the High DPI aware
                 try
                 {
-                    if (SysInfo.IsWindows)
+                    if (KnUtils.IsWindows)
                     {
                         using var dpiProccess = new Process();
                         dpiProccess.StartInfo.FileName = "REG";
@@ -1117,7 +1117,7 @@ namespace Knossos.NET
             {
                 if (globalSettings.enableTts)
                 {
-                    if (SysInfo.IsWindows)
+                    if (KnUtils.IsWindows)
                     {
                         if (ttsObject != null)
                         {
@@ -1127,11 +1127,11 @@ namespace Knossos.NET
                         }
                         if (text != string.Empty)
                         {
-                            if (!File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
+                            if (!File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
                             {
-                                if (SysInfo.CpuArch == "X86")
+                                if (KnUtils.CpuArch == "X86")
                                 {
-                                    using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
+                                    using (var fileStream = File.Create(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
                                     {
                                         AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/win/KSapi_x86.exe")).CopyTo(fileStream);
                                         fileStream.Close();
@@ -1139,7 +1139,7 @@ namespace Knossos.NET
                                 }
                                 else
                                 {
-                                    using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
+                                    using (var fileStream = File.Create(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
                                     {
                                         AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/win/KSapi.exe")).CopyTo(fileStream);
                                         fileStream.Close();
@@ -1161,7 +1161,7 @@ namespace Knossos.NET
                                 if (volume.HasValue)
                                     vol = volume.Value;
                                 using var ttsProcess = new Process();
-                                ttsProcess.StartInfo.FileName = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe";
+                                ttsProcess.StartInfo.FileName = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe";
                                 ttsProcess.StartInfo.Arguments = "-text \"" + text + "\" -voice " + voice + " -vol " + vol;
                                 ttsProcess.StartInfo.UseShellExecute = false;
                                 ttsProcess.StartInfo.CreateNoWindow = true;
@@ -1174,13 +1174,13 @@ namespace Knossos.NET
                             });
                         }
                     }
-                    if(SysInfo.IsLinux)
+                    if(KnUtils.IsLinux)
                     {
                         //unimplemented
                         if (callBack != null)
                             await Dispatcher.UIThread.InvokeAsync(() => callBack(), DispatcherPriority.Background);
                     }
-                    if(SysInfo.IsMacOS)
+                    if(KnUtils.IsMacOS)
                     {
                         if (ttsObject != null)
                         {

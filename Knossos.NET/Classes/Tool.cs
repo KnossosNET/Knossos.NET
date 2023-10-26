@@ -76,8 +76,8 @@ namespace Knossos.NET.Classes
             {
                 try
                 {
-                    if (!SysInfo.IsWindows)
-                        SysInfo.Chmod(Path.Combine(folderpath, best.executablePath));
+                    if (!KnUtils.IsWindows)
+                        KnUtils.Chmod(Path.Combine(folderpath, best.executablePath));
                     using (var process = new Process())
                     {
                         process.StartInfo.FileName = Path.Combine(folderpath, best.executablePath);
@@ -197,28 +197,28 @@ namespace Knossos.NET.Classes
                         pkg.score = 0;
                         pkg.os = pkg.os.ToLower().Replace(" ", "");
                         var archs = pkg.cpuArch.ToLower().Replace(" ", "").Split(",");
-                        if (pkg.os == "windows" && SysInfo.IsWindows || pkg.os == "linux" && SysInfo.IsLinux || pkg.os == "macosx" && SysInfo.IsMacOS)
+                        if (pkg.os == "windows" && KnUtils.IsWindows || pkg.os == "linux" && KnUtils.IsLinux || pkg.os == "macosx" && KnUtils.IsMacOS)
                         {
                             foreach(var arch in archs)
                             {
-                                if(arch == "x64" && SysInfo.CpuArch == "X64" || arch == "x86" && SysInfo.CpuArch == "X86" || arch == "arm64" && SysInfo.CpuArch == "Arm64")
+                                if(arch == "x64" && KnUtils.CpuArch == "X64" || arch == "x86" && KnUtils.CpuArch == "X86" || arch == "arm64" && KnUtils.CpuArch == "Arm64")
                                 {
                                     pkg.score = 100;
                                     continue;
                                 }
-                                if(SysInfo.IsWindows || SysInfo.IsMacOS)
+                                if(KnUtils.IsWindows || KnUtils.IsMacOS)
                                 {
-                                    if (arch == "x86" && SysInfo.CpuArch == "X64")
+                                    if (arch == "x86" && KnUtils.CpuArch == "X64")
                                     {
                                         pkg.score = 50;
                                         continue;
                                     }
-                                    if (arch == "x86" && SysInfo.CpuArch == "Arm64")
+                                    if (arch == "x86" && KnUtils.CpuArch == "Arm64")
                                     {
                                         pkg.score = 20;
                                         continue;
                                     }
-                                    if (arch == "x64" && SysInfo.CpuArch == "Arm64")
+                                    if (arch == "x64" && KnUtils.CpuArch == "Arm64")
                                     {
                                         pkg.score = 70;
                                         continue;

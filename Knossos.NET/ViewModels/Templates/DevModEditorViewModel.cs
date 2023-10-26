@@ -277,7 +277,7 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                SysInfo.OpenFolder(ActiveVersion.fullPath);
+                KnUtils.OpenFolder(ActiveVersion.fullPath);
             }
             catch (Exception ex)
             {

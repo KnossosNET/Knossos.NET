@@ -77,7 +77,7 @@ namespace Knossos.NET.ViewModels
                 {
                     ScanResults = "Folder:\n" + folderPath;
                     string[] execs;
-                    if (SysInfo.IsWindows)
+                    if (KnUtils.IsWindows)
                     {
                         execs=Directory.GetFiles(folderPath, "*.exe");
                     }
@@ -156,7 +156,7 @@ namespace Knossos.NET.ViewModels
                         }
                     }
                     Stage2 = true;
-                    buildId = @"user_build_" + SysInfo.GetTimestamp(DateTime.Now);
+                    buildId = @"user_build_" + KnUtils.GetTimestamp(DateTime.Now);
                     BuildNewPath = Knossos.GetKnossosLibraryPath()+ Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + buildId;
                 }
             }catch(Exception ex)
@@ -337,19 +337,19 @@ namespace Knossos.NET.ViewModels
                     package.name = "user_build";
                     package.status = "required";
                     package.environment = "";
-                    if(SysInfo.IsWindows)
+                    if(KnUtils.IsWindows)
                     {
                         package.environment += "windows";
                     }
                     else
                     {
-                        if (SysInfo.IsLinux)
+                        if (KnUtils.IsLinux)
                         {
                             package.environment += "linux";
                         }
                         else
                         {
-                            if (SysInfo.IsMacOS)
+                            if (KnUtils.IsMacOS)
                             {
                                 package.environment += "macosx";
                             }

@@ -163,7 +163,7 @@ namespace Knossos.NET.Models
 
         private void StartWatchingDirectory()
         {
-            iniWatcher = new FileSystemWatcher(SysInfo.GetFSODataFolderPath());
+            iniWatcher = new FileSystemWatcher(KnUtils.GetFSODataFolderPath());
             iniWatcher.NotifyFilter = NotifyFilters.LastWrite;
             iniWatcher.Changed += OnIniChanged;
             iniWatcher.Filter = "fs2_open.ini";
@@ -198,12 +198,12 @@ namespace Knossos.NET.Models
         {
             try
             {
-                if (!File.Exists(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini"))
+                if (!File.Exists(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini"))
                 {
                     return;
                 }
                 var parser = new FileIniDataParser();
-                var data = parser.ReadFile(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
+                var data = parser.ReadFile(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
                 data.Configuration.AssigmentSpacer = string.Empty;
 
                 if(iniWatcher == null)
@@ -479,9 +479,9 @@ namespace Knossos.NET.Models
         {
             try
             {
-                if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json"))
+                if (File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json"))
                 {
-                    using FileStream jsonFile = File.OpenRead(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json");
+                    using FileStream jsonFile = File.OpenRead(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json");
                     var tempSettings = JsonSerializer.Deserialize<GlobalSettings>(jsonFile)!;
                     jsonFile.Close();
                     if (tempSettings != null)
@@ -530,13 +530,13 @@ namespace Knossos.NET.Models
             try
             {
                 var parser = new FileIniDataParser();
-                if(!File.Exists(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini"))
+                if(!File.Exists(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini"))
                 {
-                    Directory.CreateDirectory(SysInfo.GetFSODataFolderPath());
-                    File.Create(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini").Close();
+                    Directory.CreateDirectory(KnUtils.GetFSODataFolderPath());
+                    File.Create(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini").Close();
                 }
 
-                var data = parser.ReadFile(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
+                var data = parser.ReadFile(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
                 data.Configuration.AssigmentSpacer = string.Empty;
 
                 /* Default Section */
@@ -681,10 +681,10 @@ namespace Knossos.NET.Models
 
                 if (iniWatcher!= null)
                     iniWatcher.EnableRaisingEvents = false;
-                parser.WriteFile(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini", data, new UTF8Encoding(false));
+                parser.WriteFile(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini", data, new UTF8Encoding(false));
                 if(iniWatcher!= null)
                     iniWatcher.EnableRaisingEvents = true;
-                Log.Add(Log.LogSeverity.Information, "GlobalSettings.WriteFS2IniValues","Writen ini: "+ SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
+                Log.Add(Log.LogSeverity.Information, "GlobalSettings.WriteFS2IniValues","Writen ini: "+ KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
             }
             catch (Exception ex)
             {
@@ -712,7 +712,7 @@ namespace Knossos.NET.Models
                 };
 
                 var json = JsonSerializer.Serialize(this, options);
-                File.WriteAllText(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json", json, new UTF8Encoding(false));
+                File.WriteAllText(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json", json, new UTF8Encoding(false));
                 Log.Add(Log.LogSeverity.Information, "GlobalSettings.Save()", "Global settings has been saved.");
             }
             catch (Exception ex)

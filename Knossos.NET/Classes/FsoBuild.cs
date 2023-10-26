@@ -83,21 +83,21 @@ namespace Knossos.NET.Models
                     parts = filename.Split('_');
                     if (parts.Length > 5)
                     {
-                        version = parts[2] + "." + parts[3] + "." + parts[4] + "-" + SysInfo.GetTimestamp(DateTime.Now);
+                        version = parts[2] + "." + parts[3] + "." + parts[4] + "-" + KnUtils.GetTimestamp(DateTime.Now);
                     }
                     else
                     {
-                        version = "99.99.99-" + SysInfo.GetTimestamp(DateTime.Now);
+                        version = "99.99.99-" + KnUtils.GetTimestamp(DateTime.Now);
                     }
                 }
                 else
                 {
-                    version = "99.99.99-" + SysInfo.GetTimestamp(DateTime.Now);
+                    version = "99.99.99-" + KnUtils.GetTimestamp(DateTime.Now);
                 }
             }
             catch
             {
-                version = "99.99.99-" + SysInfo.GetTimestamp(DateTime.Now);
+                version = "99.99.99-" + KnUtils.GetTimestamp(DateTime.Now);
             }
             try
             {
@@ -178,9 +178,9 @@ namespace Knossos.NET.Models
             }
             Log.Add(Log.LogSeverity.Information, "FsoBuild.GetFlags()", "Getting FSO Flags from file: " + fullpath);
 
-            if(SysInfo.IsLinux || SysInfo.IsMacOS)
+            if(KnUtils.IsLinux || KnUtils.IsMacOS)
             {
-                SysInfo.Chmod(fullpath,"+x");
+                KnUtils.Chmod(fullpath,"+x");
             }
 
             string output = string.Empty;
@@ -358,38 +358,38 @@ namespace Knossos.NET.Models
                 return false;
             }
 
-            if (enviroment.ToLower().Contains("windows") && !SysInfo.IsWindows || enviroment.ToLower().Contains("linux") && !SysInfo.IsLinux || enviroment.ToLower().Contains("macosx") && !SysInfo.IsMacOS)
+            if (enviroment.ToLower().Contains("windows") && !KnUtils.IsWindows || enviroment.ToLower().Contains("linux") && !KnUtils.IsLinux || enviroment.ToLower().Contains("macosx") && !KnUtils.IsMacOS)
             {
                 return false;
             }
 
-            if (enviroment.ToLower().Contains("avx2") && !SysInfo.CpuAVX2 || enviroment.ToLower().Contains("avx") && !SysInfo.CpuAVX)
+            if (enviroment.ToLower().Contains("avx2") && !KnUtils.CpuAVX2 || enviroment.ToLower().Contains("avx") && !KnUtils.CpuAVX)
             {
                 return false;
             }
 
-            if (enviroment.ToLower().Contains("x86_64") && SysInfo.CpuArch == "X64")
+            if (enviroment.ToLower().Contains("x86_64") && KnUtils.CpuArch == "X64")
             {
                 return true;
             }
-            if (enviroment.ToLower().Contains("arm64") && SysInfo.CpuArch == "Arm64")
+            if (enviroment.ToLower().Contains("arm64") && KnUtils.CpuArch == "Arm64")
             {
                 return true;
             }
-            if (enviroment.ToLower().Contains("arm32") && (SysInfo.CpuArch == "Armv6" || SysInfo.CpuArch == "Arm"))
+            if (enviroment.ToLower().Contains("arm32") && (KnUtils.CpuArch == "Armv6" || KnUtils.CpuArch == "Arm"))
             {
                 return true;
             }
-            if (SysInfo.CpuArch == "X86" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
+            if (KnUtils.CpuArch == "X86" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
             {
                 return true;
             }
-            if (SysInfo.CpuArch == "X64" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
+            if (KnUtils.CpuArch == "X64" && !enviroment.ToLower().Contains("x86_64") && !enviroment.ToLower().Contains("arm64") && !enviroment.ToLower().Contains("arm32"))
             {
                 return true;
             }
 
-            if (SysInfo.CpuArch == "Arm64" && (SysInfo.IsMacOS || SysInfo.IsWindows) && !enviroment.ToLower().Contains("arm32") && !enviroment.ToLower().Contains("avx"))
+            if (KnUtils.CpuArch == "Arm64" && (KnUtils.IsMacOS || KnUtils.IsWindows) && !enviroment.ToLower().Contains("arm32") && !enviroment.ToLower().Contains("avx"))
             {
                 return true;
             }
@@ -623,7 +623,7 @@ namespace Knossos.NET.Models
                 return 0;
             }
 
-            if (env == FsoExecEnvironment.Windows && !SysInfo.IsWindows || env == FsoExecEnvironment.Linux && !SysInfo.IsLinux || env == FsoExecEnvironment.MacOSX && !SysInfo.IsMacOS)
+            if (env == FsoExecEnvironment.Windows && !KnUtils.IsWindows || env == FsoExecEnvironment.Linux && !KnUtils.IsLinux || env == FsoExecEnvironment.MacOSX && !KnUtils.IsMacOS)
             {
                 if (modpath != string.Empty)
                     Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + modpath + filename + " is not valid for this OS. Detected: " + env);
@@ -632,15 +632,15 @@ namespace Knossos.NET.Models
 
             /* Calculate the score, keep in mind in Windows and MAC x86 can run on x64 and X86/X64 can run on ARM64 */
             /* No support for 32 bits ARM on Windows/Mac, also no support for x86/x64 AVX on Windows ARM */
-            if(SysInfo.IsWindows || SysInfo.IsMacOS)
+            if(KnUtils.IsWindows || KnUtils.IsMacOS)
             {
                 switch (arch)
                 {
                     case FsoExecArch.x64_avx2:
-                        switch(SysInfo.CpuArch)
+                        switch(KnUtils.CpuArch)
                         {
                             case "X64":
-                                score += SysInfo.CpuAVX2 ? 100 : 0;
+                                score += KnUtils.CpuAVX2 ? 100 : 0;
                                 break;
                             case "X86":
                                 break;
@@ -653,10 +653,10 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.x64_avx:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
-                                score += SysInfo.CpuAVX ? 90 : 0;
+                                score += KnUtils.CpuAVX ? 90 : 0;
                                 break;
                             case "X86":
                                 break;
@@ -669,7 +669,7 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.x64:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
                                 score += 80;
@@ -685,13 +685,13 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.x86_avx2:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
-                                score += SysInfo.CpuAVX2 ? 50 : 0;
+                                score += KnUtils.CpuAVX2 ? 50 : 0;
                                 break;
                             case "X86":
-                                score += SysInfo.CpuAVX2 ? 100 : 0;
+                                score += KnUtils.CpuAVX2 ? 100 : 0;
                                 break;
                             case "Arm64":
                                 //score += 25;
@@ -702,13 +702,13 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.x86_avx:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
-                                score += SysInfo.CpuAVX ? 45 : 0;
+                                score += KnUtils.CpuAVX ? 45 : 0;
                                 break;
                             case "X86":
-                                score += SysInfo.CpuAVX ? 90 : 0;
+                                score += KnUtils.CpuAVX ? 90 : 0;
                                 break;
                             case "Arm64":
                                 //score += 15;
@@ -719,7 +719,7 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.x86:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
                                 score += 40;
@@ -736,7 +736,7 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.arm64:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
                                 break;
@@ -751,7 +751,7 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.arm32:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
                                 break;
@@ -776,10 +776,10 @@ namespace Knossos.NET.Models
                 switch (arch)
                 {
                     case FsoExecArch.x64_avx2:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
-                                score += SysInfo.CpuAVX2 ? 100 : 0;
+                                score += KnUtils.CpuAVX2 ? 100 : 0;
                                 break;
                             case "X86":
                                 break;
@@ -791,10 +791,10 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.x64_avx:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
-                                score += SysInfo.CpuAVX ? 90 : 0;
+                                score += KnUtils.CpuAVX ? 90 : 0;
                                 break;
                             case "X86":
                                 break;
@@ -806,7 +806,7 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.x64:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
                                 score += 80;
@@ -821,12 +821,12 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.x86_avx2:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
                                 break;
                             case "X86":
-                                score += SysInfo.CpuAVX2 ? 100 : 0;
+                                score += KnUtils.CpuAVX2 ? 100 : 0;
                                 break;
                             case "Arm64":
                                 break;
@@ -836,12 +836,12 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.x86_avx:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
                                 break;
                             case "X86":
-                                score += SysInfo.CpuAVX ? 90 : 0;
+                                score += KnUtils.CpuAVX ? 90 : 0;
                                 break;
                             case "Arm64":
                                 break;
@@ -851,7 +851,7 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.x86:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
                                 break;
@@ -866,7 +866,7 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.arm64:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
                                 break;
@@ -881,7 +881,7 @@ namespace Knossos.NET.Models
                         }
                         break;
                     case FsoExecArch.arm32:
-                        switch (SysInfo.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
                                 break;

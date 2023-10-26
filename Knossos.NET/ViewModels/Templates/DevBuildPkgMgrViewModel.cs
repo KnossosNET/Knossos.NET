@@ -255,7 +255,7 @@ namespace Knossos.NET.ViewModels
                 try
                 {
                     if (PkgMgr.editor != null)
-                        SysInfo.OpenFolder(Path.Combine(PkgMgr.editor.ActiveVersion.fullPath, Package.folder != null ? Package.folder : string.Empty));
+                        KnUtils.OpenFolder(Path.Combine(PkgMgr.editor.ActiveVersion.fullPath, Package.folder != null ? Package.folder : string.Empty));
                 }
                 catch (Exception ex)
                 {

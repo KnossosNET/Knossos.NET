@@ -103,7 +103,7 @@ namespace Knossos.NET.ViewModels
                 await MessageBox.Show(MainWindow.instance!, "The mininum length for password and username is 6.", "Register error", MessageBox.MessageBoxButtons.OK);
                 return;
             }
-            if(!SysInfo.IsValidEmail(UserEmail))
+            if(!KnUtils.IsValidEmail(UserEmail))
             {
                 await MessageBox.Show(MainWindow.instance!, "Email: "+UserEmail+ " is not a valid email.", "Register error", MessageBox.MessageBoxButtons.OK);
                 return;

@@ -30,7 +30,7 @@ namespace Knossos.NET
             }
         }
 
-        public static string LogFilePath = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log";
+        public static string LogFilePath = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log";
 
         public static void Add(LogSeverity logSeverity, string from, string data)
         {

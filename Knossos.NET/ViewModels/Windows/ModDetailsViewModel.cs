@@ -38,7 +38,7 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                SysInfo.OpenBrowserURL((string)url);
+                KnUtils.OpenBrowserURL((string)url);
             }
             catch (Exception ex)
             {
@@ -497,7 +497,7 @@ namespace Knossos.NET.ViewModels
             var url = modVersions[ItemSelectedIndex].releaseThread;
             if (url != null)
             {
-                SysInfo.OpenBrowserURL(url);
+                KnUtils.OpenBrowserURL(url);
             }
         }
 

@@ -1035,7 +1035,7 @@ namespace Knossos.NET.ViewModels
                         vp.DisableCompression();
                         await vp.SaveAsAsync(vpPath, compressionCallback, cancellationTokenSource);
                         Info = "Get VP Checksum";
-                        var checksumVP = await SysInfo.GetFileHash(vpPath);
+                        var checksumVP = await KnUtils.GetFileHash(vpPath);
                         if( checksumVP != null )
                         {
                             Info = "Compressing (7z)";
@@ -1071,7 +1071,7 @@ namespace Knossos.NET.ViewModels
                             if (fi.LinkTarget == null)
                             {
                                 var relativePath = Path.GetRelativePath(modFullPath + Path.DirectorySeparatorChar + pkg.folder, file).Replace(@"\", @"/");
-                                var checksum = await SysInfo.GetFileHash(file);
+                                var checksum = await KnUtils.GetFileHash(file);
                                 if (checksum != null)
                                 {
                                     var fl = new ModFilelist();
@@ -1121,7 +1121,7 @@ namespace Knossos.NET.ViewModels
                      *
                     */
                     pkgFile.dest = "";
-                    var checksumZip = await SysInfo.GetFileHash(zipPath);
+                    var checksumZip = await KnUtils.GetFileHash(zipPath);
                     if (checksumZip != null)
                     {
                         var fi = new FileInfo(zipPath);
@@ -1488,7 +1488,7 @@ namespace Knossos.NET.ViewModels
                         writer.WriteLine("Warning: This token indicates an incomplete folder copy. If this token is present on the next Knet startup this folder WILL BE DELETED.");
                     }
 
-                    await SysInfo.CopyDirectory(currentDir.FullName, newDir, true, cancellationTokenSource, copyCallback);
+                    await KnUtils.CopyDirectoryAsync(currentDir.FullName, newDir, true, cancellationTokenSource, copyCallback);
 
                     File.Delete(newDir + Path.DirectorySeparatorChar + "knossos_net_download.token");
 
@@ -3938,7 +3938,7 @@ namespace Knossos.NET.ViewModels
                         if (progressPercentage.HasValue && filesize.HasValue)
                         {
                             ProgressCurrent = (float)progressPercentage.Value;
-                            Info = SysInfo.FormatBytes(bytesDownloaded) + " / " + SysInfo.FormatBytes(filesize.Value) + " @ " + speed ;
+                            Info = KnUtils.FormatBytes(bytesDownloaded) + " / " + KnUtils.FormatBytes(filesize.Value) + " @ " + speed ;
                         }
 
                         if (cancellationTokenSource.IsCancellationRequested)
@@ -4141,7 +4141,7 @@ namespace Knossos.NET.ViewModels
 
                     if (stopwatch.Elapsed.TotalSeconds >= 1)
                     {
-                        speed = SysInfo.FormatBytes(totalBytesPerSecond)+"/s";
+                        speed = KnUtils.FormatBytes(totalBytesPerSecond)+"/s";
                         totalBytesPerSecond = 0L;
                         stopwatch.Restart();
                     }

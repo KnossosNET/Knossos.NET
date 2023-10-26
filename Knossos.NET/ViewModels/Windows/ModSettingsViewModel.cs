@@ -144,7 +144,7 @@ namespace Knossos.NET.ViewModels
                         bytes += fi.Length;
                     }
                 }
-                ModSize = SysInfo.FormatBytes(bytes);
+                ModSize = KnUtils.FormatBytes(bytes);
                 if (modJson.modSettings.isCompressed)
                     ModSize += " (Compressed)";
             }catch(Exception ex)

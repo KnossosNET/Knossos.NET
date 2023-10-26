@@ -114,10 +114,10 @@ namespace Knossos.NET
 
         private string UnpackExec()
         {
-            string execPath = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar;
+            string execPath = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar;
             try
             {
-                if (SysInfo.IsWindows)
+                if (KnUtils.IsWindows)
                 {
                     execPath += "7za.exe";
                     if (!File.Exists(execPath))
@@ -127,7 +127,7 @@ namespace Knossos.NET
                             AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/win/7za.exe")).CopyTo(fileStream);
                             fileStream.Close();
                         }
-                        using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "7z.License.txt"))
+                        using (var fileStream = File.Create(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "7z.License.txt"))
                         {
                             AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/win/7z.License.txt")).CopyTo(fileStream);
                             fileStream.Close();
@@ -136,9 +136,9 @@ namespace Knossos.NET
                 }
                 else
                 {
-                    if (SysInfo.IsLinux)
+                    if (KnUtils.IsLinux)
                     {
-                        if (SysInfo.CpuArch == "X64")
+                        if (KnUtils.CpuArch == "X64")
                         {
                             execPath += "7zzs";
                             if (!File.Exists(execPath))
@@ -147,16 +147,16 @@ namespace Knossos.NET
                                 {
                                     AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/linux-x64/7zzs")).CopyTo(fileStream);
                                     fileStream.Close();
-                                    SysInfo.Chmod(execPath, "+x");
+                                    KnUtils.Chmod(execPath, "+x");
                                 }
-                                using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "7z.License.txt"))
+                                using (var fileStream = File.Create(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "7z.License.txt"))
                                 {
                                     AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/linux-x64/7z.License.txt")).CopyTo(fileStream);
                                     fileStream.Close();
                                 }
                             }
                         }
-                        if (SysInfo.CpuArch == "Arm64")
+                        if (KnUtils.CpuArch == "Arm64")
                         {
                             execPath += "7zzs";
                             if (!File.Exists(execPath))
@@ -165,9 +165,9 @@ namespace Knossos.NET
                                 {
                                     AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/linux-arm64/7zzs")).CopyTo(fileStream);
                                     fileStream.Close();
-                                    SysInfo.Chmod(execPath, "+x");
+                                    KnUtils.Chmod(execPath, "+x");
                                 }
-                                using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "7z.License.txt"))
+                                using (var fileStream = File.Create(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "7z.License.txt"))
                                 {
                                     AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/linux-arm64/7z.License.txt")).CopyTo(fileStream);
                                     fileStream.Close();
@@ -177,7 +177,7 @@ namespace Knossos.NET
                     }
                     else
                     {
-                        if (SysInfo.IsMacOS)
+                        if (KnUtils.IsMacOS)
                         {
                             execPath += "7zz";
                             if (!File.Exists(execPath))
@@ -186,9 +186,9 @@ namespace Knossos.NET
                                 {
                                     AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/osx/7zz")).CopyTo(fileStream);
                                     fileStream.Close();
-                                    SysInfo.Chmod(execPath, "+x");
+                                    KnUtils.Chmod(execPath, "+x");
                                 }
-                                using (var fileStream = File.Create(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "7z.License.txt"))
+                                using (var fileStream = File.Create(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "7z.License.txt"))
                                 {
                                     AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/osx/7z.License.txt")).CopyTo(fileStream);
                                     fileStream.Close();

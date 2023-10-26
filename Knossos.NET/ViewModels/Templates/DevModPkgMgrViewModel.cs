@@ -355,7 +355,7 @@ namespace Knossos.NET.ViewModels
                             if (Directory.Exists(PkgMgr.editor.ActiveVersion.fullPath + Path.DirectorySeparatorChar + Package.folder))
                             {
                                 long sizeInBytes = Directory.EnumerateFiles(PkgMgr.editor.ActiveVersion.fullPath + Path.DirectorySeparatorChar + Package.folder, "*", SearchOption.AllDirectories).Sum(fileInfo => new FileInfo(fileInfo).Length);
-                                DiskSpace = SysInfo.FormatBytes(sizeInBytes);
+                                DiskSpace = KnUtils.FormatBytes(sizeInBytes);
                             }
                         }
                     }
@@ -444,7 +444,7 @@ namespace Knossos.NET.ViewModels
                 try
                 {
                     if(PkgMgr.editor != null)
-                        SysInfo.OpenFolder(PkgMgr.editor.ActiveVersion.fullPath + Path.DirectorySeparatorChar + Package.folder);
+                        KnUtils.OpenFolder(PkgMgr.editor.ActiveVersion.fullPath + Path.DirectorySeparatorChar + Package.folder);
                 }
                 catch (Exception ex)
                 {

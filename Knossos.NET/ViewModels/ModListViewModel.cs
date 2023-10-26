@@ -174,7 +174,7 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                SysInfo.OpenFolder(SysInfo.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "screenshots");
+                KnUtils.OpenFolder(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "screenshots");
             }
             catch (Exception ex)
             {

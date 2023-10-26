@@ -51,7 +51,7 @@ namespace Knossos.NET.ViewModels
 
         public Fs2InstallerViewModel() 
         { 
-            if(SysInfo.IsWindows || SysInfo.IsMacOS || SysInfo.IsLinux && ( SysInfo.CpuArch == "X64" || SysInfo.CpuArch == "X86" || SysInfo.CpuArch == "Arm64"))
+            if(KnUtils.IsWindows || KnUtils.IsMacOS || KnUtils.IsLinux && ( KnUtils.CpuArch == "X64" || KnUtils.CpuArch == "X86" || KnUtils.CpuArch == "Arm64"))
             {
                 InnoExtractIsAvalible = true;
             }
@@ -72,31 +72,31 @@ namespace Knossos.NET.ViewModels
                 IsInstalling = true;
                 try
                 {
-                    string innoPath = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar;
-                    if (SysInfo.IsWindows)
+                    string innoPath = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar;
+                    if (KnUtils.IsWindows)
                     {
                         innoPath += "innoextract.exe";
                     }
                     else
                     {
-                        if(SysInfo.IsLinux)
+                        if(KnUtils.IsLinux)
                         {
-                            if(SysInfo.CpuArch == "X64")
+                            if(KnUtils.CpuArch == "X64")
                             {
                                 innoPath += "innoextract.x64";
                             }
-                            if (SysInfo.CpuArch == "X86")
+                            if (KnUtils.CpuArch == "X86")
                             {
                                 innoPath += "innoextract.x86";
                             }
-                            if (SysInfo.CpuArch == "Arm64")
+                            if (KnUtils.CpuArch == "Arm64")
                             {
                                 innoPath += "innoextract.arm64";
                             }
                         }
                         else
                         {
-                            if(SysInfo.IsMacOS)
+                            if(KnUtils.IsMacOS)
                             {
                                 innoPath += "innoextract.mac64";
                             }
@@ -106,9 +106,9 @@ namespace Knossos.NET.ViewModels
                     await Task.Run(() =>
                     {
                         var cmd = new Process();
-                        Directory.CreateDirectory(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog");
+                        Directory.CreateDirectory(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog");
                         cmd.StartInfo.FileName = innoPath;
-                        cmd.StartInfo.Arguments = gogExe + " -L -g -d " + SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog";
+                        cmd.StartInfo.Arguments = gogExe + " -L -g -d " + KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog";
                         cmd.StartInfo.UseShellExecute = false;
                         cmd.StartInfo.CreateNoWindow = true;
                         cmd.StartInfo.RedirectStandardOutput = true;
@@ -129,13 +129,13 @@ namespace Knossos.NET.ViewModels
                         there is an older gog installer that had all the data inside an /app folder, current version it just on the root
                         ProccessFolder need to be pointed to the folder with all the vps and the datas folder
                     */
-                    if (File.Exists(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog" + Path.DirectorySeparatorChar + "root_fs2.vp"))
+                    if (File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog" + Path.DirectorySeparatorChar + "root_fs2.vp"))
                     {
-                        ProcessFolder(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog");
+                        ProcessFolder(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog");
                     }
                     else
                     {
-                        ProcessFolder(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog" + Path.DirectorySeparatorChar + "app");
+                        ProcessFolder(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog" + Path.DirectorySeparatorChar + "app");
                     }
                 }
                 catch(Exception ex) 
@@ -152,7 +152,7 @@ namespace Knossos.NET.ViewModels
                 {
                     try
                     {
-                        Directory.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog", true);
+                        Directory.Delete(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog", true);
                     }
                     catch { }
                 }
@@ -300,7 +300,7 @@ namespace Knossos.NET.ViewModels
                     {
                         try
                         {
-                            Directory.Delete(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog",true);
+                            Directory.Delete(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog",true);
                         }
                         catch { }
                     }
@@ -325,7 +325,7 @@ namespace Knossos.NET.ViewModels
                 gogExe = null;
                 try
                 {
-                    string innoPath = SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar;
+                    string innoPath = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar;
 
                     /*Copy Innoextract License file*/
                     using (var fileStream = File.Create(innoPath + Path.DirectorySeparatorChar + "innoextract.license"))
@@ -334,7 +334,7 @@ namespace Knossos.NET.ViewModels
                         fileStream.Close();
                     }
 
-                    if (SysInfo.IsWindows)
+                    if (KnUtils.IsWindows)
                     {
                         innoPath += "innoextract.exe";
                         using (var fileStream = File.Create(innoPath))
@@ -345,39 +345,39 @@ namespace Knossos.NET.ViewModels
                     }
                     else
                     {
-                        if (SysInfo.IsLinux)
+                        if (KnUtils.IsLinux)
                         {
-                            if (SysInfo.CpuArch == "X64")
+                            if (KnUtils.CpuArch == "X64")
                             {
                                 innoPath += "innoextract.x64";
                                 using (var fileStream = File.Create(innoPath))
                                 {
                                     AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/linux-x64/innoextract.x64")).CopyTo(fileStream);
                                     fileStream.Close();
-                                    SysInfo.Chmod(innoPath,"+x");
+                                    KnUtils.Chmod(innoPath,"+x");
                                 }
                             }
-                            if (SysInfo.CpuArch == "Arm64")
+                            if (KnUtils.CpuArch == "Arm64")
                             {
                                 innoPath += "innoextract.arm64";
                                 using (var fileStream = File.Create(innoPath))
                                 {
                                     AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/linux-arm64/innoextract.arm64")).CopyTo(fileStream);
                                     fileStream.Close();
-                                    SysInfo.Chmod(innoPath, "+x");
+                                    KnUtils.Chmod(innoPath, "+x");
                                 }
                             }
                         }
                         else
                         {
-                            if(SysInfo.IsMacOS)
+                            if(KnUtils.IsMacOS)
                             {
                                 innoPath += "innoextract.mac64";
                                 using (var fileStream = File.Create(innoPath))
                                 {
                                     AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/osx/innoextract.mac64")).CopyTo(fileStream);
                                     fileStream.Close();
-                                    SysInfo.Chmod(innoPath, "+x");
+                                    KnUtils.Chmod(innoPath, "+x");
                                 }
                             }
                         }

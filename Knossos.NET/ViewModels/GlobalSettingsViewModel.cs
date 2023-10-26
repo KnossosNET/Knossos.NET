@@ -185,29 +185,29 @@ namespace Knossos.NET.ViewModels
             Fs2RootPack = Knossos.retailFs2RootFound;
             NumberOfMods = Knossos.GetInstalledModList(null).Count.ToString();
             NumberOfBuilds = Knossos.GetInstalledBuildsList(null).Count.ToString();
-            if(SysInfo.IsWindows)
+            if(KnUtils.IsWindows)
             {
                 DetectedOS = "Windows";
                 WindowsOS = true;
             }
             else
             {
-                if(SysInfo.IsLinux)
+                if(KnUtils.IsLinux)
                 {
                     DetectedOS = "Linux";
                 }
                 else
                 {
-                    if(SysInfo.IsMacOS)
+                    if(KnUtils.IsMacOS)
                     {
                         DetectedOS = "OSX";
                     }
                 }
             }
 
-            CpuArch = SysInfo.CpuArch;
-            IsAVX = SysInfo.CpuAVX;
-            IsAVX2 = SysInfo.CpuAVX2;
+            CpuArch = KnUtils.CpuArch;
+            IsAVX = KnUtils.CpuAVX;
+            IsAVX2 = KnUtils.CpuAVX2;
             ForceSSE2 = Knossos.globalSettings.forceSSE2;
             MaxConcurrentSubtasks = Knossos.globalSettings.maxConcurrentSubtasks - 1;
             switch(Knossos.globalSettings.maxDownloadSpeed)
@@ -665,7 +665,7 @@ namespace Knossos.NET.ViewModels
                         {
                             FlagDataLoaded = true;
                             Knossos.flagDataLoaded = true;
-                            SysInfo.SetFSODataFolderPath(flags.pref_path);
+                            KnUtils.SetFSODataFolderPath(flags.pref_path);
                             return flags;
                         }
                     }
@@ -682,7 +682,7 @@ namespace Knossos.NET.ViewModels
                         {
                             FlagDataLoaded = true;
                             Knossos.flagDataLoaded = true;
-                            SysInfo.SetFSODataFolderPath(flags.pref_path);
+                            KnUtils.SetFSODataFolderPath(flags.pref_path);
                             return flags;
                         }
                     }
@@ -960,7 +960,7 @@ namespace Knossos.NET.ViewModels
 
         internal void GlobalCmdHelp()
         {
-            SysInfo.OpenBrowserURL("https://wiki.hard-light.net/index.php/Command-Line_Reference");
+            KnUtils.OpenBrowserURL("https://wiki.hard-light.net/index.php/Command-Line_Reference");
         }
         internal void ReloadFlagData()
         {

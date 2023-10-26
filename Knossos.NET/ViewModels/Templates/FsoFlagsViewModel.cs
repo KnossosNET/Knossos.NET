@@ -117,7 +117,7 @@ namespace Knossos.NET.ViewModels
 
         public void OpenFlagInfoURL()
         {
-            SysInfo.OpenBrowserURL(this.Web_url);
+            KnUtils.OpenBrowserURL(this.Web_url);
         }
     }
 }
