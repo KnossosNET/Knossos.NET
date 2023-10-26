@@ -31,6 +31,12 @@ namespace Knossos.NET.ViewModels
 
         private SortType sortType = SortType.name;
 
+        [ObservableProperty]
+        private bool isTabOpen = false;
+
+        [ObservableProperty]
+        private bool isLoading = true;
+
         private string Search
         {
             get { return search; }
@@ -56,9 +62,10 @@ namespace Knossos.NET.ViewModels
                     Mods.ForEach(m => m.Visible = true);
                 }
             }
-        } 
+        }
 
-        private ObservableCollection<ModCardViewModel> Mods { get; set; } = new ObservableCollection<ModCardViewModel>();
+        [ObservableProperty]
+        private ObservableCollection<ModCardViewModel> mods = new ObservableCollection<ModCardViewModel>();
 
         public ModListViewModel()
         {
@@ -67,6 +74,20 @@ namespace Knossos.NET.ViewModels
         public ModListViewModel(bool isNebulaView)
         {
             IsNebulaView = isNebulaView;
+            if (!isNebulaView)
+            {
+                IsLoading = false;
+                IsTabOpen = true;
+            }
+        }
+
+        public async void TabOpen()
+        {
+            await Task.Run(async () =>
+            {
+                await Task.Delay(50);
+                IsTabOpen = true;
+            });
         }
 
         public void ReloadRepoCommand()
@@ -107,6 +128,36 @@ namespace Knossos.NET.ViewModels
             {
                 modCard.AddModVersion(modJson);
             }
+        }
+
+        public void AddMods(List<Mod> modList)
+        {
+            var newModCardList = new ObservableCollection<ModCardViewModel>();
+            foreach(Mod? mod in modList)
+            {
+                var modCard = newModCardList.FirstOrDefault(m => m.ID == mod.id);
+                if (modCard == null)
+                {
+                    int i;
+                    for (i = 0; i < newModCardList.Count; i++)
+                    {
+                        if (newModCardList[i].ActiveVersion != null)
+                        {
+                            if (CompareMods(newModCardList[i].ActiveVersion!, mod) > 0)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    newModCardList.Insert(i, new ModCardViewModel(mod));
+                }
+                else
+                {
+                    modCard.AddModVersion(mod);
+                }
+            }
+            Mods = newModCardList;
+            IsLoading = false;
         }
 
         internal void OpenScreenshotsFolder()

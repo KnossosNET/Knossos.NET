@@ -43,7 +43,7 @@
 				</Grid>
 			</StackPanel>
 
-			<StackPanel IsVisible="{Binding !IsInstalling}" ToolTip.Tip="{Binding Tooltip}" Name="Overlay" ZIndex="1" Background="Black" Height="225" Width="151" VerticalAlignment="Top">
+			<StackPanel IsVisible="{Binding !IsInstalling}" Name="Overlay" ZIndex="1" Background="Black" Height="225" Width="151" VerticalAlignment="Top">
 				<StackPanel IsVisible="{Binding #Overlay.Opacity}">
 					<!--Installed Overlay-->
 					<StackPanel IsVisible="{Binding IsInstalled}">

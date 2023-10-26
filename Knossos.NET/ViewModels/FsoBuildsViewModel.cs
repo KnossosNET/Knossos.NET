@@ -1,4 +1,5 @@
-﻿using Knossos.NET.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Knossos.NET.Models;
 using Knossos.NET.Views;
 using Knossos.NET.Views.Windows;
 using System;
@@ -10,12 +11,16 @@ namespace Knossos.NET.ViewModels
 {
     public partial class FsoBuildsViewModel : ViewModelBase
     {
-        public static FsoBuildsViewModel? Instance; 
+        public static FsoBuildsViewModel? Instance;
 
-        private ObservableCollection<FsoBuildItemViewModel> StableItems { get; set; } = new ObservableCollection<FsoBuildItemViewModel>();
-        private ObservableCollection<FsoBuildItemViewModel> RcItems { get; set; } = new ObservableCollection<FsoBuildItemViewModel>();
-        private ObservableCollection<FsoBuildItemViewModel> NightlyItems { get; set; } = new ObservableCollection<FsoBuildItemViewModel>();
-        private ObservableCollection<FsoBuildItemViewModel> CustomItems { get; set; } = new ObservableCollection<FsoBuildItemViewModel>();
+        [ObservableProperty]
+        private ObservableCollection<FsoBuildItemViewModel> stableItems = new ObservableCollection<FsoBuildItemViewModel>();
+        [ObservableProperty]
+        private ObservableCollection<FsoBuildItemViewModel> rcItems = new ObservableCollection<FsoBuildItemViewModel>();
+        [ObservableProperty]
+        private ObservableCollection<FsoBuildItemViewModel> nightlyItems = new ObservableCollection<FsoBuildItemViewModel>();
+        [ObservableProperty]
+        private ObservableCollection<FsoBuildItemViewModel> customItems = new ObservableCollection<FsoBuildItemViewModel>();
 
         public FsoBuildsViewModel()
         {
@@ -149,6 +154,87 @@ namespace Knossos.NET.ViewModels
                     }
                     break;
             }
+        }
+
+        public void BulkLoadNebulaBuilds(List<Mod> modsJson)
+        {
+            var newStable = new ObservableCollection<FsoBuildItemViewModel>();
+            var newRc = new ObservableCollection<FsoBuildItemViewModel>();
+            var newNightly = new ObservableCollection<FsoBuildItemViewModel>();
+            var newCustom = new ObservableCollection<FsoBuildItemViewModel>();
+            StableItems.ForEach(s => { if (s.IsInstalled) newStable.Add(s); });
+            RcItems.ForEach(s => { if (s.IsInstalled) newRc.Add(s); });
+            NightlyItems.ForEach(s => { if (s.IsInstalled) newNightly.Add(s); });
+            CustomItems.ForEach(s => { if (s.IsInstalled) newCustom.Add(s); });
+
+            foreach (var mod in modsJson)
+            {
+                var build = new FsoBuild(mod);
+                switch (build.stability)
+                {
+                    case FsoStability.Stable:
+                        var previous = newStable.FirstOrDefault(b => string.Compare(b.Date, build.date) < 0);
+                        if (previous != null)
+                        {
+                            int index = newStable.IndexOf(previous);
+                            if (index == -1)
+                                index = 0;
+                            newStable.Insert(index, new FsoBuildItemViewModel(build, this));
+                        }
+                        else
+                        {
+                            newStable.Add(new FsoBuildItemViewModel(build, this));
+                        }
+                        break;
+                    case FsoStability.RC:
+                        var previousRc = newRc.FirstOrDefault(b => string.Compare(b.Date, build.date) < 0);
+                        if (previousRc != null)
+                        {
+                            int index = newRc.IndexOf(previousRc);
+                            if (index == -1)
+                                index = 0;
+                            newRc.Insert(index, new FsoBuildItemViewModel(build, this));
+                        }
+                        else
+                        {
+                            newRc.Add(new FsoBuildItemViewModel(build, this));
+                        }
+                        break;
+                    case FsoStability.Nightly:
+                        var previousNL = newNightly.FirstOrDefault(b => string.Compare(b.Date, build.date) < 0);
+                        if (previousNL != null)
+                        {
+                            int index = newNightly.IndexOf(previousNL);
+                            if (index == -1)
+                                index = 0;
+                            newNightly.Insert(index, new FsoBuildItemViewModel(build, this));
+                        }
+                        else
+                        {
+                            newNightly.Add(new FsoBuildItemViewModel(build, this));
+                        }
+                        break;
+                    case FsoStability.Custom:
+                        var previousCu = newCustom.FirstOrDefault(b => string.Compare(b.Date, build.date) < 0);
+                        if (previousCu != null)
+                        {
+                            int index = newCustom.IndexOf(previousCu);
+                            if (index == -1)
+                                index = 0;
+                            newCustom.Insert(index, new FsoBuildItemViewModel(build, this));
+                        }
+                        else
+                        {
+                            newCustom.Add(new FsoBuildItemViewModel(build, this));
+                        }
+                        break;
+                }
+            }
+
+            StableItems = newStable;
+            RcItems = newRc;
+            NightlyItems = newNightly;
+            CustomItems = newCustom;
         }
 
         public void DeleteBuild(FsoBuild build, FsoBuildItemViewModel item)

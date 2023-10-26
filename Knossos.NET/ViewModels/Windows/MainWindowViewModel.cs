@@ -40,7 +40,11 @@ namespace Knossos.NET.ViewModels
                 if (value != tabIndex)
                 {
                     this.SetProperty(ref tabIndex, value);
-                    if(tabIndex == 4) //PXO
+                    if (tabIndex == 1) //Nebula Mods
+                    {
+                        NebulaModsView.TabOpen();
+                    }
+                    if (tabIndex == 4) //PXO
                     {
                         PxoViewModel.Instance!.InitialLoad();
                     }
@@ -104,6 +108,13 @@ namespace Knossos.NET.ViewModels
         public void AddNebulaMod(Mod modJson)
         {
             NebulaModsView.AddMod(modJson);
+        }
+
+        public void BulkLoadNebulaMods(List<Mod> mods, bool clear)
+        {
+            if(clear)
+                NebulaModsView.ClearView();
+            NebulaModsView.AddMods(mods);
         }
 
         public void CancelModInstall(string id)

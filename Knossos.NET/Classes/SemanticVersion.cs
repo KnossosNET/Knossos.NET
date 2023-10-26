@@ -7,7 +7,7 @@ namespace Knossos.NET.Classes
         Just the basics needed to do comparisons without having to include 
         a 3rd party library for this.
     */
-    public class SemanticVersion
+    public class SemanticVersion : IComparable
     {
         int major;
         int minor;
@@ -73,26 +73,23 @@ namespace Knossos.NET.Classes
             }
         }
 
-        /*
-            Compare two semantic version strings.
-            I decided for a static comparison function instead of operator overload because
-            it allowed to resolve all requeriments in a single method and also allowed to take
-            strings. If overloading is necessary it can be added at any time.
-            Retuns >=1 if VersionA is superior, 0 if equal or <=-1 if Version A is inferior.
-        */
+        /// <summary>
+        /// Compare two semantic versions.
+        /// </summary>
+        /// <param name="versionA"></param>
+        /// <param name="versionB"></param>
+        /// <returns>Retuns >=1 if A is superior, 0 if equal or <=-1 if A is inferior.</returns>    
         public static int Compare(string versionA, string versionB)
         {
             return Compare(new SemanticVersion(versionA), new SemanticVersion(versionB));
         }
 
-
-        /*
-            Compare two semantic versions.
-            I decided for a static comparison function instead of operator overload because
-            it allowed to resolve all requeriments in a single method and also allowed to take
-            strings. If overloading is necessary it can be added at any time.
-            Retuns >=1 if VersionA is superior, 0 if equal or <=-1 if Version A is inferior.
-        */
+        /// <summary>
+        /// Compare two semantic versions.
+        /// </summary>
+        /// <param name="versionA"></param>
+        /// <param name="versionB"></param>
+        /// <returns>Retuns >=1 if A is superior, 0 if equal or <=-1 if A is inferior.</returns>        
         public static int Compare(SemanticVersion versionA, SemanticVersion versionB)
         {
             if(versionA.major != versionB.major)
@@ -210,8 +207,28 @@ namespace Knossos.NET.Classes
             }catch (Exception ex) 
             {
                 Log.Add(Log.LogSeverity.Error, "SemanticVersion.SastifiesDependency()", ex);
-                return false; 
+                return false;
             }
+        }
+
+        public static bool operator >(SemanticVersion a, SemanticVersion b)
+        {
+            return Compare(a, b) > 0;
+        }
+
+        public static bool operator >=(SemanticVersion a, SemanticVersion b)
+        {
+            return Compare(a, b) >= 0;
+        }
+
+        public static bool operator <(SemanticVersion a, SemanticVersion b)
+        {
+            return Compare(a, b) < 0;
+        }
+
+        public static bool operator <=(SemanticVersion a, SemanticVersion b)
+        {
+            return Compare(a, b) <= 0;
         }
 
         public override string ToString()
@@ -224,6 +241,13 @@ namespace Knossos.NET.Classes
             {
                 return major + "." + minor + "." + revision;
             }
+        }
+
+        public int CompareTo(object? other)
+        {
+            if (other == null)
+                return 1;
+            return this > (SemanticVersion)other ? 1 : 0;
         }
     }
 }

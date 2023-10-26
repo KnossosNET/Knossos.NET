@@ -54,6 +54,11 @@ namespace Knossos.NET.Models
             }
         }
 
+        public struct RepoData
+        {
+            public Mod[]? mods { get; set; }
+        }
+
         //https://cf.fsnebula.org/storage/repo.json
         //https://dl.fsnebula.org/storage/repo.json
         //https://aigaion.feralhosting.com/discovery/nebula/repo.json
@@ -146,7 +151,7 @@ namespace Knossos.NET.Models
                 {
                     throw new TaskCanceledException();
                 }
-                var updates = await ParseRepoJson();
+                var updates = await InitialRepoLoad();
                 if (updates != null && updates.Any())
                 {
                     SaveSettings();
@@ -288,100 +293,145 @@ namespace Knossos.NET.Models
             return false;
         }
 
-        private static async Task<List<Mod>?> ParseRepoJson()
+        /// <summary>
+        /// Parses the repo_minimal.json file
+        /// </summary>
+        /// <returns>List of mods or null</returns>
+        private static async Task<List<Mod>?> GetModsInRepo(CancellationTokenSource? cancelToken = null)
         {
             try
             {
                 await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json");
+                if (cancelToken != null && cancelToken!.IsCancellationRequested)
+                {
+                    throw new TaskCanceledException();
+                }
+                RepoData? repoData = null;
+                using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json", FileMode.Open, FileAccess.ReadWrite))
+                {
+                    JsonSerializerOptions serializerOptions = new JsonSerializerOptions();
+                    try
+                    {
+                        repoData = await JsonSerializer.DeserializeAsync<RepoData>(fileStream);
+                    }
+                    catch
+                    {
+                        //TODO: Remove this at some point after a month or two (2023/10/25)
+                        //The old parsing method deleted the last character from the json file, what would fail the parsing of the file if already downloaded
+                        //before this update, so re-add it and try to desetialize again
+                        fileStream.Seek(0, SeekOrigin.End);
+                        if (fileStream.ReadByte() != '}')
+                        {
+                            fileStream.WriteByte(Convert.ToByte('}'));
+                            fileStream.Seek(0, SeekOrigin.Begin);
+                            repoData = await JsonSerializer.DeserializeAsync<RepoData>(fileStream);
+                        }
+                    }
+                }
+                if (repoData != null && repoData.Value.mods != null)
+                {
+                    return repoData.Value.mods.ToList();
+                }
+            }catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.GetModsInRepo()", ex);
+            }
+            return null;
+        }
+
+        private static async Task<List<Mod>?> InitialRepoLoad()
+        {
+            try
+            {
+                var allModsInRepo = await GetModsInRepo(cancellationToken);
+                if (allModsInRepo == null)
+                    return null;
+
+                //Only keep the newerest version of each mod
+                //Determine if it should be added to the update list to display repo changes in UI
+                var modsByID = allModsInRepo.GroupBy(m => m.id);
+                var newerestModVersionPerID = new List<Mod>();
+                var modUpdates = new List<Mod>();
+                foreach(var idGroup in modsByID)
+                {
+                    Mod? newerestOfID = idGroup.First();
+                    if(idGroup.Count() > 1)
+                    {
+                        newerestOfID = idGroup.MaxBy(x => new SemanticVersion(x.version));
+                    }
+                    if (newerestOfID != null)
+                    {
+                        newerestModVersionPerID.Add(newerestOfID);
+                        if (IsModUpdate(idGroup.First()))
+                        {
+                            modUpdates.Add(idGroup.First());
+                        }
+                    }
+                };
+
                 if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
                 {
                     throw new TaskCanceledException();
                 }
-                using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json", FileMode.Open, FileAccess.ReadWrite))
+
+                //Mods, TCs
+                var modsTcs = newerestModVersionPerID.Where( m => m.type == ModType.mod || m.type == ModType.tc ).ToList();
+                //Remove Installed, Mark update avalible to installed ones
+                foreach (var m in modsTcs.ToList())
                 {
-                    fileStream.Seek(-1, SeekOrigin.End);
-                    if (fileStream.ReadByte() == '}')
+                    if (m.type == ModType.tc || m.type == ModType.mod && (listFS2Override || (m.parent != "FS2" || m.parent == "FS2" && Knossos.retailFs2RootFound)))
                     {
-                        fileStream.SetLength(fileStream.Length - 1);
-                    }
-                    fileStream.Seek(9, SeekOrigin.Begin);
-
-                    JsonSerializerOptions serializerOptions = new JsonSerializerOptions();
-                    var mods = JsonSerializer.DeserializeAsyncEnumerable<Mod?>(fileStream);
-
-                    var updates = new List<Mod>();
-                    Mod? lastMod = null;
-                    await foreach (Mod? mod in mods)
-                    {
-                        if (mod != null && IsModUpdate(mod))
+                        //This is already installed?
+                        var isInstalled = Knossos.GetInstalledModList(m.id);
+                        if (isInstalled != null && isInstalled.Any())
                         {
-                            updates.Add(mod);
-                        }
-                        if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
-                        {
-                            fileStream.Close();
-                            throw new TaskCanceledException();
-                        }
-                        if (mod != null && !mod.isPrivate)
-                        {
-                            if (mod.type == ModType.engine)
+                            bool update = true;
+                            foreach (var intMod in isInstalled)
                             {
-                                //This is already installed?
-                                var isInstalled = Knossos.GetInstalledBuildsList(mod.id)?.Where(b => b.version == mod.version);
-                                if (isInstalled == null || isInstalled.Count() == 0)
+                                int result = SemanticVersion.Compare(intMod.version, m.version);
+                                if (result >= 0)
                                 {
-                                    await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod)), DispatcherPriority.Background);
+                                    update = false;
+                                    if (result == 0)
+                                    {
+                                        intMod.inNebula = true;
+                                    }
+                                    break;
                                 }
                             }
-                            if (mod.type == ModType.tc || mod.type == ModType.mod && (listFS2Override || (mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound)))
+                            if (update)
                             {
-                                //This is already installed?
-                                var isInstalled = Knossos.GetInstalledModList(mod.id);
-                                if (isInstalled == null || isInstalled.Count() == 0)
-                                {
-                                    if(lastMod != null && lastMod.id == mod.id)
-                                    {
-                                        lastMod = mod;
-                                    }
-                                    else
-                                    {
-                                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddNebulaMod(mod), DispatcherPriority.Background);
-                                        lastMod = mod;
-                                    }
-
-                                }
-                                else
-                                {
-                                    bool update = true;
-                                    foreach (var intMod in isInstalled)
-                                    {
-                                        int result = SemanticVersion.Compare(intMod.version, mod.version);
-                                        if (result >= 0)
-                                        {
-                                            update = false;
-                                            if (result == 0)
-                                            {
-                                                intMod.inNebula = true;
-                                            }
-                                        }
-                                    }
-                                    if (update)
-                                    {
-                                        MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id);
-                                    }
-                                }
+                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(m.id), DispatcherPriority.Background);
                             }
+                            modsTcs.Remove(m);
                         }
                     }
-                    fileStream.Close();
-                    repoLoaded = true;
-                    if (cancellationToken != null)
+                };
+
+                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.BulkLoadNebulaMods(modsTcs, true), DispatcherPriority.Background);
+
+                //Engine Builds
+                var builds = allModsInRepo.Where(m => m.type == ModType.engine).ToList();
+
+                foreach (var build in builds.ToList())
+                {
+                    //This is already installed? Remove it!
+                    var isInstalled = Knossos.GetInstalledBuildsList(build.id)?.FirstOrDefault(b => b.version == build.version);
+                    if (isInstalled != null)
                     {
-                        cancellationToken.Dispose();
-                        cancellationToken = null;
+                        builds.Remove(build);
                     }
-                    return updates;
                 }
+
+                await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.BulkLoadNebulaBuilds(builds), DispatcherPriority.Background);
+
+                if (cancellationToken != null)
+                {
+                    cancellationToken.Dispose();
+                    cancellationToken = null;
+                }
+                GC.Collect();
+                return modUpdates;
             }
             catch (TaskCanceledException)
             {
@@ -393,7 +443,7 @@ namespace Knossos.NET.Models
             }
             catch (Exception ex)
             {
-                Log.Add(Log.LogSeverity.Error, "Nebula.ParseRepoJson()", ex);
+                Log.Add(Log.LogSeverity.Error, "Nebula.InitialRepoLoad()", ex);
                 if (cancellationToken != null)
                 {
                     cancellationToken.Dispose();
@@ -440,22 +490,12 @@ namespace Knossos.NET.Models
                     }
                 }
             }
-            await WaitForFileAccess(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json");
-            using (FileStream? fileStream = new FileStream(SysInfo.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json", FileMode.Open, FileAccess.ReadWrite))
+            try
             {
-                try
+                var mods = await GetModsInRepo();
+                if (mods != null)
                 {
-                    fileStream.Seek(-1, SeekOrigin.End);
-                    if (fileStream.ReadByte() == '}')
-                    {
-                        fileStream.SetLength(fileStream.Length - 1);
-                    }
-                    fileStream.Seek(9, SeekOrigin.Begin);
-
-                    JsonSerializerOptions serializerOptions = new JsonSerializerOptions();
-                    var mods = JsonSerializer.DeserializeAsyncEnumerable<Mod?>(fileStream);
-
-                    await foreach (Mod? mod in mods)
+                    foreach (Mod mod in mods)
                     {
                         if (mod != null && (mod.id == id || id == null))
                         {
@@ -463,14 +503,12 @@ namespace Knossos.NET.Models
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "Nebula.ParseRepoJson()", ex);
-                }
-                fileStream.Close();
-                return modList;
-
             }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Nebula.GetAllModsWithID()", ex);
+            }
+            return modList;
         }
 
         private static async Task WaitForFileAccess(string filename)
