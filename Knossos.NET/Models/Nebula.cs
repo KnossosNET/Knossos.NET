@@ -190,7 +190,6 @@ namespace Knossos.NET.Models
                 privateMods = await GetPrivateMods();
                 if (privateMods != null && privateMods.Any())
                 {
-                    Mod? lastMod = null;
                     foreach (var mod in privateMods)
                     {
                         if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
@@ -206,45 +205,23 @@ namespace Knossos.NET.Models
                                 await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod)), DispatcherPriority.Background);
                             }
                         }
-                        if (mod.type == ModType.tc || mod.type == ModType.mod && (listFS2Override || (mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound)))
+                        if (mod.type == ModType.tc || mod.type == ModType.mod && (listFS2Override || mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound))
                         {
+
                             //This is already installed?
                             var isInstalled = Knossos.GetInstalledModList(mod.id);
-                            if (isInstalled == null || isInstalled.Count() == 0)
+                            if (isInstalled != null && isInstalled.Any())
                             {
-                                if (lastMod == null || lastMod.id == mod.id)
+                                isInstalled.ForEach(x => x.inNebula = true);
+                                var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
+                                if (newer != null && new SemanticVersion(newer.version) < new SemanticVersion(mod.version))
                                 {
-                                    lastMod = mod;
+                                    await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id), DispatcherPriority.Background);
                                 }
-                                else
-                                {
-                                    if (lastMod.id != mod.id)
-                                    {
-                                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddNebulaMod(lastMod), DispatcherPriority.Background);
-                                        lastMod = mod;
-                                    }
-                                }
-
                             }
                             else
                             {
-                                bool update = true;
-                                foreach (var intMod in isInstalled)
-                                {
-                                    int result = SemanticVersion.Compare(intMod.version, mod.version);
-                                    if (result >= 0)
-                                    {
-                                        update = false;
-                                        if (result == 0)
-                                        {
-                                            intMod.inNebula = true;
-                                        }
-                                    }
-                                }
-                                if (update)
-                                {
-                                    MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id);
-                                }
+                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddNebulaMod(mod), DispatcherPriority.Background);
                             }
                         }
                     }
@@ -319,7 +296,7 @@ namespace Knossos.NET.Models
                         //TODO: Remove this at some point after a month or two (2023/10/25)
                         //The old parsing method deleted the last character from the json file, what would fail the parsing of the file if already downloaded
                         //before this update, so re-add it and try to desetialize again
-                        fileStream.Seek(0, SeekOrigin.End);
+                        fileStream.Seek(-1, SeekOrigin.End);
                         if (fileStream.ReadByte() != '}')
                         {
                             fileStream.WriteByte(Convert.ToByte('}'));
@@ -362,9 +339,9 @@ namespace Knossos.NET.Models
                     if (newerestOfID != null)
                     {
                         newerestModVersionPerID.Add(newerestOfID);
-                        if (IsModUpdate(idGroup.First()))
+                        if (IsModUpdate(newerestOfID))
                         {
-                            modUpdates.Add(idGroup.First());
+                            modUpdates.Add(newerestOfID);
                         }
                     }
                 };
@@ -379,27 +356,15 @@ namespace Knossos.NET.Models
                 //Remove Installed, Mark update avalible to installed ones
                 foreach (var m in modsTcs.ToList())
                 {
-                    if (m.type == ModType.tc || m.type == ModType.mod && (listFS2Override || (m.parent != "FS2" || m.parent == "FS2" && Knossos.retailFs2RootFound)))
+                    if (m.type == ModType.tc || m.type == ModType.mod && (listFS2Override || m.parent != "FS2" || m.parent == "FS2" && Knossos.retailFs2RootFound))
                     {
                         //This is already installed?
                         var isInstalled = Knossos.GetInstalledModList(m.id);
                         if (isInstalled != null && isInstalled.Any())
                         {
-                            bool update = true;
-                            foreach (var intMod in isInstalled)
-                            {
-                                int result = SemanticVersion.Compare(intMod.version, m.version);
-                                if (result >= 0)
-                                {
-                                    update = false;
-                                    if (result == 0)
-                                    {
-                                        intMod.inNebula = true;
-                                    }
-                                    break;
-                                }
-                            }
-                            if (update)
+                            isInstalled.ForEach(x => x.inNebula = true);
+                            var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
+                            if (newer != null && new SemanticVersion(newer.version) < new SemanticVersion(m.version))
                             {
                                 await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(m.id), DispatcherPriority.Background);
                             }

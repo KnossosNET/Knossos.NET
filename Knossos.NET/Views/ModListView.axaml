@@ -56,7 +56,7 @@
 			</WrapPanel>
 			</Grid>
 			<ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-				<ItemsControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Mods}" IsVisible="{Binding IsTabOpen}">
+				<ItemsControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Mods}" IsVisible="{Binding !IsLoading}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<v:ModCardView Margin="5" Content="{Binding}"/>

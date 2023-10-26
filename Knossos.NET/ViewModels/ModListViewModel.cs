@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
@@ -11,7 +12,6 @@ using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
-using SharpCompress;
 
 namespace Knossos.NET.ViewModels
 {
@@ -81,13 +81,17 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async void TabOpen()
+        public async void OpenTab()
         {
-            await Task.Run(async () =>
+            IsTabOpen = true;
+            if (IsLoading)
             {
-                await Task.Delay(50);
-                IsTabOpen = true;
-            });
+                await Task.Run(async ()  =>
+                {
+                    await Task.Delay(100);
+                    IsLoading = false;
+                });
+            }
         }
 
         public void ReloadRepoCommand()
@@ -130,10 +134,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public void AddMods(List<Mod> modList)
+        public async void AddMods(List<Mod> modList)
         {
             var newModCardList = new ObservableCollection<ModCardViewModel>();
-            foreach(Mod? mod in modList)
+            foreach (Mod? mod in modList)
             {
                 var modCard = newModCardList.FirstOrDefault(m => m.ID == mod.id);
                 if (modCard == null)
@@ -156,8 +160,14 @@ namespace Knossos.NET.ViewModels
                     modCard.AddModVersion(mod);
                 }
             }
-            Mods = newModCardList;
-            IsLoading = false;
+            await Task.Run(()=>
+            { 
+                Mods = newModCardList;
+                if (IsTabOpen)
+                {
+                    IsLoading = false;
+                }
+            });
         }
 
         internal void OpenScreenshotsFolder()

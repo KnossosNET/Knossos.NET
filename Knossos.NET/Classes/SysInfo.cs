@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using System.Collections.Generic;
 
 namespace Knossos.NET
 {
@@ -294,6 +295,21 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "SysInfo.GetFileHash()", ex);
             }
             return null;
+        }
+
+        /// <summary>
+        /// Extension method to add ForEach to ObservableCollection
+        /// Performs the action on each element
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="enumerable"></param>
+        /// <param name="action"></param>
+        public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
+        {
+            foreach (var cur in enumerable)
+            {
+                action(cur);
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
@@ -42,7 +43,7 @@ namespace Knossos.NET.ViewModels
                     this.SetProperty(ref tabIndex, value);
                     if (tabIndex == 1) //Nebula Mods
                     {
-                        NebulaModsView.TabOpen();
+                        NebulaModsView.OpenTab();
                     }
                     if (tabIndex == 4) //PXO
                     {
