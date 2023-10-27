@@ -3,6 +3,10 @@
              xmlns:local="using:Knossos.NET"
 			 RequestedThemeVariant="Dark"
              x:Class="Knossos.NET.App">
+    <Application.Name>
+        Knossos.NET
+    </Application.Name>
+
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
