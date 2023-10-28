@@ -3647,6 +3647,7 @@ namespace Knossos.NET.ViewModels
                             if (result.HasValue && result.Value)
                             {
                                 //sender.ProgressBarCurrent = ++ProgressCurrent;
+                                ++ProgressCurrent;
                                 Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                             }
                             else

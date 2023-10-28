@@ -129,10 +129,7 @@ namespace Knossos.NET.Models
             id = modJson.id;
             title = modJson.title;
             devMode = modJson.devMode;
-            if(devMode)
-            {
-                modData = modJson;
-            }
+            modData = modJson;
             description = modJson.description;
             version = modJson.version;
             folderPath = modJson.fullPath;
@@ -151,10 +148,7 @@ namespace Knossos.NET.Models
             id = modJson.id;
             title = modJson.title;
             devMode = modJson.devMode;
-            if (devMode)
-            {
-                modData = modJson;
-            }
+            modData = modJson;
             description = modJson.description;
             version = modJson.version;
             folderPath = modJson.fullPath;

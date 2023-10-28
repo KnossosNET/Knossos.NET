@@ -11,7 +11,6 @@ namespace Knossos.NET.ViewModels
     public partial class FsoBuildItemViewModel : ViewModelBase
     {
         public FsoBuild? build;
-        private Mod? modJson;
         public CancellationTokenSource? cancellationTokenSource = null;
         [ObservableProperty]
         public string title = string.Empty;
@@ -101,15 +100,12 @@ namespace Knossos.NET.ViewModels
         {
             if (build != null)
             {
-                if (modJson == null)
+                if (MainWindow.instance != null && build.modData != null)
                 {
-                    modJson = await Nebula.GetModData(build.id, build.version);
-                }
-                if (MainWindow.instance != null && modJson != null)
-                {
-                    UpdataDisplayData(new FsoBuild(modJson), true);
+                    await build.modData.LoadFulLNebulaData();
+                    UpdataDisplayData(new FsoBuild(build.modData), true);
                     var dialog = new ModDetailsView();
-                    dialog.DataContext = new ModDetailsViewModel(modJson);
+                    dialog.DataContext = new ModDetailsViewModel(build.modData);
                     await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
                 }
                 else
@@ -158,6 +154,7 @@ namespace Knossos.NET.ViewModels
             {
                 IsDownloading = true;
                 cancellationTokenSource = new CancellationTokenSource();
+                await mod.LoadFulLNebulaData();
                 FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, mod)!;
                 if (newBuild != null)
                 {
@@ -180,14 +177,11 @@ namespace Knossos.NET.ViewModels
                 {
                     if (build != null)
                     {
-                        if (modJson == null)
-                        {
-                            modJson = await Nebula.GetModData(build.id, build.version);
-                        }
                         //Check compatibility
-                        if (modJson != null)
+                        if (build.modData != null)
                         {
-                            var tempBuild = new FsoBuild(modJson);
+                            await build.modData.LoadFulLNebulaData();
+                            var tempBuild = new FsoBuild(build.modData);
                             UpdataDisplayData(tempBuild,true);
                             if (tempBuild != null)
                             {
@@ -195,7 +189,7 @@ namespace Knossos.NET.ViewModels
                                 {
                                     IsDownloading = true;
                                     cancellationTokenSource = new CancellationTokenSource();
-                                    FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, modJson)!;
+                                    FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, build.modData)!;
                                     if (newBuild != null)
                                     {
                                         //Install completed
