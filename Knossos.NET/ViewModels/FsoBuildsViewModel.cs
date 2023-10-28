@@ -7,13 +7,17 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using Knossos.NET.Classes;
 
 namespace Knossos.NET.ViewModels
 {
     public partial class FsoBuildsViewModel : ViewModelBase
     {
         public static FsoBuildsViewModel? Instance;
-
+        private static readonly string nightlyDateLimit = DateTime.Today.AddMonths(-5).ToString("yyyy-MM-dd");
+        private List<Mod> unloadedNightlies = new List<Mod>();
+        [ObservableProperty]
+        internal bool allNightliesLoaded = false;
         [ObservableProperty]
         internal ObservableCollection<FsoBuildItemViewModel> stableItems = new ObservableCollection<FsoBuildItemViewModel>();
         [ObservableProperty]
@@ -168,6 +172,9 @@ namespace Knossos.NET.ViewModels
             NightlyItems.ForEach(s => { if (s.IsInstalled) newNightly.Add(s); });
             CustomItems.ForEach(s => { if (s.IsInstalled) newCustom.Add(s); });
 
+            AllNightliesLoaded = false;
+            unloadedNightlies.Clear();
+
             foreach (var mod in modsJson)
             {
                 var build = new FsoBuild(mod);
@@ -202,17 +209,24 @@ namespace Knossos.NET.ViewModels
                         }
                         break;
                     case FsoStability.Nightly:
-                        var previousNL = newNightly.FirstOrDefault(b => string.Compare(b.Date, build.date) < 0);
-                        if (previousNL != null)
+                        if (AllNightliesLoaded || !AllNightliesLoaded && string.Compare(nightlyDateLimit, build.date) < 0)
                         {
-                            int index = newNightly.IndexOf(previousNL);
-                            if (index == -1)
-                                index = 0;
-                            newNightly.Insert(index, new FsoBuildItemViewModel(build));
+                            var previousNL = newNightly.FirstOrDefault(b => string.Compare(b.Date, mod.lastUpdate) < 0);
+                            if (previousNL != null)
+                            {
+                                int index = newNightly.IndexOf(previousNL);
+                                if (index == -1)
+                                    index = 0;
+                                newNightly.Insert(index, new FsoBuildItemViewModel(new FsoBuild(mod)));
+                            }
+                            else
+                            {
+                                newNightly.Add(new FsoBuildItemViewModel(new FsoBuild(mod)));
+                            }
                         }
                         else
                         {
-                            newNightly.Add(new FsoBuildItemViewModel(build));
+                            unloadedNightlies.Add(mod);
                         }
                         break;
                     case FsoStability.Custom:
@@ -271,6 +285,16 @@ namespace Knossos.NET.ViewModels
 
                 await dialog.ShowDialog<AddUserBuildView?>(MainWindow.instance);
             }
+        }
+
+        internal void LoadAllNightlies()
+        {
+            AllNightliesLoaded = true;
+            foreach (var item in unloadedNightlies)
+            {
+                AddBuildToUi(new FsoBuild(item));
+            }
+            GC.Collect();
         }
     }
 }

@@ -24,13 +24,16 @@
 				</ListBox>
 			</TabItem>
 			<TabItem Header="Nightly Builds">
-				<ListBox ItemsSource="{Binding NightlyItems}">
-					<ListBox.ItemTemplate>
-						<DataTemplate>
-							<v:FsoBuildItemView Content="{Binding}"/>
-						</DataTemplate>
-					</ListBox.ItemTemplate>
-				</ListBox>
+				<Grid RowDefinitions="*,Auto">
+					<ListBox Grid.Row="0" ItemsSource="{Binding NightlyItems}">
+						<ListBox.ItemTemplate>
+							<DataTemplate>
+								<v:FsoBuildItemView Content="{Binding}"/>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
+					<Button Command="{Binding LoadAllNightlies}" IsVisible="{Binding !AllNightliesLoaded}" HorizontalAlignment="Center" Grid.Row="1">Load all Nightlies</Button>
+				</Grid>
 			</TabItem>
 			<TabItem Header="RC Builds">
 				<ListBox ItemsSource="{Binding RcItems}">
