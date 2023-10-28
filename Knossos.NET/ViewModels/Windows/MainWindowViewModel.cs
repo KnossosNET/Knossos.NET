@@ -14,26 +14,26 @@ namespace Knossos.NET.ViewModels
 
         /* UI Bindings, use the uppercase version, otherwise changes will not register */
         [ObservableProperty]
-        private string appTitle = "Knossos.NET v" + Knossos.AppVersion;
+        internal string appTitle = "Knossos.NET v" + Knossos.AppVersion;
         [ObservableProperty]
-        private ModListViewModel installedModsView = new ModListViewModel(false);
+        internal ModListViewModel installedModsView = new ModListViewModel(false);
         [ObservableProperty]
-        private ModListViewModel nebulaModsView = new ModListViewModel(true);
+        internal ModListViewModel nebulaModsView = new ModListViewModel(true);
         [ObservableProperty]
-        private FsoBuildsViewModel fsoBuildsView = new FsoBuildsViewModel();
+        internal FsoBuildsViewModel fsoBuildsView = new FsoBuildsViewModel();
         [ObservableProperty]
-        private DeveloperModsViewModel developerModView = new DeveloperModsViewModel();
+        internal DeveloperModsViewModel developerModView = new DeveloperModsViewModel();
         [ObservableProperty]
-        private PxoViewModel pxoView = new PxoViewModel();
+        internal PxoViewModel pxoView = new PxoViewModel();
         [ObservableProperty]
-        private GlobalSettingsViewModel globalSettingsView = new GlobalSettingsViewModel();
+        internal GlobalSettingsViewModel globalSettingsView = new GlobalSettingsViewModel();
         [ObservableProperty]
-        private TaskViewModel taskView = new TaskViewModel();
+        internal TaskViewModel taskView = new TaskViewModel();
         [ObservableProperty]
-        private string uiConsoleOutput = string.Empty;
+        internal string uiConsoleOutput = string.Empty;
 
-        private int tabIndex = 0;
-        private int TabIndex
+        internal int tabIndex = 0;
+        internal int TabIndex
         {
             get => tabIndex;
             set

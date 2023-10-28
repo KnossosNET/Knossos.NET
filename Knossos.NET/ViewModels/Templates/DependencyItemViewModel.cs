@@ -9,23 +9,23 @@ namespace Knossos.NET.ViewModels
 {
     public partial class DependencyItemViewModel : ViewModelBase, INotifyPropertyChanged
     {
-        private ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
-        private ObservableCollection<ComboBoxItem> ModItems { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal ObservableCollection<ComboBoxItem> ModItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
         private bool rootMod  = false;
 
         private ModSettingsViewModel? modSettingsViewModel;
 
         [ObservableProperty]
-        private bool readOnly = true;
+        internal bool readOnly = true;
         [ObservableProperty]
-        private bool arrowsReadOnly = true;
+        internal bool arrowsReadOnly = true;
         [ObservableProperty]
-        private int versionSelectedIndex = 0;
+        internal int versionSelectedIndex = 0;
 
-        private int modSelectedIndex = 0;
-        private int ModSelectedIndex
+        internal int modSelectedIndex = 0;
+        internal int ModSelectedIndex
         {
             get
             {

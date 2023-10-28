@@ -24,18 +24,18 @@ namespace Knossos.NET.ViewModels
             update
         }
 
-        private bool IsNebulaView = false;
+        internal bool IsNebulaView { get; set; } = false;
 
-        private string search  = string.Empty;
+        internal string search  = string.Empty;
 
         private SortType sortType = SortType.name;
 
-        private bool IsTabOpen = false;
+        internal bool IsTabOpen = false;
 
         [ObservableProperty]
-        private bool isLoading = true;
+        internal bool isLoading = true;
 
-        private string Search
+        internal string Search
         {
             get { return search; }
             set 
@@ -63,7 +63,7 @@ namespace Knossos.NET.ViewModels
         }
 
         [ObservableProperty]
-        private ObservableCollection<ModCardViewModel> mods = new ObservableCollection<ModCardViewModel>();
+        internal ObservableCollection<ModCardViewModel> mods = new ObservableCollection<ModCardViewModel>();
 
         public ModListViewModel()
         {
@@ -190,20 +190,26 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal void ChangeSort(object sort)
+        internal async void ChangeSort(object sort)
         {
             try
             {
                 SortType newSort = (SortType)Enum.Parse(typeof(SortType), (string)sort);
                 if (newSort != sortType)
                 {
-                    sortType = newSort;
-                    var tempList = Mods.ToList();
-                    tempList.Sort(CompareMods);
-                    for (int i = 0; i < tempList.Count; i++)
+                    await Dispatcher.UIThread.InvokeAsync( () =>
                     {
-                        Mods.Move(Mods.IndexOf(tempList[i]), i);
-                    }
+                        sortType = newSort;
+                        var tempList = Mods.ToList();
+                        tempList.Sort(CompareMods);
+                        IsLoading = true;
+                        for (int i = 0; i < tempList.Count; i++)
+                        {
+                            Mods.Move(Mods.IndexOf(tempList[i]), i);
+                        }
+                        IsLoading = false;
+                        GC.Collect();
+                    },DispatcherPriority.Background);
                 }
             }catch(Exception ex)
             {

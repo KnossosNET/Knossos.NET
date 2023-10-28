@@ -4,8 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="2000"
              x:Class="Knossos.NET.Views.GlobalSettingsView"
-			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
-			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+			 xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+			 x:DataType="vm:GlobalSettingsViewModel">
 
 	<Design.DataContext>
 		<vm:GlobalSettingsViewModel/>
@@ -159,7 +160,7 @@
 						<!-- Shadows -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<Label VerticalAlignment="Center" Grid.Column="0" Width="200">Shadows</Label>
-							<ComboBox ToolTip.Tip="High performance impact, especially at Ultra" Tag="-shadow_quality" SelectedIndex="{Binding ShadowQualitySelectedIndex}" IsEnabled="{Binding EnableShadows}" Grid.Column="1" Width="150" Margin="10,0,0,0">
+							<ComboBox ToolTip.Tip="High performance impact, especially at Ultra" Tag="-shadow_quality" SelectedIndex="{Binding ShadowQualitySelectedIndex}" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
 								<ComboBoxItem Tag="1">Low</ComboBoxItem>
 								<ComboBoxItem Tag="2">Medium</ComboBoxItem>
@@ -170,7 +171,7 @@
 						<!-- AA Filter -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<Label Grid.Column="0" Width="200" VerticalAlignment="Center">Post-processing Anti-Aliasing</Label>
-							<ComboBox Tag="-aa_preset" SelectedIndex="{Binding AaSelectedIndex}" Grid.Column="1" IsEnabled="{Binding EnableAA}" Width="150" Margin="10,0,0,0">
+							<ComboBox Tag="-aa_preset" SelectedIndex="{Binding AaSelectedIndex}" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
 								<ComboBoxItem Tag="1">FXAA Low</ComboBoxItem>
 								<ComboBoxItem Tag="2">FXAA Medium</ComboBoxItem>
@@ -184,7 +185,7 @@
             <!-- SMAA Filter -->
             <Grid ColumnDefinitions="Auto,Auto" Margin="5">
               <Label Grid.Column="0" Width="200" VerticalAlignment="Center">Extra Multisample Anti-Aliasing</Label>
-              <ComboBox ToolTip.Tip="High performance impact, especially at Ultra or at >= 4k resolution" Tag="-msaa" SelectedIndex="{Binding MsaaSelectedIndex}" Grid.Column="1" IsEnabled="{Binding EnableMSAA}" Width="150" Margin="10,0,0,0">
+              <ComboBox ToolTip.Tip="High performance impact, especially at Ultra or at >= 4k resolution" Tag="-msaa" SelectedIndex="{Binding MsaaSelectedIndex}" Grid.Column="1" Width="150" Margin="10,0,0,0">
                 <ComboBoxItem Tag="0">Disabled</ComboBoxItem>
                 <ComboBoxItem Tag="4">High</ComboBoxItem>
                 <ComboBoxItem Tag="8">Ultra</ComboBoxItem>

@@ -4,10 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Knossos.NET.Views.FsoBuildPickerView"
-			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+	         xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+			 x:DataType="vm:FsoBuildPickerViewModel">
 	
 	<Design.DataContext>
-		<vm:FsoBuildsViewModel/>
+		<vm:FsoBuildPickerViewModel/>
 	</Design.DataContext>
 	
 	<StackPanel>

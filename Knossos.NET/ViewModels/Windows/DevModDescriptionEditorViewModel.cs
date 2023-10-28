@@ -13,8 +13,8 @@ namespace Knossos.NET.ViewModels
     {
         private DevModDetailsViewModel? modeDetails;
         public TextBox? inputControl;
-        private string description = string.Empty;
-        private string Description
+        internal string description = string.Empty;
+        internal string Description
         {
             get
             {
@@ -38,7 +38,7 @@ namespace Knossos.NET.ViewModels
             }
         }
         [ObservableProperty]
-        private string descriptionHtml = string.Empty;
+        internal string descriptionHtml = string.Empty;
 
         public DevModDescriptionEditorViewModel()
         {

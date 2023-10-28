@@ -18,19 +18,19 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         public string? date;
         [ObservableProperty]
-        private string cpuArch = string.Empty;
+        internal string cpuArch = string.Empty;
         [ObservableProperty]
-        private string buildType = string.Empty;
+        internal string buildType = string.Empty;
         [ObservableProperty]
-        private bool isValid = false;
+        internal bool isValid = false;
         [ObservableProperty]
-        private bool isInstalled = false;
+        internal bool isInstalled = false;
         [ObservableProperty]
-        private bool isDownloading = false;
+        internal bool isDownloading = false;
         [ObservableProperty]
-        private bool isDevMode = false;
+        internal bool isDevMode = false;
         [ObservableProperty]
-        private bool isDetailsButtonVisible = true;
+        internal bool isDetailsButtonVisible = true;
 
         public FsoBuildItemViewModel() 
         {

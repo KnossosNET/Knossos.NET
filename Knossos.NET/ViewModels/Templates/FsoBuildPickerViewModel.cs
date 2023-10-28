@@ -15,10 +15,10 @@ namespace Knossos.NET.ViewModels
     public partial class FsoBuildPickerViewModel : ViewModelBase
     {
         private bool directSeparatorAdded = false;
-        private ObservableCollection<ComboBoxItem> BuildItems { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal ObservableCollection<ComboBoxItem> BuildItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
-        private bool hideRC = Knossos.globalSettings.hideBuildRC;
-        private bool HideRC
+        internal bool hideRC = Knossos.globalSettings.hideBuildRC;
+        internal bool HideRC
         {
             get
             {
@@ -42,8 +42,8 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private bool hideCustom = Knossos.globalSettings.hideBuildCustom;
-        private bool HideCustom
+        internal bool hideCustom = Knossos.globalSettings.hideBuildCustom;
+        internal bool HideCustom
         {
             get
             {
@@ -67,8 +67,8 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private bool hideNightly = Knossos.globalSettings.hideBuildNightly;
-        private bool HideNightly
+        internal bool hideNightly = Knossos.globalSettings.hideBuildNightly;
+        internal bool HideNightly
         {
             get
             {
@@ -93,7 +93,7 @@ namespace Knossos.NET.ViewModels
         }
 
         [ObservableProperty]
-        private int buildSelectedIndex = 0;
+        internal int buildSelectedIndex = 0;
 
         public FsoBuildPickerViewModel()
         {

@@ -11,7 +11,7 @@ namespace Knossos.NET.ViewModels
 {
     public partial class CleanupKnossosLibraryViewModel : ViewModelBase
     {
-        private ObservableCollection<CheckableModListViewModel> DeletableMods { get; set; } = new ObservableCollection<CheckableModListViewModel>();
+        internal ObservableCollection<CheckableModListViewModel> DeletableMods { get; set; } = new ObservableCollection<CheckableModListViewModel>();
         
         public event EventHandler? OnRequestClose;
 

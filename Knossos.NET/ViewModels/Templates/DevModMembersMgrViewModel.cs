@@ -21,16 +21,16 @@ namespace Knossos.NET.ViewModels
         public partial class MemberItem : ObservableObject
         {
             [ObservableProperty]
-            private ModMember? modMember;
+            internal ModMember? modMember;
             private DevModMembersMgrViewModel? memberMgr;
             [ObservableProperty]
-            private ObservableCollection<ComboBoxItem> roleItems = new ObservableCollection<ComboBoxItem>();
+            internal ObservableCollection<ComboBoxItem> roleItems = new ObservableCollection<ComboBoxItem>();
             [ObservableProperty]
-            private int roleIndex = -1;
+            internal int roleIndex = -1;
             [ObservableProperty]
-            private bool isEnabled = false;
+            internal bool isEnabled = false;
             [ObservableProperty]
-            private bool isReadOnly = true;
+            internal bool isReadOnly = true;
 
             public MemberItem(DevModMembersMgrViewModel memberMgr)
             {
@@ -88,11 +88,11 @@ namespace Knossos.NET.ViewModels
         
         private DevModEditorViewModel? editor;
         [ObservableProperty]
-        private ObservableCollection<MemberItem> memberItems = new ObservableCollection<MemberItem>();
+        internal ObservableCollection<MemberItem> memberItems = new ObservableCollection<MemberItem>();
         [ObservableProperty]
-        bool buttonsEnabled = true;
+        internal bool buttonsEnabled = true;
         [ObservableProperty]
-        bool loading = true;
+        internal bool loading = true;
 
         public DevModMembersMgrViewModel() 
         { 

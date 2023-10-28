@@ -18,8 +18,8 @@ namespace Knossos.NET.ViewModels
     {
         [ObservableProperty]
         internal List<Mod> listOfMods = Knossos.GetInstalledModList(null);
-        private int modIndex = 0;
-        private int ModIndex
+        internal int modIndex = 0;
+        internal int ModIndex
         {
             get
             {

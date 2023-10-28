@@ -26,13 +26,13 @@ namespace Knossos.NET.ViewModels
             public ModDependency Dependency { get; set; }
 
             [ObservableProperty]
-            private List<ModPackage> packages = new List<ModPackage>();
+            internal List<ModPackage> packages = new List<ModPackage>();
 
             [ObservableProperty]
-            private bool displayPackages = false;
+            internal bool displayPackages = false;
 
-            private int versionSelectedIndex = 0;
-            private int VersionSelectedIndex
+            internal int versionSelectedIndex = 0;
+            internal int VersionSelectedIndex
             {
                 get
                 {
@@ -49,10 +49,10 @@ namespace Knossos.NET.ViewModels
             }
 
             [ObservableProperty]
-            private int versionTypeIndex = 0;
+            internal int versionTypeIndex = 0;
 
-            private int modSelectedIndex = 0;
-            private int ModSelectedIndex
+            internal int modSelectedIndex = 0;
+            internal int ModSelectedIndex
             {
                 get
                 {
@@ -70,11 +70,11 @@ namespace Knossos.NET.ViewModels
                 }
             }
 
-            private ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
+            internal ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
-            private ObservableCollection<ComboBoxItem> ModItems { get; set; } = new ObservableCollection<ComboBoxItem>();
+            internal ObservableCollection<ComboBoxItem> ModItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
-            private EditorPackageItem EditorPackageItem { get; set; }
+            internal EditorPackageItem EditorPackageItem { get; set; }
 
             private string modID = string.Empty;
             private string? modParent = null;

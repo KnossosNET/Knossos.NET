@@ -41,25 +41,25 @@ namespace Knossos.NET.ViewModels
 
         /* UI Bindings */
         [ObservableProperty]
-        private string? name;
+        internal string? name;
         [ObservableProperty]
-        private string? modVersion;
+        internal string? modVersion;
         [ObservableProperty]
-        private Bitmap? image;
+        internal Bitmap? image;
         [ObservableProperty]
-        private bool visible = true;
+        internal bool visible = true;
         [ObservableProperty]
-        private bool updateAvalible = false;
+        internal bool updateAvalible = false;
         [ObservableProperty]
-        private bool isInstalled = false;
+        internal bool isInstalled = false;
         [ObservableProperty]
-        private IBrush borderColor = Brushes.Black;
+        internal IBrush borderColor = Brushes.Black;
         [ObservableProperty]
-        private bool isInstalling = false;
+        internal bool isInstalling = false;
         [ObservableProperty]
-        private bool isLocalMod = false;
+        internal bool isLocalMod = false;
         [ObservableProperty]
-        private bool isCustomConfig = false;
+        internal bool isCustomConfig = false;
 
 
         /* Should only be used by the editor preview */

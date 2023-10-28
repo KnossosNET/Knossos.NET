@@ -15,13 +15,13 @@ namespace Knossos.NET.ViewModels
         public static FsoBuildsViewModel? Instance;
 
         [ObservableProperty]
-        private ObservableCollection<FsoBuildItemViewModel> stableItems = new ObservableCollection<FsoBuildItemViewModel>();
+        internal ObservableCollection<FsoBuildItemViewModel> stableItems = new ObservableCollection<FsoBuildItemViewModel>();
         [ObservableProperty]
-        private ObservableCollection<FsoBuildItemViewModel> rcItems = new ObservableCollection<FsoBuildItemViewModel>();
+        internal ObservableCollection<FsoBuildItemViewModel> rcItems = new ObservableCollection<FsoBuildItemViewModel>();
         [ObservableProperty]
-        private ObservableCollection<FsoBuildItemViewModel> nightlyItems = new ObservableCollection<FsoBuildItemViewModel>();
+        internal ObservableCollection<FsoBuildItemViewModel> nightlyItems = new ObservableCollection<FsoBuildItemViewModel>();
         [ObservableProperty]
-        private ObservableCollection<FsoBuildItemViewModel> customItems = new ObservableCollection<FsoBuildItemViewModel>();
+        internal ObservableCollection<FsoBuildItemViewModel> customItems = new ObservableCollection<FsoBuildItemViewModel>();
 
         public FsoBuildsViewModel()
         {

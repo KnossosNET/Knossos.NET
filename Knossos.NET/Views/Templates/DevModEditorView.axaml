@@ -4,8 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="650"
              x:Class="Knossos.NET.Views.DevModEditorView"
-			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
-			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+			 xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+			 x:DataType="vm:DevModEditorViewModel">
 
 	<Design.DataContext>
 		<vm:DevModEditorViewModel/>

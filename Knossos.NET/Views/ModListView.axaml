@@ -2,10 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:v="clr-namespace:Knossos.NET.Views;assembly=Knossos.NET"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Knossos.NET.Views.ModListView"
-			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+			 x:Class="Knossos.NET.Views.ModListView"
+			 xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+			 x:DataType="vm:ModListViewModel">
 	
 	<Design.DataContext>
 		<vm:ModListViewModel/>

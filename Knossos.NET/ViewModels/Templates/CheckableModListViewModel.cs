@@ -15,11 +15,11 @@ namespace Knossos.NET.ViewModels
 
         /* UI Bindings */
         [ObservableProperty]
-        private string? modName;
+        internal string? modName;
         [ObservableProperty]
-        private bool modChecked;
+        internal bool modChecked;
         [ObservableProperty]
-        private bool modCheckEnabled;
+        internal bool modCheckEnabled;
 
         /* Should only be used by the editor preview */
         public CheckableModListViewModel()

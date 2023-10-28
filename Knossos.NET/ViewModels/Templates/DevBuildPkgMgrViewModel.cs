@@ -26,11 +26,11 @@ namespace Knossos.NET.ViewModels
             private EditorPackageItem editorPackageItem;
             private ModExecutable modExecutable;
             [ObservableProperty]
-            private string file = string.Empty;
+            internal string file = string.Empty;
             [ObservableProperty]
-            private int labelSelectedIndex = 0;
+            internal int labelSelectedIndex = 0;
             [ObservableProperty]
-            private ObservableCollection<ComboBoxItem> labels = new ObservableCollection<ComboBoxItem>();
+            internal ObservableCollection<ComboBoxItem> labels = new ObservableCollection<ComboBoxItem>();
 
             public PackageExecItem(ModExecutable modExec, EditorPackageItem editorPackageItem) 
             { 
@@ -123,22 +123,22 @@ namespace Knossos.NET.ViewModels
             public ModPackage Package { get; set; }
 
             [ObservableProperty]
-            private int packageArchIndex = 0;
+            internal int packageArchIndex = 0;
 
             [ObservableProperty]
-            private int packageOsIndex = 0;
+            internal int packageOsIndex = 0;
 
             [ObservableProperty]
-            private string packageNotes = string.Empty;
+            internal string packageNotes = string.Empty;
 
             [ObservableProperty]
-            private ObservableCollection<PackageExecItem> executables = new ObservableCollection<PackageExecItem>();
+            internal ObservableCollection<PackageExecItem> executables = new ObservableCollection<PackageExecItem>();
 
             [ObservableProperty]
-            private ObservableCollection<ComboBoxItem> arch = new ObservableCollection<ComboBoxItem>();
+            internal ObservableCollection<ComboBoxItem> arch = new ObservableCollection<ComboBoxItem>();
 
             [ObservableProperty]
-            private ObservableCollection<ComboBoxItem> os = new ObservableCollection<ComboBoxItem>();
+            internal ObservableCollection<ComboBoxItem> os = new ObservableCollection<ComboBoxItem>();
 
             public DevBuildPkgMgrViewModel PkgMgr { get; set; }
 

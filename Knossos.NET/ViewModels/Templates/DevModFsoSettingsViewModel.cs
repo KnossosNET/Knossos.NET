@@ -15,13 +15,13 @@ namespace Knossos.NET.ViewModels
     {
         private DevModEditorViewModel? editor;
         [ObservableProperty]
-        private bool configureBuildOpen = false;
+        internal bool configureBuildOpen = false;
         [ObservableProperty]
-        private FsoBuildPickerViewModel? fsoPicker;
+        internal FsoBuildPickerViewModel? fsoPicker;
         [ObservableProperty]
-        private FsoFlagsViewModel? fsoFlags = null;
+        internal FsoFlagsViewModel? fsoFlags = null;
         [ObservableProperty]
-        private string? cmdLine = string.Empty;
+        internal string? cmdLine = string.Empty;
 
         public DevModFsoSettingsViewModel()
         {

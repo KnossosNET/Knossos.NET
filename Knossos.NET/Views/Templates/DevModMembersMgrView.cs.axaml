@@ -4,7 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Knossos.NET.Views.DevModMembersMgrView"
-	         xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET">
+	         xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+			 x:DataType="vm:DevModMembersMgrViewModel">
 
 	<Design.DataContext>
 		<vm:DevModMembersMgrViewModel/>
@@ -17,7 +19,7 @@
 				<Button Command="{Binding Save}" Margin="20,0,0,0" Content="Save Changes"/>
 			</WrapPanel>
 			<Label IsVisible="{Binding Loading}" FontSize="32" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">Loading...</Label>
-			<ListBox IsVisible="{Binding !Loading}" SelectedIndex="{Binding RoleIndex}" ItemsSource="{Binding MemberItems}">
+			<ListBox IsVisible="{Binding !Loading}" ItemsSource="{Binding MemberItems}">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<Grid ColumnDefinitions="*,Auto,Auto">

@@ -22,17 +22,17 @@ namespace Knossos.NET.ViewModels
         public partial class ToolItem : ObservableObject
         {
             [ObservableProperty]
-            private IBrush favoriteColor = Brushes.White;
+            internal IBrush favoriteColor = Brushes.White;
             [ObservableProperty]
-            private bool disableButtons = false;
+            internal bool disableButtons = false;
             [ObservableProperty]
-            private bool isInstalled = false;
+            internal bool isInstalled = false;
             [ObservableProperty]
-            private bool updateAvailable = false;
+            internal bool updateAvailable = false;
             [ObservableProperty]
-            private string updateTooltip = "";
+            internal string updateTooltip = "";
             [ObservableProperty]
-            private string toolTip = "";
+            internal string toolTip = "";
             [ObservableProperty]
             public Tool tool;
             public Tool? repo;
@@ -121,7 +121,7 @@ namespace Knossos.NET.ViewModels
         /**/
 
         [ObservableProperty]
-        private ObservableCollection<ToolItem> tools = new ObservableCollection<ToolItem>();
+        internal ObservableCollection<ToolItem> tools = new ObservableCollection<ToolItem>();
 
         private bool toolsRepoLoaded = false;
 

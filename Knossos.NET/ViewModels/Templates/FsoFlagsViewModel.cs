@@ -9,12 +9,12 @@ namespace Knossos.NET.ViewModels
     public partial class FsoFlagsViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private string globalCmd = string.Empty;
+        internal string globalCmd = string.Empty;
 
         [ObservableProperty]
         public string cmdLine = string.Empty;
 
-        private ObservableCollection<FlagCategoryItem> Flags { get; set; } = new ObservableCollection<FlagCategoryItem>();
+        internal ObservableCollection<FlagCategoryItem> Flags { get; set; } = new ObservableCollection<FlagCategoryItem>();
 
         public FsoFlagsViewModel()
         {
@@ -76,7 +76,7 @@ namespace Knossos.NET.ViewModels
         public string Cmd { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Web_url { get; set; } = string.Empty;
-        private bool Enabled { get; set; } = false;
+        internal bool Enabled { get; set; } = false;
 
         private FsoFlagsViewModel view;
 

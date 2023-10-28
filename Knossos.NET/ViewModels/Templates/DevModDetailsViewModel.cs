@@ -80,29 +80,29 @@ namespace Knossos.NET.ViewModels
         /******************************************************************************************/
         private DevModEditorViewModel? editor;
         [ObservableProperty]
-        private string modName = string.Empty;
+        internal string modName = string.Empty;
         [ObservableProperty]
-        private string modId = string.Empty;
+        internal string modId = string.Empty;
         [ObservableProperty]
-        private string? modType = string.Empty;
+        internal string? modType = string.Empty;
         [ObservableProperty]
-        private string? modParent = string.Empty;
+        internal string? modParent = string.Empty;
         [ObservableProperty]
-        private string modDescription = string.Empty;
+        internal string modDescription = string.Empty;
         [ObservableProperty]
-        private string? modForumLink = string.Empty;
+        internal string? modForumLink = string.Empty;
         [ObservableProperty]
-        private string? modVideos = string.Empty;
+        internal string? modVideos = string.Empty;
         [ObservableProperty]
-        private Bitmap? tileImage;
+        internal Bitmap? tileImage;
         [ObservableProperty]
-        private string? tileImagePath;
+        internal string? tileImagePath;
         [ObservableProperty]
-        private Bitmap? bannerImage;
+        internal Bitmap? bannerImage;
         [ObservableProperty]
-        private string? bannerImagePath;
+        internal string? bannerImagePath;
         [ObservableProperty]
-        private ObservableCollection<DevModScreenshot> screenshots = new ObservableCollection<DevModScreenshot>();
+        internal ObservableCollection<DevModScreenshot> screenshots = new ObservableCollection<DevModScreenshot>();
 
         public DevModDetailsViewModel() 
         { 

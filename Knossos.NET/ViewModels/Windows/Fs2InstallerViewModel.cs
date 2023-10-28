@@ -36,17 +36,17 @@ namespace Knossos.NET.ViewModels
         private List<string> filePaths = new List<string>();
 
         [ObservableProperty]
-        private bool isInstalling = false;
+        internal bool isInstalling = false;
         [ObservableProperty]
-        private bool canInstall = false;
+        internal bool canInstall = false;
         [ObservableProperty]
-        private int progressMax = 100;
+        internal int progressMax = 100;
         [ObservableProperty]
-        private int progressCurrent = 0;
+        internal int progressCurrent = 0;
         [ObservableProperty]
-        private string installText = string.Empty;
+        internal string installText = string.Empty;
         [ObservableProperty]
-        private bool innoExtractIsAvalible = false;
+        internal bool innoExtractIsAvalible = false;
         private string? gogExe = null;
 
         public Fs2InstallerViewModel() 

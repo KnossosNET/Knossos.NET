@@ -14,7 +14,7 @@ namespace Knossos.NET.ViewModels
     public partial class TaskViewModel : ViewModelBase
     {
         public static TaskViewModel? Instance { get; private set; }
-        private  ObservableCollection<TaskItemViewModel> TaskList { get; set; } = new ObservableCollection<TaskItemViewModel>();
+        internal ObservableCollection<TaskItemViewModel> TaskList { get; set; } = new ObservableCollection<TaskItemViewModel>();
         public Queue<TaskItemViewModel> taskQueue { get; set; } = new Queue<TaskItemViewModel>();
 
         public TaskViewModel() 

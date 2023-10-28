@@ -15,29 +15,29 @@ namespace Knossos.NET.ViewModels
         private int pageNumber = 1;
 
         [ObservableProperty]
-        private bool repoDownloaded = false;
+        internal bool repoDownloaded = false;
         [ObservableProperty]
-        private bool canGoBack = false;
+        internal bool canGoBack = false;
         [ObservableProperty]
-        private bool canContinue = true;
+        internal bool canContinue = true;
         [ObservableProperty]
-        private bool lastPage = false;
+        internal bool lastPage = false;
 
         [ObservableProperty]
-        private string? libraryPath = null;
+        internal string? libraryPath = null;
 
         [ObservableProperty]
-        private bool page1 = true;
+        internal bool page1 = true;
         [ObservableProperty]
-        private bool page2 = false;
+        internal bool page2 = false;
         [ObservableProperty]
-        private bool page3 = false;
+        internal bool page3 = false;
         [ObservableProperty]
-        private bool page4 = false;
+        internal bool page4 = false;
         [ObservableProperty]
-        private bool page5 = false;
+        internal bool page5 = false;
         [ObservableProperty]
-        private bool page6 = false;
+        internal bool page6 = false;
 
         public QuickSetupViewModel() 
         {

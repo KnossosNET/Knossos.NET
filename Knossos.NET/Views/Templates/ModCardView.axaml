@@ -1,10 +1,12 @@
-<UserControl  IsVisible="{Binding Visible}"  xmlns="https://github.com/avaloniaui"
+<UserControl IsVisible="{Binding Visible}"  xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="155" d:DesignHeight="265"
              x:Class="Knossos.NET.Views.ModCardView"
-			 xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
+	         xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+			 x:DataType="vm:ModCardViewModel"
 			 Width="155"
 			 Height="265">
 	

@@ -16,8 +16,8 @@ namespace Knossos.NET.ViewModels
 {
     public partial class DevModCreateNewViewModel : ViewModelBase
     {
-        private string modId = string.Empty;
-        private string ModId
+        internal string modId = string.Empty;
+        internal string ModId
         {
             get { return modId; }
             set 
@@ -25,8 +25,8 @@ namespace Knossos.NET.ViewModels
                 SetProperty(ref modId, Regex.Replace(value.Replace(" ", ""), "[^a-zA-Z0-9-__ ]+", "", RegexOptions.Compiled));
             }
         }
-        private string modName = string.Empty;
-        private string ModName
+        internal string modName = string.Empty;
+        internal string ModName
         {
             get { return modName; }
             set
@@ -36,14 +36,14 @@ namespace Knossos.NET.ViewModels
             }
         }
         [ObservableProperty]
-        private string modVersion = "1.0.0";
+        internal string modVersion = "1.0.0";
         [ObservableProperty]
-        private int typeSelectedIndex = -1;
+        internal int typeSelectedIndex = -1;
         [ObservableProperty]
-        private ObservableCollection<ComboBoxItem> parentComboBoxItems = new ObservableCollection<ComboBoxItem>();
+        internal ObservableCollection<ComboBoxItem> parentComboBoxItems = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
-        private int parentSelectedIndex = -1;
-        private bool LoggedInNebula
+        internal int parentSelectedIndex = -1;
+        internal bool LoggedInNebula
         {
             get { return Nebula.userIsLoggedIn; }
         }

@@ -160,39 +160,39 @@ namespace Knossos.NET.ViewModels
     public partial class TaskItemViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private bool taskIsSet = false;
+        internal bool taskIsSet = false;
         [ObservableProperty]
-        private bool cancelButtonVisible = false;
+        internal bool cancelButtonVisible = false;
         [ObservableProperty]
-        private bool tooltipVisible = false;
+        internal bool tooltipVisible = false;
         [ObservableProperty]
-        private string? tooltip = null;
+        internal string? tooltip = null;
         [ObservableProperty]
-        private string info = string.Empty;
+        internal string info = string.Empty;
         [ObservableProperty]
-        private float progressBarMin = 0;
+        internal float progressBarMin = 0;
         [ObservableProperty]
-        private float progressBarMax = 0;
+        internal float progressBarMax = 0;
         [ObservableProperty]
-        private float progressCurrent = 0;
+        internal float progressCurrent = 0;
         [ObservableProperty]
-        private string name = string.Empty;
+        internal string name = string.Empty;
         [ObservableProperty]
-        private bool isCompleted = false;
+        internal bool isCompleted = false;
         [ObservableProperty]
-        private bool isCancelled = false;
+        internal bool isCancelled = false;
         [ObservableProperty]
-        private bool isFileDownloadTask = false;
+        internal bool isFileDownloadTask = false;
         [ObservableProperty]
-        private bool showProgressText = true;
+        internal bool showProgressText = true;
         [ObservableProperty]
-        private string currentMirror = string.Empty;
+        internal string currentMirror = string.Empty;
         [ObservableProperty]
-        private string pauseButtonText = "Pause";
+        internal string pauseButtonText = "Pause";
         [ObservableProperty]
-        private IBrush textColor = Brushes.White;
+        internal IBrush textColor = Brushes.White;
         [ObservableProperty]
-        private bool isTextTask = false;
+        internal bool isTextTask = false;
 
         /* If this task contains subtasks, the subtasks must be added here, from the UIthread */
         [ObservableProperty]

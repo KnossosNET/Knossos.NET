@@ -8,13 +8,13 @@ namespace Knossos.NET.ViewModels
     public partial class ReportModViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private string modName = string.Empty;
+        internal string modName = string.Empty;
 
         [ObservableProperty]
-        private string modVersion = string.Empty;
+        internal string modVersion = string.Empty;
 
         [ObservableProperty]
-        private string reasonString = string.Empty;
+        internal string reasonString = string.Empty;
 
         private Mod? mod;
 

@@ -19,46 +19,46 @@ namespace Knossos.NET.ViewModels
     public partial class AddUserBuildViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private string scanResults = string.Empty;
+        internal string scanResults = string.Empty;
         [ObservableProperty]
-        private string release = string.Empty;
+        internal string release = string.Empty;
         [ObservableProperty]
-        private string debugFile = string.Empty;
+        internal string debugFile = string.Empty;
         [ObservableProperty]
-        private string fred2 = string.Empty;
+        internal string fred2 = string.Empty;
         [ObservableProperty]
-        private string fred2Debug = string.Empty;
+        internal string fred2Debug = string.Empty;
         [ObservableProperty]
-        private string qtFred = string.Empty;
+        internal string qtFred = string.Empty;
         [ObservableProperty]
-        private string qtFredDebug = string.Empty;
+        internal string qtFredDebug = string.Empty;
         [ObservableProperty]
-        private string buildVersion = string.Empty;
+        internal string buildVersion = string.Empty;
         [ObservableProperty]
-        private string buildName = string.Empty;
+        internal string buildName = string.Empty;
         [ObservableProperty]
-        private bool stage2 = false;
+        internal bool stage2 = false;
         [ObservableProperty]
-        private bool x86 = false;
+        internal bool x86 = false;
         [ObservableProperty]
-        private bool x64 = false;
+        internal bool x64 = false;
         [ObservableProperty]
-        private bool aVX = false;
+        internal bool aVX = false;
         [ObservableProperty]
-        private bool aVX2 = false;
+        internal bool aVX2 = false;
         [ObservableProperty]
-        private bool arm32 = false;
+        internal bool arm32 = false;
         [ObservableProperty]
-        private bool arm64 = false;
+        internal bool arm64 = false;
         [ObservableProperty]
-        private bool modCreated = false;
+        internal bool modCreated = false;
         [ObservableProperty]
-        private int copyProgress = 0;
+        internal int copyProgress = 0;
         [ObservableProperty]
-        private int maxFiles = 100;
+        internal int maxFiles = 100;
 
         [ObservableProperty]
-        private string buildNewPath = string.Empty;
+        internal string buildNewPath = string.Empty;
 
         private string buildId = string.Empty;
         private string? folderPath = null;

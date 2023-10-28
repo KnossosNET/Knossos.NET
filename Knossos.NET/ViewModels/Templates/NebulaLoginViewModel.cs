@@ -12,25 +12,25 @@ namespace Knossos.NET.ViewModels
     public partial class NebulaLoginViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private string title = "Nebula Login";
+        internal string title = "Nebula Login";
 
         [ObservableProperty]
-        private bool userLoggedIn = false;
+        internal bool userLoggedIn = false;
 
         [ObservableProperty]
-        private bool registerNewUser = false;
+        internal bool registerNewUser = false;
 
         [ObservableProperty]
-        private string? userName = string.Empty;
+        internal string? userName = string.Empty;
 
         [ObservableProperty]
-        private string? userPass = string.Empty;
+        internal string? userPass = string.Empty;
 
         [ObservableProperty]
-        private string userEmail = string.Empty;
+        internal string userEmail = string.Empty;
 
         [ObservableProperty]
-        private string editableIDs = string.Empty;
+        internal string editableIDs = string.Empty;
 
         public async void UpdateUI()
         {

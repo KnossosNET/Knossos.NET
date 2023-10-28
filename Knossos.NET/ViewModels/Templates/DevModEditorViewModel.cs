@@ -35,12 +35,12 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         public DevModMembersMgrViewModel? membersView;
         [ObservableProperty]
-        private ObservableCollection<ComboBoxItem> toolItems = new ObservableCollection<ComboBoxItem>();
+        internal ObservableCollection<ComboBoxItem> toolItems = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
-        private int toolIndex = 0;
+        internal int toolIndex = 0;
 
-        private int tabIndex = 0;
-        private int TabIndex
+        internal int tabIndex = 0;
+        internal int TabIndex
         {
             get => tabIndex;
             set
@@ -67,7 +67,7 @@ namespace Knossos.NET.ViewModels
         public bool isEngineBuild = false;
 
         [ObservableProperty]
-        private Bitmap? modImage;
+        internal Bitmap? modImage;
 
         private List<Mod> mods = new List<Mod>();
         private int index = 0;

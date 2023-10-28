@@ -16,14 +16,14 @@ namespace Knossos.NET.ViewModels
     public partial class DevModVersionsViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private List<Mod> mods = new List<Mod>();
+        internal List<Mod> mods = new List<Mod>();
         [ObservableProperty]
-        private bool buttonsEnabled = true;
+        internal bool buttonsEnabled = true;
         [ObservableProperty]
-        private string visibilityButtonText = "Make it public";
+        internal string visibilityButtonText = "Make it public";
 
-        private int selectedIndex = -1;
-        private int SelectedIndex
+        internal int selectedIndex = -1;
+        internal int SelectedIndex
         {
             get
             {
@@ -46,7 +46,7 @@ namespace Knossos.NET.ViewModels
 
         private DevModEditorViewModel? editor;
 
-        private string CurrentVersion 
+        internal string CurrentVersion 
         {
             get 
             {
@@ -57,8 +57,8 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private string newVersion = string.Empty;
-        private string NewVersion
+        internal string newVersion = string.Empty;
+        internal string NewVersion
         {
             get 
             {

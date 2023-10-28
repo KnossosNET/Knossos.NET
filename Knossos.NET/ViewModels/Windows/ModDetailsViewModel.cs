@@ -51,38 +51,38 @@ namespace Knossos.NET.ViewModels
     {
         private List<Mod> modVersions = new List<Mod>();
         private ModCardViewModel? modCard = null;
-        private bool devMode { get; set; } = false;
+        internal bool devMode { get; set; } = false;
         [ObservableProperty]
-        private string owners = string.Empty;
+        internal string owners = string.Empty;
         /* UI Variables */
         [ObservableProperty]
-        private string name = string.Empty;
+        internal string name = string.Empty;
         [ObservableProperty]
-        private string? released = string.Empty;
+        internal string? released = string.Empty;
         [ObservableProperty]
-        private string? lastUpdated = string.Empty;
+        internal string? lastUpdated = string.Empty;
         [ObservableProperty]
-        private string? description = string.Empty;
+        internal string? description = string.Empty;
         [ObservableProperty]
-        private Bitmap? banner = null;
+        internal Bitmap? banner = null;
         [ObservableProperty]
-        private bool forumAvalible = true;
+        internal bool forumAvalible = true;
         [ObservableProperty]
-        private bool isInstalled = true;
+        internal bool isInstalled = true;
         [ObservableProperty]
-        private bool isPlayingTTS = false;
+        internal bool isPlayingTTS = false;
         [ObservableProperty]
-        private bool ttsAvalible = true;
+        internal bool ttsAvalible = true;
         [ObservableProperty]
-        private bool hasBanner = false;
+        internal bool hasBanner = false;
         [ObservableProperty]
-        private bool isLocalMod = false;
+        internal bool isLocalMod = false;
         [ObservableProperty]
-        private ObservableCollection<ScreenshotItem> screenshots = new ObservableCollection<ScreenshotItem>();
-        private ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal ObservableCollection<ScreenshotItem> screenshots = new ObservableCollection<ScreenshotItem>();
+        internal ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
-        private int itemSelectedIndex = 0;
-        public int ItemSelectedIndex
+        internal int itemSelectedIndex = 0;
+        internal int ItemSelectedIndex
         {
             get
             {

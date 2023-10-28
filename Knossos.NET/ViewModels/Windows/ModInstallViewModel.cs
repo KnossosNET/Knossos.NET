@@ -18,37 +18,37 @@ namespace Knossos.NET.ViewModels
     public partial class ModInstallViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private List<Mod> modVersions = new List<Mod>();
+        internal List<Mod> modVersions = new List<Mod>();
         [ObservableProperty]
-        private string title = string.Empty;
+        internal string title = string.Empty;
         [ObservableProperty]
-        private string version = string.Empty;
+        internal string version = string.Empty;
         [ObservableProperty]
-        private string name = string.Empty;
+        internal string name = string.Empty;
         [ObservableProperty]
-        private int selectedIndex = -1;
+        internal int selectedIndex = -1;
         [ObservableProperty]
-        private bool dataLoaded = false;
+        internal bool dataLoaded = false;
         [ObservableProperty]
-        private ObservableCollection<Mod> modInstallList = new ObservableCollection<Mod>();
+        internal ObservableCollection<Mod> modInstallList = new ObservableCollection<Mod>();
         [ObservableProperty]
-        private bool isInstalled = false;
+        internal bool isInstalled = false;
         [ObservableProperty]
-        private bool compress = false;
+        internal bool compress = false;
         [ObservableProperty]
-        private bool compressVisible = Knossos.globalSettings.modCompression == CompressionSettings.Manual? true : false;
+        internal bool compressVisible = Knossos.globalSettings.modCompression == CompressionSettings.Manual? true : false;
         [ObservableProperty]
-        private bool canSelectDevMode = true;
+        internal bool canSelectDevMode = true;
         [ObservableProperty]
-        private bool installInDevMode = false;
+        internal bool installInDevMode = false;
 
-        private Mod? selectedMod;
+        internal Mod? selectedMod;
         [ObservableProperty]
-        private bool hasWriteAccess = false;
+        internal bool hasWriteAccess = false;
         [ObservableProperty]
-        private bool forceDevMode = false;
+        internal bool forceDevMode = false;
 
-        private Mod? SelectedMod
+        internal Mod? SelectedMod
         {
             get { return selectedMod; }
             set

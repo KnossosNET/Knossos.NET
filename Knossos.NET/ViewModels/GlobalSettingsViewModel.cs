@@ -27,146 +27,146 @@ namespace Knossos.NET.ViewModels
         private const long speed10MB = 170000000;
 
         [ObservableProperty]
-        private bool blCfNebula = false;
+        internal bool blCfNebula = false;
         [ObservableProperty]
-        private bool blDlNebula = false;
+        internal bool blDlNebula = false;
         [ObservableProperty]
-        private bool blAigaion = false;
+        internal bool blAigaion = false;
 
         [ObservableProperty]
-        private bool flagDataLoaded = false;
+        internal bool flagDataLoaded = false;
         [ObservableProperty]
-        private bool enable16BitColor = false;
+        internal bool enable16BitColor = false;
         [ObservableProperty]
-        private bool windowsOS = false;
+        internal bool windowsOS = false;
 
         /* Knossos */
         [ObservableProperty]
-        private string basePath = string.Empty;
+        internal string basePath = string.Empty;
         [ObservableProperty]
-        private bool enableLogFile = true;
+        internal bool enableLogFile = true;
         [ObservableProperty]
-        private int logLevel = 1;
+        internal int logLevel = 1;
         [ObservableProperty]
-        private bool fs2RootPack = false;
+        internal bool fs2RootPack = false;
         [ObservableProperty]
-        private string numberOfMods = string.Empty;
+        internal string numberOfMods = string.Empty;
         [ObservableProperty]
-        private string numberOfBuilds = string.Empty;
+        internal string numberOfBuilds = string.Empty;
         [ObservableProperty]
-        private string detectedOS = string.Empty;
+        internal string detectedOS = string.Empty;
         [ObservableProperty]
-        private string cpuArch = string.Empty;
+        internal string cpuArch = string.Empty;
         [ObservableProperty]
-        private bool isAVX = false;
+        internal bool isAVX = false;
         [ObservableProperty]
-        private bool isAVX2 = false;
+        internal bool isAVX2 = false;
         [ObservableProperty]
-        private bool forceSSE2 = false;
+        internal bool forceSSE2 = false;
         [ObservableProperty]
-        private int maxConcurrentSubtasks = 3;
+        internal int maxConcurrentSubtasks = 3;
         [ObservableProperty]
-        private long maxDownloadSpeedIndex = 0;
+        internal long maxDownloadSpeedIndex = 0;
         [ObservableProperty]
-        private CompressionSettings modCompression = CompressionSettings.Manual;
+        internal CompressionSettings modCompression = CompressionSettings.Manual;
         [ObservableProperty]
-        private int compressionMaxParallelism = 4;
+        internal int compressionMaxParallelism = 4;
         [ObservableProperty]
-        private bool checkUpdates = true;
+        internal bool checkUpdates = true;
         [ObservableProperty]
-        private bool autoUpdate = false;
+        internal bool autoUpdate = false;
 
         /*VIDEO*/
         [ObservableProperty]
-        private int bitsSelectedIndex = 0;
+        internal int bitsSelectedIndex = 0;
         [ObservableProperty]
-        private int resolutionSelectedIndex = 0;
+        internal int resolutionSelectedIndex = 0;
         [ObservableProperty]
-        private int textureSelectedIndex = 0;
-        private ObservableCollection<ComboBoxItem> ResolutionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal int textureSelectedIndex = 0;
+        internal ObservableCollection<ComboBoxItem> ResolutionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
-        private int shadowQualitySelectedIndex = 0;
+        internal int shadowQualitySelectedIndex = 0;
         [ObservableProperty]
-        private int aaSelectedIndex = 5;
+        internal int aaSelectedIndex = 5;
         [ObservableProperty]
-        private int msaaSelectedIndex = 0;
+        internal int msaaSelectedIndex = 0;
         [ObservableProperty]
-        private bool enableSoftParticles = true;
+        internal bool enableSoftParticles = true;
         [ObservableProperty]
-        private bool enableDeferredLighting = true;
+        internal bool enableDeferredLighting = true;
         [ObservableProperty]
-        private int windowMode = 2;
+        internal int windowMode = 2;
         [ObservableProperty]
-        private bool vsync = true;
+        internal bool vsync = true;
         [ObservableProperty]
-        private bool postProcess = true;
+        internal bool postProcess = true;
         [ObservableProperty]
-        private bool noFpsCapping = false;
+        internal bool noFpsCapping = false;
         [ObservableProperty]
-        private bool showFps = false;
+        internal bool showFps = false;
 
         /*AUDIO*/
         [ObservableProperty]
-        private int playbackSelectedIndex = 0;
-        private ObservableCollection<ComboBoxItem> PlaybackItems { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal int playbackSelectedIndex = 0;
+        internal ObservableCollection<ComboBoxItem> PlaybackItems { get; set; } = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
-        private int captureSelectedIndex = 0;
-        private ObservableCollection<ComboBoxItem> CaptureItems { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal int captureSelectedIndex = 0;
+        internal ObservableCollection<ComboBoxItem> CaptureItems { get; set; } = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
-        private int sampleRateSelectedIndex = 0;
+        internal int sampleRateSelectedIndex = 0;
         [ObservableProperty]
-        private bool enableEFX = false;
+        internal bool enableEFX = false;
         [ObservableProperty]
-        private bool disableAudio = false;
+        internal bool disableAudio = false;
         [ObservableProperty]
-        private bool disableMusic = false;
+        internal bool disableMusic = false;
         [ObservableProperty]
-        private bool enableTTS = true;
+        internal bool enableTTS = true;
         [ObservableProperty]
-        private int voiceSelectedIndex = 0;
-        private ObservableCollection<ComboBoxItem> VoiceItems { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal int voiceSelectedIndex = 0;
+        internal ObservableCollection<ComboBoxItem> VoiceItems { get; set; } = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
-        private bool ttsTechroom = true;
+        internal bool ttsTechroom = true;
         [ObservableProperty]
-        private bool ttsBriefings = true;
+        internal bool ttsBriefings = true;
         [ObservableProperty]
-        private bool ttsIngame = true;
+        internal bool ttsIngame = true;
         [ObservableProperty]
-        private bool ttsMulti = true;
+        internal bool ttsMulti = true;
         [ObservableProperty]
-        private bool ttsDescription = true;
+        internal bool ttsDescription = true;
         [ObservableProperty]
-        private int ttsVolume = 100;
+        internal int ttsVolume = 100;
         [ObservableProperty]
-        private bool playingTTS = false;
+        internal bool playingTTS = false;
 
         /*JOYSTICK*/
-        private ObservableCollection<ComboBoxItem> Joystick1Items { get; set; } = new ObservableCollection<ComboBoxItem>();
-        private ObservableCollection<ComboBoxItem> Joystick2Items { get; set; } = new ObservableCollection<ComboBoxItem>();
-        private ObservableCollection<ComboBoxItem> Joystick3Items { get; set; } = new ObservableCollection<ComboBoxItem>();
-        private ObservableCollection<ComboBoxItem> Joystick4Items { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal ObservableCollection<ComboBoxItem> Joystick1Items { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal ObservableCollection<ComboBoxItem> Joystick2Items { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal ObservableCollection<ComboBoxItem> Joystick3Items { get; set; } = new ObservableCollection<ComboBoxItem>();
+        internal ObservableCollection<ComboBoxItem> Joystick4Items { get; set; } = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
-        private int joy1SelectedIndex = -1;
+        internal int joy1SelectedIndex = -1;
         [ObservableProperty]
-        private int joy2SelectedIndex = -1;
+        internal int joy2SelectedIndex = -1;
         [ObservableProperty]
-        private int joy3SelectedIndex = -1;
+        internal int joy3SelectedIndex = -1;
         [ObservableProperty]
-        private int joy4SelectedIndex = -1;
+        internal int joy4SelectedIndex = -1;
 
         /* MOD / FS2 */
         [ObservableProperty]
-        private string globalCmd = string.Empty;
+        internal string globalCmd = string.Empty;
         [ObservableProperty]
-        private int fs2LangSelectedIndex = 0;
+        internal int fs2LangSelectedIndex = 0;
         [ObservableProperty]
-        private uint multiPort = 7808;
+        internal uint multiPort = 7808;
         [ObservableProperty]
-        private uint mouseSensitivity = 5;
+        internal uint mouseSensitivity = 5;
         [ObservableProperty]
-        private uint joystickSensitivity = 9;
+        internal uint joystickSensitivity = 9;
         [ObservableProperty]
-        private uint joystickDeadZone = 10;
+        internal uint joystickDeadZone = 10;
 
         public GlobalSettingsViewModel()
         {

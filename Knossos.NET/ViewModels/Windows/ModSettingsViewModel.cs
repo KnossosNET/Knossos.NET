@@ -18,31 +18,31 @@ namespace Knossos.NET.ViewModels
         private Mod? modJson;
         private ModCardViewModel? modCardViewModel;
 
-        private ObservableCollection<DependencyItemViewModel> DepItems { get; set; } = new ObservableCollection<DependencyItemViewModel>();
+        internal ObservableCollection<DependencyItemViewModel> DepItems { get; set; } = new ObservableCollection<DependencyItemViewModel>();
 
         /* UI Variables with ObervableProperty*/
         [ObservableProperty]
-        private bool configureBuildOpen = false;
+        internal bool configureBuildOpen = false;
         [ObservableProperty]
-        private string title = string.Empty;
+        internal string title = string.Empty;
         [ObservableProperty]
-        private bool customDependencies = false;
+        internal bool customDependencies = false;
         [ObservableProperty]
-        private FsoBuildPickerViewModel fsoPicker;
+        internal FsoBuildPickerViewModel fsoPicker;
         [ObservableProperty]
-        private FsoFlagsViewModel? fsoFlags = null;
+        internal FsoFlagsViewModel? fsoFlags = null;
         [ObservableProperty]
-        private string modSize = "0GB";
+        internal string modSize = "0GB";
         [ObservableProperty]
-        private bool compressionAvalible = false;
+        internal bool compressionAvalible = false;
         [ObservableProperty]
-        private bool compressed = false;
+        internal bool compressed = false;
         [ObservableProperty]
-        private bool isDevMode = false;
+        internal bool isDevMode = false;
         [ObservableProperty]
-        private string quickLaunch = "";
+        internal string quickLaunch = "";
         [ObservableProperty]
-        private bool ignoreGlobalCmd = false;
+        internal bool ignoreGlobalCmd = false;
 
         public ModSettingsViewModel()
         {

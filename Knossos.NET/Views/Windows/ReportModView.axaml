@@ -2,7 +2,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="380"
         x:Class="Knossos.NET.Views.ReportModView"
 		x:Name="ReportModWindow"
@@ -12,7 +11,10 @@
 		CanResize="False"
 		WindowStartupLocation="CenterScreen"
 		SizeToContent="WidthAndHeight"
-        Title="Report Mod">
+        Title="Report Mod"
+		xmlns:v="using:Knossos.NET.Views"
+		xmlns:vm="using:Knossos.NET.ViewModels"
+		x:DataType="vm:ReportModViewModel">
 	
 	<Design.DataContext>
 		<vm:ReportModViewModel/>

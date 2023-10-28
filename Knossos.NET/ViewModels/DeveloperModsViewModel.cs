@@ -15,16 +15,16 @@ namespace Knossos.NET.ViewModels
     {
         public static DeveloperModsViewModel? Instance;
         [ObservableProperty]
-        private ObservableCollection<Mod> mods = new ObservableCollection<Mod>();
+        internal ObservableCollection<Mod> mods = new ObservableCollection<Mod>();
         [ObservableProperty]
-        private DevModEditorViewModel? modEditor;
+        internal DevModEditorViewModel? modEditor;
         [ObservableProperty]
-        private NebulaLoginViewModel nebulaLoginVM = new NebulaLoginViewModel();
+        internal NebulaLoginViewModel nebulaLoginVM = new NebulaLoginViewModel();
         [ObservableProperty]
-        private DevToolManagerViewModel devToolManager = new DevToolManagerViewModel();
+        internal DevToolManagerViewModel devToolManager = new DevToolManagerViewModel();
 
-        private int tabIndex = 0;
-        private int TabIndex
+        internal int tabIndex = 0;
+        internal int TabIndex
         {
             get => tabIndex;
             set
@@ -47,8 +47,8 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private int selectedIndex = -1;
-        private int SelectedIndex
+        internal int selectedIndex = -1;
+        internal int SelectedIndex
         {
             get
             {
