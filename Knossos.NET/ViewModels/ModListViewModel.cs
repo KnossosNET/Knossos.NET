@@ -85,13 +85,17 @@ namespace Knossos.NET.ViewModels
             {
                 await Dispatcher.UIThread.InvokeAsync(async ()  =>
                 {
-                    await Task.Delay(100);
-                    IsLoading = false;
-                    foreach (var m in Mods)
+                    try
                     {
-                        m.Visible = true;
-                        await Task.Delay(5);
+                        await Task.Delay(100);
+                        IsLoading = false;
+                        foreach (var m in Mods)
+                        {
+                            m.Visible = true;
+                            await Task.Delay(5);
+                        }
                     }
+                    catch { }
                 });
             }
             IsTabOpen = true;
@@ -167,13 +171,17 @@ namespace Knossos.NET.ViewModels
             Mods = newModCardList;
             if (IsTabOpen)
             {
-                await Task.Delay(100);
-                IsLoading = false;
-                foreach (var m in Mods)
+                try
                 {
-                    m.Visible = true;
-                    await Task.Delay(5);
+                    await Task.Delay(100);
+                    IsLoading = false;
+                    foreach (var m in Mods)
+                    {
+                        m.Visible = true;
+                        await Task.Delay(5);
+                    }
                 }
+                catch { }
             }
             IsLoading = false;
         }
