@@ -55,11 +55,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private IBrush borderColor = Brushes.Black;
         [ObservableProperty]
-        private string? tooltip;
-        [ObservableProperty]
         private bool isInstalling = false;
-        [ObservableProperty]
-        private bool buttonPage1 = true;
         [ObservableProperty]
         private bool isLocalMod = false;
         [ObservableProperty]
@@ -97,22 +93,6 @@ namespace Knossos.NET.ViewModels
                 devMode = modJson.devMode;
             }
             IsInstalled = modJson.installed;
-            if (modJson.description != null)
-            {
-                if (modJson.description.Length > 500)
-                {
-                    var cleanDescriptionString = Regex.Replace(modJson.description.Substring(0, 500) + "\n...", @" ?\[.*?\]", string.Empty);
-                    cleanDescriptionString = Regex.Replace(cleanDescriptionString, @" ?\<.*?\>", string.Empty);
-                    Tooltip = cleanDescriptionString;
-
-                }
-                else
-                {
-                    var cleanDescriptionString = Regex.Replace(modJson.description, @" ?\[.*?\]", string.Empty);
-                    cleanDescriptionString = Regex.Replace(cleanDescriptionString, @" ?\<.*?\>", string.Empty);
-                    Tooltip = cleanDescriptionString;
-                }
-            }
 
             if (devMode && ID != "FS2")
             {
@@ -177,18 +157,6 @@ namespace Knossos.NET.ViewModels
                 activeVersionIndex = newIndex;
                 Name = modVersions[newIndex].title;
                 ModVersion = modVersions[newIndex].version + " (+" + (modVersions.Count - 1) + ")";
-                if (modVersions[newIndex].description != null)
-                {
-                    if (modVersions[newIndex].description!.Length > 500)
-                    {
-                        Tooltip = Regex.Replace(modVersions[newIndex].description!.Substring(0, 500) + "\n...", @" ?\[.*?\]", string.Empty);
-
-                    }
-                    else
-                    {
-                        Tooltip = Regex.Replace(modVersions[newIndex].description!, @" ?\[.*?\]", string.Empty);
-                    }
-                }
                 if (modVersions[newIndex].modSource == ModSource.local)
                 {
                     IsLocalMod = true;
@@ -222,24 +190,22 @@ namespace Knossos.NET.ViewModels
         }
 
         /* Button Commands */
-        internal void ButtonCommandPlay()
+        internal void ButtonCommand(object command)
         {
-            Knossos.PlayMod(modVersions[activeVersionIndex],FsoExecType.Release);
-        }
-
-        internal void ButtonCommandFred2()
-        {
-            Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2);
-        }
-
-        internal void ButtonCommandDebug()
-        {
-            Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Debug);
-        }
-
-        internal void ButtonCommandQtFred() 
-        {
-            Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.QtFred);
+            switch((string)command)
+            {
+                case "play" : Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release); break;
+                case "fred2": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2); break;
+                case "debug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Debug); break;
+                case "qtfred": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.QtFred); break;
+                case "update": ButtonCommandUpdate(); break;
+                case "modify": ButtonCommandModify(); break;
+                case "delete": ButtonCommandDelete(); break;
+                case "details": ButtonCommandDetails(); break;
+                case "settings": ButtonCommandSettings(); break;
+                case "install": ButtonCommandInstall(); break;
+                case "cancel": CancelInstallCommand(); break;
+            }
         }
 
         internal async void ButtonCommandUpdate()
@@ -314,16 +280,6 @@ namespace Knossos.NET.ViewModels
             {
                 await MessageBox.Show(MainWindow.instance!, "Dev mode mods can not be delated from the main view, go to the Development section.", "Mod is dev mode", MessageBox.MessageBoxButtons.OK);
             }
-        }
-
-        internal void ButtonCommandGoPage2()
-        {
-            ButtonPage1 = false;
-        }
-
-        internal void ButtonCommandGoPage1()
-        {
-            ButtonPage1 = true;
         }
 
         internal async void ButtonCommandDetails()

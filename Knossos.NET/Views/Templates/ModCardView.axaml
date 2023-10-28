@@ -19,98 +19,54 @@
 		<Style Selector="StackPanel#Overlay:not(:pointerover)" >
 			<Setter Property="Opacity" Value="0"/>
 		</Style>
-		<Style Selector="StackPanel#Messages:pointerover" >
-			<Setter Property="Opacity" Value="0.0"/>
-		</Style>
-		<Style Selector="StackPanel#Messages:not(:pointerover)" >
-			<Setter Property="Opacity" Value="0.6"/>
-		</Style>
 	</UserControl.Styles>
 	
 	<Border Background="#422626" BorderBrush="{Binding BorderColor}" BorderThickness="3" CornerRadius="2">
 		<Grid>
 			<!--Default-->
-			<Grid RowDefinitions="Auto,*" ZIndex="0">
-				<Image Grid.Row="0" Source="{Binding Image}" Width="150" Height="225"></Image>
-				<TextBlock Grid.Row="1" VerticalAlignment="Center" Width="151" Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" TextAlignment="Center" FontSize="14" Foreground="White"/>
-			</Grid>
-			<!--Message Overlay-->
-			<StackPanel IsVisible="{Binding IsInstalled}" Name="Messages" ZIndex="2">
-				<!--Version-->
-				<Grid Height="20">
-					<StackPanel Width="150" Background="Black" HorizontalAlignment="Left"></StackPanel>
-					<Label Content="{Binding ModVersion}" FontWeight="Bold" FontSize="12" Width="151" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
-				</Grid>
-			</StackPanel>
+			<Image HorizontalAlignment="Center" VerticalAlignment="Top" Source="{Binding Image}" Width="150" Height="225"></Image>
+			<TextBlock Margin="0,221,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Width="151" Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" TextAlignment="Center" FontSize="14" Foreground="White"/>
 
 			<StackPanel IsVisible="{Binding !IsInstalling}" Name="Overlay" ZIndex="1" Background="Black" Height="225" Width="151" VerticalAlignment="Top">
-				<StackPanel IsVisible="{Binding #Overlay.Opacity}">
-					<!--Installed Overlay-->
-					<StackPanel IsVisible="{Binding IsInstalled}">
-						<!--Buttons 1-->
-						<StackPanel Margin="0,40,0,0" IsVisible="{Binding ButtonPage1}">
-							<!--Normal-->
-							<StackPanel IsVisible="{Binding !devMode}">
-								<Button Command="{Binding ButtonCommandPlay}" Content="Play" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,2,0,0" Width="100" ></Button>
-								<StackPanel IsVisible="{Binding !IsLocalMod}">
-									<Button Command="{Binding ButtonCommandUpdate}" Content="Update/Modify" IsVisible="{Binding UpdateAvalible}" FontWeight="Bold" FontSize="11" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Blue" Margin="0,2,0,0" Width="100" ></Button>
-									<Button Command="{Binding ButtonCommandModify}" Content="Modify" IsVisible="{Binding !UpdateAvalible}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkCyan" Margin="0,2,0,0" Width="100" ></Button>
-								</StackPanel>
-								<Button Command="{Binding ButtonCommandDetails}" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkGray" Margin="0,2,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandSettings}" Content="Settings" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Crimson" Margin="0,2,0,0" Width="100" ></Button>
-							</StackPanel>
-							<!--DevMode-->
-							<StackPanel IsVisible="{Binding devMode}">
-								<Button Command="{Binding ButtonCommandPlay}" Content="Play" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,2,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandFred2}" Content="Fred2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkOrange" Margin="0,2,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandQtFred}" Content="QtFred" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Purple" Margin="0,2,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandSettings}" Content="Settings" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Crimson" Margin="0,2,0,0" Width="100" ></Button>
-							</StackPanel>
+				<Label Content="{Binding ModVersion}" FontWeight="Bold" FontSize="14" Width="151" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
+				<!--Installed Overlay-->
+				<TabControl IsVisible="{Binding IsInstalled}" Margin="0,-15,0,0">
+					<TabItem>
+						<TabItem.Header>
+							<Label FontWeight="Bold" FontSize="13" Foreground="White">Main</Label>
+						</TabItem.Header>
+						<StackPanel Margin="5">
+							<Button Command="{Binding ButtonCommand}" CommandParameter="play" Content="Play" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommand}" CommandParameter="fred2" Content="Fred2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkOrange" Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommand}" CommandParameter="qtfred" Content="QtFred" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Purple" Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommand}" CommandParameter="settings" Content="Settings" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Crimson" Margin="0,2,0,0" Width="100" ></Button>
 						</StackPanel>
-						<!--Buttons 2-->
-						<StackPanel Margin="0,40,0,0" IsVisible="{Binding !ButtonPage1}">
-							<!--Normal-->
-							<StackPanel IsVisible="{Binding !devMode}">
-								<Button Command="{Binding ButtonCommandFred2}" Content="Fred2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkOrange" Margin="0,2,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandDebug}" Content="FSO Debug" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,2,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandQtFred}" Content="QtFred" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Purple" Margin="0,2,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandDelete}" Content="Delete" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,2,0,0" Width="100" ></Button>
-							</StackPanel>
-							<!--DevMode-->
-							<StackPanel IsVisible="{Binding devMode}">
-								<Button Command="{Binding ButtonCommandDetails}" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkGray" Margin="0,2,0,0" Width="100" ></Button>
-								<Button Command="{Binding ButtonCommandDebug}" Content="FSO Debug" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,2,0,0" Width="100" ></Button>
-							</StackPanel>
+					</TabItem>
+					<TabItem Margin="-5" IsVisible="{Binding !IsLocalMod}">
+						<TabItem.Header>
+							<Label FontWeight="Bold" FontSize="13" Foreground="White">Advanced</Label>
+						</TabItem.Header>
+						<StackPanel Margin="5">
+							<Button Command="{Binding ButtonCommand}" CommandParameter="debug" Content="FSO Debug" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommand}" CommandParameter="update" Content="Update/Modify" IsVisible="{Binding UpdateAvalible}" FontWeight="Bold" FontSize="11" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Blue" Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommand}" CommandParameter="modify" Content="Modify" IsVisible="{Binding !UpdateAvalible}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkCyan" Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommand}" CommandParameter="details" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkGray" Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommand}" CommandParameter="delete" Content="Delete" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,2,0,0" Width="100" ></Button>
 						</StackPanel>
-						<!--Row of Icons-->
-						<WrapPanel ZIndex="5" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5">
-							<!--Special Icons-->
-							<Border IsVisible="{Binding IsCustomConfig}" Margin="5" BorderBrush="Transparent" BorderThickness="1" CornerRadius="2" ToolTip.Tip="This mod is configured to run with user custom settings">
-								<Image HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Width="15" Source="/Assets/general/custom-config-icon.png"/>
-							</Border>
-							<!--Page Control-->
-							<Border Margin="5" BorderBrush="White" BorderThickness="1" CornerRadius="2">
-								<Grid ColumnDefinitions="Auto">
-									<Button IsVisible="{Binding ButtonPage1}" Command="{Binding ButtonCommandGoPage2}" Grid.Column="0" Content=">>"></Button>
-									<Button IsVisible="{Binding !ButtonPage1}" Command="{Binding ButtonCommandGoPage1}" Grid.Column="0" Content="&lt;&lt;"></Button>
-								</Grid>
-							</Border>
-						</WrapPanel>
-					</StackPanel>
-					<!--Nebula Overlay--> 
-					<StackPanel IsVisible="{Binding !IsInstalled}" Margin="0,40,0,0">
-						<Button Command="{Binding ButtonCommandInstall}" Content="Install" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,5,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommandDetails}" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,5,0,0" Width="100" ></Button>
-					</StackPanel>
-				</StackPanel>
+					</TabItem>
+				</TabControl>
+				<!--Special Icons-->
+				<Image IsVisible="{Binding IsCustomConfig}" Margin="0,0,0,8" ZIndex="2" ToolTip.Tip="This mod is configured to run with user custom settings" HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Width="15" Source="/Assets/general/custom-config-icon.png"/>
+				<!--Nebula Overlay--> 
+				<Button Margin="0,20,0,0" IsVisible="{Binding !IsInstalled}" Command="{Binding ButtonCommand}" CommandParameter="install" Content="Install" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Width="100" ></Button>
+				<Button Margin="0,10,0,0" IsVisible="{Binding !IsInstalled}" Command="{Binding ButtonCommand}" CommandParameter="details" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Width="100" ></Button>
 			</StackPanel>
 			<!--Installing Overlay-->
-			<StackPanel IsVisible="{Binding IsInstalling}" Opacity="0.8" ZIndex="2" Background="Black" Width="151" Height="225" VerticalAlignment="Top">
+			<StackPanel IsVisible="{Binding IsInstalling}" Opacity="0.8" ZIndex="3" Background="Black" Width="151" Height="225" VerticalAlignment="Top">
 				<Label Content="Installing..." FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="0,50,0,0" Width="100"></Label>
-				<Button Command="{Binding CancelInstallCommand}" Content="Cancel" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,5,0,0" Width="100" ></Button>
+				<Button Command="{Binding ButtonCommand}" CommandParameter="cancel" Content="Cancel" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,5,0,0" Width="100" ></Button>
 			</StackPanel>
 		</Grid>
-
 	</Border>
 	
 </UserControl>

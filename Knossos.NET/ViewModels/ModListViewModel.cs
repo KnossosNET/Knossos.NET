@@ -24,15 +24,13 @@ namespace Knossos.NET.ViewModels
             update
         }
 
-        [ObservableProperty]
-        private bool isNebulaView = false;
+        private bool IsNebulaView = false;
 
         private string search  = string.Empty;
 
         private SortType sortType = SortType.name;
 
-        [ObservableProperty]
-        private bool isTabOpen = false;
+        private bool IsTabOpen = false;
 
         [ObservableProperty]
         private bool isLoading = true;

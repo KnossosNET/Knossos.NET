@@ -3596,8 +3596,10 @@ namespace Knossos.NET.ViewModels
                         }
 
                         ProgressBarMin = 0;
-                        sender.ProgressBarCurrent = ProgressCurrent = 0;
-                        sender.ProgressBarMax = ProgressBarMax = (files.Count * 2) + 1;
+                        //sender.ProgressBarCurrent = ProgressCurrent = 0;
+                        ProgressCurrent = 0;
+                        //sender.ProgressBarMax = ProgressBarMax = (files.Count * 2) + 1;
+                        ProgressBarMax = (files.Count * 2) + 1;
                         Info = "Tasks: 0/" + ProgressBarMax;
 
                         try
@@ -3644,7 +3646,7 @@ namespace Knossos.NET.ViewModels
 
                             if (result.HasValue && result.Value)
                             {
-                                sender.ProgressBarCurrent = ++ProgressCurrent;
+                                //sender.ProgressBarCurrent = ++ProgressCurrent;
                                 Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                             }
                             else
@@ -3692,7 +3694,8 @@ namespace Knossos.NET.ViewModels
                                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", "Error while decompressing the file " + fileFullPath);
                                 CancelTaskCommand();
                             }
-                            sender.ProgressBarCurrent = ++ProgressCurrent;
+                            //sender.ProgressBarCurrent = ++ProgressCurrent;
+                            ++ProgressCurrent;
                             File.Delete(fileFullPath);
                         });
                         files.Clear();
@@ -3768,7 +3771,8 @@ namespace Knossos.NET.ViewModels
                         }
 
                         /**/
-                        sender.ProgressBarCurrent = ++ProgressCurrent;
+                        //sender.ProgressBarCurrent = ++ProgressCurrent;
+                        ++ProgressCurrent;
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                         modJson.fullPath = modPath + Path.DirectorySeparatorChar;
                         modJson.folderName = modFolder;

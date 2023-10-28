@@ -105,11 +105,11 @@ namespace Knossos.NET.ViewModels
                         int index = StableItems.IndexOf(previous);
                         if (index == -1)
                             index = 0;
-                        StableItems.Insert(index, new FsoBuildItemViewModel(build, this));
+                        StableItems.Insert(index, new FsoBuildItemViewModel(build));
                     }
                     else
                     {
-                        StableItems.Add(new FsoBuildItemViewModel(build, this));
+                        StableItems.Add(new FsoBuildItemViewModel(build));
                     }
                     break;
                 case FsoStability.RC:
@@ -119,11 +119,11 @@ namespace Knossos.NET.ViewModels
                         int index = RcItems.IndexOf(previousRc);
                         if (index == -1)
                             index = 0;
-                        RcItems.Insert(index, new FsoBuildItemViewModel(build, this));
+                        RcItems.Insert(index, new FsoBuildItemViewModel(build));
                     }
                     else
                     {
-                        RcItems.Add(new FsoBuildItemViewModel(build, this));
+                        RcItems.Add(new FsoBuildItemViewModel(build));
                     }
                     break;
                 case FsoStability.Nightly:
@@ -133,11 +133,11 @@ namespace Knossos.NET.ViewModels
                         int index = NightlyItems.IndexOf(previousNL);
                         if (index == -1)
                             index = 0;
-                        NightlyItems.Insert(index, new FsoBuildItemViewModel(build, this));
+                        NightlyItems.Insert(index, new FsoBuildItemViewModel(build));
                     }
                     else
                     {
-                        NightlyItems.Add(new FsoBuildItemViewModel(build, this));
+                        NightlyItems.Add(new FsoBuildItemViewModel(build));
                     }
                     break;
                 case FsoStability.Custom:
@@ -147,11 +147,11 @@ namespace Knossos.NET.ViewModels
                         int index = CustomItems.IndexOf(previousCu);
                         if (index == -1)
                             index = 0;
-                        CustomItems.Insert(index, new FsoBuildItemViewModel(build, this));
+                        CustomItems.Insert(index, new FsoBuildItemViewModel(build));
                     }
                     else
                     {
-                        CustomItems.Add(new FsoBuildItemViewModel(build, this));
+                        CustomItems.Add(new FsoBuildItemViewModel(build));
                     }
                     break;
             }
@@ -180,11 +180,11 @@ namespace Knossos.NET.ViewModels
                             int index = newStable.IndexOf(previous);
                             if (index == -1)
                                 index = 0;
-                            newStable.Insert(index, new FsoBuildItemViewModel(build, this));
+                            newStable.Insert(index, new FsoBuildItemViewModel(build));
                         }
                         else
                         {
-                            newStable.Add(new FsoBuildItemViewModel(build, this));
+                            newStable.Add(new FsoBuildItemViewModel(build));
                         }
                         break;
                     case FsoStability.RC:
@@ -194,11 +194,11 @@ namespace Knossos.NET.ViewModels
                             int index = newRc.IndexOf(previousRc);
                             if (index == -1)
                                 index = 0;
-                            newRc.Insert(index, new FsoBuildItemViewModel(build, this));
+                            newRc.Insert(index, new FsoBuildItemViewModel(build));
                         }
                         else
                         {
-                            newRc.Add(new FsoBuildItemViewModel(build, this));
+                            newRc.Add(new FsoBuildItemViewModel(build));
                         }
                         break;
                     case FsoStability.Nightly:
@@ -208,11 +208,11 @@ namespace Knossos.NET.ViewModels
                             int index = newNightly.IndexOf(previousNL);
                             if (index == -1)
                                 index = 0;
-                            newNightly.Insert(index, new FsoBuildItemViewModel(build, this));
+                            newNightly.Insert(index, new FsoBuildItemViewModel(build));
                         }
                         else
                         {
-                            newNightly.Add(new FsoBuildItemViewModel(build, this));
+                            newNightly.Add(new FsoBuildItemViewModel(build));
                         }
                         break;
                     case FsoStability.Custom:
@@ -222,11 +222,11 @@ namespace Knossos.NET.ViewModels
                             int index = newCustom.IndexOf(previousCu);
                             if (index == -1)
                                 index = 0;
-                            newCustom.Insert(index, new FsoBuildItemViewModel(build, this));
+                            newCustom.Insert(index, new FsoBuildItemViewModel(build));
                         }
                         else
                         {
-                            newCustom.Add(new FsoBuildItemViewModel(build, this));
+                            newCustom.Add(new FsoBuildItemViewModel(build));
                         }
                         break;
                 }

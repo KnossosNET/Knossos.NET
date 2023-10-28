@@ -12,32 +12,15 @@ namespace Knossos.NET.ViewModels
     {
         public FsoBuild? build;
         private Mod? modJson;
-        private FsoBuildsViewModel? buildsView;
         public CancellationTokenSource? cancellationTokenSource = null;
         [ObservableProperty]
-        private string title;
+        public string title = string.Empty;
         [ObservableProperty]
-        private string? date;
+        public string? date;
         [ObservableProperty]
-        private bool x86 = false;
+        private string cpuArch = string.Empty;
         [ObservableProperty]
-        private bool x64 = false;
-        [ObservableProperty]
-        private bool avx = false;
-        [ObservableProperty]
-        private bool avx2 = false;
-        [ObservableProperty]
-        private bool arm32 = false;
-        [ObservableProperty]
-        private bool arm64 = false;
-        [ObservableProperty]
-        private bool release = false;
-        [ObservableProperty]
-        private bool debug = false;
-        [ObservableProperty]
-        private bool fred2 = false;
-        [ObservableProperty]
-        private bool qtfred = false;
+        private string buildType = string.Empty;
         [ObservableProperty]
         private bool isValid = false;
         [ObservableProperty]
@@ -45,26 +28,22 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         private bool isDownloading = false;
         [ObservableProperty]
-        public float progressBarMax = 100;
-        [ObservableProperty]
-        public float progressBarCurrent = 0;
-        [ObservableProperty]
         private bool isDevMode = false;
-        [ObservableProperty]
-        private IBrush backgroundColor = Brushes.Black;
         [ObservableProperty]
         private bool isDetailsButtonVisible = true;
 
         public FsoBuildItemViewModel() 
         {
-            title = "Test Build Title";
-            date = "19/12/20";
+            IsValid = true;
+            Title = "Test Build Title";
+            Date = "19/12/20";
+            CpuArch = "x86";
+            BuildType = "Release, Fred2";
         }
 
-        public FsoBuildItemViewModel (FsoBuild build, FsoBuildsViewModel view)
+        public FsoBuildItemViewModel (FsoBuild build)
         {
             this.build = build;
-            buildsView = view;
             title = build.ToString();
             UpdataDisplayData(build);
         }
@@ -74,6 +53,8 @@ namespace Knossos.NET.ViewModels
             Date = build.date;
             IsInstalled = build.isInstalled;
             IsValid = false;
+            CpuArch = "";
+            BuildType = "";
             if (build.id == "FSO")
             {
                 //No detail button on official FSO builds
@@ -85,10 +66,6 @@ namespace Knossos.NET.ViewModels
             }
 
             IsDevMode = build.devMode;
-            if (IsDevMode)
-            {
-                BackgroundColor = Brushes.DimGray;
-            }
 
             if (IsInstalled || skipInstalledCheck)
             {
@@ -97,27 +74,20 @@ namespace Knossos.NET.ViewModels
                     if (exe.isValid)
                     {
                         IsValid = true;
-                        switch (exe.type)
-                        {
-                            case FsoExecType.Release: Release = true; break;
-                            case FsoExecType.Debug: Debug = true; break;
-                            case FsoExecType.Fred2Debug:
-                            case FsoExecType.Fred2: Fred2 = true; break;
-                            case FsoExecType.QtFredDebug:
-                            case FsoExecType.QtFred: Qtfred = true; break;
-                        }
-
                         switch (exe.arch)
                         {
-                            case FsoExecArch.x86: X86 = true; break;
-                            case FsoExecArch.x64: X64 = true; break;
-                            case FsoExecArch.x86_avx2: Avx2 = true; X86 = true; break;
-                            case FsoExecArch.x64_avx2: Avx2 = true; X64 = true; break;
-                            case FsoExecArch.x86_avx: Avx = true; X86 = true; break;
-                            case FsoExecArch.x64_avx: Avx = true; X64 = true; break;
-                            case FsoExecArch.arm32: Arm32 = true; break;
-                            case FsoExecArch.arm64: Arm64 = true; break;
+                            case FsoExecArch.x86: if (!CpuArch.Contains("X86")) CpuArch += "X86   "; break;
+                            case FsoExecArch.x64: if (!CpuArch.Contains("X64")) CpuArch += "X64   "; break;
+                            case FsoExecArch.x86_avx2: if (!CpuArch.Contains("X86")) CpuArch += "X86   "; if (!CpuArch.Contains("AVX2 ")) CpuArch += "AVX2   "; break;
+                            case FsoExecArch.x64_avx2: if (!CpuArch.Contains("X64")) CpuArch += "X64   "; if (!CpuArch.Contains("AVX2 ")) CpuArch += "AVX2   "; break;
+                            case FsoExecArch.x86_avx: if (!CpuArch.Contains("X86")) CpuArch += "X86   "; if (!CpuArch.Contains("AVX ")) CpuArch += "AVX   "; break;
+                            case FsoExecArch.x64_avx: if (!CpuArch.Contains("X64")) CpuArch += "X64   "; if (!CpuArch.Contains("AVX ")) CpuArch += "AVX   "; break;
+                            case FsoExecArch.arm32: if (!CpuArch.Contains("ARM32")) CpuArch += "ARM32   "; break;
+                            case FsoExecArch.arm64: if (!CpuArch.Contains("ARM64")) CpuArch += "ARM64   "; break;
                         }
+
+                        if (!BuildType.Contains(exe.type.ToString()))
+                            BuildType += exe.type.ToString() + "  ";
                     }
                 }
             }
@@ -151,17 +121,17 @@ namespace Knossos.NET.ViewModels
 
         internal async void DeleteBuildCommand()
         {
-            if (MainWindow.instance != null && build != null && buildsView != null)
+            if (MainWindow.instance != null && build != null)
             {
                 var resp = await MessageBox.Show(MainWindow.instance, "Deleting FSO build: " + build.ToString() + ". This can't be undone.", "Delete FSO build", MessageBox.MessageBoxButtons.OKCancel);
                 if(resp == MessageBox.MessageBoxResult.OK)
                 {
                     Log.Add(Log.LogSeverity.Information, "FsoBuildItemViewModel.DeleteBuildCommand()", "Deleting FSO build " + build.ToString());
-                    buildsView.DeleteBuild(build,this);
+                    FsoBuildsViewModel.Instance!.DeleteBuild(build,this);
                     var result = await Nebula.GetModData(build.id, build.version);
                     if (result != null)
                     {
-                        buildsView.AddBuildToUi(new FsoBuild(result));
+                        FsoBuildsViewModel.Instance!.AddBuildToUi(new FsoBuild(result));
                     }
                 }
             }
