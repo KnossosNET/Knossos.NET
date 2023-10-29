@@ -8,6 +8,14 @@ using System.Threading.Tasks;
 
 namespace Knossos.NET
 {
+    /// <summary>
+    /// 7z console wrapper for Knet
+    /// Supports Windows, Linux and Mac
+    /// Uses 64 bit executable Windows x86(so it is not really supported), x64 and Arm64
+    /// Uses 64 bit executable on Mac x64 and arm64
+    /// Uses 64 bit executable on Linux x64
+    /// Uses arm64 executable on Linux arm64
+    /// </summary>
     public class SevenZipConsoleWrapper : IDisposable
     {
         private bool disposed = false;

@@ -31,6 +31,10 @@ namespace Knossos.NET
         public static bool flagDataLoaded = false;
         private static object? ttsObject = null;
 
+        /// <summary>
+        /// StartUp sequence
+        /// </summary>
+        /// <param name="isQuickLaunch"></param>
         public static async void StartUp(bool isQuickLaunch)
         {
             try
@@ -94,6 +98,9 @@ namespace Knossos.NET
             }
         }
 
+        /// <summary>
+        /// Launch the QuickLaunch mod and close
+        /// </summary>
         private static async Task QuickLaunch()
         {
             string[] args = Environment.GetCommandLineArgs();
@@ -179,6 +186,10 @@ namespace Knossos.NET
             MainWindow.instance!.Close();
         }
 
+
+        /// <summary>
+        /// Deletes .old files in the executable folder
+        /// </summary>
         private static void CleanUpdateFiles()
         {
             try
@@ -193,6 +204,9 @@ namespace Knossos.NET
             catch { }
         }
 
+        /// <summary>
+        /// Connects to KNet repo and check for updates
+        /// </summary>
         private static async Task CheckKnetUpdates()
         {
             try
@@ -424,6 +438,9 @@ namespace Knossos.NET
             }
         }
 
+        /// <summary>
+        /// Shows Quick Setup Guide
+        /// </summary>
         public static void OpenQuickSetup()
         {
             Dispatcher.UIThread.InvokeAsync(() =>
@@ -434,6 +451,9 @@ namespace Knossos.NET
             });
         }
 
+        /// <summary>
+        /// Resets the current library path, clears all loaded data and mods
+        /// </summary>
         public static void ResetBasePath()
         {
             Dispatcher.UIThread.InvokeAsync(async () =>
@@ -449,6 +469,10 @@ namespace Knossos.NET
             });
         }
 
+        /// <summary>
+        /// Loads knossos library and connects to Nebula
+        /// </summary>
+        /// <param name="isQuickLaunch"></param>
         public async static void LoadBasePath(bool isQuickLaunch = false)
         {
             if (globalSettings.basePath != null)
@@ -474,16 +498,27 @@ namespace Knossos.NET
             }
         }
 
+        /// <summary>
+        /// Get fullpath to Knossos library from the settings
+        /// </summary>
+        /// <returns>fullpath or null if not set</returns>
         public static string? GetKnossosLibraryPath()
         {
             return globalSettings.basePath;
         }
 
+        /// <summary>
+        /// Plays a mod or starts a standalone server
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <param name="fsoExecType"></param>
+        /// <param name="standaloneServer"></param>
+        /// <param name="standalonePort"></param>
         public static async void PlayMod(Mod mod, FsoExecType fsoExecType, bool standaloneServer = false, int standalonePort = 0)
         {
             if (TaskViewModel.Instance!.IsSafeState() == false)
             {
-                var result=await MessageBox.Show(MainWindow.instance!, "Other important tasks are running, it is recommended that you wait until they finish before launching the game because it may cause them to fail.\nIf you are absolutely sure those tasks cannot interfere you can continue.", "Tasks are running", MessageBox.MessageBoxButtons.ContinueCancel);
+                var result = await MessageBox.Show(MainWindow.instance!, "Other important tasks are running, it is recommended that you wait until they finish before launching the game because it may cause them to fail.\nIf you are absolutely sure those tasks cannot interfere you can continue.", "Tasks are running", MessageBox.MessageBoxButtons.ContinueCancel);
                 if(result != MessageBox.MessageBoxResult.Continue)
                     return;
             }
@@ -813,19 +848,6 @@ namespace Knossos.NET
                 }
             }
 
-            //Get full path for requested exec type
-            var execPath = fsoBuild.GetExec(fsoExecType);
-
-            if (execPath == null)
-            {
-                Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", "Could not find a executable type for the requested fso build :" +fsoBuild.ToString() + " Requested Type: "+fsoExecType );
-                if (MainWindow.instance != null)
-                {
-                    await MessageBox.Show(MainWindow.instance, "Could not find a executable type for the requested fso build :" + fsoBuild.ToString() + " Requested Type: " + fsoExecType, "Error launching mod", MessageBox.MessageBoxButtons.OK);
-                }
-                return;
-            }
-
             /* Build the cmdline, take in consideration systemcmd, globalcmd, modcmd(with user changes if any) */
             var modCmd = mod.GetModCmdLine()?.Split('-');
             var systemCmd = Knossos.globalSettings.GetSystemCMD(fsoBuild)?.Split('-');
@@ -835,10 +857,10 @@ namespace Knossos.NET
             {
                 if (!mod.modSettings.ignoreGlobalCmd)
                 {
-                    cmdline = CmdLineBuilder(cmdline, systemCmd);
-                    cmdline = CmdLineBuilder(cmdline, globalCmd);
+                    cmdline = KnUtils.CmdLineBuilder(cmdline, systemCmd);
+                    cmdline = KnUtils.CmdLineBuilder(cmdline, globalCmd);
                 }
-                cmdline = CmdLineBuilder(cmdline, modCmd);
+                cmdline = KnUtils.CmdLineBuilder(cmdline, modCmd);
             }
             else
             {
@@ -856,87 +878,31 @@ namespace Knossos.NET
 
             Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used cmdLine : " + cmdline);
 
-            try
+            //Launch FSO!!!
+            var fsoResult = await fsoBuild.RunFSO(fsoExecType, cmdline, rootPath, false);
+
+            if (!fsoResult.IsSuccess)
             {
-                //In Linux make sure it is marked as executable
-                if (KnUtils.IsLinux || KnUtils.IsMacOS)
+                Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", fsoResult.ErrorMessage);
+                if (MainWindow.instance != null)
                 {
-                    KnUtils.Chmod(execPath, "+x");
+                    await MessageBox.Show(MainWindow.instance, fsoResult.ErrorMessage, "Error launching mod", MessageBox.MessageBoxButtons.OK);
                 }
-
-                //In Windows enable the High DPI aware
-                try
-                {
-                    if (KnUtils.IsWindows)
-                    {
-                        using var dpiProccess = new Process();
-                        dpiProccess.StartInfo.FileName = "REG";
-                        dpiProccess.StartInfo.Arguments = "ADD \"HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers\" /V \"" + execPath + "\" /T REG_SZ /D HIGHDPIAWARE /F";
-                        dpiProccess.StartInfo.UseShellExecute = false;
-                        dpiProccess.StartInfo.Verb = "runas";
-                        dpiProccess.Start();
-                        dpiProccess.WaitForExit();
-                    }
-                }catch { }
-
-                //LAUNCH!! FINALLY!
-                using var fso = new Process();
-                fso.StartInfo.FileName = execPath;
-                fso.StartInfo.Arguments = cmdline;
-                fso.StartInfo.UseShellExecute = false;
-                fso.StartInfo.WorkingDirectory = rootPath;
-                fso.Start();
-            }catch(Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", ex);
-                await MessageBox.Show(MainWindow.instance!, ex.Message, "Error launching fso", MessageBox.MessageBoxButtons.OK);
             }
         }
 
-        private static string CmdLineBuilder(string cmdline, string[]? args)
-        {
-            try
-            {
-                if (args != null && args.Any())
-                {
-                    var addedArgs = new List<string>();
-                    foreach (var arg in cmdline.ToLower().Split('-'))
-                    {
-                        addedArgs.Add(arg.Split(' ')[0].Trim());
-                    }
-                    foreach (var arg in args)
-                    {
-                        var argName = arg.Trim().Split(' ')[0];
-                        if (!addedArgs.Contains(argName.ToLower()))
-                        {
-                            if (arg.Trim().Length > 0)
-                            {
-                                cmdline += " -" + arg.Trim();
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error, "Knossos.CmdLineBuilder()", ex);
-            }
-            return cmdline;
-        }
-
+        /// <summary>
+        /// Gets installed Mods or TC
+        /// This does not includes FSO builds
+        /// Optional ID to return all versions of a specific mod id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>List of Mods or empty list</returns>
         public static List<Mod> GetInstalledModList(string? id)
         {
             if (id != null)
             {
-                var modList = new List<Mod>();
-                foreach (var mod in installedMods)
-                {
-                    if (id == mod.id)
-                    {
-                        modList.Add(mod);
-                    }
-                }
-                return modList;
+                return installedMods.Where(m => m.id == id).ToList();
             }
             else
             {
@@ -944,11 +910,24 @@ namespace Knossos.NET
             }
         }
 
+        /// <summary>
+        /// Gets a installed mod data
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="version"></param>
+        /// <returns>Mod class or null if not found</returns>
         public static Mod? GetInstalledMod(string id, string version)
         {
             return installedMods.FirstOrDefault(m => m.id == id && m.version == version);
         }
 
+        /// <summary>
+        /// Gets a list of requested installed FsoBuild
+        /// Optional id and FsoStability to narrow down the results
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="stability"></param>
+        /// <returns>List of FsoBuild or a empty list</returns>
         public static List<FsoBuild> GetInstalledBuildsList(string? id=null, FsoStability? stability = null)
         {
             if (id != null)
@@ -975,6 +954,12 @@ namespace Knossos.NET
             }
         }
 
+        /// <summary>
+        /// Search and load mods, builds and tools on the library path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="isQuickLaunch"></param>
+        /// <param name="folderLevel"></param>
         private static async Task FolderSearchRecursive(string path, bool isQuickLaunch, int folderLevel=0)
         {
             try
@@ -1053,27 +1038,52 @@ namespace Knossos.NET
             }
         }
 
+        /// <summary>
+        /// Writes an string ONLY to the Debug -> Console window
+        /// This is only valid for the current session
+        /// </summary>
+        /// <param name="message"></param>
         public static void WriteToUIConsole(string message)
         {
             MainWindowViewModel.Instance?.WriteToUIConsole(message);
         }
 
+        /// <summary>
+        /// Removes a from the installed builds list
+        /// This does not removes the physical files or the UI element
+        /// </summary>
+        /// <param name="build"></param>
         public static void RemoveBuild(FsoBuild build)
         {
             engineBuilds.Remove(build);
         }
 
+        /// <summary>
+        /// Add a builds to the installed builds list
+        /// This does not creates the UI element
+        /// </summary>
+        /// <param name="build"></param>
         public static void AddBuild(FsoBuild build)
         {
             engineBuilds.Add(build);
         }
 
+        /// <summary>
+        /// Add a mod to the installed mod list
+        /// This does not creates the UI element
+        /// </summary>
+        /// <param name="mod"></param>
         public static void AddMod(Mod mod)
         {
             installedMods.Add(mod);
         }
 
-        /* Remove ALL */
+        /// <summary>
+        /// Remove all isntalled versions of a MOD ID
+        /// Also removes the UI element and physical files
+        /// It does not re-add the UI element to the Nebula tab
+        /// </summary>
+        /// <param name="modId"></param>
         public static void RemoveMod(string modId)
         {
             try
@@ -1096,7 +1106,12 @@ namespace Knossos.NET
             }
         }
 
-        /* Remove one version */
+        /// <summary>
+        /// Removes one mod version from the installed mod list
+        /// Deletes Physical files
+        /// Does not deletes the UI element in any case
+        /// </summary>
+        /// <param name="mod"></param>
         public static void RemoveMod(Mod mod)
         {
             try
@@ -1111,6 +1126,15 @@ namespace Knossos.NET
             }
         }
 
+        /// <summary>
+        /// Text-to-speech using the same system and voice that FSO is currently set to use
+        /// Uses the Ksapi utility in Windows, what is likely to not work properly on ARM64 due to SAPI registry keys
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="voice_index"></param>
+        /// <param name="voice_name"></param>
+        /// <param name="volume"></param>
+        /// <param name="callBack"></param>
         public async static void Tts(string text, int? voice_index = null, string? voice_name = null, int? volume = null, Func<bool>? callBack = null)
         {
             try
@@ -1238,16 +1262,29 @@ namespace Knossos.NET
             }
         }
 
+        /// <summary>
+        /// Removes a tool from the installed tool list
+        /// Does not removes physical files
+        /// </summary>
+        /// <param name="tool"></param>
         public static void RemoveTool(Tool tool)
         {
             modTools.Remove(tool);
         }
 
+        /// <summary>
+        /// Add a tool to the installed tool list
+        /// </summary>
+        /// <param name="tool"></param>
         public static void AddTool(Tool tool)
         {
             modTools.Add(tool);
         }
 
+        /// <summary>
+        /// Get all installed Tool list
+        /// </summary>
+        /// <returns>List of tools or empty list</returns>
         public static List<Tool> GetTools()
         {
             return modTools;

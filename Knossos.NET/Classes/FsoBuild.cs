@@ -1,4 +1,5 @@
 ﻿using Knossos.NET.Classes;
+using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +12,6 @@ using System.Threading.Tasks;
 
 namespace Knossos.NET.Models
 {
-    /* Using enums (and a large number of switch() as a result), in general must be avoided if possible. But they will do for now. */
     public enum FsoExecType
     {
         Unknown,
@@ -52,6 +52,24 @@ namespace Knossos.NET.Models
         Custom
     }
 
+    public struct FsoResult
+    {
+        public bool IsSuccess;
+        public string ErrorMessage;
+
+        public FsoResult(bool isSuccess, string errorMessage)
+        {
+            IsSuccess = isSuccess;
+            ErrorMessage = errorMessage;
+        }
+
+        public FsoResult (bool isSuccess)
+        {
+            IsSuccess = isSuccess;
+            ErrorMessage = string.Empty;
+        }
+    }
+
     public class FsoBuild
     {
         public string id;
@@ -67,9 +85,13 @@ namespace Knossos.NET.Models
         public bool devMode = false;
         public Mod? modData; 
       
-        /*
-         Direct Exe
-         */
+        /// <summary>
+        /// This is a "DirectExec" FsoBuild
+        /// This is intended to be used for when the user manually selects a FSO build executable file on mod settings
+        /// Version will be attempted to be parsed from the file name, if this fails 99.99.99-CurrentTimestamp will be used
+        /// Stability is set to "Custom"
+        /// </summary>
+        /// <param name="directExecpath"></param>
         public FsoBuild(string directExecpath)
         {
             id = "DirectExec";
@@ -116,9 +138,12 @@ namespace Knossos.NET.Models
             date = DateTime.Now.ToString();
             directExec = directExecpath;
         }
-        /*
-         Installed/nebula builds
-         */
+        
+        /// <summary>
+        /// Creates a new FsoBuild object from a Mod Json that is currently installed or it is on Nebula
+        /// If the build is installed or it is a nebula build it is determined by the value of modJson.fullPath, if it is empty it is a Nebula build
+        /// </summary>
+        /// <param name="modJson"></param>
         public FsoBuild(Mod modJson)
         {
             if (modJson.fullPath == string.Empty)
@@ -138,6 +163,11 @@ namespace Knossos.NET.Models
             LoadExecutables(modJson);
         }
 
+        /// <summary>
+        /// Updates Updates Build Json data
+        /// This updates everything, including stability and the executables array
+        /// </summary>
+        /// <param name="modJson"></param>
         public void UpdateBuildData(Mod modJson)
         {
             if (modJson.fullPath == string.Empty)
@@ -158,6 +188,59 @@ namespace Knossos.NET.Models
             LoadExecutables(modJson);
         }
 
+        /// <summary>
+        /// Run a FSO build
+        /// Pass restested executable type, cmdline and a optional working folder and waitforexist before return
+        /// </summary>
+        /// <param name="executableType"></param>
+        /// <param name="cmdline"></param>
+        /// <param name="workingFolder"></param>
+        /// <param name="waitForExit"></param>
+        /// <returns>
+        /// A FsoResult structure with IsSuccess = true if the FSO buld was executed fine
+        /// or IsSuccess = false and a ErrorMessage with the reason if failed
+        /// </returns>
+        public async Task<FsoResult> RunFSO(FsoExecType executableType, string cmdline, string? workingFolder = null, bool waitForExit = false)
+        {
+            try
+            {
+                var execPath = GetExec(executableType);
+                if (execPath == null)
+                {
+                    Log.Add(Log.LogSeverity.Error, "FsoBuild.RunFSO()", "Could not find a executable type for the requested fso build :" + executableType.ToString() + " Requested Type: " + executableType);
+                    return new FsoResult(false, "Could not find a executable type for the requested fso build :" + executableType.ToString() + " Requested Type: " + executableType);
+                }
+
+                //In Linux and Mac make sure it is marked as executable
+                if (KnUtils.IsLinux || KnUtils.IsMacOS)
+                {
+                    KnUtils.Chmod(execPath, "+x");
+                }
+
+                using (var fso = new Process())
+                {
+                    fso.StartInfo.FileName = execPath;
+                    fso.StartInfo.Arguments = cmdline;
+                    fso.StartInfo.UseShellExecute = false;
+                    if(workingFolder != null)
+                        fso.StartInfo.WorkingDirectory = workingFolder;
+                    fso.Start();
+                    if(waitForExit)
+                        await fso.WaitForExitAsync();
+                    return new FsoResult(true);
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "FsoBuild.RunFSO()", ex);
+                return new FsoResult(false, ex.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Get FSO flags structure of this build using the JSON format V1
+        /// </summary>
+        /// <returns>A FlagsJsonV1 structure or null if failed</returns>
         public FlagsJsonV1? GetFlagsV1()
         {
             var fullpath = GetExec(FsoExecType.Release);
@@ -180,26 +263,28 @@ namespace Knossos.NET.Models
             string output = string.Empty;
             try
             {
-                var cmd = new Process();
-                cmd.StartInfo.FileName = fullpath;
-                cmd.StartInfo.Arguments = "-get_flags json_v1";
-                cmd.StartInfo.UseShellExecute = false;
-                cmd.StartInfo.CreateNoWindow = true;
-                cmd.StartInfo.RedirectStandardOutput = true;
-                cmd.StartInfo.RedirectStandardInput = true;
-                cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
-                cmd.StartInfo.WorkingDirectory = folderPath;
-                cmd.Start();
-                string result = cmd.StandardOutput.ReadToEnd();
-                output = result;
-                cmd.WaitForExit();
-                cmd.Dispose();
-                //avoiding the "fso is running in legacy config mode..."
-                if(result.Contains("{"))
+                using (var cmd = new Process())
                 {
-                    result = result.Substring(result.IndexOf('{'));
+                    cmd.StartInfo.FileName = fullpath;
+                    cmd.StartInfo.Arguments = "-get_flags json_v1";
+                    cmd.StartInfo.UseShellExecute = false;
+                    cmd.StartInfo.CreateNoWindow = true;
+                    cmd.StartInfo.RedirectStandardOutput = true;
+                    cmd.StartInfo.RedirectStandardInput = true;
+                    cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
+                    cmd.StartInfo.WorkingDirectory = folderPath;
+                    cmd.Start();
+                    string result = cmd.StandardOutput.ReadToEnd();
+                    output = result;
+                    cmd.WaitForExit();
+                    cmd.Dispose();
+                    //avoiding the "fso is running in legacy config mode..."
+                    if (result.Contains("{"))
+                    {
+                        result = result.Substring(result.IndexOf('{'));
+                    }
+                    return JsonSerializer.Deserialize<FlagsJsonV1>(result);
                 }
-                return JsonSerializer.Deserialize<FlagsJsonV1>(result);
             }
             catch (JsonException exJson)
             {
@@ -224,10 +309,11 @@ namespace Knossos.NET.Models
             }
         }
 
-        /*
-            Return the best executable fullpath that is valid for user system and requested type.
-            Null if none.
-         */
+        /// <summary>
+        /// Return the best executable fullpath that is valid for user system and requested type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>Fullpath to executable or null if no a valid executable is found</returns>
         public string? GetExec(FsoExecType type)
         {
             if (directExec != null)
@@ -241,6 +327,7 @@ namespace Knossos.NET.Models
             {
                 foreach(var exe in validExecs)
                 {
+                    //Make score adjustments to force SSE2
                     if (Knossos.globalSettings.forceSSE2)
                     {
                         if (exe.arch == FsoExecArch.x64 || exe.arch == FsoExecArch.x86)
@@ -251,6 +338,7 @@ namespace Knossos.NET.Models
                     }
                     else
                     {
+                        //If SSE2 was previously enabled on this session and its not anymore return the score to normal if it was altered
                         if (exe.arch == FsoExecArch.x64 || exe.arch == FsoExecArch.x86)
                         {
                             if (exe.score > 200)
@@ -258,12 +346,18 @@ namespace Knossos.NET.Models
                         }
                     }
                 }
-                validExecs = validExecs.OrderByDescending(b => b.score);
-                return folderPath + validExecs.ToArray()[0].filename;
+                return folderPath + validExecs.MaxBy(b => b.score)!.filename;
             }
             return null;
         }
 
+        /// <summary>
+        /// Loads the Build executable list
+        /// sets the correct cpu arch, os, exec type and fullpath depending if it is devmode path or not
+        /// Uses the package enviroment string and completely ignores executable propeties in json
+        /// In fact properties are generated here at runtime
+        /// </summary>
+        /// <param name="modJson"></param>
         private void LoadExecutables(Mod modJson)
         {
             if (modJson.packages != null)
@@ -299,48 +393,48 @@ namespace Knossos.NET.Models
             }
         }
 
-        /*
-         Complete mod executable properties if missing from the enviroment
-         */
+        /// <summary>
+        /// Complete mod executable properties from the enviroment string
+        /// </summary>
+        /// <param name="environment"></param>
+        /// <returns>ModProperties</returns>
         public static ModProperties FillProperties(string environment)
         {
             var properties = new ModProperties();
             if (environment.ToLower().Contains("arm64"))
             {
                 properties.arm64 = true;
+                return properties;
             }
             if (environment.ToLower().Contains("arm32"))
             {
                 properties.arm32 = true;
+                return properties;
             }
-
-            if (!environment.ToLower().Contains("arm32") && !environment.ToLower().Contains("arm64"))
+            if (!environment.ToLower().Contains("avx"))
             {
-                if (!environment.ToLower().Contains("avx"))
+                properties.sse2 = true;
+            }
+            if (environment.ToLower().Contains("x86_64") || environment.ToLower().Contains("x64"))
+            {
+                properties.x64 = true;
+            }
+            if (environment.ToLower().Contains("avx2"))
+            {
+                properties.avx2 = true;
+            }
+            else
+            {
+                if (environment.ToLower().Contains("avx"))
                 {
-                    properties.sse2 = true;
-                }
-                if (environment.ToLower().Contains("x86_64") || environment.ToLower().Contains("x64"))
-                {
-                    properties.x64 = true;
-                }
-                if (environment.ToLower().Contains("avx2"))
-                {
-                    properties.avx2 = true;
-                }
-                else
-                {
-                    if (environment.ToLower().Contains("avx"))
-                    {
-                        properties.avx = true;
-                    }
+                    properties.avx = true;
                 }
             }
             return properties;
         }
 
         /// <summary>
-        /// Determines if the current environment string is valid to download in the current system
+        /// Determines if the current environment string is valid to download for the current system
         /// Used to determine witch packages to install for each build
         /// </summary>
         /// <param name="enviroment"></param>
@@ -391,9 +485,13 @@ namespace Knossos.NET.Models
             return false;
         }
 
-        /*
-            Determine the operating system this build file is compiled for 
-        */
+        /// <summary>
+        /// Determine the operating system this build file is compiled for, using the enviroment string
+        /// </summary>
+        /// <param name="enviroment"></param>
+        /// <returns>
+        /// FsoExecEnvironment
+        /// </returns>
         public static FsoExecEnvironment GetExecEnvironment(string? enviroment)
         {
             if (enviroment == null)
@@ -413,9 +511,12 @@ namespace Knossos.NET.Models
             return FsoExecEnvironment.Unknown;
         }
 
-        /*
-            Determine the CPU arch this build file is compiled for
-        */
+        /// <summary>
+        /// Determine the CPU arch this build file is compiled for from properties
+        /// Note: FsoBuild properties are always generated at runtime from the enviroment string and not read from the json
+        /// </summary>
+        /// <param name="properties"></param>
+        /// <returns>FsoExecArch</returns>
         public static FsoExecArch GetExecArch(ModProperties? properties)
         {
             if (properties == null || properties.other)
@@ -447,9 +548,12 @@ namespace Knossos.NET.Models
             }
         }
 
-        /*
-          If label is null, then is Release.
-        */
+        /// <summary>
+        /// Gets the right FsoExecType from the label string
+        /// Label = null => Release
+        /// </summary>
+        /// <param name="label"></param>
+        /// <returns>FsoExecType</returns>
         public static FsoExecType GetExecType(string? label)
         {
             if (label == null)
@@ -485,6 +589,11 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Converts FsoExecType enum value to the right label string value
+        /// </summary>
+        /// <param name="fsoExecType"></param>
+        /// <returns>label string</returns>
         public static string? GetLabelString(FsoExecType fsoExecType)
         {
             switch (fsoExecType)
@@ -499,10 +608,13 @@ namespace Knossos.NET.Models
             return null;
         }
 
-        /* 
-           Official FSO builds from nebula use "FSO" as id, only check stability on those.
-           For all others the stability is "custom" since we cant really know.    
-        */
+        /// <summary>
+        /// Official FSO builds from nebula use "FSO" as id, only check stability on those.
+        /// For all others the stability is "custom" since we cant really know.
+        /// </summary>
+        /// <param name="stability"></param>
+        /// <param name="modId"></param>
+        /// <returns>FsoStability</returns>
         public static FsoStability GetFsoStability(string? stability, string? modId)
         {
             if (modId == null || stability == null)
@@ -526,9 +638,15 @@ namespace Knossos.NET.Models
             }
         }
 
-        public static string GetEnviromentString(FsoExecArch arch, FsoExecEnvironment so)
+        /// <summary>
+        /// Gets the right enviroment string from exec arch and operative system
+        /// </summary>
+        /// <param name="arch"></param>
+        /// <param name="os"></param>
+        /// <returns>Enviroment String</returns>
+        public static string GetEnviromentString(FsoExecArch arch, FsoExecEnvironment os)
         {
-            string env = so.ToString().ToLower();
+            string env = os.ToString().ToLower();
 
             switch(arch)
             {
@@ -545,6 +663,11 @@ namespace Knossos.NET.Models
             return env;
         }
 
+        /// <summary>
+        /// Get the Title + Version string
+        /// or fullpath in case of "DirectExec"
+        /// </summary>
+        /// <returns>string</returns>
         public override string ToString()
         {
             if(directExec != null)
@@ -552,9 +675,9 @@ namespace Knossos.NET.Models
             return title + " " + version;
         }
 
-        /* To use with the List .Sort()
-           Results are inverted
-        */
+        /// <summary>
+        /// To use with the List .Sort()
+        /// </summary>
         public static int CompareDatesAsTimestamp(FsoBuild build1, FsoBuild build2)
         {
             if(build1.date == null && build2.date == null)
@@ -566,9 +689,9 @@ namespace Knossos.NET.Models
             return string.Compare(build2.date.Replace("-", "").Trim(), build1.date.Replace("-", "").Trim());
         }
 
-        /* 
-         * To use with the List .Sort()
-        */
+        /// <summary>
+        /// To use with the List .Sort()
+        /// </summary>
         public static int CompareVersion(FsoBuild build1, FsoBuild build2)
         {
             //inverted
@@ -583,7 +706,7 @@ namespace Knossos.NET.Models
         public FsoExecArch arch;
         public FsoExecEnvironment env;
         public bool isValid = false;
-        internal int score = 0;
+        public int score { get; internal set; } = 0;
 
         public FsoFile(string filename, string modpath, FsoExecType type, FsoExecArch arch, FsoExecEnvironment env)
         {
@@ -596,9 +719,11 @@ namespace Knossos.NET.Models
                 isValid = true;
         }
 
-        /*
-            Determine FSO File score based on OS and CPU Arch
-         */
+        /// <summary>
+        /// Determine FSO File score based on OS and CPU Arch
+        /// </summary>
+        /// <param name="modpath"></param>
+        /// <returns>int score from 0 to 100</returns>
         private int DetermineScore(string modpath)
         {
             int score = 0;

@@ -6,6 +6,10 @@ using System;
 
 namespace Knossos.NET.Classes
 {
+    /// <summary>
+    /// ThrottledStream class for Knet
+    /// Applies a max download speed based on the maxBytesPerSecond defined in GlobalSettingsViewModel.cs
+    /// </summary>
     public class ThrottledStream : Stream
     {
         private Stream stream;

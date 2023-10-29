@@ -69,6 +69,11 @@ namespace Knossos.NET.Classes
             }
         }
 
+        /// <summary>
+        /// Open a tool
+        /// </summary>
+        /// <param name="workingFolder"></param>
+        /// <returns>true or false depending if the process start was successfull</returns>
         public bool Open(string? workingFolder = null)
         {
             var best = GetBestPackage();
@@ -102,6 +107,10 @@ namespace Knossos.NET.Classes
             return false;
         }
 
+        /// <summary>
+        /// Deletes a tool, it deletes the physical file and removes it from the knossos installed tool list
+        /// It is availble to re download after this
+        /// </summary>
         public void Delete()
         {
             if (folderpath != string.Empty)
@@ -119,6 +128,12 @@ namespace Knossos.NET.Classes
             }
         }
 
+        /// <summary>
+        /// Saves tool Json
+        /// If path is passed it is updated internally before saving the json
+        /// That it is used when we are installing a tool, since tools that arent installed does not have a folderpath
+        /// </summary>
+        /// <param name="path"></param>
         public void SaveJson(string? path = null)
         {
             try
@@ -147,6 +162,10 @@ namespace Knossos.NET.Classes
             }
         }
 
+        /// <summary>
+        /// Get string for the download URL of the best package for this system
+        /// </summary>
+        /// <returns>url for download or null if not valid package is found</returns>
         public string? GetDownloadURL()
         {
             if(IsValidPlatform())
@@ -156,6 +175,10 @@ namespace Knossos.NET.Classes
             return null;
         }
 
+        /// <summary>
+        /// Gets the best package for this system OS and cpu arch
+        /// </summary>
+        /// <returns>Toolpackage or null if none was found</returns>
         private ToolPackage? GetBestPackage()
         {
             try
@@ -170,6 +193,10 @@ namespace Knossos.NET.Classes
             return null;
         }
 
+        /// <summary>
+        /// Determine if this tool can be installed and run on this system
+        /// </summary>
+        /// <returns>true or false</returns>
         public bool IsValidPlatform()
         {
             try
@@ -184,6 +211,9 @@ namespace Knossos.NET.Classes
             return false;
         }
 
+        /// <summary>
+        /// Sets the packages scores by OS and cpu arch
+        /// </summary>
         private void SetPkgScores()
         {
             if (scoresSet)

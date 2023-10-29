@@ -1,12 +1,15 @@
-﻿using System;
+﻿using Avalonia.Animation.Easings;
+using System;
 
 namespace Knossos.NET.Classes
 {
-    /*
-        Helper class to handle semantic versions used by FSO and Knossos.
-        Just the basics needed to do comparisons without having to include 
-        a 3rd party library for this.
-    */
+    /// <summary>
+    /// Helper class to handle semantic versions used by FSO and Knossos.
+    /// Just the basics needed to do comparisons without having to include
+    /// a 3rd party library for this.
+    /// Implements the IComparable interface to use with LINQ .MaxBy();
+    /// This is a basic implementation of SemanticVersion intended to be tailored for the needs of FSO mods
+    /// </summary>
     public class SemanticVersion : IComparable
     {
         int major;
@@ -14,6 +17,11 @@ namespace Knossos.NET.Classes
         int revision;
         string? prerelease;
 
+        /// <summary>
+        /// Creates a new Semantic Version class from a version string
+        /// If parsing fails it sets, major, minor and revision to "0"
+        /// </summary>
+        /// <param name="version"></param>
         public SemanticVersion(string version)
         {
             try
@@ -127,10 +135,15 @@ namespace Knossos.NET.Classes
         }
 
         /*
-            Compares a semantic version string to the version string in the mod dependency to see if it sastifies the requirement.
-            Returns true or false
-            Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 < 4.7.0, Version: ">=4.6.1"->equal or better
+
         */
+        /// <summary>
+        /// Compares a semantic version string to the version string in the mod dependency to see if it sastifies the requirement.
+        /// Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 < 4.7.0, Version: ">=4.6.1"->equal or better
+        /// </summary>
+        /// <param name="dependencyVersion"></param>
+        /// <param name="version"></param>
+        /// <returns>true or false</returns>
         public static bool SastifiesDependency(string? dependencyVersion, string? version)
         {
             if (version == null)
@@ -140,10 +153,15 @@ namespace Knossos.NET.Classes
         }
 
         /*
-            Compares a semantic version to the version string in the mod dependency to see if it sastifies the requirement.
-            Returns true or false
-            Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 < 4.7.0, Version: ">=4.6.1"->equal or better
+
         */
+        /// <summary>
+        /// Compares a semantic version to the version string in the mod dependency to see if it sastifies the requirement.
+        /// Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 < 4.7.0, Version: ">=4.6.1"->equal or better
+        /// </summary>
+        /// <param name="dependencyVersion"></param>
+        /// <param name="version"></param>
+        /// <returns>returns true or false</returns>
         public static bool SastifiesDependency(string? dependencyVersion, SemanticVersion version)
         {
             try
@@ -231,6 +249,9 @@ namespace Knossos.NET.Classes
             return Compare(a, b) <= 0;
         }
 
+        /// <summary>
+        /// major . minor . revision - prerelease (if it has one)
+        /// </summary>
         public override string ToString()
         {
             if(prerelease != null)

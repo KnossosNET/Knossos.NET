@@ -416,5 +416,42 @@ namespace Knossos.NET
                 action(cur);
             }
         }
+
+        /// <summary>
+        /// Adds arguments to a cmdline string, only if they arent already present
+        /// </summary>
+        /// <param name="cmdline"></param>
+        /// <param name="args"></param>
+        /// <returns>cmdline string</returns>
+        public static string CmdLineBuilder(string cmdline, string[]? args)
+        {
+            try
+            {
+                if (args != null && args.Any())
+                {
+                    var addedArgs = new List<string>();
+                    foreach (var arg in cmdline.ToLower().Split('-'))
+                    {
+                        addedArgs.Add(arg.Split(' ')[0].Trim());
+                    }
+                    foreach (var arg in args)
+                    {
+                        var argName = arg.Trim().Split(' ')[0];
+                        if (!addedArgs.Contains(argName.ToLower()))
+                        {
+                            if (arg.Trim().Length > 0)
+                            {
+                                cmdline += " -" + arg.Trim();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.CmdLineBuilder()", ex);
+            }
+            return cmdline;
+        }
     }
 }
