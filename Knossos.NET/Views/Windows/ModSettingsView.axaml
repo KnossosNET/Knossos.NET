@@ -38,6 +38,7 @@
 						<!--FSO Build Settings -->
 						<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">FSO BUILD</Label>
 						<v:FsoBuildPickerView Content="{Binding FsoPicker}"/>
+						<TextBlock Margin="5,0,0,0" TextWrapping="Wrap" Foreground="Red" Text="{Binding BuildMissingWarning}"/>
 						<Button IsVisible="{Binding !ConfigureBuildOpen}" Command="{Binding ConfigureBuildCommand}" Margin="5" FontWeight="Bold" FontSize="18" Background="Black" Foreground="White">Configure</Button>
 						<v:FsoFlagsView Content="{Binding FsoFlags}"/>
 						<CheckBox IsChecked="{Binding IgnoreGlobalCmd}" Margin="5,5,0,0" ToolTip.Tip="This means that global settings and global cmdline is not applied to the mod.">Do not apply settings or global cmdline on this mod</CheckBox>

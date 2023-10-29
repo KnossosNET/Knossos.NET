@@ -43,6 +43,8 @@ namespace Knossos.NET.ViewModels
         internal string quickLaunch = "";
         [ObservableProperty]
         internal bool ignoreGlobalCmd = false;
+        [ObservableProperty]
+        internal string buildMissingWarning = string.Empty;
 
         public ModSettingsViewModel()
         {
@@ -96,13 +98,15 @@ namespace Knossos.NET.ViewModels
                         }
                         else
                         {
-                            Log.Add(Log.LogSeverity.Warning, "ModSettingsViewModel.Constructor()", "Missing user-saved build version for mod: " + modJson.tile + " - " + modJson.version + " requested build id: " + modJson.modSettings.customBuildId + " and version: " + modJson.modSettings.customBuildVersion);
+                            Log.Add(Log.LogSeverity.Warning, "ModSettingsViewModel.Constructor()", "Missing user-saved build version for mod: " + modJson.title + " - " + modJson.version + " requested build id: " + modJson.modSettings.customBuildId + " and version: " + modJson.modSettings.customBuildVersion);
+                            BuildMissingWarning = "Missing user-saved build version for mod: " + modJson.title + " - " + modJson.version + " requested build id: " + modJson.modSettings.customBuildId + " and version: " + modJson.modSettings.customBuildVersion;
                             fsoPicker = new FsoBuildPickerViewModel(null);
                         }
                     }
                     else
                     {
-                        Log.Add(Log.LogSeverity.Warning, "ModSettingsViewModel.Constructor()", "Missing user-saved build id for mod: " + modJson.tile + " - " + modJson.version + " requested build id: " + modJson.modSettings.customBuildId);
+                        Log.Add(Log.LogSeverity.Warning, "ModSettingsViewModel.Constructor()", "Missing user-saved build id for mod: " + modJson.title + " - " + modJson.version + " requested build id: " + modJson.modSettings.customBuildId);
+                        BuildMissingWarning = "Missing user-saved build id for mod: " + modJson.title + " - " + modJson.version + " requested build id: " + modJson.modSettings.customBuildId;
                         fsoPicker = new FsoBuildPickerViewModel(null);
                     }
                 }
@@ -219,6 +223,7 @@ namespace Knossos.NET.ViewModels
         {
             if(modJson!= null)
             {
+                BuildMissingWarning = string.Empty;
                 //Dependencies
                 if (CustomDependencies)
                 {
@@ -349,6 +354,7 @@ namespace Knossos.NET.ViewModels
         internal void ResetSettingsCommand()
         {
             CustomDependencies = false;
+            BuildMissingWarning = string.Empty;
             FsoPicker = new FsoBuildPickerViewModel(null);
             FsoFlags = null;
             ConfigureBuild(true);
