@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Knossos.NET
 {
