@@ -74,12 +74,12 @@ namespace Knossos.NET.ViewModels
 
             internal ObservableCollection<ComboBoxItem> ModItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
-            internal EditorPackageItem EditorPackageItem { get; set; }
+            internal EditorModPackageItem EditorPackageItem { get; set; }
 
             private string modID = string.Empty;
             private string? modParent = null;
 
-            public EditorDependencyItem(ModDependency dep, EditorPackageItem pkgItem, string modId, string? modParent)
+            public EditorDependencyItem(ModDependency dep, EditorModPackageItem pkgItem, string modId, string? modParent)
             {
                 Dependency = dep;
                 EditorPackageItem = pkgItem;
@@ -293,31 +293,31 @@ namespace Knossos.NET.ViewModels
         }
 
         /*************************************************** PACKAGE ITEM ***********************************************************/
-        public partial class EditorPackageItem : ObservableObject
+        public partial class EditorModPackageItem : ObservableObject
         {
             public ModPackage Package { get; set; }
 
             [ObservableProperty]
-            private int packageStatusIndex = 0;
+            internal int packageStatusIndex = 0;
 
             [ObservableProperty]
-            private string packageNotes = string.Empty;
+            internal string packageNotes = string.Empty;
 
             [ObservableProperty]
-            private bool isEnabled = true;
+            internal bool isEnabled = true;
 
             [ObservableProperty]
-            private bool packVP = false;
+            internal bool packVP = false;
 
             [ObservableProperty]
-            private string diskSpace = string.Empty;
+            internal string diskSpace = string.Empty;
 
             [ObservableProperty]
-            private ObservableCollection<EditorDependencyItem> dependencyItems = new ObservableCollection<EditorDependencyItem>();
+            internal ObservableCollection<EditorDependencyItem> dependencyItems = new ObservableCollection<EditorDependencyItem>();
 
-            private DevModPkgMgrViewModel PkgMgr { get; set; }
+            public DevModPkgMgrViewModel PkgMgr { get; set; }
 
-            public EditorPackageItem(ModPackage pkg, DevModPkgMgrViewModel pkgmgr) 
+            public EditorModPackageItem(ModPackage pkg, DevModPkgMgrViewModel pkgmgr) 
             {
                 Package = pkg;
                 PkgMgr = pkgmgr;
@@ -361,7 +361,7 @@ namespace Knossos.NET.ViewModels
                     }
                     catch(Exception ex)
                     {
-                        Log.Add(Log.LogSeverity.Warning, "EditorPackageItem.UpdateFolderSize", ex);
+                        Log.Add(Log.LogSeverity.Warning, "EditorModPackageItem.UpdateFolderSize", ex);
                     }
                 });
             }
@@ -410,11 +410,11 @@ namespace Knossos.NET.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Log.Add(Log.LogSeverity.Error, "EditorPackageItem.DeleteDependency()", ex);
+                    Log.Add(Log.LogSeverity.Error, "EditorModPackageItem.DeleteDependency()", ex);
                 }
             }
 
-            internal void DeletePkg()
+            internal void DeleteModPkg()
             {
                 try
                 {
@@ -422,11 +422,11 @@ namespace Knossos.NET.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Log.Add(Log.LogSeverity.Error, "EditorPackageItem.DeletePkg()", ex);
+                    Log.Add(Log.LogSeverity.Error, "EditorModPackageItem.DeletePkg()", ex);
                 }
             }
 
-            internal void AddDependency()
+            internal void AddModDependency()
             {
                 try
                 {
@@ -435,11 +435,11 @@ namespace Knossos.NET.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Log.Add(Log.LogSeverity.Error, "EditorPackageItem.AddDependency()", ex);
+                    Log.Add(Log.LogSeverity.Error, "EditorModPackageItem.AddDependency()", ex);
                 }
             }
 
-            internal void OpenPackageFolder()
+            internal void OpenModPackageFolder()
             {
                 try
                 {
@@ -448,7 +448,7 @@ namespace Knossos.NET.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Log.Add(Log.LogSeverity.Error, "EditorPackageItem.OpenPackageFolder()", ex);
+                    Log.Add(Log.LogSeverity.Error, "EditorModPackageItem.OpenPackageFolder()", ex);
                 }
             }
         }
@@ -461,7 +461,7 @@ namespace Knossos.NET.ViewModels
 
             public string FlagName { get; set; }
 
-            private DevModPkgMgrViewModel PkgMgr { get; set; }
+            internal DevModPkgMgrViewModel PkgMgr { get; set; }
 
             public bool IsThisMod { get; set; }
 
@@ -503,13 +503,13 @@ namespace Knossos.NET.ViewModels
 
         public DevModEditorViewModel? editor;
         [ObservableProperty]
-        private ObservableCollection<EditorFlagItem> editorFlagItems = new ObservableCollection<EditorFlagItem>();
+        internal ObservableCollection<EditorFlagItem> editorFlagItems = new ObservableCollection<EditorFlagItem>();
         [ObservableProperty]
-        private ObservableCollection<EditorPackageItem> editorPackageItems = new ObservableCollection<EditorPackageItem>();
+        internal ObservableCollection<EditorModPackageItem> editorPackageItems = new ObservableCollection<EditorModPackageItem>();
 
-        private string newPackageName = string.Empty;
+        internal string newPackageName = string.Empty;
 
-        private string NewPackageName
+        internal string NewPackageName
         {
             get
             {
@@ -526,7 +526,7 @@ namespace Knossos.NET.ViewModels
         }
 
         [ObservableProperty]
-        private string newPackageFolder = string.Empty;
+        internal string newPackageFolder = string.Empty;
 
         public DevModPkgMgrViewModel()
         {
@@ -542,7 +542,7 @@ namespace Knossos.NET.ViewModels
 
             foreach (var item in editor.ActiveVersion.packages)
             {
-                EditorPackageItems.Add(new EditorPackageItem(item, this));
+                EditorPackageItems.Add(new EditorModPackageItem(item, this));
             }
         }
 
@@ -553,7 +553,7 @@ namespace Knossos.NET.ViewModels
                 return;
             var newPkgs = new List<ModPackage>();
             //Get all listed packages with updated data
-            foreach (EditorPackageItem pkg in EditorPackageItems)
+            foreach (EditorModPackageItem pkg in EditorPackageItems)
             {
                 var newPkg = pkg.GetPackage();
                 newPkgs.Add(newPkg);
@@ -627,7 +627,7 @@ namespace Knossos.NET.ViewModels
                     var newPkg = new ModPackage();
                     newPkg.folder = NewPackageFolder;
                     newPkg.name = NewPackageName;
-                    EditorPackageItems.Add(new EditorPackageItem(newPkg, this));
+                    EditorPackageItems.Add(new EditorModPackageItem(newPkg, this));
                     NewPackageName = string.Empty;
                     NewPackageFolder = string.Empty;
                 }
@@ -638,7 +638,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal async void DeletePkg(EditorPackageItem editorPackageItem)
+        internal async void DeletePkg(EditorModPackageItem editorPackageItem)
         {
             try
             {

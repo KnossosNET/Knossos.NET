@@ -43,8 +43,8 @@
 						<WrapPanel>
 							<CheckBox ToolTip.Tip="If package is enabled or disabled. Disabled packages are not used when playing." IsChecked="{Binding IsEnabled}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></CheckBox>
 							<Label MinWidth="250" FontWeight="Bold" FontSize="18" Content="{Binding Package.name}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
-							<Button Command="{Binding OpenPackageFolder}" Margin="10,0,0,0">Open Folder</Button>
-							<Button Command="{Binding AddDependency}" Margin="10,0,0,0">+Dependency</Button>
+							<Button Command="{Binding OpenModPackageFolder}" Margin="10,0,0,0">Open Folder</Button>
+							<Button Command="{Binding AddModDependency}" Margin="10,0,0,0">+Dependency</Button>
 							<Button Margin="10,0,0,0" Content="Notes">
 								<Button.Flyout>
 									<Flyout>
@@ -59,7 +59,7 @@
 							</ComboBox>
 							<CheckBox IsChecked="{Binding PackVP}" Margin="10,0,0,0" ToolTip.Tip="Whether Knossos should pack the files in a VP on upload.&#x0a;Warning: VPs have a 2GB total size limit.">Make VP</CheckBox>
 							<Label FontSize="16" Margin="5" ToolTip.Tip="Current package folder size" Foreground="Yellow" Content="{Binding DiskSpace}"/>
-							<Button Command="{Binding DeletePkg}" Margin="20,0,0,0" Background="Red" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">Delete</Button>
+							<Button Command="{Binding DeleteModPkg}" Margin="20,0,0,0" Background="Red" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">Delete</Button>
 						</WrapPanel>
 						<!--Pkg Dependency List-->
 						<ItemsControl ItemsSource="{Binding DependencyItems}" Margin="0,5,0,0">

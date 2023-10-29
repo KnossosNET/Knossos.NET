@@ -292,9 +292,9 @@ namespace Knossos.NET.ViewModels
 
         public DevModEditorViewModel? editor;
         [ObservableProperty]
-        private ObservableCollection<EditorPackageItem> editorPackageItems = new ObservableCollection<EditorPackageItem>();
-        private string newPackageName = string.Empty;
-        private string NewPackageName
+        internal ObservableCollection<EditorPackageItem> editorPackageItems = new ObservableCollection<EditorPackageItem>();
+        internal string newPackageName = string.Empty;
+        internal string NewPackageName
         {
             get
             {
@@ -311,7 +311,7 @@ namespace Knossos.NET.ViewModels
         }
 
         [ObservableProperty]
-        private string newPackageFolder = string.Empty;
+        internal string newPackageFolder = string.Empty;
 
         public DevBuildPkgMgrViewModel()
         {
