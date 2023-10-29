@@ -305,7 +305,7 @@ namespace Knossos.NET
                                         }
                                         catch { }
                                     }
-
+                                    await Task.Delay(1000);
                                     //Decompress new files
                                     try
                                     {
