@@ -92,7 +92,7 @@ namespace Knossos.NET.ViewModels
                         foreach (var m in Mods)
                         {
                             m.Visible = true;
-                            await Task.Delay(5);
+                            await Task.Delay(3);
                         }
                     }
                     catch { }
@@ -178,7 +178,7 @@ namespace Knossos.NET.ViewModels
                     foreach (var m in Mods)
                     {
                         m.Visible = true;
-                        await Task.Delay(5);
+                        await Task.Delay(3);
                     }
                 }
                 catch { }
