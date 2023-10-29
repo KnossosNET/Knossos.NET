@@ -29,8 +29,8 @@
 			<Label Grid.Row="2" Grid.Column="0" Margin="10" FontWeight="Bold" FontSize="16">Reason</Label>
 			<TextBox Text="{Binding ReasonString}" Grid.Row="2" MinHeight="200" MinWidth="500" Grid.Column="1" Margin="10" FontSize="16"></TextBox>
 			<WrapPanel Grid.Row="4" Grid.Column="1" HorizontalAlignment="Center">
-				<Button Margin="10" Command="{Binding Submit, Mode=OneWay}" CommandParameter="{Binding ElementName=ReportModWindow}" Background="DarkGreen">Submit Report</Button>
-				<Button Margin="10" Command="{Binding Cancel, Mode=OneWay}" CommandParameter="{Binding ElementName=ReportModWindow}" Background="DarkRed">Cancel</Button>
+				<Button Margin="10" Command="{Binding Submit}" Background="DarkGreen">Submit Report</Button>
+				<Button Margin="10" Command="{Binding Cancel}" Background="DarkRed">Cancel</Button>
 			</WrapPanel>
 		</Grid>
 	</ScrollViewer>

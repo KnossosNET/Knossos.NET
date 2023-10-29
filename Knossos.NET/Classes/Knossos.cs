@@ -446,7 +446,7 @@ namespace Knossos.NET
             Dispatcher.UIThread.InvokeAsync(() =>
             {
                 var dialog = new QuickSetupView();
-                dialog.DataContext = new QuickSetupViewModel();
+                dialog.DataContext = new QuickSetupViewModel(dialog);
                 dialog.Show(MainWindow.instance!);
             });
         }

@@ -103,14 +103,14 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-
+        private Window? dialog;
 
         /* Only used in preview */
         public ModDetailsViewModel()
         {
         }
 
-        public ModDetailsViewModel(Mod modJson)
+        public ModDetailsViewModel(Mod modJson, Window dialog)
         {
             this.modVersions = new List<Mod>() { modJson };
             this.modCard = null;
@@ -125,10 +125,13 @@ namespace Knossos.NET.ViewModels
             {
                 TtsAvalible = false;
             }
+
+            this.dialog = dialog;
         }
 
-        public ModDetailsViewModel(List<Mod> modVersions, int selectedIndex, ModCardViewModel modCard)
+        public ModDetailsViewModel(List<Mod> modVersions, int selectedIndex, ModCardViewModel modCard, Window dialog)
         {
+            this.dialog = dialog;
             this.modVersions = modVersions;
             this.modCard = modCard;
             foreach (var mod in modVersions)
@@ -440,7 +443,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal async void ButtonCommandDelete(object window)
+        internal async void ButtonCommandDelete()
         {
             if (!modVersions[ItemSelectedIndex].devMode)
             {
@@ -473,10 +476,9 @@ namespace Knossos.NET.ViewModels
                             }
                             Knossos.RemoveMod(modVersions[0].id);
                             MainWindowViewModel.Instance?.RunModStatusChecks();
-                            if (window != null)
+                            if (dialog != null)
                             {
-                                var w = (ModDetailsView)window;
-                                w.Close();
+                                dialog.Close();
                             }
                         }
                     }
@@ -509,8 +511,7 @@ namespace Knossos.NET.ViewModels
                 return;
             }
             var dialog = new ReportModView();
-            dialog.DataContext = new ReportModViewModel(modVersions[ItemSelectedIndex]);
-
+            dialog.DataContext = new ReportModViewModel(modVersions[ItemSelectedIndex], dialog);
             await dialog.ShowDialog<ReportModView?>(MainWindow.instance!);
         }
     }

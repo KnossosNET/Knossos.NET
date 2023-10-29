@@ -132,7 +132,7 @@ namespace Knossos.NET.ViewModels
         internal async void CreateMod()
         {
             var dialog = new DevModCreateNewView();
-            dialog.DataContext = new DevModCreateNewViewModel();
+            dialog.DataContext = new DevModCreateNewViewModel(dialog);
             await dialog.ShowDialog<DevModCreateNewView?>(MainWindow.instance!);
         }
     }

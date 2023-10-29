@@ -211,21 +211,21 @@ namespace Knossos.NET.ViewModels
         internal async void ButtonCommandUpdate()
         {
             var dialog = new ModInstallView();
-            dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex]);
+            dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex], dialog);
             await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
         }
 
         internal async void ButtonCommandModify()
         {
             var dialog = new ModInstallView();
-            dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex], modVersions[activeVersionIndex].version);
+            dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex], dialog, modVersions[activeVersionIndex].version);
             await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
         }
 
         internal async void ButtonCommandInstall()
         {
             var dialog = new ModInstallView();
-            dialog.DataContext = new ModInstallViewModel(modVersions[0]);
+            dialog.DataContext = new ModInstallViewModel(modVersions[0], dialog);
             await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
         }
 
@@ -287,7 +287,7 @@ namespace Knossos.NET.ViewModels
             if (MainWindow.instance != null)
             {
                 var dialog = new ModDetailsView();
-                dialog.DataContext = new ModDetailsViewModel(modVersions,activeVersionIndex,this);
+                dialog.DataContext = new ModDetailsViewModel(modVersions, activeVersionIndex, this, dialog);
 
                 await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
             }

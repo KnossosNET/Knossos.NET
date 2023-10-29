@@ -17,13 +17,15 @@ namespace Knossos.NET.ViewModels
         internal string reasonString = string.Empty;
 
         private Mod? mod;
+        private Window? dialog;
 
         public ReportModViewModel()
         {
         }
 
-        public ReportModViewModel(Mod mod)
+        public ReportModViewModel(Mod mod, Window dialog)
         {
+            this.dialog = dialog;
             this.mod = mod;
             modName = mod.title;
             modVersion = mod.version;
@@ -37,8 +39,10 @@ namespace Knossos.NET.ViewModels
                 if(reply)
                 {
                     await MessageBox.Show(MainWindow.instance!, "Your report has been submitted to fsnebula, we will act as soon as possible.", "Mod Report OK", MessageBox.MessageBoxButtons.OK);
-                    var w = (Window)window;
-                    w.Close();
+                    if(dialog != null)
+                    {
+                        dialog.Close();
+                    }
                 }
                 else
                 {
@@ -53,8 +57,10 @@ namespace Knossos.NET.ViewModels
 
         internal void Cancel(object window)
         {
-            var w = (Window)window;
-            w.Close();
+            if (dialog != null)
+            {
+                dialog.Close();
+            }
         }
     }
 }

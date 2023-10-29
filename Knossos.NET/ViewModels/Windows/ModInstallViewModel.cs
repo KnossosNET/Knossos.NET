@@ -48,6 +48,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool forceDevMode = false;
 
+        private Window? dialogWindow;
+
         internal Mod? SelectedMod
         {
             get { return selectedMod; }
@@ -65,8 +67,9 @@ namespace Knossos.NET.ViewModels
         {
         }
 
-        public ModInstallViewModel(Mod modJson, string? preSelectedVersion = null, bool forceDevModeOn = false)
+        public ModInstallViewModel(Mod modJson, Window dialog, string? preSelectedVersion = null, bool forceDevModeOn = false)
         {
+            dialogWindow = dialog;
             Title = "Installing: " + modJson.title;
             CanSelectDevMode = !forceDevModeOn;
             InstallInDevMode = forceDevModeOn;
@@ -300,19 +303,21 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal void InstallMod(object window)
+        internal void InstallMod()
         {
             foreach (var mod in ModInstallList)
             {
                 if (mod == SelectedMod)
                     mod.devMode = InstallInDevMode;
-                if(mod.isSelected)
+                if (mod.isSelected)
                     TaskViewModel.Instance!.InstallMod(mod, null, Compress);
             }
             ModInstallList.Clear();
 
-            var w = (Window)window;
-            w.Close();
+            if (dialogWindow != null)
+            { 
+                dialogWindow.Close(); 
+            }      
         }
     }
 }

@@ -39,8 +39,10 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool page6 = false;
 
-        public QuickSetupViewModel() 
+        private Window? dialog;
+        public QuickSetupViewModel(Window dialog) 
         {
+            this.dialog = dialog;
             TrackRepoStatus();
         }
 
@@ -118,10 +120,10 @@ namespace Knossos.NET.ViewModels
             SetActivePage();
         }
 
-        internal void Finish(object window)
+        internal void Finish()
         {
-            var w = (Window)window;
-            w.Close();
+            if(dialog != null)
+                dialog.Close();
         }
 
         private void SetActivePage()

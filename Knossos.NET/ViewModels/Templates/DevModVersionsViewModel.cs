@@ -133,7 +133,7 @@ namespace Knossos.NET.ViewModels
                 if (editor != null)
                 {
                     var dialog = new ModInstallView();
-                    dialog.DataContext = new ModInstallViewModel(editor.ActiveVersion, editor.ActiveVersion.version, true);
+                    dialog.DataContext = new ModInstallViewModel(editor.ActiveVersion, dialog, editor.ActiveVersion.version, true);
                     await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
                 }
             }

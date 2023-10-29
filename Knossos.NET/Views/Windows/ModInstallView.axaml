@@ -56,7 +56,7 @@
 				</DataTemplate>
 			</TreeView.DataTemplates>
 		</TreeView>
-		<Button IsVisible="{Binding DataLoaded}" Grid.Row="2" Command="{Binding InstallMod, Mode=OneWay}" CommandParameter="{Binding ElementName=InstallModWindow}" Background="Green" FontWeight="Bold" Width="150" HorizontalAlignment="Center" HorizontalContentAlignment="Center">Install</Button>
+		<Button IsVisible="{Binding DataLoaded}" Grid.Row="2" Command="{Binding InstallMod}" Background="Green" FontWeight="Bold" Width="150" HorizontalAlignment="Center" HorizontalContentAlignment="Center">Install</Button>
 		<StackPanel IsVisible="{Binding CompressVisible}" Grid.Row="3" HorizontalAlignment="Center">
 			<StackPanel IsVisible="{Binding !IsInstalled}">
 				<StackPanel IsVisible="{Binding DataLoaded}">

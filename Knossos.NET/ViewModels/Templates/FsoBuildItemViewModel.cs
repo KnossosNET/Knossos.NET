@@ -105,7 +105,7 @@ namespace Knossos.NET.ViewModels
                     await build.modData.LoadFulLNebulaData();
                     UpdataDisplayData(new FsoBuild(build.modData), true);
                     var dialog = new ModDetailsView();
-                    dialog.DataContext = new ModDetailsViewModel(build.modData);
+                    dialog.DataContext = new ModDetailsViewModel(build.modData, dialog);
                     await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
                 }
                 else
