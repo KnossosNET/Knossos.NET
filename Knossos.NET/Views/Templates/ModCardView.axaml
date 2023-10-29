@@ -32,7 +32,7 @@
 			<StackPanel IsVisible="{Binding !IsInstalling}" Name="Overlay" ZIndex="1" Background="Black" Height="225" Width="151" VerticalAlignment="Top">
 				<Label Content="{Binding ModVersion}" FontWeight="Bold" FontSize="14" Width="151" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				<!--Installed Overlay-->
-				<TabControl IsVisible="{Binding IsInstalled}" Margin="0,-15,0,0">
+				<TabControl IsVisible="{Binding IsInstalled}" Margin="0,-12,0,0">
 					<TabItem>
 						<TabItem.Header>
 							<Label FontWeight="Bold" FontSize="13" Foreground="White">Main</Label>
@@ -44,7 +44,7 @@
 							<Button Command="{Binding ButtonCommand}" CommandParameter="settings" Content="Settings" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Crimson" Margin="0,2,0,0" Width="100" ></Button>
 						</StackPanel>
 					</TabItem>
-					<TabItem Margin="-5" IsVisible="{Binding !IsLocalMod}">
+					<TabItem Margin="-5, 0, 0 0" IsVisible="{Binding !IsLocalMod}">
 						<TabItem.Header>
 							<Label FontWeight="Bold" FontSize="13" Foreground="White">Advanced</Label>
 						</TabItem.Header>
