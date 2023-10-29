@@ -164,7 +164,7 @@ namespace Knossos.NET.Models
             The package list will only contain the missing packages if a valid
             semantic version is found, but it is missing packages.
         */
-        public List<ModDependency> GetMissingDependenciesList(bool overrideSettings = false,bool filterdeps = false)
+        public List<ModDependency> GetMissingDependenciesList(bool overrideSettings = false, bool filterdeps = false)
         {
             var dependencies = GetModDependencyList(overrideSettings, filterdeps);
             List<ModDependency> missingDependencyList = new List<ModDependency>();
@@ -286,7 +286,7 @@ namespace Knossos.NET.Models
                 {
                     foreach (var package in packages)
                     {
-                        if (package.dependencies != null)
+                        if (package.dependencies != null && ( !devMode || package.isEnabled ))
                         {
                             dependencies.AddRange(package.dependencies);
                         }

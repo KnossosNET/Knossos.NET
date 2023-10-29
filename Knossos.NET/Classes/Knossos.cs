@@ -655,13 +655,16 @@ namespace Knossos.NET
                     {
                         foreach (var pkg in mod.packages.OrderBy(x => x.name))
                         {
-                            if (modFlag.Length > 0)
+                            if (pkg.isEnabled)
                             {
-                                modFlag += "," + mod.folderName + Path.DirectorySeparatorChar + pkg.folder;
-                            }
-                            else
-                            {
-                                modFlag += mod.folderName + Path.DirectorySeparatorChar + pkg.folder;
+                                if (modFlag.Length > 0)
+                                {
+                                    modFlag += "," + mod.folderName + Path.DirectorySeparatorChar + pkg.folder;
+                                }
+                                else
+                                {
+                                    modFlag += mod.folderName + Path.DirectorySeparatorChar + pkg.folder;
+                                }
                             }
                         }
 
