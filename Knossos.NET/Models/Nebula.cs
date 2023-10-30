@@ -199,10 +199,17 @@ namespace Knossos.NET.Models
                         if (mod.type == ModType.engine)
                         {
                             //This is already installed?
-                            var isInstalled = Knossos.GetInstalledBuildsList(mod.id)?.Where(b => b.version == mod.version);
-                            if (isInstalled == null || isInstalled.Count() == 0)
+                            var isInstalled = Knossos.GetInstalledBuildsList(mod.id)?.FirstOrDefault(b => b.version == mod.version);
+                            if (isInstalled == null)
                             {
                                 await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod)), DispatcherPriority.Background);
+                            }
+                            else
+                            {
+                                if(isInstalled.modData != null)
+                                {
+                                    isInstalled.modData.inNebula = true;
+                                }
                             }
                         }
                         if (mod.type == ModType.tc || mod.type == ModType.mod && (listFS2Override || mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound))
@@ -212,7 +219,9 @@ namespace Knossos.NET.Models
                             var isInstalled = Knossos.GetInstalledModList(mod.id);
                             if (isInstalled != null && isInstalled.Any())
                             {
-                                isInstalled.ForEach(x => x.inNebula = true);
+                                var versionInNebula = isInstalled.FirstOrDefault(x => x.version == mod.version);
+                                if (versionInNebula != null)
+                                    versionInNebula.inNebula = true;
                                 var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
                                 if (newer != null && new SemanticVersion(newer.version) < new SemanticVersion(mod.version))
                                 {
@@ -362,7 +371,9 @@ namespace Knossos.NET.Models
                         var isInstalled = Knossos.GetInstalledModList(m.id);
                         if (isInstalled != null && isInstalled.Any())
                         {
-                            isInstalled.ForEach(x => x.inNebula = true);
+                            var versionInNebula = isInstalled.FirstOrDefault(x => x.version == m.version);
+                            if (versionInNebula != null)
+                                versionInNebula.inNebula = true;
                             var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
                             if (newer != null && new SemanticVersion(newer.version) < new SemanticVersion(m.version))
                             {
@@ -381,10 +392,13 @@ namespace Knossos.NET.Models
                 foreach (var build in builds.ToList())
                 {
                     //This is already installed? Remove it!
+                    //Also mark it as in inNebula
                     var isInstalled = Knossos.GetInstalledBuildsList(build.id)?.FirstOrDefault(b => b.version == build.version);
                     if (isInstalled != null)
                     {
                         builds.Remove(build);
+                        if (isInstalled.modData != null)
+                            isInstalled.modData.inNebula = true;
                     }
                 }
 
