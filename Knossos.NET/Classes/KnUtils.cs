@@ -29,6 +29,7 @@ namespace Knossos.NET
         private static readonly bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         private static readonly bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         private static readonly bool isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        private static readonly bool isAppImage = isLinux && !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPIMAGE"));
         private static readonly bool cpuAVX = Avx.IsSupported;
         private static readonly bool cpuAVX2 = Avx2.IsSupported;
         private static string fsoPrefPath = string.Empty;
@@ -39,6 +40,13 @@ namespace Knossos.NET
         public static string CpuArch => cpuArch;
         public static bool CpuAVX => cpuAVX;
         public static bool CpuAVX2 => cpuAVX2;
+        public static bool IsAppImage => isAppImage;
+        public static string AppImagePath => appImagePath;
+
+        /// <summary>
+        /// Full path to AppImage file
+        /// </summary>
+        private static readonly string appImagePath = Environment.GetEnvironmentVariable("APPIMAGE")!;
 
         /// <summary>
         /// Possible Values:
