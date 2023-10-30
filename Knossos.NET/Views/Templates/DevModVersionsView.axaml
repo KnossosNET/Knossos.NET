@@ -6,7 +6,7 @@
              x:Class="Knossos.NET.Views.DevModVersionsView"			 
 	         xmlns:v="using:Knossos.NET.Views"
 			 xmlns:vm="using:Knossos.NET.ViewModels"
-			 x:DataType="vm:DevModVersionsViewModel">
+			 x:CompileBindings="False">
 	
 	<Design.DataContext>
 		<vm:DevModVersionsViewModel/>
