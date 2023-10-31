@@ -3283,7 +3283,7 @@ namespace Knossos.NET.ViewModels
                         var tileTask = new TaskItemViewModel();
                         await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
                         var uri = new Uri(mod.tile);
-                        await tileTask.DownloadFile(mod.tile, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading tile image", false, null, cancellationTokenSource);
+                        await tileTask.DownloadFile(mod.tile, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading tile image", true, null);
                         mod.tile = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                     }
 
@@ -3299,7 +3299,7 @@ namespace Knossos.NET.ViewModels
                         var bannerTask = new TaskItemViewModel();
                         await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
                         var uri = new Uri(mod.banner);
-                        await bannerTask.DownloadFile(mod.banner, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading banner image", false, null, cancellationTokenSource);
+                        await bannerTask.DownloadFile(mod.banner, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading banner image", true, null);
                         mod.banner = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                     }
 
@@ -3322,7 +3322,7 @@ namespace Knossos.NET.ViewModels
                             var scTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));
                             var uri = new Uri(sc);
-                            await scTask.DownloadFile(sc, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading screenshot", false, null, cancellationTokenSource);
+                            await scTask.DownloadFile(sc, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading screenshot", true, null);
                             scList.Add("kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath));
                         }
                         mod.screenshots = scList.ToArray();
@@ -3722,7 +3722,7 @@ namespace Knossos.NET.ViewModels
                             var tileTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
                             var uri = new Uri(modJson.tile);
-                            await tileTask.DownloadFile(modJson.tile, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading tile image", false, null, cancellationTokenSource);
+                            await tileTask.DownloadFile(modJson.tile, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading tile image", true, null);
                             modJson.tile = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                         }
 
@@ -3737,7 +3737,7 @@ namespace Knossos.NET.ViewModels
                             var bannerTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
                             var uri = new Uri(modJson.banner);
-                            await bannerTask.DownloadFile(modJson.banner, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading banner image", false, null, cancellationTokenSource);
+                            await bannerTask.DownloadFile(modJson.banner, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading banner image", true, null);
                             modJson.banner = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                         }
 
@@ -3760,7 +3760,7 @@ namespace Knossos.NET.ViewModels
                                 var scTask = new TaskItemViewModel();
                                 await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));
                                 var uri = new Uri(sc);
-                                await scTask.DownloadFile(sc, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading screenshot", false, null, cancellationTokenSource);
+                                await scTask.DownloadFile(sc, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading screenshot", true, null);
                                 scList.Add("kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath));
                             }
                             modJson.screenshots = scList.ToArray();
