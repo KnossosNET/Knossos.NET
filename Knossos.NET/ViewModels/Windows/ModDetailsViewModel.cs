@@ -317,7 +317,7 @@ namespace Knossos.NET.ViewModels
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    client.Timeout = TimeSpan.FromSeconds(5);
+                    client.Timeout = TimeSpan.FromSeconds(30);
                     HttpResponseMessage response = await client.GetAsync(url);
                     byte[] content = await response.Content.ReadAsByteArrayAsync();
                     Stream stream = new MemoryStream(content);
@@ -354,7 +354,7 @@ namespace Knossos.NET.ViewModels
                 {
                     using (HttpClient client = new HttpClient())
                     {
-                        client.Timeout = TimeSpan.FromSeconds(5);
+                        client.Timeout = TimeSpan.FromSeconds(30);
                         HttpResponseMessage response = await client.GetAsync(imageUrl);
                         byte[] content = await response.Content.ReadAsByteArrayAsync();
                         Stream stream = new MemoryStream(content);
