@@ -12,22 +12,20 @@
 		<vm:TaskViewModel/>
 	</Design.DataContext>
 
-	<Border IsVisible="{Binding TaskList.Count}" BorderBrush="Gray" BorderThickness="2" CornerRadius="1">
-		<ScrollViewer MaxHeight="400">
-			<Grid>
-				<WrapPanel HorizontalAlignment="Right">
-					<Button Background="Black" Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">Clear</Button>
-				</WrapPanel>
-				<Grid RowDefinitions="Auto">
-					<ItemsControl Grid.Row="0" ItemsSource="{Binding TaskList}">
-						<ItemsControl.ItemTemplate>
-							<DataTemplate>
-								<v:TaskItemView Content="{Binding}"/>
-							</DataTemplate>
-						</ItemsControl.ItemTemplate>
-					</ItemsControl>
-				</Grid>
+	<ScrollViewer IsVisible="{Binding TaskList.Count}">
+		<Grid>
+			<WrapPanel HorizontalAlignment="Right">
+				<Button Background="Black" Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">Clear</Button>
+			</WrapPanel>
+			<Grid RowDefinitions="Auto">
+				<ItemsControl Grid.Row="0" ItemsSource="{Binding TaskList}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<v:TaskItemView Content="{Binding}"/>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
 			</Grid>
-		</ScrollViewer>
-	</Border>
+		</Grid>
+	</ScrollViewer>
 </UserControl>

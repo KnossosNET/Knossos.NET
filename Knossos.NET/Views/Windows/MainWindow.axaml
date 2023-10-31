@@ -17,9 +17,13 @@
 	
 
 	<!-- Main View -->
-	<Grid Background="#18191A" RowDefinitions="Auto,*">
-		<v:TaskView Grid.Row="0" Content="{Binding TaskView}"/>
-		<TabControl Grid.Row="1" SelectedIndex="{Binding TabIndex}">
+	<Grid Background="#18191A">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"></RowDefinition>
+			<RowDefinition Height="4"></RowDefinition>
+			<RowDefinition Height="Auto" MaxHeight="550"></RowDefinition>
+		</Grid.RowDefinitions>
+		<TabControl Grid.Row="0" SelectedIndex="{Binding TabIndex}">
 			<!--Installed Mods / Home-->
 			<TabItem Header="Home">
 				<v:ModListView Content="{Binding InstalledModsView}"/>
@@ -59,5 +63,7 @@
 				</Grid>
 			</TabItem>
 		</TabControl>
+		<GridSplitter Grid.Row="1" Background="Black" ResizeDirection="Rows"/>
+		<v:TaskView Grid.Row="2" Content="{Binding TaskView}" VerticalAlignment="Top"/>
 	</Grid>
 </Window>
