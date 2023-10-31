@@ -13,8 +13,11 @@ namespace Knossos.NET.Models
 {
     public static class GitHubApi
     {
-        private readonly static string GitHubRepoURL = "https://api.github.com/repos/Shivansps/Knossos.NET";
-
+        /// <summary>
+        /// Get the last release on Knet github repo
+        /// URL of this repo is set on the Knossos class
+        /// </summary>
+        /// <returns>GitHubRelease or null if the api call failed</returns>
         public static async Task<GitHubRelease?> GetLastRelease()
         {
 
@@ -24,7 +27,7 @@ namespace Knossos.NET.Models
                 {
                     client.Timeout = TimeSpan.FromSeconds(30);
                     client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("product", "1"));
-                    HttpResponseMessage response = await client.GetAsync(GitHubRepoURL + "/releases/latest");
+                    HttpResponseMessage response = await client.GetAsync(Knossos.GitHubUpdateRepoURL + "/releases/latest");
                     var json = await response.Content.ReadAsStringAsync();
                     return JsonSerializer.Deserialize<GitHubRelease>(json)!;
                 }
@@ -36,7 +39,6 @@ namespace Knossos.NET.Models
             }
         }
     }
-
 
     public class GitHubRelease
     {
@@ -59,7 +61,6 @@ namespace Knossos.NET.Models
         public string? zipball_url { get; set; }
         public string? body { get; set; }
     }
-
 
     public class GitHubReleaseAsset
     {

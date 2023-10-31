@@ -14,6 +14,11 @@ using System.Linq;
 
 namespace Knossos.NET.Models
 {
+    /// <summary>
+    /// "mod, tc and engine" are used in the mod.json
+    /// tool and ext are unimplemented in Nebula and ignored by Knet
+    /// modlegacy is used for data loaded from a mod.ini
+    /// </summary>
     public enum ModType
     {
         mod,
@@ -24,12 +29,20 @@ namespace Knossos.NET.Models
         modlegacy
     }
 
+    /// <summary>
+    /// nebula = petty much every normal mod
+    /// local = mod.ini or any mod not stored in nebula, like fs2 retail, it disables some options like update/modify
+    /// </summary>
     public enum ModSource
     {
         nebula,
         local
     }
 
+    /// <summary>
+    /// Nebula int values, do not change
+    /// It is not clear what can each one of the roles do and what not
+    /// </summary>
     public enum ModMemberRole
     {
         Owner = 0,
@@ -39,12 +52,15 @@ namespace Knossos.NET.Models
     }
 
     /*
-        The "mod class" variables math the json properties for the mod.json file that is located at the root of the mod folder.
-        In order to maintain compatibility with other launchers all properties saved in the mod.json file must be
-        in the original type and value range. Adding new data with additional values is ok.
-        Most of the comments on the original data structure were copied from https://github.com/ngld/old-knossos/blob/develop/schema.txt
+
      */
 
+    /// <summary>
+    /// The "mod class" variables math the json properties for the mod.json file that is located at the root of the mod folder.
+    /// In order to maintain compatibility with other launchers all properties saved in the mod.json file must be
+    /// in the original type and value range. Adding new data with additional values is ok.
+    /// Most of the comments on the original data structure were copied from https://github.com/ngld/old-knossos/blob/develop/schema.txt
+    /// </summary>
     public class Mod
     {
         /*
@@ -117,6 +133,14 @@ namespace Knossos.NET.Models
         {
         }
 
+        /// <summary>
+        /// Creates a mod class and parses the mod.json file
+        /// Also loads mod_settings.json if it exist in folder
+        /// Modtype should only be passed when loading a mod.ini (modlegacy)
+        /// </summary>
+        /// <param name="modPath"></param>
+        /// <param name="folderName"></param>
+        /// <param name="type"></param>
         public Mod(string modPath, string folderName, ModType? type = null)
         {
             this.fullPath = modPath;
@@ -135,18 +159,24 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Returns mod title + version
+        /// </summary>
         public override string ToString()
         {
             return title + " " + version;
         }
 
-        /*
-            Clear all the data that is not needed for normal operation
-            (so everything not needed to play or view details/settings)
-        */
+        /// <summary>
+        /// Clear all the data that is not needed for normal operation
+        /// (so everything not needed to play or view details/settings)
+        /// This was usefull for the regular repo.json now the effect is minimal as it is only
+        /// applied to installed mods
+        /// </summary>
         public void ClearUnusedData()
         {
             notes = null;
+            fullDataLoaded = false;
             foreach (ModPackage pkg in packages)
             {
                 if (!devMode)
@@ -159,11 +189,15 @@ namespace Knossos.NET.Models
             }
         }
 
-        /*
-            Returns of List of <ModDependency> with unsastified dependencies.
-            The package list will only contain the missing packages if a valid
-            semantic version is found, but it is missing packages.
-        */
+        /// <summary>
+        /// Returns of List of <ModDependency> with unsastified dependencies.
+        /// The package list will only contain the missing packages if a valid
+        /// semantic version is found, but it is missing packages.
+        /// Includes mods, tcs and engines
+        /// </summary>
+        /// <param name="overrideSettings"></param>
+        /// <param name="filterdeps"></param>
+        /// <returns>List of ModDependency or empty list</returns>
         public List<ModDependency> GetMissingDependenciesList(bool overrideSettings = false, bool filterdeps = false)
         {
             var dependencies = GetModDependencyList(overrideSettings, filterdeps);
@@ -186,7 +220,7 @@ namespace Knossos.NET.Models
                                 var missingPkg = new List<string>();
                                 foreach (var pkg in dep.packages)
                                 {
-                                    if (!bestMod.CheckPackageInstalled(pkg))
+                                    if (!bestMod.IsPackageInstalled(pkg))
                                     {
                                         missingPkg.Add(pkg);
                                     }
@@ -225,10 +259,11 @@ namespace Knossos.NET.Models
             return missingDependencyList;
         }
 
-        /*
-            Returns the modFlag list, takes into account user settings, if any.
-        */
-
+        /// <summary>
+        /// Returns the modFlag list, takes into account user settings, if any.
+        /// </summary>
+        /// <param name="overrideSettings"></param>
+        /// <returns>modflag list or empty list</returns>
         public List<string> GetModFlagList(bool overrideSettings = false)
         {
             if(modSettings.customModFlags != null && overrideSettings == false)
@@ -241,34 +276,37 @@ namespace Knossos.NET.Models
             }
         }
 
-        /*
-            Searchs all packages and returns a ModDependency by id.
-            Null if not found.
-            Takes into account user settings, if any.
-        */
-
+        /// <summary>
+        /// Searchs all packages and returns a ModDependency by id.
+        /// Null if not found.
+        /// Takes into account user settings, if any.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="overrideSettings"></param>
+        /// <returns>ModDependency or null if not found</returns>
         public ModDependency? GetDependency(string id, bool overrideSettings = false)
         {
             var deps = GetModDependencyList(overrideSettings);
             if (deps != null)
             {
-                foreach (var dep in deps)
-                {
-                    if (dep.id == id)
-                    {
-                        return dep;
-                    }
-                }
+                return deps.FirstOrDefault(d => d.id == id);
             }
 
             return null;
         }
 
-        /*
-            Returns a list of <ModJsonDependency> of all packages in the mod.
-            Returns null if the mod has no dependencies or packages.
-            Takes into account user settings, if any.
-        */
+        /// <summary>
+        /// Returns a list of <ModDependency> of all packages in the mod.
+        /// Returns null if the mod has no dependencies or packages.
+        /// Takes into account user settings, if any.
+        /// Optional option to filter dependencies
+        /// Filter dependencies option is going to resolve duplicated dependency ids into 
+        /// a single dependency that includes them all
+        /// If mod is devmode it ignores all dependencies from a disabled package
+        /// </summary>
+        /// <param name="overrideSettings"></param>
+        /// <param name="filterDependencies"></param>
+        /// <returns>ModDependency list or null</returns>
         public List<ModDependency>? GetModDependencyList(bool overrideSettings = false, bool filterDependencies = false)
         {
             if(modSettings.customDependencies != null && overrideSettings == false)
@@ -431,9 +469,11 @@ namespace Knossos.NET.Models
             }
         }
 
-        /*
-            Returns the mod cmdline taking into account user setting if any 
-        */
+        /// <summary>
+        /// Returns the mod cmdline taking into account user setting if any 
+        /// </summary>
+        /// <param name="ignoreUserSettings"></param>
+        /// <returns>mod cmdline or null if not set by mod or user</returns>
         public string? GetModCmdLine(bool ignoreUserSettings = false)
         {
             if(modSettings.customCmdLine!= null && ignoreUserSettings == false)
@@ -443,26 +483,21 @@ namespace Knossos.NET.Models
             return cmdline;
         }
 
-        /*
-            Checks if the package is installed
-            returns true/false
-        */
-        private bool CheckPackageInstalled(string packageName)
+        /// <summary>
+        /// Checks if the package name is installed
+        /// </summary>
+        /// <param name="packageName"></param>
+        /// <returns>true/false</returns>
+        public bool IsPackageInstalled(string packageName)
         {
-            var isInstalled = false;
-
-            foreach (var pkg in packages)
-            {
-                if (pkg.name == packageName)
-                {
-                    isInstalled = true;
-                }
-            }
-
-            return isInstalled;
+            return packages.FirstOrDefault(p=>p.name == packageName) != null ? true : false;
         }
 
-        /* Loads all data in the json file */
+        /// <summary>
+        /// Loads all data from the mod.json file
+        /// Any new variable must be added here or data will not be loaded
+        /// </summary>
+        /// <param name="modPath"></param>
         private void ParseJson(string modPath)
         {
             try
@@ -504,6 +539,10 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Load all data from mod.ini
+        /// </summary>
+        /// <param name="modPath"></param>
         private void ParseIni(string modPath)
         {
             try
@@ -657,12 +696,17 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Reload all data from the mod.json file
+        /// </summary>
         public void ReLoadJson()
         {
             ParseJson(fullPath);
         }
 
-        /* Saves all data to the json file */
+        /// <summary>
+        /// Saves all data to the json file
+        /// </summary>
         public void SaveJson()
         {
             try
@@ -689,6 +733,11 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Uses the new API call introduced along with repo_minimal.json to load the missing data from Nebula using the api
+        /// Can be called multiple times, the data is only loaded once unless ClearUnusedData() is called on this mod object
+        /// Does nothing for installed mods
+        /// </summary>
         public async Task LoadFulLNebulaData()
         {
             if(!installed && !fullDataLoaded)
@@ -723,10 +772,12 @@ namespace Knossos.NET.Models
                 }
             }
         }
-      
-        /* 
-         * To use with the List .Sort()
-        */
+
+        /// <summary>
+        /// To use with the List .Sort()
+        /// </summary>
+        /// <param name="mod1"></param>
+        /// <param name="mod2"></param>
         public static int CompareVersion(Mod mod1, Mod mod2)
         {
             //inverted
@@ -753,11 +804,6 @@ namespace Knossos.NET.Models
         */
         public string? status { get; set; } // "<required|recommended|optional>"
         public ModDependency[]? dependencies { get; set; } = new ModDependency[0];
-        /*
-            Knossos.Net will only take the "windows" value from here, i assume the other enviroments are called linux and mac until i can get confirmation.
-            Im not sure why this exist at this point, the exec arch is indicated on Executable->Properties, so there should be no reason for having it here too.
-            This data must be written to the mod.json regardless.
-        */
         public string? environment { get; set; } // optional, boolean expression like "windows && X86_64 && (sse || sse2)"
         public string? folder { get; set; }
         [JsonPropertyName("is_vp")]
@@ -781,10 +827,11 @@ namespace Knossos.NET.Models
         public string? version { get; set; } // required, https://getcomposer.org/doc/01-basic-usage.md#package-versions
         public List<string>? packages { get; set; } // optional, specifies which optional and recommended packages are also required
 
-        /*
-            Returns the best installed mod that meets this dependency by semantic version, null if none.
-            Also returns null if the ID is a FSO build.
-        */
+        /// <summary>
+        /// Returns the best installed mod that meets this dependency by semantic version, null if none.
+        /// Also returns null if the ID is a FSO build.
+        /// </summary>
+        /// <returns>Mod or null</returns>
         public Mod? SelectMod()
         {
             var mods = Knossos.GetInstalledModList(id);
@@ -817,10 +864,12 @@ namespace Knossos.NET.Models
             return validMod;
         }
 
-        /*
-            Returns the best available mod on nebula that meets this dependency by semantic version, null if none.
-            Takes an optional list with all mods, if passed it will use that list intead of checking the repo.json again
-        */
+        /// <summary>
+        /// Returns the best available mod on nebula that meets this dependency by semantic version, null if none.
+        /// Takes an optional list with all mods, if passed it will use that list intead of checking the repo.json again
+        /// </summary>
+        /// <param name="mods"></param>
+        /// <returns>Mod or null</returns>
         public async Task<Mod?> SelectModNebula(List<Mod>? mods = null)
         {
             if(mods == null)
@@ -864,6 +913,10 @@ namespace Knossos.NET.Models
             return validMod;
         }
 
+        /// <summary>
+        /// Returns the best installed build that meets this dependency by semantic version, null if none.
+        /// </summary>
+        /// <returns>FsoBuild or null</returns>
         public FsoBuild? SelectBuild()
         {
             FsoBuild? validBuild = null;
@@ -956,6 +1009,9 @@ namespace Knossos.NET.Models
             return validBuild;
         }
 
+        /// <summary>
+        /// returns id + version
+        /// </summary>
         public override string ToString()
         {
             return id + " " + version;
@@ -988,6 +1044,9 @@ namespace Knossos.NET.Models
         public ModProperties? properties { get; set; }
     }
 
+    /// <summary>
+    /// This is generated from the enviroment string at runtime
+    /// </summary>
     public class ModProperties
     {
         public bool x64 { get; set; } 

@@ -11,11 +11,11 @@ using System.Text.Unicode;
 
 namespace Knossos.NET.Models
 {
-    /*
-        Model for the mod_settings.json file saved at the root of the mod folder to store custom user settings for the mod.
-        This works as a "extension" of the mod.json
-        All default values must be null for non-change.
-    */
+    /// <summary>
+    /// Model for the mod_settings.json file saved at the root of the mod folder to store custom user settings for the mod.
+    /// This works as a "extension" of the mod.json
+    /// All default values must be null for non-change.
+    /// </summary>
     public class ModSettings
     {
         [JsonPropertyName("custom_dependencies")]
@@ -69,11 +69,16 @@ namespace Knossos.NET.Models
             return true;
         }
 
-        public void Load(string fullPath)
+        /// <summary>
+        /// Load mod_settings.json data 
+        /// Any new variabled must be added here or it will not be loaded
+        /// </summary>
+        /// <param name="modFolderPath"></param>
+        public void Load(string modFolderPath)
         {
             try
             {
-                this.filePath = fullPath + Path.DirectorySeparatorChar + "mod_settings.json";
+                this.filePath = modFolderPath + Path.DirectorySeparatorChar + "mod_settings.json";
                 if(File.Exists(filePath))
                 {
                     using FileStream jsonFile = File.OpenRead(filePath);
@@ -104,6 +109,9 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Save data to mod_settings.json
+        /// </summary>
         public void Save()
         {
             try

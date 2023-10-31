@@ -17,6 +17,12 @@ using System.Threading.Tasks;
 
 namespace Knossos.NET.Models
 {
+    /// <summary>
+    /// Disabled = No option to compress is ever show
+    /// Manual = User can select to compress mods manually during install and in mod settings
+    /// Always = Always compress all mods during install, no matter what.
+    /// ModSupport = Compress only if the mod depends on a FSO verson that is higher or equal than the minimal required (23.2.0)
+    /// </summary>
     public enum CompressionSettings
     {
         Disabled,
@@ -25,9 +31,9 @@ namespace Knossos.NET.Models
         ModSupport
     }
 
-    /*
-        Stores and load the global Knossos.NET configuration.
-    */
+    /// <summary>
+    /// Stores and load the global Knossos.NET configuration
+    /// </summary>
     public class GlobalSettings
     {
         struct Resolution
@@ -161,6 +167,10 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         private FileSystemWatcher? iniWatcher = null;
 
+        /// <summary>
+        /// When the User is on the settings tab we must watch the fs2_open.ini for external changes
+        /// This is the initial call that must be called once, then we start or stop raising of events
+        /// </summary>
         private void StartWatchingDirectory()
         {
             iniWatcher = new FileSystemWatcher(KnUtils.GetFSODataFolderPath());
@@ -169,6 +179,9 @@ namespace Knossos.NET.Models
             iniWatcher.Filter = "fs2_open.ini";
         }
 
+        /// <summary>
+        /// If the fs2_open.ini is changed externally, reload the data
+        /// </summary>
         private void OnIniChanged(object sender, FileSystemEventArgs e)
         {
             iniWatcher!.EnableRaisingEvents = false;
@@ -182,19 +195,29 @@ namespace Knossos.NET.Models
             iniWatcher!.EnableRaisingEvents = true;
         }
 
+        /// <summary>
+        /// Start watching for changes on the ini file
+        /// </summary>
         public void EnableIniWatch()
         {
             if(iniWatcher != null) 
                 iniWatcher.EnableRaisingEvents = true;
         }
+
+        /// <summary>
+        /// Stop watching for changes on the ini file
+        /// </summary>
         public void DisableIniWatch()
         {
             if(iniWatcher != null)
                 iniWatcher.EnableRaisingEvents = false;
         }
 
-
-        public void ReadFS2IniValues()
+        /// <summary>
+        /// Load setting data that saves on the fs2_open.ini
+        /// On the ini we save all data that is used by both FSO and KNET
+        /// </summary>
+        private void ReadFS2IniValues()
         {
             try
             {
@@ -475,6 +498,12 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Load all Knet setting data, both from settings.json and from the fs2_open.ini
+        /// Data that is used only by KNET is saved on settings.json
+        /// Data that is used by FSO anf KNET is saved on the fs2_open.ini
+        /// Any new variable that is added to the json must be added here or it would not be loaded
+        /// </summary>
         public void Load()
         {
             try
@@ -525,6 +554,10 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Save setting data to the fs2_open.ini
+        /// Stops the ini-watcher if it was enabled and re-enables it to avoid triggering a read
+        /// </summary>
         public void WriteFS2IniValues()
         {
             try
@@ -679,10 +712,14 @@ namespace Knossos.NET.Models
                 data["PXO"]["Login"] = pxoLogin;
                 data["PXO"]["Password"] = pxoPassword;
 
-                if (iniWatcher!= null)
+                bool wasWatchingIni = false;
+                if (iniWatcher != null)
+                {
+                    wasWatchingIni = iniWatcher.EnableRaisingEvents;
                     iniWatcher.EnableRaisingEvents = false;
+                }
                 parser.WriteFile(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini", data, new UTF8Encoding(false));
-                if(iniWatcher!= null)
+                if(iniWatcher!= null && wasWatchingIni)
                     iniWatcher.EnableRaisingEvents = true;
                 Log.Add(Log.LogSeverity.Information, "GlobalSettings.WriteFS2IniValues","Writen ini: "+ KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
             }
@@ -692,11 +729,11 @@ namespace Knossos.NET.Models
             }
         }
 
-        /*
-            Write values to settings.json and fs2_open.ini
-            Writing the ini is optional, it should not be done for 
-            Knossos-only settings.
-        */
+        /// <summary>
+        /// Write values to settings.json and fs2_open.ini
+        /// Writing the ini is optional, it should not be done for Knossos-only settings.
+        /// </summary>
+        /// <param name="writeIni"></param>
         public void Save(bool writeIni = true) 
         {
             if (writeIni)
@@ -721,6 +758,11 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Convert user-selected settings into FSO cmdline arguments
+        /// </summary>
+        /// <param name="build"></param>
+        /// <returns>cmdline string</returns>
         public string GetSystemCMD(FsoBuild? build = null)
         { 
             var cmd = string.Empty;

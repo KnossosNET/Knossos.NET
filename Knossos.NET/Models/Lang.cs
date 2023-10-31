@@ -2,10 +2,11 @@
 
 namespace Knossos.NET.Models
 {
-    /*
-        Used to handle string localization.
-        Loads and handles the lang files json.
-    */
+    /// <summary>
+    /// Used to handle string localization.
+    /// Loads and handles the lang files json.
+    /// This is UNIMPLEMENTED for now
+    /// </summary>
     public static class Lang
     {
         private struct Language
@@ -27,6 +28,7 @@ namespace Knossos.NET.Models
         public static void LoadFiles()
         {
             //test
+            /*
             var test = new Language();
             test.name = "English";
             test.version = "1.0.0";
@@ -34,6 +36,7 @@ namespace Knossos.NET.Models
             test.strings.Add(new LangString { key = "test", value = "it works!" });
             installedLangs.Add(test);
             enabledLangIndex = 0;
+            */
         }
 
         public static string GetString(string key)

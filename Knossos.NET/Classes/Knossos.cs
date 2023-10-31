@@ -23,6 +23,7 @@ namespace Knossos.NET
     {
         public static readonly string AppVersion = "0.2.0-RC3";
         public readonly static string ToolRepoURL = "https://raw.githubusercontent.com/Shivansps/Knet-Tool-Repo/main/knet_tools.json";
+        public readonly static string GitHubUpdateRepoURL = "https://api.github.com/repos/Shivansps/Knossos.NET";
         private static List<Mod> installedMods = new List<Mod>();
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();
         private static List<Tool> modTools = new List<Tool>();

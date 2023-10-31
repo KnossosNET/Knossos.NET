@@ -7,6 +7,9 @@ using System.IO;
 
 namespace Knossos.NET.Models
 {
+    /// <summary>
+    /// Multicfg file is used to configure standalone servers
+    /// </summary>
     public class MultiCfg
     {
         public string? Name { get; set; }
@@ -18,6 +21,11 @@ namespace Knossos.NET.Models
         public int Port { get; set; } = 0;
         public List<string> Others { get; set; } = new List<string>();
 
+        /// <summary>
+        /// Load data from file
+        /// Data is saved in {modfolder}\data\multi.cfg
+        /// </summary>
+        /// <param name="mod"></param>
         public void LoadData(Mod mod)
         {
             UsePXO = false;
@@ -97,6 +105,11 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Save data to file
+        /// Data is saved in {modfolder}\data\multi.cfg
+        /// </summary>
+        /// <param name="mod"></param>
         public void SaveData(Mod mod)
         {
             try

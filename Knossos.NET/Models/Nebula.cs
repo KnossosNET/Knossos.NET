@@ -24,9 +24,9 @@ using System.Reflection;
 
 namespace Knossos.NET.Models
 {
-    /*
-        Model to handle all the Nebula website operations.
-    */
+    /// <summary>
+    /// Model to handle all the Nebula website operations.
+    /// </summary>
     public static class Nebula
     {
         private class NewerModVersionsData
@@ -77,6 +77,15 @@ namespace Knossos.NET.Models
         private static Mod[]? privateMods;
         private static string[]? editableIds;
 
+        /// <summary>
+        /// Initial method
+        /// Loads settings from nebula.json
+        /// Check etag/gets repo.json
+        /// parse repo json
+        /// load nebula mods/fso builds to UI
+        /// If user has saved credentials to Nebula, login and check private mods
+        /// Displays mods updates to taskview (if any)
+        /// </summary>
         public static async void Trinity()
         {
             try
@@ -183,6 +192,10 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Gets private mods from nebula and display them on UI
+        /// </summary>
+        /// <param name="cancellationToken"></param>
         private static async Task LoadPrivateMods(CancellationTokenSource? cancellationToken)
         {
             try
@@ -241,6 +254,13 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Checks if a MOD version is
+        /// newer than the saved version on NewWerModVersions
+        /// for that ID.
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <returns>true/false</returns>
         private static bool IsModUpdate(Mod mod)
         {
             try
@@ -325,6 +345,12 @@ namespace Knossos.NET.Models
             return null;
         }
 
+        /// <summary>
+        /// Load data from repo to UI
+        /// Return list of NewerModVersions
+        /// That contains every ID and its newer version
+        /// </summary>
+        /// <returns>NewerModVersions list</returns>
         private static async Task<List<Mod>?> InitialRepoLoad()
         {
             try
@@ -432,6 +458,9 @@ namespace Knossos.NET.Models
             return null;
         }
 
+        /// <summary>
+        /// Cancel repo download
+        /// </summary>
         public static void CancelOperations()
         {
             if (cancellationToken != null)
@@ -440,6 +469,12 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Checks if a mod ID is used in Nebula
+        /// Uses NewerModVersions array, or, if user is logged in, the nebula api if not found on NewerModVersions.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static async Task<bool> IsModIdInNebula(string id)
         {
             //Use the mod list used for newer versions
@@ -456,6 +491,11 @@ namespace Knossos.NET.Models
             return false;
         }
 
+        /// <summary>
+        /// Returns all mods versions of an id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>List Mod or empty list</returns>
         public static async Task<List<Mod>> GetAllModsWithID(string? id)
         {
             var modList = new List<Mod>();
@@ -490,6 +530,11 @@ namespace Knossos.NET.Models
             return modList;
         }
 
+        /// <summary>
+        /// Waits for read access to repo_minimal.json
+        /// Returns when the file can be used or the task is cancelled
+        /// </summary>
+        /// <param name="filename"></param>
         private static async Task WaitForFileAccess(string filename)
         {
             try
@@ -516,6 +561,10 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Reads the current repo ETAG on nebula
+        /// </summary>
+        /// <returns>etag string or null</returns>
         private static async Task<string?> GetRepoEtag()
         {
             try
@@ -539,6 +588,9 @@ namespace Knossos.NET.Models
             }
         }
 
+        /// <summary>
+        /// Save nebula.json file
+        /// </summary>
         public static async void SaveSettings()
         {
             try
@@ -602,6 +654,20 @@ namespace Knossos.NET.Models
             GET
         }
 
+        /// <summary>
+        /// Nebula Api call
+        /// Resource url example: "mod/release"
+        /// </summary>
+        /// <param name="resourceUrl"></param>
+        /// <param name="data"></param>
+        /// <param name="needsLogIn"></param>
+        /// <param name="timeoutSeconds"></param>
+        /// <param name="method"></param>
+        /// <returns>
+        /// apireply or null if the call failed completely
+        /// It is difficult to point out exactly what the reply is because it changed from call to call
+        /// Most api calls return a ApiReply.result true or false if successfull or not but this is not to case for every call
+        /// </returns>
         private static async Task<ApiReply?> ApiCall(string resourceUrl, HttpContent? data, bool needsLogIn = false, int timeoutSeconds = 30, ApiMethod method = ApiMethod.POST)
         {
             try
@@ -702,6 +768,13 @@ namespace Knossos.NET.Models
             return null;
         }
 
+        /// <summary>
+        /// Gets Mod data from Nebula for a specific mod id and version
+        /// if not found it returns reason "not_found" 
+        /// </summary>
+        /// <param name="modid"></param>
+        /// <param name="version"></param>
+        /// <returns>Mod class or null</returns>
         public static async Task<Mod?> GetModData(string modid, string version)
         {
             try
@@ -738,6 +811,12 @@ namespace Knossos.NET.Models
             return null;
         }
 
+        /// <summary>
+        /// Upload fso log string to nebula
+        /// And opens the browser on the returned URL
+        /// </summary>
+        /// <param name="logString"></param>
+        /// <returns>true if successfull, false otherwise</returns>
         public static async Task<bool> UploadLog(string logString)
         {
             try
@@ -761,6 +840,12 @@ namespace Knossos.NET.Models
             return false;
         }
 
+        /// <summary>
+        /// Reports a mod to nebula
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <param name="reason"></param>
+        /// <returns>true if successfull, false otherwise</returns>
         public static async Task<bool> ReportMod(Mod mod, string reason)
         {
             try
@@ -785,6 +870,13 @@ namespace Knossos.NET.Models
             return false;
         }
 
+        /// <summary>
+        /// Log in to Nebula
+        /// User password is decoded from base64
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="password"></param>
+        /// <returns>true if successfull, false otherwise</returns>
         public static async Task<bool> Login(string? user = null, string? password = null)
         {
             try
@@ -841,6 +933,13 @@ namespace Knossos.NET.Models
             return false;
         }
 
+        /// <summary>
+        /// Register a new username in nebula
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="password"></param>
+        /// <param name="email"></param>
+        /// <returns>"ok" if successfull or reason for failure string</returns>
         public static async Task<string> Register(string user, string password, string email)
         {
             try
@@ -873,6 +972,11 @@ namespace Knossos.NET.Models
             return "unknown error";
         }
 
+        /// <summary>
+        /// Reset user password
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns>"ok" if successfull or reason for failure string</returns>
         public static async Task<string> Reset(string user)
         {
             try
@@ -903,6 +1007,9 @@ namespace Knossos.NET.Models
             return "unknown error";
         }
 
+        /// <summary>
+        /// Clears saved user data
+        /// </summary>
         public static void LogOff()
         {
             settings.logged = false;
@@ -1478,6 +1585,12 @@ namespace Knossos.NET.Models
 
         /* Multipart Uploader */
         #region MultiPartUploader
+        /// <summary>
+        /// Multipart Nebula file uploader
+        /// Call .Upload() to start
+        /// Supports auto upload-resume and checks if the file is already uploaded
+        /// Support upload cancel via token
+        /// </summary>
         public class MultipartUploader : IDisposable
         {
             private bool disposedValue = false;
@@ -1517,6 +1630,12 @@ namespace Knossos.NET.Models
                 }
             }
 
+            /// <summary>
+            /// Starts the upload process
+            /// </summary>
+            /// <returns>true if the upload completed successfully or file is already uploaded, false otherwise</returns>
+            /// <exception cref="ObjectDisposedException"></exception>
+            /// <exception cref="TaskCanceledException"></exception>
             public async Task<bool> Upload()
             {
                 if (disposedValue)
@@ -1595,6 +1714,11 @@ namespace Knossos.NET.Models
                 return verified;
             }
 
+            /// <summary>
+            /// Call to complete the upload process
+            /// Nebula will check the complete file checksum here
+            /// </summary>
+            /// <returns>true if everything is fine, false otherwise</returns>
             private async Task<bool> Finish()
             {
                 var data = new MultipartFormDataContent()
@@ -1622,6 +1746,11 @@ namespace Knossos.NET.Models
                 return false;
             }
 
+            /// <summary>
+            /// Starts the file upload process
+            /// Here we pass file checksum, file size and number of parts to Nebula
+            /// </summary>
+            /// <returns>true if everything is fine, false otherwise</returns>
             private async Task<bool> Start()
             {
                 await GetChecksum();
@@ -1659,6 +1788,15 @@ namespace Knossos.NET.Models
                 return false;
             }
 
+            /// <summary>
+            /// Reads bytes[] from the source file
+            /// This operation is executed in order, waits in queue until other reads requests are completed 
+            /// </summary>
+            /// <param name="offset"></param>
+            /// <param name="length"></param>
+            /// <returns></returns>
+            /// <exception cref="ObjectDisposedException"></exception>
+            /// <exception cref="Exception"></exception>
             internal async Task<byte[]> ReadBytes(long offset, long length)
             {
                 if (disposedValue)
@@ -1679,6 +1817,11 @@ namespace Knossos.NET.Models
                 return buffer;
             }
 
+            /// <summary>
+            /// Get file hash
+            /// </summary>
+            /// <returns>file checksum or null</returns>
+            /// <exception cref="ObjectDisposedException"></exception>
             internal async Task<string?> GetChecksum()
             {
                 if(fileChecksum != null)
