@@ -243,7 +243,14 @@ namespace Knossos.NET.ViewModels
                         {
                             Banner?.Dispose();
                             Banner = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/loading.png")));
-                            DownloadImage(url);
+                            Task.Run(async () =>
+                            {
+                                using (var fs = await KnUtils.GetImageStream(url))
+                                {
+                                    if (fs != null)
+                                        Banner = new Bitmap(fs);
+                                }
+                            });
                         }
                     }
                 }
@@ -293,10 +300,17 @@ namespace Knossos.NET.ViewModels
                             }
                             else
                             {
-                                if (scn.ToLower().Contains("http"))
+                                Task.Run(async () =>
                                 {
-                                    DownloadImage(scn, true);
-                                }
+                                    using (var fs = await KnUtils.GetImageStream(scn))
+                                    {
+                                        if (fs != null)
+                                        {
+                                            var item = new ScreenshotItem(new Bitmap(fs));
+                                            Screenshots.Add(item);
+                                        }
+                                    }
+                                });
                             }
                         }catch (Exception ex)
                         {
@@ -308,31 +322,6 @@ namespace Knossos.NET.ViewModels
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Warning, "ModDetailsViewModel.LoadScreenshots", ex);
-            }
-        }
-
-        private async void DownloadImage(string url, bool screenshoot = false)
-        {
-            try
-            {
-                using (HttpClient client = new HttpClient())
-                {
-                    client.Timeout = TimeSpan.FromSeconds(30);
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    byte[] content = await response.Content.ReadAsByteArrayAsync();
-                    Stream stream = new MemoryStream(content);
-                    if (!screenshoot)
-                        Banner = new Bitmap(stream);
-                    else
-                    {
-                        var item = new ScreenshotItem(new Bitmap(stream));
-                        Screenshots.Add(item);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Warning, "ModDetailsViewModel.DownloadImage", ex);
             }
         }
 

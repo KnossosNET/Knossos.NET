@@ -320,34 +320,20 @@ namespace Knossos.NET.ViewModels
                     }
                     else
                     {
-                        Task.Run(() => DownloadImage(tile));
+                        Task.Run(async () =>
+                        {
+                            using (var fs = await KnUtils.GetImageStream(tile))
+                            {
+                                if(fs != null)
+                                    Image = new Bitmap(fs);
+                            }
+                        }); 
                     }
                 }
             }
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Warning, "ModCardViewModel.LoadImage", ex);
-            }
-        }
-
-        private async void DownloadImage(string url)
-        {
-            try
-            {
-                using (HttpClient client = new HttpClient())
-                {
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    byte[] content = await response.Content.ReadAsByteArrayAsync();
-                    await using (Stream stream = new MemoryStream(content))
-                    {
-                        
-                        Image = new Bitmap(stream);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Warning, "ModCardViewModel.DownloadImage", ex);
             }
         }
     }

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 
 namespace Knossos.NET
 {
@@ -453,6 +454,85 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "KnUtils.CmdLineBuilder()", ex);
             }
             return cmdline;
+        }
+
+        /// <summary>
+        /// Gets the complete size of all files in a folder and subdirectories in bytes
+        /// </summary>
+        /// <param name="folderPath"></param>
+        /// <returns>size in bytes or 0 if failed</returns>
+        public static async Task<long> GetSizeOfFolderInBytes(string folderPath)
+        {
+            return await Task<long>.Run(() => {
+                try
+                {
+                    if (Directory.Exists(folderPath))
+                    {
+                        return Directory.EnumerateFiles(folderPath, "*", SearchOption.AllDirectories).Sum(fileInfo => new FileInfo(fileInfo).Length);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Warning, "KnUtils.GetSizeOfFolderInBytes", ex);
+                }
+                return 0;
+            });
+        }
+
+        /// <summary>
+        /// Gets the fullpath to image storage cache
+        /// </summary>
+        /// <returns></returns>
+        public static string GetImageCachePath()
+        {
+            try
+            {
+                return Path.Combine(GetKnossosDataFolderPath(), "image_cache");
+            }
+            catch { return string.Empty; }
+        }
+
+        /// <summary>
+        /// Downloads a image from a URL, stores it in cache and serves the filestream
+        /// If the image is already in cache, no download is done
+        /// </summary>
+        /// <param name="imageURL"></param>
+        /// <returns>Cached image filestream or null if failed</returns>
+        public static async Task<FileStream?> GetImageStream(string imageURL)
+        {
+            try
+            {
+                return await Task.Run(async () => { 
+                    var imageName = Path.GetFileName(imageURL);
+                    var imageInCachePath = Path.Combine(GetImageCachePath(), imageName);
+                    
+                    if(File.Exists(imageInCachePath) && new FileInfo(imageInCachePath).Length > 0)
+                    {
+                        return new FileStream(imageInCachePath, FileMode.Open, FileAccess.Read);
+                    }
+                    else
+                    {
+                        //Download to cache and copy
+                        Directory.CreateDirectory(Path.Combine(GetKnossosDataFolderPath(), "image_cache"));
+                        using (HttpClient client = new HttpClient())
+                        {
+                            using (var imageStream = await client.GetStreamAsync(imageURL))
+                            {
+                                var fileStream = new FileStream(imageInCachePath, FileMode.Create, FileAccess.ReadWrite);
+                                await imageStream.CopyToAsync(fileStream);
+                                imageStream.Close();
+                                fileStream.Seek(0, SeekOrigin.Begin);
+                                return fileStream;
+                            }
+                        }
+                    }
+                });
+            }
+            catch(Exception ex) 
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.GetImageStream()", ex);
+            }
+            return null;
         }
     }
 }

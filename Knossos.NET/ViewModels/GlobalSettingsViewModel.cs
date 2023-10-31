@@ -4,9 +4,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
@@ -41,6 +44,8 @@ namespace Knossos.NET.ViewModels
         internal bool windowsOS = false;
 
         /* Knossos */
+        [ObservableProperty]
+        internal string imgCacheSize = "0 MB";
         [ObservableProperty]
         internal string basePath = string.Empty;
         [ObservableProperty]
@@ -1013,6 +1018,46 @@ namespace Knossos.NET.ViewModels
 
                 await dialog.ShowDialog<CleanupKnossosLibraryView?>(MainWindow.instance);
             }
+        }
+
+        internal async void ClearImageCache()
+        {
+            await Task.Run(() => {
+                try
+                {
+                    var path = KnUtils.GetImageCachePath();
+                    Directory.Delete(path, true);
+                    UpdateImgCacheSize();
+                
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error,"GlobalSettingsViewModel.ClearImageCache()",ex);
+                }
+            });
+        }
+
+        public void UpdateImgCacheSize()
+        {
+            Task.Run(async () => {
+                try
+                {
+                    var path = KnUtils.GetImageCachePath();
+                    if (Directory.Exists(path))
+                    {
+                        var sizeInBytes = await KnUtils.GetSizeOfFolderInBytes(path);
+                        ImgCacheSize = KnUtils.FormatBytes(sizeInBytes);
+                    }
+                    else
+                    {
+                        ImgCacheSize = "0 MB";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "GlobalSettingsViewModel.ClearImageCache()", ex);
+                }
+            });
         }
     }
 }

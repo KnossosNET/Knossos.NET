@@ -67,6 +67,12 @@
 							<CheckBox IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="1" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start.">Check for updates at startup</CheckBox>
 							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="2" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input.">Auto Update</CheckBox>
 						</Grid>
+						<!-- Image Cache -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto">
+							<Label Grid.Column="0" VerticalAlignment="Center" Width="212" Content="Image Cache Size"/>
+							<Label Grid.Column="1" VerticalAlignment="Center" Foreground="Yellow" Content="{Binding ImgCacheSize}"/>
+							<Button Command="{Binding ClearImageCache}" Grid.Column="2" Background="Black">Clear Cache</Button>
+						</Grid>
 						<!-- SubTasks -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Concurrent Subtasks</TextBlock>
