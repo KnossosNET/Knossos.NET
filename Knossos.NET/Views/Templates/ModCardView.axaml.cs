@@ -7,7 +7,6 @@ namespace Knossos.NET.Views
         public ModCardView()
         {
             InitializeComponent();
-            //this.FindControl<StackPanel>("Overlay").IsPointerOver ;
         }
     }
 }
