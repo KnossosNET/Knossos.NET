@@ -175,17 +175,22 @@ namespace Knossos.NET.Models
         /// </summary>
         public void ClearUnusedData()
         {
-            notes = null;
-            fullDataLoaded = false;
-            foreach (ModPackage pkg in packages)
+            //Do NOT clear this for private mods
+            //There is no way to get it back whiout downloading the entire private mods array again
+            if (!isPrivate)
             {
-                if (!devMode)
+                notes = null;
+                fullDataLoaded = false;
+                foreach (ModPackage pkg in packages)
                 {
-                    pkg.notes = null;
+                    if (!devMode)
+                    {
+                        pkg.notes = null;
+                    }
+                    pkg.filelist = null;
+                    pkg.files = null;
+                    pkg.checkNotes = null;
                 }
-                pkg.filelist = null;
-                pkg.files = null;
-                pkg.checkNotes = null;
             }
         }
 
