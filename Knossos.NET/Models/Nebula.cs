@@ -493,6 +493,7 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// Returns all mods versions of an id
+        /// Includes private and public versions
         /// </summary>
         /// <param name="id"></param>
         /// <returns>List Mod or empty list</returns>
@@ -501,26 +502,14 @@ namespace Knossos.NET.Models
             var modList = new List<Mod>();
             if (privateMods != null && privateMods.Any())
             {
-                foreach (Mod mod in privateMods)
-                {
-                    if (mod != null && (mod.id == id || id == null))
-                    {
-                        modList.Add(mod);
-                    }
-                }
+                modList.AddRange(privateMods.Where(m=> m != null && (m.id == id || id == null)));
             }
             try
             {
                 var mods = await GetModsInRepo();
                 if (mods != null)
                 {
-                    foreach (Mod mod in mods)
-                    {
-                        if (mod != null && (mod.id == id || id == null))
-                        {
-                            modList.Add(mod);
-                        }
-                    }
+                    modList.AddRange(mods.Where(m => m != null && (m.id == id || id == null)));
                 }
             }
             catch (Exception ex)
