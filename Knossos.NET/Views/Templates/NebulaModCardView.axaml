@@ -8,7 +8,8 @@
 			 xmlns:vm="using:Knossos.NET.ViewModels"
 			 x:DataType="vm:NebulaModCardViewModel"
 			 Width="154"
-			 Height="264">
+			 Height="264"
+			 Background="Black">
 	
 	<Design.DataContext>
 		<vm:NebulaModCardViewModel/>

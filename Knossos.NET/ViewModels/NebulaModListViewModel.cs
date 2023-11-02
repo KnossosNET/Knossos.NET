@@ -169,18 +169,6 @@ namespace Knossos.NET.ViewModels
             IsLoading = false;
         }
 
-        internal void OpenScreenshotsFolder()
-        {
-            try
-            {
-                KnUtils.OpenFolder(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "screenshots");
-            }
-            catch (Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.OpenScreenshotsFolder", ex);
-            }
-        }
-
         internal async void ChangeSort(object sort)
         {
             try

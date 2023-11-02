@@ -23,11 +23,11 @@ namespace Knossos.NET.ViewModels
     {
         private CancellationTokenSource? cancellationTokenSource = null;
         public Mod? modJson { get; set; }
-        public string? ID { get; set; }
+        public string? ID { get { return modJson != null ? modJson.id : null; } }
 
         /* UI Bindings */
-        internal string? Name { get; set; }
-        internal string? ModVersion { get; set; }
+        internal string? Name { get { return modJson != null ? modJson.title : null; } }
+        internal string? ModVersion { get { return modJson != null ? modJson.version : null; } }
         [ObservableProperty]
         internal Bitmap? tileImage;
         [ObservableProperty]
@@ -39,9 +39,10 @@ namespace Knossos.NET.ViewModels
         /* Should only be used by the editor preview */
         public NebulaModCardViewModel()
         {
-            Name = "default test string very long";
-            ModVersion = "1.0.0";
-            ID = "test";
+            modJson = new Mod();
+            modJson.title = "default test string very long";
+            modJson.version = "1.0.0";
+            modJson.id = "test";
             TileImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
         }
 
@@ -49,9 +50,6 @@ namespace Knossos.NET.ViewModels
         {
             Log.Add(Log.LogSeverity.Information, "NebulaModCardViewModel(Constructor)", "Creating mod card for " + modJson);
             modJson.ClearUnusedData();
-            ModVersion = modJson.version;
-            Name = modJson.title;
-            ID = modJson.id;
             this.modJson = modJson;
             LoadImage(modJson.fullPath,modJson.tile);
         }

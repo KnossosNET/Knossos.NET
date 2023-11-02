@@ -40,7 +40,7 @@
 				<ItemsControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Mods}" IsVisible="{Binding !IsLoading}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
-							<v:ModCardView Margin="5" Content="{Binding}"/>
+							<v:NebulaModCardView Margin="5" Content="{Binding}"/>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 					<ItemsControl.ItemsPanel>
