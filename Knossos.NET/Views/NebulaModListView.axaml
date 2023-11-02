@@ -3,13 +3,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-			 x:Class="Knossos.NET.Views.ModListView"
+			 x:Class="Knossos.NET.Views.NebulaModListView"
 			 xmlns:v="using:Knossos.NET.Views"
 			 xmlns:vm="using:Knossos.NET.ViewModels"
-			 x:DataType="vm:ModListViewModel">
+			 x:DataType="vm:NebulaModListViewModel">
 	
 	<Design.DataContext>
-		<vm:ModListViewModel/>
+		<vm:NebulaModListViewModel/>
 	</Design.DataContext>
 	
 	<Border Background="#18191A">
@@ -31,30 +31,13 @@
 					<TextBox Text="{Binding Search}" Width="300"></TextBox>
 				</WrapPanel>
 				<WrapPanel Margin="10" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">
-					<Button Margin="0,0,5,0" Background="Black" FontWeight="Bold" Content="?" ToolTip.Tip="View Color Codes" HorizontalAlignment="Right">
-						<Button.Flyout>
-							<Flyout Placement="Left">
-								<WrapPanel>
-									<Border Margin="0,0,0,0"  Background="DimGray" Height="30" CornerRadius="5">
-										<Label VerticalAlignment="Center">Dev Mode</Label>
-									</Border>
-									<Border Margin="20,0,0,0" Background="Blue" Height="30" CornerRadius="5">
-										<Label VerticalAlignment="Center">Update Avalible</Label>
-									</Border>
-									<Border Margin="20,0,0,0" Background="Red" Height="30" CornerRadius="5">
-										<Label VerticalAlignment="Center">Problem Detected</Label>
-									</Border>
-								</WrapPanel>
-							</Flyout>
-						</Button.Flyout>
-					</Button>
-					<Button Background="Black" Command="{Binding OpenScreenshotsFolder}" ToolTip.Tip="Open screenshots folder" HorizontalAlignment="Right">
-					  <Image Height="20" Width="20" Source="/Assets/general/screenshot.png"></Image>
+					<Button Background="Black" Command="{Binding ReloadRepoCommand}" ToolTip.Tip="Refresh">
+					  <Image Height="20" Width="20" Source="/Assets/general/refresh.png"></Image>
 					</Button>
 				</WrapPanel>
 			</Grid>
 			<ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-				<ItemsControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Mods}">
+				<ItemsControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Mods}" IsVisible="{Binding !IsLoading}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<v:ModCardView Margin="5" Content="{Binding}"/>
@@ -67,6 +50,7 @@
 					</ItemsControl.ItemsPanel>
 				</ItemsControl>
 			</ScrollViewer>
+			<Label Grid.Row="1" FontWeight="Bold" FontSize="24" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding IsLoading}">Loading...</Label>
 		</Grid>
 	</Border>
 </UserControl>

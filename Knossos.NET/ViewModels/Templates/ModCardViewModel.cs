@@ -24,7 +24,6 @@ namespace Knossos.NET.ViewModels
         /* General Mod variables */
         private List<Mod> modVersions = new List<Mod>();
         private int activeVersionIndex = 0;
-        private CancellationTokenSource? cancellationTokenSource = null;
         private bool devMode { get; set; } = false;
         public string ID { get; set; }
 
@@ -51,11 +50,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool updateAvalible = false;
         [ObservableProperty]
-        internal bool isInstalled = false;
-        [ObservableProperty]
         internal IBrush borderColor = Brushes.Black;
-        [ObservableProperty]
-        internal bool isInstalling = false;
         [ObservableProperty]
         internal bool isLocalMod = false;
         [ObservableProperty]
@@ -92,7 +87,6 @@ namespace Knossos.NET.ViewModels
             {
                 devMode = modJson.devMode;
             }
-            IsInstalled = modJson.installed;
 
             if (devMode && ID != "FS2")
             {
@@ -203,8 +197,6 @@ namespace Knossos.NET.ViewModels
                 case "delete": ButtonCommandDelete(); break;
                 case "details": ButtonCommandDetails(); break;
                 case "settings": ButtonCommandSettings(); break;
-                case "install": ButtonCommandInstall(); break;
-                case "cancel": CancelInstallCommand(); break;
             }
         }
 
@@ -220,37 +212,6 @@ namespace Knossos.NET.ViewModels
             var dialog = new ModInstallView();
             dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex], dialog, modVersions[activeVersionIndex].version);
             await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
-        }
-
-        internal async void ButtonCommandInstall()
-        {
-            var dialog = new ModInstallView();
-            dialog.DataContext = new ModInstallViewModel(modVersions[0], dialog);
-            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
-        }
-
-        public void InstallingMod(CancellationTokenSource cancelToken)
-        {
-            IsInstalling = true;
-            cancellationTokenSource = cancelToken;
-        }
-
-        public void CancelInstall()
-        {
-            IsInstalling = false;
-            cancellationTokenSource = null;
-        }
-
-        public void CancelInstallCommand()
-        {
-            IsInstalling = false;
-            try
-            {
-                cancellationTokenSource?.Cancel();
-            }
-            catch { }
-            cancellationTokenSource = null;
-            TaskViewModel.Instance?.CancelAllInstallTaskWithID(modVersions[activeVersionIndex].id, modVersions[activeVersionIndex].version);
         }
 
         internal async void ButtonCommandDelete()

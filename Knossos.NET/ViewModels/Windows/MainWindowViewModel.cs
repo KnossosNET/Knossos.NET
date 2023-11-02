@@ -16,9 +16,9 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string appTitle = "Knossos.NET v" + Knossos.AppVersion;
         [ObservableProperty]
-        internal ModListViewModel installedModsView = new ModListViewModel(false);
+        internal ModListViewModel installedModsView = new ModListViewModel();
         [ObservableProperty]
-        internal ModListViewModel nebulaModsView = new ModListViewModel(true);
+        internal NebulaModListViewModel nebulaModsView = new NebulaModListViewModel();
         [ObservableProperty]
         internal FsoBuildsViewModel fsoBuildsView = new FsoBuildsViewModel();
         [ObservableProperty]
