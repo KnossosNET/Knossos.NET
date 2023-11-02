@@ -1,0 +1,44 @@
+<UserControl IsVisible="{Binding Visible}"  xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="155" d:DesignHeight="265"
+             x:Class="Knossos.NET.Views.NebulaModCardView"
+	         xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+			 x:DataType="vm:NebulaModCardViewModel"
+			 Width="154"
+			 Height="264"
+			 Background="Black">
+	
+	<Design.DataContext>
+		<vm:NebulaModCardViewModel/>
+	</Design.DataContext>
+
+	<UserControl.Styles>
+		<Style Selector="StackPanel#Overlay:pointerover" >
+			<Setter Property="Opacity" Value="0.8"/>
+		</Style>
+		<Style Selector="StackPanel#Overlay:not(:pointerover)" >
+			<Setter Property="Opacity" Value="0"/>
+		</Style>
+	</UserControl.Styles>
+	
+	<Grid Background="#422626" Width="150" Height="260" VerticalAlignment="Center" HorizontalAlignment="Center">
+		<!--Default-->
+		<Image VerticalAlignment="Top" Source="{Binding TileImage}" Width="150" Height="225"></Image>
+		<TextBlock Margin="0,222,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" TextAlignment="Center" FontSize="14" Foreground="White"/>
+		<!--Nebula Overlay-->
+		<StackPanel IsVisible="{Binding !IsInstalling}" Name="Overlay" ZIndex="1" Background="Black" Height="225" Width="150" VerticalAlignment="Top">
+			<Label Content="{Binding ModVersion}" FontWeight="Bold" FontSize="14" Width="150" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
+			<Button Margin="0,55,0,0" Command="{Binding ButtonCommand}" CommandParameter="install" Content="Install" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Width="100" ></Button>
+			<Button Margin="0,10,0,0" Command="{Binding ButtonCommand}" CommandParameter="details" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Width="100" ></Button>
+		</StackPanel>
+		<!--Installing Overlay-->
+		<StackPanel IsVisible="{Binding IsInstalling}" Opacity="0.8" ZIndex="3" Background="Black" Width="150" Height="225" VerticalAlignment="Top">
+			<Label Content="Installing..." FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="0,50,0,0" Width="100"></Label>
+			<Button Command="{Binding ButtonCommand}" CommandParameter="cancel" Content="Cancel" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,5,0,0" Width="100" ></Button>
+		</StackPanel>
+	</Grid>
+	
+</UserControl>

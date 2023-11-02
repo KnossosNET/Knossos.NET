@@ -30,7 +30,7 @@
 			</TabItem>
 			<!--Nebula Mods / Explore-->
 			<TabItem Header="Nebula">
-				<v:ModListView Content="{Binding NebulaModsView}"/>
+				<v:NebulaModListView Content="{Binding NebulaModsView}"/>
 			</TabItem>
 			<!--FSO Builds-->
 			<TabItem Header="Engine">

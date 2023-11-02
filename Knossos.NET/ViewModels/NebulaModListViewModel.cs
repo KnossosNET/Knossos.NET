@@ -10,12 +10,13 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
+using Knossos.NET.Views;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
 
 namespace Knossos.NET.ViewModels
 {
-    public partial class ModListViewModel : ViewModelBase
+    public partial class NebulaModListViewModel : ViewModelBase
     {
         enum SortType
         {
@@ -27,6 +28,11 @@ namespace Knossos.NET.ViewModels
         internal string search  = string.Empty;
 
         private SortType sortType = SortType.name;
+
+        internal bool IsTabOpen = false;
+
+        [ObservableProperty]
+        internal bool isLoading = true;
 
         internal string Search
         {
@@ -56,21 +62,42 @@ namespace Knossos.NET.ViewModels
         }
 
         [ObservableProperty]
-        internal ObservableCollection<ModCardViewModel> mods = new ObservableCollection<ModCardViewModel>();
+        internal ObservableCollection<NebulaModCardViewModel> mods = new ObservableCollection<NebulaModCardViewModel>();
 
-        public ModListViewModel()
+        public NebulaModListViewModel()
         {
+        }
+
+        public async void OpenTab()
+        {
+            if (!IsLoading && !IsTabOpen)
+            {
+                await Dispatcher.UIThread.InvokeAsync(async ()  =>
+                {
+                    try
+                    {
+                        await Task.Delay(100);
+                        IsLoading = false;
+                        foreach (var m in Mods)
+                        {
+                            m.Visible = true;
+                            await Task.Delay(3);
+                        }
+                    }
+                    catch { }
+                });
+            }
+            IsTabOpen = true;
+        }
+
+        public void ReloadRepoCommand()
+        {
+            Knossos.ResetBasePath();
         }
 
         public void ClearView()
         {
             Mods.Clear();
-        }
-
-        public void RunModStatusChecks()
-        {
-            Mods.ForEach(m => m.RefreshSpecialIcons());
-            Mods.ForEach(m => m.CheckDependencyActiveVersion());
         }
 
         public void AddMod(Mod modJson)
@@ -81,32 +108,65 @@ namespace Knossos.NET.ViewModels
                 int i;
                 for (i = 0; i < Mods.Count; i++)
                 {
-                    if (Mods[i].ActiveVersion != null)
+                    if (Mods[i].modJson != null)
                     {
-                        if(CompareMods(Mods[i].ActiveVersion!,modJson) > 0)
+                        if(CompareMods(Mods[i].modJson!,modJson) > 0)
                         {
                             break;
                         }
                     }
                 }
-                Mods.Insert(i, new ModCardViewModel(modJson));
+                Mods.Insert(i, new NebulaModCardViewModel(modJson));
             }
             else
             {
-                modCard.AddModVersion(modJson);
+                //Update?
             }
         }
 
-        internal void OpenScreenshotsFolder()
+        public async void AddMods(List<Mod> modList)
         {
-            try
+            var newModCardList = new ObservableCollection<NebulaModCardViewModel>();
+            foreach (Mod? mod in modList)
             {
-                KnUtils.OpenFolder(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "screenshots");
+                var modCard = newModCardList.FirstOrDefault(m => m.ID == mod.id);
+                if (modCard == null)
+                {
+                    int i;
+                    for (i = 0; i < newModCardList.Count; i++)
+                    {
+                        if (newModCardList[i].modJson != null)
+                        {
+                            if (CompareMods(newModCardList[i].modJson!, mod) > 0)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    newModCardList.Insert(i, new NebulaModCardViewModel(mod));
+                }
+                else
+                {
+                    //Update?
+                }
             }
-            catch (Exception ex)
+            newModCardList.ForEach(m=>m.Visible = false);
+            Mods = newModCardList;
+            if (IsTabOpen)
             {
-                Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.OpenScreenshotsFolder", ex);
+                try
+                {
+                    await Task.Delay(100);
+                    IsLoading = false;
+                    foreach (var m in Mods)
+                    {
+                        m.Visible = true;
+                        await Task.Delay(3);
+                    }
+                }
+                catch { }
             }
+            IsLoading = false;
         }
 
         internal async void ChangeSort(object sort)
@@ -121,10 +181,12 @@ namespace Knossos.NET.ViewModels
                         sortType = newSort;
                         var tempList = Mods.ToList();
                         tempList.Sort(CompareMods);
+                        IsLoading = true;
                         for (int i = 0; i < tempList.Count; i++)
                         {
                             Mods.Move(Mods.IndexOf(tempList[i]), i);
                         }
+                        IsLoading = false;
                         GC.Collect();
                     },DispatcherPriority.Background);
                 }
@@ -134,10 +196,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private int CompareMods(ModCardViewModel x, ModCardViewModel y)
+        private int CompareMods(NebulaModCardViewModel x, NebulaModCardViewModel y)
         {
-            if (x.ActiveVersion != null && y.ActiveVersion != null)
-                return CompareMods(x.ActiveVersion, y.ActiveVersion);
+            if (x.modJson != null && y.modJson != null)
+                return CompareMods(x.modJson, y.modJson);
             else
                 return 0;
         }
@@ -188,17 +250,17 @@ namespace Knossos.NET.ViewModels
                 }
             }catch(Exception ex)
             { 
-                Log.Add(Log.LogSeverity.Warning, "ModListViewModel.CompareMods()",ex.Message);
+                Log.Add(Log.LogSeverity.Warning, "NebulaModListViewModel.CompareMods()",ex.Message);
                 return 0; 
             }
         }
 
-        public void UpdateIsAvalible(string id,bool value)
+        public void SetInstalling(string id, CancellationTokenSource cancelToken)
         {
             var modCard = Mods.FirstOrDefault(m => m.ID == id);
             if (modCard != null)
             {
-                modCard.UpdateIsAvalible(value);
+                modCard.InstallingMod(cancelToken);
             }
         }
 
@@ -208,6 +270,15 @@ namespace Knossos.NET.ViewModels
             if (modCard != null)
             {
                 Mods.Remove(modCard);
+            }
+        }
+
+        public void CancelModInstall(string id)
+        {
+            var modCard = Mods.FirstOrDefault(m => m.ID == id);
+            if (modCard != null)
+            {
+                modCard.CancelInstall();
             }
         }
     }
