@@ -159,6 +159,10 @@ namespace Knossos.NET.ViewModels
                     }
                     break;
             }
+            if (build.modData != null && !build.modData.isPrivate && !build.devMode)
+            {
+                build.modData!.ClearUnusedData();
+            }
         }
 
         public void BulkLoadNebulaBuilds(List<Mod> modsJson)
@@ -243,6 +247,10 @@ namespace Knossos.NET.ViewModels
                             newCustom.Add(new FsoBuildItemViewModel(build));
                         }
                         break;
+                }
+                if (!mod.isPrivate && !mod.devMode)
+                {
+                    mod.ClearUnusedData();
                 }
             }
 
