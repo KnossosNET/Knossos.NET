@@ -10,6 +10,10 @@ using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Simple Quick Setup Guide
+    /// Basic view model for the Quick Setup view
+    /// </summary>
     public partial class QuickSetupViewModel : ViewModelBase
     {
         private int pageNumber = 1;
@@ -46,6 +50,9 @@ namespace Knossos.NET.ViewModels
             TrackRepoStatus();
         }
 
+        /// <summary>
+        /// Wait until repo_minimal.json has been parsed
+        /// </summary>
         private void TrackRepoStatus()
         {
             Task.Run(async () =>
@@ -62,6 +69,9 @@ namespace Knossos.NET.ViewModels
             });
         }
 
+        /// <summary>
+        /// Wait until the Knossos library path is set
+        /// </summary>
         private void EnterPage2()
         {
             Task.Run(() => 
@@ -86,6 +96,9 @@ namespace Knossos.NET.ViewModels
             });
         }
 
+        /// <summary>
+        /// Wait until FSO flags has been loaded
+        /// </summary>
         private void EnterPage3()
         {
             Task.Run(() =>

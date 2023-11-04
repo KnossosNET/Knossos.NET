@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// View Model for the Server Creator View
+    /// </summary>
     public partial class ServerCreatorViewModel : ViewModelBase
     {
         [ObservableProperty]
@@ -29,7 +32,7 @@ namespace Knossos.NET.ViewModels
             {
                 if (modIndex != value)
                 {
-                    modIndex = value;
+                    this.SetProperty(ref modIndex, value);
                     LoadCFG();
                 }
             }
@@ -61,9 +64,16 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         public string? password = null;
 
+        /// <summary>
+        /// 0 = Release
+        /// 1 = Debug
+        /// </summary>
         [ObservableProperty]
         public int buildType = 0;
 
+        /// <summary>
+        /// Load multi.cfg file for the currently selected mod in the list
+        /// </summary>
         internal void LoadCFG()
         {
             BanList = ExtraOptions = string.Empty;
@@ -99,6 +109,10 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Error, "ServerCreatorViewModel.LoadCFG()", ex);
             }
         }
+
+        /// <summary>
+        /// Save multi.cfg for the currently selected mod 
+        /// </summary>
         internal void SaveCFG()
         {
             try
@@ -133,6 +147,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Open multi.cfg for the currently selected mod in a external text editor
+        /// </summary>
         internal void OpenCFG()
         {
             try
@@ -142,11 +159,12 @@ namespace Knossos.NET.ViewModels
                     var f = File.Create(Path.Combine(ListOfMods[ModIndex].fullPath, "data", "multi.cfg"));
                     f.Close();
                 }
-                var cmd = new Process();
-                cmd.StartInfo.FileName = Path.Combine(ListOfMods[ModIndex].fullPath, "data", "multi.cfg");
-                cmd.StartInfo.UseShellExecute = true;
-                cmd.Start();
-                cmd.Dispose();
+                using (var cmd = new Process())
+                {
+                    cmd.StartInfo.FileName = Path.Combine(ListOfMods[ModIndex].fullPath, "data", "multi.cfg");
+                    cmd.StartInfo.UseShellExecute = true;
+                    cmd.Start();
+                }
             }
             catch (Exception ex)
             {
@@ -154,6 +172,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Open the dedicated server
+        /// </summary>
         internal void LaunchServer()
         {
             if (BuildType < 1)
@@ -163,13 +184,15 @@ namespace Knossos.NET.ViewModels
 
         }
 
+        /// <summary>
+        /// Open mod settings
+        /// </summary>
         internal async void OpenModSettings()
         {
             if (MainWindow.instance != null)
             {
                 var dialog = new ModSettingsView();
                 dialog.DataContext = new ModSettingsViewModel(ListOfMods[ModIndex]);
-
                 await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
             }
         }

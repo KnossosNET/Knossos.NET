@@ -16,6 +16,9 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Nebula mod card container view, this is the "explore" tab
+    /// </summary>
     public partial class NebulaModListViewModel : ViewModelBase
     {
         enum SortType
@@ -25,15 +28,23 @@ namespace Knossos.NET.ViewModels
             update
         }
 
-        internal string search  = string.Empty;
-
+        /// <summary>
+        /// Current Sort Mode
+        /// </summary>
         private SortType sortType = SortType.name;
 
+        /// <summary>
+        /// The user has opened this tab in this session?
+        /// </summary>
         internal bool IsTabOpen = false;
 
         [ObservableProperty]
         internal bool isLoading = true;
 
+        /// <summary>
+        /// Search string
+        /// </summary>
+        internal string search = string.Empty;
         internal string Search
         {
             get { return search; }
@@ -68,6 +79,9 @@ namespace Knossos.NET.ViewModels
         {
         }
 
+        /// <summary>
+        /// Open the tab and slowly display modcards to avoid ui lock
+        /// </summary>
         public async void OpenTab()
         {
             if (!IsLoading && !IsTabOpen)
@@ -90,16 +104,26 @@ namespace Knossos.NET.ViewModels
             IsTabOpen = true;
         }
 
+        /// <summary>
+        /// Reload all mods from nebula
+        /// </summary>
         public void ReloadRepoCommand()
         {
             Knossos.ResetBasePath();
         }
 
+        /// <summary>
+        /// Clears all mods in view
+        /// </summary>
         public void ClearView()
         {
             Mods.Clear();
         }
 
+        /// <summary>
+        /// Adds a single mod into the view, it will be inserted in order depending on the current select sort mode
+        /// </summary>
+        /// <param name="modJson"></param>
         public void AddMod(Mod modJson)
         {
             var modCard = Mods.FirstOrDefault(m => m.ID == modJson.id);
@@ -120,10 +144,15 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                //Update?
+                //Update? Should NOT be needed for Nebula mods
             }
         }
 
+        /// <summary>
+        /// Adds a new list of mods into the, in a more efficient way that loading one by one
+        /// It replaces all mods, all old mods are deleted, intended only for the first big load of mods
+        /// </summary>
+        /// <param name="modList"></param>
         public async void AddMods(List<Mod> modList)
         {
             var newModCardList = new ObservableCollection<NebulaModCardViewModel>();
@@ -147,7 +176,7 @@ namespace Knossos.NET.ViewModels
                 }
                 else
                 {
-                    //Update?
+                    //Update? Should NOT be needed for Nebula mods
                 }
             }
             newModCardList.ForEach(m=>m.Visible = false);
@@ -169,6 +198,10 @@ namespace Knossos.NET.ViewModels
             IsLoading = false;
         }
 
+        /// <summary>
+        /// Change sorting mode and re-order the list of mods
+        /// </summary>
+        /// <param name="sort"></param>
         internal async void ChangeSort(object sort)
         {
             try
@@ -254,7 +287,12 @@ namespace Knossos.NET.ViewModels
                 return 0; 
             }
         }
-
+        
+        /// <summary>
+        /// Changes a modcard to "installing" mode
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="cancelToken"></param>
         public void SetInstalling(string id, CancellationTokenSource cancelToken)
         {
             var modCard = Mods.FirstOrDefault(m => m.ID == id);
@@ -264,6 +302,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Removes a mod id from view
+        /// </summary>
+        /// <param name="id"></param>
         public void RemoveMod(string id)
         {
             var modCard = Mods.FirstOrDefault(m => m.ID == id);
@@ -273,6 +315,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Cancels a mod install of a mod id in view, removing the "installing" mode 
+        /// </summary>
+        /// <param name="id"></param>
         public void CancelModInstall(string id)
         {
             var modCard = Mods.FirstOrDefault(m => m.ID == id);

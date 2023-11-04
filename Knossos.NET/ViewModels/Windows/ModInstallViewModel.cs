@@ -15,8 +15,13 @@ using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// View Model for the Mod Install Window
+    /// </summary>
     public partial class ModInstallViewModel : ViewModelBase
     {
+        private Window? dialogWindow;
+
         [ObservableProperty]
         internal List<Mod> modVersions = new List<Mod>();
         [ObservableProperty]
@@ -41,15 +46,12 @@ namespace Knossos.NET.ViewModels
         internal bool canSelectDevMode = true;
         [ObservableProperty]
         internal bool installInDevMode = false;
-
-        internal Mod? selectedMod;
         [ObservableProperty]
         internal bool hasWriteAccess = false;
         [ObservableProperty]
         internal bool forceDevMode = false;
 
-        private Window? dialogWindow;
-
+        internal Mod? selectedMod;
         internal Mod? SelectedMod
         {
             get { return selectedMod; }
@@ -57,7 +59,7 @@ namespace Knossos.NET.ViewModels
             {
                 if (selectedMod != value)
                 {
-                    selectedMod = value;
+                    this.SetProperty(ref selectedMod, value);
                     UpdateSelectedVersion();
                 }
             }
@@ -67,6 +69,14 @@ namespace Knossos.NET.ViewModels
         {
         }
 
+        /// <summary>
+        /// Mod Install View Model
+        /// Dialog is the window this datacontext is attached to, used to close the window when user clicks "install"
+        /// </summary>
+        /// <param name="modJson"></param>
+        /// <param name="dialog"></param>
+        /// <param name="preSelectedVersion"></param>
+        /// <param name="forceDevModeOn"></param>
         public ModInstallViewModel(Mod modJson, Window dialog, string? preSelectedVersion = null, bool forceDevModeOn = false)
         {
             dialogWindow = dialog;
@@ -77,6 +87,11 @@ namespace Knossos.NET.ViewModels
             InitialLoad(modJson.id, preSelectedVersion);
         }
 
+        /// <summary>
+        /// Initial Load, if preselected version is pass, that would be the displayed version when the UI is show
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="preSelectedVersion"></param>
         private async void InitialLoad(string id, string? preSelectedVersion = null)
         {
             if (Nebula.userIsLoggedIn)
@@ -87,7 +102,7 @@ namespace Knossos.NET.ViewModels
                     HasWriteAccess = true;
                 }
             }
-            ModVersions =await Nebula.GetAllModsWithID(id);
+            ModVersions = await Nebula.GetAllModsWithID(id);
             if(ModVersions.Any())
             {
                 if(preSelectedVersion == null)
@@ -96,17 +111,14 @@ namespace Knossos.NET.ViewModels
                 }
                 else
                 {
-                    for(var i=0; i < ModVersions.Count(); i++)
+                    var preSelect = ModVersions.FirstOrDefault(m=>m.version == preSelectedVersion);
+                    if (preSelect != null)
                     {
-                        if (ModVersions[i].version == preSelectedVersion)
-                        {
-                            SelectedIndex = i;
-                            continue;
-                        }
+                        SelectedIndex = ModVersions.IndexOf(preSelect);
                     }
-                    /* Version not found? maybe deleted from nebula Select the newerest */
-                    if(SelectedIndex == -1)
+                    else
                     {
+                        /* Version not found? maybe deleted from nebula Select the newerest */
                         SelectedIndex = ModVersions.Count() - 1;
                     }
                 }
@@ -118,6 +130,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Load to UI all mod packages (and dependencies) for the current selected mod version
+        /// </summary>
         private async void UpdateSelectedVersion()
         {
             ModInstallList.Clear();
@@ -185,6 +200,16 @@ namespace Knossos.NET.ViewModels
             GC.Collect();
         }
 
+        /// <summary>
+        /// Add a mod to the install list/tree
+        /// Loads full data from nebula if not already loaded for the relevant mods
+        /// Detects any missing dependency of this mod and add them to install too
+        /// Then it recursively calls this function again on all dependencies
+        /// Making a full mod tree dependency resolution.
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <param name="allMods"></param>
+        /// <param name="processed"></param>
         private async Task ProcessMod(Mod mod, List<Mod> allMods, List<Mod>? processed = null)
         {
             if (processed == null)
@@ -221,17 +246,14 @@ namespace Knossos.NET.ViewModels
             });
         }
 
+        /// <summary>
+        /// Add mod to list, it cheks if the mod is already added and if thats the case
+        /// then it checks the packages of that mod to make sure recommended and requiered packages are properly marked
+        /// </summary>
+        /// <param name="mod"></param>
         private void AddModToList(Mod mod)
         {
-            Mod? modInList = null;
-            foreach (var inList in ModInstallList)
-            {
-                if (mod.id == inList.id && inList.version == mod.version)
-                {
-                    modInList = inList;
-                    continue;
-                }
-            }
+            var modInList = ModInstallList.FirstOrDefault(m=>m.id == mod.id && m.version == mod.version);
 
             if (modInList == null)
             {
@@ -282,13 +304,16 @@ namespace Knossos.NET.ViewModels
                                 }
 
                             }
-                            continue;
+                            break;
                         }
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// Starts Mod Verify Task
+        /// </summary>
         internal void VerifyCommand()
         {
             if(SelectedMod != null)
@@ -303,6 +328,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Calls install mod on all mods in install list
+        /// And closes the window
+        /// </summary>
         internal void InstallMod()
         {
             foreach (var mod in ModInstallList)

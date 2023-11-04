@@ -11,6 +11,9 @@ using System.Linq;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Develop Tab View Model
+    /// </summary>
     public partial class DeveloperModsViewModel : ViewModelBase
     {
         public static DeveloperModsViewModel? Instance;
@@ -59,7 +62,7 @@ namespace Knossos.NET.ViewModels
                 if (selectedIndex != value || ModEditor == null)
                 {
                     if (value >= 0)
-                        selectedIndex = value;
+                        this.SetProperty(ref selectedIndex, value);
                     else
                         selectedIndex = 0;
 
@@ -79,6 +82,9 @@ namespace Knossos.NET.ViewModels
             Instance = this;
         }
 
+        /// <summary>
+        /// Close Mod Editor
+        /// </summary>
         public void CloseEditor()
         {
             ModEditor = null;
@@ -93,6 +99,10 @@ namespace Knossos.NET.ViewModels
             GC.Collect();
         }
 
+        /// <summary>
+        /// Delete a mod from the Dev Mod list
+        /// </summary>
+        /// <param name="modid"></param>
         public void DeleteMod(string modid)
         {
             var mod = Mods.FirstOrDefault(m=>m.id == modid);
@@ -100,6 +110,11 @@ namespace Knossos.NET.ViewModels
                 Mods.Remove(mod);
         }
 
+        /// <summary>
+        /// Add a mod to the Dev Mod list
+        /// Only one version can exist in this list at any given time
+        /// </summary>
+        /// <param name="mod"></param>
         public void AddMod(Mod mod)
         {
             try
@@ -127,8 +142,21 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Clear view
+        /// </summary>
+        /// <exception cref="NotImplementedException"></exception>
+        internal void ClearView()
+        {
+            Mods.Clear();
+            CloseEditor();
+        }
+
         /* Buttons */
 
+        /// <summary>
+        /// Open Create Mod dialog
+        /// </summary>
         internal async void CreateMod()
         {
             var dialog = new DevModCreateNewView();

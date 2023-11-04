@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// This is the class responsable for the "settings" tab
+    /// </summary>
     public partial class GlobalSettingsViewModel : ViewModelBase
     {
         /* Limiters definition */
@@ -177,6 +180,10 @@ namespace Knossos.NET.ViewModels
         {
         }
 
+        /// <summary>
+        /// Loads data from the GlobalSettings.cs class into this one to display it in the UI
+        /// Also loads flag data from a FSO build, if one is installed
+        /// </summary>
         public void LoadData()
         {
             var flagData = GetFlagData();
@@ -699,6 +706,9 @@ namespace Knossos.NET.ViewModels
         }
 
         /* UI Buttons */
+        /// <summary>
+        /// Changes the knossos library path, reloads settings and nebula repo
+        /// </summary>
         internal async void BrowseFolderCommand()
         {
             if (MainWindow.instance != null)
@@ -723,6 +733,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Reload data from json
+        /// </summary>
         internal void ResetCommand()
         {
             Knossos.globalSettings = new GlobalSettings();
@@ -730,6 +743,9 @@ namespace Knossos.NET.ViewModels
             SaveCommand();
         }
 
+        /// <summary>
+        /// Copies data from the UI into the GlobalSettings.cs class and saves it into the json
+        /// </summary>
         internal void SaveCommand()
         {
             /* Knossos Settings */
@@ -938,6 +954,9 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.Save();
         }
 
+        /// <summary>
+        /// Start TTS Voice Test with selected voice
+        /// </summary>
         internal void TestVoiceCommand()
         {
             if (VoiceSelectedIndex != -1)
@@ -952,26 +971,44 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Stop TTS
+        /// </summary>
         internal void StopTTS()
         {
             Knossos.Tts(string.Empty);
         }
 
+        /// <summary>
+        /// When TTS test is over, change the button
+        /// </summary>
+        /// <returns></returns>
         private bool TTSCompletedCallback()
         {
             PlayingTTS = false;
             return true;
         }
 
+        /// <summary>
+        /// Opens the hard light wiki CMDline reference help
+        /// </summary>
         internal void GlobalCmdHelp()
         {
             KnUtils.OpenBrowserURL("https://wiki.hard-light.net/index.php/Command-Line_Reference");
         }
+
+        /// <summary>
+        /// Reloads configuration and FSO flag data
+        /// </summary>
         internal void ReloadFlagData()
         {
             Knossos.globalSettings.Load();
             LoadData();
         }
+
+        /// <summary>
+        /// Opens performance help window
+        /// </summary>
         internal async void OpenPerformanceHelp()
         {
             if (MainWindow.instance != null)
@@ -982,6 +1019,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Open the GetSapiVoices window
+        /// </summary>
         internal async void OpenGetVoices()
         {
             if (MainWindow.instance != null)
@@ -993,6 +1033,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Open the retails FS2 installer window
+        /// </summary>
         internal async void InstallFS2Command()
         {
             if (MainWindow.instance != null)
@@ -1004,11 +1047,17 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Opens the quick setup guide window
+        /// </summary>
         internal void QuickSetupCommand()
         {
             Knossos.OpenQuickSetup();
         }
         
+        /// <summary>
+        /// Opens the library cleaner window
+        /// </summary>
         internal async void CleanupLibraryCommand()
         {
             if (MainWindow.instance != null)
@@ -1020,6 +1069,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Clears the knet image cache folder
+        /// </summary>
         internal async void ClearImageCache()
         {
             await Task.Run(() => {
@@ -1037,6 +1089,9 @@ namespace Knossos.NET.ViewModels
             });
         }
 
+        /// <summary>
+        /// Update the size of the Knet image cache folder into UI
+        /// </summary>
         public void UpdateImgCacheSize()
         {
             Task.Run(async () => {

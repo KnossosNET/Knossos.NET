@@ -14,6 +14,10 @@ using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Create New Model Windows View Model
+    /// For DevMode
+    /// </summary>
     public partial class DevModCreateNewViewModel : ViewModelBase
     {
         internal string modId = string.Empty;

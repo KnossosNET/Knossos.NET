@@ -49,9 +49,15 @@ namespace Knossos.NET.ViewModels
         public List<string> Flags { get; set; } = new List<string>();
     }
 
+    /// <summary>
+    /// PXO Tab View Model Class
+    /// </summary>
     public partial class PxoViewModel : ViewModelBase
     {
         public static PxoViewModel? Instance;
+        /// <summary>
+        /// Server loading is only done once, when the user open tha tab
+        /// </summary>
         private bool initialLoadDone = false;
 
         [ObservableProperty]
@@ -72,6 +78,9 @@ namespace Knossos.NET.ViewModels
             KnUtils.OpenBrowserURL(@"https://pxo.nottheeye.com/");
         }
 
+        /// <summary>
+        /// Load multi data into UI when the users clicks the tab
+        /// </summary>
         public void InitialLoad()
         {
             Login = Knossos.globalSettings.pxoLogin;
@@ -83,6 +92,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Write PXO login credentians to fs2_open.ini file
+        /// </summary>
         internal async void SavePXOCredentials()
         {
             Login = Login.Replace(" ","");
@@ -110,6 +122,9 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.WriteFS2IniValues();
         }
 
+        /// <summary>
+        /// Open the standalone server creator window
+        /// </summary>
         internal async void OpenServerCreator()
         {
             if (MainWindow.instance != null)
@@ -121,6 +136,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Reload data from the PXO api
+        /// There is a limit, do not do this too often
+        /// </summary>
         public async void RefreshData()
         {
             

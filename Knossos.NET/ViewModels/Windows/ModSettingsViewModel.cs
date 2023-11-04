@@ -13,6 +13,9 @@ using VP.NET;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Mod Settings Window View Model
+    /// </summary>
     public partial class ModSettingsViewModel : ViewModelBase
     {
         private Mod? modJson;
@@ -51,6 +54,13 @@ namespace Knossos.NET.ViewModels
             fsoPicker = new FsoBuildPickerViewModel();
         }
 
+        /// <summary>
+        /// Open Mod Settings of a certain, installed, Mod.
+        /// If modcard is passed it will force a status icons update on Save()
+        /// Reads compression settings, it checks mod folder size, reads mods the dependency list
+        /// </summary>
+        /// <param name="modJson"></param>
+        /// <param name="modCard"></param>
         public ModSettingsViewModel(Mod modJson, ModCardViewModel? modCard=null)
         {
             try
@@ -116,7 +126,10 @@ namespace Knossos.NET.ViewModels
             Task.Factory.StartNew(() => UpdateModSize());
         }
 
-        private void UpdateModSize()
+        /// <summary>
+        /// Update Mod Folder size value on UI
+        /// </summary>
+        private async void UpdateModSize()
         {
             if(modJson == null || modJson.fullPath == string.Empty)
             {
@@ -125,30 +138,7 @@ namespace Knossos.NET.ViewModels
 
             try
             {
-                long bytes = 0;
-                if (modJson.id != "FS2")
-                {
-                    var files = Directory.GetFiles(modJson.fullPath, "*.*", SearchOption.AllDirectories);
-                    foreach (var file in files)
-                    {
-                        var fi = new FileInfo(file);
-                        bytes += fi.Length;
-                    }
-                }
-                else
-                {
-                    var files = Directory.GetFiles(modJson.fullPath, "*.*").ToList();
-                    if(Directory.Exists(modJson.fullPath+Path.DirectorySeparatorChar+"data"))
-                    {
-                        files.AddRange(Directory.GetFiles(modJson.fullPath + Path.DirectorySeparatorChar + "data", "*.*", SearchOption.AllDirectories).ToList());
-                    }
-                    foreach (var file in files)
-                    {
-                        var fi = new FileInfo(file);
-                        bytes += fi.Length;
-                    }
-                }
-                ModSize = KnUtils.FormatBytes(bytes);
+                ModSize = KnUtils.FormatBytes(await KnUtils.GetSizeOfFolderInBytes(modJson.fullPath));
                 if (modJson.modSettings.isCompressed)
                     ModSize += " (Compressed)";
             }catch(Exception ex)
@@ -157,6 +147,11 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Load the Dependency List
+        /// Pass override settings = true to force to load mod defined dependencies and ignore user settings
+        /// </summary>
+        /// <param name="overrideSettings"></param>
         private void CreateDependencyItems(bool overrideSettings = false)
         {
             if (modJson != null)
@@ -194,6 +189,10 @@ namespace Knossos.NET.ViewModels
         }
 
         /* External Commands */
+        /// <summary>
+        /// Dependency Item Control: move dep one place up
+        /// </summary>
+        /// <param name="item"></param>
         public void DepUP(DependencyItemViewModel item)
         {
             int index = DepItems.IndexOf(item);
@@ -203,6 +202,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Dependency Item Control: move dep one place down
+        /// </summary>
+        /// <param name="item"></param>
         public void DepDOW(DependencyItemViewModel item)
         {
             int index = DepItems.IndexOf(item);
@@ -212,6 +215,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Dependency Item Control: delete dependecy
+        /// </summary>
+        /// <param name="item"></param>
         public void DepDEL(DependencyItemViewModel item)
         {
             DepItems.Remove(item);
@@ -303,6 +310,11 @@ namespace Knossos.NET.ViewModels
             ConfigureBuild(false);
         }
 
+        /// <summary>
+        /// Display Fso Build Flag list
+        /// Also allows to edit the mod cmdline
+        /// </summary>
+        /// <param name="ignoreUserSettings"></param>
         private void ConfigureBuild(bool ignoreUserSettings)
         {
             if (modJson == null)
@@ -351,6 +363,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Reset settings to DEFAULT on UI BUT it does not save them, the user must click save
+        /// </summary>
         internal void ResetSettingsCommand()
         {
             CustomDependencies = false;
@@ -362,6 +377,9 @@ namespace Knossos.NET.ViewModels
             CreateDependencyItems(true);
         }
 
+        /// <summary>
+        /// Toggle custom dependecies on/off
+        /// </summary>
         internal void CustomDependenciesClick()
         {
 
@@ -379,11 +397,20 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Add new dependency to list
+        /// Custom dependecy should be ON at this point
+        /// </summary>
         internal void AddDependencyCommand()
         {
             DepItems.Add(new DependencyItemViewModel(this));
         }
 
+        /// <summary>
+        /// Start task to Compress Mod, does all standard checks, mod setting save is done on the task method
+        /// Mod cant be Dev Mode
+        /// Warns if FSO version that is resolved via user or mod dependencies is below the minimum needed to run compressed files (23.2.0) 
+        /// </summary>
         internal async void CompressCommand()
         {
             var cancel = false;
@@ -440,6 +467,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Create the task to decompress the mod, mod setting save is done on the task method
+        /// </summary>
         internal async void DecompressCommand()
         {
             if (modJson != null && modJson.fullPath != string.Empty)

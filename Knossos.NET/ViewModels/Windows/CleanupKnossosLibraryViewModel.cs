@@ -9,6 +9,9 @@ using Knossos.NET.Models;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Mod Cleanup Window View Model
+    /// </summary>
     public partial class CleanupKnossosLibraryViewModel : ViewModelBase
     {
         internal ObservableCollection<CheckableModListViewModel> DeletableMods { get; set; } = new ObservableCollection<CheckableModListViewModel>();
@@ -109,20 +112,21 @@ namespace Knossos.NET.ViewModels
             });
         }
 
-        internal void Cleanup()
+        internal async void Cleanup()
         {
-            /*TODO: Make async (depends on async-capable Knossos.RemoveMod())*/
-            foreach (var modView in DeletableMods)
-            {
-                if (!modView.ModChecked)
-                    continue;
+            await Task.Run(() => { 
+                foreach (var modView in DeletableMods)
+                {
+                    if (!modView.ModChecked)
+                        continue;
 
-                var mod = modView.mod;
-                if (mod == null)
-                    continue;
+                    var mod = modView.mod;
+                    if (mod == null)
+                        continue;
 
-                Knossos.RemoveMod(mod);
-            }
+                    Knossos.RemoveMod(mod);
+                }
+            });
             MainWindowViewModel.Instance?.RunModStatusChecks();
             OnRequestClose?.Invoke(this, EventArgs.Empty);
         }

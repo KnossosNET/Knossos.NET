@@ -5,6 +5,11 @@ using Knossos.NET.Views;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Report Mod View Model
+    /// This dialog allow a user to report a mod
+    /// User must be logged into to create a mod report in nebula
+    /// </summary>
     public partial class ReportModViewModel : ViewModelBase
     {
         [ObservableProperty]
@@ -31,7 +36,11 @@ namespace Knossos.NET.ViewModels
             modVersion = mod.version;
         }
 
-        internal async void Submit(object window)
+        /// <summary>
+        /// Upload mod report to Nebula
+        /// User must be logged in
+        /// </summary>
+        internal async void Submit()
         {
             if(ReasonString.Trim() != string.Empty && mod != null)
             {
@@ -55,7 +64,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal void Cancel(object window)
+        internal void Cancel()
         {
             if (dialog != null)
             {

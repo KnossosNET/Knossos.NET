@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Mod Description Editor Window View Mode
+    /// For DevMode
+    /// </summary>
     public partial class DevModDescriptionEditorViewModel : ViewModelBase
     {
         private DevModDetailsViewModel? modeDetails;
@@ -24,6 +28,7 @@ namespace Knossos.NET.ViewModels
             {
                 if(value != description)
                 {
+                    /* Update Right View on text change*/
                     SetProperty(ref description, value);
                     try
                     {
@@ -44,12 +49,19 @@ namespace Knossos.NET.ViewModels
         {
         }
 
+        /// <summary>
+        /// Insert BBcode from toolbar into text
+        /// </summary>
+        /// <param name="command"></param>
         internal void ToolBar (object command)
         {
             var caret = inputControl != null ? inputControl.CaretIndex : 0;
             Description = Description.Insert(caret, (string)command);
         }
 
+        /// <summary>
+        /// On window close call save
+        /// </summary>
         internal void Closing()
         {
             if(modeDetails != null)

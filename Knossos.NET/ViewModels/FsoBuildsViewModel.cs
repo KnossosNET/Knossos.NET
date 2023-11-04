@@ -11,6 +11,9 @@ using Knossos.NET.Classes;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Fso builds list view model
+    /// </summary>
     public partial class FsoBuildsViewModel : ViewModelBase
     {
         public static FsoBuildsViewModel? Instance;
@@ -32,6 +35,9 @@ namespace Knossos.NET.ViewModels
             Instance = this;
         }
 
+        /// <summary>
+        /// Clear ALL lists of FSO Builds in the UI
+        /// </summary>
         public void ClearView()
         {
             StableItems.Clear();
@@ -40,6 +46,12 @@ namespace Knossos.NET.ViewModels
             CustomItems.Clear();
         }
 
+        /// <summary>
+        /// External call to start download a FSO build
+        /// This is equivalent of clicking the "download" button
+        /// Used to start engine build installs when a build is referenced as a dependency of a mod
+        /// </summary>
+        /// <param name="mod"></param>
         public void RelayInstallBuild(Mod mod)
         {
             var buildStability = FsoBuild.GetFsoStability(mod.stability, mod.id);
@@ -61,6 +73,13 @@ namespace Knossos.NET.ViewModels
                 }
                 else
                 {
+                    //If we are searching for a nightly and it was not found, load them all
+                    if(buildStability == FsoStability.Nightly && !AllNightliesLoaded)
+                    {
+                        LoadAllNightlies();
+                        RelayInstallBuild(mod);
+                        return;
+                    }
                     Log.Add(Log.LogSeverity.Error, "FsoBuildsViewModel.RelayInstallBuild()", "Unable to find the build UI item with these parameters. Build install cancelled. Version: " + mod.version + " ID: " + mod.id);
                 }
             }
@@ -70,6 +89,11 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// This "updates" a FSO build info on UI, what it actually does is to delete the old version and insert the new one
+        /// Used to update data on sser devmode builds
+        /// </summary>
+        /// <param name="build"></param>
         public void UpdateBuildUI(FsoBuild build)
         {
             switch (build.stability)
@@ -98,6 +122,11 @@ namespace Knossos.NET.ViewModels
             AddBuildToUi(build);
         }
 
+        /// <summary>
+        /// Add a new FSO build to UI, depending on stability
+        /// It calls ClearUnusedData() if not devmode or private
+        /// </summary>
+        /// <param name="build"></param>
         public void AddBuildToUi(FsoBuild build)
         {
             switch(build.stability)
@@ -165,6 +194,11 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Load an lists of FSO builds into ui in a more efficient way that doing it one by one
+        /// It deletes all displayed elements, except for fso builds that are installed locally
+        /// </summary>
+        /// <param name="modsJson"></param>
         public void BulkLoadNebulaBuilds(List<Mod> modsJson)
         {
             var newStable = new ObservableCollection<FsoBuildItemViewModel>();
@@ -260,6 +294,12 @@ namespace Knossos.NET.ViewModels
             CustomItems = newCustom;
         }
 
+        /// <summary>
+        /// Completely deletes an FSO Build, from UI, from Knossos internal list and also clears physical files
+        /// It forces to re-run mod status checks
+        /// </summary>
+        /// <param name="build"></param>
+        /// <param name="item"></param>
         public void DeleteBuild(FsoBuild build, FsoBuildItemViewModel item)
         {
             try
@@ -284,7 +324,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async void CommandAddUserBuild()
+        /// <summary>
+        /// Opens view to add custom user fso build
+        /// </summary>
+        internal async void CommandAddUserBuild()
         {
             if (MainWindow.instance != null)
             {
@@ -295,14 +338,20 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Loads all nightlies into view that arent loaded due to being too old
+        /// </summary>
         internal void LoadAllNightlies()
         {
-            AllNightliesLoaded = true;
-            foreach (var item in unloadedNightlies)
+            if (!AllNightliesLoaded)
             {
-                AddBuildToUi(new FsoBuild(item));
+                AllNightliesLoaded = true;
+                foreach (var item in unloadedNightlies)
+                {
+                    AddBuildToUi(new FsoBuild(item));
+                }
+                GC.Collect();
             }
-            GC.Collect();
         }
     }
 }

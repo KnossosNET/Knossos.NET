@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
@@ -16,6 +17,10 @@ using static System.Net.WebRequestMethods;
 
 namespace Knossos.NET.ViewModels
 { 
+    /// <summary>
+    /// Add user build view model
+    /// This is on FsoBuilds tab -> Custom builds
+    /// </summary>
     public partial class AddUserBuildViewModel : ViewModelBase
     {
         [ObservableProperty]
@@ -309,7 +314,7 @@ namespace Knossos.NET.ViewModels
             return null;
         }
 
-        internal void AddCommand()
+        internal async void AddCommand()
         {
             if(!Verify())
             {
@@ -318,7 +323,7 @@ namespace Knossos.NET.ViewModels
 
             if (folderPath != null)
             {
-                if(CopyFilesRecursively(folderPath, BuildNewPath))
+                if(await CopyFilesRecursively(folderPath, BuildNewPath))
                 {
                     Mod mod = new Mod();
                     mod.fullPath = BuildNewPath + Path.DirectorySeparatorChar;
@@ -505,37 +510,38 @@ namespace Knossos.NET.ViewModels
             return true;
         }
 
-        /*TODO: make it async*/
-        private bool CopyFilesRecursively(string sourcePath, string targetPath)
+        private async Task<bool> CopyFilesRecursively(string sourcePath, string targetPath)
         {
-            try
-            {
-                Directory.CreateDirectory(targetPath);
-                foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            return await Task<bool>.Factory.StartNew(() => { 
+                try
                 {
-                    Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
-                }
-                var allFiles = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories);
-                MaxFiles = allFiles.Length;
-                foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
-                {
-                    if (!newPath.ToLower().Contains(".pdb") && !newPath.ToLower().Contains(".lib") && !newPath.ToLower().Contains(".exp"))
+                    Directory.CreateDirectory(targetPath);
+                    foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
                     {
-                        System.IO.File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+                        Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
                     }
-                    CopyProgress++;
+                    var allFiles = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories);
+                    Dispatcher.UIThread.Invoke(()=> MaxFiles = allFiles.Length );
+                    foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+                    {
+                        if (!newPath.ToLower().Contains(".pdb") && !newPath.ToLower().Contains(".lib") && !newPath.ToLower().Contains(".exp"))
+                        {
+                            System.IO.File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+                        }
+                        Dispatcher.UIThread.Invoke(() => CopyProgress++);
+                    }
+                    return true;
                 }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error, "AddUserBuildViewModel.CopyFilesRecursively()", ex);
-                if (MainWindow.instance != null)
+                catch (Exception ex)
                 {
-                    MessageBox.Show(MainWindow.instance, "Error while copying files:\n"+ex.Message.ToString(), "Filecopy error", MessageBox.MessageBoxButtons.OK);
+                    Log.Add(Log.LogSeverity.Error, "AddUserBuildViewModel.CopyFilesRecursively()", ex);
+                    if (MainWindow.instance != null)
+                    {
+                        MessageBox.Show(MainWindow.instance, "Error while copying files:\n"+ex.Message.ToString(), "Filecopy error", MessageBox.MessageBoxButtons.OK);
+                    }
+                    return false;
                 }
-                return false;
-            }
+            });
         }
     }
 }

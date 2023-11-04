@@ -11,17 +11,29 @@ using System;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// This class is intended to be the gateway used by the rest of the code to create and display tasks in the UI
+    /// </summary>
     public partial class TaskViewModel : ViewModelBase
     {
         public static TaskViewModel? Instance { get; private set; }
+        /// <summary>
+        /// Tasks currently displayed in UI. Internal use only, must be modified from the UIThread
+        /// </summary>
         internal ObservableCollection<TaskItemViewModel> TaskList { get; set; } = new ObservableCollection<TaskItemViewModel>();
-        public Queue<TaskItemViewModel> taskQueue { get; set; } = new Queue<TaskItemViewModel>();
+        /// <summary>
+        /// Task Execute Queue. Internal use only, must be modified from the UIThread
+        /// </summary>
+        internal Queue<TaskItemViewModel> taskQueue { get; set; } = new Queue<TaskItemViewModel>();
 
         public TaskViewModel() 
         {
             Instance = this;
         }
 
+        /// <summary>
+        /// Calls CancelTaskCommand() on all tasks
+        /// </summary>
         public void CancelAllRunningTasks()
         {
             foreach (var task in TaskList)
@@ -30,6 +42,11 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Cancel a ModInstall or Verify mod by mod ID and version
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="version"></param>
         public void CancelAllInstallTaskWithID(string id, string? version)
         {
             foreach (var task in TaskList)
@@ -41,6 +58,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Checks if all tasks in queue are mark as cancelled or completed
+        /// </summary>
+        /// <returns>true if all completed or cancelled, false if there is running tasks</returns>
         public bool IsSafeState()
         {
             foreach (var task in TaskList)
@@ -53,6 +74,15 @@ namespace Knossos.NET.ViewModels
             return true;
         }
 
+        /// <summary>
+        /// Download a file from a url and display download progress
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="dest"></param>
+        /// <param name="msg"></param>
+        /// <param name="showStopButton"></param>
+        /// <param name="tooltip"></param>
+        /// <returns>true on successfull download, false otherwise</returns>
         public async Task<bool?> AddFileDownloadTask(string url, string dest, string msg, bool showStopButton, string? tooltip = null)
         {
             var newTask = new TaskItemViewModel();
@@ -60,6 +90,11 @@ namespace Knossos.NET.ViewModels
             return await newTask.DownloadFile(url, dest, msg, showStopButton, tooltip);
         }
 
+        /// <summary>
+        /// Displays a simple message on task list
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="tooltip"></param>
         public void AddMessageTask(string msg, string? tooltip = null)
         {
             var newTask = new TaskItemViewModel();
@@ -67,6 +102,10 @@ namespace Knossos.NET.ViewModels
             newTask.ShowMsg(msg, tooltip);
         }
 
+        /// <summary>
+        /// Displays the list of updated mod news
+        /// </summary>
+        /// <param name="updatedMods"></param>
         public void AddDisplayUpdatesTask(List<Mod> updatedMods)
         {
             var newTask = new TaskItemViewModel();
@@ -74,6 +113,9 @@ namespace Knossos.NET.ViewModels
             newTask.DisplayUpdates(updatedMods);
         }
 
+        /// <summary>
+        /// Remove all tasks from view except for the ones currently running or waiting in the execute queue
+        /// </summary>
         public void CleanCommand()
         {
             for (int i = TaskList.Count - 1; i >= 0; i--)
@@ -85,6 +127,13 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Downloads a new FSO build from Nebula
+        /// </summary>
+        /// <param name="build"></param>
+        /// <param name="sender"></param>
+        /// <param name="modJson"></param>
+        /// <returns>FsoBuild class of the installed build or null if failed or cancelled</returns>
         public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, Mod? modJson=null)
         {
             if(Knossos.GetKnossosLibraryPath() == null)
@@ -101,6 +150,13 @@ namespace Knossos.NET.ViewModels
             return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson);
         }
 
+        /// <summary>
+        /// Install a mod from Nebula, the reinstallPkgs list can be used to reinstall installed packages or install new ones
+        /// if manualCompress = true a mod compress task will be started after this one finishes
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <param name="reinstallPkgs"></param>
+        /// <param name="manualCompress"></param>
         public async void InstallMod(Mod mod, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false)
         {
             if (Knossos.GetKnossosLibraryPath() == null)
@@ -128,6 +184,12 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Compress a mod for FSO using LZ41
+        /// Reemplaces .vp for .vpc and compress losse files inside the data folder
+        /// Do not do this for Devmode mods
+        /// </summary>
+        /// <param name="mod"></param>
         public async Task CompressMod(Mod mod)
         {
             if (mod.type == ModType.engine)
@@ -147,6 +209,11 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Decompresses a mod from LZ41 into regular files
+        /// Reemplaces .vpc for .vp and decompress .lz41 files inside the data folder
+        /// </summary>
+        /// <param name="mod"></param>
         public async Task DecompressMod(Mod mod)
         {
             if (mod.type == ModType.engine)
@@ -166,6 +233,12 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Verefies a MOD files using their checksum info
+        /// Also checks and informs if there is extra files that should not be there.
+        /// Extra files are not considered as a fail
+        /// </summary>
+        /// <param name="mod"></param>
         public async void VerifyMod(Mod mod)
         {
             var cancelSource = new CancellationTokenSource();
@@ -176,6 +249,13 @@ namespace Knossos.NET.ViewModels
             cancelSource.Dispose();
         }
 
+        /// <summary>
+        /// For Devmode
+        /// Creates a copy of the mod, on the same folder were it is located, using the new passed version string
+        /// </summary>
+        /// <param name="oldMod"></param>
+        /// <param name="newVersion"></param>
+        /// <param name="hackCallback"></param>
         public async void CreateModVersion(Mod oldMod, string newVersion, Action hackCallback)
         {
             var cancelSource = new CancellationTokenSource();
@@ -187,6 +267,13 @@ namespace Knossos.NET.ViewModels
             cancelSource.Dispose();
         }
 
+        /// <summary>
+        /// For devmode
+        /// Upload a mod to nebula
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <param name="isNewMod"></param>
+        /// <param name="metadataonly"></param>
         public async void UploadModVersion(Mod mod, bool isNewMod, bool metadataonly = false)
         {
             var cancelSource = new CancellationTokenSource();
@@ -197,6 +284,12 @@ namespace Knossos.NET.ViewModels
             cancelSource.Dispose();
         }
 
+        /// <summary>
+        /// Downloads and extract a new tool from the tool repo, also handles updates
+        /// </summary>
+        /// <param name="tool"></param>
+        /// <param name="updateFrom"></param>
+        /// <param name="finishedCallback"></param>
         public async void DownloadTool(Tool tool, Tool? updateFrom, Action<bool> finishedCallback)
         {
             var cancelSource = new CancellationTokenSource();

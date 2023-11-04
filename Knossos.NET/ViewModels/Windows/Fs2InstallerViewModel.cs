@@ -17,8 +17,14 @@ using Avalonia.Platform.Storage;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Fs2 Retail Window View Model
+    /// </summary>
     public partial class Fs2InstallerViewModel : ViewModelBase
     {
+        /// <summary>
+        /// Must have file list
+        /// </summary>
         private readonly string[] required =
         {
             "root_fs2.vp", "smarty_fs2.vp", "sparky_fs2.vp",
@@ -26,6 +32,9 @@ namespace Knossos.NET.ViewModels
             "tango2_fs2.vp", "tango3_fs2.vp", "warble_fs2.vp"
         };
 
+        /// <summary>
+        /// Additional files to find and copy
+        /// </summary>
         private readonly string[] optional =
         {
             "hud_1.hcf", "hud_2.hcf", "hud_3.hcf", "movies_fs2.vp", "multi-mission-pack.vp", "multi-voice-pack.vp", "bastion.ogg", "colossus.ogg",
@@ -57,6 +66,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// The main install process
+        /// </summary>
         internal async void InstallFS2Command()
         {
             if(Knossos.GetKnossosLibraryPath() == null)
@@ -312,6 +324,9 @@ namespace Knossos.NET.ViewModels
             });
         }
 
+        /// <summary>
+        /// Open file dialog to select a gog exe file, it checks that this is a valid FS2 install file
+        /// </summary>
         internal async void LoadGoGExeCommand()
         {
             FilePickerOpenOptions options = new FilePickerOpenOptions();
@@ -419,6 +434,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Select a fs2retail folder
+        /// </summary>
         internal async void LoadFolderCommand()
         {
             FolderPickerOpenOptions options = new FolderPickerOpenOptions();
@@ -434,6 +452,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Search the folder to find all files
+        /// </summary>
+        /// <param name="path"></param>
         private async void ProcessFolder(string path)
         {
             try

@@ -8,6 +8,11 @@ using System.IO;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Main Windows View Mode
+    /// Everything starts here
+    /// All other parts of the UI are attached here, except for popup windows
+    /// </summary>
     public partial class MainWindowViewModel : ViewModelBase 
     {
         public static MainWindowViewModel? Instance { get; set; }
@@ -38,6 +43,7 @@ namespace Knossos.NET.ViewModels
             get => tabIndex;
             set
             {
+                /* Execute code when user changes tab */
                 if (value != tabIndex)
                 {
                     this.SetProperty(ref tabIndex, value);
@@ -80,38 +86,67 @@ namespace Knossos.NET.ViewModels
         }
 
         /* External Commands */
+        /// <summary>
+        /// Add mod to DevMod tab
+        /// </summary>
+        /// <param name="devmod"></param>
         public void AddDevMod(Mod devmod)
         {
             DeveloperModView.AddMod(devmod);
         }
 
+        /// <summary>
+        /// Refresh Installed mods status icon/border
+        /// </summary>
         public void RunModStatusChecks()
         {
             InstalledModsView.RunModStatusChecks();
         }
 
+        /// <summary>
+        /// Clear all views
+        /// </summary>
         public void ClearViews()
         {
             InstalledModsView?.ClearView();
             FsoBuildsView?.ClearView();
             NebulaModsView?.ClearView();
+            DeveloperModView?.ClearView();
         }
 
+        /// <summary>
+        /// Informs in the installed mod card that a update is avalible
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="value"></param>
         public void MarkAsUpdateAvalible(string id, bool value = true)
         {
             InstalledModsView.UpdateIsAvalible(id, value);
         }
 
+        /// <summary>
+        /// Add a mod to the installed (home) tab
+        /// </summary>
+        /// <param name="modJson"></param>
         public void AddInstalledMod(Mod modJson)
         {
             InstalledModsView.AddMod(modJson);
         }
 
+        /// <summary>
+        /// Add a mod to the nebula (explore) tab
+        /// </summary>
+        /// <param name="modJson"></param>
         public void AddNebulaMod(Mod modJson)
         {
             NebulaModsView.AddMod(modJson);
         }
 
+        /// <summary>
+        /// First load of Nebula mods
+        /// </summary>
+        /// <param name="mods"></param>
+        /// <param name="clear"></param>
         public void BulkLoadNebulaMods(List<Mod> mods, bool clear)
         {
             if(clear)
@@ -119,21 +154,36 @@ namespace Knossos.NET.ViewModels
             NebulaModsView.AddMods(mods);
         }
 
+        /// <summary>
+        /// Relay cancel order to the nebula modcard
+        /// </summary>
+        /// <param name="id"></param>
         public void CancelModInstall(string id)
         {
             NebulaModsView.CancelModInstall(id);
         }
 
+        /// <summary>
+        /// Deletes a modcard from the installed (home) tab
+        /// </summary>
+        /// <param name="id"></param>
         public void RemoveInstalledMod(string id)
         {
             InstalledModsView.RemoveMod(id);
         }
 
+        /// <summary>
+        /// Load settings to settings tab
+        /// </summary>
         public void GlobalSettingsLoadData()
         {
             GlobalSettingsView.LoadData();
         }
 
+        /// <summary>
+        /// Write a string to UI console on debug tab
+        /// </summary>
+        /// <param name="message"></param>
         public void WriteToUIConsole(string message)
         {
             UiConsoleOutput += "\n"+ message;

@@ -20,6 +20,9 @@ using System.Web;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Call to display screenshots items on mod details window
+    /// </summary>
     public class ScreenshotItem
     {
         public Bitmap image { get; set; }
@@ -47,6 +50,9 @@ namespace Knossos.NET.ViewModels
         }
     }
 
+    /// <summary>
+    /// Mod Details View Model Class
+    /// </summary>
     public partial class ModDetailsViewModel : ViewModelBase
     {
         private List<Mod> modVersions = new List<Mod>();
@@ -115,6 +121,9 @@ namespace Knossos.NET.ViewModels
             this.modVersions = new List<Mod>() { modJson };
             this.modCard = null;
             ItemSelectedIndex = 0;
+            var item = new ComboBoxItem();
+            item.Content = modJson.version;
+            VersionItems.Add(item);
             LoadVersion(0);
             devMode = modJson.devMode;
             if (Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts)
@@ -157,11 +166,19 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Play description button binding, used due to the delay argument
+        /// </summary>
         internal void PlayDescriptionCommand()
         {
             PlayDescription(0);
         }
 
+        /// <summary>
+        /// Play mod description using Knossos TTS
+        /// (the same system and voice used by FSO)
+        /// </summary>
+        /// <param name="delay"></param>
         private async void PlayDescription(int delay = 0)
         {
             if(delay > 0)
@@ -174,12 +191,20 @@ namespace Knossos.NET.ViewModels
             Knossos.Tts(cleanDescriptionString, null, null, null, CompletedCallback);
         }
 
+        /// <summary>
+        /// When the TTS playback is over, change the button back to normal
+        /// </summary>
+        /// <returns></returns>
         private bool CompletedCallback()
         {
             IsPlayingTTS = false;
             return true;
         }
 
+        /// <summary>
+        /// Load Current version in the array to UI
+        /// </summary>
+        /// <param name="index"></param>
         private async void LoadVersion(int index)
         {
             try
@@ -225,6 +250,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Load banner to UI using the Knossos Cache system
+        /// </summary>
+        /// <param name="selectedIndex"></param>
         private void LoadBanner(int selectedIndex)
         {
             try
@@ -265,6 +294,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Load screenshots to UI using the Knossos Cache system
+        /// </summary>
+        /// <param name="selectedIndex"></param>
         private void LoadScreenshots(int selectedIndex)
         {
             try
@@ -325,6 +358,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Download and Display Youtube Video thumbnail
+        /// </summary>
+        /// <param name="url"></param>
         private async void DownloadVideoThumbnail(string url)
         {
             try
@@ -368,6 +405,11 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Parse the youtube video ID out of the URL
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
         private string? GetYouTubeVideoId(Uri uri)
         {
             var query = HttpUtility.ParseQueryString(uri.Query);

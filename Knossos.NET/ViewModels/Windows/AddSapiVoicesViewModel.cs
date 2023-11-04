@@ -5,15 +5,20 @@ using System.IO;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Add SapiVoices Windows View Model
+    /// </summary>
     public partial class AddSapiVoicesViewModel : ViewModelBase
     {
 
         internal void OpenSpeechSettings()
         {
-            var speech = new Process();
-            speech.StartInfo.FileName = "ms-settings:speech";
-            speech.StartInfo.UseShellExecute = true;
-            speech.Start();
+            using (var speech = new Process())
+            {
+                speech.StartInfo.FileName = "ms-settings:speech";
+                speech.StartInfo.UseShellExecute = true;
+                speech.Start();
+            }
         }
 
         internal void CopyKeys()
@@ -22,21 +27,25 @@ namespace Knossos.NET.ViewModels
             {
                 if (!File.Exists(KnUtils.GetKnossosDataFolderPath() + @"\sapi_tokens_backup.reg"))
                 {
-                    var back = new Process();
-                    back.StartInfo.FileName = "reg";
-                    back.StartInfo.Arguments = @"export HKLM\SOFTWARE\Microsoft\Speech\Voices\Tokens " + KnUtils.GetKnossosDataFolderPath() + @"\sapi_tokens_backup.reg";
-                    back.StartInfo.UseShellExecute = true;
-                    back.Start();
-                    back.WaitForExit();
+                    using (var back = new Process())
+                    {
+                        back.StartInfo.FileName = "reg";
+                        back.StartInfo.Arguments = @"export HKLM\SOFTWARE\Microsoft\Speech\Voices\Tokens " + KnUtils.GetKnossosDataFolderPath() + @"\sapi_tokens_backup.reg";
+                        back.StartInfo.UseShellExecute = true;
+                        back.Start();
+                        back.WaitForExit();
+                    }
                 }
 
                 //Export OneCore Keys
-                var export = new Process();
-                export.StartInfo.FileName = "reg";
-                export.StartInfo.Arguments = @"export HKLM\SOFTWARE\Microsoft\Speech_OneCore\Voices\Tokens " + KnUtils.GetKnossosDataFolderPath() + @"\one_core.reg";
-                export.StartInfo.UseShellExecute = true;
-                export.Start();
-                export.WaitForExit();
+                using (var export = new Process())
+                {
+                    export.StartInfo.FileName = "reg";
+                    export.StartInfo.Arguments = @"export HKLM\SOFTWARE\Microsoft\Speech_OneCore\Voices\Tokens " + KnUtils.GetKnossosDataFolderPath() + @"\one_core.reg";
+                    export.StartInfo.UseShellExecute = true;
+                    export.Start();
+                    export.WaitForExit();
+                }
 
                 //Change the reg key
                 if (File.Exists(KnUtils.GetKnossosDataFolderPath() + @"\one_core.reg"))
@@ -48,13 +57,15 @@ namespace Knossos.NET.ViewModels
                 }
 
                 //Import New Keys
-                var import = new Process();
-                import.StartInfo.FileName = "reg";
-                import.StartInfo.Arguments = @"import " + KnUtils.GetKnossosDataFolderPath() + @"\one_core_modified.reg";
-                import.StartInfo.UseShellExecute = true;
-                import.StartInfo.Verb = "runas";
-                import.Start();
-                import.WaitForExit();
+                using (var import = new Process())
+                {
+                    import.StartInfo.FileName = "reg";
+                    import.StartInfo.Arguments = @"import " + KnUtils.GetKnossosDataFolderPath() + @"\one_core_modified.reg";
+                    import.StartInfo.UseShellExecute = true;
+                    import.StartInfo.Verb = "runas";
+                    import.Start();
+                    import.WaitForExit();
+                }
 
                 File.Delete(KnUtils.GetKnossosDataFolderPath() + @"\one_core.reg");
                 File.Delete(KnUtils.GetKnossosDataFolderPath() + @"\one_core_modified.reg");

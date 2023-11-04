@@ -15,6 +15,9 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace Knossos.NET.ViewModels
 {
+    /// <summary>
+    /// Installed mod card container view, this is the "Home" tab
+    /// </summary>
     public partial class ModListViewModel : ViewModelBase
     {
         enum SortType
@@ -24,10 +27,12 @@ namespace Knossos.NET.ViewModels
             update
         }
 
-        internal string search  = string.Empty;
-
+        /// <summary>
+        /// Current Sort Mode
+        /// </summary>
         private SortType sortType = SortType.name;
 
+        internal string search = string.Empty;
         internal string Search
         {
             get { return search; }
@@ -62,17 +67,28 @@ namespace Knossos.NET.ViewModels
         {
         }
 
+
+        /// <summary>
+        /// Clears all mods in view
+        /// </summary>
         public void ClearView()
         {
             Mods.Clear();
         }
 
+        /// <summary>
+        /// Updates border color and status icons on all mod cards
+        /// </summary>
         public void RunModStatusChecks()
         {
             Mods.ForEach(m => m.RefreshSpecialIcons());
             Mods.ForEach(m => m.CheckDependencyActiveVersion());
         }
 
+        /// <summary>
+        /// Adds a single mod into the view, it will be inserted in order depending on the current select sort mode
+        /// </summary>
+        /// <param name="modJson"></param>
         public void AddMod(Mod modJson)
         {
             var modCard = Mods.FirstOrDefault(m => m.ID == modJson.id);
@@ -97,6 +113,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Open screenshot folder button command
+        /// </summary>
         internal void OpenScreenshotsFolder()
         {
             try
@@ -109,6 +128,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Change sorting mode and re-order the list of mods
+        /// </summary>
+        /// <param name="sort"></param>
         internal async void ChangeSort(object sort)
         {
             try
@@ -193,6 +216,12 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Calls a "UpdateIsAvalible(value)" on the mod card
+        /// This would be a external way to telling the mod card that the mod has updates available
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="value"></param>
         public void UpdateIsAvalible(string id,bool value)
         {
             var modCard = Mods.FirstOrDefault(m => m.ID == id);
@@ -202,6 +231,10 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Remove a mod card from view
+        /// </summary>
+        /// <param name="id"></param>
         public void RemoveMod(string id)
         {
             var modCard = Mods.FirstOrDefault(m => m.ID == id);
