@@ -84,24 +84,33 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public async void OpenTab()
         {
-            if (!IsLoading && !IsTabOpen)
+            if (IsLoading)
             {
-                await Dispatcher.UIThread.InvokeAsync(async ()  =>
+                IsTabOpen = true;
+                return;
+            }
+
+            if (!IsTabOpen)
+            {
+                IsTabOpen = true;
+                await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
                     try
                     {
                         await Task.Delay(100);
                         IsLoading = false;
-                        foreach (var m in Mods)
+                        foreach (NebulaModCardViewModel m in Mods.ToList())
                         {
                             m.Visible = true;
-                            await Task.Delay(3);
+                            await Task.Delay(1);
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "NebulaModListViewModel.OpenTab", ex);
+                    }
                 });
             }
-            IsTabOpen = true;
         }
 
         /// <summary>
@@ -140,7 +149,10 @@ namespace Knossos.NET.ViewModels
                         }
                     }
                 }
-                Mods.Insert(i, new NebulaModCardViewModel(modJson));
+                var card = new NebulaModCardViewModel(modJson);
+                if (IsLoading)
+                    card.Visible = false;
+                Mods.Insert(i, card);
             }
             else
             {
@@ -155,6 +167,8 @@ namespace Knossos.NET.ViewModels
         /// <param name="modList"></param>
         public async void AddMods(List<Mod> modList)
         {
+            IsLoading = true;
+            await Task.Delay(20);
             var newModCardList = new ObservableCollection<NebulaModCardViewModel>();
             foreach (Mod? mod in modList)
             {
@@ -172,30 +186,22 @@ namespace Knossos.NET.ViewModels
                             }
                         }
                     }
-                    newModCardList.Insert(i, new NebulaModCardViewModel(mod));
+                    var card = new NebulaModCardViewModel(mod);
+                    card.Visible = false;
+                    newModCardList.Insert(i, card);
                 }
                 else
                 {
                     //Update? Should NOT be needed for Nebula mods
                 }
             }
-            newModCardList.ForEach(m=>m.Visible = false);
             Mods = newModCardList;
+            IsLoading = false;
             if (IsTabOpen)
             {
-                try
-                {
-                    await Task.Delay(100);
-                    IsLoading = false;
-                    foreach (var m in Mods)
-                    {
-                        m.Visible = true;
-                        await Task.Delay(3);
-                    }
-                }
-                catch { }
+                IsTabOpen = false;
+                OpenTab();
             }
-            IsLoading = false;
         }
 
         /// <summary>
