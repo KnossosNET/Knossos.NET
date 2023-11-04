@@ -225,6 +225,7 @@ namespace Knossos.NET.Models
                                 }
                             }
                         }
+                        //Remove Installed and FS2 parent mods if FS2 root pack is not detected, Mark update avalible to installed ones
                         if (mod.type == ModType.tc || mod.type == ModType.mod && (listFS2Override || mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound))
                         {
 
@@ -388,18 +389,24 @@ namespace Knossos.NET.Models
 
                 //Mods, TCs
                 var modsTcs = newerestModVersionPerID.Where( m => m.type == ModType.mod || m.type == ModType.tc ).ToList();
-                //Remove Installed, Mark update avalible to installed ones
+                //Remove Installed and FS2 parent mods if FS2 root pack is not detected, Mark update avalible to installed ones, set installed ones as inNebula
                 foreach (var m in modsTcs.ToList())
                 {
-                    if (m.type == ModType.tc || m.type == ModType.mod && (listFS2Override || m.parent != "FS2" || m.parent == "FS2" && Knossos.retailFs2RootFound))
+
+                    if (listFS2Override || ( m.parent != "FS2" || m.parent == "FS2" && Knossos.retailFs2RootFound ))
                     {
                         //This is already installed?
                         var isInstalled = Knossos.GetInstalledModList(m.id);
                         if (isInstalled != null && isInstalled.Any())
                         {
-                            var versionInNebula = isInstalled.FirstOrDefault(x => x.version == m.version);
-                            if (versionInNebula != null)
-                                versionInNebula.inNebula = true;
+                            //Set installed mods that are uploded to Nebula as "inNebula=true"
+                            isInstalled.ForEach(mod =>
+                            {
+                                if (mod != null && allModsInRepo.FirstOrDefault(repo => repo.id == mod.id && repo.version == mod.version) != null)
+                                {
+                                    mod.inNebula = true;
+                                }
+                            });
                             var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
                             if (newer != null && new SemanticVersion(newer.version) < new SemanticVersion(m.version))
                             {
@@ -407,6 +414,10 @@ namespace Knossos.NET.Models
                             }
                             modsTcs.Remove(m);
                         }
+                    }
+                    else
+                    {
+                        modsTcs.Remove(m);
                     }
                 };
 
