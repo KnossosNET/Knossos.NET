@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=$_NAME
+Comment=A multi platform launcher for FreeSpace Open using .NET 6.0 and AvaloniaUI
+Icon=$_ID
+Exec=$_NAME
+Categories=Game;

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>$_ID</id>
+
+  <name>$_NAME</name>
+  <summary>A multi platform launcher for FreeSpace Open using .NET 6.0 and AvaloniaUI</summary>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0</project_license>
+
+  <description>
+    <p>
+      Knossos.NET is a launcher and mod manager for FreeSpace Open that runs on
+      Windows, Linux, and macOS. It offers a searchable library of mods which can
+      be easily installed and ready to play with minimal effort.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">$_ID.desktop</launchable>
+  <url type="homepage">https://github.com/Shivansps/Knossos.NET</url>
+
+  <provides>
+    <id>$_ID.desktop</id>
+    <binary>$_NAME</binary>
+  </provides>
+</component>

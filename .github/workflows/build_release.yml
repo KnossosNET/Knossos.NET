@@ -1,0 +1,59 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+env:
+  OUTPUT_DIR: ${{ github.workspace }}/build/packages
+  PUBLISH_DIR: ${{ github.workspace }}/build/publish
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: '${{ github.ref }}'
+
+      - name: Install utilities
+        # zip for packaging windows builds
+        run: sudo apt-get update && sudo apt-get install zip
+
+      - name: Create directories
+        run: |
+          mkdir -p "$OUTPUT_DIR"
+          mkdir -p "$PUBLISH_DIR"
+
+      - name: Publish all RIDs
+        run: ${{ github.workspace }}/ci/publish_all.sh
+
+      - name: Package all RIDs
+        run: ${{ github.workspace }}/ci/package_all.sh
+
+      - name: Set up QEMU integration for Docker
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+      - name: Create AppImage (x86_64)
+        env:
+          ARCH: x86_64
+        run: ${{ github.workspace }}/ci/create_appimage.sh
+
+      - name: Create AppImage (aarch64)
+        env:
+          ARCH: aarch64
+        run: ${{ github.workspace }}/ci/create_appimage.sh
+
+      - name: Generate Release
+        uses: softprops/action-gh-release@v1
+        with:
+          # body_path: ${{ github.workspace }}/CHANGES.md
+          draft: true
+          files: ${{ env.OUTPUT_DIR }}/*
