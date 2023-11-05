@@ -46,6 +46,7 @@ for rid in $RIDS; do
     if [ ${rid:0:3} = "win" ]; then
         zip "$OUTPUT_DIR/$fname.zip" * -x \*.pdb
     else
+        chmod +x "$NAME"  # make sure binary is executable
         tar -czvf "$OUTPUT_DIR/$fname.tar.gz" --exclude='*.pdb' *
     fi
 
