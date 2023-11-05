@@ -49,7 +49,8 @@ esac
 [ -f "$OUTPUT_DIR/Linux_$DOTNET_ARCH.tar.gz" ] || fail_msg "ERROR: Linux $DOTNET_ARCH archive not found!"
 
 
-VERSION="$(grep string\ AppVersion -rI $NAME | cut -d \" -f 2)" # this will surely come back to bite me
+# VERSION="$(grep string\ AppVersion -rI $NAME | cut -d \" -f 2)" # this will surely come back to bite me
+VERSION="${VERSION:="0.0.0"}"
 
 BUILD_DIR="/appimage"
 APPDIR="$BUILD_DIR/AppDir"
@@ -132,7 +133,7 @@ export APPIMAGE_EXTRACT_AND_RUN=1
 # arm64 appimagetool doesn't run properly in qemu multiarch so work around it
 [ "$DOTNET_ARCH" = "arm64" ] && LAUNCHER="qemu-aarch64-static" || LAUNCHER=""
 
-$LAUNCHER "$BUILD_DIR/appimagetool" -u "$UPDATE_SCHEME" "$APPDIR" "$OUTPUT_DIR/$NAME-$VERSION-$ARCH.AppImage"
+$LAUNCHER "$BUILD_DIR/appimagetool" -u "$UPDATE_SCHEME" "$APPDIR" "$OUTPUT_DIR/$NAME-$ARCH.AppImage"
 
 # zsync file is saved to current directory so move it to proper place
-[ -f "$NAME-$VERSION-$ARCH.AppImage.zsync" ] && mv "$NAME-$VERSION-$ARCH.AppImage.zsync" "$OUTPUT_DIR"
+[ -f "$NAME-$ARCH.AppImage.zsync" ] && mv "$NAME-$ARCH.AppImage.zsync" "$OUTPUT_DIR"

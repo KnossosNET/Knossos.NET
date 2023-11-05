@@ -1,5 +1,7 @@
 name: Create Release
 
+# NOTE: this file is only intended to be used when triggered by a version tag!
+
 on:
   push:
     tags:
@@ -9,12 +11,57 @@ permissions:
   contents: write
 
 env:
-  OUTPUT_DIR: ${{ github.workspace }}/build/packages
-  PUBLISH_DIR: ${{ github.workspace }}/build/publish
+  OUTPUT_DIR: ./build/packages
+  PUBLISH_DIR: ./build/publish
 
 jobs:
-  build:
-    name: Build and Release
+  publish:
+    name: Publish builds
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: '${{ github.ref }}'
+
+      - name: Set environment
+        shell: bash
+        run: |
+          echo "VERSION=$(echo ${{ github.ref_name }} | cut -c 2-)" >> $GITHUB_ENV
+          echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Create directories
+        shell: bash
+        run: |
+          mkdir -p "$OUTPUT_DIR"
+          mkdir -p "$PUBLISH_DIR"
+
+      - name: Publish all RIDs
+        shell: bash
+        run: ./ci/publish_all.sh
+
+      - name: Archive builds
+        shell: bash
+        run: |
+          cd "$PUBLISH_DIR"
+          tar -czvf builds.tgz --exclude='*.pdb' *
+
+      - name: Upload build archive
+        uses: actions/upload-artifact@v3
+        with:
+          name: builds
+          path: ${{ env.PUBLISH_DIR }}/builds.tgz
+          retention-days: 5
+
+  package_release:
+    name: Package and release
+    needs: publish
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -22,6 +69,12 @@ jobs:
         with:
           fetch-depth: 0
           ref: '${{ github.ref }}'
+
+      - name: Set environment
+        shell: bash
+        run: |
+          echo "VERSION=$(echo ${{ github.ref_name }} | cut -c 2-)" >> $GITHUB_ENV
+          echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
 
       - name: Install utilities
         # zip for packaging windows builds
@@ -32,8 +85,16 @@ jobs:
           mkdir -p "$OUTPUT_DIR"
           mkdir -p "$PUBLISH_DIR"
 
-      - name: Publish all RIDs
-        run: ${{ github.workspace }}/ci/publish_all.sh
+      - name: Download build archive
+        uses: actions/download-artifact@v3
+        with:
+          name: builds
+          path: ${{ env.PUBLISH_DIR }}
+
+      - name: Extract build archive
+        run: |
+          cd "$PUBLISH_DIR"
+          tar -xzvf builds.tgz
 
       - name: Package all RIDs
         run: ${{ github.workspace }}/ci/package_all.sh
