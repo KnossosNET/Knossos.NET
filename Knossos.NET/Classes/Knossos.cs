@@ -264,6 +264,11 @@ namespace Knossos.NET
                                     await Task.Delay(500);
                                 }
                                 var extension = Path.GetExtension(releaseAsset.browser_download_url);
+                                //little hack to pickup tar.gz
+                                if(extension != null && extension.ToLower() == ".gz" && releaseAsset.browser_download_url.Contains(".tar.gz")) 
+                                {
+                                    extension = ".tar.gz";
+                                }
                                 var download = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance!.AddFileDownloadTask(releaseAsset.browser_download_url, KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension, "Downloading "+latest.tag_name+" "+releaseAsset.name, true, "This is a Knossos.NET update"), DispatcherPriority.Background);
                                 if (download != null && download == true)
                                 {
@@ -354,16 +359,16 @@ namespace Knossos.NET
                                         }
                                         else
                                         {
-                                            using (var archive = ArchiveFactory.Open(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension))
+                                            using (Stream stream = File.OpenRead(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension))
+                                            using (var archive = ReaderFactory.Open(stream))
                                             {
                                                 try
                                                 {
-                                                    var reader = archive.ExtractAllEntries();
-                                                    while (reader.MoveToNextEntry())
+                                                    while (archive.MoveToNextEntry())
                                                     {
-                                                        if (!reader.Entry.IsDirectory)
+                                                        if (!archive.Entry.IsDirectory)
                                                         {
-                                                            reader.WriteEntryToDirectory(appDirPath!, new ExtractionOptions() { ExtractFullPath = false, Overwrite = true });
+                                                            archive.WriteEntryToDirectory(appDirPath!, new ExtractionOptions() { ExtractFullPath = false, Overwrite = true });
                                                         }
                                                     }
                                                 }
