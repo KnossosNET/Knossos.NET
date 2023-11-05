@@ -17,6 +17,7 @@ source ./packaging/vars
 [ -n "$NAME" ] || fail_msg "ERROR: Name isn't specified!"
 [ -n "$ID" ]   || fail_msg "ERROR: ID isn't specified!"
 [ -n "$RIDS" ] || fail_msg "ERROR: Runtime IDs not specified!"
+[ -n "$GITHUB_ORG" ] || fail_msg "ERROR: GitHub Project not specified!"
 
 PUBLISH_DIR="$(readlink -f ${PUBLISH_DIR:="./build/publish"})" 
 
@@ -66,7 +67,7 @@ ICON_FILE="knossos"
 
 APPIMAGE_TOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-$ARCH.AppImage"
 
-UPDATE_SCHEME="gh-releases-zsync|ShivanSpS|$NAME|latest|$NAME-*$ARCH.AppImage.zsync"
+UPDATE_SCHEME="gh-releases-zsync|$GITHUB_ORG|$NAME|latest|$NAME-*$ARCH.AppImage.zsync"
 
 
 # install required packages:
