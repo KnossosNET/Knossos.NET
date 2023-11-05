@@ -65,7 +65,14 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                QuickLaunch = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName + " -playmod " + modJson.id + " -version " + modJson.version;
+                if(!KnUtils.IsAppImage)
+                {
+                    QuickLaunch = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName + " -playmod " + modJson.id + " -version " + modJson.version;
+                }
+                else
+                {
+                    QuickLaunch = KnUtils.AppImagePath + " -playmod " + modJson.id + " -version " + modJson.version;
+                }
             }catch { }
             this.modJson = modJson;
             modCardViewModel = modCard;
