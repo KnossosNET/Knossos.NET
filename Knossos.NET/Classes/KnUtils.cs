@@ -49,6 +49,25 @@ namespace Knossos.NET
         private static readonly string appImagePath = Environment.GetEnvironmentVariable("APPIMAGE")!;
 
         /// <summary>
+        /// Return fullpath to current Knet application folder 
+        /// </summary>
+        public static string? KnetFolderPath
+        {
+            get
+            {
+                if(IsAppImage)
+                {
+                    return Path.GetDirectoryName(KnUtils.AppImagePath);
+                }
+                else
+                {
+                    return AppDomain.CurrentDomain.BaseDirectory;
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Possible Values:
         /// Arm	  //A 32-bit ARM processor architecture.
         /// Armv6 //A 32-bit ARMv6 processor architecture.

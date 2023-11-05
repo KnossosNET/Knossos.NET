@@ -13,7 +13,6 @@ using System.Xml.Linq;
 using Avalonia.Platform;
 using Avalonia;
 using VP.NET;
-using SharpCompress.Archives;
 using SharpCompress.Readers;
 using SharpCompress.Common;
 
@@ -195,14 +194,20 @@ namespace Knossos.NET
         {
             try
             {
-                var appDirPath = System.AppDomain.CurrentDomain.BaseDirectory;
-                var oldFiles = System.IO.Directory.GetFiles(appDirPath, "*.old");
-                foreach (string f in oldFiles)
+                var appDirPath = KnUtils.KnetFolderPath;
+                if(appDirPath != null)
                 {
-                    File.Delete(f);
+                    var oldFiles = System.IO.Directory.GetFiles(appDirPath, "*.old");
+                    foreach (string f in oldFiles)
+                    {
+                        File.Delete(f);
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex) 
+            {
+                Log.Add(Log.LogSeverity.Error, "Knossos.CleanUpdateFiles()", ex);
+            }
         }
 
         /// <summary>
@@ -338,24 +343,27 @@ namespace Knossos.NET
                                         // NOTE: exeName is already the full path to the AppImage
                                         if (KnUtils.IsAppImage)
                                         {
-                                            File.Move(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension, execName!);
+                                            var appFolder = KnUtils.KnetFolderPath;
+                                            if (appFolder == null)
+                                            {
+                                                throw new ArgumentNullException(nameof(appFolder));
+                                            }
+                                            var newFileFullPath = Path.Combine(appFolder, Path.GetFileName(releaseAsset.browser_download_url));
+                                            File.Move(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension, newFileFullPath);
 
                                             //Start again
                                             try
                                             {
-                                                KnUtils.Chmod(execName!, "+x");
+                                                KnUtils.Chmod(newFileFullPath, "+x");
 
                                                 Process p = new Process();
-                                                p.StartInfo.FileName = execName!;
+                                                p.StartInfo.FileName = newFileFullPath;
                                                 p.Start();
                                             }
                                             catch (Exception ex)
                                             {
                                                 Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
                                             }
-
-                                            //Close App
-                                            MainWindow.instance!.Close();
                                         }
                                         else
                                         {
@@ -400,12 +408,13 @@ namespace Knossos.NET
                                                         File.Delete(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension);
                                                 }
                                                 catch { }
-
-                                                //Close App
-                                                MainWindow.instance!.Close();
                                             }
                                         }
-                                    }catch(Exception ex)
+
+                                        //Close App
+                                        MainWindow.instance!.Close();
+                                    }
+                                    catch(Exception ex)
                                     {
                                         //Rollback
                                         try
