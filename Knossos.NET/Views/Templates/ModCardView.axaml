@@ -36,7 +36,7 @@
 			<TabControl Margin="0,-12,0,0">
 				<TabItem>
 					<TabItem.Header>
-						<Label FontWeight="Bold" FontSize="13" Foreground="White">Main</Label>
+						<Label FontWeight="Bold" FontSize="11" Foreground="White">Main</Label>
 					</TabItem.Header>
 					<StackPanel Margin="5">
 						<Button Command="{Binding ButtonCommand}" CommandParameter="play" Content="Play" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,2,0,0" Width="100" ></Button>
@@ -47,7 +47,7 @@
 				</TabItem>
 				<TabItem Margin="-5, 0, 0 0" IsVisible="{Binding !IsLocalMod}">
 					<TabItem.Header>
-						<Label FontWeight="Bold" FontSize="13" Foreground="White">Advanced</Label>
+						<Label FontWeight="Bold" FontSize="11" Foreground="White">Advanced</Label>
 					</TabItem.Header>
 					<StackPanel Margin="5">
 						<Button Command="{Binding ButtonCommand}" CommandParameter="debug" Content="FSO Debug" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,2,0,0" Width="100" ></Button>
