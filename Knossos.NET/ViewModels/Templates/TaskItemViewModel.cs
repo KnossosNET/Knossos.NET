@@ -1373,7 +1373,7 @@ namespace Knossos.NET.ViewModels
                     {
                         try
                         {
-                            Directory.Delete(mod.fullPath + Path.DirectorySeparatorChar + "kn_upload");
+                            Directory.Delete(mod.fullPath + Path.DirectorySeparatorChar + "kn_upload", true);
                         }
                         catch (Exception ex)
                         {
