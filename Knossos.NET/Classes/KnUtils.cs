@@ -338,6 +338,10 @@ namespace Knossos.NET
                         await CopyDirectoryAsync(subDir.FullName, newDestinationDir, true, cancelSource, progressCallback);
                     }
                 }
+
+                Directory.SetCreationTime(destinationDir, Directory.GetCreationTime(sourceDir));
+                Directory.SetLastAccessTime(destinationDir, Directory.GetLastAccessTime(sourceDir));
+                Directory.SetLastWriteTime(destinationDir, Directory.GetLastWriteTime(sourceDir));
             });
         }
 
@@ -416,7 +420,7 @@ namespace Knossos.NET
         {
             try
             {
-                using (FileStream? file = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
+                using (FileStream? file = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     using (SHA256 checksum = SHA256.Create())
                     {

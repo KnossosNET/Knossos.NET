@@ -100,7 +100,7 @@ namespace VP.NET
                 exists.Delete();
             }
 
-            var nf = new VPFile(VPFileType.File, vp!, this, file.Name, 0, 0, VPTime.GetCurrentTime(), file.FullName);
+            var nf = new VPFile(VPFileType.File, vp!, this, file.Name, 0, 0, VPTime.GetTimestampFromFile(file.FullName), file.FullName);
             VPFile.InsertInOrder(files, nf);
         }
 
@@ -144,7 +144,7 @@ namespace VP.NET
                     {
                         exists.Delete();
                     }
-                    var nf = new VPFile(VPFileType.File, vp!, this, f.Name, 0, 0, VPTime.GetCurrentTime(), f.FullName);
+                    var nf = new VPFile(VPFileType.File, vp!, this, f.Name, 0, 0, VPTime.GetTimestampFromFile(f.FullName), f.FullName);
                     VPFile.InsertInOrder(files, nf);
                 }
             }

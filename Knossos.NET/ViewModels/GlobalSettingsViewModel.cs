@@ -83,6 +83,8 @@ namespace Knossos.NET.ViewModels
         internal bool checkUpdates = true;
         [ObservableProperty]
         internal bool autoUpdate = false;
+        [ObservableProperty]
+        internal bool deleteUploadedFiles = true;
 
         /*VIDEO*/
         [ObservableProperty]
@@ -259,6 +261,7 @@ namespace Knossos.NET.ViewModels
             CompressionMaxParallelism = Knossos.globalSettings.compressionMaxParallelism;
             CheckUpdates = Knossos.globalSettings.checkUpdate;
             AutoUpdate = Knossos.globalSettings.autoUpdate;
+            DeleteUploadedFiles = Knossos.globalSettings.deleteUploadedFiles;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -801,6 +804,7 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.modCompression = ModCompression;
             Knossos.globalSettings.compressionMaxParallelism = CompressionMaxParallelism;
             Knossos.globalSettings.checkUpdate = CheckUpdates;
+            Knossos.globalSettings.deleteUploadedFiles = DeleteUploadedFiles;
             if(!CheckUpdates)
             {
                 AutoUpdate = false;

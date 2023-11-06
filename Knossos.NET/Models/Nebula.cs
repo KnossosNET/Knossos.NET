@@ -746,8 +746,8 @@ namespace Knossos.NET.Models
                                         var reply = JsonSerializer.Deserialize<ApiReply>(json);
                                         if (!reply.result)
                                         {
-                                            if(reply.reason == "mod_not_found")
-                                                Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "Api call returned: mod_not_found");
+                                            if(reply.reason == "not_found")
+                                                Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "GetMod returned: not_found");
                                             else
                                                 Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode + "\n" + json);
                                         }
@@ -1591,24 +1591,23 @@ namespace Knossos.NET.Models
         /// Supports auto upload-resume and checks if the file is already uploaded
         /// Support upload cancel via token
         /// </summary>
-        public class MultipartUploader : IDisposable
+        public class MultipartUploader
         {
-            private bool disposedValue = false;
             private static readonly int maxUploadParallelism = 3;
-            private static readonly int maxUploadRetries = 3;
+            private static readonly int maxUploadRetries = 4;
             private static readonly long partMaxSize = 10485760; //10MB
             private List<FilePart> fileParts = new List<FilePart>();
             private CancellationTokenSource cancellationTokenSource;
-            private FileStream fs;
             private Action<string, int, int>? progressCallback;
             private string? fileChecksum;
-            private Queue<object> readQueue = new Queue<object>();
+            private string fileFullPath;
             private long fileLenght = 0;
             private bool completed = false;
             private bool verified = false;
 
             public MultipartUploader(string filePath, CancellationTokenSource? cancellationTokenSource, Action<string, int, int>? progressCallback)
             {
+                fileFullPath = filePath;
                 this.progressCallback = progressCallback;
                 if (cancellationTokenSource != null)
                 {
@@ -1618,13 +1617,11 @@ namespace Knossos.NET.Models
                 {
                     this.cancellationTokenSource = new CancellationTokenSource();
                 }
-                fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                fs.Seek(0, SeekOrigin.Begin);
-                fileLenght = fs.Length;
+                fileLenght = new FileInfo(filePath).Length;
                 var partIdx = 0;
-                while(partIdx * partMaxSize < fs.Length)
+                while(partIdx * partMaxSize < fileLenght)
                 {
-                    var partLengh = fs.Length - ( partIdx * partMaxSize ) < partMaxSize ? fs.Length - (partIdx * partMaxSize) : partMaxSize;
+                    var partLengh = fileLenght - ( partIdx * partMaxSize ) < partMaxSize ? fileLenght - (partIdx * partMaxSize) : partMaxSize;
                     fileParts.Add(new FilePart(this, partIdx, partIdx * partMaxSize, partLengh));
                     partIdx++;
                 }
@@ -1638,9 +1635,6 @@ namespace Knossos.NET.Models
             /// <exception cref="TaskCanceledException"></exception>
             public async Task<bool> Upload()
             {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(fs));
-
                 if (cancellationTokenSource.IsCancellationRequested)
                     throw new TaskCanceledException();
 
@@ -1663,7 +1657,7 @@ namespace Knossos.NET.Models
                 if(completed)
                 {
                     if (progressCallback != null)
-                        progressCallback.Invoke("Already uploaded.", 1, 1);
+                        progressCallback.Invoke("Already Uploaded", 1, 1);
                     return true;
                 }
 
@@ -1677,10 +1671,14 @@ namespace Knossos.NET.Models
                     var attempt = 1;
                     do
                     {
+                        if (attempt > 1)
+                            await Task.Delay(500);
                         var result = await part.Upload();
-                        if(result)
+                        await Task.Delay(200);
+                        if (result)
                         {
                             partCompleted = await part.Verify();
+                            await Task.Delay(100);
                         }
                     } 
                     while ( partCompleted != true && attempt++ <= maxUploadRetries);
@@ -1707,10 +1705,9 @@ namespace Knossos.NET.Models
 
                 verified = await Finish();
 
-                if (progressCallback != null)
+                if (verified && progressCallback != null)
                     progressCallback.Invoke("Verify: " + verified, maxProgress, maxProgress);
 
-                fs.Close();
                 return verified;
             }
 
@@ -1735,10 +1732,12 @@ namespace Knossos.NET.Models
                     if (!reply.Value.result)
                     {
                         Log.Add(Log.LogSeverity.Error, "MultipartUploader.Finish", "Unable to multi part upload process to Nebula. Reason: " + reply.Value.reason);
+                        if (progressCallback != null)
+                            progressCallback.Invoke("Verify: " + reply.Value.reason, 0, 1);
                     }
                     else
                     {
-                        Log.Add(Log.LogSeverity.Information, "MultipartUploader.Finish", "Multiupload: File uploaded to Nebula! " + fs.Name);
+                        Log.Add(Log.LogSeverity.Information, "MultipartUploader.Finish", "Multiupload: File uploaded to Nebula! " + fileFullPath);
                     }
                     completed = reply.Value.result;
                     return reply.Value.result;
@@ -1777,8 +1776,16 @@ namespace Knossos.NET.Models
                             {
                                 if(part.GetID() == finished)
                                 {
-                                    fileParts.Remove(part);
-                                    Log.Add(Log.LogSeverity.Information, "MultipartUploader.Start", "Removing part id " + part.GetID() + " because it was already uploaded.");
+                                    var verify = await part.Verify();
+                                    if (verify)
+                                    {
+                                        fileParts.Remove(part);
+                                        Log.Add(Log.LogSeverity.Information, "MultipartUploader.Start", "Removing part id " + part.GetID() + " because it was already uploaded. Max parts: " + fileParts.Count());
+                                    }
+                                    else
+                                    {
+                                        Log.Add(Log.LogSeverity.Warning, "MultipartUploader.Start", "Part id " + part.GetID() + " is already uploaded, but the checksum is incorrect, re-uploading. Max parts: " + fileParts.Count());
+                                    }
                                 }
                             }
                         }
@@ -1789,32 +1796,12 @@ namespace Knossos.NET.Models
             }
 
             /// <summary>
-            /// Reads bytes[] from the source file
-            /// This operation is executed in order, waits in queue until other reads requests are completed 
+            /// Return full path to file
             /// </summary>
-            /// <param name="offset"></param>
-            /// <param name="length"></param>
-            /// <returns></returns>
-            /// <exception cref="ObjectDisposedException"></exception>
-            /// <exception cref="Exception"></exception>
-            internal async Task<byte[]> ReadBytes(long offset, long length)
+            /// <returns>fullpath string</returns>
+            public string GetFilePath()
             {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(fs));
-
-                var queueObject = new object();
-                readQueue.Enqueue(queueObject);
-                while(readQueue.Peek() != queueObject)
-                {
-                    await Task.Delay(100);
-                }
-                fs.Seek(offset, SeekOrigin.Begin);
-                var buffer = new byte[length];
-                var numberReadBytes = await fs.ReadAsync(buffer, 0, buffer.Length);
-                readQueue.Dequeue();
-                if (numberReadBytes != length)
-                    throw new Exception(" We wanted to read " + length + " bytes, but we read " + buffer.Length + " bytes.");
-                return buffer;
+                return fileFullPath;
             }
 
             /// <summary>
@@ -1830,46 +1817,14 @@ namespace Knossos.NET.Models
                 }
                 else
                 {
-                    if (disposedValue)
-                        throw new ObjectDisposedException(nameof(fs));
+                    fileChecksum = await KnUtils.GetFileHash(fileFullPath);
 
-                    var queueObject = new object();
-                    readQueue.Enqueue(queueObject);
-                    while (readQueue.Peek() != queueObject)
-                    {
-                        await Task.Delay(100);
-                    }
-                    using (SHA256 sha256 = SHA256.Create())
-                    {
-                        fs.Seek(0, SeekOrigin.Begin);
-                        fileChecksum = BitConverter.ToString(await sha256.ComputeHashAsync(fs)).Replace("-", String.Empty).ToLower();
-                        readQueue.Dequeue();
-                        return fileChecksum;
-                    }
-                }
-            }
-
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-
-            protected virtual void Dispose(bool disposing)
-            {
-                if (!disposedValue)
-                {
-                    if (disposing)
-                    {
-                        fs.Dispose();
-                    }
-
-                    disposedValue = true;
+                    return fileChecksum;
                 }
             }
         }
 
-        private class FilePart
+        internal class FilePart
         {
             private MultipartUploader uploader;
             private string? fileID;
@@ -1893,9 +1848,13 @@ namespace Knossos.NET.Models
             {
                 if (partBytes == null)
                 {
-                    partBytes = await uploader.ReadBytes(fileOffset, partLength);
-                    if(partBytes.Length != partLength)
-                        throw new Exception("Expected to read " + partLength + " bytes, but we read " + partBytes.Length + " instead.");
+                    using (var fs = new FileStream(uploader.GetFilePath(), FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        fs.Seek(fileOffset, SeekOrigin.Begin);
+                        partBytes = new byte[partLength];
+                        if (await fs.ReadAsync(partBytes, 0, partBytes.Length) != partLength)
+                            throw new Exception("Expected to read " + partLength + " bytes, but we read " + partBytes.Length + " instead.");
+                    }
                 }
             }
 
@@ -1943,8 +1902,6 @@ namespace Knossos.NET.Models
 
             public async Task<bool> Verify()
             {
-                if (!completed)
-                    return false;
                 if (fileID == null)
                     fileID = await uploader.GetChecksum();
 

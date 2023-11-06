@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace VP.NET
 {
@@ -14,6 +15,24 @@ namespace VP.NET
         public static int GetCurrentTime()
         {
             return (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        }
+
+        /// <summary>
+        /// Gets the file unix timestamp
+        /// from the modified time
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns>unix timestamp</returns>
+        public static int GetTimestampFromFile(string filePath)
+        {
+            try
+            {
+                var date = new DateTimeOffset(File.GetLastWriteTime(filePath));
+                return (int)date.ToUnixTimeSeconds();
+            } catch
+            {
+                return 1;
+            }
         }
 
         /// <summary>

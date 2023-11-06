@@ -451,7 +451,7 @@ namespace VP.NET
                     {
                         exists.Delete();
                     }
-                    var nf = new VPFile(VPFileType.File, this, null, file.Name, 0, 0, VPTime.GetCurrentTime(), file.FullName);
+                    var nf = new VPFile(VPFileType.File, this, null, file.Name, 0, 0, VPTime.GetTimestampFromFile(file.FullName), file.FullName);
                     VPFile.InsertInOrder(vpFiles, nf);
                 }
             }

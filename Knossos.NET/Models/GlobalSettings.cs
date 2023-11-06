@@ -67,6 +67,8 @@ namespace Knossos.NET.Models
         public bool autoUpdate { get; set; } = false;
         [JsonPropertyName("check_updates")]
         public bool checkUpdate { get; set; } = true;
+        [JsonPropertyName("delete_uploaded_files")]
+        public bool deleteUploadedFiles { get; set; } = true;
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 
@@ -537,6 +539,7 @@ namespace Knossos.NET.Models
                         autoUpdate = tempSettings.autoUpdate;
                         checkUpdate = tempSettings.checkUpdate;
                         ttsVoiceName = tempSettings.ttsVoiceName;
+                        deleteUploadedFiles = tempSettings.deleteUploadedFiles;
 
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");

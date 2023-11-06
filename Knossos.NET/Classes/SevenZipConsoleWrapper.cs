@@ -50,11 +50,13 @@ namespace Knossos.NET
         /// <param name="destFile"></param>
         /// <returns>true if successfull, false otherwise</returns>
         /// <exception cref="ObjectDisposedException"></exception>
-        public async Task<bool> CompressFolder(string sourceFolder, string destFile)
+        public async Task<bool> CompressFolder(string sourceFolder, string destFile, bool doNotStoreTimestamp = false)
         {
             if (disposed)
                 throw new ObjectDisposedException("This object was already disposed.");
             string cmdline = "a -t7z -m0=lzma2 -md=64M -mx=9 -ms=on -bsp1 -y ";
+            if (doNotStoreTimestamp)
+                cmdline += "-mtm- ";
             return await Run(cmdline + destFile, sourceFolder);
         }
 
@@ -66,14 +68,21 @@ namespace Knossos.NET
         /// <param name="destFile"></param>
         /// <returns>true if successfull, false otherwise</returns>
         /// <exception cref="ObjectDisposedException"></exception>
-        public async Task<bool> CompressFolderTarGz(string sourceFolder, string destFile)
+        public async Task<bool> CompressFolderTarGz(string sourceFolder, string destFile, bool doNotStoreTimestamp = false)
         {
             if (disposed)
                 throw new ObjectDisposedException("This object was already disposed.");
             string cmdline = "a -snh -snl -y ";
+            if (doNotStoreTimestamp)
+                cmdline += "-mtm- ";
             var r = await Run(cmdline + destFile + ".tar", sourceFolder);
             if (r)
-                return await Run("a -mx=8 -bsp1 -y " + destFile + ".tar.gz" + " " + destFile + ".tar", sourceFolder);
+            {
+                cmdline = "a -mx=8 -bsp1 -y ";
+                if (doNotStoreTimestamp)
+                    cmdline += "-mtm- ";
+                return await Run(cmdline + destFile + ".tar.gz" + " " + destFile + ".tar", sourceFolder);
+            }
             return r;
         }
 
@@ -85,11 +94,13 @@ namespace Knossos.NET
         /// <param name="destFile"></param>
         /// <returns>true if successfull, false otherwise</returns>
         /// <exception cref="ObjectDisposedException"></exception>
-        public async Task<bool> CompressFile(string filepath, string workingFolder, string destFile)
+        public async Task<bool> CompressFile(string filepath, string workingFolder, string destFile, bool doNotStoreTimestamp = false)
         {
             if (disposed)
                 throw new ObjectDisposedException("This object was already disposed.");
             string cmdline = "a -t7z -m0=lzma2 -md=64M -mx=9 -ms=on -bsp1 -y ";
+            if (doNotStoreTimestamp)
+                cmdline += "-mtm- ";
             return await Run(cmdline + destFile + " " + filepath, workingFolder);
         }
 
