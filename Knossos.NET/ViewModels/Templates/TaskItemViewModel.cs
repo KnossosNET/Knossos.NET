@@ -894,13 +894,15 @@ namespace Knossos.NET.ViewModels
                         throw new TaskCanceledException();
                     }
 
+                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.UploadPkg()", "Uploading: " + zipPath);
+
                     var multi = new Nebula.MultipartUploader(zipPath, cancellationTokenSource, multiuploaderCallback);
                     if (!await multi.Upload())
-                    { 
+                    {
                         throw new TaskCanceledException();
                     }
                     await Task.Delay(300);
-                    Info = "OK";
+                    //Info = "OK";
                     IsCompleted = true;
                     CancelButtonVisible = false;
                     ProgressCurrent = ProgressBarMax;
@@ -917,7 +919,6 @@ namespace Knossos.NET.ViewModels
                 IsCompleted = false;
                 IsCancelled = true;
                 CancelButtonVisible = false;
-                Info = "Task Cancelled";
                 //Only dispose the token if it was created locally
                 if (cancelSource == null)
                 {
@@ -936,7 +937,6 @@ namespace Knossos.NET.ViewModels
                 IsCompleted = false;
                 CancelButtonVisible = false;
                 IsCancelled = true;
-                Info = "Task Failed";
                 //Only dispose the token if it was created locally
                 if (cancelSource == null)
                 {
@@ -1043,7 +1043,7 @@ namespace Knossos.NET.ViewModels
                             ProgressCurrent = 0;
                             using (var compressor = new SevenZipConsoleWrapper(sevenZipCallback, cancellationTokenSource))
                             {
-                                if (!await compressor.CompressFile(vpPath, modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps", zipPath))
+                                if (!await compressor.CompressFile(vpPath, modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps", zipPath, true))
                                 {
                                     Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
                                     throw new TaskCanceledException();
@@ -1363,16 +1363,23 @@ namespace Knossos.NET.ViewModels
                         Info = "Metadata Updated!";
 
                     //Completed
+                    mod.inNebula = true;
                     IsCompleted = true; 
                     CancelButtonVisible = false;
                     ProgressCurrent = ProgressBarMax;
 
                     //Delete kn_upload folder?
-                    try
+                    if (Knossos.globalSettings.deleteUploadedFiles)
                     {
-                        //Directory.Delete(mod.fullPath + Path.DirectorySeparatorChar + "kn_upload");
+                        try
+                        {
+                            Directory.Delete(mod.fullPath + Path.DirectorySeparatorChar + "kn_upload", true);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.UploadModVersion()", ex);
+                        }
                     }
-                    catch { }
 
                     if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                     {
@@ -3402,6 +3409,8 @@ namespace Knossos.NET.ViewModels
 
                     if (installed == null)
                     {
+                        //mark all pkgs as enabled
+                        mod.packages?.ForEach(pkg => pkg.isEnabled = true);
                         mod.SaveJson();
                     }
                     else
@@ -3411,6 +3420,8 @@ namespace Knossos.NET.ViewModels
                         {
                             installed.packages.AddRange(mod.packages);
                         }
+                        //mark all pkgs as enabled
+                        mod.packages?.ForEach(pkg => pkg.isEnabled = true);
                         installed.SaveJson();
                         mod.ClearUnusedData();
                     }
