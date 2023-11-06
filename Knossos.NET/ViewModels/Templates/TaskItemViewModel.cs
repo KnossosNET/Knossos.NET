@@ -3409,6 +3409,8 @@ namespace Knossos.NET.ViewModels
 
                     if (installed == null)
                     {
+                        //mark all pkgs as enabled
+                        mod.packages?.ForEach(pkg => pkg.isEnabled = true);
                         mod.SaveJson();
                     }
                     else
@@ -3418,6 +3420,8 @@ namespace Knossos.NET.ViewModels
                         {
                             installed.packages.AddRange(mod.packages);
                         }
+                        //mark all pkgs as enabled
+                        mod.packages?.ForEach(pkg => pkg.isEnabled = true);
                         installed.SaveJson();
                         mod.ClearUnusedData();
                     }
