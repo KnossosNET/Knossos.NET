@@ -3288,29 +3288,20 @@ namespace Knossos.NET.ViewModels
                     {
                         Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         var uri = new Uri(mod.tile);
-                        if (File.Exists(Path.Combine(KnUtils.GetImageCachePath(), Path.GetFileName(uri.LocalPath))))
-                        {
-                            using (var fs = await KnUtils.GetImageStream(mod.tile))
-                            {
-                                var tileTask = new TaskItemViewModel();
-                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
-                                tileTask.ShowMsg("Copying tile image from cache", null);
-                                if (fs != null)
-                                {
-                                    using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath),FileMode.Create,FileAccess.Write))
-                                    {
-                                        await fs.CopyToAsync(destImg);
-                                        fs.Close();
-                                        destImg.Close();
-                                    }
-                                }
-                            }
-                        }
-                        else
+                        using (var fs = await KnUtils.GetImageStream(mod.tile))
                         {
                             var tileTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
-                            await tileTask.DownloadFile(mod.tile, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading tile image", true, null);
+                            tileTask.ShowMsg("Getting tile image", null);
+                            if (fs != null)
+                            {
+                                using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), FileMode.Create, FileAccess.Write))
+                                {
+                                    await fs.CopyToAsync(destImg);
+                                    fs.Close();
+                                    destImg.Close();
+                                }
+                            }
                         }
                         mod.tile = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                     }
@@ -3326,29 +3317,20 @@ namespace Knossos.NET.ViewModels
                         Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         var uri = new Uri(mod.banner);
-                        if (File.Exists(Path.Combine(KnUtils.GetImageCachePath(), Path.GetFileName(uri.LocalPath))))
-                        {
-                            using (var fs = await KnUtils.GetImageStream(mod.banner))
-                            {
-                                var bannerTask = new TaskItemViewModel();
-                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
-                                bannerTask.ShowMsg("Copying banner image from cache", null);
-                                if (fs != null)
-                                {
-                                    using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), FileMode.Create, FileAccess.Write))
-                                    {
-                                        await fs.CopyToAsync(destImg);
-                                        fs.Close();
-                                        destImg.Close();
-                                    }
-                                }
-                            }
-                        }
-                        else
+                        using (var fs = await KnUtils.GetImageStream(mod.banner))
                         {
                             var bannerTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
-                            await bannerTask.DownloadFile(mod.banner, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading banner image", true, null);
+                            bannerTask.ShowMsg("Getting banner image", null);
+                            if (fs != null)
+                            {
+                                using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), FileMode.Create, FileAccess.Write))
+                                {
+                                    await fs.CopyToAsync(destImg);
+                                    fs.Close();
+                                    destImg.Close();
+                                }
+                            }
                         }
                         mod.banner = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                     }
@@ -3363,7 +3345,6 @@ namespace Knossos.NET.ViewModels
                     {
                         Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         var scList = new List<string>();
-                        int scNumber = 0;
                         foreach (var sc in mod.screenshots)
                         {
                             if (cancellationTokenSource.IsCancellationRequested)
@@ -3371,29 +3352,20 @@ namespace Knossos.NET.ViewModels
                                 throw new TaskCanceledException();
                             }
                             var uri = new Uri(sc);
-                            if (File.Exists(Path.Combine(KnUtils.GetImageCachePath(), Path.GetFileName(uri.LocalPath))))
-                            {
-                                using (var fs = await KnUtils.GetImageStream(sc))
-                                {
-                                    var scTask = new TaskItemViewModel();
-                                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));
-                                    scTask.ShowMsg("Copying screenshot #"+ (scNumber++) + " from cache", null);
-                                    if (fs != null)
-                                    {
-                                        using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), FileMode.Create, FileAccess.Write))
-                                        {
-                                            await fs.CopyToAsync(destImg);
-                                            fs.Close();
-                                            destImg.Close();
-                                        }
-                                    }
-                                }
-                            }
-                            else
+                            using (var fs = await KnUtils.GetImageStream(sc))
                             {
                                 var scTask = new TaskItemViewModel();
                                 await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));
-                                await scTask.DownloadFile(sc, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading screenshot", true, null);
+                                scTask.ShowMsg("Getting screenshot #" + scList.Count() + " image", null);
+                                if (fs != null)
+                                {
+                                    using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), FileMode.Create, FileAccess.Write))
+                                    {
+                                        await fs.CopyToAsync(destImg);
+                                        fs.Close();
+                                        destImg.Close();
+                                    }
+                                }
                             }
                             scList.Add("kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath));
                         }
@@ -3797,29 +3769,20 @@ namespace Knossos.NET.ViewModels
                         {
                             Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                             var uri = new Uri(modJson.tile);
-                            if (File.Exists(Path.Combine(KnUtils.GetImageCachePath(), Path.GetFileName(uri.LocalPath))))
-                            {
-                                using (var fs = await KnUtils.GetImageStream(modJson.tile))
-                                {
-                                    var tileTask = new TaskItemViewModel();
-                                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
-                                    tileTask.ShowMsg("Copying tile image from cache", null);
-                                    if (fs != null)
-                                    {
-                                        using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), FileMode.Create, FileAccess.Write))
-                                        {
-                                            await fs.CopyToAsync(destImg);
-                                            fs.Close();
-                                            destImg.Close();
-                                        }
-                                    }
-                                }
-                            }
-                            else
+                            using (var fs = await KnUtils.GetImageStream(modJson.tile))
                             {
                                 var tileTask = new TaskItemViewModel();
                                 await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
-                                await tileTask.DownloadFile(modJson.tile, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading tile image", true, null);
+                                tileTask.ShowMsg("Getting tile image", null);
+                                if (fs != null)
+                                {
+                                    using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), FileMode.Create, FileAccess.Write))
+                                    {
+                                        await fs.CopyToAsync(destImg);
+                                        fs.Close();
+                                        destImg.Close();
+                                    }
+                                }
                             }
                             modJson.tile = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                         }
@@ -3836,29 +3799,20 @@ namespace Knossos.NET.ViewModels
                         {
                             Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                             var uri = new Uri(modJson.banner);
-                            if (File.Exists(Path.Combine(KnUtils.GetImageCachePath(), Path.GetFileName(uri.LocalPath))))
-                            {
-                                using (var fs = await KnUtils.GetImageStream(modJson.banner))
-                                {
-                                    var bannerTask = new TaskItemViewModel();
-                                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
-                                    bannerTask.ShowMsg("Copying banner image from cache", null);
-                                    if (fs != null)
-                                    {
-                                        using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), FileMode.Create, FileAccess.Write))
-                                        {
-                                            await fs.CopyToAsync(destImg);
-                                            fs.Close();
-                                            destImg.Close();
-                                        }
-                                    }
-                                }
-                            }
-                            else
+                            using (var fs = await KnUtils.GetImageStream(modJson.banner))
                             {
                                 var bannerTask = new TaskItemViewModel();
                                 await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
-                                await bannerTask.DownloadFile(modJson.banner, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading banner image", true, null);
+                                bannerTask.ShowMsg("Getting banner image", null);
+                                if (fs != null)
+                                {
+                                    using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), FileMode.Create, FileAccess.Write))
+                                    {
+                                        await fs.CopyToAsync(destImg);
+                                        fs.Close();
+                                        destImg.Close();
+                                    }
+                                }
                             }
                             modJson.banner = "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath);
                         }
@@ -3880,29 +3834,20 @@ namespace Knossos.NET.ViewModels
                                     throw new TaskCanceledException();
                                 }
                                 var uri = new Uri(sc);
-                                if (File.Exists(Path.Combine(KnUtils.GetImageCachePath(), Path.GetFileName(uri.LocalPath))))
-                                {
-                                    using (var fs = await KnUtils.GetImageStream(sc))
-                                    {
-                                        var scTask = new TaskItemViewModel();
-                                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));
-                                        scTask.ShowMsg("Copying banner image from cache", null);
-                                        if (fs != null)
-                                        {
-                                            using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), FileMode.Create, FileAccess.Write))
-                                            {
-                                                await fs.CopyToAsync(destImg);
-                                                fs.Close();
-                                                destImg.Close();
-                                            }
-                                        }
-                                    }
-                                }
-                                else
+                                using (var fs = await KnUtils.GetImageStream(sc))
                                 {
                                     var scTask = new TaskItemViewModel();
                                     await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));
-                                    await scTask.DownloadFile(sc, modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), "Downloading screenshot", true, null);
+                                    scTask.ShowMsg("Getting screenshot #"+ scList.Count() + " image", null);
+                                    if (fs != null)
+                                    {
+                                        using (var destImg = new FileStream(modPath + Path.DirectorySeparatorChar + "kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath), FileMode.Create, FileAccess.Write))
+                                        {
+                                            await fs.CopyToAsync(destImg);
+                                            fs.Close();
+                                            destImg.Close();
+                                        }
+                                    }
                                 }
                                 scList.Add("kn_images" + Path.DirectorySeparatorChar + Path.GetFileName(uri.LocalPath));
                             }

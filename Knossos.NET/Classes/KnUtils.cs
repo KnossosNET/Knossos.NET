@@ -529,7 +529,7 @@ namespace Knossos.NET
         /// </summary>
         /// <param name="imageURL"></param>
         /// <returns>Cached image filestream or null if failed</returns>
-        public static async Task<FileStream?> GetImageStream(string imageURL)
+        public static async Task<FileStream?> GetImageStream(string imageURL, int attempt = 1)
         {
             try
             {
@@ -539,7 +539,7 @@ namespace Knossos.NET
                     
                     if(File.Exists(imageInCachePath) && new FileInfo(imageInCachePath).Length > 0)
                     {
-                        return new FileStream(imageInCachePath, FileMode.Open, FileAccess.Read);
+                        return new FileStream(imageInCachePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     }
                     else
                     {
@@ -549,7 +549,7 @@ namespace Knossos.NET
                         {
                             using (var imageStream = await client.GetStreamAsync(imageURL))
                             {
-                                var fileStream = new FileStream(imageInCachePath, FileMode.Create, FileAccess.ReadWrite);
+                                var fileStream = new FileStream(imageInCachePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
                                 await imageStream.CopyToAsync(fileStream);
                                 imageStream.Close();
                                 fileStream.Seek(0, SeekOrigin.Begin);
@@ -562,6 +562,11 @@ namespace Knossos.NET
             catch(Exception ex) 
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtils.GetImageStream()", ex);
+                if (attempt <= 2)
+                {
+                    await Task.Delay(1000);
+                    return await GetImageStream(imageURL, attempt + 1);
+                }
             }
             return null;
         }
