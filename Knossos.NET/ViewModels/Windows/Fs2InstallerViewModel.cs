@@ -1,9 +1,6 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Platform;
+﻿using Avalonia.Platform;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
@@ -120,7 +117,7 @@ namespace Knossos.NET.ViewModels
                         var cmd = new Process();
                         Directory.CreateDirectory(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog");
                         cmd.StartInfo.FileName = innoPath;
-                        cmd.StartInfo.Arguments = gogExe + " -L -g -d " + KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog";
+                        cmd.StartInfo.Arguments = gogExe + " -L -g -d \"" + KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog\"";
                         cmd.StartInfo.UseShellExecute = false;
                         cmd.StartInfo.CreateNoWindow = true;
                         cmd.StartInfo.RedirectStandardOutput = true;
@@ -132,6 +129,7 @@ namespace Knossos.NET.ViewModels
                             Dispatcher.UIThread.InvokeAsync(() =>
                             {
                                 InstallText = "Running innoextract" + output;
+                                ProgressCurrent++;
                             });
                         }
                         cmd.WaitForExit();
@@ -174,8 +172,9 @@ namespace Knossos.NET.ViewModels
             await Task.Run(() => { 
                 try
                 {
-                    IsInstalling = true; 
-                    ProgressMax = filePaths.Count();
+                    IsInstalling = true;
+                    ProgressMax += filePaths.Count();
+                    ProgressCurrent = ProgressMax - filePaths.Count();
                     Directory.CreateDirectory(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "movies");
                     Directory.CreateDirectory(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "players");
                     foreach (string file in filePaths)
@@ -400,9 +399,9 @@ namespace Knossos.NET.ViewModels
 
                     var cmd = new Process();
                     var file = new FileInfo(result[0].Path.LocalPath.ToString());
-                    gogExe = file.FullName;
+                    gogExe = "\"" + file.FullName + "\"";
                     cmd.StartInfo.FileName = innoPath;
-                    cmd.StartInfo.Arguments = file.FullName + " -l -g";
+                    cmd.StartInfo.Arguments = gogExe + " -l -g";
                     cmd.StartInfo.UseShellExecute = false;
                     cmd.StartInfo.CreateNoWindow = true;
                     cmd.StartInfo.RedirectStandardOutput = true;
@@ -419,13 +418,15 @@ namespace Knossos.NET.ViewModels
                             count++;
                     }
 
-                    if (count != 9)
+                    if (count != required.Count())
                     {
                         //Missing files
                         gogExe = null;
                         await MessageBox.Show(MainWindow.instance!, "Unable to find all the required Freespace 2 files in gog exe.", "Files not found", MessageBox.MessageBoxButtons.OK);
                         return;
                     }
+                    ProgressMax = innoOutput.Split('\n').Length-2;
+                    ProgressMax += required.Count() + optional.Count();
                     CanInstall = true;
                 }catch(Exception ex)
                 {
