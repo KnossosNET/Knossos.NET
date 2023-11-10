@@ -1353,6 +1353,8 @@ namespace Knossos.NET.ViewModels
                     mod.tile = origTile;
                     mod.banner = origBanner;
                     mod.screenshots = origScreenshots;
+                    //mark all pkgs as enabled
+                    mod.packages?.ForEach(pkg => pkg.isEnabled = true);
                     mod.SaveJson();
 
                     ProgressCurrent++;
@@ -1380,6 +1382,10 @@ namespace Knossos.NET.ViewModels
                             Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.UploadModVersion()", ex);
                         }
                     }
+
+                    //Reload version editor if needed
+                    if(!metaOnly)
+                        DeveloperModsViewModel.Instance?.UpdateVersionManager(mod.id);
 
                     if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
                     {
@@ -3113,7 +3119,7 @@ namespace Knossos.NET.ViewModels
                                 {
                                     foreach (var file in mod.packages[i].files!)
                                     {
-                                        file.dest = mod.packages[i].name + Path.DirectorySeparatorChar + file.dest;
+                                        file.dest = mod.packages[i].folder + Path.DirectorySeparatorChar + file.dest;
                                         if (mod.packages[i].isVp)
                                             vPExtractionNeeded++;
                                     }
@@ -3446,10 +3452,17 @@ namespace Knossos.NET.ViewModels
                         MainWindowViewModel.Instance?.NebulaModsView.RemoveMod(mod.id);
                         Knossos.AddMod(mod);
                         await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(mod), DispatcherPriority.Background);
-                        await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id, false), DispatcherPriority.Background);
+                        //We cant determine if the version we are installing is the newer one at this point, but this will determine if it is newer than anything was was installed previously, what is good enoght
+                        var newer = Knossos.GetInstalledModList(mod.id)?.MaxBy(x => new SemanticVersion(x.version));
+                        if (newer == mod)
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id, false), DispatcherPriority.Background);
+                        }
                         if (mod.devMode)
                         {
                             await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddDevMod(mod), DispatcherPriority.Background);
+                            //Reload version editor if needed
+                            DeveloperModsViewModel.Instance?.UpdateVersionManager(mod.id);
                         }
                         MainWindowViewModel.Instance?.RunModStatusChecks();
                     }
@@ -3881,6 +3894,8 @@ namespace Knossos.NET.ViewModels
                         if (modJson.devMode)
                         {
                             await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddDevMod(modJson), DispatcherPriority.Background);
+                            //Update version editor if needed
+                            DeveloperModsViewModel.Instance?.UpdateVersionManager(modJson.id);
                         }
                         IsCompleted = true;
                         CancelButtonVisible = false;

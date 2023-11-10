@@ -336,5 +336,17 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Error, "DevModEditorViewModel.InsertToolInOrder", ex);
             }
         }
+
+
+        /// <summary>
+        /// Updates the Version Manager Version List
+        /// If modid is passed it will be only be updated IF loaded mod id matches the modid
+        /// </summary>
+        /// <param name="modid"></param>
+        public void UpdateVersionManager(string? modid = null)
+        {
+            if(VersionsView != null && (modid == null || ActiveVersion.id == modid) )
+                VersionsView?.HackUpdateModList();
+        }
     }
 }

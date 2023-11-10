@@ -6,6 +6,7 @@ using Knossos.NET.Views.Windows;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.IO;
 using System.Linq;
 
@@ -97,6 +98,17 @@ namespace Knossos.NET.ViewModels
                 SelectedIndex = -1;
             }
             GC.Collect();
+        }
+
+
+        /// <summary>
+        /// Updates the Version Manager Version List
+        /// If modid is passed it will be only be updated IF loaded mod id matches the modid
+        /// </summary>
+        /// <param name="modid"></param>
+        public void UpdateVersionManager(string? modid = null)
+        {
+            ModEditor?.UpdateVersionManager(modid); 
         }
 
         /// <summary>

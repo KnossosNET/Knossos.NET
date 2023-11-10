@@ -92,44 +92,64 @@ namespace Knossos.NET.ViewModels
                 if(currentMod != null)
                 {
                     modSelectedIndex=ModItems.IndexOf(currentMod);
+
+                    FillAllVersions();
+
+                    var currentVersion = VersionItems.FirstOrDefault(x => x.Content != null && dep.version != null && x.Content.ToString() == dep.version.Trim().Replace(">=", "").Replace("~", ""));
+                    if (currentVersion != null)
+                    {
+                        versionSelectedIndex = VersionItems.IndexOf(currentVersion);
+                        if (dep.version!.Contains("~"))
+                        {
+                            versionTypeIndex = 2;
+                        }
+                        else
+                        {
+                            if (dep.version!.Contains(">="))
+                            {
+                                versionTypeIndex = 1;
+                            }
+                            else
+                            {
+                                versionTypeIndex = 0;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        VersionSelectedIndex = 0;
+                    }
+
+                    FillPackages();
                 }
                 else
                 {
+                    //Dependency Mod id not found
                     var itemMod = new ComboBoxItem();
                     itemMod.Tag = dep.id;
-                    itemMod.Content = dep.id;
-                    ModItems.Add(itemMod);
-                    modSelectedIndex = 0;
-                
-                }
-
-                FillAllVersions();
-
-                var currentVersion = VersionItems.FirstOrDefault(x => x.Content != null && dep.version != null && x.Content.ToString() == dep.version.Trim().Replace(">=","").Replace("~", ""));
-                if (currentVersion != null)
-                {
-                    versionSelectedIndex = VersionItems.IndexOf(currentVersion);
-                    if(dep.version!.Contains("~"))
+                    itemMod.Content = dep.id + " (Missing)";
+                    itemMod.IsEnabled = false; //Important! This signals that on writing to return the original depedency data to avoid possible loss of dep data
+                    ModItems.Insert(0, itemMod);
+                    ModSelectedIndex = 0;
+                    if (dep.version!.Contains("~"))
                     {
-                        versionTypeIndex = 2; 
+                        VersionTypeIndex = 2;
                     }
                     else
                     {
                         if (dep.version!.Contains(">="))
                         {
-                            versionTypeIndex = 1;
+                            VersionTypeIndex = 1;
                         }
                         else
                         {
-                            versionTypeIndex = 0;
+                            VersionTypeIndex = 0;
                         }
                     }
+                    var itemVer = new ComboBoxItem();
+                    itemVer.Content = dep.version != null ? dep.version.Replace(">=","").Replace("~", "") : "Any";
+                    VersionItems.Add(itemVer);
                 }
-                else
-                {
-                    VersionSelectedIndex = 0;
-                }
-                FillPackages();
             }
 
             private void FillModList()
@@ -263,13 +283,19 @@ namespace Knossos.NET.ViewModels
             {
                 try
                 {
+                    //If we are reading a missing dep, return original data
+                    if (!ModItems[ModSelectedIndex].IsEnabled)
+                    {
+                        return Dependency;
+                    }
+
                     var depId = ModItems[ModSelectedIndex].Tag as string;
                     var depVersion = VersionItems[VersionSelectedIndex].Content as string;
 
                     if(depId != "-1" && depId != null)
                     {
                         Dependency.id = depId;
-                        var versionType = VersionTypeIndex == 0 ? string.Empty : VersionSelectedIndex == 1 ? ">=" : "~";
+                        var versionType = VersionTypeIndex == 0 ? string.Empty : VersionTypeIndex == 1 ? ">=" : "~";
                         Dependency.version = depVersion != "Any" ? versionType+depVersion : null;
                         var newPkgs = new List<string>();
                         foreach (var pkg in Packages)
