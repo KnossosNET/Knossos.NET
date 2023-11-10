@@ -182,7 +182,7 @@ namespace Knossos.NET.ViewModels
         /// <summary>
         /// Hack to force to update the list in the ui, since Mod class dosent implement observable object
         /// </summary>
-        private void HackUpdateModList()
+        public void HackUpdateModList()
         {
             Mods = Mods.ToList();
         }

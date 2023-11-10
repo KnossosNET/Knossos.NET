@@ -100,12 +100,14 @@ namespace Knossos.NET.ViewModels
                 if (ids != null && ids.Any() && ids.FirstOrDefault(x => x == id) != null)
                 {
                     HasWriteAccess = true;
+                    InstallInDevMode = true;
                 }
             }
             ModVersions = await Nebula.GetAllModsWithID(id);
             if(ModVersions.Any())
             {
-                if(preSelectedVersion == null)
+                ModVersions.Sort(Mod.CompareVersion);
+                if (preSelectedVersion == null)
                 {
                     SelectedIndex = ModVersions.Count() - 1;
                 }
@@ -185,7 +187,7 @@ namespace Knossos.NET.ViewModels
                     else
                     {
                         CanSelectDevMode = true;
-                        InstallInDevMode = false;
+                        InstallInDevMode = HasWriteAccess;
                     }
                 }
                 SelectedMod.isEnabled=false;
