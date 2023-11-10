@@ -32,8 +32,6 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace IonKiwi.lz4 {
 	public sealed class LZ4UserDataFrameEventArgs : EventArgs {

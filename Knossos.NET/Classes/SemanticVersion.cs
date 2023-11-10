@@ -1,5 +1,4 @@
-﻿using Avalonia.Animation.Easings;
-using System;
+﻿using System;
 
 namespace Knossos.NET.Classes
 {

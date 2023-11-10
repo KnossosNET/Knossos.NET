@@ -1,16 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Knossos.NET.Models;
 using Knossos.NET.Classes;
-using Knossos.NET.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.ComponentModel;
 using Avalonia.Media;
 using System.Net.Http;
 

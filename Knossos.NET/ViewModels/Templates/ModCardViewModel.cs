@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Platform;
+﻿using Avalonia.Platform;
 using Avalonia.Media.Imaging;
 using System;
 using Knossos.NET.Models;
@@ -9,11 +8,7 @@ using System.Collections.Generic;
 using Knossos.NET.Classes;
 using Knossos.NET.Views;
 using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Avalonia.Controls;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Linq;
 using Avalonia.Threading;
 

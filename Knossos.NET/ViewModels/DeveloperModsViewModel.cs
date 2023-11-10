@@ -2,12 +2,8 @@
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
-using Knossos.NET.Views.Windows;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.ObjectModel;
-using System.Data;
-using System.IO;
 using System.Linq;
 
 namespace Knossos.NET.ViewModels

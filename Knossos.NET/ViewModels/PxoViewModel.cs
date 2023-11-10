@@ -1,18 +1,11 @@
-﻿using Avalonia.Controls;
-using CommunityToolkit.Mvvm.ComponentModel;
-using Knossos.NET.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Views;
 using Knossos.NET.Views.Windows;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {

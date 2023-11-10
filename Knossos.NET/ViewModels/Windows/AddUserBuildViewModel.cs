@@ -1,5 +1,4 @@
-﻿using Avalonia.Controls;
-using Avalonia.Platform.Storage;
+﻿using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
@@ -7,13 +6,9 @@ using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.Intrinsics.X86;
 using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
 
 namespace Knossos.NET.ViewModels
 { 

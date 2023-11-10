@@ -1,7 +1,4 @@
-﻿using System;
-using System.Globalization;
-
-namespace VP.NET
+﻿namespace VP.NET
 {
     /// <summary>
     /// Helper class to handle the date timestamp in vps

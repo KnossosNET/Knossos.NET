@@ -7,7 +7,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using Knossos.NET.Classes;
 
 namespace Knossos.NET.ViewModels
 {

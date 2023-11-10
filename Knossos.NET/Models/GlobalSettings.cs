@@ -5,13 +5,9 @@ using System.Text.Json.Serialization;
 using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Text.Unicode;
 using Knossos.NET.Classes;
 using IniParser;
-using IniParser.Model;
-using HarfBuzzSharp;
 using Avalonia.Threading;
-using Knossos.NET.Views;
 using Knossos.NET.ViewModels;
 using System.Threading.Tasks;
 

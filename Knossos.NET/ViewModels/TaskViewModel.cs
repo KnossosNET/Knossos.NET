@@ -4,7 +4,6 @@ using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System;

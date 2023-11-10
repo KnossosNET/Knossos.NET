@@ -15,13 +15,9 @@ using SharpCompress.Readers;
 using SharpCompress.Common;
 using System.Threading;
 using System.Net;
-using Avalonia;
 using Knossos.NET.Classes;
-using System.Reflection;
-using System.Reflection.PortableExecutable;
 using VP.NET;
 using System.Text;
-using System.Text.Encodings;
 using Avalonia.Media;
 using System.Text.RegularExpressions;
 
