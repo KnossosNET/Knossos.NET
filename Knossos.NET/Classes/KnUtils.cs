@@ -570,5 +570,31 @@ namespace Knossos.NET
             }
             return null;
         }
+
+        /// <summary>
+        /// Check FreeSpace avalible on the disk/partion of path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>Size in bytes</returns>
+        public static long CheckDiskSpace(string path)
+        {
+            try
+            {
+                var rootPath = new FileInfo(path).Directory?.Root.FullName;
+                if (rootPath != null)
+                {
+                    var drive = new DriveInfo(rootPath);
+                    if (drive.IsReady)
+                    {
+                        return drive.AvailableFreeSpace;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.CheckDiskSpace", ex);
+            }
+            return 0;
+        }
     }
 }

@@ -33,6 +33,8 @@
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
 			</ComboBox>
+			<Label ToolTip.Tip="Download size consist of LZMA2 7z compressed files with max compression, the actual extracted size will be considerable higher than this value. It is recommended that you have at least double free space than what it is indicated here." Content="{Binding InstallSize}" Margin="5" FontSize="18" HorizontalAlignment="Center"></Label>
+			<Label Content="{Binding FreeSpace}" Margin="5,0,5,5" FontSize="18" HorizontalAlignment="Center"></Label>
 			<Label IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="Green"> This version is installed, you can add optional packages</Label>
 			<Button Command="{Binding VerifyCommand}" Margin="5" IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="White" Background="DarkOrange">Verify</Button>
 		</StackPanel>
@@ -45,13 +47,13 @@
 			<TreeView.DataTemplates>
 				<TreeDataTemplate DataType="models:Mod" ItemsSource="{Binding packages}">
 					<WrapPanel>
-						<CheckBox Content="{Binding title}" IsChecked="{Binding isSelected}" IsEnabled="{Binding isEnabled}" MaxWidth="600" FontWeight="Bold"></CheckBox>
+						<CheckBox Checked="CheckBox_Changed" Unchecked="CheckBox_Changed" Content="{Binding title}" IsChecked="{Binding isSelected}" IsEnabled="{Binding isEnabled}" MaxWidth="600" FontWeight="Bold"></CheckBox>
 						<TextBlock Margin="10,0,0,0" FontWeight="Bold" Text="{Binding version}" IsEnabled="{Binding isEnabled}" VerticalAlignment="Center" />
 					</WrapPanel>
 				</TreeDataTemplate>
 				<DataTemplate DataType="models:ModPackage">
 					<WrapPanel>
-						<CheckBox ToolTip.Tip="{Binding notes}" Content="{Binding name}" IsChecked="{Binding isSelected}" IsEnabled="{Binding isEnabled}" Width="350"></CheckBox>
+						<CheckBox Checked="CheckBox_Changed" Unchecked="CheckBox_Changed" ToolTip.Tip="{Binding notes}" Content="{Binding name}" IsChecked="{Binding isSelected}" IsEnabled="{Binding isEnabled}" Width="350"></CheckBox>
 					</WrapPanel>
 				</DataTemplate>
 			</TreeView.DataTemplates>

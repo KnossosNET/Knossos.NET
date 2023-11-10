@@ -50,6 +50,10 @@ namespace Knossos.NET.ViewModels
         internal bool hasWriteAccess = false;
         [ObservableProperty]
         internal bool forceDevMode = false;
+        [ObservableProperty]
+        internal string installSize = string.Empty;
+        [ObservableProperty]
+        internal string freeSpace = string.Empty;
 
         internal Mod? selectedMod;
         internal Mod? SelectedMod
@@ -172,6 +176,7 @@ namespace Knossos.NET.ViewModels
                             }
                         }
                     }
+                    SelectedMod.installed = true;
                     InstallInDevMode = installed.devMode;
                     CanSelectDevMode = false;
                 }
@@ -349,6 +354,53 @@ namespace Knossos.NET.ViewModels
             { 
                 dialogWindow.Close(); 
             }      
+        }
+
+        internal async void UpdateSpace()
+        {
+            try
+            {
+                await Task.Delay(500);
+                long size = 0;
+                foreach (var mod in ModInstallList)
+                {
+                    if(mod.isSelected)
+                    {
+                        if (mod.packages != null)
+                        {
+                            Mod? installed = null;
+                            if (mod.installed)
+                            {
+                                installed = Knossos.GetInstalledMod(mod.id, mod.version);
+                            }
+                            foreach (var pkg in mod.packages)
+                            {
+                                if (pkg.isSelected && pkg.files != null)
+                                {
+                                    if(installed != null)
+                                    {
+                                        if (installed.IsPackageInstalled(pkg.name))
+                                            continue;
+                                    }
+                                    foreach (var file in pkg.files)
+                                    {
+                                        size += file.filesize;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                await Dispatcher.UIThread.InvokeAsync(() => {
+                    InstallSize = "Download Size: " + KnUtils.FormatBytes(size) + " (*)";
+                    if(Knossos.GetKnossosLibraryPath() != null)
+                       FreeSpace = "Free space in library: " + KnUtils.FormatBytes(KnUtils.CheckDiskSpace(Knossos.GetKnossosLibraryPath()!));
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "ModInstallViewModel.UpdateSpace()", ex);
+            }
         }
     }
 }

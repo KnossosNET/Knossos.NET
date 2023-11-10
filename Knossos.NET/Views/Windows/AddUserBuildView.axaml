@@ -10,15 +10,17 @@
 		Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterScreen"
         Title="Add Custom FSO Build" 
-		SizeToContent="WidthAndHeight" 
-		CanResize="False">
+		SizeToContent="Width"
+		Height="600"
+		CanResize="True">
 	
 	<Design.DataContext>
 		<vm:AddUserBuildViewModel/>
 	</Design.DataContext>
 
-	<StackPanel Background="#18191A">
-		<StackPanel IsEnabled="{Binding !CopyProgress}">
+	<ScrollViewer Background="#18191A">
+	<Grid RowDefinitions="*,Auto,Auto">
+		<StackPanel Grid.Row="0" IsEnabled="{Binding !CopyProgress}">
 			<Label>1) Click on the button and select the folders where the executables are located.</Label>
 			<Button Command="{Binding OpenFolderCommand}">Open Folder</Button>
 			<TextBlock TextWrapping="Wrap" Text="{Binding ScanResults}"></TextBlock>
@@ -64,7 +66,8 @@
 				<Button VerticalAlignment="Center" Command="{Binding AddCommand}">Add new build</Button>
 			</StackPanel>
 		</StackPanel>
-		<ProgressBar IsVisible="{Binding CopyProgress}" Value="{Binding CopyProgress}" Maximum="{Binding MaxFiles}" Height="50" Minimum="0" Width="200" HorizontalAlignment="Center"></ProgressBar>
-		<Label IsVisible="{Binding ModCreated}" HorizontalAlignment="Center" FontWeight="Bold">Complete!</Label>
-	</StackPanel>
+		<ProgressBar Grid.Row="1" IsVisible="{Binding CopyProgress}" Value="{Binding CopyProgress}" Maximum="{Binding MaxFiles}" Height="50" Minimum="0" Width="200" HorizontalAlignment="Center"></ProgressBar>
+		<Label Grid.Row="2" IsVisible="{Binding ModCreated}" HorizontalAlignment="Center" FontWeight="Bold">Complete!</Label>
+	</Grid>
+	</ScrollViewer>
 </Window>
