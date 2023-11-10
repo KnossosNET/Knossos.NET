@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using static System.Net.WebRequestMethods;
 
 namespace IonKiwi.lz4 {
 	public static class LZ4RawUtility {

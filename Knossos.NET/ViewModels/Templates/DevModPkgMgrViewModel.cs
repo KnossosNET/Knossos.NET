@@ -1,7 +1,5 @@
 ﻿using Avalonia.Controls;
-using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
@@ -10,11 +8,8 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static Knossos.NET.ViewModels.DevModPkgMgrViewModel;
 
 namespace Knossos.NET.ViewModels
 {

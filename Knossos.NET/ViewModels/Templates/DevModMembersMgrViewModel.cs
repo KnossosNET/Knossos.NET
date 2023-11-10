@@ -1,17 +1,10 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
-using HarfBuzzSharp;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Diagnostics.Metrics;
-using System.Dynamic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {

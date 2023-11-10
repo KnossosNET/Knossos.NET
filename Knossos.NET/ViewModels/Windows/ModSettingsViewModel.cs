@@ -7,7 +7,6 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Linq;
 using Avalonia.Threading;
-using System.IO;
 using System;
 using VP.NET;
 

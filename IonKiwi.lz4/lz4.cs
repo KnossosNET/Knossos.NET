@@ -43,16 +43,10 @@ using System.Buffers;
 #if NET6_0_OR_GREATER
 using System.Buffers.Binary;
 #endif
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 
 namespace IonKiwi.lz4 {
 	internal static class lz4 {

@@ -38,11 +38,6 @@
 	  - source repository : https://github.com/IonKiwi/lz4.managed
 */
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
-
 namespace IonKiwi.lz4 {
 	internal unsafe struct LZ4_stream {
 		public fixed ulong table[lz4.LZ4_STREAM_MINSIZE];

@@ -32,13 +32,7 @@
 */
 
 using System;
-using System.Buffers;
-using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace IonKiwi.lz4 {
 	public static class LZ4Utility {

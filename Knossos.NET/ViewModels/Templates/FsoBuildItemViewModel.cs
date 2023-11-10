@@ -1,9 +1,6 @@
-﻿using Avalonia;
-using Avalonia.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
-using System.Diagnostics;
 using System.Threading;
 
 namespace Knossos.NET.ViewModels
