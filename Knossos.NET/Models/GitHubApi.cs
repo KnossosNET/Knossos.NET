@@ -15,22 +15,18 @@ namespace Knossos.NET.Models
         /// <returns>GitHubRelease or null if the api call failed</returns>
         public static async Task<GitHubRelease?> GetLastRelease()
         {
-
-            using (HttpClient client = new HttpClient())
+            try
             {
-                try
-                {
-                    client.Timeout = TimeSpan.FromSeconds(30);
-                    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("product", "1"));
-                    HttpResponseMessage response = await client.GetAsync(Knossos.GitHubUpdateRepoURL + "/releases/latest");
-                    var json = await response.Content.ReadAsStringAsync();
-                    return JsonSerializer.Deserialize<GitHubRelease>(json)!;
-                }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "GitHubApi.GetLastRelease()", ex);
-                    return null;
-                }
+                var client = KnUtils.GetHttpClient();
+                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("product", "1"));
+                HttpResponseMessage response = await client.GetAsync(Knossos.GitHubUpdateRepoURL + "/releases/latest");
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<GitHubRelease>(json)!;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "GitHubApi.GetLastRelease()", ex);
+                return null;
             }
         }
     }
