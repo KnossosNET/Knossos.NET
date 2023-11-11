@@ -74,8 +74,8 @@ namespace Knossos.NET
                 //Check for updates
                 if (globalSettings.checkUpdate && !isQuickLaunch)
                 {
-                    await CheckKnetUpdates();
-                    await Task.Delay(300);
+                    await CheckKnetUpdates().ConfigureAwait(false);
+                    await Task.Delay(300).ConfigureAwait(false);
                     CleanUpdateFiles();
                 }
 
@@ -215,7 +215,7 @@ namespace Knossos.NET
         {
             try
             {
-                var latest = await GitHubApi.GetLastRelease();
+                var latest = await GitHubApi.GetLastRelease().ConfigureAwait(false);
                 if (latest != null && latest.tag_name != null)
                 {
                     if (SemanticVersion.Compare(AppVersion, latest.tag_name.ToLower().Replace("v", "").Trim()) <= -1)
@@ -264,7 +264,7 @@ namespace Knossos.NET
                                 }
                                 else
                                 {
-                                    await Task.Delay(500);
+                                    await Task.Delay(500).ConfigureAwait(false);
                                 }
                                 var extension = Path.GetExtension(releaseAsset.browser_download_url);
                                 //little hack to pickup tar.gz
@@ -272,7 +272,7 @@ namespace Knossos.NET
                                 {
                                     extension = ".tar.gz";
                                 }
-                                var download = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance!.AddFileDownloadTask(releaseAsset.browser_download_url, KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension, "Downloading "+latest.tag_name+" "+releaseAsset.name, true, "This is a Knossos.NET update"), DispatcherPriority.Background);
+                                var download = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance!.AddFileDownloadTask(releaseAsset.browser_download_url, KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension, "Downloading "+latest.tag_name+" "+releaseAsset.name, true, "This is a Knossos.NET update"), DispatcherPriority.Background).ConfigureAwait(false);
                                 if (download != null && download == true)
                                 {
                                     //Rename files in app folder
@@ -333,7 +333,7 @@ namespace Knossos.NET
                                         }
                                         catch { }
                                     }
-                                    await Task.Delay(1000);
+                                    await Task.Delay(1000).ConfigureAwait(false);
                                     //Decompress new files
                                     try
                                     {
@@ -522,7 +522,7 @@ namespace Knossos.NET
                 retailFs2RootFound = false;
                 TaskViewModel.Instance?.CancelAllRunningTasks();
                 Nebula.CancelOperations();
-                await Task.Delay(2000);
+                await Task.Delay(2000).ConfigureAwait(false);
                 LoadBasePath();
             });
         }
@@ -535,19 +535,25 @@ namespace Knossos.NET
         {
             if (globalSettings.basePath != null)
             {
-                await FolderSearchRecursive(globalSettings.basePath, isQuickLaunch);
+                await FolderSearchRecursive(globalSettings.basePath, isQuickLaunch).ConfigureAwait(false);
 
                 if (!isQuickLaunch)
                 {
                     //Red border for mod with missing deps
-                    MainWindowViewModel.Instance?.RunModStatusChecks();
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        MainWindowViewModel.Instance?.RunModStatusChecks();
+                    });
 
                     //Load config options to view, must be done after loading the fso builds due to flag data
-                    MainWindowViewModel.Instance?.GlobalSettingsLoadData();
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        MainWindowViewModel.Instance?.GlobalSettingsLoadData();
+                    });
 
                     //Enter the nebula
                     //Note: this has to be done after scanning the local folder
-                    await Task.Run(() => { Nebula.Trinity(); });
+                    await Task.Run(() => { Nebula.Trinity(); }).ConfigureAwait(false);
                 }
                 else
                 {

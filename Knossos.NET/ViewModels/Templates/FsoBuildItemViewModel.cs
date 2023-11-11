@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System.Threading;
@@ -41,10 +42,10 @@ namespace Knossos.NET.ViewModels
         {
             this.build = build;
             title = build.ToString();
-            UpdataDisplayData(build);
+            UpdateDisplayData(build);
         }
 
-        private void UpdataDisplayData(FsoBuild build, bool skipInstalledCheck = false)
+        private void UpdateDisplayData(FsoBuild build, bool skipInstalledCheck = false)
         {
             Date = build.date;
             IsInstalled = build.isInstalled;
@@ -99,11 +100,13 @@ namespace Knossos.NET.ViewModels
             {
                 if (MainWindow.instance != null && build.modData != null)
                 {
-                    await build.modData.LoadFulLNebulaData();
-                    UpdataDisplayData(new FsoBuild(build.modData), true);
-                    var dialog = new ModDetailsView();
-                    dialog.DataContext = new ModDetailsViewModel(build.modData, dialog);
-                    await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
+                    await build.modData.LoadFulLNebulaData().ConfigureAwait(false);
+                    await Dispatcher.UIThread.InvokeAsync(async () => {
+                        UpdateDisplayData(new FsoBuild(build.modData), true);
+                        var dialog = new ModDetailsView();
+                        dialog.DataContext = new ModDetailsViewModel(build.modData, dialog);
+                        await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
+                    }).ConfigureAwait(false);
                 }
                 else
                 {
@@ -121,11 +124,13 @@ namespace Knossos.NET.ViewModels
                 {
                     Log.Add(Log.LogSeverity.Information, "FsoBuildItemViewModel.DeleteBuildCommand()", "Deleting FSO build " + build.ToString());
                     FsoBuildsViewModel.Instance!.DeleteBuild(build,this);
-                    var result = await Nebula.GetModData(build.id, build.version);
-                    if (result != null)
-                    {
-                        FsoBuildsViewModel.Instance!.AddBuildToUi(new FsoBuild(result));
-                    }
+                    var result = await Nebula.GetModData(build.id, build.version).ConfigureAwait(false);
+                    Dispatcher.UIThread.Invoke(() => {
+                        if (result != null)
+                        {
+                            FsoBuildsViewModel.Instance!.AddBuildToUi(new FsoBuild(result));
+                        }
+                    });
                 }
             }
         }
@@ -151,17 +156,19 @@ namespace Knossos.NET.ViewModels
             {
                 IsDownloading = true;
                 cancellationTokenSource = new CancellationTokenSource();
-                await mod.LoadFulLNebulaData();
-                FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, mod)!;
-                if (newBuild != null)
-                {
-                    //Install completed
-                    IsInstalled = true;
-                    build = newBuild;
-                }
-                IsDownloading = false;
-                cancellationTokenSource?.Dispose();
-                cancellationTokenSource = null;
+                await mod.LoadFulLNebulaData().ConfigureAwait(false);
+                await Dispatcher.UIThread.InvokeAsync(async () => { 
+                    FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, mod)!;
+                    if (newBuild != null)
+                    {
+                        //Install completed
+                        IsInstalled = true;
+                        build = newBuild;
+                    }
+                    IsDownloading = false;
+                    cancellationTokenSource?.Dispose();
+                    cancellationTokenSource = null;
+                }).ConfigureAwait(false);
             }
         }
 
@@ -177,31 +184,33 @@ namespace Knossos.NET.ViewModels
                         //Check compatibility
                         if (build.modData != null)
                         {
-                            await build.modData.LoadFulLNebulaData();
+                            await build.modData.LoadFulLNebulaData().ConfigureAwait(false);
                             var tempBuild = new FsoBuild(build.modData);
-                            UpdataDisplayData(tempBuild,true);
-                            if (tempBuild != null)
-                            {
-                                if (IsValid)
+                            await Dispatcher.UIThread.InvokeAsync(async() => {
+                                UpdateDisplayData(tempBuild, true);
+                                if (tempBuild != null)
                                 {
-                                    IsDownloading = true;
-                                    cancellationTokenSource = new CancellationTokenSource();
-                                    FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, build.modData)!;
-                                    if (newBuild != null)
+                                    if (IsValid)
                                     {
-                                        //Install completed
-                                        IsInstalled = true;
-                                        build = newBuild;
+                                        IsDownloading = true;
+                                        cancellationTokenSource = new CancellationTokenSource();
+                                        FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, build.modData)!;
+                                        if (newBuild != null)
+                                        {
+                                            //Install completed
+                                            IsInstalled = true;
+                                            build = newBuild;
+                                        }
+                                        IsDownloading = false;
+                                        cancellationTokenSource?.Dispose();
+                                        cancellationTokenSource = null;
                                     }
-                                    IsDownloading = false;
-                                    cancellationTokenSource?.Dispose();
-                                    cancellationTokenSource = null;
+                                    else
+                                    {
+                                        await MessageBox.Show(MainWindow.instance, "This build does not have any executables compatible with your operating system or CPU arch.", "Build is not valid for this computer", MessageBox.MessageBoxButtons.OK);
+                                    }
                                 }
-                                else
-                                {
-                                    await MessageBox.Show(MainWindow.instance, "This build does not have any executables compatible with your operating system or CPU arch.", "Build is not valid for this computer", MessageBox.MessageBoxButtons.OK);
-                                }
-                            }
+                            }).ConfigureAwait(false);
                         }
                         else
                         {

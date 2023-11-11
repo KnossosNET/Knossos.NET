@@ -88,23 +88,34 @@ namespace Knossos.NET.ViewModels
             if (!IsTabOpen)
             {
                 IsTabOpen = true;
-                await Dispatcher.UIThread.InvokeAsync(async () =>
+
+                try
                 {
-                    try
+                    await Task.Delay(100).ConfigureAwait(false);
+                    List<NebulaModCardViewModel>? modsInView = null;
+                    await Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        await Task.Delay(100);
                         IsLoading = false;
-                        foreach (NebulaModCardViewModel m in Mods.ToList())
+                        modsInView = Mods.ToList();
+                    });
+                    if (modsInView != null)
+                    {
+                        foreach (var m in modsInView)
                         {
-                            m.Visible = true;
-                            await Task.Delay(1);
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                m.Visible = true;
+                            });
+                            await Task.Delay(1).ConfigureAwait(false);
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        Log.Add(Log.LogSeverity.Error, "NebulaModListViewModel.OpenTab", ex);
-                    }
-                });
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "NebulaModListViewModel.OpenTab", ex);
+                }
+
+
             }
         }
 
@@ -163,7 +174,7 @@ namespace Knossos.NET.ViewModels
         public async void AddMods(List<Mod> modList)
         {
             IsLoading = true;
-            await Task.Delay(20);
+            await Task.Delay(20).ConfigureAwait(false);
             var newModCardList = new ObservableCollection<NebulaModCardViewModel>();
             foreach (Mod? mod in modList)
             {
@@ -190,27 +201,30 @@ namespace Knossos.NET.ViewModels
                     //Update? Should NOT be needed for Nebula mods
                 }
             }
-            Mods = newModCardList;
-            IsLoading = false;
-            if (IsTabOpen)
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                IsTabOpen = false;
-                OpenTab();
-            }
+                Mods = newModCardList;
+                IsLoading = false;
+                if (IsTabOpen)
+                {
+                    IsTabOpen = false;
+                    OpenTab();
+                }
+            });
         }
 
         /// <summary>
         /// Change sorting mode and re-order the list of mods
         /// </summary>
         /// <param name="sort"></param>
-        internal async void ChangeSort(object sort)
+        internal void ChangeSort(object sort)
         {
             try
             {
                 SortType newSort = (SortType)Enum.Parse(typeof(SortType), (string)sort);
                 if (newSort != sortType)
                 {
-                    await Dispatcher.UIThread.InvokeAsync( () =>
+                    Dispatcher.UIThread.Invoke( () =>
                     {
                         sortType = newSort;
                         var tempList = Mods.ToList();

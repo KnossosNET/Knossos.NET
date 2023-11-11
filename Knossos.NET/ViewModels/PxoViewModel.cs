@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Views;
 using Knossos.NET.Views.Windows;
 using System;
@@ -137,22 +138,25 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync("https://pxo.nottheeye.com/api/v1/games/active");
-                var json = await response.Content.ReadAsStringAsync();
-                ActiveGames = JsonSerializer.Deserialize<List<PxoGamesActive>>(json)!;
-                foreach (var result in ActiveGames)
+                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync("https://pxo.nottheeye.com/api/v1/games/active").ConfigureAwait(false);
+                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                Dispatcher.UIThread.Invoke(() =>
                 {
-                    foreach(var server in result.Servers)
+                    ActiveGames = JsonSerializer.Deserialize<List<PxoGamesActive>>(json)!;
+                    foreach (var result in ActiveGames)
                     {
-                        foreach(var flag in server.Flags)
+                        foreach(var server in result.Servers)
                         {
-                            if(flag.Contains("probe"))
+                            foreach(var flag in server.Flags)
                             {
-                                server.Probe = flag;
+                                if(flag.Contains("probe"))
+                                {
+                                    server.Probe = flag;
+                                }
                             }
                         }
                     }
-                }
+                });
             }
             catch (Exception ex)
             {

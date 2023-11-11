@@ -8,6 +8,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Threading;
+using Avalonia.Threading;
 
 namespace Knossos.NET.ViewModels
 {
@@ -124,12 +125,14 @@ namespace Knossos.NET.ViewModels
                     {
                         Task.Run(async () =>
                         {
-                            using (var fs = await KnUtils.GetImageStream(tileString))
+                            using (var fs = await KnUtils.GetImageStream(tileString).ConfigureAwait(false))
                             {
-                                if(fs != null)
-                                    TileImage = new Bitmap(fs);
+                                Dispatcher.UIThread.Invoke(() => { 
+                                    if(fs != null)
+                                        TileImage = new Bitmap(fs);
+                                });
                             }
-                        }); 
+                        }).ConfigureAwait(false); 
                     }
                 }
             }

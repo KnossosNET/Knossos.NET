@@ -87,7 +87,7 @@ namespace Knossos.NET.Models
                 if (cancellationToken != null)
                 {
                     cancellationToken.Cancel();
-                    await Task.Delay(5000);
+                    await Task.Delay(5000).ConfigureAwait(false);
                 }
                 cancellationToken = new CancellationTokenSource();
 
@@ -109,13 +109,13 @@ namespace Knossos.NET.Models
             try
             {
                 bool displayUpdates = settings.NewerModsVersions.Any() ? true : false;
-                var webEtag = await GetRepoEtag();
+                var webEtag = await GetRepoEtag().ConfigureAwait(false);
                 if (!File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json") || settings.etag != webEtag)
                 {
                     //Download the repo_minimal.json
                     if (TaskViewModel.Instance != null)
                     {
-                        var result = await Dispatcher.UIThread.InvokeAsync(async()=>await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal_temp.json", "Downloading repo_minimal.json", true, "The repo_minimal.json file contains info on all the mods available in Nebula, without this you will not be able to install new mods or engine builds"), DispatcherPriority.Background);
+                        var result = await Dispatcher.UIThread.InvokeAsync(async()=>await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal_temp.json", "Downloading repo_minimal.json", true, "The repo_minimal.json file contains info on all the mods available in Nebula, without this you will not be able to install new mods or engine builds"), DispatcherPriority.Background).ConfigureAwait(false);
 
                         if (cancellationToken!.IsCancellationRequested)
                         {
@@ -145,7 +145,7 @@ namespace Knossos.NET.Models
                 else
                 {
                     //No update is needed
-                    await Dispatcher.UIThread.InvokeAsync(() => TaskViewModel.Instance!.AddMessageTask("Nebula: repo_minimal.json is up to date!"), DispatcherPriority.Background);
+                    Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance!.AddMessageTask("Nebula: repo_minimal.json is up to date!"), DispatcherPriority.Background);
                     Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "repo_minimal.json is up to date!");
                     displayUpdates = false;
                 }
@@ -153,7 +153,7 @@ namespace Knossos.NET.Models
                 {
                     throw new TaskCanceledException();
                 }
-                var updates = await InitialRepoLoad();
+                var updates = await InitialRepoLoad().ConfigureAwait(false);
                 if (updates != null && updates.Any())
                 {
                     SaveSettings();
@@ -161,7 +161,7 @@ namespace Knossos.NET.Models
                     {
                         try
                         {
-                            await Dispatcher.UIThread.InvokeAsync(() => TaskViewModel.Instance!.AddDisplayUpdatesTask(updates), DispatcherPriority.Background);
+                            Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance!.AddDisplayUpdatesTask(updates), DispatcherPriority.Background);
                         }
                         catch { }
                     }
@@ -172,7 +172,7 @@ namespace Knossos.NET.Models
                 }
                 if (userIsLoggedIn)
                 {
-                    await LoadPrivateMods(cancellationToken);
+                    await LoadPrivateMods(cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (TaskCanceledException)
@@ -193,7 +193,7 @@ namespace Knossos.NET.Models
         {
             try
             {
-                privateMods = await GetPrivateMods();
+                privateMods = await GetPrivateMods().ConfigureAwait(false);
                 if (privateMods != null && privateMods.Any())
                 {
                     foreach (var mod in privateMods)
@@ -208,7 +208,7 @@ namespace Knossos.NET.Models
                             var isInstalled = Knossos.GetInstalledBuildsList(mod.id)?.FirstOrDefault(b => b.version == mod.version);
                             if (isInstalled == null)
                             {
-                                await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod)), DispatcherPriority.Background);
+                                Dispatcher.UIThread.Invoke(() => FsoBuildsViewModel.Instance?.AddBuildToUi(new FsoBuild(mod)), DispatcherPriority.Background);
                             }
                             else
                             {
@@ -232,12 +232,12 @@ namespace Knossos.NET.Models
                                 var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
                                 if (newer != null && new SemanticVersion(newer.version) < new SemanticVersion(mod.version))
                                 {
-                                    await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id), DispatcherPriority.Background);
+                                    Dispatcher.UIThread.Invoke(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id), DispatcherPriority.Background);
                                 }
                             }
                             else
                             {
-                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddNebulaMod(mod), DispatcherPriority.Background);
+                                Dispatcher.UIThread.Invoke(() => MainWindowViewModel.Instance!.AddNebulaMod(mod), DispatcherPriority.Background);
                             }
                         }
                     }

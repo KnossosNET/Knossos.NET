@@ -1,6 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Views;
 using System;
@@ -39,11 +40,11 @@ namespace Knossos.NET.ViewModels
                         else
                         {
                             Task.Run(async () => {
-                                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(path);
-                                byte[] content = await response.Content.ReadAsByteArrayAsync();
+                                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(path).ConfigureAwait(false);
+                                byte[] content = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                                 using (Stream stream = new MemoryStream(content))
                                 {
-                                    Bitmap = new Bitmap(stream);
+                                    Dispatcher.UIThread.Invoke(()=>{ Bitmap = new Bitmap(stream); });
                                 }
                             });
                         }
@@ -297,11 +298,14 @@ namespace Knossos.NET.ViewModels
                     {
                         Task.Run(async () => {
                             
-                            HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(TileImagePath);
-                            byte[] content = await response.Content.ReadAsByteArrayAsync();
+                            HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(TileImagePath).ConfigureAwait(false);
+                            byte[] content = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                             using (Stream stream = new MemoryStream(content))
                             {
-                                BannerImage = new Bitmap(stream);
+                                Dispatcher.UIThread.Invoke(() =>
+                                {
+                                    BannerImage = new Bitmap(stream);
+                                });
                             }
                         });
                     }
@@ -326,11 +330,14 @@ namespace Knossos.NET.ViewModels
                     else
                     {
                         Task.Run( async () => { 
-                            HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(TileImagePath);
-                            byte[] content =  await response.Content.ReadAsByteArrayAsync();
+                            HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(TileImagePath).ConfigureAwait(false);
+                            byte[] content =  await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                             using (Stream stream = new MemoryStream(content))
                             {
-                                TileImage = new Bitmap(stream);
+                                Dispatcher.UIThread.Invoke(() =>
+                                {
+                                    TileImage = new Bitmap(stream);
+                                }); 
                             }
                         });
                     }

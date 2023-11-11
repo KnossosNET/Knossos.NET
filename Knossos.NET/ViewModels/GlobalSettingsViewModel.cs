@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
@@ -1090,7 +1091,7 @@ namespace Knossos.NET.ViewModels
                 {
                     Log.Add(Log.LogSeverity.Error,"GlobalSettingsViewModel.ClearImageCache()",ex);
                 }
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1104,19 +1105,23 @@ namespace Knossos.NET.ViewModels
                     var path = KnUtils.GetImageCachePath();
                     if (Directory.Exists(path))
                     {
-                        var sizeInBytes = await KnUtils.GetSizeOfFolderInBytes(path);
-                        ImgCacheSize = KnUtils.FormatBytes(sizeInBytes);
+                        var sizeInBytes = await KnUtils.GetSizeOfFolderInBytes(path).ConfigureAwait(false);
+                        Dispatcher.UIThread.Invoke(()=>{ 
+                            ImgCacheSize = KnUtils.FormatBytes(sizeInBytes);
+                        });
                     }
                     else
                     {
-                        ImgCacheSize = "0 MB";
+                        Dispatcher.UIThread.Invoke(() => {
+                            ImgCacheSize = "0 MB";
+                        });
                     }
                 }
                 catch (Exception ex)
                 {
                     Log.Add(Log.LogSeverity.Error, "GlobalSettingsViewModel.ClearImageCache()", ex);
                 }
-            });
+            }).ConfigureAwait(false);
         }
     }
 }

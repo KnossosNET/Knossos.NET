@@ -126,14 +126,14 @@ namespace Knossos.NET.ViewModels
         /// Change sorting mode and re-order the list of mods
         /// </summary>
         /// <param name="sort"></param>
-        internal async void ChangeSort(object sort)
+        internal void ChangeSort(object sort)
         {
             try
             {
                 SortType newSort = (SortType)Enum.Parse(typeof(SortType), (string)sort);
                 if (newSort != sortType)
                 {
-                    await Dispatcher.UIThread.InvokeAsync( () =>
+                    Dispatcher.UIThread.Invoke( () =>
                     {
                         sortType = newSort;
                         var tempList = Mods.ToList();
