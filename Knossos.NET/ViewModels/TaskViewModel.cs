@@ -35,10 +35,13 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public void CancelAllRunningTasks()
         {
-            foreach (var task in TaskList)
+            Dispatcher.UIThread.Invoke(() =>
             {
-                task.CancelTaskCommand();
-            }
+                foreach (var task in TaskList)
+                {
+                    task.CancelTaskCommand();
+                }
+            });
         }
 
         /// <summary>
@@ -48,13 +51,16 @@ namespace Knossos.NET.ViewModels
         /// <param name="version"></param>
         public void CancelAllInstallTaskWithID(string id, string? version)
         {
-            foreach (var task in TaskList)
+            Dispatcher.UIThread.Invoke(() =>
             {
-                if(!task.IsCompleted && task.installID == id && task.installVersion == version)
+                foreach (var task in TaskList)
                 {
-                    task.CancelTaskCommand();
+                    if (!task.IsCompleted && task.installID == id && task.installVersion == version)
+                    {
+                        task.CancelTaskCommand();
+                    }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -85,8 +91,11 @@ namespace Knossos.NET.ViewModels
         public async Task<bool?> AddFileDownloadTask(string url, string dest, string msg, bool showStopButton, string? tooltip = null)
         {
             var newTask = new TaskItemViewModel();
-            TaskList.Add(newTask);
-            return await newTask.DownloadFile(url, dest, msg, showStopButton, tooltip);
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                TaskList.Add(newTask);
+            });
+            return await newTask.DownloadFile(url, dest, msg, showStopButton, tooltip).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -96,9 +105,12 @@ namespace Knossos.NET.ViewModels
         /// <param name="tooltip"></param>
         public void AddMessageTask(string msg, string? tooltip = null)
         {
-            var newTask = new TaskItemViewModel();
-            TaskList.Add(newTask);
-            newTask.ShowMsg(msg, tooltip);
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                var newTask = new TaskItemViewModel();
+                TaskList.Add(newTask);
+                newTask.ShowMsg(msg, tooltip);
+            });
         }
 
         /// <summary>
@@ -107,9 +119,12 @@ namespace Knossos.NET.ViewModels
         /// <param name="updatedMods"></param>
         public void AddDisplayUpdatesTask(List<Mod> updatedMods)
         {
-            var newTask = new TaskItemViewModel();
-            TaskList.Add(newTask);
-            newTask.DisplayUpdates(updatedMods);
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                var newTask = new TaskItemViewModel();
+                TaskList.Add(newTask);
+                newTask.DisplayUpdates(updatedMods);
+            });
         }
 
         /// <summary>
@@ -117,13 +132,16 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public void CleanCommand()
         {
-            for (int i = TaskList.Count - 1; i >= 0; i--)
+            Dispatcher.UIThread.Invoke(() =>
             {
-                if (TaskList[i].CancelButtonVisible == false)
+                for (int i = TaskList.Count - 1; i >= 0; i--)
                 {
-                    TaskList.RemoveAt(i);
+                    if (TaskList[i].CancelButtonVisible == false)
+                    {
+                        TaskList.RemoveAt(i);
+                    }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -144,9 +162,12 @@ namespace Knossos.NET.ViewModels
                 return null;
             }
             var newTask = new TaskItemViewModel();
-            TaskList.Add(newTask);
-            taskQueue.Enqueue(newTask);
-            return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson);
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                TaskList.Add(newTask);
+                taskQueue.Enqueue(newTask);
+            });
+            return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -174,12 +195,16 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                var cancelSource = new CancellationTokenSource();
-                var newTask = new TaskItemViewModel();
-                TaskList.Add(newTask);
-                taskQueue.Enqueue(newTask);
-                await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress);
-                cancelSource.Dispose();
+                using (var cancelSource = new CancellationTokenSource())
+                {
+                    var newTask = new TaskItemViewModel();
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        TaskList.Add(newTask);
+                        taskQueue.Enqueue(newTask);
+                    });
+                    await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress).ConfigureAwait(false);
+                }
             }
         }
 
@@ -197,14 +222,16 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                var cancelSource = new CancellationTokenSource();
-                var newTask = new TaskItemViewModel();
-                await Dispatcher.UIThread.InvokeAsync( () => {
-                    TaskList.Add(newTask);
-                    taskQueue.Enqueue(newTask);
-                });
-                await newTask.CompressMod(mod, cancelSource);
-                cancelSource.Dispose();
+                using (var cancelSource = new CancellationTokenSource())
+                {
+                    var newTask = new TaskItemViewModel();
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        TaskList.Add(newTask);
+                        taskQueue.Enqueue(newTask);
+                    });
+                    await newTask.CompressMod(mod, cancelSource).ConfigureAwait(false);
+                }
             }
         }
 
@@ -221,14 +248,16 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                var cancelSource = new CancellationTokenSource();
-                var newTask = new TaskItemViewModel();
-                await Dispatcher.UIThread.InvokeAsync( () => {
-                    TaskList.Add(newTask);
-                    taskQueue.Enqueue(newTask);
-                });
-                await newTask.DecompressMod(mod, cancelSource);
-                cancelSource.Dispose();
+                using (var cancelSource = new CancellationTokenSource())
+                {
+                    var newTask = new TaskItemViewModel();
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        TaskList.Add(newTask);
+                        taskQueue.Enqueue(newTask);
+                    });
+                    await newTask.DecompressMod(mod, cancelSource).ConfigureAwait(false);
+                }
             }
         }
 
@@ -240,12 +269,16 @@ namespace Knossos.NET.ViewModels
         /// <param name="mod"></param>
         public async void VerifyMod(Mod mod)
         {
-            var cancelSource = new CancellationTokenSource();
-            var newTask = new TaskItemViewModel();
-            TaskList.Add(newTask);
-            taskQueue.Enqueue(newTask);
-            await newTask.VerifyMod(mod, cancelSource);
-            cancelSource.Dispose();
+            using (var cancelSource = new CancellationTokenSource())
+            {
+                var newTask = new TaskItemViewModel();
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    TaskList.Add(newTask);
+                    taskQueue.Enqueue(newTask);
+                });
+                await newTask.VerifyMod(mod, cancelSource).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -257,13 +290,20 @@ namespace Knossos.NET.ViewModels
         /// <param name="hackCallback"></param>
         public async void CreateModVersion(Mod oldMod, string newVersion, Action hackCallback)
         {
-            var cancelSource = new CancellationTokenSource();
-            var newTask = new TaskItemViewModel();
-            TaskList.Add(newTask);
-            taskQueue.Enqueue(newTask);
-            await newTask.CreateModVersion(oldMod, newVersion, cancelSource);
-            hackCallback?.Invoke();
-            cancelSource.Dispose();
+            using (var cancelSource = new CancellationTokenSource())
+            {
+                var newTask = new TaskItemViewModel();
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    TaskList.Add(newTask);
+                    taskQueue.Enqueue(newTask);
+                });
+                await newTask.CreateModVersion(oldMod, newVersion, cancelSource).ConfigureAwait(false);
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    hackCallback?.Invoke();
+                });
+            }
         }
 
         /// <summary>
@@ -275,12 +315,16 @@ namespace Knossos.NET.ViewModels
         /// <param name="metadataonly"></param>
         public async void UploadModVersion(Mod mod, bool isNewMod, bool metadataonly = false)
         {
-            var cancelSource = new CancellationTokenSource();
-            var newTask = new TaskItemViewModel();
-            TaskList.Add(newTask);
-            taskQueue.Enqueue(newTask);
-            await newTask.UploadModVersion(mod, isNewMod, metadataonly, cancelSource);
-            cancelSource.Dispose();
+            using (var cancelSource = new CancellationTokenSource())
+            {
+                var newTask = new TaskItemViewModel();
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    TaskList.Add(newTask);
+                    taskQueue.Enqueue(newTask);
+                });
+                await newTask.UploadModVersion(mod, isNewMod, metadataonly, cancelSource).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -291,12 +335,16 @@ namespace Knossos.NET.ViewModels
         /// <param name="finishedCallback"></param>
         public async void DownloadTool(Tool tool, Tool? updateFrom, Action<bool> finishedCallback)
         {
-            var cancelSource = new CancellationTokenSource();
-            var newTask = new TaskItemViewModel();
-            TaskList.Add(newTask);
-            taskQueue.Enqueue(newTask);
-            await newTask.InstallTool(tool, updateFrom, finishedCallback, cancelSource);
-            cancelSource.Dispose();
+            using (var cancelSource = new CancellationTokenSource())
+            {
+                var newTask = new TaskItemViewModel();
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    TaskList.Add(newTask);
+                    taskQueue.Enqueue(newTask);
+                });
+                await newTask.InstallTool(tool, updateFrom, finishedCallback, cancelSource).ConfigureAwait(false);
+            }
         }
     }
 }

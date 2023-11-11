@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 
@@ -35,10 +36,13 @@ namespace Knossos.NET.ViewModels
             UserPass = Nebula.userPass;
             if(UserLoggedIn) 
             { 
-                var ids = await Nebula.GetEditableModIDs();
+                var ids = await Nebula.GetEditableModIDs().ConfigureAwait(false);
                 if (ids != null)
                 {
-                    EditableIDs = string.Join(", ", ids);
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        EditableIDs = string.Join(", ", ids);
+                    });
                 }
             }
         }

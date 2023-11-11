@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
@@ -100,20 +101,26 @@ namespace Knossos.NET.ViewModels
         {
             if (editor != null && !MemberItems.Any())
             {
-                var members = await Nebula.GetTeamMembers(editor.ActiveVersion.id);
-                if(members != null)
+                var members = await Nebula.GetTeamMembers(editor.ActiveVersion.id).ConfigureAwait(false);
+                Dispatcher.UIThread.Invoke(() =>
                 {
-                    foreach(var member in members)
+                    if (members != null)
                     {
-                        MemberItems.Add(new MemberItem(member, this));
+                        foreach (var member in members)
+                        {
+                            MemberItems.Add(new MemberItem(member, this));
+                        }
                     }
-                }
-                else
-                {
-                    _ = MessageBox.Show(MainWindow.instance!, "An error has ocurred while retrieving the mod member list. The log may provide more information.", "Error", MessageBox.MessageBoxButtons.OK);
-                }
+                    else
+                    {
+                        _ = MessageBox.Show(MainWindow.instance!, "An error has ocurred while retrieving the mod member list. The log may provide more information.", "Error", MessageBox.MessageBoxButtons.OK);
+                    }
+                });
             }
-            Loading = false;
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                Loading = false;
+            });
         }
 
         internal async void Save()
@@ -146,23 +153,25 @@ namespace Knossos.NET.ViewModels
                         return;
                     }
                     ButtonsEnabled = false;
-                    var result = await Nebula.UpdateTeamMembers(editor.ActiveVersion.id, members.ToArray()!);
-                    if(result != null)
-                    {
-                        if(result == "ok")
+                    var result = await Nebula.UpdateTeamMembers(editor.ActiveVersion.id, members.ToArray()!).ConfigureAwait(false);
+                    await Dispatcher.UIThread.InvokeAsync(async() => { 
+                        if(result != null)
                         {
-                            await MessageBox.Show(MainWindow.instance!, "Mod members updated successfully!", "Save Changes", MessageBox.MessageBoxButtons.OK);
+                            if(result == "ok")
+                            {
+                                await MessageBox.Show(MainWindow.instance!, "Mod members updated successfully!", "Save Changes", MessageBox.MessageBoxButtons.OK);
+                            }
+                            else
+                            {
+                                await MessageBox.Show(MainWindow.instance!, "An error has ocurred while updating members, no changes were saved. Reason: " + result, "Error", MessageBox.MessageBoxButtons.OK);
+                            }
                         }
                         else
                         {
-                            await MessageBox.Show(MainWindow.instance!, "An error has ocurred while updating members, no changes were saved. Reason: " + result, "Error", MessageBox.MessageBoxButtons.OK);
+                            await MessageBox.Show(MainWindow.instance!, "An error has ocurred while updating members, no changes were saved. Reason: Unknown", "Error", MessageBox.MessageBoxButtons.OK);
                         }
-                    }
-                    else
-                    {
-                        await MessageBox.Show(MainWindow.instance!, "An error has ocurred while updating members, no changes were saved. Reason: Unknown", "Error", MessageBox.MessageBoxButtons.OK);
-                    }
-                    ButtonsEnabled = true;
+                        ButtonsEnabled = true;
+                    }).ConfigureAwait(false);
                 }
             }
             catch(Exception ex)

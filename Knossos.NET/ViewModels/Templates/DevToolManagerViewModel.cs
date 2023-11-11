@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia.Media;
 using System.Net.Http;
+using Avalonia.Threading;
 
 namespace Knossos.NET.ViewModels
 {
@@ -131,7 +132,7 @@ namespace Knossos.NET.ViewModels
                 {
                     InsertInOrder(installedTool);
                 }
-                await LoadToolRepo();
+                await LoadToolRepo().ConfigureAwait(false);
                 toolsRepoLoaded = true;
             }
         }
@@ -140,8 +141,8 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(Knossos.ToolRepoURL);
-                var json = await response.Content.ReadAsStringAsync();
+                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(Knossos.ToolRepoURL).ConfigureAwait(false);
+                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var toolsRepo = JsonSerializer.Deserialize<Tool[]>(json)!;
                 if(toolsRepo != null && toolsRepo.Any())
                 {
@@ -149,15 +150,17 @@ namespace Knossos.NET.ViewModels
                     {
                         if(tool.IsValidPlatform())
                         {
-                            var installed = Tools.FirstOrDefault(x=>x.Tool.name == tool.name);
-                            if (installed != null)
-                            {
-                                installed.AddRepoVersion(tool);
-                            }
-                            else
-                            {
-                                InsertInOrder(tool);
-                            }
+                            Dispatcher.UIThread.Invoke(() => { 
+                                var installed = Tools.FirstOrDefault(x=>x.Tool.name == tool.name);
+                                if (installed != null)
+                                {
+                                    installed.AddRepoVersion(tool);
+                                }
+                                else
+                                {
+                                    InsertInOrder(tool);
+                                }
+                            });
                         }
                     }
                 }

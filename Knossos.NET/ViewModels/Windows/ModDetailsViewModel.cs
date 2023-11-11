@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using BBcodes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
@@ -180,7 +181,7 @@ namespace Knossos.NET.ViewModels
         {
             if(delay > 0)
             {
-                await Task.Delay(delay);
+                await Task.Delay(delay).ConfigureAwait(false);
             }
             IsPlayingTTS = true;
             var cleanDescriptionString = Regex.Replace(modVersions[ItemSelectedIndex].description!, @" ?\[.*?\]", string.Empty);
@@ -211,35 +212,37 @@ namespace Knossos.NET.ViewModels
                 LastUpdated = modVersions[index].lastUpdate;
                 if(!IsLocalMod && !modVersions[index].installed)
                 {
-                    await modVersions[index].LoadFulLNebulaData();
+                    await modVersions[index].LoadFulLNebulaData().ConfigureAwait(false);
                 }
-                if (modVersions[index].description != null)
-                {
-                    var html = BBCode.ConvertToHtml(modVersions[index].description!, BBCode.BasicRules);
-                    Description = "<body style=\"overflow: hidden;\"><span style=\"white-space: pre-line;color:white;overflow: hidden;\">" + html + "</span></body>";
-                    //Log.WriteToConsole(html);
-                }
-                if (modVersions[index].owners != null && modVersions[index].owners!.Any()) 
-                {
-                    Owners = string.Join(", ", modVersions[index].owners!);
-                }
-                else
-                {
-                    Owners = string.Empty;
-                }
-                Released = modVersions[index].firstRelease;
-                IsInstalled = modVersions[index].installed;
-                if (modVersions[index].releaseThread != null)
-                {
-                    ForumAvalible = true;
-                }
-                else
-                {
-                    ForumAvalible = false;
-                }
-                LoadBanner(index);
-                LoadScreenshots(index);
-                modCard?.SwitchModVersion(index);
+                Dispatcher.UIThread.Invoke(()=>{ 
+                    if (modVersions[index].description != null)
+                    {
+                        var html = BBCode.ConvertToHtml(modVersions[index].description!, BBCode.BasicRules);
+                        Description = "<body style=\"overflow: hidden;\"><span style=\"white-space: pre-line;color:white;overflow: hidden;\">" + html + "</span></body>";
+                        //Log.WriteToConsole(html);
+                    }
+                    if (modVersions[index].owners != null && modVersions[index].owners!.Any()) 
+                    {
+                        Owners = string.Join(", ", modVersions[index].owners!);
+                    }
+                    else
+                    {
+                        Owners = string.Empty;
+                    }
+                    Released = modVersions[index].firstRelease;
+                    IsInstalled = modVersions[index].installed;
+                    if (modVersions[index].releaseThread != null)
+                    {
+                        ForumAvalible = true;
+                    }
+                    else
+                    {
+                        ForumAvalible = false;
+                    }
+                    LoadBanner(index);
+                    LoadScreenshots(index);
+                    modCard?.SwitchModVersion(index);
+                });
             }
             catch (Exception ex)
             {
@@ -271,12 +274,14 @@ namespace Knossos.NET.ViewModels
                             Banner = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/loading.png")));
                             Task.Run(async () =>
                             {
-                                using (var fs = await KnUtils.GetImageStream(url))
+                                using (var fs = await KnUtils.GetImageStream(url).ConfigureAwait(false))
                                 {
-                                    if (fs != null)
-                                        Banner = new Bitmap(fs);
+                                    Dispatcher.UIThread.Invoke(() => { 
+                                        if (fs != null)
+                                            Banner = new Bitmap(fs);
+                                    });
                                 }
-                            });
+                            }).ConfigureAwait(false);
                         }
                     }
                 }
@@ -324,9 +329,11 @@ namespace Knossos.NET.ViewModels
                         {
                             if (System.IO.File.Exists(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + scn))
                             {
-                                var bitmap = new Bitmap(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + scn);
-                                var item = new ScreenshotItem(bitmap);
-                                Screenshots.Add(item);
+                                Dispatcher.UIThread.Invoke(() => {
+                                    var bitmap = new Bitmap(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + scn);
+                                    var item = new ScreenshotItem(bitmap);
+                                    Screenshots.Add(item);
+                                });
                             }
                             else
                             {
@@ -336,11 +343,13 @@ namespace Knossos.NET.ViewModels
                                     {
                                         if (fs != null)
                                         {
-                                            var item = new ScreenshotItem(new Bitmap(fs));
-                                            Screenshots.Add(item);
+                                            Dispatcher.UIThread.Invoke(() => { 
+                                                var item = new ScreenshotItem(new Bitmap(fs));
+                                                Screenshots.Add(item);
+                                            });
                                         }
                                     }
-                                });
+                                }).ConfigureAwait(false);
                             }
                         }catch (Exception ex)
                         {
@@ -375,25 +384,31 @@ namespace Knossos.NET.ViewModels
 
                 if (imageUrl != string.Empty)
                 {
-                    HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(imageUrl);
-                    byte[] content = await response.Content.ReadAsByteArrayAsync();
+                    HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(imageUrl).ConfigureAwait(false);
+                    byte[] content = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                     Stream stream = new MemoryStream(content);
                     var item = new ScreenshotItem(new Bitmap(stream), true);
                     item.url = url;
-                    Screenshots.Add(item);
+                    Dispatcher.UIThread.Invoke(() => {
+                        Screenshots.Add(item);
+                    });
                 }
                 else
                 {
                     var item = new ScreenshotItem(new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/loading.png"))), true);
                     item.url = url;
-                    Screenshots.Add(item);
+                    Dispatcher.UIThread.Invoke(() => {
+                        Screenshots.Add(item);
+                    });
                 }
             }
             catch (Exception ex)
             {
                 var item = new ScreenshotItem(new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/loading.png"))), true);
                 item.url = url;
-                Screenshots.Add(item);
+                Dispatcher.UIThread.Invoke(() => {
+                    Screenshots.Add(item);
+                });
                 Log.Add(Log.LogSeverity.Warning, "ModDetailsViewModel.DownloadVideoThumbnail", ex);
             }
         }
