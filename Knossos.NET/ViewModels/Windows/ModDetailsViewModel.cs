@@ -375,16 +375,12 @@ namespace Knossos.NET.ViewModels
 
                 if (imageUrl != string.Empty)
                 {
-                    using (HttpClient client = new HttpClient())
-                    {
-                        client.Timeout = TimeSpan.FromSeconds(30);
-                        HttpResponseMessage response = await client.GetAsync(imageUrl);
-                        byte[] content = await response.Content.ReadAsByteArrayAsync();
-                        Stream stream = new MemoryStream(content);
-                        var item = new ScreenshotItem(new Bitmap(stream), true);
-                        item.url = url;
-                        Screenshots.Add(item);
-                    }
+                    HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(imageUrl);
+                    byte[] content = await response.Content.ReadAsByteArrayAsync();
+                    Stream stream = new MemoryStream(content);
+                    var item = new ScreenshotItem(new Bitmap(stream), true);
+                    item.url = url;
+                    Screenshots.Add(item);
                 }
                 else
                 {

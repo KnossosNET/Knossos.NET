@@ -138,37 +138,33 @@ namespace Knossos.NET.ViewModels
 
         private async Task LoadToolRepo()
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                try
+                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(Knossos.ToolRepoURL);
+                var json = await response.Content.ReadAsStringAsync();
+                var toolsRepo = JsonSerializer.Deserialize<Tool[]>(json)!;
+                if(toolsRepo != null && toolsRepo.Any())
                 {
-                    client.Timeout = TimeSpan.FromSeconds(30);
-                    HttpResponseMessage response = await client.GetAsync(Knossos.ToolRepoURL);
-                    var json = await response.Content.ReadAsStringAsync();
-                    var toolsRepo = JsonSerializer.Deserialize<Tool[]>(json)!;
-                    if(toolsRepo != null && toolsRepo.Any())
+                    foreach(var tool in toolsRepo)
                     {
-                        foreach(var tool in toolsRepo)
+                        if(tool.IsValidPlatform())
                         {
-                            if(tool.IsValidPlatform())
+                            var installed = Tools.FirstOrDefault(x=>x.Tool.name == tool.name);
+                            if (installed != null)
                             {
-                                var installed = Tools.FirstOrDefault(x=>x.Tool.name == tool.name);
-                                if (installed != null)
-                                {
-                                    installed.AddRepoVersion(tool);
-                                }
-                                else
-                                {
-                                    InsertInOrder(tool);
-                                }
+                                installed.AddRepoVersion(tool);
+                            }
+                            else
+                            {
+                                InsertInOrder(tool);
                             }
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "DevToolManagerViewModel.LoadToolRepo()", ex);
-                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "DevToolManagerViewModel.LoadToolRepo()", ex);
             }
         }
 

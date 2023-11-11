@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net;
 using System.Net.Http;
 
 namespace Knossos.NET
@@ -25,6 +27,24 @@ namespace Knossos.NET
             public string? base_path { get; set; }
         }
 
+        /// <summary>
+        /// Static Constructor to generate the httpfactory service
+        /// </summary>
+        static KnUtils()
+        {
+            var serviceCollention = new ServiceCollection();
+            serviceCollention.AddHttpClient("generic", options =>
+            {
+                options.Timeout = TimeSpan.FromSeconds(45);
+            }).ConfigurePrimaryHttpMessageHandler(x => new HttpClientHandler()
+            {
+                AutomaticDecompression = DecompressionMethods.All,
+                AllowAutoRedirect = true
+            });
+
+            httpClientFactory = serviceCollention.BuildServiceProvider().GetRequiredService<IHttpClientFactory>();
+        }
+
         private static readonly bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         private static readonly bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         private static readonly bool isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
@@ -32,6 +52,7 @@ namespace Knossos.NET
         private static readonly bool cpuAVX = Avx.IsSupported;
         private static readonly bool cpuAVX2 = Avx2.IsSupported;
         private static string fsoPrefPath = string.Empty;
+        private static IHttpClientFactory httpClientFactory;
 
         public static bool IsWindows => isWindows;
         public static bool IsLinux => isLinux;
@@ -64,7 +85,6 @@ namespace Knossos.NET
                 }
             }
         }
-
 
         /// <summary>
         /// Possible Values:
@@ -544,16 +564,13 @@ namespace Knossos.NET
                     {
                         //Download to cache and copy
                         Directory.CreateDirectory(Path.Combine(GetKnossosDataFolderPath(), "image_cache"));
-                        using (HttpClient client = new HttpClient())
+                        using (var imageStream = await GetHttpClient().GetStreamAsync(imageURL))
                         {
-                            using (var imageStream = await client.GetStreamAsync(imageURL))
-                            {
-                                var fileStream = new FileStream(imageInCachePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-                                await imageStream.CopyToAsync(fileStream);
-                                imageStream.Close();
-                                fileStream.Seek(0, SeekOrigin.Begin);
-                                return fileStream;
-                            }
+                            var fileStream = new FileStream(imageInCachePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                            await imageStream.CopyToAsync(fileStream);
+                            imageStream.Close();
+                            fileStream.Seek(0, SeekOrigin.Begin);
+                            return fileStream;
                         }
                     }
                 });
@@ -594,6 +611,16 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "KnUtils.CheckDiskSpace", ex);
             }
             return 0;
+        }
+
+        /// <summary>
+        /// Gets an instance of HttpClient from the IHttpClientFactory
+        /// Dispose() should do nothing here, so no need to dispose them
+        /// </summary>
+        /// <returns>HttpClient</returns>
+        public static HttpClient GetHttpClient()
+        {
+            return httpClientFactory.CreateClient("generic");
         }
     }
 }

@@ -135,34 +135,30 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public async void RefreshData()
         {
-            
-            using (HttpClient client = new HttpClient())
+            try
             {
-                try
+                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync("https://pxo.nottheeye.com/api/v1/games/active");
+                var json = await response.Content.ReadAsStringAsync();
+                ActiveGames = JsonSerializer.Deserialize<List<PxoGamesActive>>(json)!;
+                foreach (var result in ActiveGames)
                 {
-                    HttpResponseMessage response = await client.GetAsync("https://pxo.nottheeye.com/api/v1/games/active");
-                    var json = await response.Content.ReadAsStringAsync();
-                    ActiveGames = JsonSerializer.Deserialize<List<PxoGamesActive>>(json)!;
-                    foreach (var result in ActiveGames)
+                    foreach(var server in result.Servers)
                     {
-                        foreach(var server in result.Servers)
+                        foreach(var flag in server.Flags)
                         {
-                            foreach(var flag in server.Flags)
+                            if(flag.Contains("probe"))
                             {
-                                if(flag.Contains("probe"))
-                                {
-                                    server.Probe = flag;
-                                }
+                                server.Probe = flag;
                             }
                         }
                     }
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                if(MainWindow.instance != null)
                 {
-                    if(MainWindow.instance != null)
-                    {
-                        await MessageBox.Show(MainWindow.instance,ex.Message,"Error getting PXO Game list",MessageBox.MessageBoxButtons.OK);
-                    }
+                    await MessageBox.Show(MainWindow.instance,ex.Message,"Error getting PXO Game list",MessageBox.MessageBoxButtons.OK);
                 }
             }
         }

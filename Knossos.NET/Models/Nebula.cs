@@ -564,12 +564,9 @@ namespace Knossos.NET.Models
             {
                 string? newEtag = null;
                 Log.Add(Log.LogSeverity.Information, "Nebula.GetRepoEtag()", "Getting repo_minimal.json etag.");
-                using (HttpClient client = new HttpClient())
-                {
-                    client.Timeout = TimeSpan.FromSeconds(30);
-                    var result = await client.GetAsync(repoUrl, HttpCompletionOption.ResponseHeadersRead);
-                    newEtag = result.Headers?.ETag?.ToString().Replace("\"", "");
-                }
+                
+                var result = await KnUtils.GetHttpClient().GetAsync(repoUrl, HttpCompletionOption.ResponseHeadersRead);
+                newEtag = result.Headers?.ETag?.ToString().Replace("\"", "");
 
                 Log.Add(Log.LogSeverity.Information, "Nebula.GetRepoEtag()", "repo_minimal.json etag: " + newEtag);
                 return newEtag;
@@ -665,93 +662,91 @@ namespace Knossos.NET.Models
         {
             try
             {
-                using (HttpClient client = new HttpClient())
+                var client = KnUtils.GetHttpClient();
+                if (needsLogIn)
                 {
-                    if (needsLogIn)
+                    if (apiUserToken == null)
                     {
+                        await Login();
                         if (apiUserToken == null)
                         {
-                            await Login();
-                            if (apiUserToken == null)
-                            {
-                                Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "An api call that needed a login token was requested, but we were unable to log into the nebula service.");
-                                return null;
-                            }
+                            Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "An api call that needed a login token was requested, but we were unable to log into the nebula service.");
+                            return null;
                         }
-                        client.DefaultRequestHeaders.Add("X-KN-TOKEN", apiUserToken);
                     }
-                    client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
-                    switch (method)
-                    {
-                        case ApiMethod.POST:
+                    client.DefaultRequestHeaders.Add("X-KN-TOKEN", apiUserToken);
+                }
+                client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
+                switch (method)
+                {
+                    case ApiMethod.POST:
+                        {
+                            if (data == null)
                             {
-                                if (data == null)
+                                throw new ArgumentNullException(nameof(data));
+                            }
+                            var response = await client.PostAsync(apiURL + resourceUrl, data);
+                            data.Dispose();
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var jsonReply = await response.Content.ReadAsStringAsync();
+                                if (jsonReply == "OK") // multiupload/part hack
                                 {
-                                    throw new ArgumentNullException(nameof(data));
+                                    var reply = new ApiReply();
+                                    reply.result = true;
+                                    return reply;
                                 }
-                                var response = await client.PostAsync(apiURL + resourceUrl, data);
-                                data.Dispose();
-                                if (response.IsSuccessStatusCode)
+                                if (jsonReply != null)
                                 {
-                                    var jsonReply = await response.Content.ReadAsStringAsync();
-                                    if (jsonReply == "OK") // multiupload/part hack
-                                    {
-                                        var reply = new ApiReply();
-                                        reply.result = true;
-                                        return reply;
-                                    }
-                                    if (jsonReply != null)
-                                    {
-                                        var reply = JsonSerializer.Deserialize<ApiReply>(jsonReply);
-                                        if (!reply.result)
-                                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode + "\n" + data);
+                                    var reply = JsonSerializer.Deserialize<ApiReply>(jsonReply);
+                                    if (!reply.result)
+                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode + "\n" + data);
 
-                                        return reply;
-                                    }
+                                    return reply;
                                 }
-                                else
+                            }
+                            else
+                            {
+                                /* Upload/Update/delete Mod Timeout Hack */
+                                if(response.StatusCode.ToString() == "GatewayTimeout" && (resourceUrl == "mod/release" || resourceUrl == "mod/release/update" || resourceUrl == "mod/release/delete"))
                                 {
-                                    /* Upload/Update/delete Mod Timeout Hack */
-                                    if(response.StatusCode.ToString() == "GatewayTimeout" && (resourceUrl == "mod/release" || resourceUrl == "mod/release/update" || resourceUrl == "mod/release/delete"))
-                                    {
-                                        Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "During mod/release request a GatewayTimeout was recieved. This is a known issue with Nebula and while Knet handles this" +
-                                            " as a success there is not an actual way to know if the api call was really successfull.");
-                                        var reply = new ApiReply();
-                                        reply.result = true;
-                                        return reply;
-                                    }
+                                    Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "During mod/release request a GatewayTimeout was recieved. This is a known issue with Nebula and while Knet handles this" +
+                                        " as a success there is not an actual way to know if the api call was really successfull.");
+                                    var reply = new ApiReply();
+                                    reply.result = true;
+                                    return reply;
                                 }
-                                Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode);
                             }
-                            break;
-                        case ApiMethod.PUT:
+                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode);
+                        }
+                        break;
+                    case ApiMethod.PUT:
+                        {
+                            throw new NotImplementedException();
+                        }
+                    case ApiMethod.GET:
+                        {
+                            var response = await client.GetAsync(apiURL + resourceUrl);
+                            if (response.IsSuccessStatusCode)
                             {
-                                throw new NotImplementedException();
-                            }
-                        case ApiMethod.GET:
-                            {
-                                var response = await client.GetAsync(apiURL + resourceUrl);
-                                if (response.IsSuccessStatusCode)
+                                var json = await response.Content.ReadAsStringAsync();
+                                if (json != null)
                                 {
-                                    var json = await response.Content.ReadAsStringAsync();
-                                    if (json != null)
+                                    var reply = JsonSerializer.Deserialize<ApiReply>(json);
+                                    if (!reply.result)
                                     {
-                                        var reply = JsonSerializer.Deserialize<ApiReply>(json);
-                                        if (!reply.result)
-                                        {
-                                            if(reply.reason == "not_found")
-                                                Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "GetMod returned: not_found");
-                                            else
-                                                Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode + "\n" + json);
-                                        }
+                                        if(reply.reason == "not_found")
+                                            Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "GetMod returned: not_found");
+                                        else
+                                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode + "\n" + json);
+                                    }
 
-                                        return reply;
-                                    }
+                                    return reply;
                                 }
-                                Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode);
                             }
-                            break;
-                    }
+                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode);
+                        }
+                        break;
                 }
             }
             catch (Exception ex)

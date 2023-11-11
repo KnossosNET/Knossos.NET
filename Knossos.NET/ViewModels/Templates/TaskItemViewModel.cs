@@ -4165,10 +4165,8 @@ namespace Knossos.NET.ViewModels
                 bool isJson = false;
                 Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.Download()", "Downloading file: " + downloadUrl);
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-                HttpClientHandler handler = new HttpClientHandler();
-                handler.AllowAutoRedirect = true;
-                handler.AutomaticDecompression = DecompressionMethods.All;
-                using HttpClient httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) };
+
+                var httpClient = KnUtils.GetHttpClient();
                 if (downloadUrl.ToString().ToLower().Contains(".json"))
                 {
                     httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "br, gzip, deflate");
@@ -4185,7 +4183,7 @@ namespace Knossos.NET.ViewModels
                     {
                         if (s == "Accept-Encoding")
                         {
-                            var c = new HttpClient();
+                            var c = KnUtils.GetHttpClient();
                             c.Timeout = TimeSpan.FromSeconds(30);
                             var r = await c.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
                             totalBytes = r.Content.Headers.ContentLength;
