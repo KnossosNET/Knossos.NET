@@ -580,6 +580,15 @@ namespace Knossos.NET.ViewModels
                     cleanMod.members = new List<ModMember>();
                     cleanMod.notes = mod.notes == null ? "" : mod.notes;
 
+                    if(cleanMod.packages != null && cleanMod.packages.Any())
+                    {
+                        foreach(var pkg in cleanMod.packages)
+                        {
+                            if(pkg.dependencies == null)
+                                pkg.dependencies = new ModDependency[0];
+                        }
+                    }
+
                     string? result;
 
                     if (!metaUpdate)
@@ -704,7 +713,7 @@ namespace Knossos.NET.ViewModels
                     }
                     ProgressCurrent++;
                     //Banner
-                    if (!string.IsNullOrEmpty(mod.tile))
+                    if (!string.IsNullOrEmpty(mod.banner))
                     {
                         Info = "Banner Image";
                         mod.banner = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + mod.banner);
@@ -1367,7 +1376,7 @@ namespace Knossos.NET.ViewModels
                     ProgressCurrent = ProgressBarMax;
 
                     //Delete kn_upload folder?
-                    if (Knossos.globalSettings.deleteUploadedFiles)
+                    if (Knossos.globalSettings.deleteUploadedFiles && Directory.Exists(mod.fullPath + Path.DirectorySeparatorChar + "kn_upload"))
                     {
                         try
                         {
