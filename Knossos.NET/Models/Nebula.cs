@@ -182,6 +182,7 @@ namespace Knossos.NET.Models
                     cancellationToken.Dispose();
                     cancellationToken = null;
                 }
+                repoLoaded = true;
             }
         }
 
