@@ -63,6 +63,10 @@ namespace Knossos.NET
         public static void Add(LogSeverity logSeverity, string from, Exception exception)
         {
             Add(logSeverity,from, exception.Message);
+            if (exception.InnerException != null)
+            {
+                Add(logSeverity, from, exception.InnerException.Message);
+            }
         }
 
         /// <summary>
