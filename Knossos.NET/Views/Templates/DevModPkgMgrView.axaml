@@ -12,7 +12,8 @@
 		<vm:DevModPkgMgrViewModel/>
 	</Design.DataContext>
 
-	<StackPanel>
+	<ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+	<StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 		<Label FontWeight="Bold" FontSize="20" Margin="5">Packages and Dependencies</Label>
 		<WrapPanel>
 			<Button Margin="8,0,0,5" Content="+Package">
@@ -39,7 +40,7 @@
 			<ListBox.ItemTemplate>
 				<DataTemplate>
 					<!--Package Item-->
-					<StackPanel>
+					<StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 						<WrapPanel>
 							<CheckBox ToolTip.Tip="If package is enabled or disabled. Disabled packages are not used when playing." IsChecked="{Binding IsEnabled}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></CheckBox>
 							<Label MinWidth="250" FontWeight="Bold" FontSize="18" Content="{Binding Package.name}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
@@ -126,5 +127,5 @@
 		<Label Margin="5,0,0,0" FontSize="14">-Only add additional FSO or mod dependencies to optional packages IF that package needs a different version than the rest of the mod.</Label>
 		<Label Margin="5,0,0,0" FontSize="14">-Do not repeat the same dependency across multiple packages, this is not needed.</Label>
 	</StackPanel>
-	
+	</ScrollViewer>
 </UserControl>

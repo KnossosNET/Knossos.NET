@@ -216,6 +216,8 @@ namespace Knossos.NET.Models
                                 if(isInstalled.modData != null)
                                 {
                                     isInstalled.modData.inNebula = true;
+                                    if (isInstalled.modData.devMode)
+                                        DeveloperModsViewModel.Instance!.UpdateVersionManager(isInstalled.modData.id);
                                 }
                             }
                         }
@@ -235,6 +237,8 @@ namespace Knossos.NET.Models
                                 {
                                     Dispatcher.UIThread.Invoke(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id), DispatcherPriority.Background);
                                 }
+                                if(isInstalled.First().devMode)
+                                    DeveloperModsViewModel.Instance!.UpdateVersionManager(isInstalled.First().id);
                             }
                             else
                             {

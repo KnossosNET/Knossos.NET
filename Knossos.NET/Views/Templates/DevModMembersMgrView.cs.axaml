@@ -13,7 +13,7 @@
 	</Design.DataContext>
 
 	<ScrollViewer Background="#422626">
-		<StackPanel IsEnabled="{Binding ButtonsEnabled}">
+		<StackPanel IsEnabled="{Binding ButtonsEnabled}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 			<WrapPanel IsVisible="{Binding !Loading}" Margin="20">
 				<Button Command="{Binding NewMember}" Content="Add Member"/>
 				<Button Command="{Binding Save}" Margin="20,0,0,0" Content="Save Changes"/>
