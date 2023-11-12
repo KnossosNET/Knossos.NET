@@ -14,11 +14,17 @@
 	
 	<StackPanel>
 		<Grid Margin="5" ColumnDefinitions="Auto,Auto,Auto,Auto">
-			<CheckBox IsChecked="{Binding HideRC}" Grid.Column="0">Hide RC builds</CheckBox>
-			<CheckBox IsChecked="{Binding HideNightly}" Grid.Column="1" Margin="10,0,0,0">Hide Nightly builds</CheckBox>
-			<CheckBox IsChecked="{Binding HideCustom}" Grid.Column="2" Margin="10,0,0,0">Hide Custom builds</CheckBox>
+			<CheckBox IsChecked="{Binding HideRC}" Foreground="Yellow" Grid.Column="0">Hide RC builds</CheckBox>
+			<CheckBox IsChecked="{Binding HideNightly}" Foreground="LightBlue" Grid.Column="1" Margin="10,0,0,0">Hide Nightly builds</CheckBox>
+			<CheckBox IsChecked="{Binding HideCustom}" Foreground="Green" Grid.Column="2" Margin="10,0,0,0">Hide Custom builds</CheckBox>
 			<Button Command="{Binding OpenFileCommand}" Grid.Column="3" Margin="10,0,0,0">Browse</Button>
 		</Grid>
-		<ComboBox ItemsSource="{Binding BuildItems}" SelectedIndex="{Binding BuildSelectedIndex}" Margin="5" HorizontalAlignment="Stretch"></ComboBox>
+		<ComboBox ItemsSource="{Binding BuildItems}" SelectedIndex="{Binding BuildSelectedIndex}" Margin="5" HorizontalAlignment="Stretch">
+			<ComboBox.ItemsPanel>
+				<ItemsPanelTemplate>
+					<StackPanel />
+				</ItemsPanelTemplate>
+			</ComboBox.ItemsPanel>
+		</ComboBox>
 	</StackPanel>
 </UserControl>

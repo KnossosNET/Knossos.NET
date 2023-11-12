@@ -1,8 +1,10 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -14,7 +16,8 @@ namespace Knossos.NET.ViewModels
     public partial class FsoBuildPickerViewModel : ViewModelBase
     {
         private bool directSeparatorAdded = false;
-        internal ObservableCollection<ComboBoxItem> BuildItems { get; set; } = new ObservableCollection<ComboBoxItem>();
+        [ObservableProperty]
+        internal ObservableCollection<ComboBoxItem> buildItems = new ObservableCollection<ComboBoxItem>();
 
         internal bool hideRC = Knossos.globalSettings.hideBuildRC;
         internal bool HideRC
@@ -27,16 +30,13 @@ namespace Knossos.NET.ViewModels
             {
                 if (hideRC != value)
                 {
-                    hideRC = value;
+                    this.SetProperty(ref hideRC, value);
                     Knossos.globalSettings.hideBuildRC = value;
-                    var rcItems = BuildItems.Where(items => items.Tag?.ToString() == "rc");
-                    if(rcItems.Any())
-                    {
-                        foreach (var items in rcItems)
-                        {
-                            items.IsVisible = !value;
-                        }
-                    }
+                    Knossos.globalSettings.Save(false);
+                    BuildItems.ForEach(buildItem => { 
+                        if(buildItem.Tag != null && buildItem.Tag?.ToString() == "rc")
+                            buildItem.IsVisible = !value;
+                    });
                 }
             }
         }
@@ -53,15 +53,12 @@ namespace Knossos.NET.ViewModels
                 if (hideCustom != value)
                 {
                     Knossos.globalSettings.hideBuildCustom = value;
-                    hideCustom = value;
-                    var customItems = BuildItems.Where(items => items.Tag?.ToString() == "custom");
-                    if (customItems.Any())
-                    {
-                        foreach (var items in customItems)
-                        {
-                            items.IsVisible = !value;
-                        }
-                    }
+                    Knossos.globalSettings.Save(false);
+                    this.SetProperty(ref hideCustom, value);
+                    BuildItems.ForEach(buildItem => {
+                        if (buildItem.Tag != null && buildItem.Tag?.ToString() == "custom")
+                            buildItem.IsVisible = !value;
+                    });
                 }
             }
         }
@@ -77,16 +74,13 @@ namespace Knossos.NET.ViewModels
             {
                 if (hideNightly != value)
                 {
-                    hideNightly = value;
+                    this.SetProperty(ref hideNightly, value);
                     Knossos.globalSettings.hideBuildNightly = value;
-                    var nightlyItems = BuildItems.Where(items => items.Tag?.ToString() == "nightly");
-                    if (nightlyItems.Any())
-                    {
-                        foreach (var items in nightlyItems)
-                        {
-                            items.IsVisible = !value;
-                        }
-                    }
+                    Knossos.globalSettings.Save(false);
+                    BuildItems.ForEach(buildItem => {
+                        if (buildItem.Tag != null && buildItem.Tag?.ToString() == "nightly")
+                            buildItem.IsVisible = !value;
+                    });
                 }
             }
         }
@@ -166,6 +160,7 @@ namespace Knossos.NET.ViewModels
                     item.Content = build;
                     item.Tag = "custom";
                     item.IsVisible = !HideCustom;
+                    item.Foreground = Brushes.Green;
                     BuildItems.Add(item);
                     if (preSelected != null)
                     {
@@ -192,6 +187,7 @@ namespace Knossos.NET.ViewModels
                     item.Content = build;
                     item.Tag = "rc";
                     item.IsVisible = !HideRC;
+                    item.Foreground = Brushes.Yellow;
                     BuildItems.Add(item);
                     if (preSelected != null)
                     {
@@ -218,6 +214,7 @@ namespace Knossos.NET.ViewModels
                     item.Content = build;
                     item.Tag = "nightly";
                     item.IsVisible = !HideNightly;
+                    item.Foreground = Brushes.LightBlue;
                     BuildItems.Add(item);
                     if (preSelected != null)
                     {
@@ -243,6 +240,7 @@ namespace Knossos.NET.ViewModels
                 ComboBoxItem item = new ComboBoxItem();
                 item.Content = preSelected;
                 item.Tag = "directexec";
+                item.Foreground = Brushes.LemonChiffon;
                 BuildItems.Add(item);
                 selectedItem = item;
             }
@@ -278,6 +276,7 @@ namespace Knossos.NET.ViewModels
                 item.Content = new FsoBuild(path);
                 item.Tag = "directexec";
                 item.IsSelected = true;
+                item.Foreground = Brushes.LemonChiffon;
                 BuildItems.Add(item);
                 BuildSelectedIndex = BuildItems.IndexOf(item);  
             }
