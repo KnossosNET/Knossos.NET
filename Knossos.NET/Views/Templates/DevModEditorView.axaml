@@ -11,11 +11,10 @@
 	<Design.DataContext>
 		<vm:DevModEditorViewModel/>
 	</Design.DataContext>
-	
-	<ScrollViewer>
 
-		<Grid ColumnDefinitions="Auto,*">
-			<StackPanel Width="250" Grid.Column="0">
+	<Grid ColumnDefinitions="Auto,*">
+		<ScrollViewer Width="250" Grid.Column="0">
+			<StackPanel Width="250" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 				<TextBlock HorizontalAlignment="Center" Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextWrapping="Wrap" Margin="0"></TextBlock>
 				<Image HorizontalAlignment="Center" Margin="10" Source="{Binding ModImage}" Width="150" Height="225"></Image>
 				<TextBlock HorizontalAlignment="Center" Text="Active Version" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
@@ -40,36 +39,34 @@
 					<Button Command="{Binding OpenTool}" HorizontalAlignment="Center" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black">Open</Button>
 				</StackPanel>
 			</StackPanel>
-		
-			<TabControl SelectedIndex="{Binding TabIndex}" Grid.Column="1">
+		</ScrollViewer>
+		<TabControl SelectedIndex="{Binding TabIndex}" Grid.Column="1">
 			
-				<TabItem Header="Versions">
-					<v:DevModVersionsView Content="{Binding VersionsView}"/>
-				</TabItem>
+			<TabItem Header="Versions">
+				<v:DevModVersionsView Content="{Binding VersionsView}"/>
+			</TabItem>
 
-				<TabItem Header="Details">
-					<v:DevModDetailsView Content="{Binding DetailsView}"/>
-				</TabItem>
+			<TabItem Header="Details">
+				<v:DevModDetailsView Content="{Binding DetailsView}"/>
+			</TabItem>
 			
-				<TabItem Header="Packages" >
-					<StackPanel>
-						<v:DevModPkgMgrView IsVisible="{Binding !IsEngineBuild}" Content="{Binding PkgMgrView}"/>
-						<v:DevBuildPkgMgrView IsVisible="{Binding IsEngineBuild}" Content="{Binding PkgMgrView}"/>
-					</StackPanel>
-				</TabItem>
+			<TabItem Header="Packages" >
+				<Grid>
+					<v:DevModPkgMgrView IsVisible="{Binding !IsEngineBuild}" Content="{Binding PkgMgrView}"/>
+					<v:DevBuildPkgMgrView IsVisible="{Binding IsEngineBuild}" Content="{Binding PkgMgrView}"/>
+				</Grid>
+			</TabItem>
 
-				<TabItem Header="FSO Settings" IsVisible="{Binding !IsEngineBuild}">
-					<v:DevModFsoSettingsView Content="{Binding FsoSettingsView}"/>
-				</TabItem>
+			<TabItem Header="FSO Settings" IsVisible="{Binding !IsEngineBuild}">
+				<v:DevModFsoSettingsView Content="{Binding FsoSettingsView}"/>
+			</TabItem>
 			
-				<TabItem Header="Members">
-					<v:DevModMembersMgrView Content="{Binding MembersView}"/>
-				</TabItem>
+			<TabItem Header="Members">
+				<v:DevModMembersMgrView Content="{Binding MembersView}"/>
+			</TabItem>
 			
-			</TabControl>
+		</TabControl>
 
-		</Grid>
-		
-	</ScrollViewer>
-	
+	</Grid>
+
 </UserControl>

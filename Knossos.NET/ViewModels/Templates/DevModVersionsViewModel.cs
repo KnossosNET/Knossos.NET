@@ -499,6 +499,7 @@ namespace Knossos.NET.ViewModels
                             if (result == "ok")
                             {
                                 editor.ActiveVersion.inNebula = false;
+                                HackUpdateModList();
                                 await MessageBox.Show(MainWindow.instance!, "The mod " + editor.ActiveVersion + " was deleted from Nebula.", "Mod deleted", MessageBox.MessageBoxButtons.OK);
                             }
                             else

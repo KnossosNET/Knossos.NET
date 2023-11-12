@@ -12,7 +12,7 @@
 		<vm:DevModVersionsViewModel/>
 	</Design.DataContext>
 
-	<Grid RowDefinitions="Auto,*, Auto, Auto">
+	<Grid RowDefinitions="Auto,*, Auto, Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 		<WrapPanel IsEnabled="{Binding ButtonsEnabled}" Grid.Row="0" Margin="10" HorizontalAlignment="Center">
 			<Button Background="DarkCyan" FontWeight="Bold" Content="New Version" x:Name="CreateVersion">
 				<Button.Flyout>

@@ -12,7 +12,8 @@
 		<vm:DevBuildPkgMgrViewModel/>
 	</Design.DataContext>
 
-	<StackPanel>
+	<ScrollViewer>
+	<StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 		<Label FontWeight="Bold" FontSize="20" Margin="5">Packages</Label>
 		<WrapPanel>
 			<Button Margin="8,0,0,5" Content="+Package">
@@ -78,5 +79,5 @@
 			</ListBox.ItemTemplate>
 		</ListBox>
 	</StackPanel>
-
+	</ScrollViewer>
 </UserControl>
