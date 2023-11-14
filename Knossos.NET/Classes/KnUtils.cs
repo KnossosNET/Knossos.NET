@@ -596,7 +596,10 @@ namespace Knossos.NET
         {
             try
             {
-                var directoryPath = new FileInfo(path).Directory?.FullName;
+                var fi = new FileInfo(path);
+                var isDirectory = (fi.Attributes & FileAttributes.Directory) == FileAttributes.Directory;
+
+                var directoryPath = isDirectory ? fi.FullName : fi.Directory?.FullName;
                 if (directoryPath != null)
                 {
                     var drive = new DriveInfo(directoryPath);
