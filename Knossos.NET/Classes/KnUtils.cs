@@ -596,10 +596,10 @@ namespace Knossos.NET
         {
             try
             {
-                var rootPath = new FileInfo(path).Directory?.Root.FullName;
-                if (rootPath != null)
+                var directoryPath = new FileInfo(path).Directory?.FullName;
+                if (directoryPath != null)
                 {
-                    var drive = new DriveInfo(rootPath);
+                    var drive = new DriveInfo(directoryPath);
                     if (drive.IsReady)
                     {
                         return drive.AvailableFreeSpace;
