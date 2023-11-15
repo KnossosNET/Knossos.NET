@@ -695,6 +695,42 @@ namespace Knossos.NET.Models
             //inverted
             return SemanticVersion.Compare(build2.version, build1.version);
         }
+
+        /// <summary>
+        /// Used to fix up the executable name for macOS app bundles. Takes as arguments
+        /// the full path to the directory containing the current exe and the name of what
+        /// is currently considered the exe.
+        /// </summary>
+        /// <param name="pathName"></param>
+        /// <param name="fileName"></param>
+        /// <returns>string</returns>
+        public static string GetRealExeName(string pathName, string fileName)
+        {
+            try {
+                if (KnUtils.IsMacOS)
+                {
+                    var exe = new FileInfo(Path.Combine(pathName, fileName));
+                    if (exe != null && ((exe.Attributes & FileAttributes.Directory) == FileAttributes.Directory))
+                    {
+                        var files = Directory.GetFiles(Path.Combine(exe.FullName, "Contents/MacOS"));
+                        foreach(string file in files)
+                        {
+                            var fi = new FileInfo(file);
+                            if (fi != null && (fi.Name.ToLower().Contains("fs2_open") || fi.Name.ToLower().Contains("fred2_open") || fi.Name.ToLower().Contains("qtfred")))
+                            {
+                                return exe.Name + "/Contents/MacOS/" + fi.Name;
+                            }
+                        }
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "AddUserBuildViewModel.GetExeName()", ex);
+            }
+
+            return fileName;
+        }
     }
 
     public class FsoFile

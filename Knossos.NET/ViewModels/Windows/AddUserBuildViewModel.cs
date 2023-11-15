@@ -81,6 +81,10 @@ namespace Knossos.NET.ViewModels
                     {
                         execs=Directory.GetFiles(folderPath, "*.exe");
                     }
+                    else if (KnUtils.IsMacOS)
+                    {
+                        execs=Directory.GetDirectories(folderPath, "*.app");
+                    }
                     else
                     {
                         execs=Directory.GetFiles(folderPath, "*.AppImage");
@@ -408,14 +412,14 @@ namespace Knossos.NET.ViewModels
                     if(Release != string.Empty)
                     {
                         var newFile = new ModExecutable();
-                        newFile.file = Release;
+                        newFile.file = FsoBuild.GetRealExeName(folderPath, Release);
                         newFile.properties= properties;
                         package.executables.Add(newFile);
                     }
                     if (DebugFile != string.Empty)
                     {
                         var newFile = new ModExecutable();
-                        newFile.file = DebugFile;
+                        newFile.file = FsoBuild.GetRealExeName(folderPath, DebugFile);
                         newFile.label = "FastDebug";
                         newFile.properties = properties;
                         package.executables.Add(newFile);
@@ -423,7 +427,7 @@ namespace Knossos.NET.ViewModels
                     if (Fred2 != string.Empty)
                     {
                         var newFile = new ModExecutable();
-                        newFile.file = Fred2;
+                        newFile.file = FsoBuild.GetRealExeName(folderPath, Fred2);
                         newFile.label = "FRED2";
                         newFile.properties = properties;
                         package.executables.Add(newFile);
@@ -431,7 +435,7 @@ namespace Knossos.NET.ViewModels
                     if (Fred2Debug != string.Empty)
                     {
                         var newFile = new ModExecutable();
-                        newFile.file = Fred2Debug;
+                        newFile.file = FsoBuild.GetRealExeName(folderPath, Fred2Debug);
                         newFile.label = "Fred FastDebug";
                         newFile.properties = properties;
                         package.executables.Add(newFile);
@@ -439,7 +443,7 @@ namespace Knossos.NET.ViewModels
                     if (QtFred != string.Empty)
                     {
                         var newFile = new ModExecutable();
-                        newFile.file = QtFred;
+                        newFile.file = FsoBuild.GetRealExeName(folderPath, QtFred);
                         newFile.label = "QTFred";
                         newFile.properties = properties;
                         package.executables.Add(newFile);
@@ -447,7 +451,7 @@ namespace Knossos.NET.ViewModels
                     if (QtFredDebug != string.Empty)
                     {
                         var newFile = new ModExecutable();
-                        newFile.file = QtFredDebug;
+                        newFile.file = FsoBuild.GetRealExeName(folderPath, QtFredDebug);
                         newFile.label = "QTFred FastDebug";
                         newFile.properties = properties;
                         package.executables.Add(newFile);
@@ -519,7 +523,7 @@ namespace Knossos.NET.ViewModels
                     Dispatcher.UIThread.Invoke(()=> MaxFiles = allFiles.Length );
                     foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
                     {
-                        if (!newPath.ToLower().Contains(".pdb") && !newPath.ToLower().Contains(".lib") && !newPath.ToLower().Contains(".exp"))
+                        if (!newPath.ToLower().Contains(".pdb") && !newPath.ToLower().Contains(".lib") && !newPath.ToLower().Contains(".exp") && !newPath.ToLower().EndsWith(".a"))
                         {
                             System.IO.File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
                         }

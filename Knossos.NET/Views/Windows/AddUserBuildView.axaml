@@ -62,7 +62,7 @@
 			<StackPanel IsVisible="{Binding Stage2}" Margin="0,30,0,0">
 				<Label>3) Click the button when ready, the folder will be copied to:</Label>
 				<TextBlock TextWrapping="Wrap" Text="{Binding BuildNewPath}"></TextBlock>
-				<Label>Any (.lib, .pdb and .exp) will be ignored, and a mod.json file will be generated.</Label>
+				<Label>Any (.lib, .a, .pdb and .exp) will be ignored, and a mod.json file will be generated.</Label>
 				<Button VerticalAlignment="Center" Command="{Binding AddCommand}">Add new build</Button>
 			</StackPanel>
 		</StackPanel>
