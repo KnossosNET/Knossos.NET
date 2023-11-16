@@ -12,7 +12,7 @@
 		<vm:FsoBuildItemViewModel/>
 	</Design.DataContext>
 
-	<Grid Background="Black" ColumnDefinitions="Auto,Auto,Auto,Auto,*">
+	<Grid Background="Black" Margin="0,0,0,10" ColumnDefinitions="Auto,Auto,Auto,Auto,*">
 		<Label FontWeight="Bold" Width="150" Grid.Column="0" Content="{Binding Date}" VerticalAlignment="Center"></Label>
 		<Label FontWeight="Bold" Width="300" Grid.Column="1" Content="{Binding Title}" VerticalAlignment="Center"></Label>
 
@@ -30,5 +30,5 @@
 			<Label Foreground="White" FontWeight="Bold" Margin="0,0,10,0" FontSize="18">Downloading...</Label>
 			<Button Command="{Binding CancelDownloadCommand}" Width="100" HorizontalContentAlignment="Center" Background="DarkRed">Cancel</Button>
 		</WrapPanel>
-	</Grid Margin="0,0,0,10"><!-- Margin to keep items from joining with it on the bottom -->
+	</Grid><!-- Margin to keep items from joining with it on the bottom -->
 </UserControl>
