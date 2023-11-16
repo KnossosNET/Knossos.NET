@@ -32,7 +32,7 @@
 							</DataTemplate>
 						</ListBox.ItemTemplate>
 					</ListBox>
-					<Button Command="{Binding LoadAllNightlies}" IsVisible="{Binding !AllNightliesLoaded}" HorizontalAlignment="Center" Grid.Row="1">Load all Nightlies</Button>
+					<Button Command="{Binding LoadAllNightlies}" IsVisible="{Binding !AllNightliesLoaded}" HorizontalAlignment="Center" Margin="0,5,0,20" Grid.Row="1">Load all Nightlies</Button>
 				</Grid>
 			</TabItem>
 			<TabItem Header="RC Builds">
