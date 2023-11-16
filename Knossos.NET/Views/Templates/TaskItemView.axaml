@@ -43,7 +43,7 @@
 										<Label Height="22" FontSize="12" Margin="5,0,0,0" VerticalAlignment="Bottom" Content="{Binding Info}"/>
 									</WrapPanel>
 									<StackPanel IsVisible="{Binding !IsTextTask}">
-										<Label Height="22" FontSize="14" VerticalAlignment="Bottom" IsVisible="{Binding IsCompleted}" Foreground="Green" Margin="5,0,0,0" Content="Complete!"/>
+										<Label Height="22" FontSize="14" VerticalAlignment="Bottom" IsVisible="{Binding IsCompleted}" Foreground="Green" Margin="125,0,0,0" Content="Complete!"/>
 									</StackPanel>
 								</WrapPanel>
 							</WrapPanel>
