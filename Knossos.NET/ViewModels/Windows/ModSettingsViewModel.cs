@@ -381,6 +381,7 @@ namespace Knossos.NET.ViewModels
             ConfigureBuild(true);
             DepItems.Clear();
             CreateDependencyItems(true);
+            IgnoreGlobalCmd = false;
         }
 
         /// <summary>
