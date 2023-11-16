@@ -761,25 +761,28 @@ namespace Knossos.NET.Models
         private int DetermineScore(string modpath)
         {
             int score = 0;
+            string filePath = string.Empty;
+            if (modpath != string.Empty)
+                filePath = Path.Combine(modpath, filename);
             /* First the cases that are an instant 0 */
             if (arch == FsoExecArch.other || env == FsoExecEnvironment.Unknown || type == FsoExecType.Unknown)
             {
                 if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + modpath + filename + " has an unknown cpu arch, build or enviroment type in json.");
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " has an unknown cpu arch, build or enviroment type in json.");
                 return 0;
             }
-
-            if (modpath != string.Empty && !File.Exists(modpath + filename))
+// get exe name here for exists check
+            if (modpath != string.Empty && !File.Exists(filePath))
             {
                 if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + modpath + filename + " does not exist!");
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " does not exist!");
                 return 0;
             }
 
             if (env == FsoExecEnvironment.Windows && !KnUtils.IsWindows || env == FsoExecEnvironment.Linux && !KnUtils.IsLinux || env == FsoExecEnvironment.MacOSX && !KnUtils.IsMacOS)
             {
                 if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + modpath + filename + " is not valid for this OS. Detected: " + env);
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " is not valid for this OS. Detected: " + env);
                 return 0;
             }
 
