@@ -3245,6 +3245,7 @@ namespace Knossos.NET.ViewModels
                                         }
                                     }
                                     fileTask.Info = " Checksum OK!";
+                                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Remove(fileTask));
                                 }
                             }
                             else
