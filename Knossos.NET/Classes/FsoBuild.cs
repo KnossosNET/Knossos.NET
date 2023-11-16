@@ -695,6 +695,42 @@ namespace Knossos.NET.Models
             //inverted
             return SemanticVersion.Compare(build2.version, build1.version);
         }
+
+        /// <summary>
+        /// Used to fix up the executable name for macOS app bundles. Takes as arguments
+        /// the full path to the directory containing the current exe and the name of what
+        /// is currently considered the exe.
+        /// </summary>
+        /// <param name="pathName"></param>
+        /// <param name="fileName"></param>
+        /// <returns>string</returns>
+        public static string GetRealExeName(string pathName, string fileName)
+        {
+            try {
+                if (KnUtils.IsMacOS)
+                {
+                    var exe = new FileInfo(Path.Combine(pathName, fileName));
+                    if (exe != null && ((exe.Attributes & FileAttributes.Directory) == FileAttributes.Directory))
+                    {
+                        var files = Directory.GetFiles(Path.Combine(exe.FullName, "Contents/MacOS"));
+                        foreach(string file in files)
+                        {
+                            var fi = new FileInfo(file);
+                            if (fi != null && (fi.Name.ToLower().Contains("fs2_open") || fi.Name.ToLower().Contains("fred2_open") || fi.Name.ToLower().Contains("qtfred")))
+                            {
+                                return exe.Name + "/Contents/MacOS/" + fi.Name;
+                            }
+                        }
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "AddUserBuildViewModel.GetExeName()", ex);
+            }
+
+            return fileName;
+        }
     }
 
     public class FsoFile
@@ -725,25 +761,28 @@ namespace Knossos.NET.Models
         private int DetermineScore(string modpath)
         {
             int score = 0;
+            string filePath = string.Empty;
+            if (modpath != string.Empty)
+                filePath = Path.Combine(modpath, filename);
             /* First the cases that are an instant 0 */
             if (arch == FsoExecArch.other || env == FsoExecEnvironment.Unknown || type == FsoExecType.Unknown)
             {
                 if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + modpath + filename + " has an unknown cpu arch, build or enviroment type in json.");
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " has an unknown cpu arch, build or enviroment type in json.");
                 return 0;
             }
-
-            if (modpath != string.Empty && !File.Exists(modpath + filename))
+// get exe name here for exists check
+            if (modpath != string.Empty && !File.Exists(filePath))
             {
                 if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + modpath + filename + " does not exist!");
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " does not exist!");
                 return 0;
             }
 
             if (env == FsoExecEnvironment.Windows && !KnUtils.IsWindows || env == FsoExecEnvironment.Linux && !KnUtils.IsLinux || env == FsoExecEnvironment.MacOSX && !KnUtils.IsMacOS)
             {
                 if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + modpath + filename + " is not valid for this OS. Detected: " + env);
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " is not valid for this OS. Detected: " + env);
                 return 0;
             }
 
