@@ -30,5 +30,5 @@
 			<Label Foreground="White" FontWeight="Bold" Margin="0,0,10,0" FontSize="18">Downloading...</Label>
 			<Button Command="{Binding CancelDownloadCommand}" Width="100" HorizontalContentAlignment="Center" Background="DarkRed">Cancel</Button>
 		</WrapPanel>
-	</Grid>
+	</Grid Margin="0,0,0,10"><!-- Margin to keep items from joining with it on the bottom -->
 </UserControl>
