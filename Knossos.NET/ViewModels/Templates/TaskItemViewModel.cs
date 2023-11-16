@@ -1856,7 +1856,7 @@ namespace Knossos.NET.ViewModels
                             FileInfo fi = new FileInfo(file);
                             Info = ProgressCurrent + " / " + ProgressBarMax + " " + fi.Name;
                             input.Seek(0, SeekOrigin.Begin);
-                            var output = new FileStream(fi.FullName.ToLower().Replace(".lz41",string.Empty), FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                            var output = new FileStream(fi.FullName.Replace(".lz41",string.Empty,StringComparison.OrdinalIgnoreCase), FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                             if (!output.CanWrite)
                             {
                                 input.Dispose();
@@ -2105,15 +2105,15 @@ namespace Knossos.NET.ViewModels
                         var vp = new VPContainer();
                         await vp.LoadVP(vpFile.FullName);
                         vp.DisableCompression();
-                        await vp.SaveAsAsync(vpFile.FullName.ToLower().Replace(".vpc", ".vp"), compressionCallback, cancellationTokenSource);
+                        await vp.SaveAsAsync(vpFile.FullName.Replace(".vpc", ".vp", StringComparison.OrdinalIgnoreCase), compressionCallback, cancellationTokenSource);
                     });
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
                         try
                         {
-                            File.Delete(vpFile.FullName.ToLower().Replace(".vpc", ".vp"));
-                            File.Delete(vpFile.FullName.ToLower().Replace(".vpc", ".vp") + ".tmp");
+                            File.Delete(vpFile.FullName.Replace(".vpc", ".vp", StringComparison.OrdinalIgnoreCase));
+                            File.Delete(vpFile.FullName.Replace(".vpc", ".vp", StringComparison.OrdinalIgnoreCase) + ".tmp");
                         }
                         catch { }
                         throw new TaskCanceledException();
