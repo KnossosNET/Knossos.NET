@@ -13,8 +13,8 @@
 	</Design.DataContext>
 
 	<Grid RowDefinitions="Auto,*">
-		<TabControl Grid.Row="1">
-			<TabItem Header="Stable Builds" VerticalContentAlignment="Center">
+		<TabControl Margin="0,0,0,5" Grid.Row="1">
+			<TabItem Header="Stable Builds" VerticalContentAlignment="Center" ToolTip.Tip="Well tested builds for the average player">
 				<ListBox ItemsSource="{Binding StableItems}">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
@@ -23,7 +23,7 @@
 					</ListBox.ItemTemplate>
 				</ListBox>
 			</TabItem>
-			<TabItem Header="Nightly Builds">
+			<TabItem Header="Nightly Builds" ToolTip.Tip="Builds with the latest features">
 				<Grid RowDefinitions="*,Auto">
 					<ListBox Grid.Row="0" ItemsSource="{Binding NightlyItems}">
 						<ListBox.ItemTemplate>
@@ -32,10 +32,10 @@
 							</DataTemplate>
 						</ListBox.ItemTemplate>
 					</ListBox>
-					<Button Command="{Binding LoadAllNightlies}" IsVisible="{Binding !AllNightliesLoaded}" HorizontalAlignment="Center" Grid.Row="1">Load all Nightlies</Button>
+					<Button Command="{Binding LoadAllNightlies}" IsVisible="{Binding !AllNightliesLoaded}" HorizontalAlignment="Center" Margin="0,5,0,10" Grid.Row="1">Load All Nightlies</Button>
 				</Grid>
 			</TabItem>
-			<TabItem Header="RC Builds">
+			<TabItem Header="RC Builds" ToolTip.Tip="Release Candidate builds, used in pre-stable release testing">
 				<ListBox ItemsSource="{Binding RcItems}">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
@@ -44,9 +44,9 @@
 					</ListBox.ItemTemplate>
 				</ListBox>
 			</TabItem>
-			<TabItem Header="Custom Builds" >
+			<TabItem Header="Custom Builds" ToolTip.Tip="Builds for testing specific new features or bugfixes">
 				<Grid RowDefinitions="Auto,*">
-					<Button Command="{Binding CommandAddUserBuild}" Margin="0,0,0,5">Add Build</Button>
+					<Button Command="{Binding CommandAddUserBuild}" FontWeight="Bold" HorizontalAlignment="Right" Margin="0,0,0,5">Import Local Build</Button>
 					<ListBox Grid.Row="1" ItemsSource="{Binding CustomItems}">
 						<ListBox.ItemTemplate>
 							<DataTemplate>

@@ -28,7 +28,7 @@
 							</Flyout>
 						</Button.Flyout>
 					</Button>
-					<TextBox Text="{Binding Search}" Width="300"></TextBox>
+					<TextBox Text="{Binding Search}" FontSize="16" Width="300"></TextBox>
 				</WrapPanel>
 				<WrapPanel Margin="10" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">
 					<Button Background="Black" Command="{Binding ReloadRepoCommand}" ToolTip.Tip="Refresh">

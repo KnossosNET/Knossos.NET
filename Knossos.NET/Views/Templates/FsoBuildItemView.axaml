@@ -14,9 +14,9 @@
 
 	<Grid Background="Black" ColumnDefinitions="Auto,Auto,Auto,Auto,*">
 		<Label FontWeight="Bold" Width="150" Grid.Column="0" Content="{Binding Date}" VerticalAlignment="Center"></Label>
-		<Label FontWeight="Bold" Width="300" Grid.Column="1" Content="{Binding Title}" VerticalAlignment="Center"></Label>
+		<Label FontWeight="Bold" Width="250" Grid.Column="1" Content="{Binding Title}" VerticalAlignment="Center"></Label>
 
-		<Label Grid.Column="2" IsVisible="{Binding IsValid}" Width="300" Foreground="Green" FontWeight="Bold" Content="{Binding CpuArch}" VerticalAlignment="Center"></Label>
+		<Label Grid.Column="2" IsVisible="{Binding IsValid}" Width="250" Foreground="Green" FontWeight="Bold" Content="{Binding CpuArch}" VerticalAlignment="Center"></Label>
 		<Label Grid.Column="3" IsVisible="{Binding IsValid}" Foreground="Cyan" FontWeight="Bold" Content="{Binding BuildType}" VerticalAlignment="Center"></Label>
 		<Label Grid.Column="4" Foreground="Red" IsVisible="{Binding !IsValid}" FontWeight="Bold">No valid or usable files were found in this build</Label>
 			
@@ -30,5 +30,5 @@
 			<Label Foreground="White" FontWeight="Bold" Margin="0,0,10,0" FontSize="18">Downloading...</Label>
 			<Button Command="{Binding CancelDownloadCommand}" Width="100" HorizontalContentAlignment="Center" Background="DarkRed">Cancel</Button>
 		</WrapPanel>
-	</Grid>
+	</Grid><!-- Margin to keep items from joining with it on the bottom -->
 </UserControl>
