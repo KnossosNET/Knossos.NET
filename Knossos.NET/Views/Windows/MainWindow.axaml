@@ -25,11 +25,11 @@
 		</Grid.RowDefinitions>
 		<TabControl Grid.Row="0" SelectedIndex="{Binding TabIndex}">
 			<!--Installed Mods / Home-->
-			<TabItem ToolTip.Tip="View and run installed Freepsace Open games and modifications" Header="Home">
+			<TabItem ToolTip.Tip="View and run installed Freepsace Open games and modifications" Header="Play">
 				<v:ModListView Content="{Binding InstalledModsView}"/>
 			</TabItem>
 			<!--Nebula Mods / Explore-->
-			<TabItem ToolTip.Tip="Search and install Freespace Open games and modifications" Header="Nebula">
+			<TabItem ToolTip.Tip="Search and install Freespace Open games and modifications" Header="Explore">
 				<v:NebulaModListView Content="{Binding NebulaModsView}"/>
 			</TabItem>
 			<!--FSO Builds-->
@@ -41,11 +41,11 @@
 				<v:DeveloperModsView Content="{Binding DeveloperModView}"/>
 			</TabItem>
 			<!--PXO-->
-			<TabItem ToolTip.Tip="View multiplayer games using PXO servers" Header="PXO">
+			<TabItem ToolTip.Tip="View multiplayer games using PXO servers" Header="Multiplayer">
 				<v:PxoView Content="{Binding PxoView}"/>
 			</TabItem>
 			<!--Global Settings-->
-			<TabItem ToolTip.Tip="Change Global Freespace Open and Knossos.NET settings" Header="Settings">
+			<TabItem ToolTip.Tip="Change global Freespace Open and Knossos.NET settings" Header="Settings">
 				<v:GlobalSettingsView Content="{Binding GlobalSettingsView}"/>
 			</TabItem>
 			<!--Debug-->
