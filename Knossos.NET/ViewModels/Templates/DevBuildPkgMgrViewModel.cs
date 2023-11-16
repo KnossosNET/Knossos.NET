@@ -273,7 +273,8 @@ namespace Knossos.NET.ViewModels
 
                     if (result != null && result.Count > 0)
                     {
-                        var newFile = result[0].Path.LocalPath.ToString();
+                        var fullPath = result[0].Path.LocalPath.ToString();
+                        var newFile = Path.Combine(Path.GetDirectoryName(fullPath)!, FsoBuild.GetRealExeName(Path.GetDirectoryName(fullPath)!, Path.GetFileName(fullPath)));
                         var newExec = new ModExecutable();
                         newExec.file = Path.GetRelativePath(Path.Combine(PkgMgr.editor!.ActiveVersion.fullPath, Package.folder != null ? Package.folder : "" ), newFile).Replace(@"\",@"/");
                         Executables.Add(new PackageExecItem(newExec, this));
