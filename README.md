@@ -4,7 +4,6 @@
 <br />
 This project is intended to create a multi platform launcher for Freespace 2 Open using .NET 6.0 and AvaloniaUI<br />
 <br />
-<br />
 
 
 <br /><br />
@@ -28,21 +27,21 @@ The "Mod Settings" window displays the cmdline to play that mod directly via qui
 **mod.ini Support:**<br />
 Using legacy mod.ini files for mod folders is also supported, and some additional keys were added to extend support. mod.ini can be used to attempt to load an old mod or to manually add a mod to the launcher whiout having to write a mod.json file. The folder still has to be placed in the correct path inside the library as with any other mod.<br />
 Details on how Knet handles mod.ini and the new keys can be found here:<br />
-https://wiki.hard-light.net/index.php/Mod.ini#KnossosNET_Support
+https://wiki.hard-light.net/index.php/Mod.ini#KnossosNET_Support<br />
 
 <br /><br />
 **CmdLine Priority Explained:**<br />
 On KnossosNET there are multiples sources of cmdline arguments that are eventually joined into a single one to launch the game, repeating arguments are not allowed.<br />
 <br />
 By default, the priority works in this order:<br />
-SystemCMD(Global Settings) > Global CMD > User/Mod CMD
+_>SystemCMD(Global Settings) > Global CMD > User/Mod CMD_
 <br />
 <br />
 Users also have the option to not apply the global cmdline on a per-mod basis by checking the box in a mod's settings. If checked, the priority is then only: <br />
-User/Mod CMD
-<br />
+_>User/Mod CMD_
 <br />
 
+<br /><br />
 **Dev Environment:**<br />
 -MSVC 2022<br />
 -.NET 6.0.406 SDK https://dotnet.microsoft.com/en-us/download/dotnet/6.0<br />
