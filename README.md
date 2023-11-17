@@ -6,14 +6,11 @@ This project is intended to create a multi platform launcher for Freespace 2 Ope
 <br />
 <br />
 
-**Runtime Requirement:**<br />
-.Net 6.0.14 (newer 6.0.x versions also work)<br />
-https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.14-windows-x64-installer<br />
 
 <br /><br />
-**The current status:**<br />
+**Current Status:**<br />
 <br />
--Version 0.1.3 - Most of the user functions are in, except for dev mode<br />
+-Version 0.2 - Base functions are in, cleanup and testing is current priority<br />
 -Working in Windows, Mac and Linux<br />
 -Mod compression support<br />
 
@@ -28,21 +25,25 @@ If no version is given (KnossosNET.exe -playmod mod-id) the highest version of t
 The "Mod Settings" window displays the cmdline to play that mod directly via quick launch.<br />
 
 <br /><br />
-**mod.ini support:**<br />
+**mod.ini Support:**<br />
 Using legacy mod.ini files for mod folders is also supported, and some additional keys were added to extend support. mod.ini can be used to attempt to load an old mod or to manually add a mod to the launcher whiout having to write a mod.json file. The folder still has to be placed in the correct path inside the library as with any other mod.<br />
 Details on how Knet handles mod.ini and the new keys can be found here:<br />
 https://wiki.hard-light.net/index.php/Mod.ini#KnossosNET_Support
 
 <br /><br />
-**CmdLine priority explained:**<br />
+**CmdLine Priority Explained:**<br />
 On KnossosNET there are multiples sources of cmdline arguments that are eventually joined into a single one to launch the game, repeating arguments are not allowed.<br />
-The priority works in this order.<br />
 <br />
+By default, the priority works in this order:<br />
 SystemCMD(Global Settings) > Global CMD > User/Mod CMD
 <br />
 <br />
+Users also have the option to not apply the global cmdline on a per-mod basis by checking the box in a mod's settings. If checked, the priority is then only: <br />
+User/Mod CMD
+<br />
+<br />
 
-**Dev Enviroment:**<br />
+**Dev Environment:**<br />
 -MSVC 2022<br />
 -.NET 6.0.406 SDK https://dotnet.microsoft.com/en-us/download/dotnet/6.0<br />
 -Avalonia Extension for Visual Studio https://marketplace.visualstudio.com/items?itemName=AvaloniaTeam.AvaloniaVS<br />
