@@ -14,7 +14,9 @@
 	<Border BorderBrush="BlueViolet">
 		<WrapPanel ToolTip.Tip="{Binding Tooltip}">
 			<WrapPanel VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="5">
-				<Button Command="{Binding CancelTaskCommand}" IsVisible="{Binding CancelButtonVisible}" Margin="5,0,0,0" Height="25" Width="27" FontSize="14" Background="Red" Foreground="Black" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold">X</Button>
+				<Button Command="{Binding CancelTaskCommand}" IsVisible="{Binding CancelButtonVisible}" Margin="5,0,0,0" Height="25" Width="27" Background="Red" HorizontalAlignment="Left" VerticalAlignment="Top">
+					<Image Height="14" Width="14" Source="/Assets/general/x.png"></Image>
+				</Button>
 				<!--Task Tree-->
 				<TreeView Margin="10,0,0,0" IsVisible="{Binding TaskRoot.Count}" ItemsSource="{Binding TaskRoot}">
 					<TreeView.DataTemplates>
