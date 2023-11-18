@@ -2607,7 +2607,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async Task<bool> DecompressNebulaFile(string filepath, string? filename, string dest, CancellationTokenSource? cancelSource = null)
+        public async Task<bool> DecompressNebulaFile(string filepath, string? filename, string dest, CancellationTokenSource? cancelSource = null, bool extractFullPath = true)
         {
             try
             {
@@ -2629,7 +2629,7 @@ namespace Knossos.NET.ViewModels
                         cancellationTokenSource = new CancellationTokenSource();
                     }
 
-                    return await KnUtils.DecompressFile(filepath, dest, cancellationTokenSource, true, deCompressionCallback);
+                    return await KnUtils.DecompressFile(filepath, dest, cancellationTokenSource, extractFullPath, deCompressionCallback);
                 }
                 else
                 {

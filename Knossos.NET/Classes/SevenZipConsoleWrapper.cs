@@ -20,7 +20,7 @@ namespace Knossos.NET
     {
         private bool disposed = false;
         public string versionString = string.Empty;
-        private string pathToConsoleExecutable;
+        private static string? pathToConsoleExecutable = null;
         private Action<int>? progressCallback;
         private Process? process;
         private bool completedSuccessfully = false;
@@ -28,18 +28,21 @@ namespace Knossos.NET
 
         public SevenZipConsoleWrapper(Action<int>? progressCallback = null, CancellationTokenSource? cancelSource = null) 
         {
-            this.pathToConsoleExecutable = UnpackExec();
+            if(pathToConsoleExecutable == null)
+            {
+                pathToConsoleExecutable = UnpackExec();
+                if (File.Exists(pathToConsoleExecutable))
+                {
+                    _ = Run();
+                }
+                else
+                {
+                    pathToConsoleExecutable = null;
+                    Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.Constructor", "File does not exist: " + pathToConsoleExecutable);
+                }
+            }
             this.progressCallback = progressCallback;
             this.cancelSource = cancelSource;
-
-            if(File.Exists(pathToConsoleExecutable))
-            {
-                _ = Run();
-            }
-            else
-            {
-                Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.Constructor", "File does not exist: " + pathToConsoleExecutable);
-            }
         }
 
         /// <summary>
@@ -188,7 +191,7 @@ namespace Knossos.NET
                 if (KnUtils.IsWindows)
                 {
                     execPath += "7za.exe";
-                    if (!File.Exists(execPath))
+                    if (!File.Exists(execPath) || new FileInfo(execPath).Length == 0)
                     {
                         using (var fileStream = File.Create(execPath))
                         {
@@ -209,7 +212,7 @@ namespace Knossos.NET
                         if (KnUtils.CpuArch == "X64")
                         {
                             execPath += "7zzs";
-                            if (!File.Exists(execPath))
+                            if (!File.Exists(execPath) || new FileInfo(execPath).Length == 0)
                             {
                                 using (var fileStream = File.Create(execPath))
                                 {
@@ -227,7 +230,7 @@ namespace Knossos.NET
                         if (KnUtils.CpuArch == "Arm64")
                         {
                             execPath += "7zzs";
-                            if (!File.Exists(execPath))
+                            if (!File.Exists(execPath) || new FileInfo(execPath).Length == 0)
                             {
                                 using (var fileStream = File.Create(execPath))
                                 {
@@ -248,7 +251,7 @@ namespace Knossos.NET
                         if (KnUtils.IsMacOS)
                         {
                             execPath += "7zz";
-                            if (!File.Exists(execPath))
+                            if (!File.Exists(execPath) || new FileInfo(execPath).Length == 0)
                             {
                                 using (var fileStream = File.Create(execPath))
                                 {
@@ -277,6 +280,10 @@ namespace Knossos.NET
             try
             {
                 completedSuccessfully = false;
+
+                if (pathToConsoleExecutable == null)
+                    throw new Exception("Path con 7z console executable was null, the extraction probably failed.");
+                
                 using (process = new Process())
                 {
                     process.StartInfo.FileName = pathToConsoleExecutable;
@@ -297,7 +304,7 @@ namespace Knossos.NET
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.Run()", ex);
             }
             return completedSuccessfully;
         }

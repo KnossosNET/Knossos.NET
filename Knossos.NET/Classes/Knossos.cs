@@ -370,7 +370,12 @@ namespace Knossos.NET
                                         else
                                         {
 
-                                            var result = await KnUtils.DecompressFile(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension, appDirPath!, null, false, null).ConfigureAwait(false);
+                                            var result = false;
+
+                                            await Dispatcher.UIThread.Invoke(async () =>
+                                            {
+                                                result  = await TaskViewModel.Instance!.AddFileDecompressionTask(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension, appDirPath!, false);
+                                            }).ConfigureAwait(false);
 
                                             if (!result)
                                             {

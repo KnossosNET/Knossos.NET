@@ -631,6 +631,21 @@ namespace Knossos.NET
             return httpClientFactory.CreateClient("generic");
         }
 
+        /// <summary>
+        /// Decompress a Zip, 7z, or tar.gz file to a folder
+        /// If not Decompressor method is specified the one saved in the global settings will be used
+        /// Decompression Method:
+        /// Auto(0) = First it tries with sharpcompress, and if it fails it then uses the SevepZip console utility
+        /// Sharpcompress(1) = Decompress only using Sharpcompress
+        /// SevenZip(2) = Decompress only using SevenZip cmdline utility
+        /// </summary>
+        /// <param name="compressedFilePath"></param>
+        /// <param name="destFolderPath"></param>
+        /// <param name="cancellationTokenSource"></param>
+        /// <param name="extractFullPath"></param>
+        /// <param name="progressCallback"></param>
+        /// <param name="decompressor"></param>
+        /// <returns> true if decompression was successfull, false otherwise</returns>
         public async static Task<bool> DecompressFile(string compressedFilePath, string destFolderPath, CancellationTokenSource? cancellationTokenSource, bool extractFullPath = true, Action<int>? progressCallback = null, Decompressor? decompressor = null)
         {
             if(!File.Exists(compressedFilePath))
@@ -675,6 +690,15 @@ namespace Knossos.NET
             });
         }
 
+        /// <summary>
+        /// Decompress a Zip, 7z, or tar.gz file using SevenZip cmdline utility
+        /// </summary>
+        /// <param name="compressedFilePath"></param>
+        /// <param name="destFolderPath"></param>
+        /// <param name="cancellationTokenSource"></param>
+        /// <param name="extractFullPath"></param>
+        /// <param name="progressCallback"></param>
+        /// <returns> true if decompression was successfull, false otherwise</returns>
         private async static Task<bool> DecompressFileSevenZip(string compressedFilePath, string destFolderPath, CancellationTokenSource cancellationTokenSource, bool extractFullPath = true, Action<int>? progressCallback = null)
         {
             try
