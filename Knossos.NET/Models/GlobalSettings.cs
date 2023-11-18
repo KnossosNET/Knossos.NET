@@ -28,6 +28,17 @@ namespace Knossos.NET.Models
     }
 
     /// <summary>
+    /// Decompressor Method setting for KnUtils
+    /// Auto = First try with sharpcompress and if it fails try with sevenzip
+    /// </summary>
+    public enum Decompressor
+    {
+        Auto,
+        SharpCompress,
+        SevenZip
+    }
+
+    /// <summary>
     /// Stores and load the global Knossos.NET configuration
     /// </summary>
     public class GlobalSettings
@@ -65,6 +76,8 @@ namespace Knossos.NET.Models
         public bool checkUpdate { get; set; } = true;
         [JsonPropertyName("delete_uploaded_files")]
         public bool deleteUploadedFiles { get; set; } = true;
+        [JsonPropertyName("decompressor")]
+        public Decompressor decompressor { get; set; } = Decompressor.Auto;
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 
@@ -536,7 +549,7 @@ namespace Knossos.NET.Models
                         checkUpdate = tempSettings.checkUpdate;
                         ttsVoiceName = tempSettings.ttsVoiceName;
                         deleteUploadedFiles = tempSettings.deleteUploadedFiles;
-
+                        decompressor = tempSettings.decompressor;
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");
                     }

@@ -13,6 +13,11 @@ using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http;
+using SharpCompress.Archives;
+using SharpCompress.Common;
+using SharpCompress.Readers;
+using Knossos.NET.Classes;
+using Knossos.NET.Models;
 
 namespace Knossos.NET
 {
@@ -624,6 +629,163 @@ namespace Knossos.NET
         public static HttpClient GetHttpClient()
         {
             return httpClientFactory.CreateClient("generic");
+        }
+
+        /// <summary>
+        /// Decompress a Zip, 7z, or tar.gz file to a folder
+        /// If not Decompressor method is specified the one saved in the global settings will be used
+        /// Decompression Method:
+        /// Auto(0) = First it tries with sharpcompress, and if it fails it then uses the SevepZip console utility
+        /// Sharpcompress(1) = Decompress only using Sharpcompress
+        /// SevenZip(2) = Decompress only using SevenZip cmdline utility
+        /// </summary>
+        /// <param name="compressedFilePath"></param>
+        /// <param name="destFolderPath"></param>
+        /// <param name="cancellationTokenSource"></param>
+        /// <param name="extractFullPath"></param>
+        /// <param name="progressCallback"></param>
+        /// <param name="decompressor"></param>
+        /// <returns> true if decompression was successfull, false otherwise</returns>
+        public async static Task<bool> DecompressFile(string compressedFilePath, string destFolderPath, CancellationTokenSource? cancellationTokenSource, bool extractFullPath = true, Action<int>? progressCallback = null, Decompressor? decompressor = null)
+        {
+            if(!File.Exists(compressedFilePath))
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtil.DecompressFile()", "File " + compressedFilePath + " does not exist!");
+                return false;
+            }
+            if(decompressor == null)
+            {
+                decompressor = Knossos.globalSettings.decompressor;
+            }
+
+            return await Task.Run(async() => {
+                if(cancellationTokenSource == null)
+                    cancellationTokenSource = new CancellationTokenSource();
+
+                progressCallback?.Invoke(0);
+
+                bool result = false;
+
+                switch(decompressor)
+                {
+                    case Decompressor.Auto: 
+                        result = DecompressFileSharpCompress(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback);
+                        if(!result)
+                        {
+                            result = await DecompressFileSevenZip(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback).ConfigureAwait(false);
+                        }
+                        break;
+                    case Decompressor.SharpCompress:
+                        result = DecompressFileSharpCompress(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback);
+                        break;
+                    case Decompressor.SevenZip:
+                        result = await DecompressFileSevenZip(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback).ConfigureAwait(false);
+                        break;
+                }
+
+                if (!result)
+                    cancellationTokenSource?.Cancel();
+
+                return result;
+            });
+        }
+
+        /// <summary>
+        /// Decompress a Zip, 7z, or tar.gz file using SevenZip cmdline utility
+        /// </summary>
+        /// <param name="compressedFilePath"></param>
+        /// <param name="destFolderPath"></param>
+        /// <param name="cancellationTokenSource"></param>
+        /// <param name="extractFullPath"></param>
+        /// <param name="progressCallback"></param>
+        /// <returns> true if decompression was successfull, false otherwise</returns>
+        private async static Task<bool> DecompressFileSevenZip(string compressedFilePath, string destFolderPath, CancellationTokenSource cancellationTokenSource, bool extractFullPath = true, Action<int>? progressCallback = null)
+        {
+            try
+            {
+                using (var sevenZip = new SevenZipConsoleWrapper(progressCallback, cancellationTokenSource))
+                {
+                    return await sevenZip.DecompressFile(compressedFilePath, destFolderPath, extractFullPath);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                Log.Add(Log.LogSeverity.Warning, "KnUtil.DecompressFileSevenZip()", "Decompression of file " + compressedFilePath + " was cancelled.");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtil.DecompressFileSevenZip()", ex);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Decompress a Zip, 7z, or tar.gz file using SharpCompress lib
+        /// </summary>
+        /// <param name="compressedFilePath"></param>
+        /// <param name="destFolderPath"></param>
+        /// <param name="cancellationTokenSource"></param>
+        /// <param name="extractFullPath"></param>
+        /// <param name="progressCallback"></param>
+        /// <returns> true if decompression was successfull, false otherwise</returns>
+        private static bool DecompressFileSharpCompress(string compressedFilePath, string destFolderPath, CancellationTokenSource cancellationTokenSource, bool extractFullPath = true, Action<int>? progressCallback = null)
+        {
+            try
+            {
+                using (var fileStream = new ProgressStream(File.Open(compressedFilePath, FileMode.Open, FileAccess.Read, FileShare.Read), progressCallback))
+                {
+                    //tar.gz
+                    if (compressedFilePath!.ToLower().Contains(".tar") || compressedFilePath.ToLower().Contains(".gz"))
+                    {
+                        using (var reader = ReaderFactory.Open(fileStream))
+                        {
+                            while (reader.MoveToNextEntry())
+                            {
+                                if (!reader.Entry.IsDirectory)
+                                {
+                                    reader.WriteEntryToDirectory(destFolderPath, new ExtractionOptions() { ExtractFullPath = extractFullPath, Overwrite = true, WriteSymbolicLink = (source, target) => { File.CreateSymbolicLink(source, target); } });
+                                }
+                                if (cancellationTokenSource!.IsCancellationRequested)
+                                {
+                                    throw new TaskCanceledException();
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //zip, 7z
+                        using (var archive = ArchiveFactory.Open(fileStream))
+                        {
+                            var reader = archive.ExtractAllEntries();
+                            while (reader.MoveToNextEntry())
+                            {
+                                if (!reader.Entry.IsDirectory)
+                                {
+                                    reader.WriteEntryToDirectory(destFolderPath, new ExtractionOptions() { ExtractFullPath = extractFullPath, Overwrite = true });
+                                }
+                                if (cancellationTokenSource!.IsCancellationRequested)
+                                {
+                                    throw new TaskCanceledException();
+                                }
+                            }
+                        }
+                    }
+                    fileStream.Close();
+                    return true;
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                Log.Add(Log.LogSeverity.Warning, "KnUtil.DecompressFileSharpCompress()", "Decompression of file " + compressedFilePath + " was cancelled.");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtil.DecompressFileSharpCompress()", ex);
+                return false;
+            }
         }
     }
 }

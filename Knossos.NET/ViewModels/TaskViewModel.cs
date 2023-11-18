@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System;
+using System.IO;
 
 namespace Knossos.NET.ViewModels
 {
@@ -96,6 +97,36 @@ namespace Knossos.NET.ViewModels
                 TaskList.Add(newTask);
             });
             return await newTask.DownloadFile(url, dest, msg, showStopButton, tooltip).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Extracts a file to a folder showing a progress bar
+        /// This task does not wait in queue
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="destFolder"></param>
+        /// <returns>true if the extraction was completed, false otherwise</returns>
+        public async Task<bool> AddFileDecompressionTask(string filePath, string destFolder, bool extractFullPath = true)
+        {
+            var newTask = new TaskItemViewModel();
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                TaskList.Add(newTask);
+            });
+
+            if(!File.Exists(filePath))
+            {
+                Log.Add(Log.LogSeverity.Error, "TaskViewModel.AddFileDecompressionTask()", "File: " + filePath + " dosent exist!");
+                return false;
+            }
+
+            if (!Directory.Exists(destFolder))
+            {
+                Log.Add(Log.LogSeverity.Error, "TaskViewModel.AddFileDecompressionTask()", "Dest folder: " + destFolder + " dosent exist!");
+                return false;
+            }
+
+            return await newTask.DecompressNebulaFile(filePath, Path.GetFileName(filePath), destFolder, null, extractFullPath).ConfigureAwait(false);
         }
 
         /// <summary>

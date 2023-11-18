@@ -20,26 +20,75 @@ namespace Knossos.NET
     {
         private bool disposed = false;
         public string versionString = string.Empty;
-        private string pathToConsoleExecutable;
-        private Action<string>? progressCallback;
+        private static string? pathToConsoleExecutable = null;
+        private Action<int>? progressCallback;
         private Process? process;
         private bool completedSuccessfully = false;
         private CancellationTokenSource? cancelSource;
 
-        public SevenZipConsoleWrapper(Action<string>? progressCallback = null, CancellationTokenSource? cancelSource = null) 
+        public SevenZipConsoleWrapper(Action<int>? progressCallback = null, CancellationTokenSource? cancelSource = null) 
         {
-            this.pathToConsoleExecutable = UnpackExec();
+            if(pathToConsoleExecutable == null)
+            {
+                pathToConsoleExecutable = UnpackExec();
+                if (File.Exists(pathToConsoleExecutable))
+                {
+                    _ = Run();
+                }
+                else
+                {
+                    pathToConsoleExecutable = null;
+                    Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.Constructor", "File does not exist: " + pathToConsoleExecutable);
+                }
+            }
             this.progressCallback = progressCallback;
             this.cancelSource = cancelSource;
+        }
 
-            if(File.Exists(pathToConsoleExecutable))
-            {
-                _ = Run();
-            }
+        /// <summary>
+        /// Decompress a .zip, .7z or .tar.gz file to a folder using the 7zip cmdline tool
+        /// </summary>
+        /// <param name="sourceFile"></param>
+        /// <param name="destFolder"></param>
+        /// <param name="extractFullPath"></param>
+        /// <returns>true if the descompression was successfull, false otherwise</returns>
+        /// <exception cref="ObjectDisposedException"></exception>
+        public async Task<bool> DecompressFile(string sourceFile, string destFolder, bool extractFullPath = true)
+        {
+            if (disposed)
+                throw new ObjectDisposedException("This object was already disposed.");
+
+            bool isTarGz = false;
+
+            if (sourceFile.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase))
+                isTarGz = true;
+
+            string cmdline = "\"" + sourceFile + "\" -aoa -bsp1 -y";
+
+            if (extractFullPath)
+                cmdline = "x " + cmdline;
             else
+                cmdline = "e " + cmdline;
+
+            var result = await Run(cmdline, destFolder);
+
+            if (isTarGz && result)
             {
-                Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.Constructor", "File does not exist: " + pathToConsoleExecutable);
+                sourceFile = Path.Combine(destFolder, Path.GetFileName(sourceFile).Replace(".tar.gz", ".tar"));
+                if (extractFullPath)
+                    cmdline = "x ";
+                else
+                    cmdline = "e ";
+                cmdline += "\"" + sourceFile + "\" -aoa -bsp1 -y";
+                result = await Run(cmdline, destFolder);
+                try
+                {
+                    File.Delete(sourceFile);
+                }
+                catch { }
             }
+
+            return result;
         }
 
         /// <summary>
@@ -57,7 +106,7 @@ namespace Knossos.NET
             string cmdline = "a -t7z -m0=lzma2 -md=64M -mx=9 -ms=on -bsp1 -y ";
             if (doNotStoreTimestamp)
                 cmdline += "-mtm- ";
-            return await Run(cmdline + destFile, sourceFolder);
+            return await Run(cmdline + "\"" + destFile + "\"", sourceFolder);
         }
 
         /// <summary>
@@ -81,7 +130,7 @@ namespace Knossos.NET
                 cmdline = "a -mx=8 -bsp1 -y ";
                 if (doNotStoreTimestamp)
                     cmdline += "-mtm- ";
-                return await Run(cmdline + destFile + ".tar.gz" + " " + destFile + ".tar", sourceFolder);
+                return await Run(cmdline + "\"" + destFile + ".tar.gz\"" + " " + destFile + ".tar", sourceFolder);
             }
             return r;
         }
@@ -123,7 +172,10 @@ namespace Knossos.NET
         {
             try
             {
-                process?.Kill();
+                if (process != null && process.ExitCode != 0)
+                {
+                    process.Kill();
+                }
             }
             catch (Exception ex)
             {
@@ -139,7 +191,7 @@ namespace Knossos.NET
                 if (KnUtils.IsWindows)
                 {
                     execPath += "7za.exe";
-                    if (!File.Exists(execPath))
+                    if (!File.Exists(execPath) || new FileInfo(execPath).Length == 0)
                     {
                         using (var fileStream = File.Create(execPath))
                         {
@@ -160,7 +212,7 @@ namespace Knossos.NET
                         if (KnUtils.CpuArch == "X64")
                         {
                             execPath += "7zzs";
-                            if (!File.Exists(execPath))
+                            if (!File.Exists(execPath) || new FileInfo(execPath).Length == 0)
                             {
                                 using (var fileStream = File.Create(execPath))
                                 {
@@ -178,7 +230,7 @@ namespace Knossos.NET
                         if (KnUtils.CpuArch == "Arm64")
                         {
                             execPath += "7zzs";
-                            if (!File.Exists(execPath))
+                            if (!File.Exists(execPath) || new FileInfo(execPath).Length == 0)
                             {
                                 using (var fileStream = File.Create(execPath))
                                 {
@@ -199,7 +251,7 @@ namespace Knossos.NET
                         if (KnUtils.IsMacOS)
                         {
                             execPath += "7zz";
-                            if (!File.Exists(execPath))
+                            if (!File.Exists(execPath) || new FileInfo(execPath).Length == 0)
                             {
                                 using (var fileStream = File.Create(execPath))
                                 {
@@ -228,6 +280,10 @@ namespace Knossos.NET
             try
             {
                 completedSuccessfully = false;
+
+                if (pathToConsoleExecutable == null)
+                    throw new Exception("Path con 7z console executable was null, the extraction probably failed.");
+                
                 using (process = new Process())
                 {
                     process.StartInfo.FileName = pathToConsoleExecutable;
@@ -248,7 +304,7 @@ namespace Knossos.NET
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.Run()", ex);
             }
             return completedSuccessfully;
         }
@@ -275,11 +331,12 @@ namespace Knossos.NET
                         {
                             percentage = match.Groups[1].Value;
                         }
-                        progressCallback?.Invoke(percentage);
+                        progressCallback?.Invoke(int.Parse(percentage));
                     }  
                 }catch { }
                 if(e.Data.Contains("Everything is Ok"))
                 {
+                    progressCallback?.Invoke(100);
                     completedSuccessfully = true;
                 }
             }
@@ -308,7 +365,10 @@ namespace Knossos.NET
             {
                 try
                 {
-                    process.Kill();
+                    if (process.ExitCode != 0)
+                    {
+                        process.Kill();
+                    }
                 }
                 catch { }
                 process.Dispose();

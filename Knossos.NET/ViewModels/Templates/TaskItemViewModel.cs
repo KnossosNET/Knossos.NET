@@ -10,11 +10,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using SharpCompress.Archives;
-using SharpCompress.Readers;
-using SharpCompress.Common;
 using System.Threading;
-using System.Net;
 using Knossos.NET.Classes;
 using VP.NET;
 using System.Text;
@@ -2611,7 +2607,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async Task<bool> DecompressNebulaFile(string filepath, string? filename, string dest, CancellationTokenSource? cancelSource = null)
+        public async Task<bool> DecompressNebulaFile(string filepath, string? filename, string dest, CancellationTokenSource? cancelSource = null, bool extractFullPath = true)
         {
             try
             {
@@ -2620,9 +2616,10 @@ namespace Knossos.NET.ViewModels
                     TaskIsSet = true;
                     CancelButtonVisible = false;
                     Name = "Decompressing " + filename;
-                    ShowProgressText = false;
+                    ShowProgressText = true;
                     ProgressBarMin = 0;
                     ProgressCurrent = 0;
+                    ProgressBarMax = 100;
                     if (cancelSource != null)
                     {
                         cancellationTokenSource = cancelSource;
@@ -2631,105 +2628,8 @@ namespace Knossos.NET.ViewModels
                     {
                         cancellationTokenSource = new CancellationTokenSource();
                     }
-                    //tar.gz
-                    if (filename!.ToLower().Contains(".tar") || filename.ToLower().Contains(".gz"))
-                    {
-                        await Task.Run(() =>
-                        {
-                            using var fileStream = File.OpenRead(filepath);
-                            using (var reader = ReaderFactory.Open(fileStream))
-                            {
-                                try
-                                {
-                                    ProgressCurrent = 0;
-                                    ProgressBarMax = 1;
-                                    while (reader.MoveToNextEntry())
-                                    {
 
-                                        if (!reader.Entry.IsDirectory)
-                                        {
-                                            reader.WriteEntryToDirectory(dest, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true, WriteSymbolicLink = (source, target) => { File.CreateSymbolicLink(source, target); } });
-                                        }
-                                        if (cancellationTokenSource!.IsCancellationRequested)
-                                        {
-                                            throw new TaskCanceledException();
-                                        }
-                                    }
-                                    IsCompleted = true;
-                                    Info = string.Empty;
-                                    ProgressCurrent = ProgressBarMax;
-                                    fileStream.Close();
-                                    return true;
-                                }
-                                catch (TaskCanceledException)
-                                {
-                                    Info = "Task Cancelled";
-                                    IsCancelled = true;
-                                    fileStream.Close();
-                                    return false;
-                                }
-                                catch (Exception ex)
-                                {
-                                    Info = "Task Failed";
-                                    IsCompleted = false;
-                                    IsCancelled = true;
-                                    CancelButtonVisible = false;
-                                    cancellationTokenSource?.Cancel();
-                                    fileStream.Close();
-                                    Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.DecompressTask()", ex);
-                                    return false;
-                                }
-                            }
-                        });
-                    }
-                    else
-                    {
-                        //zip, 7z
-                        await Task.Run(() => {
-                            using (var archive = ArchiveFactory.Open(filepath))
-                            {
-                                try
-                                {
-                                    var reader = archive.ExtractAllEntries();
-                                    ProgressBarMax = archive.Entries.Count();
-                                    while (reader.MoveToNextEntry())
-                                    {
-                                        Info = "Files: " + ProgressCurrent + "/" + ProgressBarMax;
-                                        if (!reader.Entry.IsDirectory)
-                                        {
-                                            reader.WriteEntryToDirectory(dest, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
-                                        }
-                                        ProgressCurrent++;
-                                        if (cancellationTokenSource!.IsCancellationRequested)
-                                        {
-                                            throw new TaskCanceledException();
-                                        }
-                                    }
-                                    IsCompleted = true;
-                                    Info = string.Empty;
-                                    ProgressCurrent = ProgressBarMax;
-                                    return true;
-                                }
-                                catch (TaskCanceledException)
-                                {
-                                    Info = "Task Cancelled";
-                                    IsCancelled = true;
-                                    return false;
-                                }
-                                catch (Exception ex)
-                                {
-                                    Info = "Task Failed";
-                                    IsCompleted = false;
-                                    IsCancelled = true;
-                                    CancelButtonVisible = false;
-                                    cancellationTokenSource?.Cancel();
-                                    Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.DecompressTask()", ex);
-                                    return false;
-                                }
-                            }
-                        });
-                    }
-                    return true;
+                    return await KnUtils.DecompressFile(filepath, dest, cancellationTokenSource, extractFullPath, deCompressionCallback);
                 }
                 else
                 {
@@ -4293,12 +4193,12 @@ namespace Knossos.NET.ViewModels
             });
         }
 
-        private async void sevenZipCallback(string percentage)
+        private async void sevenZipCallback(int percentage)
         {
             await Dispatcher.UIThread.InvokeAsync(() => {
                 try
                 {
-                    ProgressCurrent = int.Parse(percentage);
+                    ProgressCurrent = percentage;
                 }
                 catch { }
             });
@@ -4360,6 +4260,13 @@ namespace Knossos.NET.ViewModels
                     Info = ProgressCurrent.ToString() + " / " + ProgressBarMax.ToString() + "  -  " + filename;
                 }
                 catch { }
+            });
+        }
+
+        private void deCompressionCallback(int progress)
+        {
+            Dispatcher.UIThread.InvokeAsync(() => {
+                ProgressCurrent = progress;
             });
         }
 
