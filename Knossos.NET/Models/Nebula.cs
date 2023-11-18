@@ -148,6 +148,7 @@ namespace Knossos.NET.Models
                     Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance!.AddMessageTask("Nebula: repo_minimal.json is up to date!"), DispatcherPriority.Background);
                     Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "repo_minimal.json is up to date!");
                     displayUpdates = false;
+                    repoLoaded = true;
                 }
                 if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
                 {
