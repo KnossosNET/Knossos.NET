@@ -95,7 +95,9 @@
 								<WrapPanel>
 									<Button Command="{Binding ScUp}" Background="Black">↑</Button>
 									<Button Command="{Binding ScDown}" Background="Black">↓</Button>
-									<Button Command="{Binding ScDel}" Background="Red">X</Button>
+									<Button Command="{Binding ScDel}" Background="Red">
+										<Image Height="14" Width="14" Source="/Assets/general/x.png"></Image>								
+									</Button>
 									<Image Margin="5,0,0,0" Width="320" Height="180" Source="{Binding Bitmap}"></Image>
 								</WrapPanel>
 							</DataTemplate>

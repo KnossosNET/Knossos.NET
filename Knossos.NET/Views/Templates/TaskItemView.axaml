@@ -14,7 +14,9 @@
 	<Border BorderBrush="BlueViolet">
 		<WrapPanel ToolTip.Tip="{Binding Tooltip}">
 			<WrapPanel VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="5">
-				<Button Command="{Binding CancelTaskCommand}" IsVisible="{Binding CancelButtonVisible}" Margin="5,0,0,0" Height="25" Width="27" FontSize="14" Background="Red" Foreground="Black" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold">X</Button>
+				<Button Command="{Binding CancelTaskCommand}" IsVisible="{Binding CancelButtonVisible}" Margin="5,0,0,0" Height="25" Width="27" Background="Red" HorizontalAlignment="Left" VerticalAlignment="Top">
+					<Image Height="14" Width="14" Source="/Assets/general/x.png"></Image>
+				</Button>
 				<!--Task Tree-->
 				<TreeView Margin="10,0,0,0" IsVisible="{Binding TaskRoot.Count}" ItemsSource="{Binding TaskRoot}">
 					<TreeView.DataTemplates>
@@ -25,8 +27,8 @@
 								<WrapPanel IsEnabled="{Binding IsFileDownloadTask}" IsVisible="{Binding IsFileDownloadTask}">
 									<Label Height="22" Width="300" HorizontalContentAlignment="Left" FontSize="14" Margin="5,0,0,0" Content="{Binding Name}" Foreground="{Binding TextColor}"/>
 									<WrapPanel IsVisible="{Binding !IsCompleted}">
-										<Button Margin="5,0,0,0" Width="57" Content="{Binding PauseButtonText}" Background="Black" IsVisible="{Binding !IsCancelled }" HorizontalAlignment="Center" FontWeight="Bold" Height="22" FontSize="10" Command="{Binding PauseDownloadCommand}"/>
-										<Button Margin="5,0,0,0" Width="53" Background="Black" IsVisible="{Binding !IsCancelled}" HorizontalAlignment="Center" FontWeight="Bold" Height="22" FontSize="10" Command="{Binding RestartDownloadCommand}">Restart</Button>
+										<Button Margin="5,0,0,0" Width="57" Content="{Binding PauseButtonText}" Background="Black" IsVisible="{Binding !IsCancelled }" HorizontalAlignment="Center" FontWeight="Bold" Height="24" FontSize="9" Command="{Binding PauseDownloadCommand}"/>
+										<Button Margin="5,0,0,0" Width="53" Background="Black" IsVisible="{Binding !IsCancelled}" HorizontalAlignment="Center" FontWeight="Bold" Height="24" FontSize="9" Command="{Binding RestartDownloadCommand}">Restart</Button>
 										<ProgressBar Width="250" IsVisible="{Binding ProgressBarMax}" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="{Binding ShowProgressText}"></ProgressBar>
 										<Label Height="22" FontSize="10" Margin="5,0,0,0" VerticalAlignment="Bottom" Content="{Binding Info}"/>
 										<Label IsVisible="{Binding IsFileDownloadTask}" Height="22" FontSize="10" Margin="5,0,0,0" VerticalAlignment="Bottom" Content="{Binding CurrentMirror}"/>

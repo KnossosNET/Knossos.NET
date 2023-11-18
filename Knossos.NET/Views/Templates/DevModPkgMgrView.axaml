@@ -93,7 +93,9 @@
 											</Button.Flyout>
 										</Button>
 										<!--End Packages-->
-										<Button Command="{Binding DeleteDependency}" Grid.Column="5" Margin="10,0,0,0" Background="Red" ToolTip.Tip="Remove this dependency" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">X</Button>
+										<Button Command="{Binding DeleteDependency}" Grid.Column="5" Margin="10,0,0,0" Background="Red" ToolTip.Tip="Remove this dependency" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">									
+											<Image Height="14" Width="14" Source="/Assets/general/x.png"></Image>
+										</Button>
 									</Grid>
 									<!-- End Pkg Dependency Item-->
 								</DataTemplate>
