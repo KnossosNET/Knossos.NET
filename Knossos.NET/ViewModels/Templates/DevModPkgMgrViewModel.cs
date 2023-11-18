@@ -126,20 +126,25 @@ namespace Knossos.NET.ViewModels
                     itemMod.IsEnabled = false; //Important! This signals that on writing to return the original depedency data to avoid possible loss of dep data
                     ModItems.Insert(0, itemMod);
                     ModSelectedIndex = 0;
-                    if (dep.version!.Contains("~"))
+                    if (dep.version != null) // Make sure we hae a version to read.
                     {
-                        VersionTypeIndex = 2;
-                    }
-                    else
-                    {
-                        if (dep.version!.Contains(">="))
+                        if (dep.version!.Contains("~"))
                         {
-                            VersionTypeIndex = 1;
+                            VersionTypeIndex = 2;
                         }
                         else
                         {
-                            VersionTypeIndex = 0;
+                            if (dep.version!.Contains(">="))
+                            {
+                                VersionTypeIndex = 1;
+                            }
+                            else
+                            {
+                                VersionTypeIndex = 0;
+                            }
                         }
+                    } else {
+                        VersionTypeIndex = 0;
                     }
                     var itemVer = new ComboBoxItem();
                     itemVer.Content = dep.version != null ? dep.version.Replace(">=","").Replace("~", "") : "Any";
