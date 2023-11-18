@@ -14,28 +14,28 @@
 
 	<ScrollViewer>
 		<StackPanel Margin="5">
-			<TextBlock FontWeight="Bold" FontSize="24" TextWrapping="Wrap">PXO is the Freespace 2 Open Multiplayer Match Making Service</TextBlock>
-			<TextBlock TextWrapping="Wrap" Padding="0,3">Current ongoing Multiplayer games are listed here. There is a small hourly limit on list refreshes.</TextBlock>
 		
 			<Grid ColumnDefinitions="*,Auto" Margin="5">
-					<StackPanel Grid.Column="1" MaxWidth="350">
-            <TextBlock HorizontalAlignment="Left" Padding="0,3" FontWeight="Bold" FontSize="20">Getting Started</TextBlock>
-						<TextBlock Margin="0,5,0,5" TextWrapping="Wrap">• Register on PXO, our match making service</TextBlock>
-						<Button Margin="5, 8, 0, 10" Tooltip.Tip="https://pxo.nottheeye.com" Command="{Binding OpenPXOWeb}">PXO</Button>
-						<TextBlock Margin="0,10,0,10" TextWrapping="Wrap">• Now input the "Game Credentials" from PXO below and save</TextBlock>
+					<StackPanel Grid.Column="1" MaxWidth="300">
+            			<TextBlock HorizontalAlignment="Left" Padding="0,3" FontWeight="Bold" FontSize="20">Getting Started</TextBlock>
+						<TextBlock Margin="0,5,0,5" TextWrapping="Wrap">Register on PXO, our match making service</TextBlock>
+						<Button Margin="5, 8, 0, 10" ToolTip.Tip="https://pxo.nottheeye.com" Command="{Binding OpenPXOWeb}">PXO</Button>
+						<TextBlock Margin="0,10,0,10" TextWrapping="Wrap">Now input the "Game Credentials" from PXO below and save</TextBlock>
 						<Label Margin="5,0,0,0">Login</Label>
 						<TextBox Margin="5,0,0,0" Text="{Binding Login}"></TextBox>
 						<Label Margin="5,0,0,0">Password</Label>
 						<TextBox Margin="5,0,0,0" PasswordChar="●" Text="{Binding Password}"></TextBox>
-						<Button Margin="5,0,0,10" Command="{Binding SavePXOCredentials}" Margin="0, 8" HorizontalAlignment="Left">Save Credentials</Button>
-						<TextBlock Margin="0,10,0,0" TextWrapping="Wrap">• FSO should now be configured for PXO multiplayer. You can now join the PXO lobby in-game if the mod you are playing supports multiplayer.</TextBlock>
-						<TextBlock Margin="5,0,0,0" TextWrapping="Wrap">• For further help with multiplayer for a specific mod or to look for a match you join our discord</TextBlock>
-						<Button Margin="5,10,0,0" ToolTip.Tip="Hard Light Productions" Command="{Binding OpenHLPDiscord}">Hard Light Productions Discord</Button>
+						<Button Margin="5,10,0,10" Command="{Binding SavePXOCredentials}" HorizontalAlignment="Left">Save Credentials</Button>
+						<TextBlock Margin="0,10,0,0" TextWrapping="Wrap">FSO should now be configured for PXO multiplayer. You can now join the PXO lobby in-game if the mod you are playing supports multiplayer.</TextBlock>
+						<TextBlock Margin="0,30,0,0" TextWrapping="Wrap">For further help with multiplayer for a specific mod or to look for a match join our discord</TextBlock>
+						<Button Margin="5,10,0,0" ToolTip.Tip="Hard Light Productions Discord - Permanent Invitation: https://discord.gg/cyhMBhMHzK" Command="{Binding JoinHLPDiscord}">HLP Discord</Button>
 					</StackPanel>
 			
 				<StackPanel Margin="5" Grid.Column="0">
+					<TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" Padding="0,3" FontWeight="Bold" FontSize="20">Server List</TextBlock>
+					<TextBlock TextWrapping="Wrap" Margin="0,2,0,0" Padding="0,3">Current ongoing Multiplayer games are listed here. There is a small hourly limit on list refreshes.</TextBlock>
 
-					<Button Command="{Binding RefreshData}">Refresh Game List</Button>
+					<Button Margin="0,5,0,0" Command="{Binding RefreshData}">Refresh Game List</Button>
 					<TreeView Margin="10,0,0,0"  ItemsSource="{Binding ActiveGames}">
 						<TreeView.Styles>
 							<Style Selector="TreeViewItem">
@@ -62,9 +62,9 @@
 							</DataTemplate>
 						</TreeView.DataTemplates>
 					</TreeView>
-					<TextBlock HorizontalAlignment="Left" Padding="0,3" FontWeight="Bold" FontSize="20">Standalone Servers</TextBlock>
-					<TextBlock TextWrapping="Wrap">You can create a dedicated multiplayer server where other people can join in and play.</TextBlock>
-					<Button Command="{Binding OpenServerCreator}" Margin="0, 8" HorizontalAlignment="Left">Open Server Creator</Button>				
+					<TextBlock Margin="10,30,0,0" HorizontalAlignment="Left" Padding="0,3" FontWeight="Bold" FontSize="20">Standalone Servers</TextBlock>
+					<TextBlock Margin="0,5,0,0" TextWrapping="Wrap">You can create a dedicated multiplayer server where other people can join in and play.</TextBlock>
+					<Button Command="{Binding OpenServerCreator}" Margin="0,8,0,0" HorizontalAlignment="Left">Standalone Server Creator</Button>				
 				</StackPanel>
 		
 			</Grid>
