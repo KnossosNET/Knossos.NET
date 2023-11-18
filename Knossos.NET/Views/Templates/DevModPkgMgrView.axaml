@@ -53,13 +53,13 @@
 									</Flyout>
 								</Button.Flyout>
 							</Button>
-							<ComboBox Margin="10,0,0,0" SelectedIndex="{Binding PackageStatusIndex}" MinWidth="130" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Background="White" Foreground="Black">
+							<ComboBox Margin="10,0,0,0" SelectedIndex="{Binding PackageStatusIndex}" MinWidth="130" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Background="White" Foreground="Black">
 								<ComboBoxItem ToolTip.Tip="Always installed with the mod, in fact these are the base files of the mod">Required</ComboBoxItem>
 								<ComboBoxItem ToolTip.Tip="Automatically selected for installation, but the user can skip them">Recommended</ComboBoxItem>
 								<ComboBoxItem ToolTip.Tip="Not automatically selected, but user can add them during the install process">Optional</ComboBoxItem>
 							</ComboBox>
 							<CheckBox IsChecked="{Binding PackVP}" Margin="10,0,0,0" ToolTip.Tip="Whether Knossos should pack the files in a VP on upload.&#x0a;Warning: VPs have a 2GB total size limit.">Make VP</CheckBox>
-							<Label FontSize="16" Margin="5" ToolTip.Tip="Current package folder size" Foreground="Yellow" Content="{Binding DiskSpace}"/>
+							<Label FontSize="15" Margin="5" ToolTip.Tip="Current package folder size" Foreground="Yellow" Content="{Binding DiskSpace}"/>
 							<Button Command="{Binding DeleteModPkg}" Margin="20,0,0,0" Background="Red" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">Delete</Button>
 						</WrapPanel>
 						<!--Pkg Dependency List-->
@@ -69,15 +69,15 @@
 									<!--Pkg Dependency Item-->
 									<Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto">
 										<Label Margin="30,0,0,0" Grid.Column="0" FontSize="18" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">&#x21B3;</Label>
-										<ComboBox SelectedIndex="{Binding ModSelectedIndex}" ItemsSource="{Binding ModItems}" Grid.Column="1" HorizontalAlignment="Stretch" Margin="5,2,2,2" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
+										<ComboBox SelectedIndex="{Binding ModSelectedIndex}" ItemsSource="{Binding ModItems}" Grid.Column="1" HorizontalAlignment="Stretch" Margin="5,2,2,2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
 										<ComboBox SelectedIndex="{Binding VersionTypeIndex}" Grid.Column="2" MinWidth="75" Margin="2" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black">
 											<ComboBoxItem ToolTip.Tip="Only the selected version">==</ComboBoxItem>
 											<ComboBoxItem ToolTip.Tip="Higher or equal than the selected version">>=</ComboBoxItem>
 											<ComboBoxItem ToolTip.Tip="Same minor version, revision equal or better:&#x0a;Dependency: ~1.5.2&#x0a;1.5.1 ->Not Valid&#x0a;1.5.6 -> Valid&#x0a;1.6.0 -> Not valid">~</ComboBoxItem>
 										</ComboBox>
-										<ComboBox SelectedIndex="{Binding VersionSelectedIndex}" ItemsSource="{Binding VersionItems}" Grid.Column="3" MinWidth="150" Margin="2" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
+										<ComboBox SelectedIndex="{Binding VersionSelectedIndex}" ItemsSource="{Binding VersionItems}" Grid.Column="3" MinWidth="150" Margin="2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
 										<!--Packages-->
-										<Button IsVisible="{Binding DisplayPackages}" Grid.Column="4" Margin="5,0,2,0" Content="Packages" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+										<Button IsVisible="{Binding DisplayPackages}" Grid.Column="4" Margin="5,0,2,0" Content="Packages" FontSize="16" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
 											<Button.Flyout>
 												<Flyout Placement="Left">
 													<ScrollViewer MaxHeight="400">
@@ -107,7 +107,7 @@
 		</ListBox>
 
 		<!--Mod Flag List-->
-		<Label FontWeight="Bold" FontSize="20" Margin="5">ModFlag</Label>
+		<Label FontWeight="Bold" FontSize="20" Margin="5,15,5,5">ModFlag</Label>
 		<ListBox ItemsSource="{Binding EditorFlagItems}" Margin="8,0,0,0">
 			<ListBox.ItemTemplate>
 				<DataTemplate>
@@ -123,9 +123,9 @@
 
 		<!--Best Practices-->
 		<Label Margin="5" FontWeight="Bold" FontSize="20">Best Practices</Label>
-		<Label Margin="5,0,0,0" FontSize="14">-Attach all dependencies needed, both mods and the FSO build to a single "Required" package.</Label>
-		<Label Margin="5,0,0,0" FontSize="14">-Only add additional FSO or mod dependencies to optional packages IF that package needs a different version than the rest of the mod.</Label>
-		<Label Margin="5,0,0,0" FontSize="14">-Do not repeat the same dependency across multiple packages, this is not needed.</Label>
+		<TextBlock Margin="5,0,0,3" FontSize="14" TextWrapping="Wrap">-Attach all dependencies needed, both mods and the FSO build to a single "Required" package.</TextBlock>
+		<TextBlock Margin="5,0,0,3" FontSize="14" TextWrapping="Wrap">-Only add additional FSO or mod dependencies to optional packages IF that package needs a different version than the rest of the mod.</TextBlock>
+		<TextBlock Margin="5,0,0,3" FontSize="14" TextWrapping="Wrap">-Do not repeat the same dependency across multiple packages, this is not needed.</TextBlock>
 	</StackPanel>
 	</ScrollViewer>
 </UserControl>

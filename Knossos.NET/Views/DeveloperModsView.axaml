@@ -30,7 +30,7 @@
 									</DataTemplate>
 								</ListBox.ItemTemplate>
 							</ListBox>
-							<Button Command="{Binding CreateMod}" Grid.Row="1" Background="DarkOliveGreen" HorizontalAlignment="Center">Create New Mod</Button>
+							<Button Margin="0,10,0,25" Command="{Binding CreateMod}" Grid.Row="1" Background="DarkOliveGreen" HorizontalAlignment="Center">Create New Mod</Button>
 						</Grid>
 					</SplitView.Pane>
 
