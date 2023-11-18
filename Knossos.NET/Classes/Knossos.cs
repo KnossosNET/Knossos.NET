@@ -11,8 +11,6 @@ using System.IO;
 using System.Linq;
 using Avalonia.Platform;
 using VP.NET;
-using SharpCompress.Readers;
-using SharpCompress.Common;
 
 namespace Knossos.NET
 {
@@ -70,6 +68,9 @@ namespace Knossos.NET
 
                 //Load knossos config
                 globalSettings.Load();
+
+                //Print Decompressor Type
+                Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "The selected decompressor type is set to " + globalSettings.decompressor.ToString());
 
                 //Check for updates
                 if (globalSettings.checkUpdate && !isQuickLaunch)
@@ -256,8 +257,11 @@ namespace Knossos.NET
                             {
                                 if (!globalSettings.autoUpdate)
                                 {
-                                    var result = await MessageBox.Show(null, "Knossos.NET " + latest.tag_name + ":\n" + latest.body + "\n\n\nIf you continue Knossos.NET will be re-started after download.", "An update is available", MessageBox.MessageBoxButtons.ContinueCancel);
-                                    if(result != MessageBox.MessageBoxResult.Continue)
+                                    MessageBox.MessageBoxResult result = MessageBox.MessageBoxResult.Cancel;
+                                    await Dispatcher.UIThread.Invoke(async () => {
+                                        result = await MessageBox.Show(null, "Knossos.NET " + latest.tag_name + ":\n" + latest.body + "\n\n\nIf you continue Knossos.NET will be re-started after download.", "An update is available", MessageBox.MessageBoxButtons.ContinueCancel);
+                                    }).ConfigureAwait(false);
+                                    if (result != MessageBox.MessageBoxResult.Continue)
                                     {
                                         return;
                                     }
@@ -347,7 +351,7 @@ namespace Knossos.NET
                                                 throw new ArgumentNullException(nameof(appFolder));
                                             }
                                             var newFileFullPath = Path.Combine(appFolder, Path.GetFileName(releaseAsset.browser_download_url));
-                                            File.Move(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension, newFileFullPath);
+                                            File.Move(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension, newFileFullPath);
 
                                             //Start again
                                             try
@@ -365,52 +369,44 @@ namespace Knossos.NET
                                         }
                                         else
                                         {
-                                            using (Stream stream = File.OpenRead(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension))
-                                            using (var archive = ReaderFactory.Open(stream))
+
+                                            var result = await KnUtils.DecompressFile(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension, appDirPath!, null, false, null).ConfigureAwait(false);
+
+                                            if (!result)
                                             {
-                                                try
-                                                {
-                                                    while (archive.MoveToNextEntry())
-                                                    {
-                                                        if (!archive.Entry.IsDirectory)
-                                                        {
-                                                            archive.WriteEntryToDirectory(appDirPath!, new ExtractionOptions() { ExtractFullPath = false, Overwrite = true });
-                                                        }
-                                                    }
-                                                }
-                                                catch (Exception ex)
-                                                {
-                                                    Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
-                                                }
-
-                                                //Start again
-                                                try
-                                                {
-                                                    if (KnUtils.IsMacOS || KnUtils.IsLinux)
-                                                    {
-                                                        KnUtils.Chmod(Path.Combine(appDirPath, execName!), "+x");
-                                                    }
-                                                    Process p = new Process();
-                                                    p.StartInfo.FileName = Path.Combine(appDirPath, execName!);
-                                                    p.Start();
-                                                }
-                                                catch (Exception ex)
-                                                {
-                                                    Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
-                                                }
-
-                                                //Cleanup file
-                                                try
-                                                {
-                                                    if (File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension))
-                                                        File.Delete(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension);
-                                                }
-                                                catch { }
+                                                throw new Exception("Error while decompressing update file: " + KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension);
                                             }
-                                        }
 
-                                        //Close App
-                                        MainWindow.instance!.Close();
+                                            //Start again
+                                            try
+                                            {
+                                                if (KnUtils.IsMacOS || KnUtils.IsLinux)
+                                                {
+                                                    KnUtils.Chmod(Path.Combine(appDirPath, execName!), "+x");
+                                                }
+                                                Process p = new Process();
+                                                p.StartInfo.FileName = Path.Combine(appDirPath, execName!);
+                                                p.Start();
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
+                                            }
+
+                                            //Cleanup file
+                                            try
+                                            {
+                                                if (File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension))
+                                                    File.Delete(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension);
+                                            }
+                                            catch { }
+
+                                            //Close App
+                                            Dispatcher.UIThread.Invoke(() =>
+                                            {
+                                                MainWindow.instance!.Close();
+                                            });
+                                        }
                                     }
                                     catch(Exception ex)
                                     {
