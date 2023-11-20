@@ -65,6 +65,11 @@ namespace Knossos.NET.ViewModels
             });
         }
 
+        internal void OpenDiscordQuickSetup()
+        {
+            KnUtils.OpenBrowserURL(@"https://discord.gg/raSEhVeTGw");
+        }
+
         /// <summary>
         /// Wait until the Knossos library path is set
         /// </summary>
