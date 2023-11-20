@@ -815,7 +815,7 @@ namespace Knossos.NET.Models
         public ModFilelist[]? filelist { get; set; } = new ModFilelist[0];
         public List<ModExecutable>? executables { get; set; } = new List<ModExecutable>();// optional
         [JsonPropertyName("check_notes")]
-        public string? checkNotes { get; set; }
+        public object? checkNotes { get; set; }
 
         /* Knet Only */
         [JsonIgnore]
