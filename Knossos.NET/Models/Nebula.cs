@@ -398,7 +398,7 @@ namespace Knossos.NET.Models
                         var isInstalled = Knossos.GetInstalledModList(m.id);
                         if (isInstalled != null && isInstalled.Any())
                         {
-                            //Set installed mods that are uploded to Nebula as "inNebula=true"
+                            //Set installed mods that are uploaded to Nebula as "inNebula=true"
                             isInstalled.ForEach(mod =>
                             {
                                 if (mod != null && allModsInRepo.FirstOrDefault(repo => repo.id == mod.id && repo.version == mod.version) != null)
