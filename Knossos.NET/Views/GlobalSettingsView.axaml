@@ -17,24 +17,24 @@
 			<StackPanel>
 				<WrapPanel Margin="0,10,0,0">
 					<Button Command="{Binding QuickSetupCommand}" FontSize="22" Background="Black" Margin="5,0,0,0" Classes="Secondary">Quick Setup Guide</Button>
-					<Button Command="{Binding SaveCommand}"  FontWeight="Bold" FontSize="22" Classes="Accept" Margin="340,0,0,0">Save</Button>
+					<Button Command="{Binding SaveCommand}"  FontWeight="Bold" FontSize="22" Classes="Accept" Margin="450,0,0,0">Save</Button>
 					<Button Command="{Binding ReloadFlagData}" Foreground="White" FontSize="20" Background="Black" Margin="10,0,0,0" Classes="Option">Reload Data</Button>
 					<Button Command="{Binding ResetCommand}" FontWeight="Bold" FontSize="20" Margin="10,0,0,0" Classes="Cancel">Reset</Button>
 				</WrapPanel>
-				<TextBlock Margin="10,15,0,0" TextWrapping="Wrap" FontSize="16" VerticalAlignment="Center" >Please exit this tab open before playing, as Knossos constantly scans here for changes to the .ini file.</TextBlock>
+				<TextBlock Margin="10,15,0,3" TextWrapping="Wrap" FontSize="16" VerticalAlignment="Center" >Please close this tab before playing, as Knossos constantly scans here for changes to the .ini file.</TextBlock>
 			</StackPanel>
 		</Border>
 		<ScrollViewer Grid.Row="1">
 			<StackPanel>
 				<!--KNOSSOS SETTINGS-->
-				<Label Margin="5,5,0,0" FontWeight="Bold" FontSize="18">Knossos Settings</Label>
+				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Knossos Settings</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Base Path -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="Heavy" Width="200">Library </TextBlock>
 							<TextBox Text="{Binding BasePath}" Margin="10,0,0,0" Grid.Column="1" IsReadOnly="True" Width="500"></TextBox>
-							<Button Grid.Column="2" Classes="Secondary" Command="{Binding BrowseFolderCommand}">Browse</Button>
+							<Button Margin="5,0,0,0" Grid.Column="2" Classes="Secondary" Command="{Binding BrowseFolderCommand}">Browse</Button>
 						</Grid>
 						<!-- Lib Info -->
 						<Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto, Auto" Margin="5">
@@ -44,8 +44,8 @@
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
 								<Label Margin="40,5,0,0" FontWeight="Bold">Builds:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfBuilds}"></TextBlock>
-								<CheckBox Margin="40,0,0,0" IsEnabled="False" IsChecked="{Binding Fs2RootPack}">FS2 Root Pack</CheckBox>
-								<Button Classes="Secondary" Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Background="Black" Margin="10,0,0,0">FS2 Retail Installer</Button>
+								<CheckBox Margin="40,0,0,0" IsEnabled="False" IsChecked="{Binding Fs2RootPack}">Retail Freespace 2 Installed</CheckBox>
+								<Button Classes="Secondary" Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Background="Black" Margin="10,0,0,0">Installer</Button>
 							</WrapPanel>
 						</Grid>
 						<WrapPanel Grid.Column="1" Margin="220,5,0,0">
@@ -134,7 +134,7 @@
 					</StackPanel>
 				</Border>
 				<!--VIDEO SETTINGS-->
-				<Label Margin="5,5,0,0" FontWeight="Bold" FontSize="18">Video Settings</Label>
+				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Video Settings</Label>
 				<Border BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Resolution -->
@@ -189,23 +189,24 @@
 								<ComboBoxItem Tag="7">SMAA Ultra</ComboBoxItem>
 							</ComboBox>
 						</Grid>
-            <!-- SMAA Filter -->
-            <Grid ColumnDefinitions="Auto,Auto" Margin="5">
-              <Label Grid.Column="0" Width="200" VerticalAlignment="Center">Extra Multisample Anti-Aliasing</Label>
-              <ComboBox ToolTip.Tip="High performance impact, especially at Ultra or at >= 4k resolution" Tag="-msaa" SelectedIndex="{Binding MsaaSelectedIndex}" Grid.Column="1" Width="150" Margin="10,0,0,0">
-                <ComboBoxItem Tag="0">Disabled</ComboBoxItem>
-                <ComboBoxItem Tag="4">High</ComboBoxItem>
-                <ComboBoxItem Tag="8">Ultra</ComboBoxItem>
-              </ComboBox>
-            </Grid>
+						<!-- SMAA Filter -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+						<Label Grid.Column="0" Width="200" VerticalAlignment="Center">Extra Multisample Anti-Aliasing</Label>
+						<ComboBox ToolTip.Tip="High performance impact, especially at Ultra or at >= 4k resolution" Tag="-msaa" SelectedIndex="{Binding MsaaSelectedIndex}" Grid.Column="1" Width="150" Margin="10,0,0,0">
+							<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
+							<ComboBoxItem Tag="4">High</ComboBoxItem>
+							<ComboBoxItem Tag="8">Ultra</ComboBoxItem>
+						</ComboBox>
+						</Grid>
 						<!-- Enable deferred lighting -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="-no_deferred" Grid.Column="0" IsChecked="{Binding EnableDeferredLighting}" Width="200">Enable Deferred Lighting</CheckBox>
+							<Label Margin="5,0,0,0" Width="200">Enable Deferred Lighting</Label> 
+							<CheckBox Tag="-no_deferred" Grid.Column="0" IsChecked="{Binding EnableDeferredLighting}" Width="200"></CheckBox>
 						</Grid>
-            <!-- Enable soft particles -->
-            <Grid ColumnDefinitions="Auto,Auto" Margin="5">
-              <CheckBox Tag="-soft_particles" Grid.Column="0" IsChecked="{Binding EnableSoftParticles}" Width="200">Enable Soft Particles</CheckBox>
-            </Grid>
+						<!-- Enable soft particles -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+						<CheckBox Tag="-soft_particles" Grid.Column="0" IsChecked="{Binding EnableSoftParticles}" Width="200">Enable Soft Particles</CheckBox>
+						</Grid>
 						<!-- VSYNC -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<CheckBox Tag="-no_vsync" Grid.Column="0" IsChecked="{Binding Vsync}" Width="200">Enable VSync</CheckBox>
@@ -222,12 +223,12 @@
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<CheckBox Tag="-fps" Grid.Column="0" IsChecked="{Binding ShowFps}" Width="200">Display FPS</CheckBox>
 						</Grid>
-            <Button Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="Slow in-game performance?" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
+            			<Button Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="Slow in-game performance?" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
 					</StackPanel>
 				</Border>
 
 				<!--Audio SETTINGS-->
-				<Label Margin="5,5,0,0" FontWeight="Bold" FontSize="18">Audio Settings</Label>
+				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Audio Settings</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Playback -->
@@ -265,7 +266,7 @@
 							<CheckBox Tag="-nomusic" Grid.Column="0" IsChecked="{Binding DisableMusic}" Width="200">Disable Music</CheckBox>
 						</Grid>
 						<!-- TTS -->
-						<CheckBox IsChecked="{Binding EnableTTS}" Margin="5">Enable TTS (Text to speech)</CheckBox>
+						<CheckBox IsChecked="{Binding EnableTTS}" Margin="5">Enable Text to speech</CheckBox>
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Voice</TextBlock>
 							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
@@ -292,7 +293,7 @@
 				</Border>
 
 				<!--INPUT SETTINGS-->
-				<Label Margin="5,5,0,0" FontWeight="Bold" FontSize="18">Input Settings</Label>
+				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Input Settings</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
             <?ignore
@@ -338,9 +339,9 @@
 				</Border>
 		
 				<!--MOD SETTINGS-->
+				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">FSO Global Settings</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<Label FontWeight="Bold" FontSize="18">FSO Global Settings</Label>
 						<!-- GLOBAL CMDLINE -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Cmdline</Label>
