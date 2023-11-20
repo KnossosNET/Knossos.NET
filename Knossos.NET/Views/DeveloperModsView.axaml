@@ -12,40 +12,39 @@
 		<vm:DeveloperModsViewModel/>
 	</Design.DataContext>
 
-	<Border BorderBrush="Transparent" BorderThickness="2" CornerRadius="2" Margin="5">
-		<TabControl SelectedIndex="{Binding TabIndex}">
-			<TabItem Header="Mods">
-				<SplitView Margin="0,0,0,5" IsPaneOpen="True" DisplayMode="Inline" OpenPaneLength="400">
-					<SplitView.Pane>
-						<Grid RowDefinitions="*,Auto">
-							<ListBox Grid.Row="0" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}">
-								<ListBox.ItemTemplate>
-									<DataTemplate>
-										<WrapPanel>
-											<Label FontWeight="Bold" Content="["/>
-											<Label FontWeight="Bold" Content="{Binding type}"/>
-											<Label FontWeight="Bold" Content="]"/>
-											<Label Content="{Binding title}"/>
-										</WrapPanel>
-									</DataTemplate>
-								</ListBox.ItemTemplate>
-							</ListBox>
-							<Button Command="{Binding CreateMod}" Grid.Row="1" Background="DarkOliveGreen" HorizontalAlignment="Center">Create New Mod</Button>
-						</Grid>
-					</SplitView.Pane>
+	<TabControl Margin="5" SelectedIndex="{Binding TabIndex}">
+		<TabItem Header="Mods">
+			<SplitView Margin="0,0,0,5" IsPaneOpen="True" DisplayMode="Inline" OpenPaneLength="400">
+				<SplitView.Pane>
+					<Grid RowDefinitions="*,Auto">
+						<ListBox Background="{StaticResource BackgroundColorSecondary}" Grid.Row="0" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}">
+							<ListBox.ItemTemplate>
+								<DataTemplate>
+									<WrapPanel>
+										<Label FontWeight="Bold" Content="["/>
+										<Label FontWeight="Bold" Content="{Binding type}"/>
+										<Label FontWeight="Bold" Content="]"/>
+										<Label Content="{Binding title}"/>
+									</WrapPanel>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+						<Button Command="{Binding CreateMod}" Grid.Row="1" Classes="Quaternary"  HorizontalAlignment="Center">Create New Mod</Button>
+					</Grid>
+				</SplitView.Pane>
 
-					<v:DevModEditorView Content="{Binding ModEditor}"/>
+				<v:DevModEditorView Content="{Binding ModEditor}"/>
 					
-				</SplitView>
-			</TabItem>
+			</SplitView>
+		</TabItem>
 
-			<TabItem Header="Modding Tools">
-				<v:DevToolManagerView Content="{Binding DevToolManager}"/>
-			</TabItem>
+		<TabItem Header="Modding Tools">
+			<v:DevToolManagerView Content="{Binding DevToolManager}"/>
+		</TabItem>
 
-			<TabItem Header="Nebula">
-				<v:NebulaLoginView Content="{Binding NebulaLoginVM}"/>
-			</TabItem>
-		</TabControl>
-	</Border>
+		<TabItem Header="Nebula">
+			<v:NebulaLoginView Content="{Binding NebulaLoginVM}"/>
+		</TabItem>
+	</TabControl>
+
 </UserControl>

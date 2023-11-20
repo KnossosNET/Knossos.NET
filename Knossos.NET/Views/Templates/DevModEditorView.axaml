@@ -21,22 +21,22 @@
 				<TextBlock HorizontalAlignment="Center" Text="{Binding Version}" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
 				<!--MODS-->
 				<StackPanel Margin="10" HorizontalAlignment="Center" IsVisible="{Binding !IsEngineBuild}">
-					<Button Command="{Binding PlayMod}" CommandParameter="release" Background="#52971D" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Play</Button>
-					<Button Command="{Binding PlayMod}" CommandParameter="fred2" Background="#FFC847" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Fred2</Button>
-					<Button Command="{Binding PlayMod}" CommandParameter="qtfred" Background="DarkCyan" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >QtFred</Button>
-					<Button Command="{Binding PlayMod}" CommandParameter="debug" Background="#8D2FFD" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Debug</Button>
-					<Button Command="{Binding PlayMod}" CommandParameter="fred2debug" Background="#8E1C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Fred2 Debug</Button>
-					<Button Command="{Binding OpenModFolder}" Background="#8E3C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Open Folder</Button>
+					<Button Command="{Binding PlayMod}" CommandParameter="release" Classes="Accept" Margin="2" Width="150">Play</Button>
+					<Button Command="{Binding PlayMod}" CommandParameter="fred2" Classes="Primary" Margin="2" Width="150">Fred2</Button>
+					<Button Command="{Binding PlayMod}" CommandParameter="qtfred" Classes="Secondary" Margin="2" Width="150">QtFred</Button>
+					<Button Command="{Binding PlayMod}" CommandParameter="debug" Classes="Tertiary" Margin="2" Width="150">Debug</Button>
+					<Button Command="{Binding PlayMod}" CommandParameter="fred2debug" Classes="Quaternary" Margin="2" Width="150">Fred2 Debug</Button>
+					<Button Command="{Binding OpenModFolder}" Classes="Option" Margin="2" Width="150">Open Folder</Button>
 				</StackPanel>
 				<!--Engine Builds-->
 				<StackPanel Margin="10" HorizontalAlignment="Center" IsVisible="{Binding IsEngineBuild}">
-					<Button Command="{Binding OpenModFolder}" Background="#8E3C23" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black" >Open Folder</Button>
+					<Button Command="{Binding OpenModFolder}" Classes="Option" Margin="2" Width="150" >Open Folder</Button>
 				</StackPanel>
 				<!--Tools-->
 				<StackPanel IsVisible="true" Margin="10,10,10,10" HorizontalAlignment="Center">
 					<TextBlock HorizontalAlignment="Center" Text="Tools" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
 					<ComboBox ItemsSource="{Binding ToolItems}" Width="240" SelectedIndex="{Binding ToolIndex}"></ComboBox>
-					<Button Command="{Binding OpenTool}" HorizontalAlignment="Center" Margin="2" Width="150" HorizontalContentAlignment="Center" FontWeight="Black">Open</Button>
+					<Button Command="{Binding OpenTool}" HorizontalAlignment="Center" Margin="2" Width="150">Open</Button>
 				</StackPanel>
 			</StackPanel>
 		</ScrollViewer>

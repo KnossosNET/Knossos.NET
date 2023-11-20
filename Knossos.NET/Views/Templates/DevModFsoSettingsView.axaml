@@ -14,7 +14,7 @@
 
 	<ScrollViewer>
 		<StackPanel>
-			<Button Command="{Binding SaveSettingsCommand}" Background="Green" Margin="5">Save Changes</Button>
+			<Button Command="{Binding SaveSettingsCommand}" Classes="Accept" Margin="5">Save Changes</Button>
 			<!--FSO Build Settings -->
 			<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">FSO BUILD (DEV)</Label>
 			<v:FsoBuildPickerView Content="{Binding FsoPicker}"/>
@@ -22,7 +22,7 @@
 			<Label Foreground="Yellow" Margin="6,0,0,0">Use a package dependency to set the fso build version for players.</Label>
 			<Label Margin="0,50,0,0" FontWeight="Black" FontSize="20">Mod CmdLine</Label>
 			<TextBox Text="{Binding CmdLine}" IsVisible="{Binding !ConfigureBuildOpen}" Margin="5,20,0,0" FontSize="14"/>			
-			<Button IsVisible="{Binding !ConfigureBuildOpen}" Command="{Binding ConfigureBuild}" Margin="5" FontWeight="Bold" FontSize="18" Background="Black" Foreground="White">Open Flag Configuration</Button>
+			<Button IsVisible="{Binding !ConfigureBuildOpen}" Command="{Binding ConfigureBuild}" Margin="5" FontSize="18" Classes="Secondary">Open Flag Configuration</Button>
 			<v:FsoFlagsView Content="{Binding FsoFlags}"/>
 			<!--FSO Build END -->
 		</StackPanel>

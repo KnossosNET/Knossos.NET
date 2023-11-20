@@ -16,7 +16,7 @@
 	<Design.DataContext>
 		<vm:CleanupKnossosLibraryViewModel/>
 	</Design.DataContext>
-	<StackPanel MaxWidth="500" Background="#18191A">
+	<StackPanel MaxWidth="500" Background="{StaticResource BackgroundColorPrimary}">
 		<TextBlock Margin="10" TextWrapping="Wrap">The following are old versions of mods that are not needed as any dependency and can be safely deleted. Uncheck all mod versions you want to keep.</TextBlock>
 		<ListBox MaxHeight="620" ItemsSource="{Binding DeletableMods}">
 			<ListBox.ItemTemplate>
@@ -25,6 +25,6 @@
 				</DataTemplate>
 			</ListBox.ItemTemplate>
 		</ListBox>
-		<Button Command="{Binding Cleanup}" Margin="10">Delete Selected Mods</Button>
+		<Button Classes="Secondary" Command="{Binding Cleanup}" Margin="10">Delete Selected Mods</Button>
 	</StackPanel>
 </Window>

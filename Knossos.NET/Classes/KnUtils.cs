@@ -18,6 +18,8 @@ using SharpCompress.Common;
 using SharpCompress.Readers;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
+using Avalonia;
+using Avalonia.Media;
 
 namespace Knossos.NET
 {
@@ -80,7 +82,7 @@ namespace Knossos.NET
         {
             get
             {
-                if(IsAppImage)
+                if (IsAppImage)
                 {
                     return Path.GetDirectoryName(KnUtils.AppImagePath);
                 }
@@ -152,7 +154,8 @@ namespace Knossos.NET
             try
             {
                 return value.ToString("yyyyMMddHHmmssffff");
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtils.GetTimestamp", ex);
                 return string.Empty;
@@ -232,7 +235,8 @@ namespace Knossos.NET
                 }
 
                 return String.Format("{0:0.##} {1}", dblSByte, suffix[i]);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtils.FormatBytes()", ex);
                 return string.Empty;
@@ -382,7 +386,8 @@ namespace Knossos.NET
             {
                 var stringBytes = Encoding.UTF8.GetBytes(unencryptedString);
                 return Convert.ToBase64String(stringBytes);
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtils.DIYStringEncryption()", ex);
                 return unencryptedString;
@@ -401,7 +406,8 @@ namespace Knossos.NET
             {
                 var base64Bytes = Convert.FromBase64String(encryptedString);
                 return Encoding.UTF8.GetString(base64Bytes);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtils.DIYStringDecryption()", ex);
                 return encryptedString;
@@ -452,7 +458,7 @@ namespace Knossos.NET
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtils.GetFileHash()", ex);
             }
@@ -518,7 +524,8 @@ namespace Knossos.NET
         /// <returns>size in bytes or 0 if failed</returns>
         public static async Task<long> GetSizeOfFolderInBytes(string folderPath)
         {
-            return await Task<long>.Run(() => {
+            return await Task<long>.Run(() =>
+            {
                 try
                 {
                     if (Directory.Exists(folderPath))
@@ -557,11 +564,12 @@ namespace Knossos.NET
         {
             try
             {
-                return await Task.Run(async () => { 
+                return await Task.Run(async () =>
+                {
                     var imageName = Path.GetFileName(imageURL);
                     var imageInCachePath = Path.Combine(GetImageCachePath(), imageName);
-                    
-                    if(File.Exists(imageInCachePath) && new FileInfo(imageInCachePath).Length > 0)
+
+                    if (File.Exists(imageInCachePath) && new FileInfo(imageInCachePath).Length > 0)
                     {
                         return new FileStream(imageInCachePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     }
@@ -580,7 +588,7 @@ namespace Knossos.NET
                     }
                 });
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtils.GetImageStream()", ex);
                 if (attempt <= 2)
@@ -648,29 +656,30 @@ namespace Knossos.NET
         /// <returns> true if decompression was successfull, false otherwise</returns>
         public async static Task<bool> DecompressFile(string compressedFilePath, string destFolderPath, CancellationTokenSource? cancellationTokenSource, bool extractFullPath = true, Action<int>? progressCallback = null, Decompressor? decompressor = null)
         {
-            if(!File.Exists(compressedFilePath))
+            if (!File.Exists(compressedFilePath))
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtil.DecompressFile()", "File " + compressedFilePath + " does not exist!");
                 return false;
             }
-            if(decompressor == null)
+            if (decompressor == null)
             {
                 decompressor = Knossos.globalSettings.decompressor;
             }
 
-            return await Task.Run(async() => {
-                if(cancellationTokenSource == null)
+            return await Task.Run(async () =>
+            {
+                if (cancellationTokenSource == null)
                     cancellationTokenSource = new CancellationTokenSource();
 
                 progressCallback?.Invoke(0);
 
                 bool result = false;
 
-                switch(decompressor)
+                switch (decompressor)
                 {
-                    case Decompressor.Auto: 
+                    case Decompressor.Auto:
                         result = DecompressFileSharpCompress(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback);
-                        if(!result)
+                        if (!result)
                         {
                             result = await DecompressFileSevenZip(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback).ConfigureAwait(false);
                         }
@@ -785,6 +794,25 @@ namespace Knossos.NET
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtil.DecompressFileSharpCompress()", ex);
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Get a color by resource key specified on AppStyles.axaml
+        /// </summary>
+        /// <param name="colorKeyName"></param>
+        /// <returns>Color IBrush or transparent if error</returns>
+        public static IBrush GetResourceColor(string colorKeyName)
+        {
+            try
+            {
+                var e = Application.Current!.TryGetResource(colorKeyName, Application.Current.ActualThemeVariant, out var color);
+                return (IBrush)color!;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.GetColor()", ex);
+                return Brushes.Transparent;
             }
         }
     }

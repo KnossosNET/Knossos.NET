@@ -29,7 +29,7 @@
 					<Grid ColumnDefinitions="Auto,Auto,Auto">
 						<CheckBox Command="{Binding ToggleFlag}" Grid.Column="0" Content="{Binding Description}" IsChecked="{Binding Enabled}" Width="350"></CheckBox>
 						<TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Cmd}" Width="150" />
-						<Button Grid.Column="2" Command="{Binding OpenFlagInfoURL}" Foreground="White" Background="Black" Width="25">?</Button>
+						<Button Grid.Column="2" Command="{Binding OpenFlagInfoURL}" Width="25">?</Button>
 					</Grid>
 				</DataTemplate>
 			</TreeView.DataTemplates>

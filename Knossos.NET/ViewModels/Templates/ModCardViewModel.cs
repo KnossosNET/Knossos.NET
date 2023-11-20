@@ -45,7 +45,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool updateAvalible = false;
         [ObservableProperty]
-        internal IBrush borderColor = Brushes.Black;
+        internal IBrush borderColor = KnUtils.GetResourceColor("ModCardBorderNormal");
         [ObservableProperty]
         internal bool isLocalMod = false;
         [ObservableProperty]
@@ -85,7 +85,7 @@ namespace Knossos.NET.ViewModels
 
             if (devMode && ID != "FS2")
             {
-                BorderColor = Brushes.DimGray;
+                BorderColor = KnUtils.GetResourceColor("ModCardBorderDevMode");
             }
             LoadImage();
         }
@@ -124,14 +124,14 @@ namespace Knossos.NET.ViewModels
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            BorderColor = Brushes.Red;
+                            BorderColor = KnUtils.GetResourceColor("ModCardBorderError");
                         });
                     }
                     else
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            BorderColor = Brushes.Black;
+                            BorderColor = KnUtils.GetResourceColor("ModCardBorderNormal");
                         });
                     }
                 }
@@ -165,11 +165,11 @@ namespace Knossos.NET.ViewModels
             UpdateAvalible = value;
             if(value)
             {
-                BorderColor = Brushes.Blue;
+                BorderColor = KnUtils.GetResourceColor("ModCardBorderUpdate");
             }
             else
             {
-                BorderColor = Brushes.Black;
+                BorderColor = KnUtils.GetResourceColor("ModCardBorderNormal");
             }
         }
 

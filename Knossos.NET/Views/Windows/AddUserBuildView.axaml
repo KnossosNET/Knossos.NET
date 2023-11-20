@@ -18,11 +18,11 @@
 		<vm:AddUserBuildViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer Background="#18191A">
+	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}">
 	<Grid RowDefinitions="*,Auto,Auto">
 		<StackPanel Grid.Row="0" IsEnabled="{Binding !CopyProgress}">
 			<Label>1) Click on the button and select the folders where the executables are located.</Label>
-			<Button Command="{Binding OpenFolderCommand}">Open Folder</Button>
+			<Button Classes="Secondary" Command="{Binding OpenFolderCommand}">Open Folder</Button>
 			<TextBlock TextWrapping="Wrap" Text="{Binding ScanResults}"></TextBlock>
 			<StackPanel Margin="0,15,0,0" IsVisible="{Binding Stage2}">
 				<Label>2) Verify autodetect values and update if needed</Label>
@@ -63,7 +63,7 @@
 				<Label>3) Click the button when ready, the folder will be copied to:</Label>
 				<TextBlock TextWrapping="Wrap" Text="{Binding BuildNewPath}"></TextBlock>
 				<Label>Any (.lib, .a, .pdb and .exp) will be ignored, and a mod.json file will be generated.</Label>
-				<Button VerticalAlignment="Center" Command="{Binding AddCommand}">Add new build</Button>
+				<Button VerticalAlignment="Center" Classes="Accept" Command="{Binding AddCommand}">Add new build</Button>
 			</StackPanel>
 		</StackPanel>
 		<ProgressBar Grid.Row="1" IsVisible="{Binding CopyProgress}" Value="{Binding CopyProgress}" Maximum="{Binding MaxFiles}" Height="50" Minimum="0" Width="200" HorizontalAlignment="Center"></ProgressBar>

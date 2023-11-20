@@ -12,20 +12,20 @@
 		<vm:DevToolManagerViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer Background="#422626">
+	<ScrollViewer Background="{StaticResource BackgroundColorSecondary}">
 		<ListBox ItemsSource="{Binding Tools}">
 			<ListBox.ItemTemplate>
 				<DataTemplate>
 					<Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
-						<Button IsEnabled="{Binding !DisableButtons}" IsVisible="{Binding IsInstalled}" Command="{Binding ToggleFavorite}" Grid.Column="0" FontSize="24" Height="50" Width="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="Transparent" Foreground="{Binding FavoriteColor}" Margin="0,0,0,0">&#9733;</Button>
+						<Button IsEnabled="{Binding !DisableButtons}" IsVisible="{Binding IsInstalled}" Command="{Binding ToggleFavorite}" Grid.Column="0" FontSize="24" Height="50" Width="50" Background="Transparent" BorderBrush="Transparent" Foreground="{Binding FavoriteColor}" Margin="0,0,0,0">&#9733;</Button>
 						<WrapPanel Grid.Column="1" ToolTip.Tip="{Binding ToolTip}">
 							<Label Margin="5" FontSize="22" Content="{Binding Tool.name}"></Label>
 							<Label Margin="0,5,5,5" FontSize="22" Content="{Binding Tool.version}"></Label>
 						</WrapPanel>
-						<Button IsEnabled="{Binding !DisableButtons}" Command="{Binding Update}" ToolTip.Tip="{Binding UpdateTooltip}" IsVisible="{Binding UpdateAvailable}" Grid.Column="3" FontSize="20" FontWeight="Bold" Width="100" HorizontalContentAlignment="Center" Background="DarkBlue" Margin="10,5,20,5">Update</Button>
-						<Button IsEnabled="{Binding !DisableButtons}" ToolTip.Tip="{Binding ToolTip}" Command="{Binding Install}" IsVisible="{Binding !IsInstalled}" Grid.Column="4" FontSize="20" FontWeight="Bold" Width="100" HorizontalContentAlignment="Center" Background="DarkOrange" Margin="10,5,20,5">Install</Button>
-						<Button IsEnabled="{Binding !DisableButtons}" Command="{Binding Delete}" IsVisible="{Binding IsInstalled}" Grid.Column="2" FontSize="20" FontWeight="Bold" Width="100" HorizontalContentAlignment="Center" Background="DarkRed" Margin="10,5,20,5">Delete</Button>
-						<Button IsEnabled="{Binding !DisableButtons}" ToolTip.Tip="{Binding ToolTip}" Command="{Binding Open}" IsVisible="{Binding IsInstalled}" Grid.Column="4" FontSize="20" FontWeight="Bold" Width="100" HorizontalContentAlignment="Center" Background="DarkGreen" Margin="10,5,20,5">Open</Button>
+						<Button IsEnabled="{Binding !DisableButtons}" Command="{Binding Update}" ToolTip.Tip="{Binding UpdateTooltip}" IsVisible="{Binding UpdateAvailable}" Grid.Column="3" FontSize="20" Width="100" Classes="Option" Margin="10,5,20,5">Update</Button>
+						<Button IsEnabled="{Binding !DisableButtons}" ToolTip.Tip="{Binding ToolTip}" Command="{Binding Install}" IsVisible="{Binding !IsInstalled}" Grid.Column="4" FontSize="20" Width="100" Classes="Accept" Margin="10,5,20,5">Install</Button>
+						<Button IsEnabled="{Binding !DisableButtons}" Command="{Binding Delete}" IsVisible="{Binding IsInstalled}" Grid.Column="2" FontSize="20" Width="100" Classes="Cancel" Margin="10,5,20,5">Delete</Button>
+						<Button IsEnabled="{Binding !DisableButtons}" ToolTip.Tip="{Binding ToolTip}" Command="{Binding Open}" IsVisible="{Binding IsInstalled}" Grid.Column="4" FontSize="20" Width="100" Classes="Primary" Margin="10,5,20,5">Open</Button>
 					</Grid>
 				</DataTemplate>
 			</ListBox.ItemTemplate>

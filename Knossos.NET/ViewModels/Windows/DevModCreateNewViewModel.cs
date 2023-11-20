@@ -51,6 +51,9 @@ namespace Knossos.NET.ViewModels
             get { return Nebula.userIsLoggedIn; }
         }
 
+        public DevModCreateNewViewModel()
+        { }
+
         public DevModCreateNewViewModel(Window dialog) 
         {
             this.dialog = dialog;
