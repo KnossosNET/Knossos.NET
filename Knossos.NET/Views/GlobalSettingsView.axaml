@@ -69,7 +69,7 @@
 							<CheckBox IsVisible="{Binding IsAVX}" Grid.Column="0" ToolTip.Tip="If available, Knossos will force to run SSE2 FSO builds instead of AVX ones." IsChecked="{Binding ForceSSE2}" Width="200">Force SSE2 Builds</CheckBox>
 							<CheckBox IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="1" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start.">Check for updates at startup</CheckBox>
 							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="2" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input.">Auto Update</CheckBox>
-							<CheckBox Margin="5,0,0,0" Grid.Column="3" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successfull upload. You con choose to disable this option if you need to take a closer look or debug a problem.">Delete Uploded Mod Files</CheckBox>
+							<CheckBox Margin="5,0,0,0" Grid.Column="3" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successfull upload. You con choose to disable this option if you need to take a closer look or debug a problem.">Delete Uploaded Mod Files</CheckBox>
 						</Grid>
 						<!-- Image Cache -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto">
