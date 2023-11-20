@@ -25,7 +25,7 @@
 	</UserControl.Styles>
 	
 
-	<Grid Background="#422626" Width="150" Height="260" VerticalAlignment="Center" HorizontalAlignment="Center">
+	<Grid Background="{StaticResource BackgroundColorSecondary}" Width="150" Height="260" VerticalAlignment="Center" HorizontalAlignment="Center">
 		<!--Default-->
 		<Image VerticalAlignment="Top" Source="{Binding Image}" Width="150" Height="225"></Image>
 		<TextBlock Margin="0,222,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" TextAlignment="Center" FontSize="14" Foreground="White"/>
@@ -39,10 +39,10 @@
 						<Label FontWeight="Bold" FontSize="11" Foreground="White">Main</Label>
 					</TabItem.Header>
 					<StackPanel Margin="5">
-						<Button Command="{Binding ButtonCommand}" CommandParameter="play" Content="Play" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Margin="0,2,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommand}" CommandParameter="fred2" Content="Fred2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkOrange" Margin="0,2,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommand}" CommandParameter="details" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkGray" Margin="0,2,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommand}" CommandParameter="settings" Content="Settings" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Crimson" Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="play" Content="Play" Classes="Accept Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="fred2" Content="Fred2" Classes="Secondary Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="details" Content="Details" Classes="Tertiary Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="settings" Content="Settings" Classes="Quaternary Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
 					</StackPanel>
 				</TabItem>
 				<TabItem Margin="-5, 0, 0 0" IsVisible="{Binding !IsLocalMod}">
@@ -50,11 +50,11 @@
 						<Label FontWeight="Bold" FontSize="11" Foreground="White">Advanced</Label>
 					</TabItem.Header>
 					<StackPanel Margin="5">
-						<Button Command="{Binding ButtonCommand}" CommandParameter="debug" Content="FSO Debug" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Margin="0,2,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommand}" CommandParameter="qtfred" Content="QtFred" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Purple" Margin="0,2,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommand}" CommandParameter="update" Content="Update/Modify" IsVisible="{Binding UpdateAvalible}" FontWeight="Bold" FontSize="11" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Blue" Margin="0,2,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommand}" CommandParameter="modify" Content="Modify" IsVisible="{Binding !UpdateAvalible}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="DarkCyan" Margin="0,2,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommand}" CommandParameter="delete" Content="Delete" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="debug" Content="FSO Debug" Classes="Primary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="update" Content="Update/Modify" IsVisible="{Binding UpdateAvalible}" Classes="Option Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="modify" Content="Modify" IsVisible="{Binding !UpdateAvalible}" Classes="Quaternary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="qtfred" Content="QtFred" Classes="Tertiary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="delete" Content="Delete" Classes="Cancel Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
 					</StackPanel>
 				</TabItem>
 			</TabControl>

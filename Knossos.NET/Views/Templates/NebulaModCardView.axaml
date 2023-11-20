@@ -24,20 +24,20 @@
 		</Style>
 	</UserControl.Styles>
 	
-	<Grid Background="#422626" Width="150" Height="260" VerticalAlignment="Center" HorizontalAlignment="Center">
+	<Grid Background="{StaticResource BackgroundColorSecondary}" Width="150" Height="260" VerticalAlignment="Center" HorizontalAlignment="Center">
 		<!--Default-->
 		<Image VerticalAlignment="Top" Source="{Binding TileImage}" Width="150" Height="225"></Image>
 		<TextBlock Margin="0,222,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" TextAlignment="Center" FontSize="14" Foreground="White"/>
 		<!--Nebula Overlay-->
 		<StackPanel IsVisible="{Binding !IsInstalling}" Name="Overlay" ZIndex="1" Background="Black" Height="225" Width="150" VerticalAlignment="Top">
 			<Label Content="{Binding ModVersion}" FontWeight="Bold" FontSize="14" Width="150" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
-			<Button Margin="0,55,0,0" Command="{Binding ButtonCommand}" CommandParameter="install" Content="Install" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Green" Width="100" ></Button>
-			<Button Margin="0,10,0,0" Command="{Binding ButtonCommand}" CommandParameter="details" Content="Details" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Orange" Width="100" ></Button>
+			<Button Margin="0,55,0,0" Command="{Binding ButtonCommand}" CommandParameter="install" Content="Install" Classes="Accept Rounded" HorizontalAlignment="Center" Width="100" ></Button>
+			<Button Margin="0,10,0,0" Command="{Binding ButtonCommand}" CommandParameter="details" Content="Details" Classes="Option Rounded" HorizontalAlignment="Center" Width="100" ></Button>
 		</StackPanel>
 		<!--Installing Overlay-->
 		<StackPanel IsVisible="{Binding IsInstalling}" Opacity="0.8" ZIndex="3" Background="Black" Width="150" Height="225" VerticalAlignment="Top">
 			<Label Content="Installing..." FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="0,50,0,0" Width="100"></Label>
-			<Button Command="{Binding ButtonCommand}" CommandParameter="cancel" Content="Cancel" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="Red" Margin="0,5,0,0" Width="100" ></Button>
+			<Button Command="{Binding ButtonCommand}" CommandParameter="cancel" Content="Cancel"  Classes="Cancel Rounded" HorizontalAlignment="Center" Margin="0,5,0,0" Width="100" ></Button>
 		</StackPanel>
 	</Grid>
 	

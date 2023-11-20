@@ -1,0 +1,236 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	
+	<!--
+		Reference:
+		https://docs.avaloniaui.net/docs/next/basics/user-interface/styling/styles
+		https://docs.avaloniaui.net/docs/next/basics/user-interface/styling/style-classes 
+	-->
+	
+	<Design.PreviewWith>
+		<Border Padding="20" Background="{StaticResource BackgroundColorPrimary}">
+			<!-- Add Controls for Previewer Here -->
+			<WrapPanel>
+				<StackPanel>
+					<Label>Buttons</Label>
+					<Button Margin="2" Width="150">Generic Button</Button>
+					<Button Margin="2" IsEnabled="False" Width="150">Generic Disabled</Button>
+					<Button Margin="2" Width="150" Classes="Accept Rounded">Accept Rounded</Button>
+					<Button Margin="2" Width="150" Classes="Accept">Accept</Button>
+					<Button Margin="2" Width="150" Classes="Cancel">Cancel</Button>
+					<Button Margin="2" Width="150" Classes="Option">Option</Button>
+					<Button Margin="2" Width="150" Classes="Primary">Primary</Button>
+					<Button Margin="2" Width="150" Classes="Secondary">Secondary</Button>
+					<Button Margin="2" Width="150" Classes="Tertiary">Tertiary</Button>
+					<Button Margin="2" Width="150" Classes="Quaternary">Quaternary</Button>
+					<Label Margin="0,10,0,0">Progress Bar</Label>
+					<ProgressBar Margin="2" Width="150" Height="50" Value="50" ShowProgressText="True"></ProgressBar>
+					<Label Margin="0,10,0,0">ComboBox</Label>
+					<ComboBox Margin="2" Width="170" Height="25">
+						<ComboBoxItem>Item 1</ComboBoxItem>
+						<ComboBoxItem>Item 2</ComboBoxItem>
+						<ComboBoxItem>Item 3</ComboBoxItem>
+					</ComboBox>
+					<Label Margin="0,10,0,0">CheckBox</Label>
+					<CheckBox IsChecked="True">CheckBoxText</CheckBox>
+				</StackPanel>
+				<StackPanel>
+					<Label>Colors</Label>
+					<Label>Background Secondary</Label>
+					<Border Background="{StaticResource BackgroundColorSecondary}" Width="100" Height="20"></Border>
+					<Label>Background Tertiary</Label>
+					<Border Background="{StaticResource BackgroundColorTertiary}" Width="100" Height="20"></Border>
+					<Label>Primary</Label>
+					<Border Background="{StaticResource PrimaryColor}" Width="100" Height="20"></Border>
+					<Label>PrimaryColorMouseOver</Label>
+					<Border Background="{StaticResource PrimaryColorMouseOver}" Width="100" Height="20"></Border>
+					<Label>SecondaryColor</Label>
+					<Border Background="{StaticResource SecondaryColor}" Width="100" Height="20"></Border>
+					<Label>SecondaryColorMouseOver</Label>
+					<Border Background="{StaticResource SecondaryColorMouseOver}" Width="100" Height="20"></Border>
+					<Label>TertiaryColor</Label>
+					<Border Background="{StaticResource TertiaryColor}" Width="100" Height="20"></Border>
+					<Label>TertiaryColorMouseOver</Label>
+					<Border Background="{StaticResource TertiaryColorMouseOver}" Width="100" Height="20"></Border>
+					<Label>QuaternaryColor</Label>
+					<Border Background="{StaticResource QuaternaryColor}" Width="100" Height="20"></Border>
+					<Label>QuaternaryColorMouseOver</Label>
+					<Border Background="{StaticResource QuaternaryColorMouseOver}" Width="100" Height="20"></Border>
+					<Label>ModCardBorderNormal</Label>
+					<Border Background="{StaticResource ModCardBorderNormal}" Width="100" Height="20"></Border>
+					<Label>ModCardBorderUpdate</Label>
+					<Border Background="{StaticResource ModCardBorderUpdate}" Width="100" Height="20"></Border>
+					<Label>ModCardBorderError</Label>
+					<Border Background="{StaticResource ModCardBorderError}" Width="100" Height="20"></Border>
+					<Label>ModCardBorderDevMode</Label>
+					<Border Background="{StaticResource ModCardBorderDevMode}" Width="100" Height="20"></Border>
+				</StackPanel>
+			</WrapPanel>
+		</Border>
+	</Design.PreviewWith>
+
+	<!--Color Resource Definition-->
+	<Styles.Resources>
+		<SolidColorBrush x:Key="BackgroundColorPrimary">#18191A</SolidColorBrush>
+		<SolidColorBrush x:Key="BackgroundColorSecondary">#422626</SolidColorBrush>
+		<SolidColorBrush x:Key="BackgroundColorTertiary">#131414</SolidColorBrush>
+		
+		<SolidColorBrush x:Key="PrimaryColor">DarkCyan</SolidColorBrush>
+		<SolidColorBrush x:Key="PrimaryColorMouseOver">#7593af</SolidColorBrush>
+		<SolidColorBrush x:Key="SecondaryColor">#2c4875</SolidColorBrush>
+		<SolidColorBrush x:Key="SecondaryColorMouseOver">#8a508f</SolidColorBrush>
+		<SolidColorBrush x:Key="TertiaryColor">#ff8531</SolidColorBrush>
+		<SolidColorBrush x:Key="TertiaryColorMouseOver">#ffa600</SolidColorBrush>
+		<SolidColorBrush x:Key="QuaternaryColor">#1c4e4f</SolidColorBrush>
+		<SolidColorBrush x:Key="QuaternaryColorMouseOver">#436e6f</SolidColorBrush>
+		
+		<SolidColorBrush x:Key="ModCardBorderNormal">Transparent</SolidColorBrush>
+		<SolidColorBrush x:Key="ModCardBorderUpdate">Blue</SolidColorBrush>
+		<SolidColorBrush x:Key="ModCardBorderError">Red</SolidColorBrush>
+		<SolidColorBrush x:Key="ModCardBorderDevMode">DimGray</SolidColorBrush>
+	</Styles.Resources>
+	
+	<!--BUTTONS-->
+		<!--Generic-->
+		<Style Selector="Button">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="Black"/>
+			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="BorderBrush" Value="DarkGray"/>
+			<Setter Property="FontSize" Value="14" />
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="#131414"/>
+			<Setter Property="BorderBrush" Value="Gray"/>
+		</Style>
+	
+		<!--Generic Disabled-->
+		<Style Selector="Button:disabled /template/ ContentPresenter">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="DarkGray"/>
+			<Setter Property="Foreground" Value="Gray"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+
+		<!--Rounded-->
+		<Style Selector="Button.Rounded">
+			<Setter Property="CornerRadius" Value="40"/>
+		</Style>
+	
+		<!--Accept-->
+		<Style Selector="Button.Accept">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="DarkGreen"/>
+			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button.Accept:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="Green"/>
+		</Style>
+	
+		<!--Cancel-->
+		<Style Selector="Button.Cancel">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="DarkRed"/>
+			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="FontSize" Value="14" />
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button.Cancel:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="Red"/>
+		</Style>
+
+		<!--Option-->
+		<Style Selector="Button.Option">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="#001B79"/>
+			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="FontSize" Value="14" />
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button.Option:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="#1640D6"/>
+		</Style>
+
+		<!--Primary-->
+		<Style Selector="Button.Primary">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
+			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="FontSize" Value="14" />
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button.Primary:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="{StaticResource PrimaryColorMouseOver}"/>
+		</Style>
+	
+		<!--Secondary-->
+		<Style Selector="Button.Secondary">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="{StaticResource SecondaryColor}"/>
+			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="FontSize" Value="14" />
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button.Secondary:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="{StaticResource SecondaryColorMouseOver}"/>
+		</Style>
+	
+		<!--Tertiary-->
+		<Style Selector="Button.Tertiary">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="{StaticResource TertiaryColor}"/>
+			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="FontSize" Value="14" />
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button.Tertiary:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="{StaticResource TertiaryColorMouseOver}"/>
+		</Style>
+
+		<!--Quaternary-->
+		<Style Selector="Button.Quaternary">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="{StaticResource QuaternaryColor}"/>
+			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="FontSize" Value="14" />
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button.Quaternary:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="{StaticResource QuaternaryColorMouseOver}"/>
+		</Style>
+		<!--END BUTTONS-->
+
+	<!--Generic Progress Bar-->
+	<Style Selector="ProgressBar">
+		<Setter Property="Background" Value="{StaticResource BackgroundColorTertiary}"/>
+		<Setter Property="Foreground" Value="{StaticResource PrimaryColor}"/>
+		<Setter Property="BorderBrush" Value="DarkGray"/>
+		<Setter Property="BorderThickness" Value="1"/>
+	</Style>
+
+	<!--Generic Combo Box-->
+	<Style Selector="ComboBox">
+		<Setter Property="Background" Value="{StaticResource BackgroundColorTertiary}"/>
+		<Setter Property="FontWeight" Value="Bold"/>
+		<Setter Property="Foreground" Value="White"/>
+	</Style>
+
+	<!--Generic Combo Box Item-->
+	<Style Selector="ComboBoxItem">
+		<Setter Property="Background" Value="{StaticResource BackgroundColorTertiary}"/>
+		<Setter Property="FontWeight" Value="Bold"/>
+		<Setter Property="Foreground" Value="White"/>
+	</Style>
+</Styles>

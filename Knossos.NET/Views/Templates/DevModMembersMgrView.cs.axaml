@@ -12,11 +12,11 @@
 		<vm:DevModMembersMgrViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer Background="#422626">
+	<ScrollViewer Background="{StaticResource BackgroundColorSecondary}">
 		<StackPanel IsEnabled="{Binding ButtonsEnabled}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 			<WrapPanel IsVisible="{Binding !Loading}" Margin="20">
-				<Button Command="{Binding NewMember}" Content="Add Member"/>
-				<Button Command="{Binding Save}" Margin="20,0,0,0" Content="Save Changes"/>
+				<Button Command="{Binding NewMember}" Classes="Primary"  Content="Add Member"/>
+				<Button Command="{Binding Save}" Classes="Accept" Margin="20,0,0,0" Content="Save Changes"/>
 			</WrapPanel>
 			<Label IsVisible="{Binding Loading}" FontSize="32" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">Loading...</Label>
 			<ListBox IsVisible="{Binding !Loading}" ItemsSource="{Binding MemberItems}">
@@ -26,7 +26,7 @@
 							<Label IsVisible="{Binding !IsEnabled}" ToolTip.Tip="You can not change your own permissions!" Margin="5" Grid.Column="0" FontSize="20" Content="{Binding ModMember.user}"/>
 							<TextBox ToolTip.Tip="User Nebula Username" IsReadOnly="{Binding IsReadOnly}" IsVisible="{Binding IsEnabled}" Margin="5" Grid.Column="0" FontSize="20" Text="{Binding ModMember.user}"/>
 							<ComboBox IsEnabled="{Binding IsEnabled}" ToolTip.Tip="User Access" Margin="5" Width="200" FontSize="20" HorizontalAlignment="Right" Grid.Column="1" SelectedIndex="{Binding RoleIndex}" ItemsSource="{Binding RoleItems}"/>
-							<Button IsEnabled="{Binding IsEnabled}" Margin="50,5,5,5" FontSize="20" ToolTip.Tip="Remove User" Command="{Binding Delete}" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Right" Content="X" Background="DarkRed"/>
+							<Button IsEnabled="{Binding IsEnabled}" Margin="50,5,5,5" FontSize="20" ToolTip.Tip="Remove User" Command="{Binding Delete}" Grid.Column="2" Classes="Cancel" HorizontalAlignment="Right" Content="X"/>
 						</Grid>
 					</DataTemplate>
 				</ListBox.ItemTemplate>

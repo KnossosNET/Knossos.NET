@@ -135,6 +135,7 @@ namespace Knossos.NET.ViewModels
                 ComboBoxItem item = new ComboBoxItem();
                 item.Content = build;
                 item.Tag = "stable";
+                item.FontWeight = FontWeight.Bold;
                 BuildItems.Add(item);
                 if (preSelected != null)
                 {
@@ -159,8 +160,9 @@ namespace Knossos.NET.ViewModels
                     ComboBoxItem item = new ComboBoxItem();
                     item.Content = build;
                     item.Tag = "custom";
+                    item.FontWeight = FontWeight.Bold;
                     item.IsVisible = !HideCustom;
-                    item.Foreground = Brushes.Green;
+                    item.Foreground = KnUtils.GetResourceColor("PrimaryColorMouseOver");
                     BuildItems.Add(item);
                     if (preSelected != null)
                     {
@@ -187,7 +189,8 @@ namespace Knossos.NET.ViewModels
                     item.Content = build;
                     item.Tag = "rc";
                     item.IsVisible = !HideRC;
-                    item.Foreground = Brushes.Yellow;
+                    item.FontWeight = FontWeight.Bold;
+                    item.Foreground = KnUtils.GetResourceColor("SecondaryColorMouseOver");
                     BuildItems.Add(item);
                     if (preSelected != null)
                     {
@@ -214,7 +217,8 @@ namespace Knossos.NET.ViewModels
                     item.Content = build;
                     item.Tag = "nightly";
                     item.IsVisible = !HideNightly;
-                    item.Foreground = Brushes.LightBlue;
+                    item.FontWeight = FontWeight.Bold;
+                    item.Foreground = KnUtils.GetResourceColor("TertiaryColor");
                     BuildItems.Add(item);
                     if (preSelected != null)
                     {
@@ -240,7 +244,8 @@ namespace Knossos.NET.ViewModels
                 ComboBoxItem item = new ComboBoxItem();
                 item.Content = preSelected;
                 item.Tag = "directexec";
-                item.Foreground = Brushes.LemonChiffon;
+                item.FontWeight = FontWeight.Bold;
+                item.Foreground = KnUtils.GetResourceColor("QuaternaryColorMouseOver");
                 BuildItems.Add(item);
                 selectedItem = item;
             }
@@ -276,7 +281,8 @@ namespace Knossos.NET.ViewModels
                 item.Content = new FsoBuild(path);
                 item.Tag = "directexec";
                 item.IsSelected = true;
-                item.Foreground = Brushes.LemonChiffon;
+                item.FontWeight = FontWeight.Bold;
+                item.Foreground = KnUtils.GetResourceColor("QuaternaryColorMouseOver");
                 BuildItems.Add(item);
                 BuildSelectedIndex = BuildItems.IndexOf(item);  
             }

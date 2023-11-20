@@ -15,7 +15,7 @@
 	<ScrollViewer IsVisible="{Binding TaskList.Count}">
 		<Grid>
 			<WrapPanel HorizontalAlignment="Right" ZIndex="1">
-				<Button Background="Black" Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">Clear</Button>
+				<Button Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">Clear</Button>
 			</WrapPanel>
 			<Grid RowDefinitions="Auto" ZIndex="0">
 				<ItemsControl Grid.Row="0" ItemsSource="{Binding TaskList}">

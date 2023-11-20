@@ -7,7 +7,7 @@
 		WindowStartupLocation="CenterOwner"
         x:Class="Knossos.NET.Views.MessageBox" SizeToContent="WidthAndHeight" CanResize="False">
 
-	<Grid Background="#18191A" HorizontalAlignment="Center" RowDefinitions="Auto,Auto">
+	<Grid Background="{StaticResource BackgroundColorPrimary}" HorizontalAlignment="Center" RowDefinitions="Auto,Auto">
 		<TextBlock Margin="50" Grid.Row="0" HorizontalAlignment="Center" Name="Text" TextWrapping="Wrap"/>
 		<StackPanel Margin="0,50,0,0" Grid.Row="1" HorizontalAlignment="Center" Orientation="Horizontal" Name="Buttons">
 			<StackPanel.Styles>

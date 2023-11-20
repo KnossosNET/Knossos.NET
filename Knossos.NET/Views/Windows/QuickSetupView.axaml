@@ -22,7 +22,7 @@
 	</Design.DataContext>
 
 	<ScrollViewer>
-	<Grid Background="#18191A" HorizontalAlignment="Stretch" RowDefinitions="*,Auto">
+	<Grid Background="{StaticResource BackgroundColorPrimary}" HorizontalAlignment="Stretch" RowDefinitions="*,Auto">
 		
 		<!--Page1-->
 		<StackPanel IsVisible="{Binding Page1}" Grid.Row="0">
@@ -84,9 +84,9 @@
 		
 		<!--Navigation-->
 		<WrapPanel Grid.Row="1" HorizontalAlignment="Center">
-			<Button Command="{Binding GoBackCommand}" IsVisible="{Binding CanGoBack}" Margin="5" Background="Black">Back</Button>
-			<Button Command="{Binding ContinueCommand}" IsEnabled="{Binding CanContinue}" IsVisible="{Binding !LastPage}" Margin="5" Background="Black">Next</Button>
-			<Button Command="{Binding Finish}" IsVisible="{Binding LastPage}" Margin="5" Background="Black">Finish</Button>
+			<Button Command="{Binding GoBackCommand}" IsVisible="{Binding CanGoBack}" Margin="5" Classes="Secondary">Back</Button>
+			<Button Command="{Binding ContinueCommand}" IsEnabled="{Binding CanContinue}" IsVisible="{Binding !LastPage}" Margin="5" Classes="Accept">Next</Button>
+			<Button Command="{Binding Finish}" IsVisible="{Binding LastPage}" Margin="5" Classes="Accept">Finish</Button>
 		</WrapPanel>
 	</Grid>
 	</ScrollViewer>

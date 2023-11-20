@@ -40,6 +40,11 @@ namespace Knossos.NET.ViewModels
         internal bool page6 = false;
 
         private Window? dialog;
+
+        public QuickSetupViewModel() 
+        { 
+        }
+
         public QuickSetupViewModel(Window dialog) 
         {
             this.dialog = dialog;

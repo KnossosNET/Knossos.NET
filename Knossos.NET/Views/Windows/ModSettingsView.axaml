@@ -18,49 +18,47 @@
 		<vm:ModSettingsViewModel/>
 	</Design.DataContext>
 
-	<Grid>
-		<Border Background="#18191A" BorderBrush="Gray" BorderThickness="3" CornerRadius="2">
-			<Grid RowDefinitions="Auto,*">
-				<Grid ColumnDefinitions="Auto,Auto" HorizontalAlignment="Center" Grid.Row="0">
-					<Button Command="{Binding SaveSettingsCommand}" Grid.Column="1" FontWeight="Bold" FontSize="18" Background="Green" Foreground="White" Margin="5">Save</Button>
-					<Button Command="{Binding ResetSettingsCommand}" Grid.Column="0" FontWeight="Bold" FontSize="18" Background="Red" Foreground="White" Margin="5">Reset</Button>
-				</Grid>
-				<ScrollViewer Grid.Row="1">
-					<StackPanel>
-						<!--Compression-->
-						<Label Margin="0,5,0,0" FontWeight="Black" FontSize="20">DISK USAGE</Label>
-						<Label Content="{Binding ModSize}"></Label>
-						<Button Margin="5" Background="Black" IsVisible="{Binding CompressionAvalible}" Command="{Binding CompressCommand}">Compress</Button>
-						<Button Margin="5" Background="Black" IsVisible="{Binding Compressed}" Command="{Binding DecompressCommand}">Decompress</Button>
-						<!--Quick Launch-->
-						<Label Margin="0,5,0,0" FontWeight="Black" FontSize="20">QUICK LAUNCH</Label>
-						<TextBox Margin="5" Foreground="White" IsReadOnly="True" Text="{Binding QuickLaunch}"></TextBox>
-						<!--FSO Build Settings -->
-						<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">FSO BUILD</Label>
-						<v:FsoBuildPickerView Content="{Binding FsoPicker}"/>
-						<TextBlock Margin="5,0,0,0" TextWrapping="Wrap" Foreground="Red" Text="{Binding BuildMissingWarning}"/>
-						<Button IsVisible="{Binding !ConfigureBuildOpen}" Command="{Binding ConfigureBuildCommand}" Margin="5" FontWeight="Bold" FontSize="18" Background="Black" Foreground="White">Configure</Button>
-						<v:FsoFlagsView Content="{Binding FsoFlags}"/>
-						<CheckBox IsChecked="{Binding IgnoreGlobalCmd}" Margin="5,5,0,0" ToolTip.Tip="This means that global settings and global cmdline is not applied to the mod.">Do not apply settings or global cmdline on this mod</CheckBox>
-						<!--FSO Build END -->
-						
-						<!--Dependencies Settings-->
-						<StackPanel>
-							<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">MOD DEPENDENCIES</Label>
-							<CheckBox Command="{Binding CustomDependenciesClick}" IsChecked="{Binding CustomDependencies}" Margin="5,0,0,0" ToolTip.Tip="Changing mod dependencies may cause problems, uncheck this box to reset back to defaults if you encounter problems.">Enable custom mod dependencies</CheckBox>
-							<Button Command="{Binding AddDependencyCommand}" IsVisible="{Binding CustomDependencies}" FontWeight="Bold" FontSize="18" Background="Black" Foreground="White" Margin="5">+</Button>
-							<ListBox ItemsSource="{Binding DepItems}">
-								<ListBox.ItemTemplate>
-									<DataTemplate>
-										<v:DependencyItemView Content="{Binding}"/>
-									</DataTemplate>
-								</ListBox.ItemTemplate>
-							</ListBox>
-						</StackPanel>
-						<!--Dependencies End-->
-					</StackPanel>
-				</ScrollViewer>
+	<Grid Background="{StaticResource BackgroundColorPrimary}">
+		<Grid RowDefinitions="Auto,*">
+			<Grid ColumnDefinitions="Auto,Auto" HorizontalAlignment="Center" Grid.Row="0">
+				<Button Command="{Binding SaveSettingsCommand}" Grid.Column="1" FontSize="18" Classes="Accept" Margin="5">Save</Button>
+				<Button Command="{Binding ResetSettingsCommand}" Grid.Column="0" FontSize="18" Classes="Cancel" Foreground="White" Margin="5">Reset</Button>
 			</Grid>
-		</Border>
+			<ScrollViewer Grid.Row="1">
+				<StackPanel>
+					<!--Compression-->
+					<Label Margin="0,5,0,0" FontWeight="Black" FontSize="20">DISK USAGE</Label>
+					<Label Content="{Binding ModSize}"></Label>
+					<Button Margin="5" Classes="Secondary" IsVisible="{Binding CompressionAvalible}" Command="{Binding CompressCommand}">Compress</Button>
+					<Button Margin="5" Classes="Secondary" IsVisible="{Binding Compressed}" Command="{Binding DecompressCommand}">Decompress</Button>
+					<!--Quick Launch-->
+					<Label Margin="0,5,0,0" FontWeight="Black" FontSize="20">QUICK LAUNCH</Label>
+					<TextBox Margin="5" Foreground="White" IsReadOnly="True" Text="{Binding QuickLaunch}"></TextBox>
+					<!--FSO Build Settings -->
+					<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">FSO BUILD</Label>
+					<v:FsoBuildPickerView Content="{Binding FsoPicker}"/>
+					<TextBlock Margin="5,0,0,0" TextWrapping="Wrap" Foreground="Red" Text="{Binding BuildMissingWarning}"/>
+					<Button IsVisible="{Binding !ConfigureBuildOpen}" Command="{Binding ConfigureBuildCommand}" Margin="5" FontWeight="Bold" FontSize="18" Classes="Secondary">Configure</Button>
+					<v:FsoFlagsView Content="{Binding FsoFlags}"/>
+					<CheckBox IsChecked="{Binding IgnoreGlobalCmd}" Margin="5,5,0,0" ToolTip.Tip="This means that global settings and global cmdline is not applied to the mod.">Do not apply settings or global cmdline on this mod</CheckBox>
+					<!--FSO Build END -->
+						
+					<!--Dependencies Settings-->
+					<StackPanel>
+						<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">MOD DEPENDENCIES</Label>
+						<CheckBox Command="{Binding CustomDependenciesClick}" IsChecked="{Binding CustomDependencies}" Margin="5,0,0,0" ToolTip.Tip="Changing mod dependencies may cause problems, uncheck this box to reset back to defaults if you encounter problems.">Enable custom mod dependencies</CheckBox>
+						<Button Command="{Binding AddDependencyCommand}" IsVisible="{Binding CustomDependencies}" FontWeight="Bold" FontSize="18" Classes="Secondary" Margin="5">+</Button>
+						<ListBox ItemsSource="{Binding DepItems}">
+							<ListBox.ItemTemplate>
+								<DataTemplate>
+									<v:DependencyItemView Content="{Binding}"/>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+					</StackPanel>
+					<!--Dependencies End-->
+				</StackPanel>
+			</ScrollViewer>
+		</Grid>
 	</Grid>
 </Window>
