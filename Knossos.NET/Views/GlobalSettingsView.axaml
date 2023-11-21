@@ -370,7 +370,7 @@
 							<NumericUpDown Value="{Binding MultiPort}" Grid.Column="1" Width="150"></NumericUpDown>
 						</Grid>
 						<!-- Sys Info -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="10,5,0,0">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5,5,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Detected Build Settings </TextBlock>
 							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
 								<Label Margin="0,5,0,0" FontWeight="Bold">OS:</Label>
@@ -384,7 +384,7 @@
 
 						<WrapPanel Margin="0,5,0,0">	
 							<Label Margin="5,5,0,0" IsVisible="{Binding IsAVX}" Width="200">Force SSE2</Label> 
-							<CheckBox Margin="20,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, Knossos will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
+							<CheckBox Margin="10,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, Knossos will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
 						</WrapPanel>
 						<!-- GLOBAL CMDLINE -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
