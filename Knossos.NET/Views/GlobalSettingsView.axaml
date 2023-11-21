@@ -17,7 +17,7 @@
 			<StackPanel>
 				<WrapPanel Margin="0,10,0,0">
 					<Button Command="{Binding QuickSetupCommand}" FontSize="22" Background="Black" Margin="5,0,0,0" Classes="Secondary">Quick Setup Guide</Button>
-					<Button Command="{Binding SaveCommand}"  FontWeight="Bold" FontSize="22" Classes="Accept" Margin="450,0,0,0">Save</Button>
+					<Button Command="{Binding SaveCommand}"  FontWeight="Bold" FontSize="22" Classes="Accept" Margin="480,0,0,0">Save</Button>
 					<Button Command="{Binding ReloadFlagData}" Foreground="White" FontSize="20" Background="Black" Margin="10,0,0,0" Classes="Option">Reload Data</Button>
 					<Button Command="{Binding ResetCommand}" FontWeight="Bold" FontSize="20" Margin="10,0,0,0" Classes="Cancel">Reset</Button>
 				</WrapPanel>
@@ -27,7 +27,7 @@
 		<ScrollViewer Grid.Row="1">
 			<StackPanel>
 				<!--KNOSSOS SETTINGS-->
-				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Knossos Settings</Label>
+				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Knossos</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Base Path -->
@@ -60,24 +60,10 @@
 						<Button Command="{Binding CleanupLibraryCommand}" Background="Black" Margin="15,0,0,0">Remove Unused Dependencies</Button>
 						</WrapPanel>
 						<!--AutoUpdates -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto,Auto" Margin="210,3,0,0" >
+						<Grid ColumnDefinitions="Auto,Auto,Auto,Auto" Margin="210,5,0,0" >
 							<CheckBox IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="1" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start.">Check for updates at startup</CheckBox>
 							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="2" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input.">Auto Update</CheckBox>
 							<CheckBox Margin="5,0,0,0" Grid.Column="3" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successfull upload. You con choose to disable this option if you need to take a closer look or debug a problem.">Delete Uploaded Mod Files</CheckBox>
-						</Grid>
-						<!-- Sys Info -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5,20,0,0">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="Heavy" Width="200">System </TextBlock>
-							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
-								<Label Margin="0,5,0,0" FontWeight="Bold">OS:</Label>
-								<TextBlock Margin="5,8,0,0" Text="{Binding DetectedOS}"></TextBlock>
-								<Label Margin="30,5,0,0" FontWeight="Bold">CPU Arch:</Label>
-								<TextBlock Margin="5,8,0,0" Text="{Binding CpuArch}"></TextBlock>
-								<CheckBox Margin="20,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, Knossos will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
-								<Label Margin="0,5,0,0" IsVisible="{Binding IsAVX}">Force SSE2</Label> 
-								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX}">AVX</CheckBox>
-								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX2}">AVX2</CheckBox>
-							</WrapPanel>
 						</Grid>
 						<!-- Image Cache -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="0,5,0,0">
@@ -123,18 +109,20 @@
 							</WrapPanel>
 						</Grid>
 						<!-- Log File -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+						<WrapPanel Margin="5">
 							<CheckBox Grid.Column="0" IsChecked="{Binding EnableLogFile}" Width="200">Enable Log File</CheckBox>
+						</WrapPanel>
+						<WrapPanel Margin="5">
 							<ComboBox SelectedIndex="{Binding LogLevel}" IsEnabled="{Binding EnableLogFile}" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Information</ComboBoxItem>
 								<ComboBoxItem Tag="1">Warning</ComboBoxItem>
 								<ComboBoxItem Tag="2">Error</ComboBoxItem>
 							</ComboBox>
-						</Grid>
+						</WrapPanel>
 					</StackPanel>
 				</Border>
 				<!--VIDEO SETTINGS-->
-				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Video Settings</Label>
+				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">Video</Label>
 				<Border BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Resolution -->
@@ -156,7 +144,7 @@
 							</ComboBox>
 						</Grid>
 						<!-- Window -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<Label VerticalAlignment="Center" Grid.Column="0" Width="200">Window Mode</Label>
 							<ComboBox SelectedIndex="{Binding WindowMode}" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Windowed</ComboBoxItem>
@@ -165,7 +153,7 @@
 							</ComboBox>
 						</Grid>
 						<!-- Shadows -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<Label VerticalAlignment="Center" Grid.Column="0" Width="200">Shadows</Label>
 							<ComboBox ToolTip.Tip="High performance impact, especially at Ultra" Tag="-shadow_quality" SelectedIndex="{Binding ShadowQualitySelectedIndex}" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
@@ -176,7 +164,7 @@
 							</ComboBox>
 						</Grid>
 						<!-- AA Filter -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<Label Grid.Column="0" Width="200" VerticalAlignment="Center">Post-processing Anti-Aliasing</Label>
 							<ComboBox Tag="-aa_preset" SelectedIndex="{Binding AaSelectedIndex}" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
@@ -190,7 +178,7 @@
 							</ComboBox>
 						</Grid>
 						<!-- SMAA Filter -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 						<Label Grid.Column="0" Width="200" VerticalAlignment="Center">Extra Multisample Anti-Aliasing</Label>
 						<ComboBox ToolTip.Tip="High performance impact, especially at Ultra or at >= 4k resolution" Tag="-msaa" SelectedIndex="{Binding MsaaSelectedIndex}" Grid.Column="1" Width="150" Margin="10,0,0,0">
 							<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
@@ -199,36 +187,42 @@
 						</ComboBox>
 						</Grid>
 						<!-- Enable deferred lighting -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<Label Margin="5,0,0,0" Width="200">Enable Deferred Lighting</Label> 
-							<CheckBox Tag="-no_deferred" Grid.Column="0" IsChecked="{Binding EnableDeferredLighting}" Width="200"></CheckBox>
-						</Grid>
+						<WrapPanel>
+							<Label Margin="5,5,0,0" Width="210">Deferred Lighting</Label> 
+							<CheckBox Tag="-no_deferred" IsChecked="{Binding EnableDeferredLighting}"></CheckBox>
+						</WrapPanel>
 						<!-- Enable soft particles -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-						<CheckBox Tag="-soft_particles" Grid.Column="0" IsChecked="{Binding EnableSoftParticles}" Width="200">Enable Soft Particles</CheckBox>
-						</Grid>
-						<!-- VSYNC -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="-no_vsync" Grid.Column="0" IsChecked="{Binding Vsync}" Width="200">Enable VSync</CheckBox>
-						</Grid>
+						<WrapPanel>
+							<Label Margin="5,5,0,0" Width="210">Soft Particles</Label> 
+							<CheckBox Tag="-soft_particles" IsChecked="{Binding EnableSoftParticles}"></CheckBox>
+						</WrapPanel>
 						<!-- Disable Post Processing -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="-no_post_process" Grid.Column="0" IsChecked="{Binding PostProcess}" Width="200">Enable Post Processing</CheckBox>
-						</Grid>
+						<WrapPanel>
+							<Label Margin="5,5,0,0" Width="210">Post Processing</Label> 
+							<CheckBox Tag="-no_post_process" IsChecked="{Binding PostProcess}"></CheckBox>
+						</WrapPanel>
+
+						<!-- VSYNC -->
+						<WrapPanel>
+							<Label Margin="5,5,0,0" Width="210">VSync</Label> 
+							<CheckBox Tag="-no_vsync" IsChecked="{Binding !Vsync}"></CheckBox>
+						</WrapPanel>
 						<!-- FPS Cap -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="-no_fps_capping" Grid.Column="0" IsChecked="{Binding NoFpsCapping}" Width="200">Disable 120 FPS Limit</CheckBox>
-						</Grid>
+						<WrapPanel>
+							<Label Margin="5,5,0,0" Width="210">Limit to 120 FPS</Label> 
+							<CheckBox Tag="-no_fps_capping" IsChecked="{Binding !NoFpsCapping}"></CheckBox>
+						</WrapPanel>
 						<!-- Show FPS -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<CheckBox Tag="-fps" Grid.Column="0" IsChecked="{Binding ShowFps}" Width="200">Display FPS</CheckBox>
-						</Grid>
-            			<Button Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="Slow in-game performance?" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
+						<WrapPanel>
+							<Label Margin="5,5,0,0" Width="210">Display FPS</Label> 
+							<CheckBox Tag="-fps" IsChecked="{Binding ShowFps}" Width="200">Display FPS</CheckBox>
+						</WrapPanel>
+            			<Button Margin="3,4,0,5" Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="Slow in-game performance?" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
 					</StackPanel>
 				</Border>
 
 				<!--Audio SETTINGS-->
-				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Audio Settings</Label>
+				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">Audio</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Playback -->
@@ -293,7 +287,7 @@
 				</Border>
 
 				<!--INPUT SETTINGS-->
-				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Input Settings</Label>
+				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">Input</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
             <?ignore
@@ -338,16 +332,10 @@
 					</StackPanel>
 				</Border>
 		
-				<!--MOD SETTINGS-->
-				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">FSO Global Settings</Label>
+				<!--FSO ENGINE SETTINGS-->
+				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">FSO Engine Settings</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<!-- GLOBAL CMDLINE -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
-							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Cmdline</Label>
-							<TextBox Text="{Binding GlobalCmd}" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="1" Width="500"></TextBox>
-							<Button Command="{Binding GlobalCmdHelp}" Classes="Secondary" Grid.Column="2" Margin="10,0,0,0">?</Button>
-						</Grid>
 						<!-- FS2 Lang -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="3,0,0,0" Width="200">FS2 Language</TextBlock>
@@ -362,6 +350,26 @@
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<Label ToolTip.Tip="Network port used by multiplayer. Default is 7808." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Multiplayer Port</Label>
 							<NumericUpDown Value="{Binding MultiPort}" Grid.Column="1" Width="150"></NumericUpDown>
+						</Grid>
+						<!-- Sys Info -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5,20,0,0">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="Heavy" Width="200">System </TextBlock>
+							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
+								<Label Margin="0,5,0,0" FontWeight="Bold">OS:</Label>
+								<TextBlock Margin="5,8,0,0" Text="{Binding DetectedOS}"></TextBlock>
+								<Label Margin="30,5,0,0" FontWeight="Bold">CPU Arch:</Label>
+								<TextBlock Margin="5,8,0,0" Text="{Binding CpuArch}"></TextBlock>
+								<CheckBox Margin="20,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, Knossos will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
+								<Label Margin="0,5,0,0" IsVisible="{Binding IsAVX}">Force SSE2</Label> 
+								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX}">AVX</CheckBox>
+								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX2}">AVX2</CheckBox>
+							</WrapPanel>
+						</Grid>
+						<!-- GLOBAL CMDLINE -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Command Line</Label>
+							<TextBox Text="{Binding GlobalCmd}" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="1" Width="500"></TextBox>
+							<Button Command="{Binding GlobalCmdHelp}" Classes="Secondary" Grid.Column="2" Margin="10,0,0,0">?</Button>
 						</Grid>
 					</StackPanel>
 				</Border>
