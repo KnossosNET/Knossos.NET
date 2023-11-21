@@ -17,7 +17,7 @@
 			<StackPanel>
 				<WrapPanel Margin="0,10,0,0">
 					<Button Command="{Binding QuickSetupCommand}" FontSize="22" Background="Black" Margin="5,0,0,0" Classes="Secondary">Quick Setup Guide</Button>
-					<Button Command="{Binding ResetCommand}" FontWeight="Bold" FontSize="20" Margin="480,0,0,0" Classes="Cancel">Reset</Button>
+					<Button Command="{Binding ResetCommand}" FontWeight="Bold" FontSize="20" Margin="500,0,0,0" Classes="Cancel">Reset</Button>
 					<Button Command="{Binding ReloadFlagData}" Foreground="White" FontSize="20" Background="Black" Margin="10,0,0,0" Classes="Option">Reload Data</Button>
 					<Button Command="{Binding SaveCommand}"  FontWeight="Bold" FontSize="22" Classes="Accept" Margin="10,0,0,0">Save</Button>
 				</WrapPanel>
@@ -39,7 +39,7 @@
 						<!-- Lib Info -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="6,10,0,0">
 							<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Width="200">Stats</TextBlock>
-							<WrapPanel Grid.Column="1" Grid.Row="0"  Margin="10,2,0,0">
+							<WrapPanel Grid.Column="1" Grid.Row="0"  Margin="8,2,0,0">
 								<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications (collectively known as mods) are installed in your Knossos library.">Mods:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
 								<Label Margin="40,5,0,0" FontWeight="Bold">Builds:</Label>
@@ -111,11 +111,11 @@
 						</Grid>
 						<!-- Mirror Blacklist -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mirror Blacklist</TextBlock>
-							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
-								<CheckBox Margin="0,0,0,0" IsChecked="{Binding BlDlNebula}">dl.fsnebula.org</CheckBox>
-								<CheckBox Margin="25,0,0,0" IsChecked="{Binding BlCfNebula}">cf.fsnebula.org</CheckBox>
-								<CheckBox Margin="25,0,0,0" IsChecked="{Binding BlAigaion}">aigaion.feralhosting.com</CheckBox>
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mirrors</TextBlock>
+							<WrapPanel Grid.Column="1" Margin="8,0,0,0">
+								<CheckBox Margin="0,0,0,0" IsChecked="{Binding !BlDlNebula}">dl.fsnebula.org</CheckBox>
+								<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlCfNebula}">cf.fsnebula.org</CheckBox>
+								<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlAigaion}">aigaion.feralhosting.com</CheckBox>
 							</WrapPanel>
 						</Grid>
 						<!-- Log File -->
@@ -229,7 +229,7 @@
 							<Label Margin="5,5,0,0" Width="210">Display FPS</Label> 
 							<CheckBox Tag="-fps" IsChecked="{Binding ShowFps}" Width="200"></CheckBox>
 						</WrapPanel>
-            			<Button Margin="4,4,0,5" Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="Raising FPS Tips" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
+            			<Button Margin="4,4,0,5" Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="I need more FPS!" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
 					</StackPanel>
 				</Border>
 
