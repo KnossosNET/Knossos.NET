@@ -37,8 +37,8 @@
 							<Button Margin="5,0,0,0" Grid.Column="2" Classes="Secondary" Command="{Binding BrowseFolderCommand}">Browse</Button>
 						</Grid>
 						<!-- Lib Info -->
-						<Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto, Auto" Margin="5">
-							<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Width="200">Statistics</TextBlock>
+						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="5">
+							<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Width="200">Stats</TextBlock>
 							<WrapPanel Grid.Column="1" Grid.Row="0"  Margin="10,2,0,0">
 								<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications (collectively known as mods) are installed in your Knossos library.">Mods:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
@@ -95,7 +95,7 @@
 							</ComboBox>
 						</Grid>
 						<!-- Bandwidth limit -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Bandwidth Limit</TextBlock>
 							<ComboBox SelectedIndex="{Binding MaxDownloadSpeedIndex}" ToolTip.Tip="Bandwidth limiter (Per Individual Download)" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Unlimited</ComboBoxItem>
@@ -113,7 +113,7 @@
 							</ComboBox>
 						</Grid>
 						<!-- Mirror Blacklist -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mirror Blacklist</TextBlock>
 							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
 								<CheckBox Margin="0,0,0,0" IsChecked="{Binding BlDlNebula}">dl.fsnebula.org</CheckBox>
