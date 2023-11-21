@@ -15,7 +15,7 @@
 	<Grid ColumnDefinitions="Auto,*">
 		<ScrollViewer Width="250" Grid.Column="0">
 			<StackPanel Width="250" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-				<TextBlock HorizontalAlignment="Center" Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextWrapping="Wrap" Margin="0"></TextBlock>
+				<TextBlock HorizontalAlignment="Center" Text="{Binding Name}" FontSize="16" FontWeight="Bold" TextWrapping="Wrap" Margin="0"></TextBlock>
 				<Image HorizontalAlignment="Center" Margin="10" Source="{Binding ModImage}" Width="150" Height="225"></Image>
 				<TextBlock HorizontalAlignment="Center" Text="Active Version" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
 				<TextBlock HorizontalAlignment="Center" Text="{Binding Version}" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
@@ -33,9 +33,9 @@
 					<Button Command="{Binding OpenModFolder}" Classes="Option" Margin="2" Width="150" >Open Folder</Button>
 				</StackPanel>
 				<!--Tools-->
-				<StackPanel IsVisible="true" Margin="10,10,10,10" HorizontalAlignment="Center">
-					<TextBlock HorizontalAlignment="Center" Text="Tools" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
-					<ComboBox ItemsSource="{Binding ToolItems}" Width="240" SelectedIndex="{Binding ToolIndex}"></ComboBox>
+				<StackPanel IsVisible="true" Margin="20,10,20,10" HorizontalAlignment="Center">
+					<TextBlock HorizontalAlignment="Center" Text="Tools" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Margin="0,0,0,3"></TextBlock>
+					<ComboBox ItemsSource="{Binding ToolItems}" Width="220" SelectedIndex="{Binding ToolIndex}"></ComboBox>
 					<Button Command="{Binding OpenTool}" HorizontalAlignment="Center" Margin="2" Width="150">Open</Button>
 				</StackPanel>
 			</StackPanel>
