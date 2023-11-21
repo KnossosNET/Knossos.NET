@@ -31,28 +31,28 @@
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Base Path -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="10,10,0,0">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
 							<TextBox Text="{Binding BasePath}" Margin="10,0,0,0" Grid.Column="1" IsReadOnly="True" Width="500"></TextBox>
 							<Button Margin="5,0,0,0" Grid.Column="2" Classes="Secondary" Command="{Binding BrowseFolderCommand}">Browse</Button>
 						</Grid>
 						<!-- Lib Info -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="5,10,0,0">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="6,10,0,0">
 							<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Width="200">Stats</TextBlock>
 							<WrapPanel Grid.Column="1" Grid.Row="0"  Margin="10,2,0,0">
 								<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications (collectively known as mods) are installed in your Knossos library.">Mods:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
 								<Label Margin="40,5,0,0" FontWeight="Bold">Builds:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfBuilds}"></TextBlock>
-								<Button Margin="5,0,0,0" Command="{Binding CleanupLibraryCommand}">Remove Unused Dependencies</Button>
+								<Button Margin="40,0,0,0" Command="{Binding CleanupLibraryCommand}">Remove Unused Dependencies</Button>
 							</WrapPanel>
 						</Grid>
-						<WrapPanel Margin="10,10,0,0">	
+						<WrapPanel Margin="6,10,0,0">	
 							<Label Margin="0,5,0,0" Width="200">Retail Freespace 2</Label>
 							<CheckBox Margin="10,0,0,0" IsVisible="{Binding Fs2RootPack}" IsEnabled="False" IsChecked="{Binding Fs2RootPack}"></CheckBox>
 							<Button Classes="Secondary" Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Margin="10,0,0,0">Installer</Button>
 						</WrapPanel>
-						<WrapPanel Margin="10,10,0,0">
+						<WrapPanel Margin="8,10,0,0">
 							<TextBlock VerticalAlignment="Center" Width="200">Mod Compression</TextBlock>
 							<ComboBox SelectedIndex="{Binding ModCompression}" ToolTip.Tip="Knossos can try to compress mod files in order to save disk space. 'Manual' means you will have to compress or decompress the files manually from mod settings. 'Always' means Knossos will compress all mods during install and 'Mod Support' means Knossos will compress the files only if the mod FSO engine dependency set by the mod is over the minimum. This only works if the mod uses an official build." Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
@@ -77,12 +77,12 @@
 						</WrapPanel>
 						<!-- Image Cache -->
 						<WrapPanel Margin="5,10,0,0">
-							<Label VerticalAlignment="Center" Width="200" Content="Image Cache Size"/>
+							<Label VerticalAlignment="Center" Width="200" Content="Image Cache"/>
 							<Label Margin="10,0,0,0" VerticalAlignment="Center" Foreground="Yellow" Content="{Binding ImgCacheSize}"/>
 							<Button Command="{Binding ClearImageCache}" Margin="5,0,0,0" Classes="Secondary">Clear</Button>
 						</WrapPanel>
 						<!-- SubTasks -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5,10,0,0">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Concurrent Subtasks</TextBlock>
 							<ComboBox SelectedIndex="{Binding MaxConcurrentSubtasks}" ToolTip.Tip="All tasks are done in order, but some tasks like install tasks creates multiple subtasks to download files, etc. This setting controls how many of them can run simultaneously." Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="1">1</ComboBoxItem>
@@ -92,7 +92,7 @@
 							</ComboBox>
 						</Grid>
 						<!-- Bandwidth limit -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5,10,0,0">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Bandwidth Limit</TextBlock>
 							<ComboBox SelectedIndex="{Binding MaxDownloadSpeedIndex}" ToolTip.Tip="Bandwidth limiter (Per Individual Download)" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Unlimited</ComboBoxItem>
@@ -110,7 +110,7 @@
 							</ComboBox>
 						</Grid>
 						<!-- Mirror Blacklist -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5,10,0,0">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mirror Blacklist</TextBlock>
 							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
 								<CheckBox Margin="0,0,0,0" IsChecked="{Binding BlDlNebula}">dl.fsnebula.org</CheckBox>
@@ -261,21 +261,24 @@
 						</Grid>
 						<!-- Enable EFX -->
                         <WrapPanel>
-                            <Label Margin="5,5,0,0" Width="200">Enable EFX</Label> 
-							<CheckBox Tag="efx" Grid.Column="0" IsChecked="{Binding EnableEFX}" ToolTip.Tip="Enables in-mission sound effects to play with an extra sound environment filter set by the mission designer. By default, this filter adds a reverb effect."></CheckBox>
+                            <Label Margin="4,5,0,0" Width="200">Enable EFX</Label> 
+							<CheckBox Tag="efx" Margin="11,0,0,0" IsChecked="{Binding EnableEFX}" ToolTip.Tip="Enables in-mission sound effects to play with an extra sound environment filter set by the mission designer. By default, this filter adds a reverb effect."></CheckBox>
 						</WrapPanel>
 						<!-- Disable Audio -->
                         <WrapPanel>
-                            <Label Margin="5,5,0,0" Width="200">Disable Audio</Label> 
-							<CheckBox Tag="-nosound" Grid.Column="0" IsChecked="{Binding DisableAudio}"></CheckBox>
+                            <Label Margin="4,5,0,0" Width="200">Disable Audio</Label> 
+							<CheckBox Tag="-nosound" Margin="11,0,0,0" IsChecked="{Binding DisableAudio}"></CheckBox>
 						</WrapPanel>
 						<!-- Disable Music -->
                         <WrapPanel>
-                            <Label Margin="5,5,0,0" Width="200">Disable Music</Label> 
-							<CheckBox Tag="-nomusic" Grid.Column="0" IsChecked="{Binding DisableMusic}"></CheckBox>
+                            <Label Margin="4,5,0,0" Width="200">Disable Music</Label> 
+							<CheckBox Tag="-nomusic" Margin="11,0,0,0" IsChecked="{Binding DisableMusic}"></CheckBox>
 						</WrapPanel>
 						<!-- TTS -->
-						<CheckBox IsChecked="{Binding EnableTTS}" Margin="5">Enable Text to speech</CheckBox>
+                        <WrapPanel>
+                            <Label Margin="4,5,0,0" Width="200">Enable Text to Speech</Label> 
+							<CheckBox IsChecked="{Binding EnableTTS}" Margin="11,0,0,0"></CheckBox>
+						</WrapPanel>
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Voice</TextBlock>
 							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
@@ -368,18 +371,21 @@
 						</Grid>
 						<!-- Sys Info -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="10,5,0,0">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Build Types </TextBlock>
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Detected Build Settings </TextBlock>
 							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
 								<Label Margin="0,5,0,0" FontWeight="Bold">OS:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding DetectedOS}"></TextBlock>
 								<Label Margin="30,5,0,0" FontWeight="Bold">CPU Arch:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding CpuArch}"></TextBlock>
-								<CheckBox Margin="20,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, Knossos will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
-								<Label Margin="0,5,0,0" IsVisible="{Binding IsAVX}">Force SSE2</Label> 
 								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX}">AVX</CheckBox>
 								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX2}">AVX2</CheckBox>
 							</WrapPanel>
 						</Grid>
+
+						<WrapPanel Margin="0,5,0,0">	
+							<Label Margin="5,5,0,0" IsVisible="{Binding IsAVX}" Width="200">Force SSE2</Label> 
+							<CheckBox Margin="20,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, Knossos will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
+						</WrapPanel>
 						<!-- GLOBAL CMDLINE -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Command Line</Label>
