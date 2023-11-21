@@ -30,6 +30,16 @@
 				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Knossos</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
+						<!-- FS2 Lang -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="3,0,0,0" Width="200">In-game Language</TextBlock>
+							<ComboBox SelectedIndex="{Binding Fs2LangSelectedIndex}" Grid.Column="1" Width="200" Margin="7,0,0,0">
+								<ComboBoxItem>English</ComboBoxItem>
+								<ComboBoxItem>German</ComboBoxItem>
+								<ComboBoxItem>French</ComboBoxItem>
+								<ComboBoxItem>Polish</ComboBoxItem>
+							</ComboBox>
+						</Grid>
 						<!-- Base Path -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
@@ -78,7 +88,7 @@
 						<!-- Image Cache -->
 						<WrapPanel Margin="5,10,0,0">
 							<Label VerticalAlignment="Center" Width="200" Content="Image Cache"/>
-							<Label Margin="10,0,0,0" VerticalAlignment="Center" Foreground="Yellow" Content="{Binding ImgCacheSize}"/>
+							<Label Margin="10,0,0,0" VerticalAlignment="Center" Content="{Binding ImgCacheSize}"/>
 							<Button Command="{Binding ClearImageCache}" Margin="5,0,0,0" Classes="Secondary">Clear</Button>
 						</WrapPanel>
 						<!-- SubTasks -->
@@ -228,8 +238,8 @@
 						<WrapPanel>
 							<Label Margin="5,5,0,0" Width="210">Display FPS</Label> 
 							<CheckBox Tag="-fps" IsChecked="{Binding ShowFps}" Width="200"></CheckBox>
+							<Button Margin="20,0,0,0" Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="I need more FPS!" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
 						</WrapPanel>
-            			<Button Margin="4,4,0,5" Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="I need more FPS!" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
 					</StackPanel>
 				</Border>
 
@@ -354,21 +364,6 @@
 				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">FSO Engine Settings</Label>
 				<Border Margin="0,5,0,5" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<!-- FS2 Lang -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="3,0,0,0" Width="200">FS2 Language</TextBlock>
-							<ComboBox SelectedIndex="{Binding Fs2LangSelectedIndex}" Grid.Column="1" Width="200" Margin="7,0,0,0">
-								<ComboBoxItem>English</ComboBoxItem>
-								<ComboBoxItem>German</ComboBoxItem>
-								<ComboBoxItem>French</ComboBoxItem>
-								<ComboBoxItem>Polish</ComboBoxItem>
-							</ComboBox>
-						</Grid>
-						<!-- Multi Port -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
-							<Label ToolTip.Tip="Network port used by multiplayer. Default is 7808." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Multiplayer Port</Label>
-							<NumericUpDown Value="{Binding MultiPort}" Grid.Column="1" Width="150"></NumericUpDown>
-						</Grid>
 						<!-- Sys Info -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5,5,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Detected Build Settings </TextBlock>
@@ -391,6 +386,11 @@
 							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Command Line</Label>
 							<TextBox Text="{Binding GlobalCmd}" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="1" Width="500"></TextBox>
 							<Button Command="{Binding GlobalCmdHelp}" Classes="Secondary" Grid.Column="2" Margin="10,0,0,0">Command Line Wiki Page</Button>
+						</Grid>
+						<!-- Multi Port -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+							<Label ToolTip.Tip="Network port used by multiplayer. Default is 7808." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Multiplayer Port</Label>
+							<NumericUpDown Value="{Binding MultiPort}" Grid.Column="1" Width="150"></NumericUpDown>
 						</Grid>
 					</StackPanel>
 				</Border>
