@@ -30,16 +30,6 @@
 				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Knossos</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<!-- FS2 Lang -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="3,0,0,0" Width="200">In-game Language</TextBlock>
-							<ComboBox SelectedIndex="{Binding Fs2LangSelectedIndex}" Grid.Column="1" Width="200" Margin="7,0,0,0">
-								<ComboBoxItem>English</ComboBoxItem>
-								<ComboBoxItem>German</ComboBoxItem>
-								<ComboBoxItem>French</ComboBoxItem>
-								<ComboBoxItem>Polish</ComboBoxItem>
-							</ComboBox>
-						</Grid>
 						<!-- Base Path -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
@@ -135,7 +125,7 @@
 						</WrapPanel>
 						<WrapPanel Margin="5,10,0,0">
                             <Label Margin="0,5,0,0" Width="200">Logging Level</Label> 
-							<ComboBox SelectedIndex="{Binding LogLevel}" IsEnabled="{Binding EnableLogFile}" Grid.Column="1" Width="150" Margin="10,0,0,0">
+							<ComboBox SelectedIndex="{Binding LogLevel}" IsEnabled="{Binding EnableLogFile}" Grid.Column="1" Width="150" Margin="11,0,0,0">
 								<ComboBoxItem Tag="0">Information</ComboBoxItem>
 								<ComboBoxItem Tag="1">Warning</ComboBoxItem>
 								<ComboBoxItem Tag="2">Error</ComboBoxItem>
@@ -148,15 +138,16 @@
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Resolution -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Display Resolution</TextBlock>
+						<WrapPanel Margin="5,0,0,0">
+							<TextBlock VerticalAlignment="Center" Width="200">Display Resolution</TextBlock>
 							<ComboBox SelectedIndex="{Binding BitsSelectedIndex}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="2" Width="100" Margin="10,0,0,0">
 								<ComboBoxItem Tag="32">32 Bit</ComboBoxItem>
 								<ComboBoxItem Tag="16" IsEnabled="{Binding Enable16BitColor}">16 bit</ComboBoxItem>
 							</ComboBox>
 							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding ResolutionSelectedIndex}" ItemsSource="{Binding ResolutionItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="300" Margin="10,0,0,0"></ComboBox>
-						</Grid>
+							<Button Margin="130,0,0,0" Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="Tips to Optimize Game Performance" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Right"></Button>
+						</WrapPanel>
 						<!-- Resolution -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Texture Filtering</TextBlock>
@@ -238,7 +229,6 @@
 						<WrapPanel>
 							<Label Margin="5,5,0,0" Width="210">Display FPS</Label> 
 							<CheckBox Tag="-fps" IsChecked="{Binding ShowFps}"></CheckBox>
-							<Button Margin="20,0,0,0" Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="I need more FPS!" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
 						</WrapPanel>
 					</StackPanel>
 				</Border>
@@ -364,19 +354,26 @@
 				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">FSO Engine Settings</Label>
 				<Border Margin="0,5,0,5" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
-						<!-- Sys Info -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5,5,0,0">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Detected Build Settings </TextBlock>
-							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
-								<Label Margin="0,5,0,0" FontWeight="Bold">OS:</Label>
-								<TextBlock Margin="5,8,0,0" Text="{Binding DetectedOS}"></TextBlock>
-								<Label Margin="30,5,0,0" FontWeight="Bold">CPU Arch:</Label>
-								<TextBlock Margin="5,8,0,0" Text="{Binding CpuArch}"></TextBlock>
-								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX}">AVX</CheckBox>
-								<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX2}">AVX2</CheckBox>
-							</WrapPanel>
+						<!-- FS2 Lang -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="3,0,0,0" Width="200">In-game Language</TextBlock>
+							<ComboBox SelectedIndex="{Binding Fs2LangSelectedIndex}" Grid.Column="1" Width="200" Margin="8,0,0,0">
+								<ComboBoxItem>English</ComboBoxItem>
+								<ComboBoxItem>German</ComboBoxItem>
+								<ComboBoxItem>French</ComboBoxItem>
+								<ComboBoxItem>Polish</ComboBoxItem>
+							</ComboBox>
 						</Grid>
-
+						<!-- Sys Info -->
+						<WrapPanel Margin="9,0,0,0">
+							<TextBlock VerticalAlignment="Center" Width="201">Detected Build Settings </TextBlock>
+							<Label Margin="0,5,0,0" FontWeight="Bold">OS:</Label>
+							<TextBlock Margin="5,8,0,0" Text="{Binding DetectedOS}"></TextBlock>
+							<Label Margin="30,5,0,0" FontWeight="Bold">CPU Arch:</Label>
+							<TextBlock Margin="5,8,0,0" Text="{Binding CpuArch}"></TextBlock>
+							<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX}">AVX</CheckBox>
+							<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX2}">AVX2</CheckBox>
+						</WrapPanel>	
 						<WrapPanel Margin="0,5,0,0">	
 							<Label Margin="5,5,0,0" IsVisible="{Binding IsAVX}" Width="200">Force SSE2</Label> 
 							<CheckBox Margin="12,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, Knossos will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
