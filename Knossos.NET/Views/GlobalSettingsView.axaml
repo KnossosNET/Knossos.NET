@@ -21,7 +21,7 @@
 					<Button Command="{Binding ReloadFlagData}" Foreground="White" FontSize="20" Background="Black" Margin="10,0,0,0" Classes="Option">Reload Data</Button>
 					<Button Command="{Binding ResetCommand}" FontWeight="Bold" FontSize="20" Margin="10,0,0,0" Classes="Cancel">Reset</Button>
 				</WrapPanel>
-				<TextBlock Margin="10,15,0,3" TextWrapping="Wrap" FontSize="16" VerticalAlignment="Center" >Please close this tab before playing, as Knossos constantly scans here for changes to the .ini file.</TextBlock>
+				<TextBlock Margin="10,15,3,3" TextWrapping="Wrap" FontSize="16" VerticalAlignment="Center" >Please close this tab before playing, as Knossos constantly scans here for changes to the .ini file.</TextBlock>
 			</StackPanel>
 		</Border>
 		<ScrollViewer Grid.Row="1">
@@ -32,45 +32,58 @@
 					<StackPanel Margin="5">
 						<!-- Base Path -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="Heavy" Width="200">Library </TextBlock>
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
 							<TextBox Text="{Binding BasePath}" Margin="10,0,0,0" Grid.Column="1" IsReadOnly="True" Width="500"></TextBox>
 							<Button Margin="5,0,0,0" Grid.Column="2" Classes="Secondary" Command="{Binding BrowseFolderCommand}">Browse</Button>
 						</Grid>
 						<!-- Lib Info -->
 						<Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto, Auto" Margin="5">
-							<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Width="200"></TextBlock>
+							<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Width="200">Statistics</TextBlock>
 							<WrapPanel Grid.Column="1" Grid.Row="0"  Margin="10,2,0,0">
-								<Label Margin="0,5,0,0" FontWeight="Bold">Mods:</Label>
+								<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications (collectively known as mods) are installed in your Knossos library.">Mods:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
 								<Label Margin="40,5,0,0" FontWeight="Bold">Builds:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfBuilds}"></TextBlock>
-								<CheckBox Margin="40,0,0,0" IsEnabled="False" IsChecked="{Binding Fs2RootPack}">Retail Freespace 2 Installed</CheckBox>
-								<Button Classes="Secondary" Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Background="Black" Margin="10,0,0,0">Installer</Button>
 							</WrapPanel>
 						</Grid>
-						<WrapPanel Grid.Column="1" Margin="220,5,0,0">
-						<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="120">Mod Compression</TextBlock>
-						<ComboBox SelectedIndex="{Binding ModCompression}" ToolTip.Tip="Knossos can try to compress mod files in order to save disk space. 'Manual' means you will have to compress or decompress the files manually from mod settings. 'Always' means Knossos will compress all mods during install and 'Mod Support' means Knossos will compress the files only if the mod FSO engine dependency set by the mod is over the minimum. This only works if the mod uses an official build." Grid.Column="1" Width="150" Margin="10,0,0,0">
-							<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
-							<ComboBoxItem Tag="1">Manual</ComboBoxItem>
-							<ComboBoxItem Tag="2">Always</ComboBoxItem>
-							<ComboBoxItem Tag="3">Mod Support</ComboBoxItem>
-						</ComboBox>
-						<NumericUpDown IsEnabled="{Binding ModCompression}" Margin="10,0,0,0" Width="120" Grid.Column="2" Minimum="1" Maximum="8" Value="{Binding CompressionMaxParallelism}" ToolTip.Tip="Max number of parallel compression tasks"></NumericUpDown>
-						<Button Command="{Binding CleanupLibraryCommand}" Background="Black" Margin="15,0,0,0">Remove Unused Dependencies</Button>
+						<WrapPanel Margin="5,10,0,0">	
+							<Label Margin="5,0,0,0">Freespace 2 Retail</Label>
+							<CheckBox Margin="210,0,0,0" IsVisible="{Binding Fs2RootPack}" IsEnabled="False" IsChecked="{Binding Fs2RootPack}"></CheckBox>
+							<Button Classes="Secondary" Command="{Binding InstallFS2Command}" Background="Black" Margin="210,0,0,0">Retail Freespace 2 Installer</Button>
 						</WrapPanel>
-						<!--AutoUpdates -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto,Auto" Margin="210,5,0,0" >
-							<CheckBox IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="1" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start.">Check for updates at startup</CheckBox>
-							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" Grid.Column="2" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input.">Auto Update</CheckBox>
-							<CheckBox Margin="5,0,0,0" Grid.Column="3" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successfull upload. You con choose to disable this option if you need to take a closer look or debug a problem.">Delete Uploaded Mod Files</CheckBox>
-						</Grid>
+						<WrapPanel Margin="5,10,0,0">
+							<TextBlock VerticalAlignment="Center" Width="200">Mod Compression</TextBlock>
+							<ComboBox SelectedIndex="{Binding ModCompression}" ToolTip.Tip="Knossos can try to compress mod files in order to save disk space. 'Manual' means you will have to compress or decompress the files manually from mod settings. 'Always' means Knossos will compress all mods during install and 'Mod Support' means Knossos will compress the files only if the mod FSO engine dependency set by the mod is over the minimum. This only works if the mod uses an official build." Grid.Column="1" Width="150" Margin="10,0,0,0">
+								<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
+								<ComboBoxItem Tag="1">Manual</ComboBoxItem>
+								<ComboBoxItem Tag="2">Always</ComboBoxItem>
+								<ComboBoxItem Tag="3">Mod Support</ComboBoxItem>
+							</ComboBox>
+							<NumericUpDown IsEnabled="{Binding ModCompression}" Margin="10,0,0,0" Width="120" Grid.Column="2" Minimum="1" Maximum="8" Value="{Binding CompressionMaxParallelism}" ToolTip.Tip="Max number of parallel compression tasks"></NumericUpDown>
+						</WrapPanel>
+						<!-- AutoUpdates -->
+                        <WrapPanel Margin="5,10,0,0">
+                            <Label Margin="5,5,0,0" Width="210">Check for updates at startup</Label> 
+							<CheckBox IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start."></CheckBox>
+						</WrapPanel>
+                        <WrapPanel Margin="5,10,0,0">
+                            <Label Margin="5,5,0,0" Width="210">Auto Update</Label> 
+							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input.">Auto Update</CheckBox>
+						</WrapPanel>
+                        <WrapPanel Margin="5,10,0,0">
+                            <Label Margin="5,5,0,0" Width="210">Delete Uploaded Mod Files</Label> 
+							<CheckBox Margin="5,0,0,0" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successfull upload. You con choose to disable this option if you need to take a closer look or debug a problem."></CheckBox>
+						</WrapPanel>
+						<!-- Remove Dependencies-->
+						<WrapPanel Margin="5,5,0,0">
+							<Button Command="{Binding CleanupLibraryCommand}" Background="Black" Margin="210,0,0,0">Remove Unused Dependencies</Button>
+						</WrapPanel>
 						<!-- Image Cache -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="0,5,0,0">
-							<Label Grid.Column="0" VerticalAlignment="Center" Width="212" Content="Image Cache Size"/>
-							<Label Grid.Column="1" VerticalAlignment="Center" Foreground="Yellow" Content="{Binding ImgCacheSize}"/>
+						<WrapPanel Margin="5,5,0,0">
+							<Label VerticalAlignment="Center" Width="200" Content="Image Cache Size"/>
+							<Label Margin="10,0,0,0" VerticalAlignment="Center" Foreground="Yellow" Content="{Binding ImgCacheSize}"/>
 							<Button Command="{Binding ClearImageCache}" Grid.Column="2" Classes="Secondary">Clear Cache</Button>
-						</Grid>
+						</WrapPanel>
 						<!-- SubTasks -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Concurrent Subtasks</TextBlock>
@@ -123,7 +136,7 @@
 				</Border>
 				<!--VIDEO SETTINGS-->
 				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">Video</Label>
-				<Border BorderBrush="Black" BorderThickness="5" CornerRadius="2">
+				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Resolution -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
@@ -145,7 +158,7 @@
 						</Grid>
 						<!-- Window -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
-							<Label VerticalAlignment="Center" Grid.Column="0" Width="200">Window Mode</Label>
+							<Label VerticalAlignment="Center" Grid.Column="0" Width="200">Windowed Mode</Label>
 							<ComboBox SelectedIndex="{Binding WindowMode}" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Windowed</ComboBoxItem>
 								<ComboBoxItem Tag="1">Borderless</ComboBoxItem>
@@ -217,7 +230,7 @@
 							<Label Margin="5,5,0,0" Width="210">Display FPS</Label> 
 							<CheckBox Tag="-fps" IsChecked="{Binding ShowFps}" Width="200">Display FPS</CheckBox>
 						</WrapPanel>
-            			<Button Margin="3,4,0,5" Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="Slow in-game performance?" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
+            			<Button Margin="4,4,0,5" Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="Raising FPS Tips" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
 					</StackPanel>
 				</Border>
 
@@ -334,7 +347,7 @@
 		
 				<!--FSO ENGINE SETTINGS-->
 				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">FSO Engine Settings</Label>
-				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
+				<Border Margin="0,5,0,5" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- FS2 Lang -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
@@ -352,8 +365,8 @@
 							<NumericUpDown Value="{Binding MultiPort}" Grid.Column="1" Width="150"></NumericUpDown>
 						</Grid>
 						<!-- Sys Info -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5,20,0,0">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="Heavy" Width="200">System </TextBlock>
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5,5,0,0">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Build Types </TextBlock>
 							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
 								<Label Margin="0,5,0,0" FontWeight="Bold">OS:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding DetectedOS}"></TextBlock>
@@ -369,7 +382,7 @@
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Command Line</Label>
 							<TextBox Text="{Binding GlobalCmd}" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="1" Width="500"></TextBox>
-							<Button Command="{Binding GlobalCmdHelp}" Classes="Secondary" Grid.Column="2" Margin="10,0,0,0">?</Button>
+							<Button Command="{Binding GlobalCmdHelp}" Classes="Secondary" Grid.Column="2" Margin="10,0,0,0">Command Line Wiki Page</Button>
 						</Grid>
 					</StackPanel>
 				</Border>
