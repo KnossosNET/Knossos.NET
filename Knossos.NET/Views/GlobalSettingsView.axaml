@@ -228,7 +228,7 @@
 						<!-- Show FPS -->
 						<WrapPanel>
 							<Label Margin="5,5,0,0" Width="210">Display FPS</Label> 
-							<CheckBox Tag="-fps" IsChecked="{Binding ShowFps}" Width="200">Display FPS</CheckBox>
+							<CheckBox Tag="-fps" IsChecked="{Binding ShowFps}" Width="200"></CheckBox>
 						</WrapPanel>
             			<Button Margin="4,4,0,5" Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="Raising FPS Tips" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
 					</StackPanel>
