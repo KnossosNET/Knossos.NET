@@ -121,7 +121,7 @@
 						<!-- Log File -->
 						<WrapPanel Margin="5,10,0,0">
                             <Label Margin="0,5,0,0" Width="210">Enable Logging</Label> 
-							<CheckBox IsChecked="{Binding EnableLogFile}"></CheckBox>
+							<CheckBox Margin="1,0,0,0" IsChecked="{Binding EnableLogFile}"></CheckBox>
 						</WrapPanel>
 						<WrapPanel Margin="5,10,0,0">
                             <Label Margin="0,5,0,0" Width="200">Logging Level</Label> 
@@ -384,7 +384,7 @@
 
 						<WrapPanel Margin="0,5,0,0">	
 							<Label Margin="5,5,0,0" IsVisible="{Binding IsAVX}" Width="200">Force SSE2</Label> 
-							<CheckBox Margin="10,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, Knossos will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
+							<CheckBox Margin="12,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, Knossos will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
 						</WrapPanel>
 						<!-- GLOBAL CMDLINE -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
