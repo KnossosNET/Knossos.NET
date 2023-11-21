@@ -12,8 +12,8 @@
 		CanResize="False">
 	
 	<StackPanel MaxWidth="500" Background="{StaticResource BackgroundColorPrimary}">
-		<TextBlock Margin="10" TextWrapping="Wrap">If in-game performance is slow, ensure that "Extra Multi Sample Anti-Aliasing" and "Shadows" are disabled.</TextBlock>
-		<TextBlock TextWrapping="Wrap" Margin="10">If still slow, then disable "Deferred Lighting" and "Post-processing Anti-Aliasing".</TextBlock>
-		<TextBlock TextWrapping="Wrap" Margin="10">Always remember to click the "Save" button, too!</TextBlock>
+		<TextBlock Margin="10,20,20,0" TextWrapping="Wrap">If in-game performance is slow, try disabling "Extra Multi Sample Anti-Aliasing" or "Shadows".</TextBlock>
+		<TextBlock Margin="10,10,20,0" TextWrapping="Wrap">The next best options to disable are "Deferred Lighting" and "Post-processing Anti-Aliasing".</TextBlock>
+		<TextBlock Margin="10,10,20,20" TextWrapping="Wrap">And always remember to click the "Save" button!</TextBlock>
 	</StackPanel>
 </Window>
