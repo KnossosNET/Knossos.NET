@@ -47,9 +47,9 @@
 							</WrapPanel>
 						</Grid>
 						<WrapPanel Margin="5,10,0,0">	
-							<Label Margin="5,0,0,0">Freespace 2 Retail</Label>
-							<CheckBox Margin="210,0,0,0" IsVisible="{Binding Fs2RootPack}" IsEnabled="False" IsChecked="{Binding Fs2RootPack}"></CheckBox>
-							<Button Classes="Secondary" Command="{Binding InstallFS2Command}" Background="Black" Margin="210,0,0,0">Retail Freespace 2 Installer</Button>
+							<Label Width="200">Freespace 2 Retail</Label>
+							<CheckBox Margin="10,0,0,0" IsVisible="{Binding !Fs2RootPack}" IsEnabled="False" IsChecked="{Binding Fs2RootPack}"></CheckBox>
+							<Button Classes="Secondary" Command="{Binding InstallFS2Command}" Background="Black" Margin="10,0,0,0">Retail Freespace 2 Installer</Button>
 						</WrapPanel>
 						<WrapPanel Margin="5,10,0,0">
 							<TextBlock VerticalAlignment="Center" Width="200">Mod Compression</TextBlock>
@@ -63,15 +63,15 @@
 						</WrapPanel>
 						<!-- AutoUpdates -->
                         <WrapPanel Margin="5,10,0,0">
-                            <Label Margin="5,5,0,0" Width="210">Check for updates at startup</Label> 
+                            <Label Margin="0,5,0,0" Width="210">Check for updates at startup</Label> 
 							<CheckBox IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start."></CheckBox>
 						</WrapPanel>
                         <WrapPanel Margin="5,10,0,0">
-                            <Label Margin="5,5,0,0" Width="210">Auto Update</Label> 
-							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input.">Auto Update</CheckBox>
+                            <Label Margin="0,5,0,0" Width="210">Auto Update</Label> 
+							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input."></CheckBox>
 						</WrapPanel>
                         <WrapPanel Margin="5,10,0,0">
-                            <Label Margin="5,5,0,0" Width="210">Delete Uploaded Mod Files</Label> 
+                            <Label Margin="0,5,0,0" Width="210">Delete Uploaded Mod Files</Label> 
 							<CheckBox Margin="5,0,0,0" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successfull upload. You con choose to disable this option if you need to take a closer look or debug a problem."></CheckBox>
 						</WrapPanel>
 						<!-- Remove Dependencies-->
