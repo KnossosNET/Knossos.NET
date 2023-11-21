@@ -47,9 +47,9 @@
 							</WrapPanel>
 						</Grid>
 						<WrapPanel Margin="5,10,0,0">	
-							<Label Width="200">Freespace 2 Retail</Label>
-							<CheckBox Margin="10,0,0,0" IsVisible="{Binding !Fs2RootPack}" IsEnabled="False" IsChecked="{Binding Fs2RootPack}"></CheckBox>
-							<Button Classes="Secondary" Command="{Binding InstallFS2Command}" Background="Black" Margin="10,0,0,0">Retail Freespace 2 Installer</Button>
+							<Label Margin="0,5,0,0" Width="200">Freespace 2 Retail</Label>
+							<CheckBox Margin="10,0,0,0" IsVisible="{Binding Fs2RootPack}" IsEnabled="False" IsChecked="{Binding Fs2RootPack}"></CheckBox>
+							<Button Classes="Secondary" Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Margin="10,0,0,0">Retail Freespace 2 Installer</Button>
 						</WrapPanel>
 						<WrapPanel Margin="5,10,0,0">
 							<TextBlock VerticalAlignment="Center" Width="200">Mod Compression</TextBlock>
