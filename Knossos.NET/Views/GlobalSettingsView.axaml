@@ -17,11 +17,11 @@
 			<StackPanel>
 				<WrapPanel Margin="0,10,0,0">
 					<Button Command="{Binding QuickSetupCommand}" FontSize="22" Background="Black" Margin="5,0,0,0" Classes="Secondary">Quick Setup Guide</Button>
-					<Button Command="{Binding SaveCommand}"  FontWeight="Bold" FontSize="22" Classes="Accept" Margin="480,0,0,0">Save</Button>
+					<Button Command="{Binding ResetCommand}" FontWeight="Bold" FontSize="20" Margin="480,0,0,0" Classes="Cancel">Reset</Button>
 					<Button Command="{Binding ReloadFlagData}" Foreground="White" FontSize="20" Background="Black" Margin="10,0,0,0" Classes="Option">Reload Data</Button>
-					<Button Command="{Binding ResetCommand}" FontWeight="Bold" FontSize="20" Margin="10,0,0,0" Classes="Cancel">Reset</Button>
+					<Button Command="{Binding SaveCommand}"  FontWeight="Bold" FontSize="22" Classes="Accept" Margin="10,0,0,0">Save</Button>
 				</WrapPanel>
-				<TextBlock Margin="10,15,3,3" TextWrapping="Wrap" FontSize="16" VerticalAlignment="Center" >Please close this tab before playing, as Knossos constantly scans here for changes to the .ini file.</TextBlock>
+				<TextBlock Margin="10,15,3,3" TextWrapping="Wrap" FontSize="16" VerticalAlignment="Center" >Please navigate to another tab before playing, as this tab constantly scans for option file changes.</TextBlock>
 			</StackPanel>
 		</Border>
 		<ScrollViewer Grid.Row="1">
@@ -85,7 +85,7 @@
 							<Button Command="{Binding ClearImageCache}" Grid.Column="2" Classes="Secondary">Clear Cache</Button>
 						</WrapPanel>
 						<!-- SubTasks -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Concurrent Subtasks</TextBlock>
 							<ComboBox SelectedIndex="{Binding MaxConcurrentSubtasks}" ToolTip.Tip="All tasks are done in order, but some tasks like install tasks creates multiple subtasks to download files, etc. This setting controls how many of them can run simultaneously." Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="1">1</ComboBoxItem>
