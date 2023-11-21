@@ -49,7 +49,7 @@
 						<WrapPanel Margin="5,10,0,0">	
 							<Label Margin="0,5,0,0" Width="200">Freespace 2 Retail</Label>
 							<CheckBox Margin="10,0,0,0" IsVisible="{Binding Fs2RootPack}" IsEnabled="False" IsChecked="{Binding Fs2RootPack}"></CheckBox>
-							<Button Classes="Secondary" Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Margin="10,0,0,0">Retail Freespace 2 Installer</Button>
+							<Button Classes="Secondary" Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Margin="10,0,0,0">Installer</Button>
 						</WrapPanel>
 						<WrapPanel Margin="5,10,0,0">
 							<TextBlock VerticalAlignment="Center" Width="200">Mod Compression</TextBlock>
@@ -75,17 +75,17 @@
 							<CheckBox Margin="5,0,0,0" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successfull upload. You con choose to disable this option if you need to take a closer look or debug a problem."></CheckBox>
 						</WrapPanel>
 						<!-- Remove Dependencies-->
-						<WrapPanel Margin="5,5,0,0">
-							<Button Command="{Binding CleanupLibraryCommand}" Background="Black" Margin="210,0,0,0">Remove Unused Dependencies</Button>
+						<WrapPanel Margin="5,10,0,0">
+							<Button Command="{Binding CleanupLibraryCommand}">Remove Unused Dependencies</Button>
 						</WrapPanel>
 						<!-- Image Cache -->
-						<WrapPanel Margin="5,5,0,0">
+						<WrapPanel Margin="5,10,0,0">
 							<Label VerticalAlignment="Center" Width="200" Content="Image Cache Size"/>
 							<Label Margin="10,0,0,0" VerticalAlignment="Center" Foreground="Yellow" Content="{Binding ImgCacheSize}"/>
 							<Button Command="{Binding ClearImageCache}" Grid.Column="2" Classes="Secondary">Clear Cache</Button>
 						</WrapPanel>
 						<!-- SubTasks -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Concurrent Subtasks</TextBlock>
 							<ComboBox SelectedIndex="{Binding MaxConcurrentSubtasks}" ToolTip.Tip="All tasks are done in order, but some tasks like install tasks creates multiple subtasks to download files, etc. This setting controls how many of them can run simultaneously." Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="1">1</ComboBoxItem>
@@ -95,7 +95,7 @@
 							</ComboBox>
 						</Grid>
 						<!-- Bandwidth limit -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Bandwidth Limit</TextBlock>
 							<ComboBox SelectedIndex="{Binding MaxDownloadSpeedIndex}" ToolTip.Tip="Bandwidth limiter (Per Individual Download)" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Unlimited</ComboBoxItem>
@@ -113,7 +113,7 @@
 							</ComboBox>
 						</Grid>
 						<!-- Mirror Blacklist -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mirror Blacklist</TextBlock>
 							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
 								<CheckBox Margin="0,0,0,0" IsChecked="{Binding BlDlNebula}">dl.fsnebula.org</CheckBox>
@@ -122,10 +122,12 @@
 							</WrapPanel>
 						</Grid>
 						<!-- Log File -->
-						<WrapPanel Margin="5">
-							<CheckBox Grid.Column="0" IsChecked="{Binding EnableLogFile}" Width="200">Enable Log File</CheckBox>
+						<WrapPanel Margin="5,10,0,0">
+                            <Label Margin="0,5,0,0" Width="210">Enable Logging</Label> 
+							<CheckBox IsChecked="{Binding EnableLogFile}"></CheckBox>
 						</WrapPanel>
 						<WrapPanel Margin="5">
+                            <Label Margin="0,5,0,0" Width="210">Logging Level</Label> 
 							<ComboBox SelectedIndex="{Binding LogLevel}" IsEnabled="{Binding EnableLogFile}" Grid.Column="1" Width="150" Margin="10,0,0,0">
 								<ComboBoxItem Tag="0">Information</ComboBoxItem>
 								<ComboBoxItem Tag="1">Warning</ComboBoxItem>
@@ -365,7 +367,7 @@
 							<NumericUpDown Value="{Binding MultiPort}" Grid.Column="1" Width="150"></NumericUpDown>
 						</Grid>
 						<!-- Sys Info -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5,5,0,0">
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="10,5,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Build Types </TextBlock>
 							<WrapPanel Grid.Column="1" Margin="10,0,0,0">
 								<Label Margin="0,5,0,0" FontWeight="Bold">OS:</Label>
