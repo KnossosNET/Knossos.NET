@@ -11,7 +11,7 @@
 		SizeToContent="WidthAndHeight" 
 		CanResize="False">
 	
-	<StackPanel MaxWidth="500" Background="#18191A">
+	<StackPanel MaxWidth="500" Background="{StaticResource BackgroundColorPrimary}">
 		<TextBlock Margin="10" TextWrapping="Wrap">If in-game performance is slow, ensure that "Extra Multi Sample Anti-Aliasing" and "Shadows" are disabled.</TextBlock>
 		<TextBlock TextWrapping="Wrap" Margin="10">If still slow, then disable "Deferred Lighting" and "Post-processing Anti-Aliasing".</TextBlock>
 		<TextBlock TextWrapping="Wrap" Margin="10">Always remember to click the "Save" button, too!</TextBlock>

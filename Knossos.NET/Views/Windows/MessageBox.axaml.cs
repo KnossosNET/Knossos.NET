@@ -49,13 +49,17 @@ namespace Knossos.NET.Views
 
             var result = MessageBoxResult.OK;
 
-            void AddButton(string caption, MessageBoxResult r, bool def = false)
+            void AddButton(string caption, MessageBoxResult r, bool def = false, string classes = "")
             {                
-                var button = new Button { Content = caption };
+                var button = new Button { Content = caption, Width = 100};
                 button.Click += (_, __) => {
                     result = r;
                     msgbox.Close();
                 };
+                if(classes != "")
+                {
+                    button.Classes.Add(classes);
+                }
                 buttonPanel.Children.Add(button);
                 if (def)
                 {
@@ -65,28 +69,28 @@ namespace Knossos.NET.Views
 
             if (buttons == MessageBoxButtons.OK || buttons == MessageBoxButtons.OKCancel || buttons == MessageBoxButtons.DetailsOKCancel)
             {
-                AddButton("OK", MessageBoxResult.OK, true);
+                AddButton("OK", MessageBoxResult.OK, true, "Accept");
             }
 
             if (buttons == MessageBoxButtons.YesNo || buttons == MessageBoxButtons.YesNoCancel)
             {
-                AddButton("Yes", MessageBoxResult.Yes);
-                AddButton("No", MessageBoxResult.No, true);
+                AddButton("Yes", MessageBoxResult.Yes, false, "Accept");
+                AddButton("No", MessageBoxResult.No, true, "Cancel");
             }
 
             if (buttons == MessageBoxButtons.Continue || buttons == MessageBoxButtons.ContinueCancel || buttons == MessageBoxButtons.DetailsContinueCancel)
             {
-                AddButton("Continue", MessageBoxResult.Continue);
+                AddButton("Continue", MessageBoxResult.Continue, false, "Accept");
             }
 
             if (buttons == MessageBoxButtons.OKCancel || buttons == MessageBoxButtons.YesNoCancel || buttons == MessageBoxButtons.ContinueCancel || buttons == MessageBoxButtons.DetailsOKCancel || buttons == MessageBoxButtons.DetailsContinueCancel)
             {
-                AddButton("Cancel", MessageBoxResult.Cancel, true);
+                AddButton("Cancel", MessageBoxResult.Cancel, true, "Cancel");
             }
 
             if (buttons == MessageBoxButtons.Details || buttons == MessageBoxButtons.DetailsOKCancel || buttons == MessageBoxButtons.DetailsContinueCancel)
             {
-                AddButton("Details", MessageBoxResult.Details);
+                AddButton("Details", MessageBoxResult.Details, false, "Option");
             }
 
             var tcs = new TaskCompletionSource<MessageBoxResult>();

@@ -72,6 +72,11 @@ namespace Knossos.NET.ViewModels
             KnUtils.OpenBrowserURL(@"https://pxo.nottheeye.com/");
         }
 
+        internal void JoinHLPDiscord()
+        {
+            KnUtils.OpenBrowserURL(@"https://discord.gg/cyhMBhMHzK");
+        }
+
         /// <summary>
         /// Load multi data into UI when the users clicks the tab
         /// </summary>

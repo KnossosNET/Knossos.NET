@@ -16,7 +16,7 @@
 	<StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 		<Label FontWeight="Bold" FontSize="20" Margin="5">Packages and Dependencies</Label>
 		<WrapPanel>
-			<Button Margin="8,0,0,5" Content="+Package">
+			<Button Margin="8,0,0,5" Content="+Package" Classes="Primary">
 				<Button.Flyout>
 					<Flyout>
 						<StackPanel HorizontalAlignment="Center">
@@ -28,12 +28,12 @@
 								<Label Width="150">Folder Name: </Label>
 								<Label Content="{Binding NewPackageFolder}" MinWidth="200"></Label>
 							</WrapPanel>
-							<Button HorizontalAlignment="Center" Command="{Binding CreatePackage}">Create Package</Button>
+							<Button HorizontalAlignment="Center" Classes="Accept" Command="{Binding CreatePackage}">Create Package</Button>
 						</StackPanel>
 					</Flyout>
 				</Button.Flyout>
 			</Button>
-			<Button Command="{Binding Save}" Margin="8,0,0,5" Background="Green">Save Changes</Button>
+			<Button Command="{Binding Save}" Margin="8,0,0,5" Classes="Accept">Save Changes</Button>
 		</WrapPanel>
 		<!--Package List-->
 		<ListBox ItemsSource="{Binding EditorPackageItems}" Margin="8,0,0,0">
@@ -59,8 +59,8 @@
 								<ComboBoxItem ToolTip.Tip="Not automatically selected, but user can add them during the install process">Optional</ComboBoxItem>
 							</ComboBox>
 							<CheckBox IsChecked="{Binding PackVP}" Margin="10,0,0,0" ToolTip.Tip="Whether Knossos should pack the files in a VP on upload.&#x0a;Warning: VPs have a 2GB total size limit.">Make VP</CheckBox>
-							<Label FontSize="15" Margin="5" ToolTip.Tip="Current package folder size" Foreground="Yellow" Content="{Binding DiskSpace}"/>
-							<Button Command="{Binding DeleteModPkg}" Margin="20,0,0,0" Background="Red" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">Delete</Button>
+							<Label FontSize="16" Margin="5" ToolTip.Tip="Current package folder size" Foreground="Yellow" Content="{Binding DiskSpace}"/>
+							<Button Command="{Binding DeleteModPkg}" Margin="20,0,0,0" Classes="Cancel">Delete</Button>
 						</WrapPanel>
 						<!--Pkg Dependency List-->
 						<ItemsControl ItemsSource="{Binding DependencyItems}" Margin="0,5,0,0">
@@ -77,7 +77,7 @@
 										</ComboBox>
 										<ComboBox SelectedIndex="{Binding VersionSelectedIndex}" ItemsSource="{Binding VersionItems}" Grid.Column="3" MinWidth="150" Margin="2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
 										<!--Packages-->
-										<Button IsVisible="{Binding DisplayPackages}" Grid.Column="4" Margin="5,0,2,0" Content="Packages" FontSize="16" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+										<Button IsVisible="{Binding DisplayPackages}" Grid.Column="4" Margin="5,0,2,0" Content="Packages">
 											<Button.Flyout>
 												<Flyout Placement="Left">
 													<ScrollViewer MaxHeight="400">
@@ -93,7 +93,9 @@
 											</Button.Flyout>
 										</Button>
 										<!--End Packages-->
-										<Button Command="{Binding DeleteDependency}" Grid.Column="5" Margin="10,0,0,0" Background="Red" ToolTip.Tip="Remove this dependency" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">X</Button>
+										<Button Command="{Binding DeleteDependency}" Grid.Column="5" Margin="10,0,0,0" Classes="Cancel" ToolTip.Tip="Remove this dependency">									
+											<Image Height="14" Width="14" Source="/Assets/general/x.png"></Image>
+										</Button>
 									</Grid>
 									<!-- End Pkg Dependency Item-->
 								</DataTemplate>

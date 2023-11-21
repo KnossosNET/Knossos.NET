@@ -17,7 +17,7 @@
 		<vm:DevModCreateNewViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer Background="#18191A" Width="550" Height="330">
+	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}" Width="550" Height="330">
 		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
 			<!--NAME-->
 			<Label Grid.Row="0" Grid.Column="0" Margin="5" FontWeight="Bold" FontSize="18">Name</Label>
@@ -42,7 +42,7 @@
 			<Label IsVisible="{Binding !TypeSelectedIndex}" Grid.Row="4" Grid.Column="0" Margin="5" FontWeight="Bold" FontSize="18">Parent</Label>
 			<ComboBox IsVisible="{Binding !TypeSelectedIndex}" Width="460" Grid.Row="4" SelectedIndex="{Binding ParentSelectedIndex}" Grid.Column="1" ItemsSource="{Binding ParentComboBoxItems}" Margin="5"></ComboBox>
 			<!--Button-->
-			<Button Command="{Binding CreateMod}" Grid.Row="5" HorizontalAlignment="Left" Margin="165,40,0,0" Grid.Column="1" Background="Green">Create</Button>
+			<Button Command="{Binding CreateMod}" Grid.Row="5" HorizontalAlignment="Left" Margin="165,40,0,0" Grid.Column="1" Classes="Accept">Create</Button>
 			<Label Margin="-45,0,0,0" Grid.Column="1" Grid.Row="6" IsVisible="{Binding !LoggedInNebula}" Foreground="Yellow">You are not logged in to Nebula, mod ID avalibly cannot be properly verified.</Label>
 		</Grid>
 	</ScrollViewer>

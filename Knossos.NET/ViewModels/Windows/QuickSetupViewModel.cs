@@ -40,6 +40,11 @@ namespace Knossos.NET.ViewModels
         internal bool page6 = false;
 
         private Window? dialog;
+
+        public QuickSetupViewModel() 
+        { 
+        }
+
         public QuickSetupViewModel(Window dialog) 
         {
             this.dialog = dialog;
@@ -63,6 +68,11 @@ namespace Knossos.NET.ViewModels
                     RepoDownloaded = Nebula.repoLoaded;
                 });
             });
+        }
+
+        internal void OpenDiscordQuickSetup()
+        {
+            KnUtils.OpenBrowserURL(@"https://discord.gg/raSEhVeTGw");
         }
 
         /// <summary>

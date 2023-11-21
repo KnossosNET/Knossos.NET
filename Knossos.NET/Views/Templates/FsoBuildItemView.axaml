@@ -12,23 +12,23 @@
 		<vm:FsoBuildItemViewModel/>
 	</Design.DataContext>
 
-	<Grid Background="Black" ColumnDefinitions="Auto,Auto,Auto,Auto,*">
+	<Grid Background="{StaticResource BackgroundColorTertiary}" ColumnDefinitions="Auto,Auto,Auto,Auto,*">
 		<Label FontWeight="Bold" Width="150" Grid.Column="0" Content="{Binding Date}" VerticalAlignment="Center"></Label>
 		<Label FontWeight="Bold" Width="250" Grid.Column="1" Content="{Binding Title}" VerticalAlignment="Center"></Label>
 
-		<Label Grid.Column="2" IsVisible="{Binding IsValid}" Width="250" Foreground="Green" FontWeight="Bold" Content="{Binding CpuArch}" VerticalAlignment="Center"></Label>
-		<Label Grid.Column="3" IsVisible="{Binding IsValid}" Foreground="Cyan" FontWeight="Bold" Content="{Binding BuildType}" VerticalAlignment="Center"></Label>
-		<Label Grid.Column="4" Foreground="Red" IsVisible="{Binding !IsValid}" FontWeight="Bold">No valid or usable files were found in this build</Label>
+		<Label Grid.Column="2" IsVisible="{Binding IsValid}" Width="250" Foreground="{StaticResource TertiaryColor}" FontWeight="Bold" Content="{Binding CpuArch}" VerticalAlignment="Center"></Label>
+		<Label Grid.Column="3" IsVisible="{Binding IsValid}" Foreground="{StaticResource PrimaryColor}" FontWeight="Bold" Content="{Binding BuildType}" VerticalAlignment="Center"></Label>
+		<Label Grid.Column="4" Foreground="{StaticResource TertiaryColor}" IsVisible="{Binding !IsValid}" VerticalAlignment="Center" FontWeight="Bold">No valid or usable files were found in this build</Label>
 			
 		<WrapPanel IsEnabled="{Binding !IsDevMode}" IsVisible="{Binding !IsDownloading}" Grid.Column="5" HorizontalAlignment="Right">
-			<Button IsVisible="{Binding IsDetailsButtonVisible}" FontWeight="Bold" Background="DarkOrange" Margin="0,0,10,0" Width="100" HorizontalContentAlignment="Center" Command="{Binding ViewBuildDetails}">Details</Button>
-			<Button FontWeight="Bold" IsVisible="{Binding IsInstalled}" Width="100" HorizontalContentAlignment="Center" Background="DarkRed" Command="{Binding DeleteBuildCommand}">Delete</Button>
-			<Button FontWeight="Bold" IsVisible="{Binding !IsInstalled}" Width="100" HorizontalContentAlignment="Center" IsEnabled="{Binding IsValid}" Background="DarkGreen" Command="{Binding DownloadBuildCommand}">Download</Button>
+			<Button IsVisible="{Binding IsDetailsButtonVisible}" Classes="Tertiary" Margin="0,0,10,0" Width="100" Command="{Binding ViewBuildDetails}">Details</Button>
+			<Button IsVisible="{Binding IsInstalled}" Width="100" Classes="Cancel" Command="{Binding DeleteBuildCommand}">Delete</Button>
+			<Button IsVisible="{Binding !IsInstalled}" Width="100" IsEnabled="{Binding IsValid}" Classes="Accept" Command="{Binding DownloadBuildCommand}">Download</Button>
 		</WrapPanel>
 			
 		<WrapPanel IsVisible="{Binding IsDownloading}" Grid.Column="5" HorizontalAlignment="Right">
 			<Label Foreground="White" FontWeight="Bold" Margin="0,0,10,0" FontSize="18">Downloading...</Label>
-			<Button Command="{Binding CancelDownloadCommand}" Width="100" HorizontalContentAlignment="Center" Background="DarkRed">Cancel</Button>
+			<Button Command="{Binding CancelDownloadCommand}" Width="100" Classes="Cancel">Cancel</Button>
 		</WrapPanel>
 	</Grid><!-- Margin to keep items from joining with it on the bottom -->
 </UserControl>

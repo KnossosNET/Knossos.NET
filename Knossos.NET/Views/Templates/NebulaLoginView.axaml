@@ -18,13 +18,13 @@
 			<TextBox Text="{Binding UserPass}" Watermark="Password" PasswordChar="*" Width="300" Margin="5"></TextBox>
 			<TextBox IsVisible="{Binding RegisterNewUser}" Text="{Binding UserEmail}" Watermark="Email" Width="300" Margin="5"></TextBox>
 			<Label IsVisible="{Binding UserLoggedIn}" HorizontalAlignment="Center" Foreground="Green" FontSize="14">Logged In!</Label>
-			<Button IsVisible="{Binding UserLoggedIn}" Command="{Binding LogOff}" Background="Red" HorizontalAlignment="Center">Logout</Button>
+			<Button IsVisible="{Binding UserLoggedIn}" Command="{Binding LogOff}" Classes="Primary" HorizontalAlignment="Center">Logout</Button>
 			<WrapPanel HorizontalAlignment="Center" IsVisible="{Binding !UserLoggedIn}">
-				<Button IsVisible="{Binding !RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding Reset}" Margin="5" Background="Red">Reset Password</Button>
-				<Button IsVisible="{Binding !RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding SwitchToRegister}" Margin="5" Background="DarkBlue">Create new user</Button>
-				<Button IsVisible="{Binding !RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding LogIn}" Margin="5" Background="Green">Login</Button>
-				<Button IsVisible="{Binding RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding SwitchToLogin}" Margin="5" Background="Red">Cancel</Button>
-				<Button IsVisible="{Binding RegisterNewUser}" Width="120" HorizontalContentAlignment="Center" Command="{Binding Register}" Margin="5" Background="Green">Register</Button>
+				<Button IsVisible="{Binding !RegisterNewUser}" Width="125" Command="{Binding Reset}" Margin="5" Classes="Cancel">Reset Password</Button>
+				<Button IsVisible="{Binding !RegisterNewUser}" Width="125" Command="{Binding SwitchToRegister}" Margin="5" Classes="Option">Create new user</Button>
+				<Button IsVisible="{Binding !RegisterNewUser}" Width="125" Command="{Binding LogIn}" Margin="5" Classes="Accept">Login</Button>
+				<Button IsVisible="{Binding RegisterNewUser}" Width="125" Command="{Binding SwitchToLogin}" Margin="5" Classes="Cancel">Cancel</Button>
+				<Button IsVisible="{Binding RegisterNewUser}" Width="125" Command="{Binding Register}" Margin="5" Classes="Accept">Register</Button>
 			</WrapPanel>
 			<Label HorizontalAlignment="Center" IsVisible="{Binding UserLoggedIn}" Margin="20" FontSize="20">Mods IDs you have write access to</Label>
 			<TextBox Background="Transparent" IsReadOnly="True" IsVisible="{Binding UserLoggedIn}" TextWrapping="Wrap" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Text="{Binding EditableIDs}"></TextBox>

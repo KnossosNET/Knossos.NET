@@ -20,7 +20,7 @@
 		<vm:DevModDescriptionEditorViewModel/>
 	</Design.DataContext>
 	
-		<Grid RowDefinitions="Auto,*" Background="#18191A">
+		<Grid RowDefinitions="Auto,*" Background="{StaticResource BackgroundColorPrimary}">
 			<StackPanel Grid.Row="0" Margin="5">
 				<WrapPanel>
 					<Button FontWeight="Black" Command="{Binding ToolBar}" CommandParameter="[b]Bold Text[/b]" ToolTip.Tip="[b]Bold Text[/b]">B</Button>
