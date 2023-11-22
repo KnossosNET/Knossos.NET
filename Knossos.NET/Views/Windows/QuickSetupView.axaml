@@ -28,7 +28,7 @@
 		<StackPanel IsVisible="{Binding Page1}" Grid.Row="0">
 			<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >Welcome To Knossos.NET</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >This quick setup guide will help you through the basics of configuring the Knossos launcher for the first time. If you already know how to configure the launcher you can close this window.</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >Note, you can reopen this guide at any time. To do so, go to the "Settings" tab, look under the "Knossos Settings" section and press the "Quick Setup Guide" button.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >Note, you can reopen this guide at any time, just go to the "Settings" tab and click the "Quick Setup Guide" button.</TextBlock>
       <TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >If at any point you ever need assistance with Knossos plese ask on the Knossos Discord channel linked below.</TextBlock>
       <Button Margin="20, 10" Command="{Binding OpenDiscordQuickSetup}">Discord Help for Knossos</Button>
 		</StackPanel>
