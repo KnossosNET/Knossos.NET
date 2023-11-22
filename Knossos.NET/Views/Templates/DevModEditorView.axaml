@@ -13,9 +13,9 @@
 	</Design.DataContext>
 
 	<Grid ColumnDefinitions="Auto,*">
-		<ScrollViewer Width="250" Grid.Column="0">
-			<StackPanel Width="250" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-				<TextBlock HorizontalAlignment="Center" Text="{Binding Name}" FontSize="16" FontWeight="Bold" TextWrapping="Wrap" Margin="0"></TextBlock>
+		<ScrollViewer Width="210" Grid.Column="0">
+			<StackPanel Width="210" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+				<TextBlock HorizontalAlignment="Center" Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextWrapping="Wrap" Margin="0"></TextBlock>
 				<Image HorizontalAlignment="Center" Margin="10" Source="{Binding ModImage}" Width="150" Height="225"></Image>
 				<TextBlock HorizontalAlignment="Center" Text="Active Version" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
 				<TextBlock HorizontalAlignment="Center" Text="{Binding Version}" FontSize="14" TextWrapping="Wrap" Margin="0"></TextBlock>
