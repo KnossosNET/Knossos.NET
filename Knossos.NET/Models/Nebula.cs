@@ -664,7 +664,7 @@ namespace Knossos.NET.Models
         /// It is difficult to point out exactly what the reply is because it changed from call to call
         /// Most api calls return a ApiReply.result true or false if successfull or not but this is not to case for every call
         /// </returns>
-        private static async Task<ApiReply?> ApiCall(string resourceUrl, HttpContent? data, bool needsLogIn = false, int timeoutSeconds = 30, ApiMethod method = ApiMethod.POST)
+        private static async Task<ApiReply?> ApiCall(string resourceUrl, HttpContent? data, bool needsLogIn = false, int timeoutSeconds = 45, ApiMethod method = ApiMethod.POST)
         {
             try
             {
@@ -676,7 +676,7 @@ namespace Knossos.NET.Models
                         await Login();
                         if (apiUserToken == null)
                         {
-                            Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "An api call that needed a login token was requested, but we were unable to log into the nebula service.");
+                            Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall(" + resourceUrl + ")", "An api call that needed a login token was requested, but we were unable to log into the nebula service.");
                             return null;
                         }
                     }
@@ -706,7 +706,7 @@ namespace Knossos.NET.Models
                                 {
                                     var reply = JsonSerializer.Deserialize<ApiReply>(jsonReply);
                                     if (!reply.result)
-                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode + "\n" + data);
+                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api POST call: " + response.StatusCode + "(" + (int)response.StatusCode + ")\n" + data);
 
                                     return reply;
                                 }
@@ -716,14 +716,14 @@ namespace Knossos.NET.Models
                                 /* Upload/Update/delete Mod Timeout Hack */
                                 if(response.StatusCode.ToString() == "GatewayTimeout" && (resourceUrl == "mod/release" || resourceUrl == "mod/release/update" || resourceUrl == "mod/release/delete"))
                                 {
-                                    Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "During mod/release request a GatewayTimeout was recieved. This is a known issue with Nebula and while Knet handles this" +
+                                    Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall(" + resourceUrl + ")", "During mod/release request a GatewayTimeout was recieved. This is a known issue with Nebula and while Knet handles this" +
                                         " as a success there is not an actual way to know if the api call was really successfull.");
                                     var reply = new ApiReply();
                                     reply.result = true;
                                     return reply;
                                 }
                             }
-                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api POST call: " + response.StatusCode);
+                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api POST call: " + response.StatusCode + "(" + (int)response.StatusCode + ")");
                         }
                         break;
                     case ApiMethod.PUT:
@@ -742,22 +742,22 @@ namespace Knossos.NET.Models
                                     if (!reply.result)
                                     {
                                         if(reply.reason == "not_found")
-                                            Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall", "GetMod returned: not_found");
+                                            Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall(" + resourceUrl + ")", "GetMod returned: not_found");
                                         else
-                                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode + "\n" + json);
+                                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api GET call: " + response.StatusCode + "(" + (int)response.StatusCode + ")\n" + json);
                                     }
 
                                     return reply;
                                 }
                             }
-                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", "An error has ocurred during nebula api GET call: " + response.StatusCode);
+                            Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api GET call: " + response.StatusCode + "(" + (int)response.StatusCode + ").");
                         }
                         break;
                 }
             }
             catch (Exception ex)
             {
-                Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall", ex);
+                Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", ex);
             }
             return null;
         }
