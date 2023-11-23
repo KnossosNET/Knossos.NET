@@ -29,7 +29,7 @@
 									</DataTemplate>
 								</ListBox.ItemTemplate>
 							</ListBox>
-							<Button Command="{Binding CreateMod}" Grid.Row="1" Classes="Quaternary"  HorizontalAlignment="Center">Create New Mod</Button>
+							<Button Command="{Binding CreateMod}" Grid.Row="1" Classes="Quaternary" Margin="0,20,0,10" HorizontalAlignment="Center">Create New Mod</Button>
 						</Grid>
 					</SplitView.Pane>
 
