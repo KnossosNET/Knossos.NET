@@ -65,7 +65,7 @@
 					<Label Margin="5,3,0,0" HorizontalAlignment="Center" Foreground="Yellow" FontSize="12">This image should be 150×225 pixels large.</Label>
 				</StackPanel>
 			</WrapPanel>
-			<WrapPanel Margin="20,0,0,0" HorizontalAlignment="Center">
+			<WrapPanel Margin="130,0,0,0">
 				<Button Command="{Binding ChangeTileImage}" Width="100" Classes="Option" Margin="5">Browse</Button>
 				<Button Command="{Binding RemoveTileImage}" Width="100" Classes="Cancel" Margin="5">Remove</Button>
 			</WrapPanel>
@@ -77,7 +77,7 @@
 						<Image Width="535" Height="150" Source="{Binding BannerImage}"></Image>
 					</Border>
 					<Label HorizontalAlignment="Center" Margin="5" Foreground="Yellow" FontSize="12">This image should be 1070x300 pixels large.</Label>
-					<WrapPanel HorizontalAlignment="Center">
+					<WrapPanel Margin="130,0,0,0">
 						<Button Command="{Binding ChangeBannerImage}" Width="100" Classes="Option" Margin="5">Browse</Button>
 						<Button Command="{Binding RemoveBannerImage}" Width="100" Classes="Cancel" Margin="5">Remove</Button>
 					</WrapPanel>
