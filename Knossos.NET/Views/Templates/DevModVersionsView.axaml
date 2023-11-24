@@ -47,11 +47,11 @@
 		</ListBox>
 		<Label Grid.Row="2" Margin="0,5,0,0" HorizontalAlignment="Center">Actions for Active Version</Label>
 	</Grid>
-	<WrapPanel Margin="12,4,0,0" HorizontalAlignment="Center" IsEnabled="{Binding ButtonsEnabled}">
+	<WrapPanel Margin="11,4,0,0" HorizontalAlignment="Center" IsEnabled="{Binding ButtonsEnabled}">
 		<Button IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding UploadMod}" Classes="Accept">Upload to Nebula</Button>
 		<Button IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding ChangeVisibility}" Content="{Binding VisibilityButtonText}" Classes="Secondary" Margin="24,0,0,0"/>
 	</WrapPanel>
-	<WrapPanel Margin="1,8,0,0" HorizontalAlignment="Center" IsEnabled="{Binding ButtonsEnabled}">
+	<WrapPanel Margin="0,8,0,0" HorizontalAlignment="Center" IsEnabled="{Binding ButtonsEnabled}">
 		<Button IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding DeleteNebula}" Classes="Cancel" Margin="0,0,5,0">Delete from Nebula</Button>
 		<Button Command="{Binding DeleteLocally}" Classes="Cancel" Margin="18,0,0,0">Delete Locally</Button>
 	</WrapPanel>
