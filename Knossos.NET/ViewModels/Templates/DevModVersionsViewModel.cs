@@ -185,7 +185,7 @@ namespace Knossos.NET.ViewModels
             }
             if (Mods.FirstOrDefault(m => m.version == NewVersion) != null)
             {
-                await MessageBox.Show(MainWindow.instance!, "'" + NewVersion + "' already exist.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance!, "'" + NewVersion + "' already exists.", "Validation error", MessageBox.MessageBoxButtons.OK);
                 return;
             }
             var parentDir = new DirectoryInfo(editor.ActiveVersion.fullPath).Parent;
@@ -197,7 +197,7 @@ namespace Knossos.NET.ViewModels
             var newDir = parentDir.FullName + Path.DirectorySeparatorChar + editor.ActiveVersion.id + "-" + NewVersion;
             if (Directory.Exists(newDir))
             {
-                await MessageBox.Show(MainWindow.instance!, "The directory '"+ newDir + "' already exist.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance!, "The directory '"+ newDir + "' already exists.", "Validation error", MessageBox.MessageBoxButtons.OK);
                 return;
             }
 
@@ -593,8 +593,8 @@ namespace Knossos.NET.ViewModels
             if (editor == null)
                 return;
             string devVersion = "999.0.0-DevEnv";
-            string explanation = "A DevEnv version is a mod version intended to be used for continuous local development process and it cant be uploaded to Nebula.\nThis version will always be the default active version every time you start Knet, and" +
-                " provides a static folder you can always work on.\nWhen you want to release a new version you can create a new version from the DevEnv one and release it.";
+            string explanation = "A DevEnv version is a mod version intended to be used for continuous local development process, and it can't be uploaded to Nebula.\nThis version will always be the default active version every time you start Knet, and" +
+                            " provides a static folder you can always work on.\nWhen you want to release a new version you can create a new version from the DevEnv one and release it.";
 
             if(await MessageBox.Show(MainWindow.instance!, explanation, "Creating Dev Environment version", MessageBox.MessageBoxButtons.ContinueCancel) != MessageBox.MessageBoxResult.Continue)
             {
@@ -602,7 +602,7 @@ namespace Knossos.NET.ViewModels
             }
             if (Mods.FirstOrDefault(m => m.version == devVersion) != null)
             {
-                await MessageBox.Show(MainWindow.instance!, "'" + devVersion + "' already exist.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance!, "'" + devVersion + "' already exists.", "Validation error", MessageBox.MessageBoxButtons.OK);
                 return;
             }
             var parentDir = new DirectoryInfo(editor.ActiveVersion.fullPath).Parent;
@@ -614,7 +614,7 @@ namespace Knossos.NET.ViewModels
             var newDir = parentDir.FullName + Path.DirectorySeparatorChar + editor.ActiveVersion.id + "-" + devVersion;
             if (Directory.Exists(newDir))
             {
-                await MessageBox.Show(MainWindow.instance!, "The directory '" + newDir + "' already exist.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance!, "The directory '" + newDir + "' already exists.", "Validation error", MessageBox.MessageBoxButtons.OK);
                 return;
             }
 
