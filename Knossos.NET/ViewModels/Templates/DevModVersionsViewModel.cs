@@ -18,6 +18,10 @@ namespace Knossos.NET.ViewModels
         internal bool buttonsEnabled = true;
         [ObservableProperty]
         internal string visibilityButtonText = "Make it public";
+        [ObservableProperty]
+        internal bool isDevEnvVersion = false;
+        [ObservableProperty]
+        internal bool modHasDevEnvVersion = false;
 
         internal int selectedIndex = -1;
         internal int SelectedIndex
@@ -36,6 +40,14 @@ namespace Knossos.NET.ViewModels
                     if (selectedIndex < Mods.Count && selectedIndex >= 0 && editor != null)
                     {
                         editor.ChangeActiveVersion(Mods[value]);
+                        if (Mods[value].version.Contains("-devenv",StringComparison.OrdinalIgnoreCase))
+                        {
+                            IsDevEnvVersion = true;
+                        }
+                        else
+                        { 
+                            IsDevEnvVersion = false; 
+                        }
                     }
                 }
             }
@@ -48,7 +60,10 @@ namespace Knossos.NET.ViewModels
             get 
             {
                 if (editor != null)
-                    return editor.ActiveVersion.version;
+                    if ( !IsDevEnvVersion || Mods.Count() <= 1 || Mods.Count() <= ( selectedIndex - 1 ) )
+                        return editor.ActiveVersion.version;
+                    else
+                        return Mods[SelectedIndex - 1].version;
                 else
                     return "1.0.0-Default";
             }
@@ -87,6 +102,22 @@ namespace Knossos.NET.ViewModels
                 if (editor.ActiveVersion == m)
                 {
                     selectedIndex = Mods.IndexOf(m);
+                    if (m.version.Contains("-devenv", StringComparison.OrdinalIgnoreCase))
+                    {
+                        IsDevEnvVersion = true;
+                        ModHasDevEnvVersion = true;
+                    }
+                    else
+                    {
+                        IsDevEnvVersion = false;
+                    }
+                }
+                else
+                {
+                    if (m.version.Contains("-devenv", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ModHasDevEnvVersion = true;
+                    }
                 }
             }
             if (editor.ActiveVersion.isPrivate)
@@ -549,6 +580,45 @@ namespace Knossos.NET.ViewModels
                 HackUpdateModList();
                 ButtonsEnabled = true;
             }
+        }
+
+        /// <summary>
+        /// DevEnv is just a version tagged "999.0.0-DevEnv" this version cant be uploaded to Nebula and only used for continuous local development process
+        /// If a Mod has this version the create devenv button is disabled as well as the upload, visibility and delete from nebula buttons
+        /// </summary>
+        internal async void CreateDevEnv()
+        {
+            if (editor == null)
+                return;
+            string devVersion = "999.0.0-DevEnv";
+            string explanation = "A DevEnv version is a mod version intended to be used for continuous local development process and it cant be uploaded to Nebula.\nThis version will always be the default active version every time you start Knet, and" +
+                " provides a static folder you can always work on.\nWhen you want to release a new version you can create a new version from the DevEnv one and release it.";
+
+            if(await MessageBox.Show(MainWindow.instance!, explanation, "Creating Dev Environment version", MessageBox.MessageBoxButtons.ContinueCancel) != MessageBox.MessageBoxResult.Continue)
+            {
+                return;
+            }
+            if (Mods.FirstOrDefault(m => m.version == devVersion) != null)
+            {
+                await MessageBox.Show(MainWindow.instance!, "'" + devVersion + "' already exist.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                return;
+            }
+            var parentDir = new DirectoryInfo(editor.ActiveVersion.fullPath).Parent;
+            if (parentDir == null)
+            {
+                Log.Add(Log.LogSeverity.Error, "DevModVersionsViewModel.CreateNewVersion()", editor.ActiveVersion.fullPath + " get parent folder was null");
+                return;
+            }
+            var newDir = parentDir.FullName + Path.DirectorySeparatorChar + editor.ActiveVersion.id + "-" + devVersion;
+            if (Directory.Exists(newDir))
+            {
+                await MessageBox.Show(MainWindow.instance!, "The directory '" + newDir + "' already exist.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                return;
+            }
+
+            ModHasDevEnvVersion = true;
+
+            TaskViewModel.Instance!.CreateModVersion(editor.ActiveVersion, devVersion, HackUpdateModList);
         }
     }
 }

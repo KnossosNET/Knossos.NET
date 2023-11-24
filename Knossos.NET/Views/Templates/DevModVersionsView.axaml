@@ -28,6 +28,7 @@
 					</Flyout>
 				</Button.Flyout>
 			</Button>
+			<Button Command="{Binding CreateDevEnv}" IsVisible="{Binding !ModHasDevEnvVersion}" Classes="Quaternary" Margin="20,0,0,0">Create DevEnv Version</Button>
 			<Button Command="{Binding LoadVersionsFromNebula}" Classes="Option" Margin="20,0,0,0">Install or Modify</Button>
 			<Button Command="{Binding DeleteAll}" Classes="Cancel" Margin="20,0,0,0">Delete Mod</Button>
 		</WrapPanel>
@@ -45,9 +46,9 @@
 		</ListBox>
 		<Label Grid.Row="2" HorizontalAlignment="Center">Actions for Active Version</Label>
 		<WrapPanel Grid.Row="3" Margin="10" HorizontalAlignment="Center" IsEnabled="{Binding ButtonsEnabled}">
-			<Button Command="{Binding UploadMod}" Classes="Accept" Margin="0,5,5,5">Upload to Nebula</Button>
-			<Button Command="{Binding ChangeVisibility}" Content="{Binding VisibilityButtonText}" Classes="Secondary" Margin="20,5,5,5"/>
-			<Button Command="{Binding DeleteNebula}" Classes="Cancel" Margin="20,5,5,5">Delete from Nebula</Button>
+			<Button IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding UploadMod}" Classes="Accept" Margin="0,5,5,5">Upload to Nebula</Button>
+			<Button IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding ChangeVisibility}" Content="{Binding VisibilityButtonText}" Classes="Secondary" Margin="20,5,5,5"/>
+			<Button IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding DeleteNebula}" Classes="Cancel" Margin="20,5,5,5">Delete from Nebula</Button>
 			<Button Command="{Binding DeleteLocally}" Classes="Cancel" Margin="20,5,5,5">Delete Locally</Button>
 		</WrapPanel>
 	</Grid>
