@@ -60,10 +60,7 @@ namespace Knossos.NET.ViewModels
             get 
             {
                 if (editor != null)
-                    if ( !IsDevEnvVersion || Mods.Count() <= 1 || Mods.Count() <= ( selectedIndex - 1 ) )
-                        return editor.ActiveVersion.version;
-                    else
-                        return Mods[SelectedIndex - 1].version;
+                    return editor.ActiveVersion.version;
                 else
                     return "1.0.0-Default";
             }
@@ -77,7 +74,12 @@ namespace Knossos.NET.ViewModels
                 if (newVersion != string.Empty)
                     return newVersion;
                 else
-                    return CurrentVersion;
+                {
+                    if (!IsDevEnvVersion || Mods.Count() <= 1 || Mods.Count() <= (selectedIndex - 1))
+                        return CurrentVersion;
+                    else
+                        return Mods[SelectedIndex - 1].version;
+                }
             }
             set
             {
