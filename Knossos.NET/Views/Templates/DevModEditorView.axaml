@@ -35,8 +35,8 @@
 				<!--Tools-->
 				<StackPanel IsVisible="true" Margin="20,10,20,10" HorizontalAlignment="Center">
 					<TextBlock HorizontalAlignment="Center" Text="Tools" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" Margin="0,0,0,3"></TextBlock>
-					<ComboBox ItemsSource="{Binding ToolItems}" Width="155" SelectedIndex="{Binding ToolIndex}"></ComboBox>
-					<Button Classes="Primary" Command="{Binding OpenTool}" HorizontalAlignment="Center" Margin="2" Width="150">Open</Button>
+					<ComboBox ItemsSource="{Binding ToolItems}" Width="154" SelectedIndex="{Binding ToolIndex}"></ComboBox>
+					<Button Classes="Primary" Command="{Binding OpenTool}" HorizontalAlignment="Center" Margin="2,4,0,0" Width="150">Open</Button>
 				</StackPanel>
 			</StackPanel>
 		</ScrollViewer>
