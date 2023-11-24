@@ -330,6 +330,7 @@ namespace Knossos.NET.ViewModels
                     taskQueue.Enqueue(newTask);
                 });
                 await newTask.CreateModVersion(oldMod, newVersion, cancelSource).ConfigureAwait(false);
+                await Task.Delay(1000).ConfigureAwait(false);
                 Dispatcher.UIThread.Invoke(() =>
                 {
                     hackCallback?.Invoke();
