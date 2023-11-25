@@ -44,23 +44,27 @@
 						<WrapPanel>
 							<CheckBox ToolTip.Tip="If package is enabled or disabled. Disabled packages are not used when playing." IsChecked="{Binding IsEnabled}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></CheckBox>
 							<Label MinWidth="250" FontWeight="Bold" FontSize="18" Content="{Binding Package.name}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
-							<Button Command="{Binding OpenModPackageFolder}" Margin="10,0,0,0">Open Folder</Button>
-							<Button Command="{Binding AddModDependency}" Margin="10,0,0,0">+Dependency</Button>
-							<Button Margin="10,0,0,0" Content="Notes">
+						</WrapPanel>
+						<WrapPanel Margin="10,0,0,7">
+							<Button Command="{Binding OpenModPackageFolder}" >Open Folder</Button>
+							<Button Command="{Binding AddModDependency}" Margin="8,0,0,0">+Dependency</Button>
+							<Button Margin="8,0,0,0" Content="Notes">
 								<Button.Flyout>
 									<Flyout>
 										<TextBox Text="{Binding PackageNotes}" Width="250" MinHeight="100" TextWrapping="Wrap"></TextBox>
 									</Flyout>
 								</Button.Flyout>
 							</Button>
+						</WrapPanel>
+						<WrapPanel>
 							<ComboBox Margin="10,0,0,0" SelectedIndex="{Binding PackageStatusIndex}" MinWidth="130" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Background="White" Foreground="Black">
 								<ComboBoxItem ToolTip.Tip="Always installed with the mod, in fact these are the base files of the mod">Required</ComboBoxItem>
 								<ComboBoxItem ToolTip.Tip="Automatically selected for installation, but the user can skip them">Recommended</ComboBoxItem>
 								<ComboBoxItem ToolTip.Tip="Not automatically selected, but user can add them during the install process">Optional</ComboBoxItem>
 							</ComboBox>
 							<CheckBox IsChecked="{Binding PackVP}" Margin="10,0,0,0" ToolTip.Tip="Whether Knossos should pack the files in a VP on upload.&#x0a;Warning: VPs have a 2GB total size limit.">Make VP</CheckBox>
-							<Label FontSize="16" Margin="5" ToolTip.Tip="Current package folder size" Foreground="Yellow" Content="{Binding DiskSpace}"/>
-							<Button Command="{Binding DeleteModPkg}" Margin="20,0,0,0" Classes="Cancel">Delete</Button>
+							<Label FontSize="16" Margin="5,6,5,5" ToolTip.Tip="Current package folder size" Foreground="Yellow" Content="{Binding DiskSpace}"/>
+							<Button HorizontalAlignment="Right" Command="{Binding DeleteModPkg}" Margin="10,0,0,10" Classes="Cancel">Delete</Button>
 						</WrapPanel>
 						<!--Pkg Dependency List-->
 						<ItemsControl ItemsSource="{Binding DependencyItems}" Margin="0,5,0,0">
@@ -70,12 +74,12 @@
 									<Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto">
 										<Label Margin="30,0,0,0" Grid.Column="0" FontSize="18" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">&#x21B3;</Label>
 										<ComboBox SelectedIndex="{Binding ModSelectedIndex}" ItemsSource="{Binding ModItems}" Grid.Column="1" HorizontalAlignment="Stretch" Margin="5,2,2,2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
-										<ComboBox SelectedIndex="{Binding VersionTypeIndex}" Grid.Column="2" MinWidth="75" Margin="2" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black">
+										<ComboBox SelectedIndex="{Binding VersionTypeIndex}" Grid.Column="2" MinWidth="60" Margin="2" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black">
 											<ComboBoxItem ToolTip.Tip="Only the selected version">==</ComboBoxItem>
 											<ComboBoxItem ToolTip.Tip="Higher or equal than the selected version">>=</ComboBoxItem>
 											<ComboBoxItem ToolTip.Tip="Same minor version, revision equal or better:&#x0a;Dependency: ~1.5.2&#x0a;1.5.1 ->Not Valid&#x0a;1.5.6 -> Valid&#x0a;1.6.0 -> Not valid">~</ComboBoxItem>
 										</ComboBox>
-										<ComboBox SelectedIndex="{Binding VersionSelectedIndex}" ItemsSource="{Binding VersionItems}" Grid.Column="3" MinWidth="150" Margin="2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
+										<ComboBox SelectedIndex="{Binding VersionSelectedIndex}" ItemsSource="{Binding VersionItems}" Grid.Column="3" MinWidth="75" Margin="2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
 										<!--Packages-->
 										<Button IsVisible="{Binding DisplayPackages}" Grid.Column="4" Margin="5,0,2,0" Content="Packages">
 											<Button.Flyout>
