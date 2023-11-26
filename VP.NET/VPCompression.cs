@@ -63,9 +63,7 @@ namespace VP.NET
             switch (CompressionHeader)
             {
                 case CompressionHeader.LZ41:
-                    Parallel.Invoke(() => {
                         compressedSize = LZ4RawUtility.LZ41_Stream_Compress_HC(input, output, BlockSize, CompressionLevel, originalFileSize);
-                    });
                     break;
             }
             return compressedSize;
@@ -98,14 +96,7 @@ namespace VP.NET
             switch (header)
             {
                 case CompressionHeader.LZ41:
-                    var cpTask = Task.Factory.StartNew(() => { 
-                        uncompressedSize = LZ4RawUtility.LZ41_Stream_Decompress(input, output, compressedFileSize);
-                    }).ContinueWith((task) =>
-                    {
-                        if (task.IsFaulted && task.Exception != null)
-                            throw task.Exception;
-                    }).ConfigureAwait(false);
-                    await cpTask;
+                    uncompressedSize = LZ4RawUtility.LZ41_Stream_Decompress(input, output, compressedFileSize);
                     break;
             }
 
