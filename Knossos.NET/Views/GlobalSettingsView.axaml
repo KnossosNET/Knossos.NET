@@ -218,7 +218,7 @@
 						<!-- VSYNC -->
 						<WrapPanel>
 							<Label Margin="5,5,0,0" Width="210">VSync</Label> 
-							<CheckBox Tag="-no_vsync" IsChecked="{Binding !Vsync}"></CheckBox>
+							<CheckBox Tag="-no_vsync" IsChecked="{Binding Vsync}"></CheckBox>
 						</WrapPanel>
 						<!-- FPS Cap -->
 						<WrapPanel>
