@@ -1960,67 +1960,64 @@ namespace Knossos.NET.ViewModels
 
                     Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.CompressLosseFiles()", "Starting to compress loose files" );
 
-                    await Task.Run(async () => {
-                        await Parallel.ForEachAsync(filePaths, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism }, async (file, token) =>
-                        {
-                            var input = new FileStream(file,FileMode.Open,FileAccess.Read, FileShare.Read);
-                            BinaryReader br = new BinaryReader(input);
+                    await Parallel.ForEachAsync(filePaths, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism }, async (file, token) =>
+                    {
+                        var input = new FileStream(file,FileMode.Open,FileAccess.Read, FileShare.Read);
+                        BinaryReader br = new BinaryReader(input);
 
-                            if (!input.CanRead)
+                        if (!input.CanRead)
+                        {
+                            input.Dispose();
+                            throw new TaskCanceledException();
+                        }
+
+                        //Verify if it is compressed
+                        if (Encoding.ASCII.GetString(br.ReadBytes(4)) != "LZ41")
+                        {
+                            FileInfo fi = new FileInfo(file);
+                            await Dispatcher.UIThread.InvokeAsync(() => {
+                                Info = ProgressCurrent + " / " + ProgressBarMax + " " + fi.Name;
+                            });
+                            input.Seek(0, SeekOrigin.Begin);
+                            var output = new FileStream(fi.FullName+".lz41", FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                            if(!output.CanWrite)
                             {
                                 input.Dispose();
+                                output.Dispose();
                                 throw new TaskCanceledException();
                             }
 
-                            //Verify if it is compressed
-                            if (Encoding.ASCII.GetString(br.ReadBytes(4)) != "LZ41")
+                            var compressedSize = await VPCompression.CompressStream(input,output);
+                            output.Dispose();
+                            if(compressedSize < input.Length)
                             {
-                                FileInfo fi = new FileInfo(file);
-                                await Dispatcher.UIThread.InvokeAsync(() => {
-                                    Info = ProgressCurrent + " / " + ProgressBarMax + " " + fi.Name;
-                                });
-                                input.Seek(0, SeekOrigin.Begin);
-                                var output = new FileStream(fi.FullName+".lz41", FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-                                if(!output.CanWrite)
-                                {
-                                    input.Dispose();
-                                    output.Dispose();
-                                    throw new TaskCanceledException();
-                                }
-                            
-                                var compressedSize = await VPCompression.CompressStream(input,output);
+                                //Delete original
+                                input.Dispose();
                                 output.Dispose();
-                                if(compressedSize < input.Length)
-                                {
-                                    //Delete original
-                                    input.Dispose();
-                                    output.Dispose();
-                                    File.Delete(file);
-                                    compressedCount++;
-                                }
-                                else
-                                {
-                                    //Roll back
-                                    input.Dispose();
-                                    output.Dispose();
-                                    File.Delete(fi.FullName + ".lz41");
-                                    skippedCount++;
-                                }
+                                File.Delete(file);
+                                compressedCount++;
                             }
                             else
                             {
+                                //Roll back
+                                input.Dispose();
+                                output.Dispose();
+                                File.Delete(fi.FullName + ".lz41");
                                 skippedCount++;
                             }
-                            await input.DisposeAsync();
-                            ProgressCurrent++;
+                        }
+                        else
+                        {
+                            skippedCount++;
+                        }
+                        await input.DisposeAsync();
+                        ProgressCurrent++;
 
-                            if (cancellationTokenSource.IsCancellationRequested)
-                            {
-                                throw new TaskCanceledException();
-                            }
-                        });
+                        if (cancellationTokenSource.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
                     });
-
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
                         throw new TaskCanceledException();

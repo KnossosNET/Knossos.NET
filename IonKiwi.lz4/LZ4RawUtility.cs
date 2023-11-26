@@ -155,7 +155,7 @@ namespace IonKiwi.lz4 {
             int fileSize = inputfileSize.HasValue ? inputfileSize.Value : (int)inputStream.Length;
             int maxBlocks = (lz4.LZ4_compressBound(fileSize) / _blockSize) + 50;
             Queue<int> offsets = new Queue<int>();
-            lz4.LZ4_initStreamHC(lz4Stream, sizeof(LZ4_stream));
+            lz4.LZ4_initStreamHC(lz4Stream, sizeof(LZ4_streamHC));
 
             //Write Header
             outputStream.Write(Encoding.ASCII.GetBytes("LZ41"), 0, 4);
@@ -189,7 +189,7 @@ namespace IonKiwi.lz4 {
                         throw new IOException("Error while reading from the input stream or unexpected end of stream.");
 
                     //Reset the stream to make all blocks independient blocks
-                    lz4.LZ4_resetStreamHC_fast(lz4Stream, 6);
+                    lz4.LZ4_resetStreamHC_fast(lz4Stream, compressionLevel);
 
                     fixed (byte* inPtr = inBuf)
                     {

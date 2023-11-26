@@ -1,4 +1,5 @@
 ﻿using IonKiwi.lz4;
+using System.Threading.Tasks;
 
 namespace VP.NET
 {
@@ -61,14 +62,15 @@ namespace VP.NET
 
             switch (CompressionHeader)
             {
-                case CompressionHeader.LZ41: 
-                    await Task.Run(() => { 
-                        compressedSize = LZ4RawUtility.LZ41_Stream_Compress_HC(input, output, BlockSize, CompressionLevel, originalFileSize); 
+                case CompressionHeader.LZ41:
+                    var cpTask = Task.Factory.StartNew(() => {
+                        compressedSize = LZ4RawUtility.LZ41_Stream_Compress_HC(input, output, BlockSize, CompressionLevel, originalFileSize);
                     }).ContinueWith((task) =>
                     {
                         if (task.IsFaulted && task.Exception != null)
                             throw task.Exception;
-                    });
+                    }).ConfigureAwait(false);
+                    await cpTask;
                     break;
             }
             return compressedSize;
@@ -101,13 +103,14 @@ namespace VP.NET
             switch (header)
             {
                 case CompressionHeader.LZ41:
-                    await Task.Run(() => {
+                    var cpTask = Task.Factory.StartNew(() => { 
                         uncompressedSize = LZ4RawUtility.LZ41_Stream_Decompress(input, output, compressedFileSize);
                     }).ContinueWith((task) =>
                     {
                         if (task.IsFaulted && task.Exception != null)
                             throw task.Exception;
-                    });
+                    }).ConfigureAwait(false);
+                    await cpTask;
                     break;
             }
 
