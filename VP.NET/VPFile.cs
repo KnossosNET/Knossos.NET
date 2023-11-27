@@ -220,7 +220,7 @@
 
                 if (compressionInfo.header.HasValue)
                 {
-                    await VPCompression.DecompressStream(source, destination, compressionInfo.header.Value, info.size);
+                    VPCompression.DecompressStream(source, destination, compressionInfo.header.Value, info.size);
                 }
                 else
                 {

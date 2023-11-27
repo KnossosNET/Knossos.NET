@@ -1,5 +1,4 @@
 ﻿using IonKiwi.lz4;
-using System.Threading.Tasks;
 
 namespace VP.NET
 {
@@ -52,10 +51,10 @@ namespace VP.NET
         /// <param name="output"></param>
         /// <param name="originalFileSize"></param>
         /// <exception cref="Exception"></exception>
-        public static async Task<int> CompressStream(Stream input, Stream output, int? originalFileSize = null)
+        public static int CompressStream(Stream input, Stream output, int? originalFileSize = null)
         {
             int compressedSize = 0;
-            if(CompressionLevel < 3 || CompressionLevel > 12) 
+            if (CompressionLevel < 3 || CompressionLevel > 12)
             {
                 CompressionLevel = 6;
             }
@@ -63,7 +62,13 @@ namespace VP.NET
             switch (CompressionHeader)
             {
                 case CompressionHeader.LZ41:
+                    var cpThread = new Thread(() =>
+                    {
+                        Thread.CurrentThread.IsBackground = true;
                         compressedSize = LZ4RawUtility.LZ41_Stream_Compress_HC(input, output, BlockSize, CompressionLevel, originalFileSize);
+                    }, 1048576);
+                    cpThread.Start();
+                    cpThread.Join();
                     break;
             }
             return compressedSize;
@@ -78,11 +83,11 @@ namespace VP.NET
         /// <param name="header"></param>
         /// <param name="compressedFileSize"></param>
         /// <returns>Uncompressed file size</returns>
-        public static async Task<int> DecompressStream(Stream input, Stream output, CompressionHeader? header = null, int? compressedFileSize = null)
+        public static int DecompressStream(Stream input, Stream output, CompressionHeader? header = null, int? compressedFileSize = null)
         {
             int uncompressedSize = 0;
 
-            if(header == null)
+            if (header == null)
             {
                 long org_pos = input.Position;
                 BinaryReader br = new BinaryReader(input);
@@ -96,7 +101,13 @@ namespace VP.NET
             switch (header)
             {
                 case CompressionHeader.LZ41:
-                    uncompressedSize = LZ4RawUtility.LZ41_Stream_Decompress(input, output, compressedFileSize);
+                    var cpThread = new Thread(() =>
+                    {
+                        Thread.CurrentThread.IsBackground = true;
+                        uncompressedSize = LZ4RawUtility.LZ41_Stream_Decompress(input, output, compressedFileSize);
+                    }, 1048576);
+                    cpThread.Start();
+                    cpThread.Join();
                     break;
             }
 

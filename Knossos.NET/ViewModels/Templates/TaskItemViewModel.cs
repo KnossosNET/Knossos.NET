@@ -1860,7 +1860,7 @@ namespace Knossos.NET.ViewModels
                                 throw new TaskCanceledException();
                             }
 
-                            var compressedSize = await Task.Run(async () => await VPCompression.DecompressStream(input, output));
+                            var compressedSize = await Task.Run(async () => VPCompression.DecompressStream(input, output));
 
                             //Delete original
                             input.Dispose();
@@ -1987,7 +1987,7 @@ namespace Knossos.NET.ViewModels
                                 throw new TaskCanceledException();
                             }
 
-                            var compressedSize = await VPCompression.CompressStream(input,output);
+                            var compressedSize = VPCompression.CompressStream(input,output);
                             output.Dispose();
                             if(compressedSize < input.Length)
                             {
