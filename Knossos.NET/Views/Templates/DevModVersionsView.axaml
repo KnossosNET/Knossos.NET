@@ -29,9 +29,11 @@
 					</Flyout>
 				</Button.Flyout>
 			</Button>
-			<Button Command="{Binding CreateDevEnv}" IsVisible="{Binding !ModHasDevEnvVersion}" Classes="Quaternary" Margin="20,0,0,0">Create DevEnv Version</Button>
 			<Button Command="{Binding LoadVersionsFromNebula}" Classes="Option" Margin="20,0,0,0">Install or Modify</Button>
 			<Button Command="{Binding DeleteAll}" Classes="Cancel" Margin="20,0,0,0">Delete Mod</Button>
+		</WrapPanel>
+		<WrapPanel HorizontalAlignment="Center" Grid.Row="0" Margin="10,45,10,10">
+			<Button Command="{Binding CreateDevEnv}" IsVisible="{Binding !ModHasDevEnvVersion}" Classes="Quaternary" Margin="0,0,190,0">Create DevEnv Version</Button>
 		</WrapPanel>
 		<ListBox Background="{StaticResource BackgroundColorSecondary}" IsEnabled="{Binding ButtonsEnabled}" Margin="10,0,10,10" Grid.Row="1" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}" HorizontalAlignment="Stretch" MinHeight="180">
 			<ListBox.ItemTemplate>
