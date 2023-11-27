@@ -75,21 +75,21 @@
 		<SolidColorBrush x:Key="BackgroundColorSecondary">#422626</SolidColorBrush>
 		<SolidColorBrush x:Key="BackgroundColorTertiary">#131414</SolidColorBrush>
 		
-		<SolidColorBrush x:Key="PrimaryColor">#008E47</SolidColorBrush>
-		<SolidColorBrush x:Key="PrimaryColorMouseOver">#006030</SolidColorBrush>
-		<SolidColorBrush x:Key="SecondaryColor">#00008E</SolidColorBrush>
-		<SolidColorBrush x:Key="SecondaryColorMouseOver">#000060</SolidColorBrush>
-		<SolidColorBrush x:Key="TertiaryColor">#8E8E00</SolidColorBrush>
-		<SolidColorBrush x:Key="TertiaryColorMouseOver">#605F00</SolidColorBrush>
-		<SolidColorBrush x:Key="QuaternaryColor">#8E0047</SolidColorBrush>
-		<SolidColorBrush x:Key="QuaternaryColorMouseOver">#600030</SolidColorBrush>
+		<SolidColorBrush x:Key="PrimaryColor">#71BF40</SolidColorBrush>
+		<SolidColorBrush x:Key="PrimaryColorMouseOver">#579331</SolidColorBrush>
+		<SolidColorBrush x:Key="SecondaryColor">#BF8E40</SolidColorBrush>
+		<SolidColorBrush x:Key="SecondaryColorMouseOver">#936D31</SolidColorBrush>
+		<SolidColorBrush x:Key="TertiaryColor">#B1BF40</SolidColorBrush>
+		<SolidColorBrush x:Key="TertiaryColorMouseOver">#889331</SolidColorBrush>
+		<SolidColorBrush x:Key="QuaternaryColor">#4E40BF</SolidColorBrush>
+		<SolidColorBrush x:Key="QuaternaryColorMouseOver">#3C3193</SolidColorBrush>
 		
 		<SolidColorBrush x:Key="ForegroundColor">#F6F6F5</SolidColorBrush>
 		<SolidColorBrush x:Key="ForegroundColorMouseOver">#DEDCDA</SolidColorBrush>
 
 		<SolidColorBrush x:Key="ModCardBorderNormal">Transparent</SolidColorBrush>
-		<SolidColorBrush x:Key="ModCardBorderUpdate">#8E8E00</SolidColorBrush>
-		<SolidColorBrush x:Key="ModCardBorderError">#CD1308</SolidColorBrush>
+		<SolidColorBrush x:Key="ModCardBorderUpdate">#4E40BF</SolidColorBrush>
+		<SolidColorBrush x:Key="ModCardBorderError">#CD3632</SolidColorBrush>
 		<SolidColorBrush x:Key="ModCardBorderDevMode">DimGray</SolidColorBrush>
 	</Styles.Resources>
 	
@@ -141,14 +141,14 @@
 		<!--Cancel-->
 		<Style Selector="Button.Cancel">
 			<Setter Property="FontWeight" Value="Bold"/>
-			<Setter Property="Background" Value="#CD1308"/>
+			<Setter Property="Background" Value="#CD3632"/>
 			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="Button.Cancel:pointerover /template/ ContentPresenter">
-			<Setter Property="Background" Value="#A81007"/>
+			<Setter Property="Background" Value="#9F2927"/>
 			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 
