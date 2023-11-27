@@ -177,7 +177,7 @@
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
-		<Style Selector="Button.Option:pointerover /template/ ContentPresenter">
+		<Style Selector="Button.Settings:pointerover /template/ ContentPresenter">
 			<Setter Property="Background" Value="{StaticResource SettingsColorMouseOver}"/>
 			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>

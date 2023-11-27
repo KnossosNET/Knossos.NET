@@ -17,7 +17,7 @@
 			<CheckBox IsChecked="{Binding HideRC}" Foreground="{StaticResource SecondaryColorMouseOver}" FontWeight="Bold" Grid.Column="0">Hide RC builds</CheckBox>
 			<CheckBox IsChecked="{Binding HideNightly}" Foreground="{StaticResource TertiaryColor}" FontWeight="Bold" Grid.Column="1" Margin="10,0,0,0">Hide Nightly builds</CheckBox>
 			<CheckBox IsChecked="{Binding HideCustom}" Foreground="{StaticResource PrimaryColorMouseOver}" FontWeight="Bold" Grid.Column="2" Margin="10,0,0,0">Hide Custom builds</CheckBox>
-			<Button Command="{Binding OpenFileCommand}" Classes="Secondary" Grid.Column="3" Margin="10,0,0,0">Browse</Button>
+			<Button Command="{Binding OpenFileCommand}" Classes="Quaternary" Grid.Column="3" Margin="10,0,0,0">Browse</Button>
 		</Grid>
 		<ComboBox ItemsSource="{Binding BuildItems}" SelectedIndex="{Binding BuildSelectedIndex}" Margin="5" HorizontalAlignment="Stretch">
 			<ComboBox.ItemsPanel>

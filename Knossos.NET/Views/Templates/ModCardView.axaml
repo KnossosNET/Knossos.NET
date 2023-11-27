@@ -55,7 +55,7 @@
 					<StackPanel Margin="5">
 						<Button Command="{Binding ButtonCommand}" CommandParameter="debug" Content="FSO Debug" Classes="Primary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
 						<Button Command="{Binding ButtonCommand}" CommandParameter="fred2" Content="Fred2" Classes="Secondary Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommand}" CommandParameter="qtfred" Content="QtFred" Classes="Secondary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="qtfred" Content="QtFred" Classes="Settings Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
 						<Button Command="{Binding ButtonCommand}" CommandParameter="delete" Content="Delete" Classes="Cancel Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
 					</StackPanel>
 				</TabItem>

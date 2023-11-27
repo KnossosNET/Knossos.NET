@@ -66,7 +66,7 @@
 				</StackPanel>
 			</WrapPanel>
 			<WrapPanel Margin="130,0,0,0">
-				<Button Command="{Binding ChangeTileImage}" Width="100" Classes="Option" Margin="5">Browse</Button>
+				<Button Command="{Binding ChangeTileImage}" Width="100" Classes="Quaternary" Margin="5">Browse</Button>
 				<Button Command="{Binding RemoveTileImage}" Width="100" Classes="Cancel" Margin="5">Remove</Button>
 			</WrapPanel>
 			<!--Banner Image-->
@@ -78,7 +78,7 @@
 					</Border>
 					<Label Margin="125,5,0,0" Foreground="Yellow" FontSize="12">This image should be 1070x300 pixels large.</Label>
 					<WrapPanel Margin="130,0,0,0">
-						<Button Command="{Binding ChangeBannerImage}" Width="100" Classes="Option" Margin="5">Browse</Button>
+						<Button Command="{Binding ChangeBannerImage}" Width="100" Classes="Quaternary" Margin="5">Browse</Button>
 						<Button Command="{Binding RemoveBannerImage}" Width="100" Classes="Cancel" Margin="5">Remove</Button>
 					</WrapPanel>
 				</StackPanel>
