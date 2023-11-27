@@ -35,7 +35,7 @@
 					<TextBlock HorizontalAlignment="Left" Margin="0,0,0,0" Padding="0,3" FontWeight="Bold" FontSize="20">Server List</TextBlock>
 					<TextBlock TextWrapping="Wrap" Margin="0,2,0,0" Padding="0,3">Current ongoing Multiplayer games are listed here. There is a small hourly limit on list refreshes.</TextBlock>
 
-					<Button Margin="10,5,0,15" Command="{Binding RefreshData}">Refresh Game List</Button>
+					<Button Margin="10,5,0,15" Classes="Secondary" Command="{Binding RefreshData}">Refresh Game List</Button>
 					<TreeView Margin="10,0,0,0"  ItemsSource="{Binding ActiveGames}">
 						<TreeView.Styles>
 							<Style Selector="TreeViewItem">
@@ -64,7 +64,7 @@
 					</TreeView>
 					<TextBlock Margin="0,30,0,0" HorizontalAlignment="Left" Padding="0,3" FontWeight="Bold" FontSize="20">Standalone Servers</TextBlock>
 					<TextBlock Margin="0,5,0,0" TextWrapping="Wrap">You can create a dedicated multiplayer server where other people can join in and play</TextBlock>
-					<Button Command="{Binding OpenServerCreator}" Margin="10,8,0,0" HorizontalAlignment="Left">Standalone Server Creator</Button>				
+					<Button Classes="Tertiary" Command="{Binding OpenServerCreator}" Margin="10,8,0,0" HorizontalAlignment="Left">Standalone Server Creator</Button>				
 				</StackPanel>
 		
 			</Grid>

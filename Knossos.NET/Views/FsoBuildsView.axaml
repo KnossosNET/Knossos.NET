@@ -32,7 +32,7 @@
 							</DataTemplate>
 						</ListBox.ItemTemplate>
 					</ListBox>
-					<Button Command="{Binding LoadAllNightlies}" IsVisible="{Binding !AllNightliesLoaded}" HorizontalAlignment="Center" Margin="0,5,0,10" Grid.Row="1">Load All Nightlies</Button>
+					<Button Command="{Binding LoadAllNightlies}" IsVisible="{Binding !AllNightliesLoaded}" HorizontalAlignment="Center" Classes="Secondary" Margin="0,5,0,10" Grid.Row="1">Load All Nightlies</Button>
 				</Grid>
 			</TabItem>
 			<TabItem Header="RC Builds" ToolTip.Tip="Release Candidate builds, used in pre-stable release testing">
@@ -46,7 +46,7 @@
 			</TabItem>
 			<TabItem Header="Custom Builds" ToolTip.Tip="Builds for testing specific new features or bugfixes">
 				<Grid RowDefinitions="Auto,*">
-					<Button Command="{Binding CommandAddUserBuild}" FontWeight="Bold" HorizontalAlignment="Right" Margin="0,0,0,5">Import Local Build</Button>
+					<Button Command="{Binding CommandAddUserBuild}" FontWeight="Bold" HorizontalAlignment="Right" Classes="Tertiary" Margin="0,0,0,5">Import Local Build</Button>
 					<ListBox Grid.Row="1" ItemsSource="{Binding CustomItems}" Background="{StaticResource BackgroundColorSecondary}">
 						<ListBox.ItemTemplate>
 							<DataTemplate>

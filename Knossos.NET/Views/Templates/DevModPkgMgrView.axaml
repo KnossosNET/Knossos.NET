@@ -16,7 +16,7 @@
 	<StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 		<Label FontWeight="Bold" FontSize="20" Margin="5">Packages and Dependencies</Label>
 		<WrapPanel>
-			<Button Margin="8,0,0,5" Content="+Package" Classes="Primary">
+			<Button Margin="8,0,0,5" Content="+Package" Classes="Secondary">
 				<Button.Flyout>
 					<Flyout>
 						<StackPanel HorizontalAlignment="Center">
@@ -46,9 +46,9 @@
 							<Label MinWidth="250" FontWeight="Bold" FontSize="18" Content="{Binding Package.name}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
 						</WrapPanel>
 						<WrapPanel Margin="10,0,0,7">
-							<Button Command="{Binding OpenModPackageFolder}" >Open Folder</Button>
-							<Button Command="{Binding AddModDependency}" Margin="8,0,0,0">+Dependency</Button>
-							<Button Margin="8,0,0,0" Content="Notes">
+							<Button Command="{Binding OpenModPackageFolder}" Classes="Quaternary">Open Folder</Button>
+							<Button Command="{Binding AddModDependency}" Classes="Secondary" Margin="8,0,0,0">+Dependency</Button>
+							<Button Margin="8,0,0,0" Classes="Tertiary" Content="Notes">
 								<Button.Flyout>
 									<Flyout>
 										<TextBox Text="{Binding PackageNotes}" Width="250" MinHeight="100" TextWrapping="Wrap"></TextBox>
