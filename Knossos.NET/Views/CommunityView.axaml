@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 x:Class="Knossos.NET.Views.CommunityView"
+			 xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+			 x:DataType="vm:DeveloperModsViewModel">
+
+	<Design.DataContext>
+		<vm:CommunityViewModel/>
+	</Design.DataContext>
+
+	<TabControl>
+	    <TabItem Header="FAQ">
+            <StackPanel>
+                <WrapPanel>
+
+                </WrapPanel>
+                <WrapPanel>
+                </WrapPanel>
+                <WrapPanel>
+                </WrapPanel>
+            </StackPanel>
+
+
+		</TabItem>
+
+		<TabItem Header="Resources">
+            <StackPanel>
+                <WrapPanel>
+                    <Image Height="40" Width="40" Source="/Assets/general/.png"/>
+
+                </WrapPanel>
+                <WrapPanel>
+                </WrapPanel>
+                <WrapPanel>
+                </WrapPanel>
+            </StackPanel>
+		</TabItem>
+
+		<TabItem Header="Bug Reporting">
+            <StackPanel>
+                <WrapPanel>
+                </WrapPanel>
+                <WrapPanel>
+                </WrapPanel>
+                <WrapPanel>
+                </WrapPanel>
+            </StackPanel>
+		</TabItem>
+	</TabControl>
+
+</UserControl>
