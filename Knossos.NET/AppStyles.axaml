@@ -83,7 +83,9 @@
 		<SolidColorBrush x:Key="TertiaryColorMouseOver">#889331</SolidColorBrush>
 		<SolidColorBrush x:Key="QuaternaryColor">#4E40BF</SolidColorBrush>
 		<SolidColorBrush x:Key="QuaternaryColorMouseOver">#3C3193</SolidColorBrush>
-		
+		<SolidColorBrush x:Key="SettingsColor">#315793</SolidColorBrush>
+		<SolidColorBrush x:Key="SettingsColorMouseOver">#274575</SolidColorBrush>
+
 		<SolidColorBrush x:Key="ForegroundColor">#F6F6F5</SolidColorBrush>
 		<SolidColorBrush x:Key="ForegroundColorMouseOver">#DEDCDA</SolidColorBrush>
 
@@ -163,6 +165,20 @@
 		</Style>
 		<Style Selector="Button.Option:pointerover /template/ ContentPresenter">
 			<Setter Property="Background" Value="{StaticResource SecondaryColorMouseOver}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
+		</Style>
+
+		<!--Settings-->
+		<Style Selector="Button.Settings">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="{StaticResource SettingsColor}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+			<Setter Property="FontSize" Value="14" />
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button.Option:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="{StaticResource SettingsColorMouseOver}"/>
 			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 
