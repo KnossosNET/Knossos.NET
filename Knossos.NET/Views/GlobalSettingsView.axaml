@@ -44,7 +44,7 @@
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
 								<Label Margin="40,5,0,0" FontWeight="Bold">Builds:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfBuilds}"></TextBlock>
-								<Button Margin="40,0,0,0" Command="{Binding CleanupLibraryCommand}">Remove Unused Dependencies</Button>
+								<Button Margin="40,0,0,0" Classes="Settings" Command="{Binding CleanupLibraryCommand}">Remove Unused Dependencies</Button>
 							</WrapPanel>
 						</Grid>
 						<WrapPanel Margin="6,10,0,0">	
