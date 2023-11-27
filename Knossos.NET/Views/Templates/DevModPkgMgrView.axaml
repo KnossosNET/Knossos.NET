@@ -48,7 +48,7 @@
 						<WrapPanel Margin="10,0,0,7">
 							<Button Command="{Binding OpenModPackageFolder}" Classes="Quaternary">Open Folder</Button>
 							<Button Command="{Binding AddModDependency}" Classes="Secondary" Margin="8,0,0,0">+Dependency</Button>
-							<Button Margin="8,0,0,0" Classes="Tertiary" Content="Notes">
+							<Button HorizontalAlignment="Right" Margin="8,0,0,0" Classes="Settings" Content="Notes">
 								<Button.Flyout>
 									<Flyout>
 										<TextBox Text="{Binding PackageNotes}" Width="250" MinHeight="100" TextWrapping="Wrap"></TextBox>
@@ -62,8 +62,8 @@
 								<ComboBoxItem ToolTip.Tip="Automatically selected for installation, but the user can skip them">Recommended</ComboBoxItem>
 								<ComboBoxItem ToolTip.Tip="Not automatically selected, but user can add them during the install process">Optional</ComboBoxItem>
 							</ComboBox>
-							<CheckBox IsChecked="{Binding PackVP}" Margin="10,0,0,0" ToolTip.Tip="Whether Knossos should pack the files in a VP on upload.&#x0a;Warning: VPs have a 2GB total size limit.">Make VP</CheckBox>
-							<Label FontSize="16" Margin="5,6,5,5" ToolTip.Tip="Current package folder size" Foreground="Yellow" Content="{Binding DiskSpace}"/>
+							<CheckBox FontSize="12" IsChecked="{Binding PackVP}" Margin="10,0,0,0" ToolTip.Tip="Whether Knossos should pack the files in a VP on upload.&#x0a;Warning: VPs have a 2GB total size limit.">Make VP</CheckBox>
+							<Label FontSize="16" Margin="5,6,5,5" ToolTip.Tip="Current package folder size" Content="{Binding DiskSpace}"/>
 							<Button HorizontalAlignment="Right" Command="{Binding DeleteModPkg}" Margin="10,0,0,10" Classes="Cancel">Delete</Button>
 						</WrapPanel>
 						<!--Pkg Dependency List-->
@@ -81,7 +81,7 @@
 										</ComboBox>
 										<ComboBox SelectedIndex="{Binding VersionSelectedIndex}" ItemsSource="{Binding VersionItems}" Grid.Column="3" MinWidth="75" Margin="2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
 										<!--Packages-->
-										<Button IsVisible="{Binding DisplayPackages}" Grid.Column="4" Margin="5,0,2,0" Content="Packages">
+										<Button IsVisible="{Binding DisplayPackages}" Grid.Column="4" Margin="5,0,2,0" Classes="Settings" Content="Packages">
 											<Button.Flyout>
 												<Flyout Placement="Left">
 													<ScrollViewer MaxHeight="400">
@@ -121,7 +121,7 @@
 						<Button Command="{Binding FlagUP}" Background="Black">↑</Button>
 						<Button Command="{Binding FlagDown}" Background="Black">↓</Button>
 						<Label IsVisible="{Binding !IsThisMod}" Content="{Binding FlagName}"></Label>
-						<Label IsVisible="{Binding IsThisMod}" Foreground="Yellow" Content="{Binding FlagName}"></Label>
+						<Label IsVisible="{Binding IsThisMod}" Content="{Binding FlagName} (This mod)"></Label>
 					</WrapPanel>
 				</DataTemplate>
 			</ListBox.ItemTemplate>

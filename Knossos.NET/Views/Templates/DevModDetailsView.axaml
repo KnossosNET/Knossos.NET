@@ -14,6 +14,9 @@
 
 	<ScrollViewer>
 		<StackPanel Margin="10,5,0,0">
+			<!--Convenience Save button-->
+			<Button Command="{Binding Save}" Classes="Accept" HorizontalAlignment="Center" Margin="5">Save Changes</Button>
+
 			<!--NAME-->
 			<WrapPanel HorizontalAlignment="Left">
 				<Label Width="150" Margin="5" FontWeight="Bold" HorizontalContentAlignment="Right" FontSize="18">Name</Label>
@@ -39,7 +42,7 @@
 				<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">Description</Label>
 				<StackPanel MinWidth="280" MaxWidth="600">
 					<TextBox TextWrapping="Wrap" Height="200" Text="{Binding ModDescription}" Margin="5"></TextBox>
-					<Button Command="{Binding OpenDescriptionEditor}" Classes="Primary" Margin="5">Open Editor</Button>
+					<Button Command="{Binding OpenDescriptionEditor}" Classes="Quaternary" Margin="5">Open Editor</Button>
 				</StackPanel>
 			</WrapPanel>
 			<!--FORUM-->

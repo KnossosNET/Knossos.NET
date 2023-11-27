@@ -34,7 +34,7 @@
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
 							<TextBox Text="{Binding BasePath}" Margin="10,0,0,0" Grid.Column="1" IsReadOnly="True" Width="500"></TextBox>
-							<Button Margin="5,0,0,0" Grid.Column="2" Classes="Secondary" Command="{Binding BrowseFolderCommand}">Browse</Button>
+							<Button Margin="5,0,0,0" Grid.Column="2" Classes="Quaternary" Command="{Binding BrowseFolderCommand}">Browse</Button>
 						</Grid>
 						<!-- Lib Info -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="6,10,0,0">
@@ -50,7 +50,7 @@
 						<WrapPanel Margin="6,10,0,0">	
 							<Label Margin="0,5,0,0" Width="200">Retail Freespace 2</Label>
 							<CheckBox Margin="10,0,0,0" IsVisible="{Binding Fs2RootPack}" IsEnabled="False" IsChecked="{Binding Fs2RootPack}"></CheckBox>
-							<Button Classes="Secondary" Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Margin="10,0,0,0">Installer</Button>
+							<Button Classes="Quaternary" Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Margin="10,0,0,0">Installer</Button>
 						</WrapPanel>
 						<WrapPanel Margin="8,10,0,0">
 							<TextBlock VerticalAlignment="Center" Width="200">Mod Compression</TextBlock>
@@ -79,7 +79,7 @@
 						<WrapPanel Margin="5,10,0,0">
 							<Label VerticalAlignment="Center" Width="200" Content="Image Cache"/>
 							<Label Margin="10,0,0,0" VerticalAlignment="Center" Content="{Binding ImgCacheSize}"/>
-							<Button Command="{Binding ClearImageCache}" Margin="5,0,0,0" Classes="Secondary">Clear</Button>
+							<Button Command="{Binding ClearImageCache}" Margin="5,0,0,0" Classes="Quaternary">Clear</Button>
 						</WrapPanel>
 						<!-- SubTasks -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
@@ -146,7 +146,7 @@
 							</ComboBox>
 							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding ResolutionSelectedIndex}" ItemsSource="{Binding ResolutionItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="300" Margin="10,0,0,0"></ComboBox>
-							<Button Margin="130,0,0,0" Command="{Binding OpenPerformanceHelp}" Classes="Secondary" Content="Tips to Optimize Game Performance" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Right"></Button>
+							<Button Margin="130,0,0,0" Command="{Binding OpenPerformanceHelp}" Classes="Quaternary" Content="Tips to Optimize Game Performance" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Right"></Button>
 						</WrapPanel>
 						<!-- Resolution -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
@@ -284,7 +284,7 @@
 							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
 							<ComboBox SelectedIndex="{Binding VoiceSelectedIndex}" ItemsSource="{Binding VoiceItems}" IsEnabled="{Binding EnableTTS}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
 							<Grid Grid.Column="2" IsVisible="{Binding EnableTTS}">
-								<Button Command="{Binding TestVoiceCommand}" IsVisible="{Binding !PlayingTTS}" Margin="5,0,0,0" Classes="Secondary">Test</Button>
+								<Button Command="{Binding TestVoiceCommand}" IsVisible="{Binding !PlayingTTS}" Margin="5,0,0,0" Classes="Quaternary">Test</Button>
 								<Button Command="{Binding StopTTS}" IsVisible="{Binding PlayingTTS}" Margin="5,0,0,0" Classes="Cancel">Stop</Button>
 							</Grid>
 						</Grid>
@@ -382,7 +382,7 @@
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Command Line</Label>
 							<TextBox Text="{Binding GlobalCmd}" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="1" Width="500"></TextBox>
-							<Button Command="{Binding GlobalCmdHelp}" Classes="Secondary" Grid.Column="2" Margin="10,0,0,0">Command Line Wiki Page</Button>
+							<Button Command="{Binding GlobalCmdHelp}" Classes="Quaternary" Grid.Column="2" Margin="10,0,0,0">Command Line Wiki Page</Button>
 						</Grid>
 						<!-- Multi Port -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">

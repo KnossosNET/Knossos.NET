@@ -33,7 +33,7 @@
 					</Flyout>
 				</Button.Flyout>
 			</Button>
-			<Button Command="{Binding Save}" Margin="8,0,0,5" Classes="Accept">Save Changes</Button>
+			<Button HorizontalAlignment="Right" Command="{Binding Save}" Margin="8,0,0,5" Classes="Accept">Save Changes</Button>
 		</WrapPanel>
 		<!--Package List-->
 		<ListBox ItemsSource="{Binding EditorPackageItems}" Margin="8,0,0,0">
