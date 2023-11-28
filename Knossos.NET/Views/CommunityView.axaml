@@ -14,13 +14,9 @@
 
 	<TabControl>
 	    <TabItem Header="FAQ">
-            <StackPanel>
+            <StackPanel Margin="20,20,20,10">
                 <WrapPanel>
 
-                </WrapPanel>
-                <WrapPanel>
-                </WrapPanel>
-                <WrapPanel>
                 </WrapPanel>
             </StackPanel>
 
@@ -30,7 +26,7 @@
 		<TabItem Header="Resources">
             <StackPanel Margin="20,20,20,10">
                 <WrapPanel>
-                    <Image Height="40" Width="40" Source="/Assets/general/.png"/>
+                    <Image Height="50" Width="50" Source="/Assets/general/discordicon.jpg"/>
                     <TextBlock Margin="20,0,0,0">Join our discord!  With close to a thousdand members and the collective wisdom of the community's modders, Freders and scripters, you'll be sure to bring your FSO vision to life!</TextBlock> 
                     <Button Classes="Primary">HLP Discord</Button>
                 </WrapPanel>
@@ -43,7 +39,7 @@
 		</TabItem>
 
 		<TabItem Header="Bug Reporting">
-            <StackPanel>
+            <StackPanel Margin="20,20,20,10">
                 <WrapPanel>
                 </WrapPanel>
                 <WrapPanel>

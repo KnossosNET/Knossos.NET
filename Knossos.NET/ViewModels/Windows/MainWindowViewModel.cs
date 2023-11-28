@@ -35,6 +35,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal TaskViewModel taskView = new TaskViewModel();
         [ObservableProperty]
+        internal CommunityViewModel communityView = new CommunityViewModel();
+        [ObservableProperty]
         internal string uiConsoleOutput = string.Empty;
 
         internal int tabIndex = 0;

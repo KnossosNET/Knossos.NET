@@ -41,8 +41,8 @@
 				<v:DeveloperModsView Content="{Binding DeveloperModView}"/>
 			</TabItem>
 			<!--Community-->
-			<TabItem ToolTip.Tip="FAQs and Community Resources">
-				<v:CommunityView Content="{Binding CommunityModView}"/>
+			<TabItem ToolTip.Tip="FAQs and Community Resources" Header="Community">
+				<v:CommunityView Content="{Binding CommunityView}"/>
 			</TabItem>
 			<!--PXO-->
 			<TabItem ToolTip.Tip="View multiplayer games using PXO servers" Header="Multiplayer">
