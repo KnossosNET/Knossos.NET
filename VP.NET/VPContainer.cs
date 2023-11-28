@@ -299,7 +299,7 @@ namespace VP.NET
                                 {
                                     long inputStartingPosition = sourceVP.Position;
                                     MemoryStream compressedOutput = new MemoryStream();
-                                    int newSize = await VPCompression.CompressStream(sourceVP, compressedOutput, file.info.size);
+                                    int newSize = VPCompression.CompressStream(sourceVP, compressedOutput, file.info.size);
                                     if (newSize >= file.info.size)
                                     {
                                         sourceVP.Position = inputStartingPosition;
@@ -331,7 +331,7 @@ namespace VP.NET
                                     file.info.offset = (int)vp.Position;
                                     file.compressionInfo.header = null;
                                     file.compressionInfo.uncompressedFileSize = null;
-                                    file.info.size = await VPCompression.DecompressStream(sourceVP, vp, CompressionHeader.LZ41, file.info.size);
+                                    file.info.size = VPCompression.DecompressStream(sourceVP, vp, CompressionHeader.LZ41, file.info.size);
                                 }
                             }
                             else
@@ -370,7 +370,7 @@ namespace VP.NET
                             if (file.CheckHaveToCompress())
                             {
                                 MemoryStream compressedOutput = new MemoryStream();
-                                int newSize = await VPCompression.CompressStream(source, compressedOutput);
+                                int newSize = VPCompression.CompressStream(source, compressedOutput);
                                 if (newSize >= source.Length)
                                 {
                                     source.Seek(0, SeekOrigin.Begin);
