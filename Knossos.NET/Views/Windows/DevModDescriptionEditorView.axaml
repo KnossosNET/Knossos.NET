@@ -32,8 +32,8 @@
 					<Button Command="{Binding ToolBar}" CommandParameter="[hr]" ToolTip.Tip="Horizontal Line [hr]">Line</Button>
 					<Label VerticalContentAlignment="Center">-</Label>
 					<Button Command="{Binding ToolBar}" CommandParameter="[list]&#x0a;	Element&#x0a;	Element&#x0a;	Element&#x0a;[/list]" ToolTip.Tip="Simple List:&#x0a;[list]&#x0a;	Element&#x0a;	Element&#x0a;	Element&#x0a;[/list]">SList</Button>
-					<Button Command="{Binding ToolBar}" CommandParameter="[ul]&#x0a;[*]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[/ul]" ToolTip.Tip="Unordered List:&#x0a;[ul]&#x0a; [*] -> (HtmlRenderer bug workaround)&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;[/ul]">UList</Button>
-					<Button Command="{Binding ToolBar}" CommandParameter="[ol]&#x0a;[*]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[/ol]" ToolTip.Tip="Ordered List:&#x0a;[ol]&#x0a; [*] -> (HtmlRenderer bug workaround)&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;[/ol]">OList</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[ul]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[/ul]" ToolTip.Tip="Unordered List:&#x0a;[ul]&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;[/ul]">UList</Button>
+					<Button Command="{Binding ToolBar}" CommandParameter="[ol]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[li]Element[/li]&#x0a;[/ol]" ToolTip.Tip="Ordered List:&#x0a;[ol]&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;	[li]Element[/li]&#x0a;[/ol]">OList</Button>
 					<Label VerticalContentAlignment="Center">-</Label>
 					<Button Command="{Binding ToolBar}" CommandParameter="[left]Align left[/left]" ToolTip.Tip="Align: Left &#x0a;[left][/left]">Left</Button>
 					<Button Command="{Binding ToolBar}" CommandParameter="[center]Align center[/center]" ToolTip.Tip="Align: Center &#x0a;[center][/center]">Center</Button>
