@@ -125,7 +125,7 @@
 			<Setter Property="HorizontalContentAlignment" Value="Left"/>
 		</Style>
 		<Style Selector="Button.CommunityLink:pointerover /template/ ContentPresenter">
-			<Setter Property="Background" Value="#2f2f2f"/>
+			<Setter Property="Background" Value="#111111"/>
 		</Style>
 
 		<!--Generic Disabled-->
