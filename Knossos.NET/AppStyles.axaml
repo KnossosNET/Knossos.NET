@@ -113,6 +113,21 @@
 			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 	
+		<!--Community Links Buttons-->
+		<Style Selector="Button.CommunityLink">
+			<Setter Property="CornerRadius" Value="20"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="Black"/>
+			<Setter Property="Foreground" Value="#8a898d"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="FontSize" Value="18" />
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Left"/>
+		</Style>
+		<Style Selector="Button.CommunityLink:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="#2f2f2f"/>
+		</Style>
+
 		<!--Generic Disabled-->
 		<Style Selector="Button:disabled /template/ ContentPresenter">
 			<Setter Property="FontWeight" Value="Bold"/>
