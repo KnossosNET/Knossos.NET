@@ -40,11 +40,11 @@
 					</TabItem.Header>
 					<StackPanel Margin="5">
 						<Button Command="{Binding ButtonCommand}" CommandParameter="play" Content="Play" Classes="Accept Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommand}" CommandParameter="details" Content="Details" Classes="Tertiary Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommand}" CommandParameter="settings" Content="Settings" Classes="Quaternary Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="details" Content="Details" Classes="Settings Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="settings" Content="Settings" Classes="Secondary Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
 						<StackPanel IsVisible="{Binding !IsLocalMod}">
-							<Button Command="{Binding ButtonCommand}" CommandParameter="update" Content="Update/Modify" IsVisible="{Binding UpdateAvalible}" Classes="Option Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
-							<Button Command="{Binding ButtonCommand}" CommandParameter="modify" Content="Modify" IsVisible="{Binding !UpdateAvalible}" Classes="Secondary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommand}" CommandParameter="update" Content="Update/Modify" IsVisible="{Binding UpdateAvalible}" Classes="Quaternary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommand}" CommandParameter="modify" Content="Modify" IsVisible="{Binding !UpdateAvalible}" Classes="Quaternary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
 						</StackPanel>
 					</StackPanel>
 				</TabItem>
@@ -55,7 +55,7 @@
 					<StackPanel Margin="5">
 						<Button Command="{Binding ButtonCommand}" CommandParameter="debug" Content="FSO Debug" Classes="Primary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
 						<Button Command="{Binding ButtonCommand}" CommandParameter="fred2" Content="Fred2" Classes="Secondary Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
-						<Button Command="{Binding ButtonCommand}" CommandParameter="qtfred" Content="QtFred" Classes="Tertiary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="qtfred" Content="QtFred" Classes="Settings Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
 						<Button Command="{Binding ButtonCommand}" CommandParameter="delete" Content="Delete" Classes="Cancel Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
 					</StackPanel>
 				</TabItem>

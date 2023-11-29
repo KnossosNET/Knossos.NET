@@ -22,7 +22,7 @@
 			<Label Foreground="Yellow" Margin="6,0,0,0">Use a package dependency to set the fso build version for players.</Label>
 			<Label Margin="0,30,0,0" FontWeight="Black" FontSize="20">Mod CmdLine</Label>
 			<TextBox Text="{Binding CmdLine}" IsVisible="{Binding !ConfigureBuildOpen}" Margin="5,20,0,0" FontSize="14"/>			
-			<Button IsVisible="{Binding !ConfigureBuildOpen}" Command="{Binding ConfigureBuild}" Margin="5" FontSize="18" Classes="Secondary">Open Flag Configuration</Button>
+			<Button IsVisible="{Binding !ConfigureBuildOpen}" Command="{Binding ConfigureBuild}" Margin="5" FontSize="14" Classes="Settings">Open Flag Configuration</Button>
 			<v:FsoFlagsView Content="{Binding FsoFlags}"/>
 			<!--FSO Build END -->
 		</StackPanel>

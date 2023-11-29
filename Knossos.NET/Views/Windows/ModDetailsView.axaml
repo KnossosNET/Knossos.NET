@@ -28,7 +28,7 @@
 			<Grid IsVisible="{Binding IsInstalled}" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto" HorizontalAlignment="Center" Margin="0,10,0,0">
 				<WrapPanel Grid.Row="0" Grid.Column="0">
 					<Button Command="{Binding ButtonCommandPlay}" Content="Play" Grid.Column="0" Classes="Accept Rounded" Margin="5" Width="100" ></Button>
-					<Button Command="{Binding ButtonCommandFred2}" Content="Fred2" Grid.Column="0" Classes="Primary Rounded" Margin="5" Width="100" ></Button>
+					<Button Command="{Binding ButtonCommandFred2}" Content="Fred2" Grid.Column="0" Classes="Secondary Rounded" Margin="5" Width="100" ></Button>
 					<Button Command="{Binding ButtonCommandSettings}" Content="Settings" Classes="Quaternary Rounded" Margin="5" Width="100" ></Button>
 					<Button IsVisible="{Binding !IsLocalMod}" Command="{Binding ButtonCommandReport}" Content="Report" Classes="Rounded" Margin="5" Width="100" ></Button>
 				</WrapPanel>

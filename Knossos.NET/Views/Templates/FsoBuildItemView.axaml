@@ -21,7 +21,7 @@
 		<Label Grid.Column="4" Foreground="{StaticResource TertiaryColor}" IsVisible="{Binding !IsValid}" VerticalAlignment="Center" FontWeight="Bold">No valid or usable files were found in this build</Label>
 			
 		<WrapPanel IsEnabled="{Binding !IsDevMode}" IsVisible="{Binding !IsDownloading}" Grid.Column="5" HorizontalAlignment="Right">
-			<Button IsVisible="{Binding IsDetailsButtonVisible}" Classes="Tertiary" Margin="0,0,10,0" Width="100" Command="{Binding ViewBuildDetails}">Details</Button>
+			<Button IsVisible="{Binding IsDetailsButtonVisible}" Classes="Secondary" Margin="0,0,10,0" Width="100" Command="{Binding ViewBuildDetails}">Details</Button>
 			<Button IsVisible="{Binding IsInstalled}" Width="100" Classes="Cancel" Command="{Binding DeleteBuildCommand}">Delete</Button>
 			<Button IsVisible="{Binding !IsInstalled}" Width="100" IsEnabled="{Binding IsValid}" Classes="Accept" Command="{Binding DownloadBuildCommand}">Download</Button>
 		</WrapPanel>

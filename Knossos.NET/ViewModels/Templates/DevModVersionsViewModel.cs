@@ -17,7 +17,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool buttonsEnabled = true;
         [ObservableProperty]
-        internal string visibilityButtonText = "Make it public";
+        internal string visibilityButtonText = "Make it Public";
         [ObservableProperty]
         internal bool isDevEnvVersion = false;
         [ObservableProperty]
@@ -124,11 +124,11 @@ namespace Knossos.NET.ViewModels
             }
             if (editor.ActiveVersion.isPrivate)
             {
-                VisibilityButtonText = "Make it public";
+                VisibilityButtonText = "Make it Public";
             }
             else
             {
-                VisibilityButtonText = "Make it private";
+                VisibilityButtonText = "Make it Private";
             }
         }
 
@@ -572,11 +572,11 @@ namespace Knossos.NET.ViewModels
                 editor.ActiveVersion.isPrivate = !editor.ActiveVersion.isPrivate;
                 if (editor.ActiveVersion.isPrivate)
                 {
-                    VisibilityButtonText = "Make it public";
+                    VisibilityButtonText = "Make it Public";
                 }
                 else
                 {
-                    VisibilityButtonText = "Make it private";
+                    VisibilityButtonText = "Make it Private";
                 }
                 editor.ActiveVersion.SaveJson();
                 HackUpdateModList();

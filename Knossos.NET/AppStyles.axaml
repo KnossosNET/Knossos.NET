@@ -75,18 +75,23 @@
 		<SolidColorBrush x:Key="BackgroundColorSecondary">#422626</SolidColorBrush>
 		<SolidColorBrush x:Key="BackgroundColorTertiary">#131414</SolidColorBrush>
 		
-		<SolidColorBrush x:Key="PrimaryColor">DarkCyan</SolidColorBrush>
-		<SolidColorBrush x:Key="PrimaryColorMouseOver">#7593af</SolidColorBrush>
-		<SolidColorBrush x:Key="SecondaryColor">#2c4875</SolidColorBrush>
-		<SolidColorBrush x:Key="SecondaryColorMouseOver">#8a508f</SolidColorBrush>
-		<SolidColorBrush x:Key="TertiaryColor">#ff8531</SolidColorBrush>
-		<SolidColorBrush x:Key="TertiaryColorMouseOver">#ffa600</SolidColorBrush>
-		<SolidColorBrush x:Key="QuaternaryColor">#1c4e4f</SolidColorBrush>
-		<SolidColorBrush x:Key="QuaternaryColorMouseOver">#436e6f</SolidColorBrush>
-		
+		<SolidColorBrush x:Key="PrimaryColor">#85af50</SolidColorBrush>
+		<SolidColorBrush x:Key="PrimaryColorMouseOver">#66873e</SolidColorBrush>
+		<SolidColorBrush x:Key="SecondaryColor">#BF8E40</SolidColorBrush>
+		<SolidColorBrush x:Key="SecondaryColorMouseOver">#936D31</SolidColorBrush>
+		<SolidColorBrush x:Key="TertiaryColor">#B1BF40</SolidColorBrush>
+		<SolidColorBrush x:Key="TertiaryColorMouseOver">#889331</SolidColorBrush>
+		<SolidColorBrush x:Key="QuaternaryColor">#315793</SolidColorBrush>
+		<SolidColorBrush x:Key="QuaternaryColorMouseOver">#274575</SolidColorBrush>
+		<SolidColorBrush x:Key="SettingsColor">#949397</SolidColorBrush>
+		<SolidColorBrush x:Key="SettingsColorMouseOver">#8a898d</SolidColorBrush>
+
+		<SolidColorBrush x:Key="ForegroundColor">#DEDEDE</SolidColorBrush>
+		<SolidColorBrush x:Key="ForegroundColorMouseOver">#D3D3D3</SolidColorBrush>
+
 		<SolidColorBrush x:Key="ModCardBorderNormal">Transparent</SolidColorBrush>
-		<SolidColorBrush x:Key="ModCardBorderUpdate">Blue</SolidColorBrush>
-		<SolidColorBrush x:Key="ModCardBorderError">Red</SolidColorBrush>
+		<SolidColorBrush x:Key="ModCardBorderUpdate">#315793</SolidColorBrush>
+		<SolidColorBrush x:Key="ModCardBorderError">#CD3632</SolidColorBrush>
 		<SolidColorBrush x:Key="ModCardBorderDevMode">DimGray</SolidColorBrush>
 	</Styles.Resources>
 	
@@ -95,16 +100,17 @@
 		<Style Selector="Button">
 			<Setter Property="FontWeight" Value="Bold"/>
 			<Setter Property="Background" Value="Black"/>
-			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="BorderThickness" Value="1"/>
-			<Setter Property="BorderBrush" Value="DarkGray"/>
+			<Setter Property="BorderBrush" Value="#a7a7a7"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="Button:pointerover /template/ ContentPresenter">
 			<Setter Property="Background" Value="#131414"/>
-			<Setter Property="BorderBrush" Value="Gray"/>
+			<Setter Property="BorderBrush" Value="#423F41"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 	
 		<!--Generic Disabled-->
@@ -124,91 +130,112 @@
 		<!--Accept-->
 		<Style Selector="Button.Accept">
 			<Setter Property="FontWeight" Value="Bold"/>
-			<Setter Property="Background" Value="DarkGreen"/>
-			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="Button.Accept:pointerover /template/ ContentPresenter">
-			<Setter Property="Background" Value="Green"/>
+			<Setter Property="Background" Value="{StaticResource PrimaryColorMouseOver}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 	
 		<!--Cancel-->
 		<Style Selector="Button.Cancel">
 			<Setter Property="FontWeight" Value="Bold"/>
-			<Setter Property="Background" Value="DarkRed"/>
-			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="Background" Value="#B54A4C"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="Button.Cancel:pointerover /template/ ContentPresenter">
-			<Setter Property="Background" Value="Red"/>
+			<Setter Property="Background" Value="#843637"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 
 		<!--Option-->
 		<Style Selector="Button.Option">
 			<Setter Property="FontWeight" Value="Bold"/>
-			<Setter Property="Background" Value="#001B79"/>
-			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="Background" Value="{StaticResource SecondaryColor}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="Button.Option:pointerover /template/ ContentPresenter">
-			<Setter Property="Background" Value="#1640D6"/>
+			<Setter Property="Background" Value="{StaticResource SecondaryColorMouseOver}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
+		</Style>
+
+		<!--Settings-->
+		<Style Selector="Button.Settings">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="{StaticResource SettingsColor}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+			<Setter Property="FontSize" Value="14" />
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button.Settings:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="{StaticResource SettingsColorMouseOver}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 
 		<!--Primary-->
 		<Style Selector="Button.Primary">
 			<Setter Property="FontWeight" Value="Bold"/>
 			<Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
-			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="Button.Primary:pointerover /template/ ContentPresenter">
 			<Setter Property="Background" Value="{StaticResource PrimaryColorMouseOver}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 	
 		<!--Secondary-->
 		<Style Selector="Button.Secondary">
 			<Setter Property="FontWeight" Value="Bold"/>
 			<Setter Property="Background" Value="{StaticResource SecondaryColor}"/>
-			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="Button.Secondary:pointerover /template/ ContentPresenter">
 			<Setter Property="Background" Value="{StaticResource SecondaryColorMouseOver}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 	
 		<!--Tertiary-->
 		<Style Selector="Button.Tertiary">
 			<Setter Property="FontWeight" Value="Bold"/>
 			<Setter Property="Background" Value="{StaticResource TertiaryColor}"/>
-			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="Button.Tertiary:pointerover /template/ ContentPresenter">
 			<Setter Property="Background" Value="{StaticResource TertiaryColorMouseOver}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 
 		<!--Quaternary-->
 		<Style Selector="Button.Quaternary">
 			<Setter Property="FontWeight" Value="Bold"/>
 			<Setter Property="Background" Value="{StaticResource QuaternaryColor}"/>
-			<Setter Property="Foreground" Value="Cyan"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="Button.Quaternary:pointerover /template/ ContentPresenter">
 			<Setter Property="Background" Value="{StaticResource QuaternaryColorMouseOver}"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 		<!--END BUTTONS-->
 

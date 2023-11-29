@@ -18,7 +18,7 @@
 			<TextBox Text="{Binding UserPass}" Watermark="Password" PasswordChar="*" Width="300" Margin="5"></TextBox>
 			<TextBox IsVisible="{Binding RegisterNewUser}" Text="{Binding UserEmail}" Watermark="Email" Width="300" Margin="5"></TextBox>
 			<Label IsVisible="{Binding UserLoggedIn}" HorizontalAlignment="Center" Foreground="Green" FontSize="14">Logged In!</Label>
-			<Button IsVisible="{Binding UserLoggedIn}" Command="{Binding LogOff}" Classes="Primary" HorizontalAlignment="Center">Logout</Button>
+			<Button IsVisible="{Binding UserLoggedIn}" Margin="0,3,0,0" Command="{Binding LogOff}" Classes="Cancel" HorizontalAlignment="Center">Logout</Button>
 			<WrapPanel HorizontalAlignment="Center" IsVisible="{Binding !UserLoggedIn}">
 				<Button IsVisible="{Binding !RegisterNewUser}" Width="125" Command="{Binding Reset}" Margin="5" Classes="Cancel">Reset Password</Button>
 				<Button IsVisible="{Binding !RegisterNewUser}" Width="125" Command="{Binding SwitchToRegister}" Margin="5" Classes="Option">Create new user</Button>
