@@ -29,7 +29,7 @@ namespace Knossos.NET.ViewModels
                     try
                     {
                         var html = BBCode.ConvertToHtml(Description, BBCode.BasicRules);
-                        DescriptionHtml = "<body style=\"overflow: hidden;\"><span style=\"white-space: pre-line;color:white;overflow: hidden;\">" + html + "</span></body>";
+                        DescriptionHtml = "<body style='overflow: hidden;white-space: pre-line;color:white;text-align: left;'>" + html + "</body>";
                     }
                     catch (Exception ex) 
                     {

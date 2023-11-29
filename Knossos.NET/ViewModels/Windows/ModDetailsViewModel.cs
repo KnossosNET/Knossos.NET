@@ -218,7 +218,7 @@ namespace Knossos.NET.ViewModels
                     if (modVersions[index].description != null)
                     {
                         var html = BBCode.ConvertToHtml(modVersions[index].description!, BBCode.BasicRules);
-                        Description = "<body style=\"overflow: hidden;\"><span style=\"white-space: pre-line;color:white;overflow: hidden;\">" + html + "</span></body>";
+                        Description = "<body style='overflow: hidden;white-space: pre-line;color:white;text-align: left;'>" + html + "</body>";
                         //Log.WriteToConsole(html);
                     }
                     if (modVersions[index].owners != null && modVersions[index].owners!.Any()) 
