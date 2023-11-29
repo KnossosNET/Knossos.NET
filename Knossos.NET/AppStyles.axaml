@@ -118,7 +118,7 @@
 			<Setter Property="CornerRadius" Value="20"/>
 			<Setter Property="FontWeight" Value="Bold"/>
 			<Setter Property="Background" Value="Black"/>
-			<Setter Property="Foreground" Value="#8a898d"/>
+			<Setter Property="Foreground" Value="#DDDDDD"/>
 			<Setter Property="BorderThickness" Value="0"/>
 			<Setter Property="FontSize" Value="18" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>

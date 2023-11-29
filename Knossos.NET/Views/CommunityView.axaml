@@ -15,28 +15,28 @@
 	<TabControl>
 		<TabItem Header="Resources">
             <StackPanel Margin="40,20,20,10">
-                <Button Classes="CommunityLink">
-                    <WrapPanel Margin="5,10,15,10">
-                        <Image Height="64" Width="64" Source="/Assets/general/discordicon.png"/>
-                        <TextBlock FontSize="18" Margin="20,5,0,0" Width="800" TextWrapping="Wrap">Join our discord!  With close to a thousdand members and the collective wisdom of the community's modders, mission designers and scripters, you'll have everything you need to bring your FSO vision to life!</TextBlock>
+                <Button ToolTip.Tip="Hard Light Productions Discord - Permanent Invitation: https://discord.gg/cyhMBhMHzK" Action="{Binding JoinDiscord}" Classes="CommunityLink">
+                    <WrapPanel Margin="10,10,15,10">
+                        <Image Margin="0,3,0,0" Height="64" Width="64" Source="/Assets/general/discordicon.png"/>
+                        <TextBlock FontSize="18" Margin="30,5,0,0" Width="800" TextWrapping="Wrap">Join our discord!  With close to a thousand members and the collective wisdom of the community's modders, mission designers and scripters, you'll have everything you need to bring your FSO vision to life!</TextBlock>
                     </WrapPanel> 
                 </Button>
-                <Button Margin="0,20,0,0" Classes="CommunityLink">
-                    <WrapPanel Margin="5,10,15,10">
+                <Button ToolTip.Tip="" Action="{Binding JoinDiscord}" Margin="0,20,0,0" Classes="CommunityLink">
+                    <WrapPanel Margin="10,5,15,10">
                         <Image Height="56" Width="56" Source="/Assets/general/V_fred.ico"/>
-                        <TextBlock FontSize="18" Margin="20,5,0,0" Width="800" TextWrapping="Wrap">Our Fred tutorial will help you get started making your own missions.</TextBlock>
+                        <TextBlock FontSize="18" Margin="40,15,0,0" Width="800" TextWrapping="Wrap">Learn how to make your own custom missions for FSO with this tutorial for FRED our mission editor.</TextBlock>
                     </WrapPanel>                     
                 </Button>
-                <Button Margin="0,20,0,0" Classes="CommunityLink">
-                    <WrapPanel Margin="5,10,15,10">
+                <Button ToolTip.Tip="https://wiki.hard-light.net/index.php/Main_Page" Action="{Binding JoinDiscord}" Margin="0,20,0,0" Classes="CommunityLink">
+                    <WrapPanel Margin="10,10,15,10">
                         <Image Height="64" Width="64" Source="/Assets/knossos-icon.ico"/>
-                        <TextBlock FontSize="18" Margin="20,7,0,0" Width="800" TextWrapping="Wrap">The hard-light wiki has documentation for asset creation and maintenance, table file edits, SEXPs (Super Expressions), and the Freespace canon.</TextBlock> 
+                        <TextBlock FontSize="18" Margin="30,7,0,0" Width="800" TextWrapping="Wrap">The hard-light wiki has documentation for asset creation and maintenance, table file edits, SEXPs (Super Expressions), and the Freespace canon.</TextBlock> 
                     </WrapPanel>
                 </Button>
-                <Button Margin="0,20,0,0" Classes="CommunityLink">
-                    <WrapPanel Margin="5,10,15,10">
+                <Button ToolTip.Tip="" Action="{Binding JoinDiscord}" Margin="0,20,0,0" Classes="CommunityLink">
+                    <WrapPanel Margin="10,10,15,10">
                         <Image Height="64" Width="64" Source="/Assets/general/fsolua.png"/>
-                        <TextBlock FontSize="18" Margin="20,5,0,0" Width="800" TextWrapping="Wrap">Add advanced scripts to your mod to enabled new features to your missions and campaigns!</TextBlock> 
+                        <TextBlock FontSize="18" Margin="30,15,0,0" Width="800" TextWrapping="Wrap">Add advanced scripts to your mod to enabled new features in your missions and campaigns!</TextBlock> 
                     </WrapPanel>
                 </Button>
                 
