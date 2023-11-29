@@ -14,19 +14,24 @@
 
 	<TabControl>
 		<TabItem Header="Resources">
-            <StackPanel Margin="20,20,20,10">
+            <StackPanel Margin="40,30,20,10">
                 <WrapPanel>
-                    <Button Background="Transparent"><Image Height="70" Width="70" Source="/Assets/general/discordicon.png"/></Button>
-                    <TextBlock FontSize="20" Margin="20,5,0,0" Width="700" TextWrapping="Wrap">Join our discord!  With close to a thousdand members and the collective wisdom of the community's modders, Freders and scripters, you'll be sure to bring your FSO vision to life!</TextBlock> 
+                    <Image Height="64" Width="64" Source="/Assets/general/discordicon.png"/>
+                    <TextBlock FontSize="18" Margin="20,5,0,0" Width="800" TextWrapping="Wrap">Join our discord!  With close to a thousdand members and the collective wisdom of the community's modders, Freders and scripters, you'll have everything you need to bring your FSO vision to life!</TextBlock> 
                 </WrapPanel>
                 <WrapPanel Margin="0,50,0,0">
-                    <Button Background="Transparent"><Image Height="70" Width="70" Source="/Assets/general/discordicon.png"/></Button>
-                    <TextBlock FontSize="20" Margin="20,5,0,0" Width="700" TextWrapping="Wrap">Join our discord!  With close to a thousdand members and the collective wisdom of the community's modders, Freders and scripters, you'll be sure to bring your FSO vision to life!</TextBlock>             
+                    <Image Height="64" Width="64" Source="/Assets/general/discordicon.png"/>
+                    <TextBlock FontSize="18" Margin="20,5,0,0" Width="800" TextWrapping="Wrap">Our Fred tutorial will help you get started making your own missions.</TextBlock> 
                 </WrapPanel>
                 <WrapPanel Margin="0,50,0,0">
-                    <Button Background="Transparent"><Image Height="70" Width="70" Source="/Assets/general/discordicon.png"/></Button>
-                    <TextBlock FontSize="20" Margin="20,5,0,0" Width="700" TextWrapping="Wrap">Join our discord!  With close to a thousdand members and the collective wisdom of the community's modders, Freders and scripters, you'll be sure to bring your FSO vision to life!</TextBlock> 
+                    <Image Height="64" Width="64" Source="/Assets/knossos-icon.ico"/>
+                    <TextBlock FontSize="18" Margin="20,7,0,0" Width="800" TextWrapping="Wrap">The hard-light wiki has documentation for asset creation and maintenance, table file edits, SEXPs (Super Expressions), and the Freespace canon.</TextBlock> 
                 </WrapPanel>
+                <WrapPanel Margin="0,50,0,0">
+                    <Image Height="64" Width="64" Source="/Assets/general/discordicon.png"/>
+                    <TextBlock FontSize="18" Margin="20,5,0,0" Width="800" TextWrapping="Wrap">Add advanced scripts to your mod to enabled new features to your missions and campaigns!</TextBlock> 
+                </WrapPanel>
+                
             </StackPanel>
 		</TabItem>
 
