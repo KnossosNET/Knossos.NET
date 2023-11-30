@@ -39,6 +39,12 @@ namespace Knossos.NET.ViewModels
             KnUtils.OpenBrowserURL(@"https://github.com/FSO-Scripters/fso-scripts");
         }
 
-    }
+        internal void VisitKnossosNETIssues(){
+            KnUtils.OpenBrowserURL(@"https://github.com/KnossosNET/Knossos.NET/issues");
+        }
 
+        internal void VisitFSOIssues(){
+            KnUtils.OpenBrowserURL(@"https://github.com/scp-fs2open/fs2open.github.com/issues");
+        }
+    }
 }
