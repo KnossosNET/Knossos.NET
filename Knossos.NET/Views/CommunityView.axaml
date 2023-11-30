@@ -18,7 +18,7 @@
                 <Button Command="{Binding JoinHLPDiscord}" ToolTip.Tip="Hard Light Productions Discord - Permanent Invitation: https://discord.gg/cyhMBhMHzK"  Classes="CommunityLink">
                     <WrapPanel Margin="10,10,15,10">
                         <Image Margin="0,3,0,0" Height="64" Width="64" Source="/Assets/general/discordicon.png"/>
-                        <TextBlock FontSize="18" Margin="30,5,0,0" Width="800" TextWrapping="Wrap">Join our discord!  With close to a thousand members and the collective wisdom of the community's modders, mission designers and scripters, you'll have everything you need to bring your FSO vision to life!</TextBlock>
+                        <TextBlock FontSize="18" Margin="30,5,0,0" Width="800" TextWrapping="Wrap">Join our discord!  With more than two thousand members and the collective wisdom of the community's modders, mission designers and scripters, you'll have everything you need to bring your FSO vision to life!</TextBlock>
                     </WrapPanel> 
                 </Button>
                 <Button Command="{Binding OpenFredTutorial}" ToolTip.Tip="Fred Tutorial (Diaspora Version) http://diaspora.fs2downloads.com/FREDDocs/index.html"  Margin="0,15,0,0" Classes="CommunityLink">
