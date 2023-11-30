@@ -742,8 +742,12 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal void ResetCommand()
         {
+            var pxoUser = Knossos.globalSettings.pxoLogin;
+            var pxoPassword = Knossos.globalSettings.pxoPassword;
             Knossos.globalSettings = new GlobalSettings();
             LoadData();
+            Knossos.globalSettings.pxoPassword = pxoPassword;
+            Knossos.globalSettings.pxoLogin = pxoUser;
             SaveCommand();
         }
 
