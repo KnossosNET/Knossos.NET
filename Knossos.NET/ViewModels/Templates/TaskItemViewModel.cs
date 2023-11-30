@@ -1860,7 +1860,7 @@ namespace Knossos.NET.ViewModels
                                 throw new TaskCanceledException();
                             }
 
-                            var compressedSize = await Task.Run(async () => VPCompression.DecompressStream(input, output));
+                            VPCompression.DecompressStream(input, output);
 
                             //Delete original
                             input.Dispose();
