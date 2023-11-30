@@ -60,13 +60,13 @@
                 <Button Command="{Binding VisitFSOIssues}" ToolTip.Tip="Scripting Repository https://github.com/FSO-Scripters/fso-scripts"  Margin="20,15,0,0" Classes="CommunityLink">
                     <WrapPanel Margin="10,10,15,10">
                         <Image Height="64" Width="64" Source="/Assets/general/github.png"/>
-                        <TextBlock FontSize="18" Margin="30,15,0,0" Width="350" TextWrapping="Wrap">Freespace 2 Open Bug Reporting</TextBlock> 
+                        <TextBlock FontSize="18" Margin="30,15,0,0" Width="350" TextWrapping="Wrap">Freespace 2 Open Github Issues</TextBlock> 
                     </WrapPanel>
                 </Button>
                 <Button Command="{Binding VisitKnossosNETIssues}" ToolTip.Tip="Scripting Repository https://github.com/FSO-Scripters/fso-scripts"  Margin="20,15,0,0" Classes="CommunityLink">
                     <WrapPanel Margin="10,10,15,10">
                         <Image Height="64" Width="64" Source="/Assets/general/github.png"/>
-                        <TextBlock FontSize="18" Margin="30,15,0,0" Width="350" TextWrapping="Wrap">KnossosNET Bug Reporting</TextBlock> 
+                        <TextBlock FontSize="18" Margin="30,15,0,0" Width="350" TextWrapping="Wrap">KnossosNET Github Issues</TextBlock> 
                     </WrapPanel>
                 </Button>
             </StackPanel>
