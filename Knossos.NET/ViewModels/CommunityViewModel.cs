@@ -17,7 +17,28 @@ namespace Knossos.NET.ViewModels
         public static string githubText = string.Empty;
 
         public static string faqText = string.Empty;
-    }
+    
 
+        internal void JoinHLPDiscord()
+        {
+            KnUtils.OpenBrowserURL(@"https://discord.gg/cyhMBhMHzK");
+        }
+
+        internal void VisitHLPWiki()
+        {
+            KnUtils.OpenBrowserURL(@"https://wiki.hard-light.net/index.php/Main_Page");
+        }
+
+        internal void OpenFredTutorial()
+        {
+            KnUtils.OpenBrowserURL(@"http://diaspora.fs2downloads.com/FREDDocs/index.html");
+        }
+
+        internal void VisitScriptingRepo()
+        {
+            KnUtils.OpenBrowserURL(@"https://github.com/FSO-Scripters/fso-scripts");
+        }
+
+    }
 
 }
