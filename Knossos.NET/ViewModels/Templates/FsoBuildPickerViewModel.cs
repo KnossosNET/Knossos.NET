@@ -278,7 +278,6 @@ namespace Knossos.NET.ViewModels
                     directSeparatorAdded = true;
                 }
                 ComboBoxItem item = new ComboBoxItem();
-                path = Path.Combine(Path.GetDirectoryName(path)!, FsoBuild.GetRealExeName(Path.GetDirectoryName(path)!, Path.GetFileName(path)));
                 item.Content = new FsoBuild(path);
                 item.Tag = "directexec";
                 item.IsSelected = true;

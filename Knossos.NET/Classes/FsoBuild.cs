@@ -134,7 +134,7 @@ namespace Knossos.NET.Models
             }
             stability = FsoStability.Custom;
             date = DateTime.Now.ToString();
-            directExec = directExecpath;
+            directExec = Path.Combine(Path.GetDirectoryName(directExecpath)!, FsoBuild.GetRealExeName(Path.GetDirectoryName(directExecpath)!, Path.GetFileName(directExecpath)));
         }
         
         /// <summary>
