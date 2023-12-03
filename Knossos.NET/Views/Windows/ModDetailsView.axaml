@@ -53,7 +53,7 @@
 				<WrapPanel Grid.Row="1" Grid.Column="0">
 					<Button Command="{Binding ButtonCommandForum}" Content="Forum" IsVisible="{Binding ForumAvalible}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="LightCoral" Margin="5" Width="100" ></Button>
 				</WrapPanel>
-				<Label Content="Newerest Version" Grid.Column="3" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
+				<Label Content="Newest Version" Grid.Column="3" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<ComboBox IsEnabled="False" SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="5" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
 				<Label Content="Released" Grid.Column="4" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding Released}" Grid.Column="4" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
