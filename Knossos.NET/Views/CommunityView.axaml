@@ -22,9 +22,9 @@
                     </WrapPanel> 
                 </Button>
                 <Button Command="{Binding VisitHLPWiki}" ToolTip.Tip="Hard-Light Productions wiki https://wiki.hard-light.net/index.php/Main_Page"  Margin="0,20,0,0" Classes="CommunityLink">
-                    <WrapPanel Margin="10,5,15,10">
+                    <WrapPanel Margin="10,10,15,10">
                         <Image Height="64" Width="64" Source="/Assets/knossos-icon.ico"/>
-                        <TextBlock FontSize="18" Margin="30,7,0,0" Width="800" TextWrapping="Wrap">Our wiki has documentation for modding the game, additional resources for creating your own missions, and details about the Freespace canon.</TextBlock> 
+                        <TextBlock FontSize="18" Margin="30,10,0,0" Width="800" TextWrapping="Wrap">Our wiki has documentation for modding the game, additional resources for creating your own missions, and details about the Freespace canon.</TextBlock> 
                     </WrapPanel>
                 </Button>
                 <Button Command="{Binding OpenFredTutorial}" ToolTip.Tip="Fred Tutorial (Diaspora Version) http://diaspora.fs2downloads.com/FREDDocs/index.html"  Margin="0,15,0,0" Classes="CommunityLink">
@@ -44,18 +44,42 @@
 		</TabItem>
 
 	    <TabItem Header="FAQ">
-            <StackPanel Margin="20,20,20,10">
-                <WrapPanel>
-
-                </WrapPanel>
-            </StackPanel>
-
-
-		</TabItem>
+            <ScrollViewer>
+                <StackPanel Margin="30,20,20,10">
+                    <ItemsControl ItemsSource="{Binding Categories}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel HorizontalAlignment="Stretch" Margin="10,10,0,0">
+                                    <WrapPanel>
+                                        <TextBlock Margin="10,0,0,0" FontSize="24" Text="{Binding Name}"></TextBlock>
+                                    </WrapPanel>
+                                    <TreeView ItemsSource="{Binding Questions}">
+                                        <TreeView.ItemTemplate>
+                                            <TreeDataTemplate>
+                                                <Button Margin="0,15,0,5" Classes="CommunityInfo">
+                                                    <StackPanel Margin="10,10,10,10">
+                                                        <WrapPanel>
+                                                            <TextBlock Width="800" FontSize="18" Text="{Binding question}" TextWrapping="Wrap"></TextBlock>
+                                                        </WrapPanel>
+                                                        <WrapPanel>
+                                                            <TextBlock Width="800" Margin="0,10,0,5" FontSize="14" Text="{Binding Answer}" TextWrapping="Wrap"></TextBlock>
+                                                        </WrapPanel>
+                                                    </StackPanel>
+                                                </Button>
+                                            </TreeDataTemplate>
+                                        </TreeView.ItemTemplate>
+                                    </TreeView>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+		    </ScrollViewer>
+        </TabItem>
 
 		<TabItem Header="Bug Reporting">
             <StackPanel Margin="40,20,20,10">
-                <TextBlock TextWrapping="Wrap" FontSize="20">These github repositories are where Freespace Open and KnossosNET bug reports and feature requests are managed
+                <TextBlock TextWrapping="Wrap" FontSize="20">Freespace Open and KnossosNET bug reports and feature requests are managed at these GitHub repositories
                 </TextBlock>
                 <Button Command="{Binding VisitFSOIssues}" ToolTip.Tip="Scripting Repository https://github.com/FSO-Scripters/fso-scripts"  Margin="20,15,0,0" Classes="CommunityLink">
                     <WrapPanel Margin="10,10,15,10">
