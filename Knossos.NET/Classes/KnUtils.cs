@@ -698,6 +698,8 @@ namespace Knossos.NET
 
                 if (!result)
                     cancellationTokenSource?.Cancel();
+                else 
+                    progressCallback?.Invoke(100);
 
                 return result;
             });
