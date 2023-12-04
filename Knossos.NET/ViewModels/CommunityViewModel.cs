@@ -1,7 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using System.Collections.ObjectModel;
+using System.Text.Json;
+using System.Threading.Tasks;
+using System.Net.Http;
+using Avalonia.Threading;
+
 
 namespace Knossos.NET.ViewModels
 {
@@ -10,14 +17,30 @@ namespace Knossos.NET.ViewModels
     /// </summary>
     public partial class CommunityViewModel : ViewModelBase
     {
-        public static string discordText = string.Empty;
-        public static string hlpText = string.Empty;
-        public static string fredText = string.Empty;
+        [ObservableProperty]
+        internal ObservableCollection<QuestionCategory> categories = new ObservableCollection<QuestionCategory>();
 
-        public static string githubText = string.Empty;
+        private async Task LoadToolRepo()
+        {
+            try
+            {
+                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(Knossos.FAQURL).ConfigureAwait(false);
+                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var faqRepo = JsonSerializer.Deserialize<QuestionCategory[]>(json)!;
+                if(faqRepo != null)
+                {
+                    foreach(var category in faqRepo)
+                    {
+                        Categories.Insert(Categories.Count, new QuestionCategory(category));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "DevToolManagerViewModel.LoadToolRepo()", ex);
+            }
 
-        public static string faqText = string.Empty;
-    
+        }
 
         internal void JoinHLPDiscord()
         {
