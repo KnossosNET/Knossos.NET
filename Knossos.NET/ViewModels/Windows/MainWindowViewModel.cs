@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -53,11 +54,15 @@ namespace Knossos.NET.ViewModels
                     {
                         NebulaModsView.OpenTab();
                     }
-                    if (tabIndex == 4) //PXO
+                    if (tabIndex == 4) // Community Tab
+                    {
+                        Task.Run(async()=>{await CommunityView.LoadFAQRepo();});                     
+                    }
+                    if (tabIndex == 5) //PXO
                     {
                         PxoViewModel.Instance!.InitialLoad();
                     }
-                    if (tabIndex == 5) //Settings
+                    if (tabIndex == 6) //Settings
                     {
                         Knossos.globalSettings.Load();
                         GlobalSettingsView.LoadData();

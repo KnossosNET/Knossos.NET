@@ -20,13 +20,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal ObservableCollection<QuestionCategory> categories = new ObservableCollection<QuestionCategory>();
 
-
-        public CommunityViewModel()
-        {
-            LoadFAQRepo();
-        }
-
-        private async Task LoadFAQRepo()
+        public async Task LoadFAQRepo()
         {
             try
             {
