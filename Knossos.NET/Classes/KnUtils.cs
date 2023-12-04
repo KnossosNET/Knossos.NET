@@ -128,6 +128,10 @@ namespace Knossos.NET
             }
             else
             {
+                if (KnUtils.isMacOS){
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "HardLightProductions", "FreeSpaceOpen");
+                }
+
                 return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "HardLightProductions", "FreeSpaceOpen");
             }
 

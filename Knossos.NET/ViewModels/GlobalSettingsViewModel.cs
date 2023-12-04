@@ -189,7 +189,13 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public void LoadData()
         {
+            var old_path = KnUtils.GetFSODataFolderPath();
             var flagData = GetFlagData();
+
+            // reset the ini info if we have gotten an updated preferred path from FSO.
+            if (old_path != KnUtils.GetFSODataFolderPath()){
+                Knossos.globalSettings.Load();
+            }
             /* Knossos Settings */
             if (Knossos.globalSettings.basePath != null)
             {
