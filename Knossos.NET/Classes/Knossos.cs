@@ -18,7 +18,6 @@ namespace Knossos.NET
     {
         public static readonly string AppVersion = "0.2.0-RC7";
         public readonly static string ToolRepoURL = "https://raw.githubusercontent.com/KnossosNET/Knet-Tool-Repo/main/knet_tools.json";
-        public readonly static string FaqRepoURL = "NUNYABEEZWAX";
         public readonly static string GitHubUpdateRepoURL = "https://api.github.com/repos/KnossosNET/Knossos.NET";
         public readonly static string FAQURL = "https://raw.githubusercontent.com/KnossosNET/KNet-General-Resources-Repo/main/communityfaq.json";
         private static List<Mod> installedMods = new List<Mod>();
