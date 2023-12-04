@@ -20,7 +20,13 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal ObservableCollection<QuestionCategory> categories = new ObservableCollection<QuestionCategory>();
 
-        private async Task LoadToolRepo()
+
+        public CommunityViewModel()
+        {
+            LoadFAQRepo();
+        }
+
+        private async Task LoadFAQRepo()
         {
             try
             {
@@ -31,13 +37,13 @@ namespace Knossos.NET.ViewModels
                 {
                     foreach(var category in faqRepo)
                     {
-                        Categories.Insert(Categories.Count, new QuestionCategory(category));
+                        Categories.Insert(Categories.Count, category);
                     }
                 }
             }
             catch (Exception ex)
             {
-                Log.Add(Log.LogSeverity.Error, "DevToolManagerViewModel.LoadToolRepo()", ex);
+                Log.Add(Log.LogSeverity.Error, "CommunityViewModel.LoadFAQRepo()", ex);
             }
 
         }

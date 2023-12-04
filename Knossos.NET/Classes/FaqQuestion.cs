@@ -6,9 +6,8 @@ namespace Knossos.NET.Classes{
 
     public class QuestionCategory
     {
-        [JsonPropertyName("Name")]
-        public string name { get; set; } = string.Empty;
-        public Question[]? packages { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Question[]? Questions { get; set; }
     }
 
 
@@ -16,7 +15,6 @@ namespace Knossos.NET.Classes{
     {        
         [JsonPropertyName("Question")]
         public string question { get; set; } = string.Empty;
-        [JsonPropertyName("Answer")]
-        public string answer { get; set; } = string.Empty;
+        public string Answer { get; set; } = string.Empty;
     }
 }
