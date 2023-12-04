@@ -95,6 +95,13 @@
 		<SolidColorBrush x:Key="ModCardBorderDevMode">DimGray</SolidColorBrush>
 	</Styles.Resources>
 	
+	<!--EXPANDER-->
+		<Style Selector="Expander.FAQ">
+			<Setter Property="Background" Value="{StaticResource BackgroundColorPrimary}"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="BorderBrush" Value="{StaticResource BackgroundColorPrimary}"/>
+		</Style>
+
 	<!--BUTTONS-->
 		<!--Generic-->
 		<Style Selector="Button">

@@ -19,9 +19,15 @@ namespace Knossos.NET.ViewModels
     {
         [ObservableProperty]
         internal ObservableCollection<QuestionCategory> categories = new ObservableCollection<QuestionCategory>();
+        private bool initialized = false;
 
         public async Task LoadFAQRepo()
         {
+            if (initialized)
+                return;
+
+            initialized = true;
+            
             try
             {
                 HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(Knossos.FAQURL).ConfigureAwait(false);

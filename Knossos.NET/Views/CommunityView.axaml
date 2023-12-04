@@ -45,30 +45,32 @@
 
 	    <TabItem Header="FAQ">
             <ScrollViewer>
-                <StackPanel Margin="30,20,20,10">
+                <StackPanel Margin="30,0,20,0">
                     <ItemsControl ItemsSource="{Binding Categories}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel HorizontalAlignment="Stretch" Margin="10,10,0,0">
-                                    <WrapPanel>
-                                        <TextBlock Margin="10,0,0,0" FontSize="24" Text="{Binding Name}"></TextBlock>
-                                    </WrapPanel>
-                                    <TreeView ItemsSource="{Binding Questions}">
-                                        <TreeView.ItemTemplate>
-                                            <TreeDataTemplate>
-                                                <Button Margin="0,15,0,5" Classes="CommunityInfo">
-                                                    <StackPanel Margin="10,10,10,10">
-                                                        <WrapPanel>
-                                                            <TextBlock Width="800" FontSize="18" Text="{Binding question}" TextWrapping="Wrap"></TextBlock>
-                                                        </WrapPanel>
-                                                        <WrapPanel>
-                                                            <TextBlock Width="800" Margin="0,10,0,5" FontSize="14" Text="{Binding Answer}" TextWrapping="Wrap"></TextBlock>
-                                                        </WrapPanel>
-                                                    </StackPanel>
-                                                </Button>
-                                            </TreeDataTemplate>
-                                        </TreeView.ItemTemplate>
-                                    </TreeView>
+                                    <Expander Classes="FAQ" Margin="10,0,0,0">
+                                        <Expander.Header>
+                                                <TextBlock Width="800" FontSize="24" Text="{Binding Name}"></TextBlock>
+                                        </Expander.Header>
+                                        <TreeView ItemsSource="{Binding Questions}">
+                                            <TreeView.ItemTemplate>
+                                                <TreeDataTemplate>
+                                                    <Button Margin="0,15,0,5" Classes="CommunityInfo">
+                                                        <StackPanel Margin="10,10,10,10">
+                                                            <WrapPanel>
+                                                                <TextBlock Width="800" FontSize="18" Text="{Binding question}" TextWrapping="Wrap"></TextBlock>
+                                                            </WrapPanel>
+                                                            <WrapPanel>
+                                                                <TextBlock Width="800" Margin="0,10,0,5" FontSize="14" Text="{Binding Answer}" TextWrapping="Wrap"></TextBlock>
+                                                            </WrapPanel>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </TreeDataTemplate>
+                                            </TreeView.ItemTemplate>
+                                        </TreeView>
+                                    </Expander>
                                 </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
