@@ -45,7 +45,7 @@
 
 	    <TabItem Header="FAQ">
             <ScrollViewer>
-                <StackPanel Margin="30,0,20,0">
+                <StackPanel Margin="30,0,20,10">
                     <ItemsControl ItemsSource="{Binding Categories}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
