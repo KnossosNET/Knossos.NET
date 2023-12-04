@@ -275,4 +275,21 @@
 		<Setter Property="FontWeight" Value="Bold"/>
 		<Setter Property="Foreground" Value="White"/>
 	</Style>
+
+	<!--Community Info Area (faux button)-->
+	<Style Selector="Button.CommunityInfo">
+		<Setter Property="CornerRadius" Value="20"/>
+		<Setter Property="FontWeight" Value="Bold"/>
+		<Setter Property="Background" Value="Black"/>
+		<Setter Property="Foreground" Value="#DDDDDD"/>
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="VerticalContentAlignment" Value="Center"/>
+		<Setter Property="HorizontalContentAlignment" Value="Left"/>
+	</Style>
+	<!--Make sure that we *don't* have obvious mouse over effects-->
+	<Style Selector="Button.CommunityInfo:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="Black"/>
+		<Setter Property="Foreground" Value="#DEDEDE"/>
+	</Style>
+
 </Styles>
