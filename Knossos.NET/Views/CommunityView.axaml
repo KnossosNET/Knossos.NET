@@ -22,9 +22,9 @@
                     </WrapPanel> 
                 </Button>
                 <Button Command="{Binding VisitHLPWiki}" ToolTip.Tip="Hard-Light Productions wiki https://wiki.hard-light.net/index.php/Main_Page"  Margin="0,20,0,0" Classes="CommunityLink">
-                    <WrapPanel Margin="10,10,15,10">
+                    <WrapPanel Margin="10,5,15,10">
                         <Image Height="64" Width="64" Source="/Assets/knossos-icon.ico"/>
-                        <TextBlock FontSize="18" Margin="30,10,0,0" Width="800" TextWrapping="Wrap">Our wiki has documentation for modding the game, additional resources for creating your own missions, and details about the Freespace canon.</TextBlock> 
+                        <TextBlock FontSize="18" Margin="30,15,0,0" Width="800" TextWrapping="Wrap">Our wiki has documentation for modding the game, additional resources for creating your own missions, and details about the Freespace canon.</TextBlock> 
                     </WrapPanel>
                 </Button>
                 <Button Command="{Binding OpenFredTutorial}" ToolTip.Tip="Fred Tutorial (Diaspora Version) http://diaspora.fs2downloads.com/FREDDocs/index.html"  Margin="0,15,0,0" Classes="CommunityLink">
@@ -79,15 +79,13 @@
 
 		<TabItem Header="Bug Reporting">
             <StackPanel Margin="40,20,20,10">
-                <TextBlock TextWrapping="Wrap" FontSize="20">Freespace Open and KnossosNET bug reports and feature requests are managed at these GitHub repositories
-                </TextBlock>
-                <Button Command="{Binding VisitFSOIssues}" ToolTip.Tip="Scripting Repository https://github.com/FSO-Scripters/fso-scripts"  Margin="20,15,0,0" Classes="CommunityLink">
+                <Button Command="{Binding VisitFSOIssues}" ToolTip.Tip="https://github.com/scp-fs2open/fs2open.github.com/issues"  Margin="20,15,0,0" Classes="CommunityLink">
                     <WrapPanel Margin="10,10,15,10">
                         <Image Height="64" Width="64" Source="/Assets/general/github.png"/>
                         <TextBlock FontSize="18" Margin="30,15,0,0" Width="350" TextWrapping="Wrap">Freespace 2 Open Github Issues</TextBlock> 
                     </WrapPanel>
                 </Button>
-                <Button Command="{Binding VisitKnossosNETIssues}" ToolTip.Tip="Scripting Repository https://github.com/FSO-Scripters/fso-scripts"  Margin="20,15,0,0" Classes="CommunityLink">
+                <Button Command="{Binding VisitKnossosNETIssues}" ToolTip.Tip="https://github.com/KnossosNET/Knossos.NET/issues"  Margin="20,15,0,0" Classes="CommunityLink">
                     <WrapPanel Margin="10,10,15,10">
                         <Image Height="64" Width="64" Source="/Assets/general/github.png"/>
                         <TextBlock FontSize="18" Margin="30,15,0,0" Width="350" TextWrapping="Wrap">KnossosNET Github Issues</TextBlock> 
