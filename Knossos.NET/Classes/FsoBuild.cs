@@ -731,69 +731,22 @@ namespace Knossos.NET.Models
 
             return fileName;
         }
-    }
-
-    public class FsoFile
-    {
-        public string filename;
-        public FsoExecType type;
-        public FsoExecArch arch;
-        public FsoExecEnvironment env;
-        public bool isValid = false;
-        public int score { get; internal set; } = 0;
-
-        public FsoFile(string filename, string modpath, FsoExecType type, FsoExecArch arch, FsoExecEnvironment env)
-        {
-            this.filename = filename;
-            this.type = type;
-            this.arch = arch;
-            this.env = env;
-            this.score = DetermineScore(modpath);
-            if(score > 0)
-                isValid = true;
-        }
 
         /// <summary>
-        /// Determine FSO File score based on OS and CPU Arch
+        /// Calculate the score, keep in mind in Windows and MAC x86 can run on x64 and X86/X64 can run on ARM64
+        /// No support for 32 bits ARM on Windows/Mac, also no support for x86/x64 AVX on Windows ARM 
         /// </summary>
-        /// <param name="modpath"></param>
-        /// <returns>int score from 0 to 100</returns>
-        private int DetermineScore(string modpath)
+        /// <param name="arch"></param>
+        /// <returns>score value from 0 to 100</returns>
+        public static int DetermineScoreFromArch(FsoExecArch arch)
         {
             int score = 0;
-            string filePath = string.Empty;
-            if (modpath != string.Empty)
-                filePath = Path.Combine(modpath, filename);
-            /* First the cases that are an instant 0 */
-            if (arch == FsoExecArch.other || env == FsoExecEnvironment.Unknown || type == FsoExecType.Unknown)
-            {
-                if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " has an unknown cpu arch, build or enviroment type in json.");
-                return 0;
-            }
-// get exe name here for exists check
-            if (modpath != string.Empty && !File.Exists(filePath))
-            {
-                if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " does not exist!");
-                return 0;
-            }
-
-            if (env == FsoExecEnvironment.Windows && !KnUtils.IsWindows || env == FsoExecEnvironment.Linux && !KnUtils.IsLinux || env == FsoExecEnvironment.MacOSX && !KnUtils.IsMacOS)
-            {
-                if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " is not valid for this OS. Detected: " + env);
-                return 0;
-            }
-
-            /* Calculate the score, keep in mind in Windows and MAC x86 can run on x64 and X86/X64 can run on ARM64 */
-            /* No support for 32 bits ARM on Windows/Mac, also no support for x86/x64 AVX on Windows ARM */
-            if(KnUtils.IsWindows || KnUtils.IsMacOS)
+            if (KnUtils.IsWindows || KnUtils.IsMacOS)
             {
                 switch (arch)
                 {
                     case FsoExecArch.x64_avx2:
-                        switch(KnUtils.CpuArch)
+                        switch (KnUtils.CpuArch)
                         {
                             case "X64":
                                 score += KnUtils.CpuAVX2 ? 100 : 0;
@@ -884,7 +837,7 @@ namespace Knossos.NET.Models
                                 score += 80;
                                 break;
                             case "Arm64":
-                                score += 30; 
+                                score += 30;
                                 break;
                             case "Arm":
                             case "Armv6":
@@ -921,7 +874,7 @@ namespace Knossos.NET.Models
                                 break;
                         }
                         break;
-                    default: 
+                    default:
                         Log.Add(Log.LogSeverity.Error, "FsoFile.DetermineScore", "FsoFile.DetermineScore() is missing the case for: " + arch);
                         break;
                 }
@@ -1056,6 +1009,64 @@ namespace Knossos.NET.Models
                         break;
                 }
             }
+            return score;
+        }
+    }
+
+    public class FsoFile
+    {
+        public string filename;
+        public FsoExecType type;
+        public FsoExecArch arch;
+        public FsoExecEnvironment env;
+        public bool isValid = false;
+        public int score { get; internal set; } = 0;
+
+        public FsoFile(string filename, string modpath, FsoExecType type, FsoExecArch arch, FsoExecEnvironment env)
+        {
+            this.filename = filename;
+            this.type = type;
+            this.arch = arch;
+            this.env = env;
+            this.score = DetermineScore(modpath);
+            if(score > 0)
+                isValid = true;
+        }
+
+        /// <summary>
+        /// Determine FSO File score based on OS and CPU Arch
+        /// </summary>
+        /// <param name="modpath"></param>
+        /// <returns>int score from 0 to 100</returns>
+        private int DetermineScore(string modpath)
+        {
+            int score = 0;
+            string filePath = string.Empty;
+            if (modpath != string.Empty)
+                filePath = Path.Combine(modpath, filename);
+            /* First the cases that are an instant 0 */
+            if (arch == FsoExecArch.other || env == FsoExecEnvironment.Unknown || type == FsoExecType.Unknown)
+            {
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " has an unknown cpu arch, build or enviroment type in json.");
+                return 0;
+            }
+            // get exe name here for exists check
+            if (modpath != string.Empty && !File.Exists(filePath))
+            {
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " does not exist!");
+                return 0;
+            }
+
+            if (env == FsoExecEnvironment.Windows && !KnUtils.IsWindows || env == FsoExecEnvironment.Linux && !KnUtils.IsLinux || env == FsoExecEnvironment.MacOSX && !KnUtils.IsMacOS)
+            {
+                if (modpath != string.Empty)
+                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " is not valid for this OS. Detected: " + env);
+                return 0;
+            }
+
+            score = FsoBuild.DetermineScoreFromArch(arch);
 
             return score;
         }

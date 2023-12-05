@@ -3471,7 +3471,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null)
+        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null)
         {
             string? modPath = null;
             try
@@ -3489,6 +3489,8 @@ namespace Knossos.NET.ViewModels
                     }
                     CancelButtonVisible = true;
                     Name = "Downloading " + build.ToString();
+                    if(modifyPkgs != null)
+                        Name = "Modifying " + build.ToString();
                     ShowProgressText = false;
                     await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
                     Info = "In Queue";
@@ -3532,19 +3534,86 @@ namespace Knossos.NET.ViewModels
                         List<ModFile> files = new List<ModFile>();
                         string modFolder = modJson.id + "-" + modJson.version;
                         modPath = Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "bin"+ Path.DirectorySeparatorChar + modFolder;
-                        for (int i = modJson.packages.Count - 1; i >= 0; i--)
+                        if(modifyPkgs != null)
                         {
-                            if (FsoBuild.IsEnviromentStringValidInstall(modJson.packages[i].environment))
+                            //Modify Build
+                            foreach(var pkg in modifyPkgs)
                             {
-                                files.AddRange(modJson.packages[i].files!);
-                                foreach (ModExecutable exec in modJson.packages[i].executables!)
+                                var installedPkg = modJson.packages.FirstOrDefault(p => p.name == pkg.name && p.folder == pkg.folder);
+
+                                if(installedPkg != null && !pkg.isSelected)
                                 {
-                                    exec.properties = FsoBuild.FillProperties(modJson.packages[i].environment!);
+                                    //If it is installed but not selected, delete it
+                                    try
+                                    {
+                                        var deleteTask = new TaskItemViewModel();
+                                        deleteTask.ShowMsg("Deleting pkg: " + pkg.name, null);
+                                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, deleteTask));
+                                        if (pkg.filelist != null)
+                                        {
+                                            foreach (var f in pkg.filelist)
+                                            {
+                                                if (File.Exists(modPath + Path.DirectorySeparatorChar + f.filename))
+                                                {
+                                                    File.Delete(modPath + Path.DirectorySeparatorChar + f.filename);
+                                                }
+                                            }
+                                            deleteTask.IsCompleted = true;
+                                        }
+                                    }
+                                    catch(Exception ex)
+                                    {
+                                        Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.InstallBuild()", ex);
+                                    }
+                                    modJson.packages.Remove(installedPkg);
+                                    continue;
+                                }
+
+                                if(installedPkg == null && pkg.isSelected)
+                                {
+                                    //if it is not installed and selected, install it
+                                    files.AddRange(pkg.files!);
+                                    foreach (ModExecutable exec in pkg.executables!)
+                                    {
+                                        exec.properties = FsoBuild.FillProperties(pkg.environment!);
+                                    }
+                                    modJson.packages.Add(pkg);
                                 }
                             }
-                            else
+                        }
+                        else
+                        {
+                            //New Install
+                            for (int i = modJson.packages.Count - 1; i >= 0; i--)
                             {
-                                modJson.packages.RemoveAt(i);
+                                if (FsoBuild.IsEnviromentStringValidInstall(modJson.packages[i].environment))
+                                {
+                                    files.AddRange(modJson.packages[i].files!);
+                                    foreach (ModExecutable exec in modJson.packages[i].executables!)
+                                    {
+                                        exec.properties = FsoBuild.FillProperties(modJson.packages[i].environment!);
+                                        var arch = FsoBuild.GetExecArch(exec.properties);
+                                        exec.score = FsoBuild.DetermineScoreFromArch(arch);
+                                    }
+                                    var bestExec = modJson.packages[i].executables!.MaxBy(exec => exec.score);
+                                    if(bestExec != null)
+                                    {
+                                        modJson.packages[i].buildScore = bestExec.score;
+                                    }
+                                }
+                                else
+                                {
+                                    modJson.packages.RemoveAt(i);
+                                }
+                            }
+
+                            var bestpkg = modJson.packages!.MaxBy(pkg => pkg.buildScore);
+                            if(bestpkg != null && bestpkg.files != null)
+                            {
+                                files.Clear();
+                                modJson.packages.Clear();
+                                files.AddRange(bestpkg.files);
+                                modJson.packages.Add(bestpkg);
                             }
                         }
 
@@ -3681,7 +3750,7 @@ namespace Knossos.NET.ViewModels
                         }
 
                         //Download Tile Image
-                        if (!string.IsNullOrEmpty(modJson.tile))
+                        if (!string.IsNullOrEmpty(modJson.tile) && modifyPkgs == null)
                         {
                             Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                             var uri = new Uri(modJson.tile);
@@ -3711,7 +3780,7 @@ namespace Knossos.NET.ViewModels
 
 
                         //Download Banner Image
-                        if (!string.IsNullOrEmpty(modJson.banner))
+                        if (!string.IsNullOrEmpty(modJson.banner) && modifyPkgs == null)
                         {
                             Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                             var uri = new Uri(modJson.banner);
@@ -3739,7 +3808,7 @@ namespace Knossos.NET.ViewModels
                         }
 
                         //Download Screenshots
-                        if (modJson.screenshots != null && modJson.screenshots.Any())
+                        if (modJson.screenshots != null && modJson.screenshots.Any() && modifyPkgs == null)
                         {
                             Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                             var scList = new List<string>();
@@ -3793,7 +3862,10 @@ namespace Knossos.NET.ViewModels
                             Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", ex);
                         }
                         FsoBuild newBuild = new FsoBuild(modJson);
-                        Knossos.AddBuild(newBuild);
+                        if (modifyPkgs == null)
+                        {
+                            Knossos.AddBuild(newBuild);
+                        }
                         if (modJson.devMode)
                         {
                             await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddDevMod(modJson), DispatcherPriority.Background);
