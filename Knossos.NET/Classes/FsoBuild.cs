@@ -734,11 +734,12 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// Calculate the score, keep in mind in Windows and MAC x86 can run on x64 and X86/X64 can run on ARM64
-        /// No support for 32 bits ARM on Windows/Mac, also no support for x86/x64 AVX on Windows ARM 
+        /// No support for 32 bits ARM on Windows/Mac, also no support for x86/x64 AVX on Windows ARM
+        /// If checkForceSSE2 is true then x86/x64 non AVX builds gets 100 points bonus 
         /// </summary>
         /// <param name="arch"></param>
-        /// <returns>score value from 0 to 100</returns>
-        public static int DetermineScoreFromArch(FsoExecArch arch)
+        /// <returns>score value from 0 to 100 normally, or higher in case of SSE2 builds if they are forced</returns>
+        public static int DetermineScoreFromArch(FsoExecArch arch, bool checkForceSSE2 = false)
         {
             int score = 0;
             if (KnUtils.IsWindows || KnUtils.IsMacOS)
@@ -782,6 +783,8 @@ namespace Knossos.NET.Models
                         {
                             case "X64":
                                 score += 80;
+                                if (checkForceSSE2 && Knossos.globalSettings.forceSSE2)
+                                    score += 100;
                                 break;
                             case "X86":
                                 break;
@@ -832,9 +835,13 @@ namespace Knossos.NET.Models
                         {
                             case "X64":
                                 score += 40;
+                                if (checkForceSSE2 && Knossos.globalSettings.forceSSE2)
+                                    score += 100;
                                 break;
                             case "X86":
                                 score += 80;
+                                if (checkForceSSE2 && Knossos.globalSettings.forceSSE2)
+                                    score += 100;
                                 break;
                             case "Arm64":
                                 score += 30;

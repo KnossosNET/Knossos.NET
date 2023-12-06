@@ -3593,7 +3593,7 @@ namespace Knossos.NET.ViewModels
                                     {
                                         exec.properties = FsoBuild.FillProperties(modJson.packages[i].environment!);
                                         var arch = FsoBuild.GetExecArch(exec.properties);
-                                        exec.score = FsoBuild.DetermineScoreFromArch(arch);
+                                        exec.score = FsoBuild.DetermineScoreFromArch(arch, KnUtils.CpuArch == "X86" || KnUtils.CpuArch == "X64" ? true : false);
                                     }
                                     var bestExec = modJson.packages[i].executables!.MaxBy(exec => exec.score);
                                     if(bestExec != null)
