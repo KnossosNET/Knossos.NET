@@ -242,7 +242,7 @@ namespace Knossos.NET.ViewModels
                     foreach (var pkg in build.modData.packages)
                     {
                         var ckb = new CheckBox();
-                        ckb.Content = pkg.name;
+                        ckb.Content = pkg.name?.Replace("_","-");
                         ckb.IsChecked = true;
                         ckb.DataContext = pkg;
                         BuildPkgs.Add(ckb);
@@ -256,7 +256,7 @@ namespace Knossos.NET.ViewModels
                             if (BuildPkgs.FirstOrDefault(b => (string)b.Content! == nebulaPkg.name) == null )
                             {
                                 var ckb = new CheckBox();
-                                ckb.Content = nebulaPkg.name;
+                                ckb.Content = nebulaPkg.name?.Replace("_", "-");
                                 ckb.IsChecked = false;
                                 ckb.DataContext = nebulaPkg;
                                 if(!FsoBuild.IsEnviromentStringValidInstall(nebulaPkg.environment))
