@@ -281,61 +281,67 @@ namespace Knossos.NET.ViewModels
         {
             if(BuildPkgs.Any() && IsInstalled && build != null && build.modData != null)
             {
-                //No pkgs enabled, delete
-                if(BuildPkgs.FirstOrDefault(b => b.IsEnabled) == null)
+                try
                 {
-                    DeleteBuildCommand();
-                    return;
-                }
-
-                List<ModPackage> pkgs = new List<ModPackage>();
-
-                foreach(var ckb in BuildPkgs)
-                {
-                    if (ckb.IsEnabled)
+                    //No pkgs enabled, delete
+                    if (BuildPkgs.FirstOrDefault(b => b.IsEnabled) == null)
                     {
-                        var pkg = ckb.DataContext as ModPackage;
+                        DeleteBuildCommand();
+                        return;
+                    }
 
-                        if (pkg != null && ckb.IsChecked.HasValue)
+                    List<ModPackage> pkgs = new List<ModPackage>();
+
+                    foreach (var ckb in BuildPkgs)
+                    {
+                        if (ckb.IsEnabled)
                         {
-                            var installedPkg = build.modData.packages.FirstOrDefault(p => p.name == pkg.name && p.folder == pkg.folder);
-                            if(installedPkg != null)
+                            var pkg = ckb.DataContext as ModPackage;
+
+                            if (pkg != null && ckb.IsChecked.HasValue)
                             {
-                                if (!ckb.IsChecked.Value)
+                                var installedPkg = build.modData.packages.FirstOrDefault(p => p.name == pkg.name && p.folder == pkg.folder);
+                                if (installedPkg != null)
                                 {
-                                    //Installed and unselected
-                                    pkg.isSelected = false;
-                                    pkgs.Add(pkg);
+                                    if (!ckb.IsChecked.Value)
+                                    {
+                                        //Installed and unselected
+                                        pkg.isSelected = false;
+                                        pkgs.Add(pkg);
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                //Not installed and selected
-                                if (ckb.IsChecked.Value)
+                                else
                                 {
-                                    pkg.isSelected = true;
-                                    pkgs.Add(pkg);
+                                    //Not installed and selected
+                                    if (ckb.IsChecked.Value)
+                                    {
+                                        pkg.isSelected = true;
+                                        pkgs.Add(pkg);
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                if(pkgs.Any())
-                {
-                    IsDownloading = true;
-                    cancellationTokenSource = new CancellationTokenSource();
-                    FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, build!.modData, pkgs)!;
-                    if (newBuild != null)
+                    if (pkgs.Any())
                     {
-                        Knossos.RemoveBuild(build!);
-                        build = newBuild;
-                        UpdateDisplayData(newBuild);
-                        Knossos.AddBuild(newBuild);
+                        IsDownloading = true;
+                        cancellationTokenSource = new CancellationTokenSource();
+                        FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, build!.modData, pkgs)!;
+                        if (newBuild != null)
+                        {
+                            Knossos.RemoveBuild(build!);
+                            build = newBuild;
+                            UpdateDisplayData(newBuild);
+                            Knossos.AddBuild(newBuild);
+                        }
+                        IsDownloading = false;
+                        cancellationTokenSource?.Dispose();
+                        cancellationTokenSource = null;
                     }
-                    IsDownloading = false;
-                    cancellationTokenSource?.Dispose();
-                    cancellationTokenSource = null;
+                }catch(Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "FsoBuildItemViewModel.ModifyBuild()", ex);
                 }
             }
         }
