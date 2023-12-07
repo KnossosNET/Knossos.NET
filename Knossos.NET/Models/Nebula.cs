@@ -175,6 +175,7 @@ namespace Knossos.NET.Models
                 {
                     await LoadPrivateMods(cancellationToken).ConfigureAwait(false);
                 }
+                repoLoaded = true;
             }
             catch (TaskCanceledException)
             {
@@ -183,7 +184,6 @@ namespace Knossos.NET.Models
                     cancellationToken.Dispose();
                     cancellationToken = null;
                 }
-                repoLoaded = true;
             }
         }
 
