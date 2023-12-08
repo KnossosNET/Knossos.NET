@@ -218,35 +218,45 @@ namespace Knossos.NET.ViewModels
             if (processed == null)
                 processed = new List<Mod>();
             var dependencies = mod.GetMissingDependenciesList(false, true);
+            //Display this mod on install list
             AddModToList(mod);
-            await Parallel.ForEachAsync(dependencies, new ParallelOptions { MaxDegreeOfParallelism = 2 }, async (dep, token) =>
+            //Add this mod here to avoid possible looping
+            processed.Add(mod);
+            foreach (var dep in dependencies)
             {
-                if (processed.IndexOf(mod) == -1)
+                var modDep = await dep.SelectModNebula(allMods);
+                if (modDep != null)
                 {
-                    processed.Add(mod);
-                    var modDep = await dep.SelectModNebula(allMods);
-                    if (modDep != null)
+                    //Load Nebula data first to check the packages
+                    await modDep.LoadFulLNebulaData();
+                    //Make sure to mark all needed pkgs this mod need as required
+                    modDep.isEnabled = true;
+                    modDep.isSelected = true;
+                    foreach(var pkg in modDep.packages)
                     {
-                        modDep.isEnabled = true;
-                        modDep.isSelected = true;
-                        Parallel.ForEach(modDep.packages, (pkg, token) =>
+                        if (dep != null && dep.packages != null)
                         {
-                            if (dep != null && dep.packages != null)
+                            foreach (var depPkg in dep.packages)
                             {
-                                foreach (var depPkg in dep.packages)
+                                if (depPkg == pkg.name)
                                 {
-                                    if (depPkg == pkg.name)
-                                    {
-                                        pkg.status = "required";
-                                    }
+                                    pkg.status = "required";
                                 }
                             }
-                        });
-                        await modDep.LoadFulLNebulaData();
+                        }
+                    }
+                    //If process this depmod own dependencies if we havent done already
+                    //Otherwise re-add it to the list to enabled any potential new pkg needed
+                    if (processed.IndexOf(modDep) == -1)
+                    {
                         await ProcessMod(modDep, allMods, processed);
                     }
+                    else
+                    {
+                        AddModToList(modDep);
+                    }
                 }
-            });
+            }
         }
 
         /// <summary>
