@@ -77,7 +77,7 @@ namespace Knossos.NET.ViewModels
         /// <summary>
         /// Open the tab and slowly display modcards to avoid ui lock
         /// </summary>
-        public async void OpenTab()
+        public async void OpenTab(string newSearch)
         {
             if (IsLoading)
             {
@@ -115,8 +115,8 @@ namespace Knossos.NET.ViewModels
                     Log.Add(Log.LogSeverity.Error, "NebulaModListViewModel.OpenTab", ex);
                 }
 
-
             }
+            Search = newSearch;
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace Knossos.NET.ViewModels
                 if (IsTabOpen)
                 {
                     IsTabOpen = false;
-                    OpenTab();
+                    OpenTab(search);
                 }
             });
         }

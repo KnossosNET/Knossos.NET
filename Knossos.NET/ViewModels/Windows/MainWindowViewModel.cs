@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace Knossos.NET.ViewModels
 {
@@ -37,6 +38,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string uiConsoleOutput = string.Empty;
 
+        internal string sharedSearch = string.Empty;
+
         internal int tabIndex = 0;
         internal int TabIndex
         {
@@ -46,10 +49,25 @@ namespace Knossos.NET.ViewModels
                 /* Execute code when user changes tab */
                 if (value != tabIndex)
                 {
+                    // Things to do on tab exit
+                    if (tabIndex == 0) //Exiting the Play tab.
+                    {
+                        sharedSearch = InstalledModsView.Search;
+                    }
+                    if (tabIndex == 1) //Exiting the Nebula tab.
+                    {
+                        sharedSearch =  NebulaModsView.Search;
+                    }
+
+                    // Things to do on tab entrance
                     this.SetProperty(ref tabIndex, value);
+                    if (tabIndex == 0) //Play Tab
+                    {
+                        InstalledModsView.Search = sharedSearch;
+                    }
                     if (tabIndex == 1) //Nebula Mods
                     {
-                        NebulaModsView.OpenTab();
+                        NebulaModsView.OpenTab(sharedSearch);
                     }
                     if (tabIndex == 4) //PXO
                     {
