@@ -95,6 +95,13 @@
 		<SolidColorBrush x:Key="ModCardBorderDevMode">DimGray</SolidColorBrush>
 	</Styles.Resources>
 	
+	<!--EXPANDER-->
+		<Style Selector="Expander.FAQ">
+			<Setter Property="Background" Value="{StaticResource BackgroundColorPrimary}"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="BorderBrush" Value="{StaticResource BackgroundColorPrimary}"/>
+		</Style>
+
 	<!--BUTTONS-->
 		<!--Generic-->
 		<Style Selector="Button">
@@ -113,6 +120,21 @@
 			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 	
+		<!--Community Links Buttons-->
+		<Style Selector="Button.CommunityLink">
+			<Setter Property="CornerRadius" Value="20"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Background" Value="Black"/>
+			<Setter Property="Foreground" Value="#DDDDDD"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="FontSize" Value="18" />
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Left"/>
+		</Style>
+		<Style Selector="Button.CommunityLink:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="#111111"/>
+		</Style>
+
 		<!--Generic Disabled-->
 		<Style Selector="Button:disabled /template/ ContentPresenter">
 			<Setter Property="FontWeight" Value="Bold"/>
@@ -172,7 +194,7 @@
 		<Style Selector="Button.Settings">
 			<Setter Property="FontWeight" Value="Bold"/>
 			<Setter Property="Background" Value="{StaticResource SettingsColor}"/>
-			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+			<Setter Property="Foreground" Value="#EEEEEE"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -260,4 +282,21 @@
 		<Setter Property="FontWeight" Value="Bold"/>
 		<Setter Property="Foreground" Value="White"/>
 	</Style>
+
+	<!--Community Info Area (faux button)-->
+	<Style Selector="Button.CommunityInfo">
+		<Setter Property="CornerRadius" Value="20"/>
+		<Setter Property="FontWeight" Value="Bold"/>
+		<Setter Property="Background" Value="Black"/>
+		<Setter Property="Foreground" Value="#DDDDDD"/>
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="VerticalContentAlignment" Value="Center"/>
+		<Setter Property="HorizontalContentAlignment" Value="Left"/>
+	</Style>
+	<!--Make sure that we *don't* have obvious mouse over effects-->
+	<Style Selector="Button.CommunityInfo:pointerover /template/ ContentPresenter">
+		<Setter Property="Background" Value="Black"/>
+		<Setter Property="Foreground" Value="#DEDEDE"/>
+	</Style>
+
 </Styles>

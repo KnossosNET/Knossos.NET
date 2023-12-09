@@ -30,12 +30,12 @@
 					<Button Command="{Binding ButtonCommandPlay}" Content="Play" Grid.Column="0" Classes="Accept Rounded" Margin="5" Width="100" ></Button>
 					<Button Command="{Binding ButtonCommandFred2}" Content="Fred2" Grid.Column="0" Classes="Secondary Rounded" Margin="5" Width="100" ></Button>
 					<Button Command="{Binding ButtonCommandSettings}" Content="Settings" Classes="Quaternary Rounded" Margin="5" Width="100" ></Button>
-					<Button IsVisible="{Binding !IsLocalMod}" Command="{Binding ButtonCommandReport}" Content="Report" Classes="Rounded" Margin="5" Width="100" ></Button>
+					<Button IsVisible="{Binding !IsLocalMod}" Command="{Binding ButtonCommandReport}" Content="Report" Classes="Settings Rounded" Margin="5" Width="100" ></Button>
 				</WrapPanel>
 				<WrapPanel Grid.Row="1" Grid.Column="0">
 					<Button Command="{Binding ButtonCommandPlayDebug}" Content="Debug" Grid.Column="0" Classes="Tertiary Rounded" Margin="5" Width="100" ></Button>
-					<Button Command="{Binding ButtonCommandQtFred}" Content="QtFred" Grid.Column="0" Margin="5" Width="100" Classes="Secondary Rounded"></Button>
-					<Button Command="{Binding ButtonCommandForum}" Content="Forum" IsVisible="{Binding ForumAvalible}" Classes="Option Rounded" Margin="5" Width="100" ></Button>
+					<Button Command="{Binding ButtonCommandQtFred}" Content="QtFred" Grid.Column="0" Margin="5" Width="100" Classes="Settings Rounded"></Button>
+					<Button Command="{Binding ButtonCommandForum}" Content="Forum" IsVisible="{Binding ForumAvalible}" Classes="Settings Rounded" Margin="5" Width="100" ></Button>
 					<Button IsVisible="{Binding !devMode}" Command="{Binding ButtonCommandDelete}" Content="Delete" Classes="Cancel Rounded" Margin="5" Width="100" ></Button>
 				</WrapPanel>
 				<Label Content="Version" Grid.Column="3" Margin="20,0,20,0" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>

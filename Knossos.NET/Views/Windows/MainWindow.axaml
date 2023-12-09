@@ -40,6 +40,10 @@
 			<TabItem ToolTip.Tip="Develop new games and modifications for the Freespace Open Engine" Header="Develop">
 				<v:DeveloperModsView Content="{Binding DeveloperModView}"/>
 			</TabItem>
+			<!--Community-->
+			<TabItem ToolTip.Tip="FAQs and Community Resources" Header="Community">
+				<v:CommunityView Content="{Binding CommunityView}"/>
+			</TabItem>
 			<!--PXO-->
 			<TabItem ToolTip.Tip="View multiplayer games using PXO servers" Header="Multiplayer">
 				<v:PxoView Content="{Binding PxoView}"/>

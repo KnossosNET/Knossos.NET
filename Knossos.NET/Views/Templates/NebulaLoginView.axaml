@@ -20,9 +20,9 @@
 			<Label IsVisible="{Binding UserLoggedIn}" HorizontalAlignment="Center" Foreground="Green" FontSize="14">Logged In!</Label>
 			<Button IsVisible="{Binding UserLoggedIn}" Margin="0,3,0,0" Command="{Binding LogOff}" Classes="Cancel" HorizontalAlignment="Center">Logout</Button>
 			<WrapPanel HorizontalAlignment="Center" IsVisible="{Binding !UserLoggedIn}">
-				<Button IsVisible="{Binding !RegisterNewUser}" Width="125" Command="{Binding Reset}" Margin="5" Classes="Cancel">Reset Password</Button>
-				<Button IsVisible="{Binding !RegisterNewUser}" Width="125" Command="{Binding SwitchToRegister}" Margin="5" Classes="Option">Create new user</Button>
 				<Button IsVisible="{Binding !RegisterNewUser}" Width="125" Command="{Binding LogIn}" Margin="5" Classes="Accept">Login</Button>
+				<Button IsVisible="{Binding !RegisterNewUser}" Width="125" Command="{Binding Reset}" Margin="5" Classes="Secondary">Reset Password</Button>
+				<Button IsVisible="{Binding !RegisterNewUser}" Width="125" Command="{Binding SwitchToRegister}" Margin="5" Classes="Settings">Create new user</Button>
 				<Button IsVisible="{Binding RegisterNewUser}" Width="125" Command="{Binding SwitchToLogin}" Margin="5" Classes="Cancel">Cancel</Button>
 				<Button IsVisible="{Binding RegisterNewUser}" Width="125" Command="{Binding Register}" Margin="5" Classes="Accept">Register</Button>
 			</WrapPanel>
