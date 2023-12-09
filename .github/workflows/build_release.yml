@@ -78,7 +78,8 @@ jobs:
 
       - name: Install utilities
         # zip for packaging windows builds
-        run: sudo apt-get update && sudo apt-get install zip
+        # nsis for windows installer
+        run: sudo apt-get update && sudo apt-get install zip nsis
 
       - name: Create directories
         run: |
@@ -98,6 +99,9 @@ jobs:
 
       - name: Package all RIDs
         run: ${{ github.workspace }}/ci/package_all.sh
+
+      - name: Create installers for Windows
+        run: ${{ github.workspace }}/ci/create_win_installer.sh
 
       - name: Set up QEMU integration for Docker
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
