@@ -194,7 +194,7 @@
 		<Style Selector="Button.Settings">
 			<Setter Property="FontWeight" Value="Bold"/>
 			<Setter Property="Background" Value="{StaticResource SettingsColor}"/>
-			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+			<Setter Property="Foreground" Value="#EEEEEE"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
