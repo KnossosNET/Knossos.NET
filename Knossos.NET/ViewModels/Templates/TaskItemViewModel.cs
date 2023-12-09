@@ -2887,7 +2887,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false)
+        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false)
         {
             string? modPath = null;
             Mod? installed = null;
@@ -3371,6 +3371,87 @@ namespace Knossos.NET.ViewModels
                             DeveloperModsViewModel.Instance?.UpdateVersionManager(mod.id);
                         }
                         MainWindowViewModel.Instance?.RunModStatusChecks();
+                    }
+
+                    // Clean old versions
+                    if(cleanupOldVersions)
+                    {
+                        try
+                        {
+                            var versions = Knossos.GetInstalledModList(mod.id);
+                            if (versions != null)
+                            {
+                                versions.Remove(mod);
+                                if (versions.Any())
+                                {
+                                    foreach (var version in versions.ToList())
+                                    {
+                                        //Check if it is inferior to the one we just installed
+                                        if (SemanticVersion.Compare(mod.version, version.version) >= 1)
+                                        {
+                                            bool inUse = false;
+                                            string inUseMods = "";
+                                            foreach (var m in Knossos.GetInstalledModList(null))
+                                            {
+                                                if (m != null && m.id != mod.id)
+                                                {
+                                                    var deps = m.GetModDependencyList();
+                                                    if (deps != null)
+                                                    {
+                                                        foreach (var dep in deps)
+                                                        {
+                                                            var depMod = dep.SelectMod();
+                                                            if (depMod == version)
+                                                            {
+                                                                inUse = true;
+                                                                inUseMods += m + ", ";
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            if (inUse)
+                                            {
+                                                Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallMod()", "Cleanup: " + version + " is in use by these mods: " + inUseMods + ". Skipping.");
+                                            }
+                                            else
+                                            {
+                                                //Safe to delete
+                                                Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallMod()", "Cleanup: " + version + " is not in use, deleting...");
+                                                var msgtask = new TaskItemViewModel();
+                                                msgtask.ShowMsg("Cleanup: Deleting " + version.version, null);
+                                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, msgtask));
+                                                //Remove the mod version from Knossos and physical files
+                                                await Task.Run(() => Knossos.RemoveMod(version));
+                                                //Remove mod version from UI mod versions list
+                                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.RemoveInstalledModVersion(version));
+                                                //If the dev editor is open and loaded this mod id, reset it
+                                                await Dispatcher.UIThread.InvokeAsync(() => DeveloperModsViewModel.Instance!.ResetModEditor(mod.id));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallMod()", "Cleanup: " + version + " is newer than " + mod + ". Skipping.");
+                                        }
+                                    }
+                                    MainWindowViewModel.Instance?.RunModStatusChecks();
+                                }
+                                else
+                                {
+                                    //Nothing to cleanup
+                                    var msgtask = new TaskItemViewModel();
+                                    msgtask.ShowMsg("Cleanup: Nothing to cleanup.", null);
+                                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, msgtask));
+                                }
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            var msgtask = new TaskItemViewModel();
+                            msgtask.ShowMsg("Cleanup: An error has ocurred, check logs.", null);
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, msgtask));
+                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", ex);
+                        }
                     }
 
                     /*

@@ -180,6 +180,15 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
+        /// Remove a installed mod version from the modcard UI
+        /// </summary>
+        /// <param name="mod"></param>
+        public void RemoveInstalledModVersion(Mod mod)
+        {
+            InstalledModsView.RemoveModVersion(mod);
+        }
+
+        /// <summary>
         /// Load settings to settings tab
         /// </summary>
         public void GlobalSettingsLoadData()

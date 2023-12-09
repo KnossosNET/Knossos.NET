@@ -208,7 +208,7 @@ namespace Knossos.NET.ViewModels
         /// <param name="mod"></param>
         /// <param name="reinstallPkgs"></param>
         /// <param name="manualCompress"></param>
-        public async void InstallMod(Mod mod, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false)
+        public async void InstallMod(Mod mod, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false)
         {
             if (Knossos.GetKnossosLibraryPath() == null)
             {
@@ -234,7 +234,7 @@ namespace Knossos.NET.ViewModels
                         TaskList.Add(newTask);
                         taskQueue.Enqueue(newTask);
                     });
-                    await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress).ConfigureAwait(false);
+                    await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress, cleanupOldVersions).ConfigureAwait(false);
                 }
             }
         }

@@ -108,6 +108,20 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
+        /// Resets the mod editor
+        /// Reloads the currently loaded mod in editor if it matches the passed id, null for always
+        /// </summary>
+        /// <param name="mod"></param>
+        public void ResetModEditor(string? modid = null)
+        {
+            if (ModEditor != null && ( modid == null || modid == ModEditor.ActiveVersion.id))
+            {
+                ModEditor = new DevModEditorViewModel();
+                ModEditor.StartModEditor(Mods[selectedIndex]);
+            }
+        }
+
+        /// <summary>
         /// Delete a mod from the Dev Mod list
         /// </summary>
         /// <param name="modid"></param>

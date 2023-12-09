@@ -17,6 +17,8 @@ namespace Knossos.NET.ViewModels
     public partial class ModCardViewModel : ViewModelBase
     {
         /* General Mod variables */
+        private ModDetailsView? detailsView = null;
+        private ModSettingsView? settingsView = null;
         private List<Mod> modVersions = new List<Mod>();
         private int activeVersionIndex = 0;
         private bool devMode { get; set; } = false;
@@ -145,7 +147,10 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Information, "ModCardViewModel.SwitchModVersion()", "Changing active version for mod id " + ID + " to " + modVersions[newIndex].version);
                 activeVersionIndex = newIndex;
                 Name = modVersions[newIndex].title;
-                ModVersion = modVersions[newIndex].version + " (+" + (modVersions.Count - 1) + ")";
+                if(modVersions.Count() > 1)
+                    ModVersion = modVersions[newIndex].version + " (+" + (modVersions.Count - 1) + ")";
+                else
+                    ModVersion = modVersions[newIndex].version;
                 if (modVersions[newIndex].modSource == ModSource.local)
                 {
                     IsLocalMod = true;
@@ -158,6 +163,37 @@ namespace Knossos.NET.ViewModels
                 CheckDependencyActiveVersion();
                 RefreshSpecialIcons();
             }
+        }
+
+        /// <summary>
+        /// Deletes a mod from the mod versions list and switches the active version to the newerest
+        /// </summary>
+        /// <param name="mod"></param>
+        public void DeleteModVersion(Mod mod)
+        {
+            try
+            {
+                //if the details or settings view is open close it
+                Dispatcher.UIThread.Invoke(() => { 
+                    detailsView?.Close();
+                    settingsView?.Close();
+                });
+                modVersions.Remove(mod);
+                SwitchModVersion(modVersions.Count() - 1);
+            }
+            catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "ModCardViewModel.DeleteModVersion()", ex);
+            }
+        }
+
+        /// <summary>
+        /// Returns the number of mods in the modVersions list
+        /// </summary>
+        /// <returns>int</returns>
+        public int GetNumberOfModVersions()
+        {
+            return modVersions.Count();
         }
 
         public void UpdateIsAvalible(bool value)
@@ -244,8 +280,9 @@ namespace Knossos.NET.ViewModels
             {
                 var dialog = new ModDetailsView();
                 dialog.DataContext = new ModDetailsViewModel(modVersions, activeVersionIndex, this, dialog);
-
+                detailsView = dialog;
                 await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
+                detailsView = null;
             }
         }
 
@@ -255,7 +292,7 @@ namespace Knossos.NET.ViewModels
             {
                 var dialog = new ModSettingsView();
                 dialog.DataContext = new ModSettingsViewModel(modVersions[activeVersionIndex],this);
-
+                settingsView = dialog;
                 await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
             }
         }
