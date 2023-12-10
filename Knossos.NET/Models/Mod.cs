@@ -786,6 +786,102 @@ namespace Knossos.NET.Models
             //inverted
             return SemanticVersion.Compare(mod1.version, mod2.version);
         }
+
+        /// <summary>
+        /// Compares two mods and determines if the metadata is different
+        /// Full data must be loaded on both mods for this to work properly
+        /// I hate this nonsense, nebula should be updated to accept "lastUpdate" with hours and minutes to get rid of this 
+        /// </summary>
+        /// <returns>true if metadata is different</returns>
+        public static bool IsMetaUpdate(Mod modA, Mod modB)
+        {
+            try
+            {
+                //Basic data
+                if (modA.id != modB.id)
+                    return true;
+                if (modA.firstRelease != modB.firstRelease)
+                    return true;
+                if (modA.lastUpdate != modB.lastUpdate)
+                    return true;
+                if (modA.releaseThread != modB.releaseThread)
+                    return true;
+                if (!modA.modFlag.SequenceEqual(modB.modFlag))
+                    return true;
+                if (modA.description != modB.description)
+                    return true;
+                if (modA.title != modB.title)
+                    return true;
+                if (modA.videos == null && modB.videos != null || modA.videos != null && modB.videos == null)
+                    return true;
+                if (modA.videos != null && modB.videos != null && !modA.videos.SequenceEqual(modB.videos))
+                    return true;
+
+                //tile image
+                if (modA.tile != null && modB.tile != null)
+                {
+                    if (Path.GetFileName(modA.tile) != Path.GetFileName(modB.tile))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (modA.tile == null && modB.tile != null || modA.tile != null && modB.tile == null)
+                        return true;
+                }
+
+                //banner image
+                if (modA.banner != null && modB.banner != null)
+                {
+                    if (Path.GetFileName(modA.banner) != Path.GetFileName(modB.banner))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (modA.banner == null && modB.banner != null || modA.banner != null && modB.banner == null)
+                        return true;
+                }
+
+                //Packages
+                if (modA.packages == null && modB.packages != null || modA.packages != null && modB.packages == null)
+                    return true;
+
+                var lessPkgs = modA.packages!.Count() <= modB.packages!.Count() ? modA.packages! : modB.packages!;
+                var morePkgs = modA.packages!.Count() > modB.packages!.Count() ? modA.packages! : modB.packages!;
+
+                foreach (var pkg in lessPkgs)
+                {
+                    var other = morePkgs.FirstOrDefault(p => p.name == pkg.name);
+                    if (other == null)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        if (modA.type == ModType.mod || modB.type == ModType.tc)
+                        {
+                            if (JsonSerializer.Serialize(other.dependencies) != JsonSerializer.Serialize(pkg.dependencies))
+                                return true;
+                        }
+                        else
+                        {
+                            if (other.environment != pkg.environment)
+                                return true;
+                            if (JsonSerializer.Serialize(other.executables) != JsonSerializer.Serialize(pkg.executables))
+                                return true;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Mod.IsMetaUpdate()", ex);
+            }
+            return false;
+        }
     }
 
     public class ModMember

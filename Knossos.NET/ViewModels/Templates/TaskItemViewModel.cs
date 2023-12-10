@@ -2997,6 +2997,35 @@ namespace Knossos.NET.ViewModels
                     }
 
                     modPath = Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar +rootPack + Path.DirectorySeparatorChar + modFolder;
+
+                    /* Metadata update */
+                    bool metaUpdate = false;
+                    if (installed != null && Mod.IsMetaUpdate(mod, installed))
+                    {
+                        metaUpdate = true;
+                        installed.lastUpdate = mod.lastUpdate;
+                        installed.firstRelease = mod.firstRelease;
+                        installed.releaseThread = mod.releaseThread;
+                        installed.title = mod.title;
+                        installed.description = mod.description;
+                        installed.modFlag = mod.modFlag;
+                        installed.videos = mod.videos;
+                        foreach (var pkg in installed.packages)
+                        {
+                            var other = mod.packages.FirstOrDefault(p => p.name == pkg.name);
+                            if (other != null)
+                            {
+                                pkg.dependencies = other.dependencies;
+                            }
+                        }
+                        installed.SaveJson();
+                        installed.tile = mod.tile;
+                        installed.banner = mod.banner;
+                        var msg = new TaskItemViewModel();
+                        msg.ShowMsg("Metadata was updated", null);
+                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, msg));
+                    }
+
                     int vPExtractionNeeded = 0;
                     for (int i = mod.packages.Count - 1; i >= 0; i--)
                     {
@@ -3039,7 +3068,7 @@ namespace Knossos.NET.ViewModels
                     }
 
                     /* Is there is nothing new to install just end the task */
-                    if(files.Count == 0)
+                    if(files.Count == 0 && !metaUpdate)
                     {
                         Info = string.Empty;
                         IsCompleted = true;
@@ -3196,7 +3225,7 @@ namespace Knossos.NET.ViewModels
                     }
 
                     //Download Tile image
-                    if (!string.IsNullOrEmpty(mod.tile) && installed == null)
+                    if (!string.IsNullOrEmpty(mod.tile) && ( installed == null || metaUpdate ) )
                     {
                         Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         var uri = new Uri(mod.tile);
@@ -3224,7 +3253,7 @@ namespace Knossos.NET.ViewModels
                     }
 
                     //Download Banner
-                    if (!string.IsNullOrEmpty(mod.banner) && installed == null)
+                    if (!string.IsNullOrEmpty(mod.banner) && (installed == null || metaUpdate))
                     {
                         Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
