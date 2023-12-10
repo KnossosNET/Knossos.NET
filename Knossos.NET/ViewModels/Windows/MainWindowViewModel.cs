@@ -66,7 +66,7 @@ namespace Knossos.NET.ViewModels
                         if (sharedSortType != InstalledModsView.sortType)
                         {
                             sharedSortType = InstalledModsView.sortType;
-                            Knossos.globalSettings.Save();
+                            Knossos.globalSettings.Save(false);
                         }
                     }
                     if (tabIndex == 1) //Exiting the Nebula tab.
@@ -76,7 +76,7 @@ namespace Knossos.NET.ViewModels
                         if (sharedSortType != NebulaModsView.sortType)
                         {
                             sharedSortType = NebulaModsView.sortType;
-                            Knossos.globalSettings.Save();
+                            Knossos.globalSettings.Save(false);
                         }
                     }
 
