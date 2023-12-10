@@ -375,5 +375,13 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.UploadKnossosConsole", ex);
             }
         }
+
+        internal void applySettingsToList()
+        {
+            if (InstalledModsView != null)
+            {
+                InstalledModsView.ChangeSort(sharedSortType);
+            }
+        }
     }
 }

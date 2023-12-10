@@ -68,6 +68,11 @@ namespace Knossos.NET
 
                 //Load knossos config
                 globalSettings.Load();
+                
+                if (MainWindowViewModel.Instance != null){
+                    MainWindowViewModel.Instance.applySettingsToList();
+                }
+
 
                 //Print Decompressor Type
                 Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "The selected decompressor type is set to " + globalSettings.decompressor.ToString());
