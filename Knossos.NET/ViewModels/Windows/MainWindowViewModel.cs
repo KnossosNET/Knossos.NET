@@ -94,7 +94,11 @@ namespace Knossos.NET.ViewModels
                     {
                         NebulaModsView.OpenTab(sharedSearch, sharedSortType);
                     }
-                    if (tabIndex == 4) // Community Tab
+                    if (tabIndex == 3) //Dev Tab
+                    {
+                        DeveloperModView.UpdateBuildInstallButtons();
+                    }
+                    if (tabIndex == 4) //Community Tab
                     {
                         Task.Run(async()=>{await CommunityView.LoadFAQRepo();});                     
                     }
@@ -178,6 +182,20 @@ namespace Knossos.NET.ViewModels
         public void AddInstalledMod(Mod modJson)
         {
             InstalledModsView.AddMod(modJson);
+        }
+
+        /// <summary>
+        /// Check to see if the build provided is the most recent nightly
+        /// </summary>
+        /// <param name="buildId"></param>
+        /// <param name="nightly"></param> 
+        public void AddMostRecent(string buildId, bool nightly)
+        {
+            if (nightly){
+                DeveloperModView.LatestNightly = buildId;
+            } else {
+                DeveloperModView.LatestStable = buildId;
+            }
         }
 
         /// <summary>

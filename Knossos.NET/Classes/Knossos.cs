@@ -1037,6 +1037,15 @@ namespace Knossos.NET
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param>
+        public static FsoBuild? GetInstalledBuild (string id, string version)
+        {
+            return engineBuilds.FirstOrDefault(build => build.id == id && build.version == version);
+        }
+
+        /// <summary>
         /// Search and load mods, builds and tools on the library path
         /// </summary>
         /// <param name="path"></param>
