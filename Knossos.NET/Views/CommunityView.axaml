@@ -27,7 +27,7 @@
                         <TextBlock FontSize="18" Margin="30,15,0,0" Width="800" TextWrapping="Wrap">Our wiki has documentation for modding the game, additional resources for creating your own missions, and details about the Freespace canon.</TextBlock> 
                     </WrapPanel>
                 </Button>
-                <Button Command="{Binding OpenFredTutorial}" ToolTip.Tip="Fred Tutorial (Diaspora Version) http://diaspora.fs2downloads.com/FREDDocs/index.html"  Margin="0,15,0,0" Classes="CommunityLink">
+                <Button Command="{Binding OpenFredTutorial}" ToolTip.Tip="Fred Tutorial Selection https://wiki.hard-light.net/index.php/FRED_tutorials"  Margin="0,15,0,0" Classes="CommunityLink">
                     <WrapPanel Margin="10,10,15,10">
                         <Image Height="64" Width="64" Source="/Assets/general/fred.png"/>
                         <TextBlock FontSize="18" Margin="30,15,0,0" Width="800" TextWrapping="Wrap">Learn how to make your own custom missions for FSO with this tutorial for our mission editor, called FRED.</TextBlock>
