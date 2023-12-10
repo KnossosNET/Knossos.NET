@@ -175,7 +175,7 @@ namespace Knossos.NET.Models
         [JsonPropertyName("hide_build_nightly")]
         public bool hideBuildNightly { get; set; } = true;
         [JsonPropertyName("last_sort_type"), JsonConverter(typeof(JsonStringEnumConverter))]
-        public MainWindowViewModel.SortType sortType = MainWindowViewModel.SortType.name;
+        public MainWindowViewModel.SortType sortType { get; set; } = MainWindowViewModel.SortType.name;
 
         [JsonIgnore]
         private FileSystemWatcher? iniWatcher = null;
