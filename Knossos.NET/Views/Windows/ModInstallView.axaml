@@ -36,12 +36,8 @@
 			<Label ToolTip.Tip="Download size consist of LZMA2 7z compressed files with max compression, the actual extracted size will be considerable higher than this value. It is recommended that you have at least double free space than what it is indicated here." Content="{Binding InstallSize}" Margin="5" FontSize="18" HorizontalAlignment="Center"></Label>
 			<Label Content="{Binding FreeSpace}" Margin="5,0,5,5" FontSize="18" HorizontalAlignment="Center"></Label>
 			<Label IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="Green"> This version is installed, you can add optional packages</Label>
-<<<<<<< Updated upstream
 			<Button Command="{Binding VerifyCommand}" Margin="5" IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" Classes="Quaternary">Verify</Button>
-=======
 			<Label IsVisible="{Binding IsMetaUpdate}" HorizontalAlignment="Center" FontWeight="Black" Foreground="{StaticResource ModCardBorderUpdate}"> A metadata update is available for this mod</Label>
-			<Button Command="{Binding VerifyCommand}" Margin="5" IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" Classes="Tertiary">Verify</Button>
->>>>>>> Stashed changes
 		</StackPanel>
 		<TreeView IsVisible="{Binding DataLoaded}" Grid.Row="1" Margin="30" ItemsSource="{Binding ModInstallList}"  HorizontalAlignment="Center">
 			<TreeView.Styles>
