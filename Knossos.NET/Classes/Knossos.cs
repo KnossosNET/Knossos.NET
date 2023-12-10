@@ -930,7 +930,7 @@ namespace Knossos.NET
                     {
                         foreach(var flag in modCmd.ToList())
                         {
-                            if(GlobalSettings.SystemFlags.Contains(flag.ToLower().Trim()))
+                            if(GlobalSettings.SystemFlags.Contains(flag.ToLower().Trim().Split(' ')[0]))
                                 modCmd.Remove(flag);
                         }
                     }
