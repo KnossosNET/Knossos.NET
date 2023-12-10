@@ -61,12 +61,23 @@ namespace Knossos.NET.ViewModels
                     if (tabIndex == 0) //Exiting the Play tab.
                     {
                         sharedSearch = InstalledModsView.Search;
-                        sharedSortType = InstalledModsView.sortType;
+
+                        // Change and save to the new sort type.
+                        if (sharedSortType != InstalledModsView.sortType)
+                        {
+                            sharedSortType = InstalledModsView.sortType;
+                            Knossos.globalSettings.Save();
+                        }
                     }
                     if (tabIndex == 1) //Exiting the Nebula tab.
                     {
-                        sharedSearch =  NebulaModsView.Search;
-                        sharedSortType = NebulaModsView.sortType;
+                        sharedSearch = NebulaModsView.Search;
+
+                        if (sharedSortType != NebulaModsView.sortType)
+                        {
+                            sharedSortType = NebulaModsView.sortType;
+                            Knossos.globalSettings.Save();
+                        }
                     }
 
                     // Things to do on tab entrance

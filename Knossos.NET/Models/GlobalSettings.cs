@@ -174,6 +174,8 @@ namespace Knossos.NET.Models
         public bool hideBuildCustom { get; set; } = false;
         [JsonPropertyName("hide_build_nightly")]
         public bool hideBuildNightly { get; set; } = true;
+        [JsonPropertyName("last_sort_type"), JsonConverter(typeof(JsonStringEnumConverter))]
+        public MainWindowViewModel.SortType sortType = MainWindowViewModel.SortType.name;
 
         [JsonIgnore]
         private FileSystemWatcher? iniWatcher = null;
@@ -550,6 +552,10 @@ namespace Knossos.NET.Models
                         ttsVoiceName = tempSettings.ttsVoiceName;
                         deleteUploadedFiles = tempSettings.deleteUploadedFiles;
                         decompressor = tempSettings.decompressor;
+                        
+                        if (MainWindowViewModel.Instance != null)
+                            MainWindowViewModel.Instance.sharedSortType = tempSettings.sortType;
+
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");
                     }
@@ -754,6 +760,11 @@ namespace Knossos.NET.Models
             }
             try
             {
+                // Quickly update the sort type which is managed elsewhere
+                if (MainWindowViewModel.Instance != null){
+                    sortType = MainWindowViewModel.Instance.sharedSortType;
+                }
+
                 var options = new JsonSerializerOptions
                 {
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
