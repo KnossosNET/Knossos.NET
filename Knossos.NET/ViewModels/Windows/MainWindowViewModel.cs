@@ -40,6 +40,14 @@ namespace Knossos.NET.ViewModels
 
         internal string sharedSearch = string.Empty;
 
+        public enum SortType
+        {
+            name,
+            release,
+            update
+        }
+
+        internal SortType sharedSortType = SortType.name;
         internal int tabIndex = 0;
         internal int TabIndex
         {
@@ -53,10 +61,12 @@ namespace Knossos.NET.ViewModels
                     if (tabIndex == 0) //Exiting the Play tab.
                     {
                         sharedSearch = InstalledModsView.Search;
+                        sharedSortType = InstalledModsView.sortType;
                     }
                     if (tabIndex == 1) //Exiting the Nebula tab.
                     {
                         sharedSearch =  NebulaModsView.Search;
+                        sharedSortType = NebulaModsView.sortType;
                     }
 
                     // Things to do on tab entrance
@@ -64,10 +74,11 @@ namespace Knossos.NET.ViewModels
                     if (tabIndex == 0) //Play Tab
                     {
                         InstalledModsView.Search = sharedSearch;
+                        InstalledModsView.ChangeSort(sharedSortType);
                     }
                     if (tabIndex == 1) //Nebula Mods
                     {
-                        NebulaModsView.OpenTab(sharedSearch);
+                        NebulaModsView.OpenTab(sharedSearch, sharedSortType);
                     }
                     if (tabIndex == 4) //PXO
                     {

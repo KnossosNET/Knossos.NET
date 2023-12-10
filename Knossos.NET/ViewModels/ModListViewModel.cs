@@ -14,17 +14,10 @@ namespace Knossos.NET.ViewModels
     /// </summary>
     public partial class ModListViewModel : ViewModelBase
     {
-        enum SortType
-        {
-            name,
-            release,
-            update
-        }
-
         /// <summary>
         /// Current Sort Mode
         /// </summary>
-        private SortType sortType = SortType.name;
+        internal MainWindowViewModel.SortType sortType = MainWindowViewModel.SortType.name;
 
         internal string search = string.Empty;
         internal string Search
@@ -132,7 +125,14 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                SortType newSort = (SortType)Enum.Parse(typeof(SortType), (string)sort);
+                MainWindowViewModel.SortType newSort;
+
+                if (sort is MainWindowViewModel.SortType){
+                    newSort = (MainWindowViewModel.SortType)sort;
+                } else {
+                    newSort = (MainWindowViewModel.SortType)Enum.Parse(typeof(MainWindowViewModel.SortType), (string)sort);
+                }
+
                 if (newSort != sortType)
                 {
                     Dispatcher.UIThread.Invoke( () =>
@@ -167,9 +167,9 @@ namespace Knossos.NET.ViewModels
             {
                 switch (sortType)
                 {
-                    case SortType.name:
+                    case MainWindowViewModel.SortType.name:
                         return String.Compare(modA.title, modB.title);
-                    case SortType.release:
+                    case MainWindowViewModel.SortType.release:
                         if (modA.firstRelease == modB.firstRelease)
                             return 0;
                         if (modA.firstRelease != null && modB.firstRelease != null)
@@ -186,7 +186,7 @@ namespace Knossos.NET.ViewModels
                             else
                                 return 1;
                         }
-                    case SortType.update:
+                    case MainWindowViewModel.SortType.update:
                         if (modA.lastUpdate == modB.lastUpdate)
                             return 0;
                         if (modA.lastUpdate != null && modB.lastUpdate != null)
