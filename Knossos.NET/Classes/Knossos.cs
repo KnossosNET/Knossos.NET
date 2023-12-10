@@ -918,7 +918,7 @@ namespace Knossos.NET
             }
 
             /* Build the cmdline, take in consideration systemcmd, globalcmd, modcmd(with user changes if any) */
-            var modCmd = mod.GetModCmdLine()?.Split('-');
+            var modCmd = mod.GetModCmdLine()?.Split('-').ToList();
             var systemCmd = Knossos.globalSettings.GetSystemCMD(fsoBuild)?.Split('-');
             var globalCmd = Knossos.globalSettings.globalCmdLine?.Split('-');
 
@@ -926,10 +926,18 @@ namespace Knossos.NET
             {
                 if (!mod.modSettings.ignoreGlobalCmd)
                 {
+                    if (modCmd != null && modCmd.Any())
+                    {
+                        foreach(var flag in modCmd.ToList())
+                        {
+                            if(GlobalSettings.SystemFlags.Contains(flag.ToLower().Trim()))
+                                modCmd.Remove(flag);
+                        }
+                    }
                     cmdline = KnUtils.CmdLineBuilder(cmdline, systemCmd);
                     cmdline = KnUtils.CmdLineBuilder(cmdline, globalCmd);
                 }
-                cmdline = KnUtils.CmdLineBuilder(cmdline, modCmd);
+                cmdline = KnUtils.CmdLineBuilder(cmdline, modCmd?.ToArray());
             }
             else
             {
