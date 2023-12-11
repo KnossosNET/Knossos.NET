@@ -50,6 +50,8 @@ namespace Knossos.NET.ViewModels
         internal string installSize = string.Empty;
         [ObservableProperty]
         internal string freeSpace = string.Empty;
+        [ObservableProperty]
+        internal bool isMetaUpdate = false;
 
         internal Mod? selectedMod;
         internal Mod? SelectedMod
@@ -138,6 +140,7 @@ namespace Knossos.NET.ViewModels
         private async void UpdateSelectedVersion()
         {
             ModInstallList.Clear();
+            IsMetaUpdate = false;
             DataLoaded = false;
             Compress = false;
             List <Mod> allMods;
@@ -175,6 +178,7 @@ namespace Knossos.NET.ViewModels
                     SelectedMod.installed = true;
                     InstallInDevMode = installed.devMode;
                     CanSelectDevMode = false;
+                    IsMetaUpdate = Mod.IsMetaUpdate(SelectedMod,installed);
                 }
                 else
                 {

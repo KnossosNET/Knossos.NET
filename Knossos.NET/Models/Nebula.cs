@@ -234,7 +234,7 @@ namespace Knossos.NET.Models
                                 if (versionInNebula != null)
                                     versionInNebula.inNebula = true;
                                 var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
-                                if (newer != null && new SemanticVersion(newer.version) < new SemanticVersion(mod.version))
+                                if (newer != null && ( new SemanticVersion(newer.version) < new SemanticVersion(mod.version) || newer.version == mod.version && newer.lastUpdate != mod.lastUpdate))
                                 {
                                     Dispatcher.UIThread.Invoke(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id), DispatcherPriority.Background);
                                 }
@@ -407,7 +407,7 @@ namespace Knossos.NET.Models
                                 }
                             });
                             var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
-                            if (newer != null && new SemanticVersion(newer.version) < new SemanticVersion(m.version))
+                            if (newer != null && ( new SemanticVersion(newer.version) < new SemanticVersion(m.version) || newer.version == m.version && newer.lastUpdate != m.lastUpdate ))
                             {
                                 await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(m.id), DispatcherPriority.Background);
                             }
