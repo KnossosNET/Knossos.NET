@@ -45,7 +45,7 @@ namespace Knossos.NET.Models
     {
         /// <summary>
         /// Flags handled by globalsettings, any flag that is present in this array
-        /// will be ignored in mod cmdline if it exist.
+        /// will be ignored in mod cmdline if present.
         /// Must be in lowercase
         /// </summary>
         public static readonly string[] SystemFlags =
