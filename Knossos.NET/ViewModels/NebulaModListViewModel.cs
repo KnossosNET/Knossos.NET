@@ -45,24 +45,26 @@ namespace Knossos.NET.ViewModels
             get { return search; }
             set 
             {
-                this.SetProperty(ref search, value);
-                if (value.Trim() != string.Empty)
-                {
-                    foreach(var mod in Mods)
+                if (value != Search){
+                    this.SetProperty(ref search, value);
+                    if (value.Trim() != string.Empty)
                     {
-                        if( mod.Name != null && mod.Name.ToLower().Contains(value.ToLower()))
+                        foreach(var mod in Mods)
                         {
-                            mod.Visible = true;
-                        }
-                        else
-                        {
-                            mod.Visible = false;
+                            if( mod.Name != null && mod.Name.ToLower().Contains(value.ToLower()))
+                            {
+                                mod.Visible = true;
+                            }
+                            else
+                            {
+                                mod.Visible = false;
+                            }
                         }
                     }
-                }
-                else
-                {
-                    Mods.ForEach(m => m.Visible = true);
+                    else
+                    {
+                        Mods.ForEach(m => m.Visible = true);
+                    }
                 }
             }
         }
@@ -77,7 +79,7 @@ namespace Knossos.NET.ViewModels
         /// <summary>
         /// Open the tab and slowly display modcards to avoid ui lock
         /// </summary>
-        public async void OpenTab()
+        public async void OpenTab(string newSearch)
         {
             if (IsLoading)
             {
@@ -115,8 +117,8 @@ namespace Knossos.NET.ViewModels
                     Log.Add(Log.LogSeverity.Error, "NebulaModListViewModel.OpenTab", ex);
                 }
 
-
             }
+            Search = newSearch;
         }
 
         /// <summary>
@@ -208,7 +210,7 @@ namespace Knossos.NET.ViewModels
                 if (IsTabOpen)
                 {
                     IsTabOpen = false;
-                    OpenTab();
+                    OpenTab(search);
                 }
             });
         }
