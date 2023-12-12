@@ -60,7 +60,7 @@ namespace Knossos.NET.ViewModels
 
         internal void OpenFredTutorial()
         {
-            KnUtils.OpenBrowserURL(@"http://diaspora.fs2downloads.com/FREDDocs/index.html");
+            KnUtils.OpenBrowserURL(@"https://wiki.hard-light.net/index.php/FRED_tutorials");
         }
 
         internal void VisitScriptingRepo()

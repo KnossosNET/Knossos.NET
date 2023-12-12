@@ -43,6 +43,22 @@ namespace Knossos.NET.Models
     /// </summary>
     public class GlobalSettings
     {
+        /// <summary>
+        /// Flags handled by globalsettings, any flag that is present in this array
+        /// will be ignored in mod cmdline if present.
+        /// Must be in lowercase
+        /// </summary>
+        public static readonly string[] SystemFlags =
+        {
+            "enable_shadows", "shadow_quality", "aa",
+            "aa_preset", "fxaa", "fxaa_preset",
+            "smaa", "smaa_preset", "msaa",
+            "soft_particles", "no_deferred", "window",
+            "fullscreen_window", "no_vsync", "no_post_process",
+            "no_fps_capping", "fps", "nosound",
+            "nomusic"
+        };
+
         struct Resolution
         {
             public uint width { get; set; }

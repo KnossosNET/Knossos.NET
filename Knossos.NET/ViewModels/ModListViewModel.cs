@@ -32,24 +32,26 @@ namespace Knossos.NET.ViewModels
             get { return search; }
             set 
             {
-                this.SetProperty(ref search, value);
-                if (value.Trim() != string.Empty)
-                {
-                    foreach(var mod in Mods)
+                if (value != Search){
+                    this.SetProperty(ref search, value);
+                    if (value.Trim() != string.Empty)
                     {
-                        if( mod.Name != null && mod.Name.ToLower().Contains(value.ToLower()))
+                        foreach(var mod in Mods)
                         {
-                            mod.Visible = true;
-                        }
-                        else
-                        {
-                            mod.Visible = false;
+                            if( mod.Name != null && mod.Name.ToLower().Contains(value.ToLower()))
+                            {
+                                mod.Visible = true;
+                            }
+                            else
+                            {
+                                mod.Visible = false;
+                            }
                         }
                     }
-                }
-                else
-                {
-                    Mods.ForEach(m => m.Visible = true);
+                    else
+                    {
+                        Mods.ForEach(m => m.Visible = true);
+                    }
                 }
             }
         }

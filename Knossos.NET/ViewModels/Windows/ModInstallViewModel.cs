@@ -54,6 +54,9 @@ namespace Knossos.NET.ViewModels
         internal bool cleanupVisible = false;
         [ObservableProperty]
         internal bool cleanupEnabled = true;
+        [ObservableProperty]
+        internal bool isMetaUpdate = false;
+
 
         internal Mod? selectedMod;
         internal Mod? SelectedMod
@@ -142,6 +145,7 @@ namespace Knossos.NET.ViewModels
         private async void UpdateSelectedVersion()
         {
             ModInstallList.Clear();
+            IsMetaUpdate = false;
             DataLoaded = false;
             CleanupVisible = false;
             Compress = false;
@@ -180,6 +184,7 @@ namespace Knossos.NET.ViewModels
                     SelectedMod.installed = true;
                     InstallInDevMode = installed.devMode;
                     CanSelectDevMode = false;
+                    IsMetaUpdate = Mod.IsMetaUpdate(SelectedMod,installed);
                 }
                 else
                 {
