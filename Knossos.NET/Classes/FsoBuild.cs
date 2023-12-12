@@ -1066,7 +1066,7 @@ namespace Knossos.NET.Models
                 return 0;
             }
 
-            if (env == FsoExecEnvironment.Windows && !KnUtils.IsWindows || env == FsoExecEnvironment.Linux && !KnUtils.IsLinux || env == FsoExecEnvironment.MacOSX && !KnUtils.IsMacOS)
+            if ((env == FsoExecEnvironment.Windows && !KnUtils.IsWindows) || (env == FsoExecEnvironment.Linux && !KnUtils.IsLinux) || (env == FsoExecEnvironment.MacOSX && !KnUtils.IsMacOS))
             {
                 if (modpath != string.Empty)
                     Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " is not valid for this OS. Detected: " + env);
