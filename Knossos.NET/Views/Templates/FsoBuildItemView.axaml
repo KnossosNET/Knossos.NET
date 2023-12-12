@@ -29,7 +29,7 @@
 							<ScrollViewer MaxHeight="400" Width="300">
 								<StackPanel>
 									<ListBox ItemsSource="{Binding BuildPkgs}"></ListBox>
-									<Button Classes="Quaternary" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding ModifyBuild}">Modify</Button>
+									<Button Classes="Quaternary" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding ModifyBuild}">Apply</Button>
 								</StackPanel>
 							</ScrollViewer>
 						</Flyout>
