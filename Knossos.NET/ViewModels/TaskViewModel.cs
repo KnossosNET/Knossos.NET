@@ -182,7 +182,7 @@ namespace Knossos.NET.ViewModels
         /// <param name="sender"></param>
         /// <param name="modJson"></param>
         /// <returns>FsoBuild class of the installed build or null if failed or cancelled</returns>
-        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, Mod? modJson=null)
+        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, Mod? modJson=null, List<ModPackage>? modifyPkgs = null)
         {
             if(Knossos.GetKnossosLibraryPath() == null)
             {
@@ -198,7 +198,7 @@ namespace Knossos.NET.ViewModels
                 TaskList.Add(newTask);
                 taskQueue.Enqueue(newTask);
             });
-            return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson).ConfigureAwait(false);
+            return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson, modifyPkgs).ConfigureAwait(false);
         }
 
         /// <summary>

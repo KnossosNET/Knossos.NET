@@ -1,7 +1,12 @@
-﻿using Avalonia.Threading;
+﻿using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 
 namespace Knossos.NET.ViewModels
@@ -10,6 +15,7 @@ namespace Knossos.NET.ViewModels
     {
         public FsoBuild? build;
         public CancellationTokenSource? cancellationTokenSource = null;
+        private bool buildPkgsLoaded = false;
         [ObservableProperty]
         public string title = string.Empty;
         [ObservableProperty]
@@ -28,6 +34,8 @@ namespace Knossos.NET.ViewModels
         internal bool isDevMode = false;
         [ObservableProperty]
         internal bool isDetailsButtonVisible = true;
+        [ObservableProperty]
+        internal ObservableCollection<CheckBox> buildPkgs = new ObservableCollection<CheckBox>();
 
         public FsoBuildItemViewModel() 
         {
@@ -73,8 +81,10 @@ namespace Knossos.NET.ViewModels
                         IsValid = true;
                         switch (exe.arch)
                         {
-                            case FsoExecArch.x86: if (!CpuArch.Contains("X86")) CpuArch += "X86   "; break;
-                            case FsoExecArch.x64: if (!CpuArch.Contains("X64")) CpuArch += "X64   "; break;
+                            case FsoExecArch.x86: if (!CpuArch.Contains("X86")) CpuArch += "X86   ";
+                                                  if (!CpuArch.Contains("SSE2")) CpuArch += "SSE2   "; break;
+                            case FsoExecArch.x64: if (!CpuArch.Contains("X64")) CpuArch += "X64   ";
+                                                  if (!CpuArch.Contains("SSE2")) CpuArch += "SSE2   "; break;
                             case FsoExecArch.x86_avx2: if (!CpuArch.Contains("X86")) CpuArch += "X86   "; if (!CpuArch.Contains("AVX2 ")) CpuArch += "AVX2   "; break;
                             case FsoExecArch.x64_avx2: if (!CpuArch.Contains("X64")) CpuArch += "X64   "; if (!CpuArch.Contains("AVX2 ")) CpuArch += "AVX2   "; break;
                             case FsoExecArch.x86_avx: if (!CpuArch.Contains("X86")) CpuArch += "X86   "; if (!CpuArch.Contains("AVX ")) CpuArch += "AVX   "; break;
@@ -200,6 +210,7 @@ namespace Knossos.NET.ViewModels
                                             //Install completed
                                             IsInstalled = true;
                                             build = newBuild;
+                                            UpdateDisplayData(newBuild);
                                         }
                                         IsDownloading = false;
                                         cancellationTokenSource?.Dispose();
@@ -217,6 +228,120 @@ namespace Knossos.NET.ViewModels
                             await MessageBox.Show(MainWindow.instance, "There was an error while getting build data, check the logs.", "Get modjson failed", MessageBox.MessageBoxButtons.OK);
                         }
                     }
+                }
+            }
+        }
+
+        internal async void LoadPkgData()
+        {
+            if(!buildPkgsLoaded && IsInstalled && build != null && build.modData != null)
+            {
+                try
+                {
+                    build.modData.ReLoadJson();
+                    foreach (var pkg in build.modData.packages)
+                    {
+                        var ckb = new CheckBox();
+                        ckb.Content = pkg.name?.Replace("_","-");
+                        ckb.IsChecked = true;
+                        ckb.DataContext = pkg;
+                        BuildPkgs.Add(ckb);
+                    }
+
+                    var nebulaModData = await Nebula.GetModData(build.id, build.version);
+                    if (nebulaModData != null)
+                    {
+                        foreach (var nebulaPkg in nebulaModData.packages)
+                        {
+                            if (BuildPkgs.FirstOrDefault(b => (string)b.Content! == nebulaPkg.name) == null )
+                            {
+                                var ckb = new CheckBox();
+                                ckb.Content = nebulaPkg.name?.Replace("_", "-");
+                                ckb.IsChecked = false;
+                                ckb.DataContext = nebulaPkg;
+                                if(!FsoBuild.IsEnviromentStringValidInstall(nebulaPkg.environment))
+                                {
+                                    ckb.IsEnabled = false;
+                                }
+                                BuildPkgs.Add(ckb);
+                            }
+                        }
+                    }
+
+                    buildPkgsLoaded = true;
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "FsoBuildItemViewModel.LoadPkgData()", ex);
+                }
+            }
+        }
+
+        internal async void ModifyBuild()
+        {
+            if(BuildPkgs.Any() && IsInstalled && build != null && build.modData != null)
+            {
+                try
+                {
+                    //No pkgs enabled, delete
+                    if (BuildPkgs.FirstOrDefault(b => b.IsEnabled) == null)
+                    {
+                        DeleteBuildCommand();
+                        return;
+                    }
+
+                    List<ModPackage> pkgs = new List<ModPackage>();
+
+                    foreach (var ckb in BuildPkgs)
+                    {
+                        if (ckb.IsEnabled)
+                        {
+                            var pkg = ckb.DataContext as ModPackage;
+
+                            if (pkg != null && ckb.IsChecked.HasValue)
+                            {
+                                var installedPkg = build.modData.packages.FirstOrDefault(p => p.name == pkg.name && p.folder == pkg.folder);
+                                if (installedPkg != null)
+                                {
+                                    if (!ckb.IsChecked.Value)
+                                    {
+                                        //Installed and unselected
+                                        pkg.isSelected = false;
+                                        pkgs.Add(pkg);
+                                    }
+                                }
+                                else
+                                {
+                                    //Not installed and selected
+                                    if (ckb.IsChecked.Value)
+                                    {
+                                        pkg.isSelected = true;
+                                        pkgs.Add(pkg);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (pkgs.Any())
+                    {
+                        IsDownloading = true;
+                        cancellationTokenSource = new CancellationTokenSource();
+                        FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, build!.modData, pkgs)!;
+                        if (newBuild != null)
+                        {
+                            Knossos.RemoveBuild(build!);
+                            build = newBuild;
+                            UpdateDisplayData(newBuild);
+                            Knossos.AddBuild(newBuild);
+                        }
+                        IsDownloading = false;
+                        cancellationTokenSource?.Dispose();
+                        cancellationTokenSource = null;
+                    }
+                }catch(Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "FsoBuildItemViewModel.ModifyBuild()", ex);
                 }
             }
         }

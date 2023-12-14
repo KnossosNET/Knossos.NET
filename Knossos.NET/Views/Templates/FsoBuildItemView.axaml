@@ -21,8 +21,22 @@
 		<Label Grid.Column="4" Foreground="{StaticResource TertiaryColor}" IsVisible="{Binding !IsValid}" VerticalAlignment="Center" FontWeight="Bold">No valid or usable files were found in this build</Label>
 			
 		<WrapPanel IsEnabled="{Binding !IsDevMode}" IsVisible="{Binding !IsDownloading}" Grid.Column="5" HorizontalAlignment="Right">
-			<Button IsVisible="{Binding IsDetailsButtonVisible}" Classes="Secondary" Margin="0,0,10,0" Width="100" Command="{Binding ViewBuildDetails}">Details</Button>
-			<Button IsVisible="{Binding IsInstalled}" Width="100" Classes="Cancel" Command="{Binding DeleteBuildCommand}">Delete</Button>
+			<Button IsVisible="{Binding IsDetailsButtonVisible}" Classes="Settings" Margin="0,0,10,0" Width="100" Command="{Binding ViewBuildDetails}">Details</Button>
+			<WrapPanel IsVisible="{Binding IsInstalled}">
+				<Button IsVisible="{Binding !IsDevMode}" Width="100" Classes="Secondary" Margin="0,0,10,0" Command="{Binding LoadPkgData}" Content="Modify">
+					<Button.Flyout>
+						<Flyout Placement="Left">
+							<ScrollViewer MaxHeight="400" Width="300">
+								<StackPanel>
+									<ListBox ItemsSource="{Binding BuildPkgs}"></ListBox>
+									<Button Classes="Quaternary" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding ModifyBuild}">Apply</Button>
+								</StackPanel>
+							</ScrollViewer>
+						</Flyout>
+					</Button.Flyout>
+				</Button>
+				<Button Width="100" Classes="Cancel" Command="{Binding DeleteBuildCommand}">Delete</Button>
+			</WrapPanel>
 			<Button IsVisible="{Binding !IsInstalled}" Width="100" IsEnabled="{Binding IsValid}" Classes="Accept" Command="{Binding DownloadBuildCommand}">Download</Button>
 		</WrapPanel>
 			
