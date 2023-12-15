@@ -239,5 +239,26 @@ namespace Knossos.NET.ViewModels
                 Mods.Remove(modCard);
             }
         }
+
+        /// <summary>
+        /// Deletes a specific mod version from the UI modcard version list
+        /// IF this is the last version of a mod the modcard will be deleted instead
+        /// </summary>
+        /// <param name="mod"></param>
+        public void RemoveModVersion(Mod mod)
+        {
+            var modCard = Mods.FirstOrDefault(m => m.ID == mod.id);
+            if (modCard != null)
+            {
+                if(modCard.GetNumberOfModVersions() > 1)
+                {
+                    modCard.DeleteModVersion(mod);
+                }
+                else
+                {
+                    Mods.Remove(modCard);
+                }
+            }
+        }
     }
 }

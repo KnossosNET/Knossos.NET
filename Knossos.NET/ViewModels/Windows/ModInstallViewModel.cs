@@ -51,7 +51,12 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string freeSpace = string.Empty;
         [ObservableProperty]
+        internal bool cleanupVisible = false;
+        [ObservableProperty]
+        internal bool cleanupEnabled = true;
+        [ObservableProperty]
         internal bool isMetaUpdate = false;
+
 
         internal Mod? selectedMod;
         internal Mod? SelectedMod
@@ -142,6 +147,7 @@ namespace Knossos.NET.ViewModels
             ModInstallList.Clear();
             IsMetaUpdate = false;
             DataLoaded = false;
+            CleanupVisible = false;
             Compress = false;
             List <Mod> allMods;
             if(SelectedMod != null)
@@ -201,6 +207,10 @@ namespace Knossos.NET.ViewModels
                 Name = SelectedMod.title;
                 Version = SelectedMod.version;
                 await ProcessMod(SelectedMod,allMods);
+            }
+            if (!IsInstalled && SelectedMod != null && ModVersions.Count > 1 && ModVersions.IndexOf(SelectedMod) > 0)
+            {
+                CleanupVisible = true;
             }
             DataLoaded = true;
             allMods.Clear();
@@ -353,10 +363,16 @@ namespace Knossos.NET.ViewModels
         {
             foreach (var mod in ModInstallList)
             {
+                var cleanOldVersions = false;
                 if (mod == SelectedMod)
+                {
                     mod.devMode = InstallInDevMode;
+                    //Only for the mod we are installing, we need to check if the option is visible AND enabled
+                    if(CleanupVisible && CleanupEnabled)
+                        cleanOldVersions = true;
+                }
                 if (mod.isSelected)
-                    TaskViewModel.Instance!.InstallMod(mod, null, Compress);
+                    TaskViewModel.Instance!.InstallMod(mod, null, Compress, cleanOldVersions);
             }
             ModInstallList.Clear();
 
