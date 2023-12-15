@@ -48,13 +48,13 @@ namespace Knossos.NET.ViewModels
                         }
                         else
                         {
-                            Log.Add(Log.LogSeverity.Warning, "ModSettingsViewModel.Constructor()", "Missing user-saved build version for mod: " + editor.ActiveVersion.tile + " - " + editor.ActiveVersion.version + " requested build id: " + editor.ActiveVersion.modSettings.customBuildId + " and version: " + editor.ActiveVersion.modSettings.customBuildVersion);
+                            Log.Add(Log.LogSeverity.Warning, "DevModFsoSettingsViewModel.Constructor()", "Missing user-saved build version for mod: " + editor.ActiveVersion.tile + " - " + editor.ActiveVersion.version + " requested build id: " + editor.ActiveVersion.modSettings.customBuildId + " and version: " + editor.ActiveVersion.modSettings.customBuildVersion);
                             fsoPicker = new FsoBuildPickerViewModel(null);
                         }
                     }
                     else
                     {
-                        Log.Add(Log.LogSeverity.Warning, "ModSettingsViewModel.Constructor()", "Missing user-saved build id for mod: " + editor.ActiveVersion.tile + " - " + editor.ActiveVersion.version + " requested build id: " + editor.ActiveVersion.modSettings.customBuildId);
+                        Log.Add(Log.LogSeverity.Warning, "DevModFsoSettingsViewModel.Constructor()", "Missing user-saved build id for mod: " + editor.ActiveVersion.tile + " - " + editor.ActiveVersion.version + " requested build id: " + editor.ActiveVersion.modSettings.customBuildId);
                         fsoPicker = new FsoBuildPickerViewModel(null);
                     }
                 }
