@@ -18,7 +18,8 @@ namespace Knossos.NET.Models
         Fred2,
         Fred2Debug,
         QtFred,
-        QtFredDebug
+        QtFredDebug,
+        Flags
     }
 
     public enum FsoExecArch
@@ -241,7 +242,11 @@ namespace Knossos.NET.Models
         /// <returns>A FlagsJsonV1 structure or null if failed</returns>
         public FlagsJsonV1? GetFlagsV1()
         {
-            var fullpath = GetExec(FsoExecType.Release);
+            var fullpath = GetExec(FsoExecType.Flags);
+            if (fullpath == null)
+            {
+                fullpath = GetExec(FsoExecType.Release);
+            }
             if (fullpath == null)
             {
                 fullpath = GetExec(FsoExecType.Debug);
@@ -581,6 +586,8 @@ namespace Knossos.NET.Models
 
                 case "qtfred": return FsoExecType.QtFred;
 
+                case "flags": return FsoExecType.Flags;
+
                 default:
                     Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetExecType", "Unable to determine FSO Exec Type. Label: " + label);
                     return FsoExecType.Unknown;
@@ -602,6 +609,7 @@ namespace Knossos.NET.Models
                 case FsoExecType.Fred2Debug: return "fred2 debug";
                 case FsoExecType.QtFred: return "qtfred";
                 case FsoExecType.QtFredDebug: return "qtfred debug";
+                case FsoExecType.Flags: return "flags";
             }
             return null;
         }
