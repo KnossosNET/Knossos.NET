@@ -43,6 +43,14 @@ namespace Knossos.NET.ViewModels
 
         internal string sharedSearch = string.Empty;
 
+        public enum SortType
+        {
+            name,
+            release,
+            update
+        }
+
+        internal SortType sharedSortType = SortType.name;
         internal int tabIndex = 0;
         internal int TabIndex
         {
@@ -56,10 +64,23 @@ namespace Knossos.NET.ViewModels
                     if (tabIndex == 0) //Exiting the Play tab.
                     {
                         sharedSearch = InstalledModsView.Search;
+
+                        // Change and save to the new sort type.
+                        if (sharedSortType != InstalledModsView.sortType)
+                        {
+                            sharedSortType = InstalledModsView.sortType;
+                            Knossos.globalSettings.Save(false);
+                        }
                     }
                     if (tabIndex == 1) //Exiting the Nebula tab.
                     {
-                        sharedSearch =  NebulaModsView.Search;
+                        sharedSearch = NebulaModsView.Search;
+
+                        if (sharedSortType != NebulaModsView.sortType)
+                        {
+                            sharedSortType = NebulaModsView.sortType;
+                            Knossos.globalSettings.Save(false);
+                        }
                     }
 
                     // Things to do on tab entrance
@@ -67,10 +88,11 @@ namespace Knossos.NET.ViewModels
                     if (tabIndex == 0) //Play Tab
                     {
                         InstalledModsView.Search = sharedSearch;
+                        InstalledModsView.ChangeSort(sharedSortType);
                     }
                     if (tabIndex == 1) //Nebula Mods
                     {
-                        NebulaModsView.OpenTab(sharedSearch);
+                        NebulaModsView.OpenTab(sharedSearch, sharedSortType);
                     }
                     if (tabIndex == 4) // Community Tab
                     {
@@ -367,6 +389,14 @@ namespace Knossos.NET.ViewModels
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.UploadKnossosConsole", ex);
+            }
+        }
+
+        internal void applySettingsToList()
+        {
+            if (InstalledModsView != null)
+            {
+                InstalledModsView.ChangeSort(sharedSortType);
             }
         }
     }
