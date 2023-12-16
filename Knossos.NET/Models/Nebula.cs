@@ -457,6 +457,7 @@ namespace Knossos.NET.Models
                 MainWindowViewModel.Instance!.AddMostRecent((installed == null) ? newestStableVersion! : "", false);
                 installed = Knossos.GetInstalledBuild("FSO", newestNightlyVersion);
                 MainWindowViewModel.Instance!.AddMostRecent((installed == null) ? newestNightlyVersion! : "", true);
+                MainWindowViewModel.Instance!.DeveloperModView?.UpdateBuildInstallButtons();
 
                 await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.BulkLoadNebulaBuilds(builds), DispatcherPriority.Background);
 
