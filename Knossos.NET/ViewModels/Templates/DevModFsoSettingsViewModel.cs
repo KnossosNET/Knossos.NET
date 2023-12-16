@@ -145,6 +145,7 @@ namespace Knossos.NET.ViewModels
                 }
                 editor.ActiveVersion.cmdline = CmdLine;
                 editor.ActiveVersion.modSettings.Save();
+                editor.ActiveVersion.SaveJson();
             }
         }
     }
