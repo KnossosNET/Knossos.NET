@@ -27,14 +27,14 @@
 			<!--Buttons and Mod info-->
 			<Grid IsVisible="{Binding IsInstalled}" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto" HorizontalAlignment="Center" Margin="0,10,0,0">
 				<WrapPanel Grid.Row="0" Grid.Column="0">
-					<Button Command="{Binding ButtonCommandPlay}" Content="Play" Grid.Column="0" Classes="Accept Rounded" Margin="5" Width="100" ></Button>
-					<Button Command="{Binding ButtonCommandFred2}" Content="Fred2" Grid.Column="0" Classes="Secondary Rounded" Margin="5" Width="100" ></Button>
-					<Button Command="{Binding ButtonCommandSettings}" Content="Settings" Classes="Quaternary Rounded" Margin="5" Width="100" ></Button>
+					<Button Command="{Binding ButtonCommandPlay}" IsVisible="{Binding !Build}" IsEnabled="{Binding !Build}" Content="Play" Grid.Column="0" Classes="Accept Rounded" Margin="5" Width="100" ></Button>
+					<Button Command="{Binding ButtonCommandFred2}" IsVisible="{Binding !Build}" IsEnabled="{Binding !Build}" Content="Fred2" Grid.Column="0" Classes="Secondary Rounded" Margin="5" Width="100" ></Button>
+					<Button Command="{Binding ButtonCommandSettings}" IsVisible="{Binding !Build}" IsEnabled="{Binding !Build}" Content="Settings" Classes="Quaternary Rounded" Margin="5" Width="100" ></Button>
 					<Button IsVisible="{Binding !IsLocalMod}" Command="{Binding ButtonCommandReport}" Content="Report" Classes="Settings Rounded" Margin="5" Width="100" ></Button>
 				</WrapPanel>
 				<WrapPanel Grid.Row="1" Grid.Column="0">
-					<Button Command="{Binding ButtonCommandPlayDebug}" Content="Debug" Grid.Column="0" Classes="Tertiary Rounded" Margin="5" Width="100" ></Button>
-					<Button Command="{Binding ButtonCommandQtFred}" Content="QtFred" Grid.Column="0" Margin="5" Width="100" Classes="Settings Rounded"></Button>
+					<Button Command="{Binding ButtonCommandPlayDebug}" IsVisible="{Binding !Build}" IsEnabled="{Binding !Build}" Content="Debug" Grid.Column="0" Classes="Tertiary Rounded" Margin="5" Width="100" ></Button>
+					<Button Command="{Binding ButtonCommandQtFred}" IsVisible="{Binding !Build}" IsEnabled="{Binding !Build}" Content="QtFred" Grid.Column="0" Margin="5" Width="100" Classes="Settings Rounded"></Button>
 					<Button Command="{Binding ButtonCommandForum}" Content="Forum" IsVisible="{Binding ForumAvalible}" Classes="Settings Rounded" Margin="5" Width="100" ></Button>
 					<Button IsVisible="{Binding !devMode}" Command="{Binding ButtonCommandDelete}" Content="Delete" Classes="Cancel Rounded" Margin="5" Width="100" ></Button>
 				</WrapPanel>

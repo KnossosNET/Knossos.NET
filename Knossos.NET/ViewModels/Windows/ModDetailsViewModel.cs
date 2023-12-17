@@ -57,6 +57,8 @@ namespace Knossos.NET.ViewModels
         private ModCardViewModel? modCard = null;
         internal bool devMode { get; set; } = false;
         [ObservableProperty]
+        internal bool build = false;
+        [ObservableProperty]
         internal string owners = string.Empty;
         /* UI Variables */
         [ObservableProperty]
@@ -124,6 +126,10 @@ namespace Knossos.NET.ViewModels
             VersionItems.Add(item);
             LoadVersion(0);
             devMode = modJson.devMode;
+            
+            if (modVersions.Any() && modVersions[0].type == ModType.engine)
+                Build = true;
+
             if (Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts)
             {
                 //PlayDescription(200);
@@ -153,6 +159,9 @@ namespace Knossos.NET.ViewModels
 
             if (modVersions.Count == 1)
                 LoadVersion(0);
+
+            if (modVersions.Any() && modVersions[0].type == ModType.engine)
+                Build = true;
 
             if(Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts) 
             {
