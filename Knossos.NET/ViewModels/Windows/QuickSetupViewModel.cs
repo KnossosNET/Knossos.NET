@@ -27,6 +27,11 @@ namespace Knossos.NET.ViewModels
         internal string? libraryPath = null;
 
         [ObservableProperty]
+        public string latestBuild = string.Empty;
+        [ObservableProperty]
+        internal bool buildAvailable = false;
+
+        [ObservableProperty]
         internal bool page1 = true;
         [ObservableProperty]
         internal bool page2 = false;
@@ -41,6 +46,8 @@ namespace Knossos.NET.ViewModels
 
         private Window? dialog;
 
+        public static QuickSetupViewModel? Instance;
+
         public QuickSetupViewModel() 
         { 
         }
@@ -48,6 +55,8 @@ namespace Knossos.NET.ViewModels
         public QuickSetupViewModel(Window dialog) 
         {
             this.dialog = dialog;
+            Instance = this;
+            UpdateBuildName(MainWindowViewModel.Instance!.LatestStable);
             TrackRepoStatus();
         }
 
@@ -157,5 +166,50 @@ namespace Knossos.NET.ViewModels
                 case 6: CanGoBack = true; CanContinue = false; Page5 = false; Page6 = true; LastPage = true; break;
             }
         }
+
+        public void UpdateBuildName(string stableIn){
+            LatestBuild = stableIn;
+            UpdateBuildInstallButton();
+        }
+
+        public void UpdateBuildInstallButton()
+        {
+            if (LatestBuild == "")
+            {
+                BuildAvailable = false;
+            }
+            else 
+            {
+                var installed = Knossos.GetInstalledBuild("FSO", LatestBuild);
+                if (installed != null)
+                {
+                    LatestBuild = "";
+                    BuildAvailable = false;
+                } 
+                else 
+                {
+                    BuildAvailable = true;
+                }
+            } 
+        }
+
+        public void DownloadLatestStable()
+        {
+            if (LatestBuild != ""){
+                var stable = new Mod();
+                stable.id = "FSO";
+                stable.version = LatestBuild;
+                stable.type = ModType.engine;
+                stable.stability = "stable";
+
+                MainWindowViewModel.Instance!.FsoBuildsView!.RelayInstallBuild(stable);
+
+                var installed = Knossos.GetInstalledBuild("FSO", LatestBuild);
+                if (installed != null){
+                    LatestBuild = "";
+                    UpdateBuildInstallButton();
+                }
+            }
+        }    
     }
 }

@@ -43,6 +43,9 @@ namespace Knossos.NET.ViewModels
 
         internal string sharedSearch = string.Empty;
 
+        public string LatestNightly = string.Empty;
+        public string LatestStable = string.Empty;
+
         public enum SortType
         {
             name,
@@ -192,9 +195,9 @@ namespace Knossos.NET.ViewModels
         public void AddMostRecent(string buildId, bool nightly)
         {
             if (nightly){
-                DeveloperModView.LatestNightly = buildId;
+                LatestNightly = buildId;
             } else {
-                DeveloperModView.LatestStable = buildId;
+                LatestStable = buildId;
             }
         }
 
@@ -416,6 +419,11 @@ namespace Knossos.NET.ViewModels
             {
                 InstalledModsView.ChangeSort(sharedSortType);
             }
+        }
+
+        public void UpdateBuildInstallButtons(){
+            DeveloperModView?.UpdateBuildNames(LatestStable, LatestNightly);
+            QuickSetupViewModel.Instance?.UpdateBuildName(LatestStable);
         }
     }
 }

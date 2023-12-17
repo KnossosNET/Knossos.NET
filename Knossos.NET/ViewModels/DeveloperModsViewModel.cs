@@ -196,8 +196,14 @@ namespace Knossos.NET.ViewModels
             await dialog.ShowDialog<DevModCreateNewView?>(MainWindow.instance!);
         }
 
-        public void UpdateBuildInstallButtons()
+        public void UpdateBuildNames(string stableIn, string nightlyIn)
         {
+            LatestStable = stableIn;
+            LatestNightly = nightlyIn;
+            UpdateBuildInstallButtons();
+        }
+
+        public void UpdateBuildInstallButtons(){
             if (LatestStable == "")
             {
                 StableInstalled = true;
