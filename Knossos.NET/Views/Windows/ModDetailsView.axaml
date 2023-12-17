@@ -39,7 +39,8 @@
 					<Button IsVisible="{Binding !devMode}" Command="{Binding ButtonCommandDelete}" Content="Delete" Classes="Cancel Rounded" Margin="5" Width="100" ></Button>
 				</WrapPanel>
 				<Label Content="Version" Grid.Column="3" Margin="20,0,20,0" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
-				<ComboBox SelectedIndex="{Binding ItemSelectedIndex}" IsEnabled="{Binding !Build}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="20,5,20,0" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
+				<ComboBox IsEnabled="{Binding !Build}" IsVisible="{Binding !Build}" SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="20,5,20,0" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
+				<Label IsVisible="{Binding Build}"  Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White" Content="{Binding BuildVersion}"/>
 				<Label Content="Released" Grid.Column="4" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding Released}" Grid.Column="4" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="Last Updated" Grid.Column="5" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>

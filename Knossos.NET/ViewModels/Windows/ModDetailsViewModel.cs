@@ -59,6 +59,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool build = false;
         [ObservableProperty]
+        internal string buildVersion = string.Empty;
+        [ObservableProperty]
         internal string owners = string.Empty;
         /* UI Variables */
         [ObservableProperty]
@@ -128,7 +130,10 @@ namespace Knossos.NET.ViewModels
             devMode = modJson.devMode;
             
             if (modVersions.Any() && modVersions[0].type == ModType.engine)
+            {
                 Build = true;
+                BuildVersion = modVersions[0].version;
+            }
 
             if (Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts)
             {
@@ -161,7 +166,10 @@ namespace Knossos.NET.ViewModels
                 LoadVersion(0);
 
             if (modVersions.Any() && modVersions[0].type == ModType.engine)
+            {
                 Build = true;
+                BuildVersion = modVersions[0].version;
+            }
 
             if(Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts) 
             {
