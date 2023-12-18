@@ -45,7 +45,7 @@
 		
 		<!--Page3-->
 		<StackPanel IsVisible="{Binding Page3}" Grid.Row="0" >
-			<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left">Download a FSO engine build</TextBlock>
+			<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left">Download an FSO engine build</TextBlock>
 			<TextBlock IsVisible="{Binding !RepoDownloaded}" Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">Wait for repo_minimal.json to finish downloading before you continue...</TextBlock>
 			<StackPanel IsVisible="{Binding RepoDownloaded}">
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Now you need a game engine build, which are known as "FSO Builds". These builds are what mods run on, and Knossos also uses it to get and display system data. This is why you are not going to be able to set most of the settings in the "Settings" tab before having downloaded a FSO build. </TextBlock>
