@@ -122,14 +122,19 @@ namespace Knossos.NET.ViewModels
             Instance = this;
             string[] args = Environment.GetCommandLineArgs();
             bool isQuickLaunch = false;
+            bool forceUpdate = false;
             foreach (var arg in args)
             {
                 if (arg.ToLower() == "-playmod")
                 {
                     isQuickLaunch = true;
                 }
+                if (arg.ToLower() == "-forceupdate")
+                {
+                    forceUpdate = true;
+                }
             }
-            Knossos.StartUp(isQuickLaunch);
+            Knossos.StartUp(isQuickLaunch, forceUpdate);
         }
 
         /* External Commands */
