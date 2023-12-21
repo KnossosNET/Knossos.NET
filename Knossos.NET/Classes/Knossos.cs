@@ -297,65 +297,64 @@ namespace Knossos.NET
                                 var download = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance!.AddFileDownloadTask(releaseAsset.browser_download_url, KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension, "Downloading "+latest.tag_name+" "+releaseAsset.name, true, "This is a Knossos.NET update"), DispatcherPriority.Background).ConfigureAwait(false);
                                 if (download != null && download == true)
                                 {
-                                    //Rename files in app folder
                                     var appDirPath = System.AppDomain.CurrentDomain.BaseDirectory;
                                     var execFullPath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
-                                    if (KnUtils.IsAppImage)
-                                    {
-                                        // change exec name to be the AppImage itself (is full path!)
-                                        execFullPath = KnUtils.AppImagePath;
-                                    }
-
-                                    //Important! Clear any potential conflicting .old files!
-                                    CleanUpdateFiles();
 
                                     //Decompress new files
                                     try
                                     {
                                         // no extraction needed for AppImage, just move exec over and restart
                                         // NOTE: exeName is already the full path to the AppImage
-                                        // NOTE2: AppImage will keep using the old update method as it seems unaffected
                                         if (KnUtils.IsAppImage)
                                         {
-                                            //Move Current Executables
-                                            if (forceUpdateDownload)
-                                                Console.WriteLine("Renaming current executable files");
-                                            File.Move(execFullPath!, execFullPath + ".old", true);
+                                            // change exec name to be the AppImage itself (is full path!)
+                                            execFullPath = KnUtils.AppImagePath;
 
                                             var appFolder = KnUtils.KnetFolderPath;
                                             if (appFolder == null)
                                             {
                                                 throw new ArgumentNullException(nameof(appFolder));
                                             }
-                                            var newFileFullPath = Path.Combine(appFolder, Path.GetFileName(releaseAsset.browser_download_url));
-                                            File.Move(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension, newFileFullPath);
 
-                                            //Start again
-                                            try
+                                            //Update Script
+                                            if (forceUpdateDownload)
+                                                Console.WriteLine("Exporting update script to " + KnUtils.GetKnossosDataFolderPath());
+
+                                            Process process = new Process();
+                                            process.StartInfo.WorkingDirectory = KnUtils.GetKnossosDataFolderPath();
+                                            process.StartInfo.EnvironmentVariables["update_file"] = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension;
+                                            process.StartInfo.EnvironmentVariables["app_path"] = appDirPath;
+                                            process.StartInfo.EnvironmentVariables["app_name"] = Path.GetFileName(execFullPath);
+
+                                            var scriptPath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update_linux_appimage.sh");
+                                            using (var fileStream = File.Create(scriptPath))
                                             {
-                                                KnUtils.Chmod(newFileFullPath, "+x");
-                                                if (forceUpdateDownload)
-                                                    Console.WriteLine("Launching new version");
-                                                Process p = new Process();
-                                                p.StartInfo.FileName = newFileFullPath;
-                                                p.Start();
-
-                                                if (forceUpdateDownload)
-                                                    Console.WriteLine("Closing...");
-
-                                                //Close App
-                                                Dispatcher.UIThread.Invoke(() =>
-                                                {
-                                                    MainWindow.instance!.Close();
-                                                });
+                                                AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/scripts/update_linux_appimage.sh")).CopyTo(fileStream);
+                                                fileStream.Close();
                                             }
-                                            catch (Exception ex)
+
+                                            KnUtils.Chmod(scriptPath);
+                                            process.StartInfo.FileName = scriptPath;
+                                            process.StartInfo.Arguments = "> update.log";
+
+                                            if (forceUpdateDownload)
+                                                Console.WriteLine("Starting update script");
+
+                                            process.StartInfo.CreateNoWindow = true;
+                                            process.Start();
+
+                                            if (forceUpdateDownload)
+                                                Console.WriteLine("Closing...");
+
+                                            //Close App
+                                            Dispatcher.UIThread.Invoke(() =>
                                             {
-                                                Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
-                                            }
+                                                MainWindow.instance!.Close();
+                                            });
                                         }
                                         else
                                         {
+                                            //Regular Portable Format
                                             if (forceUpdateDownload)
                                                 Console.WriteLine("Decompressing update...");
 
@@ -391,52 +390,48 @@ namespace Knossos.NET
                                                 Console.WriteLine("Exporting update script to " + KnUtils.GetKnossosDataFolderPath());
 
                                             Process process = new Process();
+                                            process.StartInfo.WorkingDirectory = KnUtils.GetKnossosDataFolderPath();
+                                            process.StartInfo.EnvironmentVariables["update_folder"] = updateFilesFolder;
+                                            process.StartInfo.EnvironmentVariables["app_path"] = appDirPath;
+                                            process.StartInfo.EnvironmentVariables["app_name"] = Path.GetFileName(execFullPath);
 
                                             if (KnUtils.IsWindows)
                                             {
-                                                string windowsScript = @"                                                    
-                                                @echo off
-                                                echo Received: 
-                                                echo Update Files Path: ""%update_folder%""
-                                                echo Knet Path: ""%app_path%""
-                                                echo Knet Exec Name: ""%app_name%""
-                                                echo Waiting for Knet to close
-                                                set /a time=0
-                                                :retry
-                                                timeout /t 1
-                                                set /a time=time+1
-                                                IF %time%==30 goto cancel
-                                                2>nul (
-                                                    >>""%app_path%\%app_name%"" (call )
-                                                ) && (echo Ready) || (goto retry)
-                                                echo Copy Update Files
-                                                xcopy /s /y ""%update_folder%"" ""%app_path%""
-                                                echo Launching Knet
-                                                echo ""%app_path%\%app_name%""
-                                                start """" ""%app_path%\%app_name%""
-                                                echo Cleanup
-                                                echo Deleting: ""%update_folder%""
-                                                rmdir /s /q ""%update_folder%""
-                                                exit 0
-                                                :cancel
-                                                echo Time limit reached, canceling...
-                                                exit 1";
-                                                File.WriteAllText(Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update_script.cmd"), windowsScript);
-                                                process.StartInfo.FileName = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update_script.cmd");
+                                                var scriptPath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update_windows.cmd");
+                                                using (var fileStream = File.Create(scriptPath))
+                                                {
+                                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/scripts/update_windows.cmd")).CopyTo(fileStream);
+                                                    fileStream.Close();
+                                                }
+                                                process.StartInfo.FileName = scriptPath;
                                                 process.StartInfo.Arguments = "> update.log"; //Create logfile to catch script output in Knossos data folder path
-                                                process.StartInfo.WorkingDirectory = KnUtils.GetKnossosDataFolderPath();
-                                                process.StartInfo.EnvironmentVariables["update_folder"] = updateFilesFolder;
-                                                process.StartInfo.EnvironmentVariables["app_path"] = appDirPath;
-                                                process.StartInfo.EnvironmentVariables["app_name"] = Path.GetFileName(execFullPath);
                                             }
 
                                             if (KnUtils.IsLinux)
                                             {
+                                                var scriptPath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update_linux.sh");
+                                                using (var fileStream = File.Create(scriptPath))
+                                                {
+                                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/scripts/update_linux.sh")).CopyTo(fileStream);
+                                                    fileStream.Close();
+                                                }
+                                                KnUtils.Chmod(scriptPath);
+                                                process.StartInfo.FileName = scriptPath;
+                                                process.StartInfo.Arguments = "> update.log"; //Create logfile to catch script output in Knossos data folder path
                                             }
 
 
                                             if (KnUtils.IsMacOS)
                                             {
+                                                var scriptPath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update_mac.sh");
+                                                using (var fileStream = File.Create(scriptPath))
+                                                {
+                                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/scripts/update_mac.sh")).CopyTo(fileStream);
+                                                    fileStream.Close();
+                                                }
+                                                KnUtils.Chmod(scriptPath);
+                                                process.StartInfo.FileName = scriptPath;
+                                                process.StartInfo.Arguments = "> update.log"; //Create logfile to catch script output in Knossos data folder path
                                             }
 
                                             if (forceUpdateDownload)
@@ -444,8 +439,6 @@ namespace Knossos.NET
 
                                             process.StartInfo.CreateNoWindow = true;
                                             process.Start();
-
-                                            await Task.Delay(1000).ConfigureAwait(false);
                                             
                                             if (forceUpdateDownload)
                                                 Console.WriteLine("Closing...");
