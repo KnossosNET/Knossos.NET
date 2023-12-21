@@ -84,10 +84,6 @@ namespace Knossos.NET
                 if (globalSettings.checkUpdate && !isQuickLaunch)
                 {
                     await CheckKnetUpdates().ConfigureAwait(false);
-                    //Fire and forget
-                    _ = Task.Factory.StartNew(() => {
-                        CleanUpdateFiles();
-                    });
                 }
 
                 //Load base path from knossos legacy
@@ -193,31 +189,6 @@ namespace Knossos.NET
             }
             await Task.Delay(2000);
             MainWindow.instance!.Close();
-        }
-
-
-        /// <summary>
-        /// Deletes .old files in the executable folder
-        /// </summary>
-        private static async void CleanUpdateFiles()
-        {
-            try
-            {
-                await Task.Delay(2000);
-                var appDirPath = KnUtils.KnetFolderPath;
-                if(appDirPath != null)
-                {
-                    var oldFiles = System.IO.Directory.GetFiles(appDirPath, "*.old");
-                    foreach (string f in oldFiles)
-                    {
-                        File.Delete(f);
-                    }
-                }
-            }
-            catch (Exception ex) 
-            {
-                Log.Add(Log.LogSeverity.Error, "Knossos.CleanUpdateFiles()", ex);
-            }
         }
 
         /// <summary>
