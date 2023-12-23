@@ -425,8 +425,22 @@ namespace Knossos.NET.Models
                 //Engine Builds
                 var builds = allModsInRepo.Where(m => m.type == ModType.engine).ToList();
 
+                var newestNightly = string.Empty;
+                var newestNightlyVersion = string.Empty;
+                var newestStableVersion = string.Empty;
+                
+
                 foreach (var build in builds.ToList())
                 {
+                    // Check if this is the most recent build, so we can store it in the main window model.
+                    if (build.id == "FSO" && build.stability == "stable" && (string.IsNullOrEmpty(newestStableVersion) || SemanticVersion.Compare(build.version, newestStableVersion) > 0)){
+                        newestStableVersion = build.version;
+
+                    } else if (build.stability == "nightly" && (string.IsNullOrEmpty(newestNightly) || string.Compare(newestNightly, build.lastUpdate) < 0)){
+                        newestNightly = build.lastUpdate;
+                        newestNightlyVersion = build.version;
+                    }
+
                     //This is already installed? Remove it!
                     //Also mark it as in inNebula
                     var isInstalled = Knossos.GetInstalledBuildsList(build.id)?.FirstOrDefault(b => b.version == build.version);
@@ -437,6 +451,13 @@ namespace Knossos.NET.Models
                             isInstalled.modData.inNebula = true;
                     }
                 }
+
+                // If the latest of either of these is not installed, signal the main window
+                var installed = Knossos.GetInstalledBuild("FSO", newestStableVersion);
+                MainWindowViewModel.Instance!.AddMostRecent((installed == null) ? newestStableVersion! : "", false);
+                installed = Knossos.GetInstalledBuild("FSO", newestNightlyVersion);
+                MainWindowViewModel.Instance!.AddMostRecent((installed == null) ? newestNightlyVersion! : "", true);
+                MainWindowViewModel.Instance!.UpdateBuildInstallButtons();
 
                 await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.BulkLoadNebulaBuilds(builds), DispatcherPriority.Background);
 

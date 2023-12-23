@@ -43,6 +43,9 @@ namespace Knossos.NET.ViewModels
 
         internal string sharedSearch = string.Empty;
 
+        public string LatestNightly = string.Empty;
+        public string LatestStable = string.Empty;
+
         public enum SortType
         {
             name,
@@ -94,7 +97,11 @@ namespace Knossos.NET.ViewModels
                     {
                         NebulaModsView.OpenTab(sharedSearch, sharedSortType);
                     }
-                    if (tabIndex == 4) // Community Tab
+                    if (tabIndex == 3) //Dev Tab
+                    {
+                        DeveloperModView.UpdateBuildInstallButtons();
+                    }
+                    if (tabIndex == 4) //Community Tab
                     {
                         Task.Run(async()=>{await CommunityView.LoadFAQRepo();});                     
                     }
@@ -183,6 +190,20 @@ namespace Knossos.NET.ViewModels
         public void AddInstalledMod(Mod modJson)
         {
             InstalledModsView.AddMod(modJson);
+        }
+
+        /// <summary>
+        /// Check to see if the build provided is the most recent nightly
+        /// </summary>
+        /// <param name="buildId"></param>
+        /// <param name="nightly"></param> 
+        public void AddMostRecent(string buildId, bool nightly)
+        {
+            if (nightly){
+                LatestNightly = buildId;
+            } else {
+                LatestStable = buildId;
+            }
         }
 
         /// <summary>
@@ -403,6 +424,11 @@ namespace Knossos.NET.ViewModels
             {
                 InstalledModsView.ChangeSort(sharedSortType);
             }
+        }
+
+        public void UpdateBuildInstallButtons(){
+            DeveloperModView?.UpdateBuildNames(LatestStable, LatestNightly);
+            QuickSetupViewModel.Instance?.UpdateBuildName(LatestStable);
         }
     }
 }

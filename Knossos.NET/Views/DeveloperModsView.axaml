@@ -16,7 +16,7 @@
 	  <TabItem Header="Mods">
 				<SplitView Margin="0,0,0,5" IsPaneOpen="True" DisplayMode="Inline" OpenPaneLength="350">
 					<SplitView.Pane>
-						<Grid RowDefinitions="*,Auto">
+						<Grid RowDefinitions="*,Auto,Auto,Auto">
 							<ListBox Grid.Row="0" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}">
 								<ListBox.ItemTemplate>
 									<DataTemplate>
@@ -30,6 +30,9 @@
 								</ListBox.ItemTemplate>
 							</ListBox>
 							<Button Command="{Binding CreateMod}" Grid.Row="1" Margin="0,20,0,10" HorizontalAlignment="Center">Create New Mod</Button>
+							<Button Command="{Binding InstallLatestStable}" Grid.Row="2" Margin="0,0,0,10" HorizontalAlignment="Center" IsEnabled="{Binding !StableInstalled}" IsVisible="{Binding !StableInstalled}" >Get Latest Stable Build</Button>
+							<Button Command="{Binding InstallLatestNightly}" Grid.Row="3" Margin="0,0,0,10" HorizontalAlignment="Center" IsEnabled="{Binding !NightlyInstalled}" IsVisible="{Binding !NightlyInstalled}" >Get Latest Nightly Build</Button>
+							
 						</Grid>
 					</SplitView.Pane>
 

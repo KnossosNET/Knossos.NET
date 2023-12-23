@@ -2,6 +2,7 @@
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using Knossos.NET.ViewModels;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -22,6 +23,15 @@ namespace Knossos.NET.ViewModels
         internal NebulaLoginViewModel nebulaLoginVM = new NebulaLoginViewModel();
         [ObservableProperty]
         internal DevToolManagerViewModel devToolManager = new DevToolManagerViewModel();
+        [ObservableProperty]
+        public string latestStable = string.Empty;
+        [ObservableProperty]
+        public string latestNightly = string.Empty;
+
+        [ObservableProperty]
+        public bool nightlyInstalled = false;
+        [ObservableProperty]
+        public bool stableInstalled = false;
 
         internal int tabIndex = 0;
         internal int TabIndex
@@ -184,6 +194,76 @@ namespace Knossos.NET.ViewModels
             var dialog = new DevModCreateNewView();
             dialog.DataContext = new DevModCreateNewViewModel(dialog);
             await dialog.ShowDialog<DevModCreateNewView?>(MainWindow.instance!);
+        }
+
+        public void UpdateBuildNames(string stableIn, string nightlyIn)
+        {
+            LatestStable = stableIn;
+            LatestNightly = nightlyIn;
+            UpdateBuildInstallButtons();
+        }
+
+        public void UpdateBuildInstallButtons(){
+            if (LatestStable == "")
+            {
+                StableInstalled = true;
+            }
+            else 
+            {
+                var installed = Knossos.GetInstalledBuild("FSO", LatestStable);
+                StableInstalled = (installed != null);
+                if (StableInstalled)
+                    LatestStable = "";
+            }
+            if (LatestNightly == "")
+            {
+                NightlyInstalled = true;
+            }
+            else 
+            {
+                var installed = Knossos.GetInstalledBuild("FSO", LatestNightly);
+                NightlyInstalled = (installed != null);
+                if (NightlyInstalled)
+                    LatestNightly = "";
+            }
+        }
+
+        public void InstallLatestNightly()
+        {
+            if (LatestNightly != ""){
+                var nightly = new Mod();
+                nightly.id = "FSO";
+                nightly.version = LatestNightly;
+                nightly.type = ModType.engine;
+                nightly.stability = "nightly";
+
+                MainWindowViewModel.Instance!.FsoBuildsView!.RelayInstallBuild(nightly);
+
+                var installed = Knossos.GetInstalledBuild("FSO", LatestNightly);
+                if (installed != null){
+                    LatestNightly = "";
+                    UpdateBuildInstallButtons();
+                }
+            }
+        }
+
+        public void InstallLatestStable()
+        {
+            if (LatestStable != ""){
+                var stable = new Mod();
+                stable.id = "FSO";
+                stable.version = LatestStable;
+                stable.type = ModType.engine;
+                stable.stability = "stable";
+
+                MainWindowViewModel.Instance!.FsoBuildsView!.RelayInstallBuild(stable);
+
+                var installed = Knossos.GetInstalledBuild("FSO", LatestStable);
+                if (installed != null){
+                    LatestStable = "";
+                    UpdateBuildInstallButtons();
+                }
+            }
         }
     }
 }
