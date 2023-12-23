@@ -468,6 +468,25 @@ namespace Knossos.NET
                                                 process.StartInfo.Arguments = "> update.log"; //Create logfile to catch script output in Knossos data folder path
                                             }
 
+                                            if (KnUtils.IsMacOS && KnUtils.WasInstallerUsed())
+                                            {
+                                                // these variables need to be modified to be correct for the app bundle
+                                                var cutOff = execFullPath!.IndexOf(".app") + 4;
+                                                var realName = execFullPath![..cutOff];
+                                                process.StartInfo.EnvironmentVariables["app_path"] = Path.GetDirectoryName(realName);
+                                                process.StartInfo.EnvironmentVariables["app_name"] = Path.GetFileName(realName);
+
+                                                var scriptPath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update_macapp.sh");
+                                                using (var fileStream = File.Create(scriptPath))
+                                                {
+                                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/scripts/update_macapp.sh")).CopyTo(fileStream);
+                                                    fileStream.Close();
+                                                }
+                                                KnUtils.Chmod(scriptPath);
+                                                process.StartInfo.FileName = scriptPath;
+                                                process.StartInfo.Arguments = "> update.log"; //Create logfile to catch script output in Knossos data folder path
+                                            }
+
                                             if (forceUpdateDownload)
                                                 Console.WriteLine("Starting update script");
 
