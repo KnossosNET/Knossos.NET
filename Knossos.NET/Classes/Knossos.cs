@@ -27,13 +27,15 @@ namespace Knossos.NET
         public static bool retailFs2RootFound = false;
         public static bool flagDataLoaded = false;
         private static object? ttsObject = null;
+        private static bool forceUpdateDownload = false; //Only intended to test the update system!
 
         /// <summary>
         /// StartUp sequence
         /// </summary>
         /// <param name="isQuickLaunch"></param>
-        public static async void StartUp(bool isQuickLaunch)
+        public static async void StartUp(bool isQuickLaunch, bool forceUpdate)
         {
+            forceUpdateDownload = forceUpdate;
             try
             {
                 //See if the data folder works
@@ -82,8 +84,15 @@ namespace Knossos.NET
                 if (globalSettings.checkUpdate && !isQuickLaunch)
                 {
                     await CheckKnetUpdates().ConfigureAwait(false);
-                    await Task.Delay(300).ConfigureAwait(false);
-                    CleanUpdateFiles();
+                    //Check for .old files and delete them
+                    if (KnUtils.IsAppImage)
+                    {
+                        //Fire and forget
+                        _ = Task.Factory.StartNew(() =>
+                        {
+                            CleanUpdateFiles();
+                        });
+                    }
                 }
 
                 //Load base path from knossos legacy
@@ -100,6 +109,37 @@ namespace Knossos.NET
             }catch(Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Knossos.StartUp", ex);
+            }
+        }
+
+        /// <summary>
+        /// Deletes .old files in the executable folder
+        /// </summary>
+        private static async void CleanUpdateFiles()
+        {
+            try
+            {
+                await Task.Delay(2000);
+                if(KnUtils.IsAppImage && File.Exists(KnUtils.AppImagePath + ".old"))
+                {
+                    File.Delete(KnUtils.AppImagePath + "old");
+                }
+
+                /*No cleanup is needed for the other versions
+                var appDirPath = KnUtils.KnetFolderPath;
+                if (appDirPath != null)
+                {
+                    var oldFiles = System.IO.Directory.GetFiles(appDirPath, "*.old");
+                    foreach (string f in oldFiles)
+                    {
+                        File.Delete(f);
+                    }
+                }
+                */
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Knossos.CleanUpdateFiles()", ex);
             }
         }
 
@@ -191,30 +231,6 @@ namespace Knossos.NET
             MainWindow.instance!.Close();
         }
 
-
-        /// <summary>
-        /// Deletes .old files in the executable folder
-        /// </summary>
-        private static void CleanUpdateFiles()
-        {
-            try
-            {
-                var appDirPath = KnUtils.KnetFolderPath;
-                if(appDirPath != null)
-                {
-                    var oldFiles = System.IO.Directory.GetFiles(appDirPath, "*.old");
-                    foreach (string f in oldFiles)
-                    {
-                        File.Delete(f);
-                    }
-                }
-            }
-            catch (Exception ex) 
-            {
-                Log.Add(Log.LogSeverity.Error, "Knossos.CleanUpdateFiles()", ex);
-            }
-        }
-
         /// <summary>
         /// Connects to KNet repo and check for updates
         /// </summary>
@@ -222,10 +238,12 @@ namespace Knossos.NET
         {
             try
             {
+                if (forceUpdateDownload)
+                    Console.WriteLine("Starting Update Process");
                 var latest = await GitHubApi.GetLastRelease().ConfigureAwait(false);
                 if (latest != null && latest.tag_name != null)
                 {
-                    if (SemanticVersion.Compare(AppVersion, latest.tag_name.ToLower().Replace("v", "").Trim()) <= -1)
+                    if (forceUpdateDownload || SemanticVersion.Compare(AppVersion, latest.tag_name.ToLower().Replace("v", "").Trim()) <= -1)
                     {
                         if (latest.assets != null)
                         {
@@ -259,9 +277,12 @@ namespace Knossos.NET
                                 }
                             }
 
+                            if (forceUpdateDownload)
+                                Console.WriteLine("Found Release: " + latest.tag_name);
+
                             if (releaseAsset != null && releaseAsset.browser_download_url != null)
                             {
-                                if (!globalSettings.autoUpdate)
+                                if (!forceUpdateDownload && !globalSettings.autoUpdate)
                                 {
                                     MessageBox.MessageBoxResult result = MessageBox.MessageBoxResult.Cancel;
                                     await Dispatcher.UIThread.Invoke(async () => {
@@ -276,6 +297,8 @@ namespace Knossos.NET
                                 {
                                     await Task.Delay(500).ConfigureAwait(false);
                                 }
+                                if (forceUpdateDownload)
+                                    Console.WriteLine("Starting Download: " + releaseAsset.browser_download_url);
                                 var extension = Path.GetExtension(releaseAsset.browser_download_url);
                                 //little hack to pickup tar.gz
                                 if(extension != null && extension.ToLower() == ".gz" && releaseAsset.browser_download_url.Contains(".tar.gz")) 
@@ -285,102 +308,80 @@ namespace Knossos.NET
                                 var download = await Dispatcher.UIThread.InvokeAsync(async () => await TaskViewModel.Instance!.AddFileDownloadTask(releaseAsset.browser_download_url, KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update"+ extension, "Downloading "+latest.tag_name+" "+releaseAsset.name, true, "This is a Knossos.NET update"), DispatcherPriority.Background).ConfigureAwait(false);
                                 if (download != null && download == true)
                                 {
-                                    //Rename files in app folder
                                     var appDirPath = System.AppDomain.CurrentDomain.BaseDirectory;
-                                    var execName = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
-                                    if (KnUtils.IsAppImage)
-                                    {
-                                        // change exec name to be the AppImage itself (is full path!)
-                                        execName = KnUtils.AppImagePath;
-                                    }
-                                    File.Move(execName!, execName + ".old", true);
-                                    if (KnUtils.IsWindows)
-                                    {
-                                        try
-                                        {
-                                            File.Move(Path.Combine(appDirPath,"av_libglesv2.dll"), Path.Combine(appDirPath, "av_libglesv2.dll.old"), true);
-                                        }
-                                        catch { }
-                                        try
-                                        {
-                                            File.Move(Path.Combine(appDirPath, "libSkiaSharp.dll"), Path.Combine(appDirPath, "libSkiaSharp.dll.old"), true);
-                                        }
-                                        catch { }
-                                        try
-                                        {
-                                            File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.dll"), Path.Combine(appDirPath, "libHarfBuzzSharp.dll.old"), true);
-                                        }
-                                        catch { }
-                                    } 
-                                    if(KnUtils.IsLinux && !KnUtils.IsAppImage)
-                                    {
-                                        try
-                                        {
-                                            File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.so"), Path.Combine(appDirPath, "libHarfBuzzSharp.so.old"), true);
-                                        }
-                                        catch { }
-                                        try
-                                        {
-                                            File.Move(Path.Combine(appDirPath, "libSkiaSharp.so"), Path.Combine(appDirPath, "libSkiaSharp.so.old"), true);
-                                        }
-                                        catch { }
-                                    }
-                                    if(KnUtils.IsMacOS)
-                                    {
-                                        try
-                                        {
-                                            File.Move(Path.Combine(appDirPath, "libAvaloniaNative.dylib"), Path.Combine(appDirPath, "libAvaloniaNative.dylib.old"), true);
-                                        }
-                                        catch { }
-                                        try
-                                        {
-                                            File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.dylib"), Path.Combine(appDirPath, "libHarfBuzzSharp.dylib.old"), true);
-                                        }
-                                        catch { }
-                                        try
-                                        {
-                                            File.Move(Path.Combine(appDirPath, "libSkiaSharp.dylib"), Path.Combine(appDirPath, "libSkiaSharp.dylib.old"), true);
-                                        }
-                                        catch { }
-                                    }
-                                    await Task.Delay(1000).ConfigureAwait(false);
-                                    //Decompress new files
+                                    var execFullPath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
+
+                                    //Decompress new files / 2nd phase
                                     try
                                     {
                                         // no extraction needed for AppImage, just move exec over and restart
                                         // NOTE: exeName is already the full path to the AppImage
                                         if (KnUtils.IsAppImage)
                                         {
-                                            var appFolder = KnUtils.KnetFolderPath;
-                                            if (appFolder == null)
-                                            {
-                                                throw new ArgumentNullException(nameof(appFolder));
-                                            }
-                                            var newFileFullPath = Path.Combine(appFolder, Path.GetFileName(releaseAsset.browser_download_url));
-                                            File.Move(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension, newFileFullPath);
+                                            // change exec name to be the AppImage itself (is full path!)
+                                            execFullPath = KnUtils.AppImagePath;
 
-                                            //Start again
                                             try
                                             {
+                                                var appFolder = KnUtils.KnetFolderPath;
+                                                if (appFolder == null)
+                                                {
+                                                    throw new ArgumentNullException(nameof(appFolder));
+                                                }
+                                                //Move Current Executables
+                                                if (forceUpdateDownload)
+                                                    Console.WriteLine("Renaming current executable files");
+
+                                                File.Move(execFullPath!, execFullPath + ".old", true);
+
+                                                var newFileFullPath = Path.Combine(appFolder, Path.GetFileName(releaseAsset.browser_download_url));
+                                                File.Move(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension, newFileFullPath);
+
+                                                //Start again
                                                 KnUtils.Chmod(newFileFullPath, "+x");
+
+                                                if (forceUpdateDownload)
+                                                    Console.WriteLine("Launching new version");
 
                                                 Process p = new Process();
                                                 p.StartInfo.FileName = newFileFullPath;
                                                 p.Start();
+
+                                                if (forceUpdateDownload)
+                                                    Console.WriteLine("Closing...");
+
+                                                //Close App
+                                                Dispatcher.UIThread.Invoke(() =>
+                                                {
+                                                    MainWindow.instance!.Close();
+                                                });
                                             }
                                             catch (Exception ex)
                                             {
+                                                //Rollback
+                                                try
+                                                {
+                                                    File.Move(execFullPath + ".old", execFullPath!, true);
+                                                }
+                                                catch { }
                                                 Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
                                             }
                                         }
                                         else
                                         {
+                                            //Regular Portable Format
+                                            if (forceUpdateDownload)
+                                                Console.WriteLine("Decompressing update...");
+
+                                            var updateFilesFolder = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "kn_update");
+
+                                            Directory.CreateDirectory(updateFilesFolder);
 
                                             var result = false;
 
                                             await Dispatcher.UIThread.Invoke(async () =>
                                             {
-                                                result  = await TaskViewModel.Instance!.AddFileDecompressionTask(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension, appDirPath!, false);
+                                                result  = await TaskViewModel.Instance!.AddFileDecompressionTask( KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension, updateFilesFolder, false);
                                             }).ConfigureAwait(false);
 
                                             if (!result)
@@ -388,21 +389,8 @@ namespace Knossos.NET
                                                 throw new Exception("Error while decompressing update file: " + KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension);
                                             }
 
-                                            //Start again
-                                            try
-                                            {
-                                                if (KnUtils.IsMacOS || KnUtils.IsLinux)
-                                                {
-                                                    KnUtils.Chmod(Path.Combine(appDirPath, execName!), "+x");
-                                                }
-                                                Process p = new Process();
-                                                p.StartInfo.FileName = Path.Combine(appDirPath, execName!);
-                                                p.Start();
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
-                                            }
+                                            if (forceUpdateDownload)
+                                                Console.WriteLine("Delete update file");
 
                                             //Cleanup file
                                             try
@@ -411,6 +399,64 @@ namespace Knossos.NET
                                                     File.Delete(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "update" + extension);
                                             }
                                             catch { }
+
+                                            //Update Script
+                                            if (forceUpdateDownload)
+                                                Console.WriteLine("Exporting update script to " + KnUtils.GetKnossosDataFolderPath());
+
+                                            Process process = new Process();
+                                            process.StartInfo.WorkingDirectory = KnUtils.GetKnossosDataFolderPath();
+                                            process.StartInfo.EnvironmentVariables["update_folder"] = updateFilesFolder;
+                                            process.StartInfo.EnvironmentVariables["app_path"] = appDirPath;
+                                            process.StartInfo.EnvironmentVariables["app_name"] = Path.GetFileName(execFullPath);
+
+                                            if (KnUtils.IsWindows)
+                                            {
+                                                var scriptPath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update_windows.cmd");
+                                                using (var fileStream = File.Create(scriptPath))
+                                                {
+                                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/scripts/update_windows.cmd")).CopyTo(fileStream);
+                                                    fileStream.Close();
+                                                }
+                                                process.StartInfo.FileName = scriptPath;
+                                                process.StartInfo.Arguments = "> update.log"; //Create logfile to catch script output in Knossos data folder path
+                                            }
+
+                                            if (KnUtils.IsLinux)
+                                            {
+                                                var scriptPath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update_linux.sh");
+                                                using (var fileStream = File.Create(scriptPath))
+                                                {
+                                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/scripts/update_linux.sh")).CopyTo(fileStream);
+                                                    fileStream.Close();
+                                                }
+                                                KnUtils.Chmod(scriptPath);
+                                                process.StartInfo.FileName = scriptPath;
+                                                process.StartInfo.Arguments = "> update.log"; //Create logfile to catch script output in Knossos data folder path
+                                            }
+
+
+                                            if (KnUtils.IsMacOS)
+                                            {
+                                                var scriptPath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update_mac.sh");
+                                                using (var fileStream = File.Create(scriptPath))
+                                                {
+                                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/scripts/update_mac.sh")).CopyTo(fileStream);
+                                                    fileStream.Close();
+                                                }
+                                                KnUtils.Chmod(scriptPath);
+                                                process.StartInfo.FileName = scriptPath;
+                                                process.StartInfo.Arguments = "> update.log"; //Create logfile to catch script output in Knossos data folder path
+                                            }
+
+                                            if (forceUpdateDownload)
+                                                Console.WriteLine("Starting update script");
+
+                                            process.StartInfo.CreateNoWindow = true;
+                                            process.Start();
+                                            
+                                            if (forceUpdateDownload)
+                                                Console.WriteLine("Closing...");
 
                                             //Close App
                                             Dispatcher.UIThread.Invoke(() =>
@@ -421,62 +467,9 @@ namespace Knossos.NET
                                     }
                                     catch(Exception ex)
                                     {
-                                        //Rollback
-                                        try
-                                        {
-                                            File.Move(execName + ".old", execName!, true);
-                                        }
-                                        catch { }
-                                        if (KnUtils.IsWindows)
-                                        {
-                                            try
-                                            {
-                                                File.Move(Path.Combine(appDirPath, "av_libglesv2.dll.old"), Path.Combine(appDirPath, "av_libglesv2.dll"), true);
-                                            }
-                                            catch { }
-                                            try
-                                            {
-                                                File.Move(Path.Combine(appDirPath, "libSkiaSharp.dll.old"), Path.Combine(appDirPath, "libSkiaSharp.dll"), true);
-                                            }
-                                            catch { }
-                                            try
-                                            {
-                                                File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.dll.old"), Path.Combine(appDirPath, "libHarfBuzzSharp.dll"), true);
-                                            }
-                                            catch { }
-                                        }
-                                        if (KnUtils.IsLinux && !KnUtils.IsAppImage)
-                                        {
-                                            try
-                                            {
-                                                File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.so.old"), Path.Combine(appDirPath, "libHarfBuzzSharp.so"), true);
-                                            }
-                                            catch { }
-                                            try
-                                            {
-                                                File.Move(Path.Combine(appDirPath, "libSkiaSharp.so.old"), Path.Combine(appDirPath, "libSkiaSharp.so"), true);
-                                            }
-                                            catch { }
-                                        }
-                                        if (KnUtils.IsMacOS)
-                                        {
-                                            try
-                                            {
-                                                File.Move(Path.Combine(appDirPath, "libAvaloniaNative.dylib.old"), Path.Combine(appDirPath, "libAvaloniaNative.dylib"), true);
-                                            }
-                                            catch { }
-                                            try
-                                            {
-                                                File.Move(Path.Combine(appDirPath, "libHarfBuzzSharp.dylib.old"), Path.Combine(appDirPath, "libHarfBuzzSharp.dylib"), true);
-                                            }
-                                            catch { }
-                                            try
-                                            {
-                                                File.Move(Path.Combine(appDirPath, "libSkiaSharp.dylib.old"), Path.Combine(appDirPath, "libSkiaSharp.dylib"), true);
-                                            }
-                                            catch { }
-                                        }
-                                        await MessageBox.Show(MainWindow.instance, "Error during update file decompression. Update was cancelled.", "Decompression failed", MessageBox.MessageBoxButtons.OK);
+                                        Dispatcher.UIThread.Invoke(() => { 
+                                            MessageBox.Show(MainWindow.instance, "An error has ocurred during the 2nd phase of the update. The operation was cancelled.", "Update error", MessageBox.MessageBoxButtons.OK);
+                                        });
                                         Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
                                     }
                                 }
@@ -484,22 +477,30 @@ namespace Knossos.NET
                             else
                             {
                                 Log.Add(Log.LogSeverity.Warning, "Knossos.CheckKnetUpdates()", "Unable to find a matching OS and cpu arch build in the latest Github release, update has been skipped. CPU Arch:"+ KnUtils.CpuArch + " OS: "+ KnUtils.GetOSNameString());
+                                if (forceUpdateDownload)
+                                    Console.WriteLine("Update Error! No matching CPU / OS arch. Current: " + KnUtils.CpuArch + " " + KnUtils.GetOSNameString());
                             }
                         }
                         else
                         {
                             Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", "Last version from Github has a null asset array.");
+                            if (forceUpdateDownload)
+                                Console.WriteLine("Update Error! Knossos.CheckKnetUpdates()", "Last version from Github has a null asset array.");
                         }
                     }
                 }
                 else
                 {
                     Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", "Get latest version from github resulted in null or tag_name being null.");
+                    if (forceUpdateDownload)
+                        Console.WriteLine("Update Error! Get latest version from github resulted in null or tag_name being null.");
                 }
             }
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", ex);
+                if (forceUpdateDownload)
+                    Console.WriteLine("Update Error! " + ex.Message);
             }
         }
 

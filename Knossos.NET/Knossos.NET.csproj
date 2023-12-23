@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\*" />
+	<AvaloniaResource Include="Assets\scripts\**" />
 	<AvaloniaResource Include="Assets\general\**" />
 	<AvaloniaResource Include="Assets\fs2_res\**" />
 	<AvaloniaResource Include="Assets\utils\*" />

@@ -20,6 +20,7 @@ using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Avalonia;
 using Avalonia.Media;
+using Avalonia.Threading;
 
 namespace Knossos.NET
 {
@@ -675,36 +676,50 @@ namespace Knossos.NET
 
             return await Task.Run(async () =>
             {
-                if (cancellationTokenSource == null)
-                    cancellationTokenSource = new CancellationTokenSource();
-
-                progressCallback?.Invoke(0);
-
-                bool result = false;
-
-                switch (decompressor)
+                try
                 {
-                    case Decompressor.Auto:
-                        result = DecompressFileSharpCompress(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback);
-                        if (!result)
-                        {
+                    if (cancellationTokenSource == null)
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    progressCallback?.Invoke(0);
+
+                    bool result = false;
+
+                    switch (decompressor)
+                    {
+                        case Decompressor.Auto:
+                            try
+                            {
+                                result = DecompressFileSharpCompress(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback);
+                            }catch (Exception ex) 
+                            {
+                                Log.Add(Log.LogSeverity.Warning, "KnUtils.DecompressFile()", "Sharpcompress triggered an exception: " + ex.Message + ". Using SevenZip console utility instead.");
+                            }
+                            if (!result)
+                            {
+                                result = await DecompressFileSevenZip(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback).ConfigureAwait(false);
+                            }
+                            break;
+                        case Decompressor.SharpCompress:
+                            result = DecompressFileSharpCompress(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback);
+                            break;
+                        case Decompressor.SevenZip:
                             result = await DecompressFileSevenZip(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback).ConfigureAwait(false);
-                        }
-                        break;
-                    case Decompressor.SharpCompress:
-                        result = DecompressFileSharpCompress(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback);
-                        break;
-                    case Decompressor.SevenZip:
-                        result = await DecompressFileSevenZip(compressedFilePath, destFolderPath, cancellationTokenSource, extractFullPath, progressCallback).ConfigureAwait(false);
-                        break;
+                            break;
+                    }
+
+                    if (!result)
+                        cancellationTokenSource?.Cancel();
+                    else
+                        progressCallback?.Invoke(100);
+
+                    return result;
                 }
-
-                if (!result)
-                    cancellationTokenSource?.Cancel();
-                else 
-                    progressCallback?.Invoke(100);
-
-                return result;
+                catch(Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "KnUtils.DecompressFile()", ex);
+                    return false; 
+                }
             });
         }
 
