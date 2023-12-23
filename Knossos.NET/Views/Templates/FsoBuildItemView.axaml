@@ -14,9 +14,9 @@
 
 	<Grid Background="{StaticResource BackgroundColorTertiary}" ColumnDefinitions="Auto,Auto,Auto,Auto,*">
 		<Label FontWeight="Bold" Width="150" Grid.Column="0" Content="{Binding Date}" VerticalAlignment="Center"></Label>
-		<Label FontWeight="Bold" Width="400" Grid.Column="1" Content="{Binding Title}" VerticalAlignment="Center"></Label>
+		<Label FontWeight="Bold" Width="350" Grid.Column="1" Content="{Binding Title}" VerticalAlignment="Center"></Label>
 
-		<Label Grid.Column="2" IsVisible="{Binding IsValid}" Width="100" Foreground="{StaticResource TertiaryColor}" FontWeight="Bold" Content="{Binding CpuArch}" VerticalAlignment="Center"></Label>
+		<Label Grid.Column="2" IsVisible="{Binding IsValid}" Width="150" Foreground="{StaticResource TertiaryColor}" FontWeight="Bold" Content="{Binding CpuArch}" VerticalAlignment="Center"></Label>
 		<Label Grid.Column="3" IsVisible="{Binding IsValid}" Foreground="{StaticResource PrimaryColor}" FontWeight="Bold" Content="{Binding BuildType}" VerticalAlignment="Center"></Label>
 		<Label Grid.Column="4" Foreground="{StaticResource TertiaryColor}" IsVisible="{Binding !IsValid}" VerticalAlignment="Center" FontWeight="Bold">No valid or usable files were found in this build</Label>
 			
