@@ -68,6 +68,6 @@
 			</TabItem>
 		</TabControl>
 		<GridSplitter Grid.Row="1" Background="Black" ResizeDirection="Rows"/>
-		<v:TaskView Grid.Row="2" Content="{Binding TaskView}" VerticalAlignment="Top"/>
+		<v:TaskView Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxHeight="550" Content="{Binding TaskView}"/>
 	</Grid>
 </Window>
