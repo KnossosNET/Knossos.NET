@@ -818,9 +818,11 @@ namespace Knossos.NET.Models
                     return true;
 
                 //tile image
+                // Disabled tile and banner image verification for metadata update due to how nebula stores the file names (it splits filename hashes into folders using part of the hash) this is not possible
+                /*
                 if (modA.tile != null && modB.tile != null)
                 {
-                    if (Path.GetFileName(modA.tile) != Path.GetFileName(modB.tile))
+                    if (Path.GetFileName(modA.tile) != Path.GetFileName(modB.tile) && modA.tile != "kn_tile.png" && modB.tile != "kn_tile.png")
                     {
                         return true;
                     }
@@ -834,7 +836,7 @@ namespace Knossos.NET.Models
                 //banner image
                 if (modA.banner != null && modB.banner != null)
                 {
-                    if (Path.GetFileName(modA.banner) != Path.GetFileName(modB.banner))
+                    if (Path.GetFileName(modA.banner) != Path.GetFileName(modB.banner) && modA.banner != "kn_banner.png" && modB.banner != "kn_banner.png")
                     {
                         return true;
                     }
@@ -844,6 +846,7 @@ namespace Knossos.NET.Models
                     if (modA.banner == null && modB.banner != null || modA.banner != null && modB.banner == null)
                         return true;
                 }
+                */
 
                 //Packages
                 if (modA.packages == null && modB.packages != null || modA.packages != null && modB.packages == null)
