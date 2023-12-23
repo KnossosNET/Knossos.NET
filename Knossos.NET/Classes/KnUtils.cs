@@ -21,6 +21,7 @@ using Knossos.NET.Models;
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Microsoft.Win32;
 
 namespace Knossos.NET
 {
@@ -838,6 +839,39 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "KnUtils.GetColor()", ex);
                 return Brushes.Transparent;
             }
+        }
+
+        /// <summary>
+        /// Detects whether or not the app used an installer or not
+        /// </summary>
+        /// <returns>true if an installer was used, false otherwise</returns>
+        public static bool WasInstallerUsed()
+        {
+            try
+            {
+                // NOTE: Using "OperatingSystem" here because it hides the api warning on non-windows
+                if (OperatingSystem.IsWindows())
+                {
+                    // The installer writes the install path to the registry. So check that, and if the
+                    // value matches the directory of the currently running knet instance then it's a
+                    // safe bet that the installer was used
+                    var key = Registry.CurrentUser.OpenSubKey(@"Software\KnossosNET\Knossos.NET");
+                    if (key?.GetValue("InstallPath") is string installPath)
+                    {
+                        return installPath == Path.GetDirectoryName(Environment.ProcessPath);
+                    }
+                }
+                else if (IsMacOS)
+                {
+                    return Environment.ProcessPath!.Contains(".app/Contents/");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.WasInstallerUsed()", ex);
+            }
+
+            return false;
         }
     }
 }
