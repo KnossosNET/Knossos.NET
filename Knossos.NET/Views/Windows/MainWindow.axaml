@@ -21,7 +21,7 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*"></RowDefinition>
 			<RowDefinition Height="4"></RowDefinition>
-			<RowDefinition Height="Auto" MaxHeight="550"></RowDefinition>
+			<RowDefinition Height="Auto" MaxHeight="350"></RowDefinition>
 		</Grid.RowDefinitions>
 		<TabControl Grid.Row="0" SelectedIndex="{Binding TabIndex}">
 			<!--Installed Mods / Home-->
@@ -68,6 +68,6 @@
 			</TabItem>
 		</TabControl>
 		<GridSplitter Grid.Row="1" Background="Black" ResizeDirection="Rows"/>
-		<v:TaskView Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxHeight="550" Content="{Binding TaskView}"/>
+		<v:TaskView Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxHeight="350" Content="{Binding TaskView}"/>
 	</Grid>
 </Window>
