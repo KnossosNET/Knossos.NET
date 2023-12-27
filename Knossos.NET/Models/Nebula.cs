@@ -95,7 +95,7 @@ namespace Knossos.NET.Models
                 {
                     string jsonString = File.ReadAllText(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "nebula.json");
                     settings = JsonSerializer.Deserialize<NebulaSettings>(jsonString);
-                    Log.Add(Log.LogSeverity.Information, "Nebula.Constructor()", "Nebula seetings has been loaded");
+                    Log.Add(Log.LogSeverity.Information, "Nebula.Constructor()", "Nebula settings has been loaded");
                 }
                 else
                 {

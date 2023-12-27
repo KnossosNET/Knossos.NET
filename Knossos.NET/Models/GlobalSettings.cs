@@ -573,7 +573,7 @@ namespace Knossos.NET.Models
                             MainWindowViewModel.Instance.sharedSortType = tempSettings.sortType;
 
                         ReadFS2IniValues();
-                        Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global seetings has been loaded");
+                        Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings has been loaded");
                     }
 
                 }

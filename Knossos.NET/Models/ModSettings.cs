@@ -94,7 +94,7 @@ namespace Knossos.NET.Models
                         customBuildExec = tempSettings.customBuildExec;
                         isCompressed = tempSettings.isCompressed;
                         ignoreGlobalCmd = tempSettings.ignoreGlobalCmd;
-                        Log.Add(Log.LogSeverity.Information, "ModSettings.Load()", "Mod seetings has been loaded from " + filePath);
+                        Log.Add(Log.LogSeverity.Information, "ModSettings.Load()", "Mod settings has been loaded from " + filePath);
                     }
                     
                 }
@@ -129,7 +129,7 @@ namespace Knossos.NET.Models
 
                     var json = JsonSerializer.Serialize(this, options);
                     File.WriteAllText(filePath, json, new UTF8Encoding(false));
-                    Log.Add(Log.LogSeverity.Information, "ModSettings.Save()", "Mod seetings has been saved to "+filePath);
+                    Log.Add(Log.LogSeverity.Information, "ModSettings.Save()", "Mod settings has been saved to "+filePath);
                 }
                 else
                 {
