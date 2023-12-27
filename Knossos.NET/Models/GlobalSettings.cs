@@ -573,7 +573,7 @@ namespace Knossos.NET.Models
                             MainWindowViewModel.Instance.sharedSortType = tempSettings.sortType;
 
                         ReadFS2IniValues();
-                        Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings has been loaded");
+                        Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings have been loaded");
                     }
 
                 }
@@ -789,7 +789,7 @@ namespace Knossos.NET.Models
 
                 var json = JsonSerializer.Serialize(this, options);
                 File.WriteAllText(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json", json, new UTF8Encoding(false));
-                Log.Add(Log.LogSeverity.Information, "GlobalSettings.Save()", "Global settings has been saved.");
+                Log.Add(Log.LogSeverity.Information, "GlobalSettings.Save()", "Global settings have been saved.");
             }
             catch (Exception ex)
             {
