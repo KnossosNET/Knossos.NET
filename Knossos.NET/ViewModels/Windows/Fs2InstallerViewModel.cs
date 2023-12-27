@@ -180,20 +180,21 @@ namespace Knossos.NET.ViewModels
                     foreach (string file in filePaths)
                     {
                         var parts = file.Split(Path.DirectorySeparatorChar);
-                        InstallText = "Copying " + parts[parts.Count() - 1];
-                        if (parts[parts.Count() - 1].ToLower().Contains(".vp"))
+                        var fname = parts[parts.Count() - 1].ToLower();
+                        InstallText = "Copying " + fname;
+                        if (fname.ToLower().Contains(".vp"))
                         { 
-                            File.Copy(file, Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + parts[parts.Count() - 1]);
+                            File.Copy(file, Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + fname);
                         }
                         else
                         {
-                            if (parts[parts.Count() - 1].ToLower().Contains(".hcf"))
+                            if (fname.ToLower().Contains(".hcf"))
                             {
-                                File.Copy(file, Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "players" + Path.DirectorySeparatorChar + parts[parts.Count() - 1]);
+                                File.Copy(file, Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "players" + Path.DirectorySeparatorChar + fname);
                             }
                             else
                             {
-                                File.Copy(file, Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "movies" + Path.DirectorySeparatorChar + parts[parts.Count() - 1]);
+                                File.Copy(file, Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "movies" + Path.DirectorySeparatorChar + fname);
                             }
                         }
                         ProgressCurrent++;
