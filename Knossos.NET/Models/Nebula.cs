@@ -95,7 +95,7 @@ namespace Knossos.NET.Models
                 {
                     string jsonString = File.ReadAllText(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "nebula.json");
                     settings = JsonSerializer.Deserialize<NebulaSettings>(jsonString);
-                    Log.Add(Log.LogSeverity.Information, "Nebula.Constructor()", "Nebula seetings has been loaded");
+                    Log.Add(Log.LogSeverity.Information, "Nebula.Constructor()", "Nebula settings have been loaded");
                 }
                 else
                 {
@@ -624,7 +624,7 @@ namespace Knossos.NET.Models
 
                 var json = JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "nebula.json", json, Encoding.UTF8);
-                Log.Add(Log.LogSeverity.Information, "Nebula.SaveSettings()", "Nebula settings has been saved.");
+                Log.Add(Log.LogSeverity.Information, "Nebula.SaveSettings()", "Nebula settings have been saved.");
             }
             catch (Exception ex)
             {
