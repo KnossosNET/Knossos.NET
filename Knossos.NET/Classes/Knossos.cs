@@ -228,7 +228,10 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "Knossos.QuickLaunch", "Quick launch was used but the modid was not detected.");
             }
             await Task.Delay(2000);
-            MainWindow.instance!.Close();
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                MainWindow.instance!.Close();
+            });
         }
 
         /// <summary>
