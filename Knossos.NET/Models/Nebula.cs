@@ -1146,10 +1146,13 @@ namespace Knossos.NET.Models
         /// Get an array of private mods that the user has access to.
         /// </summary>
         /// <returns>An array of mods</returns>
-        public static async Task<Mod[]?> GetPrivateMods()
+        public static async Task<Mod[]?> GetPrivateMods(bool tryUseCache = false)
         {
             try
             {
+                if (tryUseCache && privateMods != null)
+                    return privateMods;
+
                 var reply = await ApiCall("mod/list_private", null, true, 30, ApiMethod.GET);
                 if (reply.Value.mods != null && reply.Value.mods.Any())
                 {
