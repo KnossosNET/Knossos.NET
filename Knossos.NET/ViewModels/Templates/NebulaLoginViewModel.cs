@@ -48,7 +48,7 @@ namespace Knossos.NET.ViewModels
                         EditableIDs = string.Join(", ", ids);
                     });
                 }
-                var privMods = await Nebula.GetPrivateMods(true).ConfigureAwait(false); ;
+                var privMods = await Nebula.GetPrivateMods(true).ConfigureAwait(false);
                 if (privMods != null)
                 {
                     foreach (var mod in privMods)
