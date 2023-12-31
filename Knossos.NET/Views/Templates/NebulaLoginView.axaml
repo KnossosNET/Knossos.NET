@@ -28,6 +28,8 @@
 			</WrapPanel>
 			<Label HorizontalAlignment="Center" IsVisible="{Binding UserLoggedIn}" Margin="20" FontSize="20">Mods IDs you have write access to</Label>
 			<TextBox Background="Transparent" IsReadOnly="True" IsVisible="{Binding UserLoggedIn}" TextWrapping="Wrap" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Text="{Binding EditableIDs}"></TextBox>
+			<Label HorizontalAlignment="Center" IsVisible="{Binding UserLoggedIn}" Margin="20" FontSize="20">Private mods you have access to</Label>
+			<TextBox Background="Transparent" IsReadOnly="True" IsVisible="{Binding UserLoggedIn}" TextWrapping="Wrap" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Text="{Binding PrivateMods}"></TextBox>
 		</StackPanel>
 	</ScrollViewer>
 </UserControl>

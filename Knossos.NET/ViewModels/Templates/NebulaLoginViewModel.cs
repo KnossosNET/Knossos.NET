@@ -28,12 +28,16 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string editableIDs = string.Empty;
 
+        [ObservableProperty]
+        internal string privateMods = string.Empty;
+
         public async void UpdateUI()
         {
             UserLoggedIn = Nebula.userIsLoggedIn;
             RegisterNewUser = false;
             UserName = Nebula.userName;
             UserPass = Nebula.userPass;
+            PrivateMods = string.Empty;
             if(UserLoggedIn) 
             { 
                 var ids = await Nebula.GetEditableModIDs().ConfigureAwait(false);
@@ -43,6 +47,17 @@ namespace Knossos.NET.ViewModels
                     {
                         EditableIDs = string.Join(", ", ids);
                     });
+                }
+                var privMods = await Nebula.GetPrivateMods(true).ConfigureAwait(false);
+                if (privMods != null)
+                {
+                    foreach (var mod in privMods)
+                    {
+                        Dispatcher.UIThread.Invoke(() =>
+                        {
+                            PrivateMods += mod + ", ";
+                        });
+                    }
                 }
             }
         }
@@ -62,11 +77,6 @@ namespace Knossos.NET.ViewModels
             else
             {
                 UpdateUI();
-                var ids = await Nebula.GetEditableModIDs();
-                if(ids != null)
-                {
-                    EditableIDs = string.Join(", ", ids);
-                }
             }
         }
 
