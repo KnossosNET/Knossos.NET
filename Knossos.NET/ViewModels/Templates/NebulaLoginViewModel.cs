@@ -37,6 +37,7 @@ namespace Knossos.NET.ViewModels
             RegisterNewUser = false;
             UserName = Nebula.userName;
             UserPass = Nebula.userPass;
+            PrivateMods = string.Empty;
             if(UserLoggedIn) 
             { 
                 var ids = await Nebula.GetEditableModIDs().ConfigureAwait(false);
@@ -47,7 +48,7 @@ namespace Knossos.NET.ViewModels
                         EditableIDs = string.Join(", ", ids);
                     });
                 }
-                var privMods = await Nebula.GetPrivateMods(true);
+                var privMods = await Nebula.GetPrivateMods(true).ConfigureAwait(false); ;
                 if (privMods != null)
                 {
                     foreach (var mod in privMods)
