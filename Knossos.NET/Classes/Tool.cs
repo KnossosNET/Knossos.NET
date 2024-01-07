@@ -175,7 +175,7 @@ namespace Knossos.NET.Classes
         /// Gets the best package for this system OS and cpu arch
         /// </summary>
         /// <returns>Toolpackage or null if none was found</returns>
-        private ToolPackage? GetBestPackage()
+        public ToolPackage? GetBestPackage()
         {
             try
             {
