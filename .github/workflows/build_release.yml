@@ -15,8 +15,8 @@ env:
   PUBLISH_DIR: ./build/publish
 
 jobs:
-  publish:
-    name: Publish builds
+  build-win:
+    name: Windows builds
     runs-on: windows-latest
     steps:
       - name: Checkout code
@@ -42,26 +42,70 @@ jobs:
           mkdir -p "$OUTPUT_DIR"
           mkdir -p "$PUBLISH_DIR"
 
-      - name: Publish all RIDs
+      - name: Publish Windows RIDs
         shell: bash
-        run: ./ci/publish_all.sh
+        run: ./ci/publish_all_host.sh
 
       - name: Archive builds
         shell: bash
         run: |
           cd "$PUBLISH_DIR"
-          tar -czvf builds.tgz --exclude='*.pdb' *
+          tar -czvf win-builds.tgz --exclude='*.pdb' *
 
       - name: Upload build archive
         uses: actions/upload-artifact@v3
         with:
-          name: builds
-          path: ${{ env.PUBLISH_DIR }}/builds.tgz
+          name: win-builds
+          path: ${{ env.PUBLISH_DIR }}/win-builds.tgz
+          retention-days: 5
+
+  build-mac:
+    name: macOS builds
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: '${{ github.ref }}'
+
+      - name: Set environment
+        shell: bash
+        run: |
+          echo "VERSION=$(echo ${{ github.ref_name }} | cut -c 2-)" >> $GITHUB_ENV
+          echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Create directories
+        shell: bash
+        run: |
+          mkdir -p "$OUTPUT_DIR"
+          mkdir -p "$PUBLISH_DIR"
+
+      - name: Publish macOS RIDs
+        shell: bash
+        run: ./ci/publish_all_host.sh
+
+      - name: Archive builds
+        shell: bash
+        run: |
+          cd "$PUBLISH_DIR"
+          tar -czvf mac-builds.tgz --exclude='*.pdb' *
+
+      - name: Upload build archive
+        uses: actions/upload-artifact@v3
+        with:
+          name: mac-builds
+          path: ${{ env.PUBLISH_DIR }}/mac-builds.tgz
           retention-days: 5
 
   package_release:
-    name: Package and release
-    needs: publish
+    name: Linux builds, package and release
+    needs: [build-win, build-mac]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -76,26 +120,43 @@ jobs:
           echo "VERSION=$(echo ${{ github.ref_name }} | cut -c 2-)" >> $GITHUB_ENV
           echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
 
+      - name: Create directories
+        shell: bash
+        run: |
+          mkdir -p "$OUTPUT_DIR"
+          mkdir -p "$PUBLISH_DIR"
+
       - name: Install utilities
         # zip for packaging windows builds
         # nsis for windows installer
         run: sudo apt-get update && sudo apt-get install zip nsis
 
-      - name: Create directories
-        run: |
-          mkdir -p "$OUTPUT_DIR"
-          mkdir -p "$PUBLISH_DIR"
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
 
-      - name: Download build archive
+      - name: Publish Linux RIDs
+        shell: bash
+        run: ./ci/publish_all_host.sh
+
+      - name: Download Windows build artifact
         uses: actions/download-artifact@v3
         with:
-          name: builds
+          name: win-builds
           path: ${{ env.PUBLISH_DIR }}
 
-      - name: Extract build archive
+      - name: Download macOS build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: mac-builds
+          path: ${{ env.PUBLISH_DIR }}
+
+      - name: Extract build archives
         run: |
           cd "$PUBLISH_DIR"
-          tar -xzvf builds.tgz
+          tar -xzvf win-builds.tgz
+          tar -xzvf mac-builds.tgz
 
       - name: Package all RIDs
         run: ${{ github.workspace }}/ci/package_all.sh
@@ -125,6 +186,5 @@ jobs:
       - name: Generate Release
         uses: softprops/action-gh-release@v1
         with:
-          # body_path: ${{ github.workspace }}/CHANGES.md
           draft: true
           files: ${{ env.OUTPUT_DIR }}/*
