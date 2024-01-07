@@ -15,5 +15,8 @@
 		<StyleInclude Source="/AppStyles.axaml" />
         <FluentTheme />
     </Application.Styles>
-	
+
+    <Application.Resources>
+        <FontFamily x:Key="ContentControlThemeFontFamily">avares://Knossos.NET/Assets/fonts#Inter</FontFamily>
+    </Application.Resources>
 </Application>
