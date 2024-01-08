@@ -23,8 +23,27 @@ namespace Knossos.NET.ViewModels
         internal string? ModVersion { get { return modJson != null ? modJson.version : null; } }
         [ObservableProperty]
         internal Bitmap? tileImage;
-        [ObservableProperty]
         internal bool visible = true;
+        internal bool Visible
+        {
+            get 
+            { 
+                return visible; 
+            }
+            set
+            {
+                if(visible != value)
+                {
+                    SetProperty(ref visible, value);
+                    if(value && TileImage == null && modJson != null)
+                    {
+                        Dispatcher.UIThread.Invoke(() => {
+                            LoadImage(modJson.fullPath, modJson.tile);
+                        });
+                    }
+                }
+            }
+        }
         [ObservableProperty]
         internal bool isInstalling = false;
 
@@ -44,7 +63,8 @@ namespace Knossos.NET.ViewModels
             Log.Add(Log.LogSeverity.Information, "NebulaModCardViewModel(Constructor)", "Creating mod card for " + modJson);
             modJson.ClearUnusedData();
             this.modJson = modJson;
-            LoadImage(modJson.fullPath,modJson.tile);
+            //Moved to load when visible only
+            //LoadImage(modJson.fullPath, modJson.tile);
         }
 
         /* Button Commands */
