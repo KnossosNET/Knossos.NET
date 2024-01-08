@@ -23,7 +23,7 @@ namespace Knossos.NET.ViewModels
         internal string? ModVersion { get { return modJson != null ? modJson.version : null; } }
         [ObservableProperty]
         internal Bitmap? tileImage;
-        internal bool visible = true;
+        internal bool visible = false;
         internal bool Visible
         {
             get 

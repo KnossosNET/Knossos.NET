@@ -153,8 +153,8 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 var card = new NebulaModCardViewModel(modJson);
-                if (IsLoading)
-                    card.Visible = false;
+                if (!IsLoading)
+                    card.Visible = true;
                 Mods.Insert(i, card);
             }
             else
@@ -190,7 +190,7 @@ namespace Knossos.NET.ViewModels
                         }
                     }
                     var card = new NebulaModCardViewModel(mod);
-                    card.Visible = false;
+                    //card.Visible = false;
                     newModCardList.Insert(i, card);
                 }
                 else
