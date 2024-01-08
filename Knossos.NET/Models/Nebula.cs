@@ -1031,6 +1031,8 @@ namespace Knossos.NET.Models
             apiUserToken = null;
             settings.user = null;
             settings.pass = null;
+            editableIds = null;
+            privateMods = null;
             SaveSettings();
         }
 
