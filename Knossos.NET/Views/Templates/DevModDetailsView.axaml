@@ -65,10 +65,10 @@
 					<Border Width="152" Height="227" BorderBrush="Gray" CornerRadius="2" BorderThickness="1">
 						<Image Width="150" Height="225" Source="{Binding TileImage}"></Image>
 					</Border>
-					<Label Margin="5,5,0,0" HorizontalAlignment="Center" Foreground="Yellow" FontSize="12">This image should be 150×225 pixels large.</Label>
+					<Label Margin="5,5,0,0" HorizontalAlignment="Center" Foreground="Yellow" FontSize="12">This image should be 150×225 pixels large, 300KB max.</Label>
 				</StackPanel>
 			</WrapPanel>
-			<WrapPanel Margin="130,0,0,0">
+			<WrapPanel Margin="160,0,0,0">
 				<Button Command="{Binding ChangeTileImage}" Width="100" Classes="Quaternary" Margin="5">Browse</Button>
 				<Button Command="{Binding RemoveTileImage}" Width="100" Classes="Cancel" Margin="5">Remove</Button>
 			</WrapPanel>
@@ -79,8 +79,8 @@
 					<Border Margin="45,5,5,5" BorderBrush="Gray" CornerRadius="2" BorderThickness="1">
 						<Image Width="535" Height="150" Source="{Binding BannerImage}"></Image>
 					</Border>
-					<Label Margin="125,5,0,0" Foreground="Yellow" FontSize="12">This image should be 1070x300 pixels large.</Label>
-					<WrapPanel Margin="130,0,0,0">
+					<Label HorizontalAlignment="Center" Margin="0,5,0,0" Foreground="Yellow" FontSize="12">This image should be 1070x300 pixels large. 10MB max, 1MB or less recommended.</Label>
+					<WrapPanel HorizontalAlignment="Center">
 						<Button Command="{Binding ChangeBannerImage}" Width="100" Classes="Quaternary" Margin="5">Browse</Button>
 						<Button Command="{Binding RemoveBannerImage}" Width="100" Classes="Cancel" Margin="5">Remove</Button>
 					</WrapPanel>

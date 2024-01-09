@@ -194,6 +194,16 @@ namespace Knossos.NET.ViewModels
                     //Get File Hash (new filename)
                     using (FileStream? file = new FileStream(filepath, FileMode.Open, FileAccess.Read))
                     {
+                        //300kb limit
+                        if(file.Length > 307200)
+                        {
+                            var length = file.Length;
+                            file.Close();
+                            Dispatcher.UIThread.Invoke(() => {
+                                MessageBox.Show(MainWindow.instance!, "The image file size (" + length + " bytes) is over the max limit allowed (307200 bytes)", "Selected image file too is too big", MessageBox.MessageBoxButtons.OK);
+                            });
+                            throw new Exception("The image file size (" + length + " bytes) is over the max limit allowed (307200 bytes)");
+                        }
                         var filename = string.Empty;
                         using (SHA256 checksum = SHA256.Create())
                         {
@@ -249,6 +259,16 @@ namespace Knossos.NET.ViewModels
                     //Get File Hash (new filename)
                     using (FileStream? file = new FileStream(filepath, FileMode.Open, FileAccess.Read))
                     {
+                        //10MB limit
+                        if (file.Length > 10485760)
+                        {
+                            var length = file.Length;
+                            file.Close();
+                            Dispatcher.UIThread.Invoke(() => {
+                                MessageBox.Show(MainWindow.instance!, "The image file size (" + length + " bytes) is over the max limit allowed (10485760 bytes)", "Selected image file too is too big", MessageBox.MessageBoxButtons.OK);
+                            });
+                            throw new Exception("The image file size (" + length + " bytes) is over the max limit allowed (10485760 bytes)");
+                        }
                         var filename = string.Empty;
                         using (SHA256 checksum = SHA256.Create())
                         {
@@ -273,7 +293,7 @@ namespace Knossos.NET.ViewModels
             }
             catch (Exception ex)
             {
-                Log.Add(Log.LogSeverity.Error, "DevModDetailsViewModel.ChangeTileImage", ex);
+                Log.Add(Log.LogSeverity.Error, "DevModDetailsViewModel.ChangeBannerImage", ex);
             }
         }
 
@@ -374,6 +394,16 @@ namespace Knossos.NET.ViewModels
                     //Get File Hash (new filename)
                     using (FileStream? file = new FileStream(filepath, FileMode.Open, FileAccess.Read))
                     {
+                        //10MB limit
+                        if (file.Length > 10485760)
+                        {
+                            var length = file.Length;
+                            file.Close();
+                            Dispatcher.UIThread.Invoke(() => {
+                                MessageBox.Show(MainWindow.instance!, "The image file size (" + length + " bytes) is over the max limit allowed (10485760 bytes)", "Selected image file too is too big", MessageBox.MessageBoxButtons.OK);
+                            });
+                            throw new Exception("The image file size (" + length + " bytes) is over the max limit allowed (10485760 bytes)");
+                        }
                         var filename = string.Empty;
                         using (SHA256 checksum = SHA256.Create())
                         {
