@@ -52,14 +52,14 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string installText = string.Empty;
         [ObservableProperty]
-        internal bool innoExtractIsAvalible = false;
+        internal bool innoExtractIsAvailable = false;
         private string? gogExe = null;
 
         public Fs2InstallerViewModel() 
         { 
             if(KnUtils.IsWindows || KnUtils.IsMacOS || KnUtils.IsLinux && ( KnUtils.CpuArch == "X64" || KnUtils.CpuArch == "X86" || KnUtils.CpuArch == "Arm64"))
             {
-                InnoExtractIsAvalible = true;
+                InnoExtractIsAvailable = true;
             }
         }
 

@@ -222,7 +222,7 @@ namespace Knossos.NET.Models
                                 }
                             }
                         }
-                        //Remove Installed and FS2 parent mods if FS2 root pack is not detected, Mark update avalible to installed ones
+                        //Remove Installed and FS2 parent mods if FS2 root pack is not detected, Mark update available to installed ones
                         if (mod.type == ModType.tc || mod.type == ModType.mod && (listFS2Override || mod.parent != "FS2" || mod.parent == "FS2" && Knossos.retailFs2RootFound))
                         {
 
@@ -236,7 +236,7 @@ namespace Knossos.NET.Models
                                 var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
                                 if (newer != null && ( new SemanticVersion(newer.version) < new SemanticVersion(mod.version) || newer.version == mod.version && newer.lastUpdate != mod.lastUpdate))
                                 {
-                                    Dispatcher.UIThread.Invoke(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id), DispatcherPriority.Background);
+                                    Dispatcher.UIThread.Invoke(() => MainWindowViewModel.Instance?.MarkAsUpdateAvailable(mod.id), DispatcherPriority.Background);
                                 }
                                 if(isInstalled.First().devMode)
                                     DeveloperModsViewModel.Instance!.UpdateVersionManager(isInstalled.First().id);
@@ -388,7 +388,7 @@ namespace Knossos.NET.Models
 
                 //Mods, TCs
                 var modsTcs = newerestModVersionPerID.Where( m => m.type == ModType.mod || m.type == ModType.tc ).ToList();
-                //Remove Installed and FS2 parent mods if FS2 root pack is not detected, Mark update avalible to installed ones, set installed ones as inNebula
+                //Remove Installed and FS2 parent mods if FS2 root pack is not detected, Mark update available to installed ones, set installed ones as inNebula
                 foreach (var m in modsTcs.ToList())
                 {
 
@@ -409,7 +409,7 @@ namespace Knossos.NET.Models
                             var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
                             if (newer != null && ( new SemanticVersion(newer.version) < new SemanticVersion(m.version) || newer.version == m.version && newer.lastUpdate != m.lastUpdate ))
                             {
-                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(m.id), DispatcherPriority.Background);
+                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvailable(m.id), DispatcherPriority.Background);
                             }
                             modsTcs.Remove(m);
                         }
@@ -517,7 +517,7 @@ namespace Knossos.NET.Models
             //If we are logged in check using the api
             if (userIsLoggedIn)
             {
-                return !await CheckIDAvalible(id);
+                return !await CheckIDAvailable(id);
             }
             return false;
         }
@@ -1045,7 +1045,7 @@ namespace Knossos.NET.Models
         /// <returns>
         /// true if MODID is available, false if it is already in use
         /// </returns>
-        public static async Task<bool> CheckIDAvalible(string id, string title = "None")
+        public static async Task<bool> CheckIDAvailable(string id, string title = "None")
         {
             try
             {
@@ -1419,7 +1419,7 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// Does a metadata check to Nebula
-        /// attachments, screenshoots and banner must be clear
+        /// attachments, screenshots and banner must be clear
         /// (thats is what old-knossos does)
         /// </summary>
         /// <param name="mod"></param>

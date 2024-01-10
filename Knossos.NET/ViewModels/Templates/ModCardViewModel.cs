@@ -45,7 +45,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool visible = true;
         [ObservableProperty]
-        internal bool updateAvalible = false;
+        internal bool updateAvailable = false;
         [ObservableProperty]
         internal IBrush borderColor = KnUtils.GetResourceColor("ModCardBorderNormal");
         [ObservableProperty]
@@ -111,7 +111,7 @@ namespace Knossos.NET.ViewModels
         {
             await Task.Run(() =>
             {
-                if (modVersions[activeVersionIndex].installed && !modVersions[activeVersionIndex].devMode && !UpdateAvalible)
+                if (modVersions[activeVersionIndex].installed && !modVersions[activeVersionIndex].devMode && !UpdateAvailable)
                 {
                     var missingDeps = modVersions[activeVersionIndex].GetMissingDependenciesList();
                     foreach (var dependency in missingDeps.ToList())
@@ -196,9 +196,9 @@ namespace Knossos.NET.ViewModels
             return modVersions.Count();
         }
 
-        public void UpdateIsAvalible(bool value)
+        public void UpdateIsAvailable(bool value)
         {
-            UpdateAvalible = value;
+            UpdateAvailable = value;
             if(value)
             {
                 BorderColor = KnUtils.GetResourceColor("ModCardBorderUpdate");

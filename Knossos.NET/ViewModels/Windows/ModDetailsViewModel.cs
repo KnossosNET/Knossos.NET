@@ -74,13 +74,13 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal Bitmap? banner = null;
         [ObservableProperty]
-        internal bool forumAvalible = true;
+        internal bool forumAvailable = true;
         [ObservableProperty]
         internal bool isInstalled = true;
         [ObservableProperty]
         internal bool isPlayingTTS = false;
         [ObservableProperty]
-        internal bool ttsAvalible = true;
+        internal bool ttsAvailable = true;
         [ObservableProperty]
         internal bool hasBanner = false;
         [ObservableProperty]
@@ -141,7 +141,7 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                TtsAvalible = false;
+                TtsAvailable = false;
             }
 
             this.dialog = dialog;
@@ -177,7 +177,7 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                TtsAvalible = false;
+                TtsAvailable = false;
             }
         }
 
@@ -250,11 +250,11 @@ namespace Knossos.NET.ViewModels
                     IsInstalled = modVersions[index].installed;
                     if (modVersions[index].releaseThread != null)
                     {
-                        ForumAvalible = true;
+                        ForumAvailable = true;
                     }
                     else
                     {
-                        ForumAvalible = false;
+                        ForumAvailable = false;
                     }
                     LoadBanner(index);
                     LoadScreenshots(index);

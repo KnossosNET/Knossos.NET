@@ -43,8 +43,8 @@
 						<Button Command="{Binding ButtonCommand}" CommandParameter="details" Content="Details" Classes="Settings Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
 						<Button Command="{Binding ButtonCommand}" CommandParameter="settings" Content="Settings" Classes="Secondary Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="100" ></Button>
 						<StackPanel IsVisible="{Binding !IsLocalMod}">
-							<Button Command="{Binding ButtonCommand}" CommandParameter="update" Content="Update/Modify" IsVisible="{Binding UpdateAvalible}" Classes="Quaternary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
-							<Button Command="{Binding ButtonCommand}" CommandParameter="modify" Content="Modify" IsVisible="{Binding !UpdateAvalible}" Classes="Quaternary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommand}" CommandParameter="update" Content="Update/Modify" IsVisible="{Binding UpdateAvailable}" Classes="Quaternary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
+							<Button Command="{Binding ButtonCommand}" CommandParameter="modify" Content="Modify" IsVisible="{Binding !UpdateAvailable}" Classes="Quaternary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
 						</StackPanel>
 					</StackPanel>
 				</TabItem>

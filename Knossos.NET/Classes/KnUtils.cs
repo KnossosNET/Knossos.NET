@@ -610,7 +610,7 @@ namespace Knossos.NET
         }
 
         /// <summary>
-        /// Check FreeSpace avalible on the disk/partion of path
+        /// Check FreeSpace available on the disk/partion of path
         /// </summary>
         /// <param name="path"></param>
         /// <returns>Size in bytes</returns>
