@@ -101,11 +101,11 @@ namespace BBcodes
                     _rules.Add(new BBCodeRules("[br]", "<br>", ""));
                     _rules.Add(new BBCodeRules("[hr]", "<hr><br>", ""));
 
-                    _rules.Add(new BBCodeRules("[list]", "<ul style='padding-top:-30px;'>", ""));
+                    _rules.Add(new BBCodeRules("[list]", "<ul>", ""));
                     _rules.Add(new BBCodeRules("[/list]", "</ul>", ""));
-                    _rules.Add(new BBCodeRules("[ul]", "<ul style='padding-top:-30px;'>", ""));
+                    _rules.Add(new BBCodeRules("[ul]", "<ul>", ""));
                     _rules.Add(new BBCodeRules("[/ul]", "</ul>", ""));
-                    _rules.Add(new BBCodeRules("[ol]", "<ol style='padding-top:-30px;'>", ""));
+                    _rules.Add(new BBCodeRules("[ol]", "<ol>", ""));
                     _rules.Add(new BBCodeRules("[/ol]", "</ol>", ""));
                     _rules.Add(new BBCodeRules("[li]", "<li>", ""));
                     _rules.Add(new BBCodeRules("[/li]", "</li>", ""));
