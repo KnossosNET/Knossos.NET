@@ -153,7 +153,7 @@ namespace Knossos.NET.ViewModels
             //Data loads on selected index change
             ItemSelectedIndex = selectedIndex;
 
-            if (modVersions.Count == 1)
+            if (modVersions.Count > 0)
                 LoadVersion(0);
 
             if (modVersions.Any() && modVersions[0].type == ModType.engine)
