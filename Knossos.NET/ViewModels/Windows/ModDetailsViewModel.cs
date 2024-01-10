@@ -74,13 +74,13 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal Bitmap? banner = null;
         [ObservableProperty]
-        internal bool forumAvailable = true;
+        internal bool forumAvailable = false;
         [ObservableProperty]
-        internal bool isInstalled = true;
+        internal bool isInstalled = false;
         [ObservableProperty]
         internal bool isPlayingTTS = false;
         [ObservableProperty]
-        internal bool ttsAvailable = true;
+        internal bool ttsAvailable = false;
         [ObservableProperty]
         internal bool hasBanner = false;
         [ObservableProperty]
@@ -135,15 +135,6 @@ namespace Knossos.NET.ViewModels
                 BuildVersion = modVersions[0].version;
             }
 
-            if (Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts)
-            {
-                //PlayDescription(200);
-            }
-            else
-            {
-                TtsAvailable = false;
-            }
-
             this.dialog = dialog;
         }
 
@@ -169,15 +160,6 @@ namespace Knossos.NET.ViewModels
             {
                 Build = true;
                 BuildVersion = modVersions[0].version;
-            }
-
-            if(Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts) 
-            {
-                //PlayDescription(200);
-            }
-            else
-            {
-                TtsAvailable = false;
             }
         }
 
@@ -232,11 +214,16 @@ namespace Knossos.NET.ViewModels
                     await modVersions[index].LoadFulLNebulaData().ConfigureAwait(false);
                 }
                 Dispatcher.UIThread.Invoke(()=>{ 
-                    if (modVersions[index].description != null)
+                    if ( !string.IsNullOrEmpty(modVersions[index].description) )
                     {
                         var html = BBCode.ConvertToHtml(modVersions[index].description!, BBCode.BasicRules);
                         Description = "<body style='overflow: hidden;white-space: pre-line;color:white;text-align: left;'>" + html + "</body>";
                         //Log.WriteToConsole(html);
+
+                        if(Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts)
+                        {
+                            TtsAvailable = true;
+                        }
                     }
                     if (modVersions[index].owners != null && modVersions[index].owners!.Any()) 
                     {
