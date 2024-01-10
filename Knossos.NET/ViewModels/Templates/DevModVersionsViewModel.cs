@@ -232,6 +232,7 @@ namespace Knossos.NET.ViewModels
              *  8) Check modid to see if it exist, and if does the user must have write permisions to it. --done
              *  9) All dependencies must be released mods, either public or private
              *  10) If mod is public it cant depend on a private dependency
+             *  11) if the tile image size is over the maximum allowed (300kb) --done
              *  
              *  WARNINGS:
              *  -(Always) Warn about the mod visibility before upload, for both private and public, and what it means. --done
@@ -326,6 +327,14 @@ namespace Knossos.NET.ViewModels
                                 ButtonsEnabled = true;
                                 return;
                             }
+                        }
+
+                        //if the tile image size is over the maximum allowed (300kb)
+                        if (!string.IsNullOrEmpty(mod.tile) && File.Exists(Path.Combine(mod.fullPath,mod.tile)) && new FileInfo(Path.Combine(mod.fullPath, mod.tile)).Length > 307200)
+                        {
+                            await MessageBox.Show(MainWindow.instance!, "The mod tile image is over the maximum of 300kb allowed.", "Basic Check Fail", MessageBox.MessageBoxButtons.OK);
+                            ButtonsEnabled = true;
+                            return;
                         }
 
                         //If type = Engine check if the enviroment string is valid and the execs are accesible.
