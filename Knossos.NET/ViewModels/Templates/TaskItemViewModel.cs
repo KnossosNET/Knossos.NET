@@ -16,6 +16,7 @@ using VP.NET;
 using System.Text;
 using Avalonia.Media;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace Knossos.NET.ViewModels
 {
@@ -332,6 +333,37 @@ namespace Knossos.NET.ViewModels
                     else
                     {
                         tool.SaveJson(toolPath);
+                    }
+
+                    if (KnUtils.IsMacOS)
+                    {
+                        // Binaries on macOS must be signed as of BigSur (11.0) in order to run
+                        // on Apple Silicon. So make sure that at least the main executable is
+                        // signed ad-hoc after install.
+                        //
+                        // NOTE: This will *not* replace an existing signature.
+                        // NOTE: This will *not* sign libraries or frameworks! The assumption
+                        //       is that more complicated tools will already be signed.
+
+                        var executablePath = tool.GetBestPackage()?.executablePath;
+
+                        if ( !string.IsNullOrEmpty(executablePath) )
+                        {
+                            var execPath = Path.Combine(toolPath, executablePath);
+
+                            try
+                            {
+                                using var process = new Process();
+                                process.StartInfo.FileName = "codesign";
+                                process.StartInfo.Arguments = $"-s - \"{execPath}\"";
+                                process.StartInfo.CreateNoWindow = true;
+                                process.Start();
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallTool()", ex);
+                            }
+                        }
                     }
 
                     ProgressCurrent++;
