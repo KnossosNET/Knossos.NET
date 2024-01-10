@@ -75,19 +75,19 @@
 		<SolidColorBrush x:Key="BackgroundColorSecondary">#422626</SolidColorBrush>
 		<SolidColorBrush x:Key="BackgroundColorTertiary">#131414</SolidColorBrush>
 		
-		<SolidColorBrush x:Key="PrimaryColor">#85af50</SolidColorBrush>
-		<SolidColorBrush x:Key="PrimaryColorMouseOver">#66873e</SolidColorBrush>
-		<SolidColorBrush x:Key="SecondaryColor">#BF8E40</SolidColorBrush>
-		<SolidColorBrush x:Key="SecondaryColorMouseOver">#936D31</SolidColorBrush>
-		<SolidColorBrush x:Key="TertiaryColor">#B1BF40</SolidColorBrush>
-		<SolidColorBrush x:Key="TertiaryColorMouseOver">#889331</SolidColorBrush>
-		<SolidColorBrush x:Key="QuaternaryColor">#315793</SolidColorBrush>
-		<SolidColorBrush x:Key="QuaternaryColorMouseOver">#274575</SolidColorBrush>
-		<SolidColorBrush x:Key="SettingsColor">#949397</SolidColorBrush>
-		<SolidColorBrush x:Key="SettingsColorMouseOver">#8a898d</SolidColorBrush>
+		<SolidColorBrush x:Key="PrimaryColor">#257200</SolidColorBrush>
+		<SolidColorBrush x:Key="PrimaryColorMouseOver">#055200</SolidColorBrush>
+		<SolidColorBrush x:Key="SecondaryColor">#ae7112</SolidColorBrush>
+		<SolidColorBrush x:Key="SecondaryColorMouseOver">#915400</SolidColorBrush>
+		<SolidColorBrush x:Key="TertiaryColor">#425a17</SolidColorBrush>
+		<SolidColorBrush x:Key="TertiaryColorMouseOver">#497100</SolidColorBrush>
+		<SolidColorBrush x:Key="QuaternaryColor">#0b50a2</SolidColorBrush>
+		<SolidColorBrush x:Key="QuaternaryColorMouseOver">#104686</SolidColorBrush>
+		<SolidColorBrush x:Key="SettingsColor">#636266</SolidColorBrush>
+		<SolidColorBrush x:Key="SettingsColorMouseOver">#4d4d50</SolidColorBrush>
 
-		<SolidColorBrush x:Key="ForegroundColor">#DEDEDE</SolidColorBrush>
-		<SolidColorBrush x:Key="ForegroundColorMouseOver">#D3D3D3</SolidColorBrush>
+		<SolidColorBrush x:Key="ForegroundColor">#e5e5e5</SolidColorBrush>
+		<SolidColorBrush x:Key="ForegroundColorMouseOver">#f0f0f0</SolidColorBrush>
 
 		<SolidColorBrush x:Key="ModCardBorderNormal">Transparent</SolidColorBrush>
 		<SolidColorBrush x:Key="ModCardBorderUpdate">#315793</SolidColorBrush>
@@ -106,18 +106,19 @@
 		<!--Generic-->
 		<Style Selector="Button">
 			<Setter Property="FontWeight" Value="Bold"/>
-			<Setter Property="Background" Value="Black"/>
+			<Setter Property="Background" Value="#343739"/>
 			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="BorderThickness" Value="1"/>
-			<Setter Property="BorderBrush" Value="#a7a7a7"/>
+			<Setter Property="BorderBrush" Value="#777777"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="Button:pointerover /template/ ContentPresenter">
 			<Setter Property="Background" Value="#131414"/>
-			<Setter Property="BorderBrush" Value="#423F41"/>
-			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
+			<Setter Property="BorderBrush" Value="#d7d7d7"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+			<Setter Property="Cursor" Value="Hand"/>
 		</Style>
 	
 		<!--Community Links Buttons-->
@@ -142,6 +143,7 @@
 			<Setter Property="Foreground" Value="Gray"/>
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+			<Setter Property="Cursor" Value="No"/>
 		</Style>
 
 		<!--Rounded-->
@@ -165,14 +167,14 @@
 		<!--Cancel-->
 		<Style Selector="Button.Cancel">
 			<Setter Property="FontWeight" Value="Bold"/>
-			<Setter Property="Background" Value="#B54A4C"/>
+			<Setter Property="Background" Value="#9f3436"/>
 			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="Button.Cancel:pointerover /template/ ContentPresenter">
-			<Setter Property="Background" Value="#843637"/>
+			<Setter Property="Background" Value="#b61d1f"/>
 			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
 
@@ -194,7 +196,7 @@
 		<Style Selector="Button.Settings">
 			<Setter Property="FontWeight" Value="Bold"/>
 			<Setter Property="Background" Value="{StaticResource SettingsColor}"/>
-			<Setter Property="Foreground" Value="#EEEEEE"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
 			<Setter Property="FontSize" Value="14" />
 			<Setter Property="VerticalContentAlignment" Value="Center"/>
 			<Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -299,4 +301,7 @@
 		<Setter Property="Foreground" Value="#DEDEDE"/>
 	</Style>
 
+	<Style Selector="TabItem:pointerover /template/ ContentPresenter">
+		<Setter Property="Cursor" Value="Hand"/>
+	</Style>
 </Styles>
