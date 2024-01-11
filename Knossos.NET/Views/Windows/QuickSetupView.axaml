@@ -13,7 +13,7 @@
 		WindowStartupLocation="CenterScreen"
 		Title="Quick Setup Guide" 
 		SizeToContent="WidthAndHeight"
-		MaxWidth="600"
+		MaxWidth="800"
 		MinHeight="400"
 		CanResize="True">
 
