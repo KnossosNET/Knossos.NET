@@ -213,17 +213,17 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Calls a "UpdateIsAvalible(value)" on the mod card
+        /// Calls a "UpdateIsAvailable(value)" on the mod card
         /// This would be a external way to telling the mod card that the mod has updates available
         /// </summary>
         /// <param name="id"></param>
         /// <param name="value"></param>
-        public void UpdateIsAvalible(string id,bool value)
+        public void UpdateIsAvailable(string id,bool value)
         {
             var modCard = Mods.FirstOrDefault(m => m.ID == id);
             if (modCard != null)
             {
-                modCard.UpdateIsAvalible(value);
+                modCard.UpdateIsAvailable(value);
             }
         }
 

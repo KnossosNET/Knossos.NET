@@ -36,7 +36,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string modSize = "0GB";
         [ObservableProperty]
-        internal bool compressionAvalible = false;
+        internal bool compressionAvailable = false;
         [ObservableProperty]
         internal bool compressed = false;
         [ObservableProperty]
@@ -80,7 +80,7 @@ namespace Knossos.NET.ViewModels
             ignoreGlobalCmd = modJson.modSettings.ignoreGlobalCmd;
             if (Knossos.globalSettings.modCompression != CompressionSettings.Disabled && !modJson.modSettings.isCompressed)
             {
-                compressionAvalible = true;
+                compressionAvailable = true;
             }
 
             Title = modJson.title + " " + modJson.version + " Mod " + "Settings";
@@ -467,7 +467,7 @@ namespace Knossos.NET.ViewModels
                 await TaskViewModel.Instance?.CompressMod(modJson)!;
                 if (modJson.modSettings.isCompressed)
                 {
-                    CompressionAvalible = false;
+                    CompressionAvailable = false;
                     Compressed = true;
                 }
                 await Task.Factory.StartNew(() => UpdateModSize());
@@ -484,7 +484,7 @@ namespace Knossos.NET.ViewModels
                 await TaskViewModel.Instance?.DecompressMod(modJson)!;
                 if (!modJson.modSettings.isCompressed)
                 {
-                    CompressionAvalible = true;
+                    CompressionAvailable = true;
                     Compressed = false;
                 }
                 await Task.Factory.StartNew(() => UpdateModSize());

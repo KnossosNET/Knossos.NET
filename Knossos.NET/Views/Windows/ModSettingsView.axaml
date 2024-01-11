@@ -29,7 +29,7 @@
 					<!--Compression-->
 					<Label Margin="0,5,0,0" FontWeight="Black" FontSize="20">DISK USAGE</Label>
 					<Label Content="{Binding ModSize}"></Label>
-					<Button Margin="5" Classes="Secondary" IsVisible="{Binding CompressionAvalible}" Command="{Binding CompressCommand}">Compress</Button>
+					<Button Margin="5" Classes="Secondary" IsVisible="{Binding CompressionAvailable}" Command="{Binding CompressCommand}">Compress</Button>
 					<Button Margin="5" Classes="Secondary" IsVisible="{Binding Compressed}" Command="{Binding DecompressCommand}">Decompress</Button>
 					<!--Quick Launch-->
 					<Label Margin="0,5,0,0" FontWeight="Black" FontSize="20">QUICK LAUNCH</Label>

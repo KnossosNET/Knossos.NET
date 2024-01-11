@@ -42,7 +42,7 @@
 									<Label VerticalAlignment="Center">Dev Mode</Label>
 								</Border>
 								<Border Margin="20,0,0,0" Background="{StaticResource ModCardBorderUpdate}" Height="30" CornerRadius="5">
-									<Label VerticalAlignment="Center">Update Avalible</Label>
+									<Label VerticalAlignment="Center">Update Available</Label>
 								</Border>
 								<Border Margin="20,0,0,0" Background="{StaticResource ModCardBorderError}" Height="30" CornerRadius="5">
 									<Label VerticalAlignment="Center">Problem Detected</Label>

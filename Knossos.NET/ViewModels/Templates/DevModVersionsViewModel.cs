@@ -242,7 +242,7 @@ namespace Knossos.NET.ViewModels
              *  UPLOAD PROCESS:
              *  A) Do pre_flight API call, im guessing that if the mod version is already uploaded Nebula will report that here somehow. YES: "duplicated version"
              *  B) Upload mod tile image(check if already uploaded), get checksum and import it on modjson.
-             *  C) Upload banner image and screenshoots(check if already uploaded), get checksum and import it on modjson.
+             *  C) Upload banner image and screenshots(check if already uploaded), get checksum and import it on modjson.
              *  D)  1) If new mod do a create_mod api call, insert first release date (yyyy-mm-dd) and fields: id, title, type, parent, logo, tile, first_release
              *      2) If mod update do a update_mod api call, fields: id(REALLY?), title, logo, tile, first_release (for what?). 
              *         Im petty sure this step is a left behind of an initial implementation and it must NOT be done. ngld never told me about it. TODO: Confirm it! 
@@ -425,7 +425,7 @@ namespace Knossos.NET.ViewModels
                         }
 
                         //Check modid to see if it exist, and if does the user must have write permisions to it.
-                        var isNewMod = await Nebula.CheckIDAvalible(mod.id);
+                        var isNewMod = await Nebula.CheckIDAvailable(mod.id);
                         if (!isNewMod)
                         {
                             if(!await Nebula.IsModEditable(mod.id))

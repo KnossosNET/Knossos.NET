@@ -174,13 +174,13 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Informs in the installed mod card that a update is avalible
+        /// Informs in the installed mod card that a update is available
         /// </summary>
         /// <param name="id"></param>
         /// <param name="value"></param>
-        public void MarkAsUpdateAvalible(string id, bool value = true)
+        public void MarkAsUpdateAvailable(string id, bool value = true)
         {
-            InstalledModsView.UpdateIsAvalible(id, value);
+            InstalledModsView.UpdateIsAvailable(id, value);
         }
 
         /// <summary>

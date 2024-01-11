@@ -1288,7 +1288,7 @@ namespace Knossos.NET.ViewModels
                             UPLOAD PROCESS:
                             1) Do pre_flight API call, im guessing that if the mod version is already uploaded Nebula will report that here somehow. YES: "duplicated version"
                             2) Upload mod tile image(check if already uploaded), get checksum and import it on modjson.
-                            3) Upload banner image and screenshoots(check if already uploaded), get checksum and import it on modjson.
+                            3) Upload banner image and screenshots(check if already uploaded), get checksum and import it on modjson.
                             4) If package = vp create a vp in mod\kn_upload\vps\{ packagename}.vp(No Compression)
                             5) 7z all packages folders and vp file and place them in kn_upload\{ packagename}.7z
                             6) Wipe and re - generate data in package.files and filelist. "files" is for the 7z file we are uploading to nebula. "filelist" is for all files inside the package folder(folder or vp)
@@ -3423,7 +3423,7 @@ namespace Knossos.NET.ViewModels
                         var newer = Knossos.GetInstalledModList(mod.id)?.MaxBy(x => new SemanticVersion(x.version));
                         if (newer == mod)
                         {
-                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvalible(mod.id, false), DispatcherPriority.Background);
+                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvailable(mod.id, false), DispatcherPriority.Background);
                         }
                         if (mod.devMode)
                         {
