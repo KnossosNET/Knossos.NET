@@ -22,6 +22,12 @@ If no version is given (KnossosNET.exe -playmod mod-id) the highest version of t
 The "Mod Settings" window displays the cmdline to play that mod directly via quick launch.<br />
 
 <br /><br />
+## **Software Rendering Mode:**<br />
+By default Knet will render the UI in the GPU, can be set to run completely on software rendering what effectively avoids any use of the user GPU, this will come at the cost of increased CPU usage, what should not be a problem when in idle.
+<br />
+You can force the software rendering mode by using the "-software" cmdline argument or by setting an environment variable "KNET_RENDER_MODE" to "software".
+
+<br /><br />
 ## **mod.ini Support:**<br />
 Using legacy mod.ini files for mod folders is also supported, and some additional keys were added to extend support. mod.ini can be used to attempt to load an old mod or to manually add a mod to the launcher whiout having to write a mod.json file. The folder still has to be placed in the correct path inside the library as with any other mod.<br />
 

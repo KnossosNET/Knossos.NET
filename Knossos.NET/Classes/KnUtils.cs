@@ -873,5 +873,65 @@ namespace Knossos.NET
 
             return false;
         }
+
+        /// <summary>
+        /// Try to get an Enviroment Variable, checks process, user and machine global levels
+        /// </summary>
+        /// <param name="variableName"></param>
+        /// <returns>string value or null if not found or exception</returns>
+        public static string? GetEnvironmentVariable(string variableName)
+        {
+            //Check all 3 targets
+            try
+            {
+                string? returnValue = Environment.GetEnvironmentVariable(variableName, EnvironmentVariableTarget.Process);
+
+                if (returnValue != null)
+                {
+                    return returnValue;
+                }
+                else
+                {
+                    returnValue = Environment.GetEnvironmentVariable(variableName, EnvironmentVariableTarget.User);
+
+                    if (returnValue != null)
+                    {
+                        return returnValue;
+                    }
+                    else
+                    {
+                        return Environment.GetEnvironmentVariable(variableName, EnvironmentVariableTarget.Machine);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.GetEnvironmentVariable()", ex);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Sets an Enviroment Variable
+        /// Default target is process level, optional user and machine(global) levels
+        /// Note: User and machine levels only works on Windows.
+        /// </summary>
+        /// <param name="variableName"></param>
+        /// <param name="value"></param>
+        /// <param name="target"></param>
+        /// <returns>true if successful or false otherwise</returns>
+        public static bool SetEnvironmentVariable(string variableName, string? value, EnvironmentVariableTarget target = EnvironmentVariableTarget.Process)
+        {
+            try
+            {
+                Environment.SetEnvironmentVariable(variableName, value, target);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.SetEnvironmentVariable()", ex);
+            }
+            return false;
+        }
     }
 }
