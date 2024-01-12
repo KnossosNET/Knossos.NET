@@ -39,14 +39,14 @@
 					<Button IsVisible="{Binding !devMode}" Command="{Binding ButtonCommandDelete}" Content="Delete" Classes="Cancel Rounded" Margin="5" Width="100" ></Button>
 				</WrapPanel>
 				<Label Content="Version" Grid.Column="3" Margin="20,0,20,0" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
-				<ComboBox IsEnabled="{Binding !Build}" IsVisible="{Binding !Build}" SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="20,5,20,0" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
+				<ComboBox IsEnabled="{Binding !Build}" IsVisible="{Binding !Build}" SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="20,5,20,0" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
 				<Label IsVisible="{Binding Build}"  Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White" Content="{Binding BuildVersion}"/>
 				<Label Content="Released" Grid.Column="4" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding Released}" Grid.Column="4" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="Last Updated" Grid.Column="5" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding LastUpdated}" Grid.Column="5" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="Owners" Grid.Column="6" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
-				<TextBlock Text="{Binding Owners}" TextWrapping="Wrap" Grid.Column="6" Grid.Row="1" FontWeight="Bold" FontSize="12" Foreground="White"/>
+				<TextBlock Text="{Binding Owners}" TextWrapping="Wrap" Grid.Column="6" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalAlignment="Top" HorizontalAlignment="Center" Foreground="White"/>
 			</Grid>
 			
 			<!--Nebula View-->
@@ -55,7 +55,7 @@
 					<Button Command="{Binding ButtonCommandForum}" Content="Forum" IsVisible="{Binding ForumAvailable}" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" CornerRadius="40" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Background="LightCoral" Margin="5" Width="100" ></Button>
 				</WrapPanel>
 				<Label Content="Newest Version" Grid.Column="3" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
-				<ComboBox IsEnabled="False" SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="5" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
+				<ComboBox IsEnabled="False" SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="5" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
 				<Label Content="Released" Grid.Column="4" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="{Binding Released}" Grid.Column="4" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 				<Label Content="Last Updated" Grid.Column="5" Margin="5" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
