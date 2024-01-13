@@ -24,7 +24,7 @@ namespace Knossos.NET.ViewModels
             get { return modId; }
             set 
             {
-                SetProperty(ref modId, Regex.Replace(value.Replace(" ", ""), "[^a-zA-Z0-9-__ ]+", "", RegexOptions.Compiled));
+                SetProperty(ref modId, Regex.Replace(value.Replace(" ", ""), "[^a-zA-Z0-9_]+", "", RegexOptions.Compiled));
             }
         }
         internal string modName = string.Empty;
