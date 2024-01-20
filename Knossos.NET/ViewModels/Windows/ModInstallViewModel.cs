@@ -241,6 +241,8 @@ namespace Knossos.NET.ViewModels
                 var modDep = await dep.SelectModNebula(allMods);
                 if (modDep != null)
                 {
+                    //Is this dependecy mod already is installed?
+                    var modInstalled = Knossos.GetInstalledMod(modDep.id, modDep.version);
                     //Load Nebula data first to check the packages
                     await modDep.LoadFulLNebulaData();
                     //Make sure to mark all needed pkgs this mod need as required
@@ -258,7 +260,23 @@ namespace Knossos.NET.ViewModels
                                 }
                             }
                         }
+
+                        //If mod is already installed change non-installed, recommended packages to optional
+                        //and all installed ones to requiered since we dont support uninstalling mod pkgs
+                        if (pkg.status != "required" && modInstalled != null && modInstalled.packages != null)
+                        {
+                            var packageIsInstalled = modInstalled.packages.FirstOrDefault(m => m.name == pkg.name);
+                            if (packageIsInstalled == null)
+                            {
+                                pkg.status = "optional";
+                            }
+                            else
+                            {
+                                pkg.status = "required";
+                            }
+                        }
                     }
+
                     //If process this depmod own dependencies if we havent done already
                     //Otherwise re-add it to the list to enabled any potential new pkg needed
                     if (processed.IndexOf(modDep) == -1)
