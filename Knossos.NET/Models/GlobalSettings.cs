@@ -812,19 +812,22 @@ namespace Knossos.NET.Models
             }
             if(aaPreset > 0)
             {
+                // recall that the aaPreset value saved in the ini/in-game options goes form 0-7
+                // but the flags use 0-6, so account for that difference
+                var flag_aaPreset = aaPreset - 1;
                 if (build == null || SemanticVersion.Compare(build.version, "21.0.0") >= 0)
                 {
                     cmd += "-aa";
-                    cmd += "-aa_preset " + aaPreset;
+                    cmd += "-aa_preset " + flag_aaPreset;
                 }
                 else
                 {
                     if (SemanticVersion.Compare(build.version, "3.8.0") >= 0)
                     {
-                        if (aaPreset <= 2)
+                        if (flag_aaPreset <= 2)
                         {
                             cmd += "-fxaa";
-                            switch (aaPreset)
+                            switch (flag_aaPreset)
                             {
                                 case 0: cmd += "-fxaa_preset 1"; break;
                                 case 1: cmd += "-fxaa_preset 5"; break;
@@ -834,7 +837,7 @@ namespace Knossos.NET.Models
                         else
                         {
                             cmd += "-smaa";
-                            switch (aaPreset)
+                            switch (flag_aaPreset)
                             {
                                 case 3: cmd += "-smaa_preset 0"; break;
                                 case 4: cmd += "-smaa_preset 1"; break;
