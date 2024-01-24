@@ -166,7 +166,8 @@ namespace Knossos.NET.ViewModels
 
                 foreach (var mod in mods)
                 {
-                    if (usedIds.IndexOf(mod.id) == -1 && modParent != null && modParent == mod.parent)
+                    //I have disabled the comparison that disallows TCs to depend on mods, and mods to depend on a mod from other TC
+                    if (usedIds.IndexOf(mod.id) == -1 /*&& modParent != null && modParent == mod.parent*/)
                     {
                         var itemMod = new ComboBoxItem();
                         itemMod.Content = mod.title + "  [ "+ mod.id+" ]";
