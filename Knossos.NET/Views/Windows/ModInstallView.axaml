@@ -12,7 +12,7 @@
 		xmlns:models="using:Knossos.NET.Models"
 		Icon="/Assets/knossos-icon.ico"
 		SizeToContent="Width"
-		Height="500"
+		Height="600"
 		Title="{Binding Title}"
 		CanResize="True">
 	
@@ -54,7 +54,8 @@
 				</TreeDataTemplate>
 				<DataTemplate DataType="models:ModPackage">
 					<WrapPanel>
-						<CheckBox Checked="CheckBox_Changed" Unchecked="CheckBox_Changed" ToolTip.Tip="{Binding notes}" Content="{Binding name}" IsChecked="{Binding isSelected}" IsEnabled="{Binding isEnabled}" Width="350"></CheckBox>
+						<CheckBox IsVisible="{Binding !isRequired}" Checked="CheckBox_Changed" Unchecked="CheckBox_Changed" ToolTip.Tip="{Binding tooltip}" Content="{Binding name}" IsChecked="{Binding isSelected}" IsEnabled="{Binding isEnabled}" Width="350"></CheckBox>
+						<CheckBox IsVisible="{Binding isRequired}" Foreground="Orange" Checked="CheckBox_Changed" Unchecked="CheckBox_Changed" ToolTip.Tip="{Binding tooltip}" Content="{Binding name}" IsChecked="{Binding isSelected}" IsEnabled="{Binding isEnabled}" Width="350"></CheckBox>
 					</WrapPanel>
 				</DataTemplate>
 			</TreeView.DataTemplates>

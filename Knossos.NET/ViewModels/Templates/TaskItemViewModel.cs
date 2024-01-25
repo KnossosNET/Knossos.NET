@@ -2988,6 +2988,7 @@ namespace Knossos.NET.ViewModels
                     installed = Knossos.GetInstalledMod(mod.id, mod.version);
                     if (installed != null) 
                     {
+                        installed.ReLoadJson();
                         Name = "Modify " + mod.ToString().Replace("_", "-"); ;
                         compressMod = installed.modSettings.isCompressed;
                     }
@@ -3058,7 +3059,52 @@ namespace Knossos.NET.ViewModels
                         await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, msg));
                     }
 
+                    /* Delete pkgs */
+                    if (installed != null)
+                    {
+                        bool save = false;
+                        foreach (var modpkg in mod.packages.ToList())
+                        {
+                            var installedPkg = installed.packages.FirstOrDefault(p => p.name == modpkg.name);
+                            if (modpkg.filelist != null && !modpkg.isSelected && installedPkg != null)
+                            {
+                                int delCount = 0;
+                                var newTask = new TaskItemViewModel();
+                                Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallMod(delete mod file)", "Deleting package: " + modpkg.name + " MOD: " + mod);
+                                Dispatcher.UIThread.Invoke(() =>
+                                {
+                                    newTask.ShowMsg("Deleting pkg: " + modpkg.name, null, Brushes.Red);
+                                    TaskList.Add(newTask);
+                                });
+                                foreach (var file in modpkg.filelist)
+                                {
+                                    try
+                                    {
+                                        if (File.Exists(installed.fullPath + Path.DirectorySeparatorChar + file.filename))
+                                        {
+                                            File.Delete(installed.fullPath + Path.DirectorySeparatorChar + file.filename);
+                                            delCount++;
+                                        }
+                                    }
+                                    catch(Exception ex)
+                                    {
+                                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod(delete mod file)", ex);
+                                    }
+                                }
+                                Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallMod(delete mod file)", "Files deleted: " + delCount);
+                                installed.packages.Remove(installedPkg);
+                                mod.packages.Remove(modpkg);
+                                save = true;
+                            }
+                        }
+                        if(save)
+                        {
+                            installed.SaveJson();
+                        }
+                    }
+
                     int vPExtractionNeeded = 0;
+
                     for (int i = mod.packages.Count - 1; i >= 0; i--)
                     {
                         bool alreadyInstalled = false;
@@ -3098,6 +3144,7 @@ namespace Knossos.NET.ViewModels
                             mod.packages.RemoveAt(i);
                         }
                     }
+
 
                     /* Is there is nothing new to install just end the task */
                     if(files.Count == 0 && !metaUpdate)

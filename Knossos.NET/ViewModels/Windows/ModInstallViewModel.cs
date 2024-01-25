@@ -172,12 +172,33 @@ namespace Knossos.NET.ViewModels
                     SelectedMod.fullPath = installed.fullPath;
                     foreach (var displayPkg in SelectedMod.packages)
                     {
-                        displayPkg.status = "optional";
-                        foreach (var pkg in installed.packages)
+                        var installedPkg = installed.packages.FirstOrDefault(ip => ip.name == displayPkg.name);
+                        if(installedPkg != null)
                         {
-                            if (pkg.name == displayPkg.name)
+                            //pkg is installed
+                            if (displayPkg.status == "required")
                             {
-                                displayPkg.status = "required";
+                                displayPkg.isEnabled = false;
+                            }
+                            else
+                            {
+                                displayPkg.isEnabled = true;
+                            }
+                            displayPkg.isSelected = true;
+                        }
+                        else
+                        {
+                            //pkg not installed
+                            if(displayPkg.status == "required")
+                            {
+                                //rare case
+                                displayPkg.isEnabled = false;
+                                displayPkg.isSelected = true;
+                            }
+                            else
+                            {
+                                displayPkg.isEnabled = true;
+                                displayPkg.isSelected = false;
                             }
                         }
                     }
@@ -188,6 +209,25 @@ namespace Knossos.NET.ViewModels
                 }
                 else
                 {
+                    foreach(var pkg in SelectedMod.packages)
+                    {
+                        switch (pkg.status)
+                        {
+                            case "required":
+                                pkg.isEnabled = false;
+                                pkg.isSelected = true;
+                                break;
+                            case "recommended":
+                                pkg.isEnabled = true;
+                                pkg.isSelected = true;
+                                break;
+                            case "optional":
+                                pkg.isEnabled = true;
+                                pkg.isSelected = false;
+                                break;
+                        }
+                    }
+
                     IsInstalled = false;
 
                     if(ForceDevMode)
@@ -241,24 +281,89 @@ namespace Knossos.NET.ViewModels
                 var modDep = await dep.SelectModNebula(allMods);
                 if (modDep != null)
                 {
+                    //Is this dependecy mod already is installed?
+                    var modInstalled = Knossos.GetInstalledMod(modDep.id, modDep.version);
                     //Load Nebula data first to check the packages
                     await modDep.LoadFulLNebulaData();
                     //Make sure to mark all needed pkgs this mod need as required
                     modDep.isEnabled = true;
                     modDep.isSelected = true;
-                    foreach(var pkg in modDep.packages)
+
+                    foreach (var pkg in modDep.packages)
                     {
                         if (dep != null && dep.packages != null)
                         {
-                            foreach (var depPkg in dep.packages)
+                            //Auto select needed packages and inform in the tooltip and change foreground
+                            var depPkg = dep.packages.FirstOrDefault(dp => dp == pkg.name);
+                            if (depPkg != null && pkg.status != "required")
                             {
-                                if (depPkg == pkg.name)
+                                pkg.isEnabled = true;
+                                pkg.isSelected = true;
+                                pkg.isRequired = true;
+
+                                if (!pkg.tooltip.Contains(mod.ToString()))
                                 {
-                                    pkg.status = "required";
+                                    var originalPkg = mod.FindPackageWithDependency(dep.originalDependency);
+                                    if(originalPkg != null)
+                                    {
+                                        pkg.tooltip += "\nRequired by MOD: " + mod + "\nPKG: " + originalPkg.name;
+                                    }
+                                    else
+                                    {
+                                        pkg.tooltip += "\nRequired by MOD: " + mod;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                switch(pkg.status)
+                                {
+                                    case "required":
+                                        pkg.isEnabled = false;
+                                        pkg.isSelected = true;
+                                        break;
+                                    case "recommended":
+                                        pkg.isSelected = true;
+                                        break;
+                                    case "optional":
+                                        //No need to do anything here
+                                        break;
+                                }
+                            }
+                        }
+
+                        //If mod is already installed, non-installed pkgs are all unselected
+                        //and all installed ones are selected
+                        if (modInstalled != null && modInstalled.packages != null)
+                        {
+                            var packageIsInstalled = modInstalled.packages.FirstOrDefault(m => m.name == pkg.name);
+                            if (packageIsInstalled != null)
+                            {
+                                //Pkg is installed
+                                if (pkg.status == "required")
+                                {
+                                    pkg.isEnabled = false;
+                                }
+                                else
+                                {
+                                    pkg.isEnabled = true;
+                                }
+                                pkg.isSelected = true;
+                            }
+                            else
+                            {
+                                //Pkg is not installed
+                                //ONLY if the currently selected mod is also installed
+                                //For new mod or new mod version installs only if the package is not needed
+                                if (IsInstalled || !IsInstalled && !pkg.isRequired)
+                                {
+                                    pkg.isEnabled = true;
+                                    pkg.isSelected = false;
                                 }
                             }
                         }
                     }
+
                     //If process this depmod own dependencies if we havent done already
                     //Otherwise re-add it to the list to enabled any potential new pkg needed
                     if (processed.IndexOf(modDep) == -1)
@@ -285,25 +390,12 @@ namespace Knossos.NET.ViewModels
             if (modInList == null)
             {
                 /* This mod was not added to the install list yet */
+                //Copy pkg notes to tooltip
                 foreach (var pkg in mod.packages)
                 {
-                    if (pkg.status!.ToLower() == "required")
+                    if (!string.IsNullOrEmpty(pkg.notes) && !pkg.tooltip.Contains(pkg.notes))
                     {
-                        pkg.isEnabled = false;
-                        pkg.isSelected = true;
-                    }
-                    else
-                    {
-                        if (pkg.status!.ToLower() == "recommended")
-                        {
-                            pkg.isSelected = true;
-                            pkg.isEnabled = true;
-                        }
-                        else
-                        {
-                            pkg.isEnabled = true;
-                        }
-
+                        pkg.tooltip = pkg.notes + pkg.tooltip;
                     }
                 }
                 ModInstallList.Add(mod);
@@ -312,26 +404,22 @@ namespace Knossos.NET.ViewModels
             {
                 foreach(var pkgInList in modInList.packages)
                 {
-                    /* If the mod is already added make sure recommended and requiered packages are properly marked */
-                    foreach (var pkg in mod.packages)
+                    /* If the mod is already added make sure all needed packages are properly marked */
+                    var pkg = mod.packages.FirstOrDefault(mp => mp.name == pkgInList.name);
+                    if(pkg != null)
                     {
-                        if (pkgInList == pkg)
+                        if (pkgInList.isEnabled && !pkg.isEnabled || pkg.status!.ToLower() == "required")
                         {
-                            if (pkg.status!.ToLower() == "required")
-                            {
-                                pkgInList.isEnabled = false;
-                                pkgInList.isSelected = true;
-                            }
-                            else
-                            {
-                                if (pkg.status!.ToLower() == "recommended")
-                                {
-                                    pkgInList.isSelected = true;
-                                    pkgInList.isEnabled = true;
-                                }
-
-                            }
-                            break;
+                            pkgInList.isEnabled = false;
+                            pkgInList.isSelected = true;
+                        }
+                        if(!pkgInList.isRequired && pkg.isRequired)
+                        {
+                            pkgInList.isRequired = true;
+                        }
+                        if (!pkgInList.tooltip.Contains(pkg.tooltip))
+                        {
+                            pkgInList.tooltip += pkg.tooltip;
                         }
                     }
                 }
