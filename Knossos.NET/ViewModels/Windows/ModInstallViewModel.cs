@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
@@ -209,6 +210,9 @@ namespace Knossos.NET.ViewModels
                 }
                 else
                 {
+                    //If this mod-version is not installed we have any other version of it installed?
+                    var otherVersionInstalled = Knossos.GetInstalledModList(SelectedMod.id)?.MaxBy(m => new SemanticVersion(m.version));
+   
                     foreach(var pkg in SelectedMod.packages)
                     {
                         switch (pkg.status)
@@ -225,6 +229,21 @@ namespace Knossos.NET.ViewModels
                                 pkg.isEnabled = true;
                                 pkg.isSelected = false;
                                 break;
+                        }
+
+                        //Copy pkg selection from the installed version if we can
+                        if (otherVersionInstalled != null && pkg.status != "required")
+                        {
+                            var pkgExist = otherVersionInstalled.packages.FirstOrDefault(p=>p.name == pkg.name);
+                            if (pkgExist != null)
+                            {
+                                pkg.isSelected = true;
+                            }
+                            else
+                            {
+                                pkg.isSelected = false;
+                            }
+                            pkg.tooltip = "\n\nNote: Selection status was copied from installed version: " + otherVersionInstalled.version;
                         }
                     }
 
@@ -306,11 +325,11 @@ namespace Knossos.NET.ViewModels
                                     var originalPkg = mod.FindPackageWithDependency(dep.originalDependency);
                                     if(originalPkg != null)
                                     {
-                                        pkg.tooltip += "\nRequired by MOD: " + mod + "\nPKG: " + originalPkg.name;
+                                        pkg.tooltip += "\n\nRequired by MOD: " + mod + "\nPKG: " + originalPkg.name;
                                     }
                                     else
                                     {
-                                        pkg.tooltip += "\nRequired by MOD: " + mod;
+                                        pkg.tooltip += "\n\nRequired by MOD: " + mod;
                                     }
                                 }
                             }
