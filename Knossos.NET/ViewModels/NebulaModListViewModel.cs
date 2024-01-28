@@ -75,6 +75,7 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public async void OpenTab(string newSearch, MainWindowViewModel.SortType newSortType)
         {
+            Search = newSearch;
             if (IsLoading)
             {
                 IsTabOpen = true;
@@ -87,7 +88,7 @@ namespace Knossos.NET.ViewModels
 
                 try
                 {
-                    await Task.Delay(100).ConfigureAwait(false);
+                    await Task.Delay(200).ConfigureAwait(false);
                     List<NebulaModCardViewModel>? modsInView = null;
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
@@ -100,7 +101,10 @@ namespace Knossos.NET.ViewModels
                         {
                             await Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                m.Visible = true;
+                                if (Search.Trim() == string.Empty || m.Name != null && m.Name.ToLower().Contains(Search.ToLower()))
+                                {
+                                    m.Visible = true;
+                                }
                             });
                             await Task.Delay(1).ConfigureAwait(false);
                         }
@@ -112,7 +116,6 @@ namespace Knossos.NET.ViewModels
                 }
 
             }
-            Search = newSearch;
             ChangeSort(newSortType);
         }
 
@@ -154,7 +157,12 @@ namespace Knossos.NET.ViewModels
                 }
                 var card = new NebulaModCardViewModel(modJson);
                 if (!IsLoading)
-                    card.Visible = true;
+                {
+                    if (Search.Trim() == string.Empty || card.Name != null && card.Name.ToLower().Contains(Search.ToLower()))
+                    {
+                        card.Visible = true;
+                    }
+                }
                 Mods.Insert(i, card);
             }
             else
@@ -190,7 +198,6 @@ namespace Knossos.NET.ViewModels
                         }
                     }
                     var card = new NebulaModCardViewModel(mod);
-                    //card.Visible = false;
                     newModCardList.Insert(i, card);
                 }
                 else
@@ -205,7 +212,7 @@ namespace Knossos.NET.ViewModels
                 if (IsTabOpen)
                 {
                     IsTabOpen = false;
-                    OpenTab(search, sortType);
+                    OpenTab(Search, sortType);
                 }
             });
         }
