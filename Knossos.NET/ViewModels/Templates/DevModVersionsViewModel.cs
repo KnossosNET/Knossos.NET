@@ -276,7 +276,8 @@ namespace Knossos.NET.ViewModels
                             return;
                         }
 
-                        //If type = TC check it must have no mod dependencies of other mod parent
+                        //If type = TC check it must have no mod dependencies of other mod parent. Update: This was disabled
+                        /*
                         if (mod.type == ModType.tc)
                         {
                             foreach(var pkg in mod.packages)
@@ -304,6 +305,7 @@ namespace Knossos.NET.ViewModels
                                 }
                             }
                         }
+                        */
 
                         //If type = mod and parent is not "FS2" it must have a dependency pointing to a TC/Version mod.
                         if(mod.type == ModType.mod && mod.parent != "FS2")

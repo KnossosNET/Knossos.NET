@@ -757,97 +757,6 @@ namespace Knossos.NET
                 }
             }
 
-            /* Build mod flag */
-            foreach (var modid in mod.GetModFlagList())
-            {
-                /* Load this mod */
-                if (modid == mod.id)
-                {
-                    /* Dev Mode ON */
-                    if (mod.devMode)
-                    {
-                        foreach (var pkg in mod.packages.OrderBy(x => x.name))
-                        {
-                            if (pkg.isEnabled)
-                            {
-                                if (modFlag.Length > 0)
-                                {
-                                    modFlag += "," + mod.folderName + Path.DirectorySeparatorChar + pkg.folder;
-                                }
-                                else
-                                {
-                                    modFlag += mod.folderName + Path.DirectorySeparatorChar + pkg.folder;
-                                }
-                            }
-                        }
-
-                        //If standalone the multi.cfg will be on mod root\data to avoid uploading it to nebula
-                        if (standaloneServer)
-                        {
-                            if (modFlag.Length > 0)
-                            {
-                                modFlag += "," + mod.folderName;
-                            }
-                            else
-                            {
-                                modFlag += mod.folderName;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //avoid passing FS2 in modflag because fs2retail runs off the working folder
-                        if (mod.id != "FS2")
-                        {
-                            if (modFlag.Length > 0)
-                            {
-                                modFlag += "," + mod.folderName;
-                            }
-                            else
-                            {
-                                modFlag += mod.folderName;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var depMod in modList)
-                    {
-                        if (depMod.id == modid)
-                        {
-                            /* Dev Mode ON */
-                            if (depMod.devMode)
-                            {
-                                foreach (var pkg in depMod.packages)
-                                {
-                                    if(modFlag.Length > 0)
-                                    {
-                                        modFlag += "," + depMod.folderName + Path.DirectorySeparatorChar + pkg.folder;
-                                    }
-                                    else
-                                    {
-                                        modFlag += depMod.folderName + Path.DirectorySeparatorChar + pkg.folder;
-                                    }
-                                    
-                                }
-                            }
-                            else
-                            {
-                                if (modFlag.Length > 0)
-                                {
-                                    modFlag += "," + depMod.folderName;
-                                }
-                                else
-                                {
-                                    modFlag += depMod.folderName;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
             /* Determine root folder */
             var rootPath = string.Empty;
 
@@ -900,7 +809,97 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used working folder : " + rootPath);
             }
 
-            if(fsoBuild == null)
+            /* Build mod flag */
+            foreach (var modid in mod.GetModFlagList())
+            {
+                /* Load this mod */
+                if (modid == mod.id)
+                {
+                    /* Dev Mode ON */
+                    if (mod.devMode)
+                    {
+                        foreach (var pkg in mod.packages.OrderBy(x => x.name))
+                        {
+                            if (pkg.isEnabled)
+                            {
+                                if (modFlag.Length > 0)
+                                {
+                                    modFlag += "," + Path.GetRelativePath(rootPath, mod.fullPath + Path.DirectorySeparatorChar + pkg.folder);
+                                }
+                                else
+                                {
+                                    modFlag += Path.GetRelativePath(rootPath, mod.fullPath + Path.DirectorySeparatorChar + pkg.folder);
+                                }
+                            }
+                        }
+
+                        //If standalone the multi.cfg will be on mod root\data to avoid uploading it to nebula
+                        if (standaloneServer)
+                        {
+                            if (modFlag.Length > 0)
+                            {
+                                modFlag += "," + Path.GetRelativePath(rootPath, mod.fullPath);
+                            }
+                            else
+                            {
+                                modFlag += Path.GetRelativePath(rootPath, mod.fullPath);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //avoid passing FS2 in modflag because fs2retail runs off the working folder
+                        if (mod.id != "FS2")
+                        {
+                            if (modFlag.Length > 0)
+                            {
+                                modFlag += "," + mod.folderName;
+                            }
+                            else
+                            {
+                                modFlag += mod.folderName;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var depMod in modList)
+                    {
+                        if (depMod.id == modid)
+                        {
+                            /* Dev Mode ON */
+                            if (depMod.devMode)
+                            {
+                                foreach (var pkg in depMod.packages)
+                                {
+                                    if (modFlag.Length > 0)
+                                    {
+                                        modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder);
+                                    }
+                                    else
+                                    {
+                                        modFlag += Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (modFlag.Length > 0)
+                                {
+                                    modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath);
+                                }
+                                else
+                                {
+                                    modFlag += Path.GetRelativePath(rootPath, depMod.fullPath);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (fsoBuild == null)
             {
                 Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", "Unable to find a valid FSO build for this mod!");
                 if(hasBuildDependency)
