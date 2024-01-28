@@ -236,6 +236,7 @@ namespace Knossos.NET.Models
                                     missingDep.id = dep.id;
                                     missingDep.version = dep.version;
                                     missingDep.packages = missingPkg;
+                                    missingDep.originalDependency = dep;
                                     missingDependencyList.Add(missingDep);
                                 }
                             }
@@ -885,6 +886,26 @@ namespace Knossos.NET.Models
             }
             return false;
         }
+
+        /// <summary>
+        /// Try to track down the mod pkg that a ModDependency belongs too
+        /// </summary>
+        /// <param name="dependency"></param>
+        /// <returns>Returns the modpkg or null if not found</returns>
+        public ModPackage? FindPackageWithDependency(ModDependency? dependency)
+        {
+            if(dependency != null && packages != null && packages.Any())
+            {
+                foreach(var pkg in packages)
+                {
+                    if(pkg.dependencies != null && pkg.dependencies.FirstOrDefault(dep => dep == dependency) != null)
+                    {
+                        return pkg;
+                    }
+                }
+            }
+            return null;
+        }
     }
 
     public class ModMember
@@ -917,10 +938,29 @@ namespace Knossos.NET.Models
         public object? checkNotes { get; set; }
 
         /* Knet Only */
+        /// <summary>
+        /// used for pkg display in a checkbox.
+        /// NOT Saved in the json
+        /// </summary>
         [JsonIgnore]
         public bool isSelected { get; set; } = false;
-
+        /// <summary>
+        /// used for display (to enable/disabled chkbox) and to enable/disable the package in devmode
+        /// Saved in the json
+        /// </summary>
         public bool isEnabled { get; set; } = true;
+        /// <summary>
+        /// Used to display checkbox tooltip
+        /// NOT saved in the Json
+        /// </summary>
+        [JsonIgnore]
+        public string tooltip { get; set; } = string.Empty;
+        /// <summary>
+        /// Used to indicate a pkg is needed during mod install checkbox selection
+        /// Used to change checkbox foreground color during mod install/modify display
+        /// </summary>
+        [JsonIgnore]
+        public bool isRequired { get; set; } = false;
         [JsonIgnore]
         public int buildScore { get; set; } = 0;
     }
@@ -930,6 +970,15 @@ namespace Knossos.NET.Models
         public string id { get; set; } = string.Empty; // required
         public string? version { get; set; } // required, https://getcomposer.org/doc/01-basic-usage.md#package-versions
         public List<string>? packages { get; set; } // optional, specifies which optional and recommended packages are also required
+
+        /// <summary>
+        /// Used to store the original dependency reference during mod.GetMissingDependencies
+        /// Useful to track down the original pkg this dependency belongs to
+        /// mod.FindPackageWithDependency()
+        /// Not saved in Json
+        /// </summary>
+        [JsonIgnore]
+        public ModDependency? originalDependency;
 
         /// <summary>
         /// Returns the best installed mod that meets this dependency by semantic version, null if none.
