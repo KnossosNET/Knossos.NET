@@ -320,14 +320,17 @@ namespace Knossos.NET.ViewModels
                                 pkg.isSelected = true;
                                 pkg.isRequired = true;
 
-                                if (!pkg.tooltip.Contains(mod.ToString()))
+                                var originalPkg = mod.FindPackageWithDependency(dep.originalDependency);
+                                if(originalPkg != null)
                                 {
-                                    var originalPkg = mod.FindPackageWithDependency(dep.originalDependency);
-                                    if(originalPkg != null)
+                                    if (!pkg.tooltip.Contains(mod + "\nPKG: " + originalPkg.name))
                                     {
                                         pkg.tooltip += "\n\nRequired by MOD: " + mod + "\nPKG: " + originalPkg.name;
                                     }
-                                    else
+                                }
+                                else
+                                {
+                                    if (!pkg.tooltip.Contains(mod.ToString()))
                                     {
                                         pkg.tooltip += "\n\nRequired by MOD: " + mod;
                                     }
