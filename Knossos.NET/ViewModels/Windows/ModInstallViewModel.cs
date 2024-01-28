@@ -210,7 +210,7 @@ namespace Knossos.NET.ViewModels
                 }
                 else
                 {
-                    //If this mod-version is not installed we have any other version of it installed?
+                    //If this mod-version is not installed, do we have any other version of it installed?
                     var otherVersionInstalled = Knossos.GetInstalledModList(SelectedMod.id)?.MaxBy(m => new SemanticVersion(m.version));
    
                     foreach(var pkg in SelectedMod.packages)
@@ -312,7 +312,7 @@ namespace Knossos.NET.ViewModels
                     {
                         if (dep != null && dep.packages != null)
                         {
-                            //Auto select needed packages and inform in the tooltip and change foreground
+                            //Auto select needed packages and inform via tooltip, updating the foreground
                             var depPkg = dep.packages.FirstOrDefault(dp => dp == pkg.name);
                             if (depPkg != null && pkg.status != "required")
                             {

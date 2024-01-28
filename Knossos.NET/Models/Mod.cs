@@ -956,7 +956,7 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public string tooltip { get; set; } = string.Empty;
         /// <summary>
-        /// Used to indicate a pkg is needed during mod install chkbox selection
+        /// Used to indicate a pkg is needed during mod install checkbox selection
         /// Used to change checkbox foreground color during mod install/modify display
         /// </summary>
         [JsonIgnore]
@@ -973,7 +973,7 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// Used to store the original dependency reference during mod.GetMissingDependencies
-        /// Usefull to track down the original pkg this dependency belong to with
+        /// Useful to track down the original pkg this dependency belongs to
         /// mod.FindPackageWithDependency()
         /// Not saved in Json
         /// </summary>
