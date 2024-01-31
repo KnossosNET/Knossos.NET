@@ -16,7 +16,7 @@ namespace Knossos.NET
 {
     public static class Knossos
     {
-        public static readonly string AppVersion = "0.2.0-RC9";
+        public static readonly string AppVersion = "0.2.0-RC10";
         public readonly static string ToolRepoURL = "https://raw.githubusercontent.com/KnossosNET/Knet-Tool-Repo/main/knet_tools.json";
         public readonly static string GitHubUpdateRepoURL = "https://api.github.com/repos/KnossosNET/Knossos.NET";
         public readonly static string FAQURL = "https://raw.githubusercontent.com/KnossosNET/KNet-General-Resources-Repo/main/communityfaq.json";
