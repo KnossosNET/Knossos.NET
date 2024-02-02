@@ -3896,10 +3896,24 @@ namespace Knossos.NET.ViewModels
                                             filehash.Close();
                                             if (hashValue.ToLower() != file.checksum[1].ToLower())
                                             {
-                                                throw new Exception("The downloaded file hash was incorrect, expected: " + file.checksum[1] + " Calculated Hash: " + hashValue);
+                                                //Nightlies Errata #1
+                                                //All Nightlies older than 20230805 got their checksum changed when they got moved and data is not updated in the DB
+                                                if (build.id == "FSO" && build.stability == FsoStability.Nightly && build.date != null && string.Compare("2023-08-05", build.date) >= 0)
+                                                {
+                                                    fileTask.Info += " Nightlies Errata #1";
+                                                    Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.InstallBuild()", "The downloaded file hash was incorrect, expected: " + file.checksum[1] + " Calculated Hash: " + hashValue + " (Nightly Errata #1)");
+                                                }
+                                                else
+                                                {
+                                                    fileTask.Info += " Checksum Mismatch!";
+                                                    throw new Exception("The downloaded file hash was incorrect, expected: " + file.checksum[1] + " Calculated Hash: " + hashValue);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                fileTask.Info += " Checksum OK!";
                                             }
                                         }
-                                        fileTask.Info += " Checksum OK!";
                                     }
                                 }
                                 else
