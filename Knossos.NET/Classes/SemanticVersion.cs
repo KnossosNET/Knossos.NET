@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Knossos.NET.Classes
 {
@@ -63,7 +64,9 @@ namespace Knossos.NET.Classes
 
                     if (version.Contains("-"))
                     {
-                        prerelease = version.Replace(" ", "").Split('-')[1];
+                        // 0.0.0-RC1 -> RC1
+                        // 0.0.0-RC1-Alpha -> RC1.Alpha
+                        prerelease = string.Join(".",version.Replace(" ", "").Split('-').Skip(1)).Trim().ToLower();
                     }
                     else
                     {
@@ -127,15 +130,132 @@ namespace Knossos.NET.Classes
                             return -1;
                         }
 
-                        return string.Compare(versionA.prerelease, versionB.prerelease);
+                        /*
+                            Pre-Release Comparison
+                            -Identifiers consisting of only digits are compared numerically.
+                            -Identifiers with letters or hyphens are compared lexically in ASCII sort order.
+                            -Numeric identifiers always have lower precedence than non-numeric identifiers.
+                            -A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal.
+                            -Example: 1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta < 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0
+                        */
+
+                        if (versionA.prerelease != null && versionB.prerelease != null)
+                        {
+                            //add "." sepators to numbers if they dont have a preceding number or "."
+                            var preReleaseA = PreReleaseSeparateNumbers(versionA.prerelease);
+                            var preReleaseB = PreReleaseSeparateNumbers(versionB.prerelease);
+
+                            var arrayA = preReleaseA.Split(".");
+                            var arrayB = preReleaseB.Split(".");
+
+                            //We use arrayA as a base
+                            for(int i = 0; i < arrayA.Length; i++)
+                            {
+                                //compare segment to segment
+                                if(i < arrayB.Length)
+                                {
+                                    //This should be enoght to resolve equal on all cases
+                                    var cmpRes = string.CompareOrdinal(arrayA[i], arrayB[i]);
+                                    if (cmpRes != 0)
+                                    {
+                                        //all digits? 
+                                        if (arrayA[i].All(char.IsDigit) && arrayB[i].All(char.IsDigit))
+                                        {
+                                            return int.Parse(arrayA[i]) - int.Parse(arrayB[i]);
+                                        }
+                                        else
+                                        {
+                                            //Same length?
+                                            if (arrayA[i].Length == arrayB[i].Length)
+                                            {
+                                                return cmpRes;
+                                            }
+                                            else
+                                            {
+                                                //Make a substring of the larger segment matching the shorter and compare
+                                                //if it matches continue, otherwise return length comparison
+                                                if (arrayA[i].Length > arrayB[i].Length)
+                                                {
+                                                    cmpRes = string.CompareOrdinal(arrayA[i].Substring(0, arrayB[i].Length), arrayB[i]);
+                                                    if (cmpRes == 0)
+                                                    {
+                                                        return arrayA[i].Length - arrayB[i].Length;
+                                                    }
+                                                    else
+                                                    {
+                                                        return cmpRes;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    cmpRes = string.CompareOrdinal(arrayB[i].Substring(0, arrayA[i].Length), arrayA[i]);
+                                                    if (cmpRes == 0)
+                                                    {
+                                                        return arrayA[i].Length - arrayB[i].Length;
+                                                    }
+                                                    else
+                                                    {
+                                                        //invert the result because we are comparing b to a
+                                                        return cmpRes * -1;
+                                                    }
+                                                }
+                                                
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    //arrayB is shorter end the comparison
+                                    break;
+                                }
+                            }
+
+                            //If we are still here that means all compared segments were equal return the lenght diference
+                            return arrayA.Length - arrayB.Length;
+                        }
+                        else
+                        {
+                            return string.Compare(versionA.prerelease, versionB.prerelease);
+                        }
                     }
                 }
             }
         }
 
-        /*
+        /// <summary>
+        /// Inserts separators to numbers in inside a Pre-Release string so they can be properly compared
+        /// Example:
+        /// -RC10 -> -RC.10
+        /// -Beta5Version4 -> -Beta.5.Version.4
+        /// </summary>
+        /// <param name="preReleaseString"></param>
+        private static string PreReleaseSeparateNumbers(string preReleaseString)
+        {
+            var pos = 1;
+            while (pos < preReleaseString.Length)
+            {
+                if (char.IsDigit(preReleaseString[pos]) && preReleaseString[pos - 1] != '.' && !char.IsDigit(preReleaseString[pos - 1]))
+                {
+                    preReleaseString = preReleaseString.Insert(pos, ".");
+                    pos += 2;
+                }
+                else
+                {
+                    if (preReleaseString[pos] != '.' && !char.IsDigit(preReleaseString[pos]) && char.IsDigit(preReleaseString[pos - 1]))
+                    {
+                        preReleaseString = preReleaseString.Insert(pos, ".");
+                        pos += 2;
+                    }
+                    else
+                    {
+                        pos++; 
+                    }
+                }
+            }
+            return preReleaseString;
+        }
 
-        */
         /// <summary>
         /// Compares a semantic version string to the version string in the mod dependency to see if it sastifies the requirement.
         /// Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 < 4.7.0, Version: ">=4.6.1"->equal or better
