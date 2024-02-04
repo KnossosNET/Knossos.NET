@@ -154,7 +154,7 @@ namespace Knossos.NET.Classes
                                 //compare segment to segment
                                 if(i < arrayB.Length)
                                 {
-                                    //This should be enoght to resolve equal on all cases
+                                    //This should be enough to resolve equal on all cases
                                     var cmpRes = string.CompareOrdinal(arrayA[i], arrayB[i]);
                                     if (cmpRes != 0)
                                     {
@@ -206,12 +206,12 @@ namespace Knossos.NET.Classes
                                 }
                                 else
                                 {
-                                    //arrayB is shorter end the comparison
+                                    //arrayB is shorter, so end the comparison
                                     break;
                                 }
                             }
 
-                            //If we are still here that means all compared segments were equal return the lenght diference
+                            //If we are still here that means all compared segments were equal. So return the length difference
                             return arrayA.Length - arrayB.Length;
                         }
                         else
@@ -224,7 +224,7 @@ namespace Knossos.NET.Classes
         }
 
         /// <summary>
-        /// Inserts separators to numbers in inside a Pre-Release string so they can be properly compared
+        /// Inserts separators to numbers within a Pre-Release string so they can be properly compared
         /// Example:
         /// -RC10 -> -RC.10
         /// -Beta5Version4 -> -Beta.5.Version.4
