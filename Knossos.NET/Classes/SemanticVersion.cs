@@ -173,7 +173,7 @@ namespace Knossos.NET.Classes
                                             else
                                             {
                                                 //Make a substring of the larger segment matching the shorter and compare
-                                                //if it matches continue, otherwise return length comparison
+                                                //if it matches compare array length, otherwise return the comparison
                                                 if (arrayA[i].Length > arrayB[i].Length)
                                                 {
                                                     cmpRes = string.CompareOrdinal(arrayA[i].Substring(0, arrayB[i].Length), arrayB[i]);
