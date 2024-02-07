@@ -824,11 +824,11 @@ namespace Knossos.NET
                             {
                                 if (modFlag.Length > 0)
                                 {
-                                    modFlag += "," + Path.GetRelativePath(rootPath, mod.fullPath + Path.DirectorySeparatorChar + pkg.folder);
+                                    modFlag += "," + Path.GetRelativePath(rootPath, mod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
                                 }
                                 else
                                 {
-                                    modFlag += Path.GetRelativePath(rootPath, mod.fullPath + Path.DirectorySeparatorChar + pkg.folder);
+                                    modFlag += Path.GetRelativePath(rootPath, mod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
                                 }
                             }
                         }
@@ -838,11 +838,11 @@ namespace Knossos.NET
                         {
                             if (modFlag.Length > 0)
                             {
-                                modFlag += "," + Path.GetRelativePath(rootPath, mod.fullPath);
+                                modFlag += "," + Path.GetRelativePath(rootPath, mod.fullPath).TrimEnd('/').TrimEnd('\\');
                             }
                             else
                             {
-                                modFlag += Path.GetRelativePath(rootPath, mod.fullPath);
+                                modFlag += Path.GetRelativePath(rootPath, mod.fullPath).TrimEnd('/').TrimEnd('\\');
                             }
                         }
                     }
@@ -875,11 +875,11 @@ namespace Knossos.NET
                                 {
                                     if (modFlag.Length > 0)
                                     {
-                                        modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder);
+                                        modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
                                     }
                                     else
                                     {
-                                        modFlag += Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder);
+                                        modFlag += Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
                                     }
                                 }
                             }
@@ -887,11 +887,11 @@ namespace Knossos.NET
                             {
                                 if (modFlag.Length > 0)
                                 {
-                                    modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath);
+                                    modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath).TrimEnd('/').TrimEnd('\\');
                                 }
                                 else
                                 {
-                                    modFlag += Path.GetRelativePath(rootPath, depMod.fullPath);
+                                    modFlag += Path.GetRelativePath(rootPath, depMod.fullPath).TrimEnd('/').TrimEnd('\\');
                                 }
                             }
                         }
