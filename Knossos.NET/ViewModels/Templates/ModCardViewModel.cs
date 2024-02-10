@@ -96,11 +96,13 @@ namespace Knossos.NET.ViewModels
         {
             modJson.ClearUnusedData();
             Log.Add(Log.LogSeverity.Information, "ModCardViewModel.AddModVersion()", "Adding additional version for mod id: " + ID + " -> " + modJson.folderName);
+            string currentVersion = modVersions[activeVersionIndex].version;
             modVersions.Add(modJson);
-            if (SemanticVersion.Compare(modJson.version, modVersions[activeVersionIndex].version) > 0)
+            modVersions.Sort((o1, o2) => -SemanticVersion.Compare(o1.version, o2.version));
+            if (SemanticVersion.Compare(modJson.version, currentVersion) > 0)
             {
                 Log.Add(Log.LogSeverity.Information, "ModCardViewModel.AddModVersion()", "Changing active version for " + modJson.title + " from " + modVersions[activeVersionIndex].version + " to " + modJson.version);
-                activeVersionIndex = modVersions.Count - 1;
+                activeVersionIndex = modVersions.FindIndex((m) => m.version.Equals(modJson.version));
                 Name = modJson.title;
                 ModVersion = modJson.version + " (+" + (modVersions.Count - 1) + ")";
                 LoadImage();
