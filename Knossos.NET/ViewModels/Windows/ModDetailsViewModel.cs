@@ -154,7 +154,7 @@ namespace Knossos.NET.ViewModels
             ItemSelectedIndex = selectedIndex;
 
             if (modVersions.Count > 0)
-                LoadVersion(0);
+                LoadVersion(selectedIndex);
 
             if (modVersions.Any() && modVersions[0].type == ModType.engine)
             {
