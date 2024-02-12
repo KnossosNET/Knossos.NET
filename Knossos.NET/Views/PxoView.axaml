@@ -48,11 +48,11 @@
 							</TreeDataTemplate>
 							<DataTemplate DataType="vm:PxoServer">
 								<WrapPanel>
-									<TextBlock Text="{Binding Game.Name}" Width="300" />
-									<TextBlock Text="{Binding Game.NumPlayers}" Width="15" />
-									<TextBlock Text="/ "/>
-									<TextBlock Text="{Binding Game.MaxPlayers}" Width="15" />
-									<TextBlock Margin="10,0,0,0" Text="{Binding Game.Mode}" Width="100"/>
+									<TextBlock Text="{Binding Game.Name}" Width="275" />
+									<TextBlock Text="{Binding Game.NumPlayers}" Width="20" />
+									<TextBlock Text="/" />
+									<TextBlock Text="{Binding Game.MaxPlayers}" Width="20" />
+									<TextBlock Margin="30,0,0,0" Text="{Binding Game.Mode}" Width="100"/>
 									<TextBlock Text="{Binding Game.Type}" Width="100"/>
 									<TextBlock Text="{Binding Game.State}" Width="100"/>
 									<TextBlock Text="{Binding Game.Mission}" Width="150"/>
