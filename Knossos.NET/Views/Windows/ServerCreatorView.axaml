@@ -10,13 +10,17 @@
 		Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterOwner"
 		SizeToContent="WidthAndHeight"
-        Title="PXO Standalone Server Creator">
+        Title="PXO Standalone Server Creator"
+		Height="800"
+		Width="500"
+		Name="ThisWindow">
 	
 	<Design.DataContext>
 		<vm:ServerCreatorViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}">
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+	<ScrollViewer MinHeight="400" MinWidth="500"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}" Background="{StaticResource BackgroundColorPrimary}">
 		<StackPanel>
 			<Label HorizontalAlignment="Center" FontWeight="Bold" FontSize="22">Select a mod</Label>
 			<ComboBox MinWidth="400" HorizontalAlignment="Center" SelectedIndex="{Binding ModIndex}" ItemsSource="{Binding ListOfMods}"></ComboBox>
@@ -62,4 +66,5 @@
 			</WrapPanel>
 		</StackPanel>
 	</ScrollViewer>
+	</Viewbox>
 </Window>

@@ -12,13 +12,15 @@
 			 Width="1070"
 			 WindowStartupLocation="CenterOwner"
 			 Title="{Binding Name}"
+			 Name="ThisWindow"
 			 CanResize="True">
 	
 	<Design.DataContext>
 		<vm:ModDetailsViewModel/>
 	</Design.DataContext>
-
-	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}">
+	
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}" MinWidth="1070" MinHeight="600"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
 	<Grid RowDefinitions="Auto,Auto,*,Auto">
 		<StackPanel Grid.Row="0" Margin="25">
 			<Image Source="{Binding Banner}" HorizontalAlignment="Stretch" Height="300" IsVisible="{Binding HasBanner}"></Image>
@@ -103,5 +105,6 @@
 		</Grid>
 	</Grid>
 	</ScrollViewer>
+	</Viewbox>
 </Window>
  

@@ -13,6 +13,8 @@
 		Icon="/Assets/knossos-icon.ico"
 		SizeToContent="Width"
 		Height="600"
+		Width="500"
+		Name="ThisWindow"
 		Title="{Binding Title}"
 		CanResize="True">
 	
@@ -20,7 +22,8 @@
 		<vm:ModInstallViewModel/>
 	</Design.DataContext>
 	
-	<Grid MinHeight="400" MinWidth="300" RowDefinitions="Auto,*,Auto, Auto, Auto" Background="{StaticResource BackgroundColorPrimary}">
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+	<Grid MinHeight="450" MinWidth="400"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}" RowDefinitions="Auto,*,Auto, Auto, Auto" Background="{StaticResource BackgroundColorPrimary}">
 		<Label IsVisible="{Binding !DataLoaded}" Grid.Row="0" Margin="0,20,0,0" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center">Loading data from repo...</Label>
 		<StackPanel IsVisible="{Binding DataLoaded}" Margin="0,20,0,0" Grid.Row="0">
 			<TextBlock Text="{Binding Name}" IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center"></TextBlock>
@@ -71,5 +74,5 @@
 		</StackPanel>
 		<CheckBox IsVisible="{Binding CleanupVisible}" IsChecked="{Binding CleanupEnabled}" Grid.Row="4" HorizontalAlignment="Center" ToolTip.Tip="Delete older versions than the one you are installing if its not in use by other mods. Note: This only applies to this mod and not to its dependencies.">Remove old versions of this mod</CheckBox>
 	</Grid>
-	
+	</Viewbox>
 </Window>

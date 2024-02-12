@@ -8,12 +8,17 @@
 		Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterScreen"
         Title="How to increase in-game performance" 
-		SizeToContent="WidthAndHeight" 
+		SizeToContent="WidthAndHeight"
+		Name="ThisWindow"
+		Height="300"
+		Width="400"
 		CanResize="False">
-	
-	<StackPanel MaxWidth="500" Background="{StaticResource BackgroundColorPrimary}">
+
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+	<StackPanel MaxHeight="500" MinHeight="150" MinWidth="300"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}" MaxWidth="500" Background="{StaticResource BackgroundColorPrimary}">
 		<TextBlock Margin="10,20,20,10" TextWrapping="Wrap">If in-game performance is slow, close the game and then try disabling "Extra Multi Sample Anti-Aliasing" and "Shadows".</TextBlock>
 		<TextBlock Margin="10,10,20,10" TextWrapping="Wrap">The next best options to disable are "Deferred Lighting" and then "Post-processing Anti-Aliasing".</TextBlock>
 		<TextBlock Margin="10,10,20,20" TextWrapping="Wrap">And always remember to click the "Save" button!</TextBlock>
 	</StackPanel>
+	</Viewbox>
 </Window>

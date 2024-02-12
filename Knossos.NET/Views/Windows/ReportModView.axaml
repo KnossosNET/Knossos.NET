@@ -8,6 +8,7 @@
 		Icon="/Assets/knossos-icon.ico"
 		Height="380"
 		Width="600"
+		Name="ThisWindow"
 		CanResize="False"
 		WindowStartupLocation="CenterScreen"
 		SizeToContent="WidthAndHeight"
@@ -19,8 +20,9 @@
 	<Design.DataContext>
 		<vm:ReportModViewModel/>
 	</Design.DataContext>
-
-	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+	
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+	<ScrollViewer MinHeight="380" MinWidth="600"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}" Background="{StaticResource BackgroundColorPrimary}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 		<Grid HorizontalAlignment="Center" ColumnDefinitions="Auto, Auto" RowDefinitions="Auto,Auto,Auto,Auto">
 			<Label Grid.Row="0" Grid.Column="0" Margin="10" FontWeight="Bold" FontSize="16">Mod</Label>
 			<Label Grid.Row="0" Grid.Column="1" Margin="10" FontSize="16" Content="{Binding ModName}"></Label>
@@ -34,5 +36,6 @@
 			</WrapPanel>
 		</Grid>
 	</ScrollViewer>
+	</Viewbox>
 	
 </Window>

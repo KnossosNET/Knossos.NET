@@ -8,6 +8,7 @@
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="900"
         x:Class="Knossos.NET.Views.MainWindow"
         Icon="/Assets/knossos-icon.ico"
+		Name="ThisWindow"
 		WindowStartupLocation="CenterScreen"
         Title="{Binding AppTitle}">
 
@@ -17,7 +18,8 @@
 	
 
 	<!-- Main View -->
-	<Grid Background="{StaticResource BackgroundColorPrimary}">
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+	<Grid Background="{StaticResource BackgroundColorPrimary}" MinWidth="900" MinHeight="500"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*"></RowDefinition>
 			<RowDefinition Height="4"></RowDefinition>
@@ -70,4 +72,5 @@
 		<GridSplitter Grid.Row="1" Background="Black" ResizeDirection="Rows"/>
 		<v:TaskView Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxHeight="350" Content="{Binding TaskView}"/>
 	</Grid>
+	</Viewbox>
 </Window>

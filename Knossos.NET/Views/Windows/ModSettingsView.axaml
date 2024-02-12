@@ -12,13 +12,16 @@
 			 Title="{Binding Title}" 
 			 SizeToContent="Width"
 			 Height="750"
+			 Width="600"
+		     Name="ThisWindow"
 			 CanResize="True">
 
 	<Design.DataContext>
 		<vm:ModSettingsViewModel/>
 	</Design.DataContext>
 
-	<Grid Background="{StaticResource BackgroundColorPrimary}">
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+	<Grid MinHeight="600" MinWidth="550"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}" Background="{StaticResource BackgroundColorPrimary}">
 		<Grid RowDefinitions="Auto,*">
 			<Grid ColumnDefinitions="Auto,Auto" HorizontalAlignment="Center" Grid.Row="0">
 				<Button Command="{Binding SaveSettingsCommand}" Grid.Column="1" FontSize="18" Classes="Accept" Margin="5">Save</Button>
@@ -61,4 +64,5 @@
 			</ScrollViewer>
 		</Grid>
 	</Grid>
+	</Viewbox>
 </Window>
