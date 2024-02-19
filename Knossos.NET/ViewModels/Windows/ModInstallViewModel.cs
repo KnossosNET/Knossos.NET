@@ -236,15 +236,14 @@ namespace Knossos.NET.ViewModels
                         if (otherVersionInstalled != null && pkg.status != "required")
                         {
                             var pkgExist = otherVersionInstalled.packages.FirstOrDefault(p=>p.name == pkg.name);
+                            pkg.tooltip = "\n\nNote: Selection status was copied from installed version: " + otherVersionInstalled.version;
                             if (pkgExist != null)
                             {
                                 pkg.isSelected = true;
-                                pkg.tooltip = "\n\nNote: Selection status was copied from installed version: " + otherVersionInstalled.version;
                             }
                             else
                             {
                                 pkg.isSelected = false;
-                                pkg.tooltip = "\n\nNote: Selection status was copied from installed version: " + otherVersionInstalled.version;
                                 //Check if this is a new mod pkg
                                 if(pkg.status == "recommended")
                                 {
