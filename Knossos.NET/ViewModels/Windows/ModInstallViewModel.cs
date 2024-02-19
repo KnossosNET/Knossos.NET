@@ -57,6 +57,7 @@ namespace Knossos.NET.ViewModels
         internal bool cleanupEnabled = true;
         [ObservableProperty]
         internal bool isMetaUpdate = false;
+        private List<Mod> modCache = new List<Mod>();
 
 
         internal Mod? selectedMod;
@@ -238,12 +239,38 @@ namespace Knossos.NET.ViewModels
                             if (pkgExist != null)
                             {
                                 pkg.isSelected = true;
+                                pkg.tooltip = "\n\nNote: Selection status was copied from installed version: " + otherVersionInstalled.version;
                             }
                             else
                             {
                                 pkg.isSelected = false;
+                                pkg.tooltip = "\n\nNote: Selection status was copied from installed version: " + otherVersionInstalled.version;
+                                //Check if this is a new mod pkg
+                                if(pkg.status == "recommended")
+                                {
+                                    var inCache = modCache.FirstOrDefault(mc => mc.id == otherVersionInstalled.id && mc.version == otherVersionInstalled.version);
+                                    if(inCache == null)
+                                    {
+                                        inCache = await Nebula.GetModData(otherVersionInstalled.id, otherVersionInstalled.version);
+                                        if(inCache != null )
+                                        {
+                                            modCache.Add(inCache);
+                                        }
+                                    }
+                                    if(inCache != null)
+                                    {
+                                        var isNewPkg = inCache.packages.FirstOrDefault(p => p.name == pkg.name);
+                                        if(isNewPkg == null)
+                                        {
+                                            //pkg did not existed in the version we are comparing to
+                                            pkg.isSelected = true;
+                                            pkg.tooltip = "\n\nNote: This is a newly added mod pkg.";
+                                        }
+                                    }
+                                }
                             }
-                            pkg.tooltip = "\n\nNote: Selection status was copied from installed version: " + otherVersionInstalled.version;
+                            
+
                         }
                     }
 
