@@ -25,7 +25,7 @@
 		<StackPanel IsVisible="{Binding DataLoaded}" Margin="0,20,0,0" Grid.Row="0">
 			<TextBlock Text="{Binding Name}" IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="28" HorizontalAlignment="Center"></TextBlock>
 			<Label FontSize="16" Margin="5" IsVisible="{Binding HasWriteAccess}" Foreground="DarkGoldenrod" HorizontalAlignment="Center">You have write access to this mod.</Label>
-			<Label FontSize="16" Margin="5" IsVisible="{Binding ForceDevMode}" Foreground="DarkGoldenrod" HorizontalAlignment="Center">DevMode install is forced ON</Label>
+			<Label FontSize="16" Margin="5" IsVisible="{Binding ForceDevMode}" Foreground="DarkGoldenrod" HorizontalAlignment="Center">DevMode install is forced ON</Label>			
 			<ComboBox ItemsSource="{Binding ModVersions}" SelectedItem="{Binding SelectedMod}" SelectedIndex="{Binding SelectedIndex}"  IsVisible="{Binding DataLoaded}" Margin="0,10,0,0" FontWeight="Bold" FontSize="22" HorizontalAlignment="Center">
 				<ComboBox.ItemTemplate>
 					<DataTemplate>
@@ -33,6 +33,8 @@
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
 			</ComboBox>
+			<TextBlock Margin="0,5,0,0" FontSize="14" HorizontalAlignment="Center" >Version Release Date: </TextBlock>
+			<TextBlock FontSize="14" HorizontalAlignment="Center" Text="{Binding ReleaseDate}"></TextBlock>
 			<Label ToolTip.Tip="Download size consist of LZMA2 7z compressed files with max compression, the actual extracted size will be considerable higher than this value. It is recommended that you have at least double free space than what it is indicated here." Content="{Binding InstallSize}" Margin="5" FontSize="18" HorizontalAlignment="Center"></Label>
 			<Label Content="{Binding FreeSpace}" Margin="5,0,5,5" FontSize="18" HorizontalAlignment="Center"></Label>
 			<Label IsVisible="{Binding IsInstalled}" HorizontalAlignment="Center" FontWeight="Black" Foreground="Green"> This version is installed, you can add optional packages</Label>
