@@ -83,7 +83,7 @@
 		<StackPanel IsVisible="{Binding Page6}" Grid.Row="0" >
 			<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left">Finishing</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Finally, before launching a mod go to the "Settings" tab and configure video and audio settings, as well as any joysticks you may have installed. Always remember to click "Save" after changing any values.</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">It is recommended to run in windowed mode at the same resolution as your desktop resolution. There is no need to enable the borderless mode, as windowed mode is already borderless at native resolution.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">It is recommended to run in windowed mode at the same resolution as your system display. There is no need to enable the borderless mode, as windowed mode is already borderless at native resolution.</TextBlock>
 		</StackPanel>
 		
 		<!--Navigation-->
