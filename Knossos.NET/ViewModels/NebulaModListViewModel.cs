@@ -20,7 +20,7 @@ namespace Knossos.NET.ViewModels
         /// <summary>
         /// Current Sort Mode
         /// </summary>
-        internal MainWindowViewModel.SortType sortType = MainWindowViewModel.SortType.name;
+        internal MainWindowViewModel.SortType sortType = MainWindowViewModel.SortType.unsorted;
 
         /// <summary>
         /// The user has opened this tab in this session?

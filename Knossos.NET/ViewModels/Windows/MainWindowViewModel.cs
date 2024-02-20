@@ -50,7 +50,8 @@ namespace Knossos.NET.ViewModels
         {
             name,
             release,
-            update
+            update,
+            unsorted
         }
 
         internal SortType sharedSortType = SortType.name;
@@ -69,7 +70,7 @@ namespace Knossos.NET.ViewModels
                         sharedSearch = InstalledModsView.Search;
 
                         // Change and save to the new sort type.
-                        if (sharedSortType != InstalledModsView.sortType)
+                        if (sharedSortType != InstalledModsView.sortType && InstalledModsView.sortType != SortType.unsorted)
                         {
                             sharedSortType = InstalledModsView.sortType;
                             Knossos.globalSettings.Save(false);
@@ -79,7 +80,7 @@ namespace Knossos.NET.ViewModels
                     {
                         sharedSearch = NebulaModsView.Search;
 
-                        if (sharedSortType != NebulaModsView.sortType)
+                        if (sharedSortType != NebulaModsView.sortType && NebulaModsView.sortType != SortType.unsorted)
                         {
                             sharedSortType = NebulaModsView.sortType;
                             Knossos.globalSettings.Save(false);
