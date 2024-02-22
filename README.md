@@ -16,19 +16,19 @@ Knossos.NET offers greatly improved performance and stability over the old Pytho
 
 <br /><br />
 ## **Quick Launch Cmdline:**<br />
-KnossosNET supports direct mod launch by adding a cmdline argument, this will open the launcher, and will launch FSO to play a mod with all the current settings and configurations, and close the launcher.<br />
+KnossosNET supports direct mod launch by adding a Command Line argument, this will open the launcher, and will launch FSO to play a mod with all the current settings and configurations, and close the launcher.<br />
 Example:<br />
 <br />
 KnossosNET.exe -playmod mod-id -version mod-version (optional)<br />
 <br />
 If no version is given (KnossosNET.exe -playmod mod-id) the highest version of the mod will be launched.<br />
-The "Mod Settings" window displays the cmdline to play that mod directly via quick launch.<br />
+The "Mod Settings" window displays the Command Line to play that mod directly via quick launch.<br />
 
 <br /><br />
 ## **Software Rendering Mode:**<br />
 By default Knet will render the UI in the GPU, can be set to run completely on software rendering what effectively avoids any use of the user GPU, this will come at the cost of increased CPU usage, what should not be a problem when in idle.
 <br />
-You can force the software rendering mode by using the "-software" cmdline argument or by setting an environment variable "KNET_RENDER_MODE" to "software".
+You can force the software rendering mode by using the "-software" Command Line argument or by setting an environment variable "KNET_RENDER_MODE" to "software".
 
 <br /><br />
 ## **mod.ini Support:**<br />
@@ -39,12 +39,12 @@ https://wiki.hard-light.net/index.php/Mod.ini#KnossosNET_Support<br />
 
 <br /><br />
 ## **CmdLine Priority Explained:**<br />
-On KnossosNET there are multiples sources of cmdline arguments that are eventually joined into a single one to launch the game, repeating arguments are not allowed.<br />
+On KnossosNET there are multiples sources of Command Line arguments that are eventually joined into a single one to launch the game, repeating arguments are not allowed.<br />
 
 - By default, the priority works in this order:<br />
   - _SystemCMD(Global Settings) > Global CMD > User/Mod CMD_
 
-- Users also have the option to not apply the global cmdline on a per-mod basis by checking the box in a mod's settings. If checked, the priority is then only: <br />
+- Users also have the option to not apply the global Command Line on a per-mod basis by checking the box in a mod's settings. If checked, the priority is then only: <br />
   - _User/Mod CMD_
 
 
