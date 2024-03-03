@@ -1390,7 +1390,7 @@ namespace Knossos.NET.Models
                             { new ByteArrayContent(imgBytes, 0, imgBytes.Length), "file", "upload" }
                         };
 
-                        var reply = await ApiCall("upload/file", data, true);
+                        var reply = await ApiCall("upload/file", data, true, 600);
                         if (reply.HasValue)
                         {
                             if (reply.Value.result)
@@ -1899,7 +1899,7 @@ namespace Knossos.NET.Models
                             { new ByteArrayContent(partBytes, 0, partBytes.Length), "file", "upload" }
                         };
 
-                        var reply = await ApiCall("multiupload/part", data, true);
+                        var reply = await ApiCall("multiupload/part", data, true, 600);
                         if (reply.HasValue)
                         {
                             if (!reply.Value.result)
