@@ -609,6 +609,11 @@ namespace Knossos.NET
                     await QuickLaunch();
                 }
             }
+
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                MainWindowViewModel.Instance?.InstalledModsView?.ChangeSort(MainWindowViewModel.Instance?.sharedSortType!);
+            });
         }
 
         /// <summary>

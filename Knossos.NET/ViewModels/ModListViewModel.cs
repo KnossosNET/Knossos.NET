@@ -17,7 +17,7 @@ namespace Knossos.NET.ViewModels
         /// <summary>
         /// Current Sort Mode
         /// </summary>
-        internal MainWindowViewModel.SortType sortType = MainWindowViewModel.SortType.name;
+        internal MainWindowViewModel.SortType sortType = MainWindowViewModel.SortType.unsorted;
 
         internal string search = string.Empty;
         internal string Search
@@ -137,12 +137,15 @@ namespace Knossos.NET.ViewModels
                 {
                     Dispatcher.UIThread.Invoke( () =>
                     {
-                        sortType = newSort;
                         var tempList = Mods.ToList();
-                        tempList.Sort(CompareMods);
-                        for (int i = 0; i < tempList.Count; i++)
-                        {
-                            Mods.Move(Mods.IndexOf(tempList[i]), i);
+                        // Only sort and update to the new sort type if we have mods to sort!
+                        if (tempList.Any()){
+                            sortType = newSort;
+                            tempList.Sort(CompareMods);
+                            for (int i = 0; i < tempList.Count; i++)
+                            {
+                                Mods.Move(Mods.IndexOf(tempList[i]), i);
+                            }
                         }
                         GC.Collect();
                     },DispatcherPriority.Background);
