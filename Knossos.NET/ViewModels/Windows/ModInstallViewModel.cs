@@ -26,6 +26,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string version = string.Empty;
         [ObservableProperty]
+        internal string releaseDate = string.Empty;
+        [ObservableProperty]
         internal string name = string.Empty;
         [ObservableProperty]
         internal int selectedIndex = -1;
@@ -265,6 +267,11 @@ namespace Knossos.NET.ViewModels
                 Compress=SelectedMod.modSettings.isCompressed;
                 Name = SelectedMod.title;
                 Version = SelectedMod.version;
+                if (SelectedMod.lastUpdate != null){                
+                    ReleaseDate = SelectedMod.lastUpdate;
+                } else {
+                    ReleaseDate = "Was not listed in repository";
+                }
                 await ProcessMod(SelectedMod,allMods);
             }
             if (!IsInstalled && SelectedMod != null && ModVersions.Count > 1 && ModVersions.IndexOf(SelectedMod) > 0)
