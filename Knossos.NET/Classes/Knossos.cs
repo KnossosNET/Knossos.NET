@@ -399,7 +399,7 @@ namespace Knossos.NET
 
                                             if (KnUtils.WasInstallerUsed())
                                             {
-                                                File.Move(Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update" + extension), Path.Combine(updateFilesFolder, "update" + extension));
+                                                File.Move(Path.Combine(KnUtils.GetKnossosDataFolderPath(), "update" + extension), Path.Combine(updateFilesFolder, "update" + extension), true);
                                             }
                                             else
                                             {
