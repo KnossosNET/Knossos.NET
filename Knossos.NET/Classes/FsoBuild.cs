@@ -163,6 +163,20 @@ namespace Knossos.NET.Models
         }
 
         /// <summary>
+        /// Returns true if this build contains at least one executable
+        /// that can be executed on this system.
+        /// Note: pkg list must be already loaded
+        /// </summary>
+        public bool IsValidBuild()
+        {
+            if(executables.Count > 0 && executables.FirstOrDefault(x=>x.isValid) != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Updates Updates Build Json data
         /// This updates everything, including stability and the executables array
         /// </summary>

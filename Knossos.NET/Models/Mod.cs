@@ -1068,15 +1068,16 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// Returns the best installed build that meets this dependency by semantic version, null if none.
+        /// Optional: Only select builds with at least one valid executabl
         /// </summary>
         /// <returns>FsoBuild or null</returns>
-        public FsoBuild? SelectBuild()
+        public FsoBuild? SelectBuild(bool onlyWithValidExecutable = false)
         {
             FsoBuild? validBuild = null;
 
             foreach (var build in Knossos.GetInstalledBuildsList(id, FsoStability.Stable))
             {
-                if (SemanticVersion.SastifiesDependency(version, build.version))
+                if ((!onlyWithValidExecutable || onlyWithValidExecutable && build.IsValidBuild()) && SemanticVersion.SastifiesDependency(version, build.version))
                 {
                   
                     if (validBuild == null)
@@ -1097,7 +1098,7 @@ namespace Knossos.NET.Models
             {
                 foreach (var build in Knossos.GetInstalledBuildsList(id, FsoStability.RC))
                 {
-                    if (SemanticVersion.SastifiesDependency(version, build.version))
+                    if ((!onlyWithValidExecutable || onlyWithValidExecutable && build.IsValidBuild()) && SemanticVersion.SastifiesDependency(version, build.version))
                     {
 
                         if (validBuild == null)
@@ -1119,7 +1120,7 @@ namespace Knossos.NET.Models
             {
                 foreach (var build in Knossos.GetInstalledBuildsList(id, FsoStability.Nightly))
                 {
-                    if (SemanticVersion.SastifiesDependency(version, build.version))
+                    if ((!onlyWithValidExecutable || onlyWithValidExecutable && build.IsValidBuild()) && SemanticVersion.SastifiesDependency(version, build.version))
                     {
 
                         if (validBuild == null)
@@ -1141,7 +1142,7 @@ namespace Knossos.NET.Models
             {
                 foreach (var build in Knossos.GetInstalledBuildsList(id, FsoStability.Custom))
                 {
-                    if (SemanticVersion.SastifiesDependency(version, build.version))
+                    if ((!onlyWithValidExecutable || onlyWithValidExecutable && build.IsValidBuild()) && SemanticVersion.SastifiesDependency(version, build.version))
                     {
 
                         if (validBuild == null)
