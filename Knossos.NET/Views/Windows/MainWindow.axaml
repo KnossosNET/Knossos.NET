@@ -62,6 +62,7 @@
 						<Button Margin="5" Classes="Settings" Command="{Binding OpenSettings}">View Settings File</Button>
 						<Button Margin="5" Classes="Settings" Command="{Binding OpenFS2Ini}">View fs2_open.ini</Button>
 						<Button Margin="5" Classes="Settings" Command="{Binding OpenFS2Log}">View fs2_open.log</Button>
+						<Button Margin="5" Classes="Primary" Command="{Binding OpenDebugFilterView}">Adjust Debug Filters</Button>
 					</WrapPanel>
 					<TextBox Grid.Row="1" Text="{Binding UiConsoleOutput}" IsReadOnly="True"></TextBox>
 				</Grid>
