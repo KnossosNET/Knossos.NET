@@ -24,17 +24,31 @@ namespace Knossos.NET.ViewModels
             get { return modId; }
             set 
             {
-                SetProperty(ref modId, Regex.Replace(value.Replace(" ", ""), "[^a-zA-Z0-9_]+", "", RegexOptions.Compiled));
+                SetProperty(ref modId, Regex.Replace(value.Replace(" ", "_"), "[^a-zA-Z0-9_]+", "", RegexOptions.Compiled));
+
+                if (modName == lastmodName){
+                    modIDManual = true;
+                }
             }
         }
+
+        // These two variables help track if the user is manually setting the mod ID.
+        internal string lastmodName = string.Empty;
+        internal bool modIDManual = false;
+
         internal string modName = string.Empty;
         internal string ModName
         {
             get { return modName; }
             set
             {
-                SetProperty(ref modName, Regex.Replace(value, "[^a-zA-Z0-9-__ ]+", "", RegexOptions.Compiled));
-                ModId = modName;
+                SetProperty(ref modName, value);
+
+                if (modName != lastmodName && !modIDManual){
+                    ModId = modName;
+                }
+
+                lastmodName = modName;
             }
         }
         [ObservableProperty]
