@@ -55,6 +55,7 @@ namespace Knossos.NET.ViewModels
 
         public DebugFiltersViewModel()
         {
+            LoadDebugRepo();
         }
 
     }
