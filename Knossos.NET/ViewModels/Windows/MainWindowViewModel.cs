@@ -123,7 +123,7 @@ namespace Knossos.NET.ViewModels
                     }
                     if (tabIndex == 7) // Debug
                     {
-                        LoadDebugRepo
+//                        LoadDebugRepo
                     }
 
                 }
@@ -429,9 +429,9 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void OpenDebugFilterView()
         {
-            var dialog = new DebugFiltersView();
-            dialog.DataContext = new DebugFiltersViewModel(dialog);
-            await dialog.ShowDialog<DevModCreateNewView?>(MainWindow.instance!);
+            var dialog = new Views.DebugFiltersView();
+            dialog.DataContext = new DebugFiltersViewModel();
+            await dialog.ShowDialog<DebugFiltersView?>(MainWindow.instance!);
         }
 
         internal void applySettingsToList()

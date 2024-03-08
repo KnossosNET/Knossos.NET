@@ -52,5 +52,11 @@ namespace Knossos.NET.ViewModels
             Initialized = true;
 
         }
+
+        public DebugFiltersViewModel()
+        {
+        }
+
     }
+
 }
