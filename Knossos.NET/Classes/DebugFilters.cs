@@ -6,22 +6,23 @@ using System.Collections.ObjectModel;
 
 namespace Knossos.NET.Classes{
 
-
     public partial class DebugFilterCategory  : ObservableObject
     {
-        public string typeName { get; set; } = string.Empty;
-
-        public partial class DebugFilter
+        public partial class DebugFilter : ObservableObject
         {        
-            [JsonPropertyName("Filter")]
-            public string filterName { get; set; } = string.Empty;
-            public string description { get; set; } = string.Empty;
+            [JsonPropertyName("Filter"), ObservableProperty]
+            internal string filterName = string.Empty;
+            [JsonPropertyName("Description"), ObservableProperty]
+            internal string description = string.Empty;
 
-            public bool enabled = false;
+            [ObservableProperty]
+            internal bool enabled = false;
         }
 
         [ObservableProperty]
-        public ObservableCollection<DebugFilter> questions = new ObservableCollection<DebugFilter>();
+        internal string typeName = string.Empty;
+        [ObservableProperty]
+        internal ObservableCollection<DebugFilter> filters = new ObservableCollection<DebugFilter>();
 
         // TODO!  Create a save function
     }

@@ -9,14 +9,42 @@
 		x:DataType="vm:DebugFiltersViewModel"
 		Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterScreen"
+		SizeToContent="WidthAndHeight"
         Title="Debug Filter Selection" 
 		CanResize="True">
 	
 	<Design.DataContext>
 		<vm:DebugFiltersViewModel/>
 	</Design.DataContext>
-	<StackPanel MaxWidth="500" Background="{StaticResource BackgroundColorPrimary}">
-		<TextBlock>Additional Debug Filters:</TextBlock>
-		
+	<StackPanel Margin="10,15,10,15" Width="500" Background="{StaticResource BackgroundColorPrimary}">
+		<TextBlock ToolTip.Tip="These are options that enable additonal FSO debug log output. They range from useful to arcane.">Debug Filters:</TextBlock>
+		    <ScrollViewer Margin="0,10,0,0" >
+                <StackPanel Margin="30,0,20,10">
+                    <ItemsControl ItemsSource="{Binding Categories}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel HorizontalAlignment="Stretch" Margin="10,10,0,0">
+                            		<TextBlock Width="500" Text="{Binding TypeName}"></TextBlock>
+									<TreeView ItemsSource="{Binding Filters}">
+										<TreeView.ItemTemplate>
+											<TreeDataTemplate>
+												<StackPanel Margin="10,10,10,10">
+													<WrapPanel>
+														<TextBlock Text="{Binding FilterName}" TextWrapping="Wrap"></TextBlock>
+													</WrapPanel>
+													<WrapPanel>
+														<TextBlock Margin="0,10,0,5" Text="{Binding Description}" TextWrapping="Wrap"></TextBlock>
+													</WrapPanel>
+												</StackPanel>
+											</TreeDataTemplate>
+										</TreeView.ItemTemplate>
+									</TreeView>                                    
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+		    </ScrollViewer>
+
 	</StackPanel>
 </Window>
