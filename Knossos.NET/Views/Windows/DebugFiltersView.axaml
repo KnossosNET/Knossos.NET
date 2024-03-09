@@ -16,10 +16,10 @@
 	<Design.DataContext>
 		<vm:DebugFiltersViewModel/>
 	</Design.DataContext>
-	<StackPanel Margin="10,15,10,15">
-		<TextBlock Margin="10,10,0,0" ToolTip.Tip="These are options that enable additonal FSO debug log output. They range from useful to arcane.">Debug Filters:</TextBlock>
-		<StackPanel Margin="30,0,20,10">
-			<ScrollViewer Margin="5,10,0,0" >
+	<ScrollViewer>
+		<StackPanel Margin="10,15,10,15">
+			<TextBlock Margin="10,10,0,0" ToolTip.Tip="These are options that enable additonal FSO debug log output. They range from useful to arcane.">Debug Filters:</TextBlock>
+			<StackPanel Margin="30,0,20,10">
 				<ItemsControl ItemsSource="{Binding Categories}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
@@ -29,7 +29,7 @@
 									<TreeView.ItemTemplate>
 										<TreeDataTemplate>
 											<StackPanel Margin="10,10,10,10">
-												<WrapPanel>
+												<WrapPanel Background="{StaticResource BackgroundColorPrimary}">
 													<CheckBox Margin="5,0,0,0" ToolTip.Tip="Enabled or disabled this filter." IsChecked="{Binding Enabled}"></CheckBox>
 													<TextBlock Margin="5,5,0,0" Text="{Binding Filter}" TextWrapping="Wrap"></TextBlock>
 												</WrapPanel>
@@ -44,7 +44,8 @@
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 				</ItemsControl>
-			</ScrollViewer>
+			
+			</StackPanel>
 		</StackPanel>
-	</StackPanel>
+	</ScrollViewer>
 </Window>
