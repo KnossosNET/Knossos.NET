@@ -16,7 +16,7 @@
 	<Design.DataContext>
 		<vm:DebugFiltersViewModel/>
 	</Design.DataContext>
-	<StackPanel Margin="10,15,10,15" Width="500" Background="{StaticResource BackgroundColorPrimary}">
+	<StackPanel Margin="10,15,10,15">
 		<TextBlock Margin="10,10,0,0" ToolTip.Tip="These are options that enable additonal FSO debug log output. They range from useful to arcane.">Debug Filters:</TextBlock>
 		<StackPanel Margin="30,0,20,10">
 			<ScrollViewer Margin="5,10,0,0" >
