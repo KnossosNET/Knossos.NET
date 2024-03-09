@@ -11,7 +11,7 @@ namespace Knossos.NET.Classes{
         public partial class DebugFilter : ObservableObject
         {        
             [JsonPropertyName("Filter"), ObservableProperty]
-            internal string filterName = string.Empty;
+            internal string filter = string.Empty;
             [JsonPropertyName("Description"), ObservableProperty]
             internal string description = string.Empty;
 
@@ -20,7 +20,7 @@ namespace Knossos.NET.Classes{
         }
 
         [ObservableProperty]
-        internal string typeName = string.Empty;
+        internal string typename = string.Empty;
         [ObservableProperty]
         internal ObservableCollection<DebugFilter> filters = new ObservableCollection<DebugFilter>();
 
