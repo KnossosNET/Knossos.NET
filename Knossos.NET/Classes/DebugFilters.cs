@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace Knossos.NET.Classes{
 
@@ -24,6 +25,14 @@ namespace Knossos.NET.Classes{
         [ObservableProperty]
         internal ObservableCollection<DebugFilter> filters = new ObservableCollection<DebugFilter>();
 
+        public void AddCustom(string customFilter){
+            var newFilter = new DebugFilter();
+            newFilter.Filter = customFilter;
+            newFilter.Enabled = true;
+
+            Filters.Add(newFilter);
+        }
+        
         // TODO!  Create a save function
     }
 }

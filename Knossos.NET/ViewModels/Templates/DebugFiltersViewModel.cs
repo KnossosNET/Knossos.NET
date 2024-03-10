@@ -22,6 +22,8 @@ namespace Knossos.NET.ViewModels
         internal ObservableCollection<DebugFilterCategory> categories = new ObservableCollection<DebugFilterCategory>();
         [ObservableProperty]
         private bool initialized = false;
+        [ObservableProperty]
+        private string customFilter = string.Empty;
 
         public async Task LoadDebugRepo()
         {
@@ -65,6 +67,35 @@ namespace Knossos.NET.ViewModels
             LoadDebugRepo();
         }
 
+        public void AddFilter()
+        {
+            // If we pressed by accident, ignore
+            if (CustomFilter == string.Empty)
+            {
+                return;
+            }
+
+            // Look for a custom category that already exists
+            foreach(var category in Categories) {
+                // Add new filter to it, if so
+                if (category.Typename == "Custom"){
+                    category.AddCustom(CustomFilter);
+
+                    // Empty the text box when done.
+                    CustomFilter = string.Empty;
+                    return;
+                }
+            }
+
+            // if no custom category exists, add it and then add the new filter
+            var customCategory = new DebugFilterCategory();
+            customCategory.Typename = "Custom";
+            customCategory.AddCustom(CustomFilter);
+            Categories.Insert(0, customCategory);
+
+            // Empty the text box when done.
+            CustomFilter = string.Empty;
+        }
     }
 
 }

@@ -18,20 +18,28 @@
 	</Design.DataContext>
 	<ScrollViewer>
 		<StackPanel Margin="10,15,10,15">
-			<TextBlock Margin="10,10,0,0" ToolTip.Tip="These are options that enable additonal FSO debug log output. They range from useful to arcane.">Debug Filters:</TextBlock>
+			<WrapPanel HorizontalAlignment="Right">
+				<TextBox Text="{Binding CustomFilter}" Width="200" Margin="10,10,0,0"></TextBox>
+				<Button Command="{Binding AddFilter}" Margin="20,9,10,0" Content="Add Custom Filter" Classes="Primary" ToolTip.Tip="When a filter is missing from this list or a custom build with custom filters is in use, use this button to add this filter to the Custom Filters category."></Button>
+			</WrapPanel>
+			<WrapPanel HorizontalAlignment="Right">
+				
+			</WrapPanel>
 			<StackPanel Margin="30,0,20,10">
 				<ItemsControl ItemsSource="{Binding Categories}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<StackPanel HorizontalAlignment="Stretch" Margin="10,10,0,0">
-								<TextBlock Margin="10,0,0,0" Text="{Binding Typename}"></TextBlock>
+								<WrapPanel Background="{StaticResource BackgroundColorPrimary}" >
+									<TextBlock Margin="10" Text="{Binding Typename}"></TextBlock>
+								</WrapPanel>
 								<TreeView ItemsSource="{Binding Filters}">
 									<TreeView.ItemTemplate>
 										<TreeDataTemplate>
 											<StackPanel Margin="10,10,10,10">
 												<WrapPanel Background="{StaticResource BackgroundColorPrimary}">
 													<CheckBox Margin="5,0,0,0" ToolTip.Tip="Enabled or disabled this filter." IsChecked="{Binding Enabled}"></CheckBox>
-													<TextBlock Margin="5,5,0,0" Text="{Binding Filter}" TextWrapping="Wrap"></TextBlock>
+													<TextBlock Margin="5,8,0,0" Text="{Binding Filter}" TextWrapping="Wrap"></TextBlock>
 												</WrapPanel>
 												<WrapPanel>
 													<TextBlock Margin="0,10,0,5" Text="{Binding Description}" TextWrapping="Wrap"></TextBlock>
