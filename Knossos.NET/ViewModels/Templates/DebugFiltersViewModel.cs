@@ -49,9 +49,12 @@ namespace Knossos.NET.ViewModels
                 return;
             }
 
-            foreach(var category in Categories){
-                if (category.Typename == "General"){
-                    foreach(var filter in category.Filters){
+            foreach(var category in Categories)
+            {
+                if (category.Typename == "General")
+                {
+                    foreach(var filter in category.Filters)
+                    {
                         filter.Enabled = true;
                     }
                 }
