@@ -35,6 +35,14 @@ namespace Knossos.NET.Classes{
 
         public void AddCustom(string customFilter, bool enabled){
             var newFilter = new DebugFilter();
+            
+            // Strings longer than 31 trigger an assert in FSO.
+            // We could remove the assert, but we still need to support older builds.
+            if (customFilter.Length > 31)
+            {
+                customFilter = customFilter.Trim().Substring(0, 31);
+            }
+
             newFilter.Filter = customFilter;
             newFilter.Enabled = enabled;
 
