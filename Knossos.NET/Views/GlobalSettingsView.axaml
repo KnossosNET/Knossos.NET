@@ -389,6 +389,10 @@
 							<Label ToolTip.Tip="Network port used by multiplayer. Default is 7808." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Multiplayer Port</Label>
 							<NumericUpDown Value="{Binding MultiPort}" Grid.Column="1" Width="150"></NumericUpDown>
 						</Grid>
+						<!-- Debug Filter-->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+							<Button Content="Adjust fs2open.log debug filters" Command="{Binding OpenDebugFilterView}"></Button>
+						</Grid>
 					</StackPanel>
 				</Border>
 			</StackPanel>

@@ -1133,5 +1133,16 @@ namespace Knossos.NET.ViewModels
                 }
             }).ConfigureAwait(false);
         }
+
+        /// <summary>
+        /// Open Debug Filter Dialog
+        /// </summary>
+        internal async void OpenDebugFilterView()
+        {
+            var dialog = new Views.DebugFiltersView();
+            dialog.DataContext = new DebugFiltersViewModel();
+            await dialog.ShowDialog<DebugFiltersView?>(MainWindow.instance!);
+        }
+
     }
 }
