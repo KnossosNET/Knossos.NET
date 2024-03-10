@@ -19,7 +19,7 @@
 		<StackPanel Margin="10,15,10,15">
 			<WrapPanel HorizontalAlignment="Right">
 				<TextBox Text="{Binding CustomFilter}" Width="200" Margin="10,10,0,0"></TextBox>
-				<Button Command="{Binding AddFilter}" Margin="20,9,10,0" Content="Add Custom Filter" Classes="Primary" ToolTip.Tip="When a filter is missing from this list or a custom build with custom filters is in use, use this button to add this filter to the Custom Filters category."></Button>
+				<Button Command="{Binding AddFilter}" Margin="20,9,10,0" Content="Add Custom Filter" Classes="Primary" ToolTip.Tip="When a filter is missing from this list or a custom build with custom filters is in use, use this button to add this filter to the Custom Filters category.  Note that custom filters can only be 31 characters long to maintain compatibility with all builds."></Button>
 			</WrapPanel>
 			<WrapPanel HorizontalAlignment="Right">
 				
