@@ -37,7 +37,7 @@
 										<TreeDataTemplate>
 											<StackPanel Margin="10,10,10,10">
 												<WrapPanel Background="{StaticResource BackgroundColorPrimary}">
-													<CheckBox Margin="5,0,0,0" ToolTip.Tip="Enabled or disabled this filter." IsChecked="{Binding Enabled}"></CheckBox>
+													<CheckBox Command="{Binding SaveConfig}" Margin="5,0,0,0" ToolTip.Tip="Enabled or disabled this filter." IsChecked="{Binding Enabled}"></CheckBox>
 													<TextBlock Margin="5,8,0,0" Text="{Binding Filter}" TextWrapping="Wrap"></TextBlock>
 												</WrapPanel>
 												<WrapPanel>
