@@ -69,7 +69,7 @@ namespace Knossos.NET.ViewModels
                 var path = Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "debug_filter.cfg");
                 if (File.Exists(path)) 
                 {
-                    using (StreamReader reader = new StreamReader(Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "debug_filter.cfg"))) 
+                    using (StreamReader reader = new StreamReader(path)) 
                     {
                         string? line;
                         while ((line = reader.ReadLine()) != null)
