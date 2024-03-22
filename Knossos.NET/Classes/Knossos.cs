@@ -716,7 +716,7 @@ namespace Knossos.NET
                         if (fsoBuild == null && mod.modSettings.customBuildId == null)
                         {
                             hasBuildDependency = true;
-                            fsoBuild = dep.SelectBuild();
+                            fsoBuild = dep.SelectBuild(true);
                         }
                     }
                 }

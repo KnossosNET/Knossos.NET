@@ -335,8 +335,64 @@ namespace Knossos.NET.ViewModels
                 {
                     //Is this dependecy mod already is installed?
                     var modInstalled = Knossos.GetInstalledMod(modDep.id, modDep.version);
-                    //Load Nebula data first to check the packages
-                    await modDep.LoadFulLNebulaData();
+
+                    //Check Cache
+                    var modInCache = modCache.FirstOrDefault(x => x.id == modDep.id && x.version == modDep.version);
+                    if (modInCache != null)
+                    {
+                        modDep = modInCache;
+                    }
+                    else
+                    {
+                        //Load Nebula data first to check the packages and add to cache
+                        await modDep.LoadFulLNebulaData();
+                        modCache.Add(modDep);
+                    }
+
+                    //If this is a engine build check if contains valid executables
+                    if (modDep.type == ModType.engine)
+                    {
+                        //Set a max amount of attempts to get an alternative version in case we need an alternative version
+                        //This is because if user request "FSO" builds with an an incompatible cpu arch this is going to try
+                        //with every FSO build in nebula that sastifies the dependency, incluiding nightlies.
+                        var attempt = 0;
+                        var maxAttempts = 10;
+                        while (modDep != null && ++attempt < maxAttempts && modDep.packages.Any(x => FsoBuild.IsEnviromentStringValidInstall(x.environment)) == false)
+                        {
+                            //This build is not valid for this pc, delete from allmods list and resend to process
+                            var remove = allMods.FirstOrDefault(x => x.id == modDep.id && x.version == modDep.version);
+                            if (remove != null)
+                            {
+                                allMods.Remove(remove);
+                                var alternativeVersion = await dep.SelectModNebula(allMods);
+                                if (alternativeVersion != null)
+                                {
+                                    //Check Cache
+                                    modInCache = modCache.FirstOrDefault(x => x.id == alternativeVersion.id && x.version == alternativeVersion.version);
+                                    if (modInCache != null)
+                                    {
+                                        alternativeVersion = modInCache;
+                                    }
+                                    else
+                                    {
+                                        //Load Nebula data first to check the packages and add to cache
+                                        await alternativeVersion.LoadFulLNebulaData();
+                                        modCache.Add(alternativeVersion);
+                                    }
+                                }
+                                modDep = alternativeVersion;
+                            }
+                            else
+                            {
+                                //if for some reason we cant find modDep on allMods (it should never happen) we have to break or we are going to loop
+                                break;
+                            }
+                        }
+                        //if we cant find a alternative version in nebula, we have to skip the rest.
+                        if (modDep == null || attempt == maxAttempts)
+                            continue;
+                    }
+
                     //Make sure to mark all needed pkgs this mod need as required
                     modDep.isEnabled = true;
                     modDep.isSelected = true;
