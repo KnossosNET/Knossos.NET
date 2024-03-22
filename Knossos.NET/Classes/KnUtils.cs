@@ -112,7 +112,7 @@ namespace Knossos.NET
         /// <returns>fullpath as a string</returns>
         public static string GetKnossosDataFolderPath()
         {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "KnossosNET");
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET");
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Knossos.NET
                 {
                     return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "HardLightProductions", "FreeSpaceOpen");
                 }
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "HardLightProductions", "FreeSpaceOpen");
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "HardLightProductions", "FreeSpaceOpen");
             }
 
         }
