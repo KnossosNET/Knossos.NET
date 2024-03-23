@@ -12,13 +12,16 @@
         Title="Add Custom FSO Build" 
 		SizeToContent="Width"
 		Height="600"
+		Width="450"
+		Name="ThisWindow"
 		CanResize="True">
 	
 	<Design.DataContext>
 		<vm:AddUserBuildViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}">
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+	<ScrollViewer MinHeight="500" MinWidth="400"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}" Background="{StaticResource BackgroundColorPrimary}">
 	<Grid RowDefinitions="*,Auto,Auto">
 		<StackPanel Grid.Row="0" IsEnabled="{Binding !CopyProgress}">
 			<Label>1) Click on the button and select the folders where the executables are located.</Label>
@@ -70,4 +73,5 @@
 		<Label Grid.Row="2" IsVisible="{Binding ModCreated}" HorizontalAlignment="Center" FontWeight="Bold">Complete!</Label>
 	</Grid>
 	</ScrollViewer>
+	</Viewbox>
 </Window>

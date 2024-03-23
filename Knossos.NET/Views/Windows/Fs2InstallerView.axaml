@@ -8,16 +8,17 @@
 		xmlns:vm="using:Knossos.NET.ViewModels"
 		x:DataType="vm:Fs2InstallerViewModel"
 		Icon="/Assets/knossos-icon.ico"
+		Name="ThisWindow"
 		WindowStartupLocation="CenterScreen"
 		Title="Freespace 2 Retail Installer" 
 		SizeToContent="WidthAndHeight"
-		CanResize="False">
+		CanResize="True">
 
 	<Design.DataContext>
 		<vm:Fs2InstallerViewModel/>
 	</Design.DataContext>
-
-	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}"  MinWidth="800" MinHeight="360"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
 		<Grid RowDefinitions="Auto, Auto, *">
 			<Border Grid.Row="0" BorderBrush="AliceBlue" BorderThickness="2" CornerRadius="2">
 				<StackPanel>
@@ -48,4 +49,5 @@
 			</Border>
 		</Grid>
 	</ScrollViewer>
+	</Viewbox>
 </Window>

@@ -7,9 +7,11 @@
 		WindowStartupLocation="CenterOwner"
         x:Class="Knossos.NET.Views.MessageBox" 
 		SizeToContent="WidthAndHeight" 
+		Name="ThisWindow"
 		CanResize="True">
 
-		<Grid Background="{StaticResource BackgroundColorPrimary}" HorizontalAlignment="Center" RowDefinitions="*,Auto">
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+		<Grid Background="{StaticResource BackgroundColorPrimary}" MinWidth="600" MinHeight="150"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}" HorizontalAlignment="Center" RowDefinitions="*,Auto">
 			<ScrollViewer MaxHeight="550" Grid.Row="0">
 				<TextBlock Margin="20" HorizontalAlignment="Center" Name="Text" TextWrapping="Wrap"/>
 			</ScrollViewer>
@@ -20,5 +22,6 @@
 					</Style>
 				</StackPanel.Styles>
 			</StackPanel>
-		</Grid>	
+		</Grid>
+	</Viewbox>
 </Window>

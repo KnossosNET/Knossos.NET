@@ -10,13 +10,18 @@
 		Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterScreen"
         Title="How to add new SAPI voices to Windows" 
-		SizeToContent="WidthAndHeight" 
+		SizeToContent="WidthAndHeight"
+		Name="ThisWindow"
+		Width="500"
+		Height="550"
 		CanResize="False">
 	
 	<Design.DataContext>
 		<vm:AddSapiVoicesViewModel/>
 	</Design.DataContext>
-	<StackPanel MaxWidth="500" Background="{StaticResource BackgroundColorPrimary}">
+
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+	<StackPanel MinHeight="550" MinWidth="500"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}" MaxWidth="500" Background="{StaticResource BackgroundColorPrimary}">
 		<TextBlock Margin="10" TextWrapping="Wrap">Freespace 2 Open uses Windows SAPI as TTS engine. SAPI is now legacy and Windows 10/11 uses a new TTS system. Most of the voices for the new system can still be used by SAPI and FSO. In order to use it you will need to copy the registry entries, KnossosNET can do this for you.</TextBlock>
 		<Label Margin="10">First download the new voices for Windows in Speech Settings menu.</Label>
 		<Button Classes="Secondary" Command="{Binding OpenSpeechSettings}" Margin="10,0,0,0">Open Speech Settings</Button>
@@ -28,4 +33,5 @@
 		<TextBlock TextWrapping="Wrap" Margin="10">Thats it! Press "Reload Data" button on the settings tab to update the list of installed voices</TextBlock>
 		<TextBlock TextWrapping="Wrap" Margin="10">Note: if you install more voices after copying the registry keys, you will need to copy the registry keys again in order to be available for SAPI.</TextBlock>
 	</StackPanel>
+	</Viewbox>
 </Window>

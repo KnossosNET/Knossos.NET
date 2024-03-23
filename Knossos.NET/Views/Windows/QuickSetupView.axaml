@@ -14,14 +14,15 @@
 		Title="Quick Setup Guide" 
 		SizeToContent="WidthAndHeight"
 		MaxWidth="800"
-		MinHeight="400"
+		Name="ThisWindow"
 		CanResize="True">
 
 	<Design.DataContext>
 		<vm:QuickSetupViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer>
+	<Viewbox Stretch="Fill" StretchDirection="DownOnly" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}">
+	<ScrollViewer MinHeight="400" MinWidth="300"  Width="{Binding Width, ElementName=ThisWindow}" Height="{Binding Height, ElementName=ThisWindow}" MaxWidth="500">
 	<Grid Background="{StaticResource BackgroundColorPrimary}" HorizontalAlignment="Stretch" RowDefinitions="*,Auto">
 		
 		<!--Page1-->
@@ -94,4 +95,5 @@
 		</WrapPanel>
 	</Grid>
 	</ScrollViewer>
+	</Viewbox>
 </Window>
