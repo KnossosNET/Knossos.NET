@@ -62,7 +62,7 @@ APPRUN_FILE="AppRun"
 METAINFO_FILE="knossos.metainfo.xml.in"
 DESKTOP_FILE="knossos.desktop.in"
 
-ICON_SIZES="256 128 64 48 32 16"    # must include 256x256 at a minimum
+ICON_SIZES="512 256 128 96 64 48"    # must include 256x256 at a minimum
 ICON_FILE="knossos"
 
 APPIMAGE_TOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-$ARCH.AppImage"
