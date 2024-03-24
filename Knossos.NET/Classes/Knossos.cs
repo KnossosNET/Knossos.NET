@@ -588,6 +588,9 @@ namespace Knossos.NET
 
                 if (!isQuickLaunch)
                 {
+                    //Sort/Re-sort installed mods
+                    MainWindowViewModel.Instance?.InstalledModsView?.ChangeSort(MainWindowViewModel.Instance?.sharedSortType!);
+
                     //Red border for mod with missing deps
                     Dispatcher.UIThread.Invoke(() =>
                     {
@@ -609,11 +612,6 @@ namespace Knossos.NET
                     await QuickLaunch();
                 }
             }
-
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                MainWindowViewModel.Instance?.InstalledModsView?.ChangeSort(MainWindowViewModel.Instance?.sharedSortType!);
-            });
         }
 
         /// <summary>
