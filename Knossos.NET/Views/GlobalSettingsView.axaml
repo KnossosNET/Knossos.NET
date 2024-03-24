@@ -391,7 +391,7 @@
 						</Grid>
 						<!-- Debug Filter-->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
-							<Button Content="Adjust fs2open.log debug filters" Command="{Binding OpenDebugFilterView}"></Button>
+							<Button Content="Adjust Debug Filters" Command="{Binding OpenDebugFilterView}"></Button>
 						</Grid>
 					</StackPanel>
 				</Border>

@@ -59,7 +59,7 @@
 						<WrapPanel Grid.Row="0" Margin="5">
 							<Button Margin="5" Classes="Primary" Command="{Binding OpenFS2Log}">View fs2_open.log</Button>
 							<Button Margin="5" Classes="Primary" Command="{Binding UploadFS2Log}">Upload fs2_open.log</Button>
-							<Button Margin="5" Classes="Settings" Command="{Binding OpenDebugFilterView}">Adjust fs2_open.log Filters</Button>
+							<Button Margin="5" Classes="Settings" Command="{Binding OpenDebugFilterView}">Adjust Debug Filters</Button>
 							<Button Margin="5" Classes="Settings" Command="{Binding OpenFS2Ini}">View fs2_open.ini</Button>
 						</WrapPanel>
 						<WrapPanel Grid.Row="0" Margin="5">
