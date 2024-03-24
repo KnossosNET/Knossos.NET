@@ -147,7 +147,7 @@ namespace Knossos.NET.ViewModels
 
         public DebugFiltersViewModel()
         {
-            LoadDebugRepo();
+            Task.Run(() => LoadDebugRepo());
         }
 
         public void AddFilter()
