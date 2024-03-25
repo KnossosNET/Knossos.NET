@@ -217,10 +217,10 @@ namespace Knossos.NET.ViewModels
                     CancelButtonVisible = true;
                     IsTextTask = false;
                     IsFileDownloadTask = true;
-                    Name = "Install Tool: " + tool.name.Replace("_","-");
+                    Name = "Install Tool: " + tool.name;
                     if(updateFrom!= null)
                     {
-                        Name = "Update Tool: " + tool.name.Replace("_", "-");
+                        Name = "Update Tool: " + tool.name;
                     }
 
                     if (cancelSource != null)
@@ -907,7 +907,7 @@ namespace Knossos.NET.ViewModels
                     CancelButtonVisible = false;
                     IsTextTask = false;
                     IsFileDownloadTask = false;
-                    Name = "Uploading: " + pkg.name.Replace("_", "-");
+                    Name = "Uploading: " + pkg.name;
 
                     if (cancelSource != null)
                         cancellationTokenSource = cancelSource;
@@ -998,7 +998,7 @@ namespace Knossos.NET.ViewModels
                     CancelButtonVisible = false;
                     IsTextTask = false;
                     IsFileDownloadTask = false;
-                    Name = "Prepare Pkg: " + pkg.name.Replace("_", "-");
+                    Name = "Prepare Pkg: " + pkg.name;
 
                     if (cancelSource != null)
                         cancellationTokenSource = cancelSource;
@@ -1243,7 +1243,7 @@ namespace Knossos.NET.ViewModels
                     IsTextTask = false;
                     IsFileDownloadTask = false;
                     Info = "In Queue";
-                    Name = "Uploading " + mod.ToString().Replace("_", "-");
+                    Name = "Uploading " + mod.ToString();
                     await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
 
                     if (cancelSource != null)
@@ -1497,7 +1497,6 @@ namespace Knossos.NET.ViewModels
                     ShowProgressText = false;
                     CancelButtonVisible = true;
                     Name = "Creating Mod Version: " + oldMod.title + " " + newVersion;
-                    Name = Name.Replace("_", "-");
                     var currentDir = new DirectoryInfo(oldMod.fullPath);
                     var parentDir = currentDir.Parent;
                     newDir = parentDir!.FullName + Path.DirectorySeparatorChar + oldMod.id + "-" + newVersion;
@@ -1657,7 +1656,7 @@ namespace Knossos.NET.ViewModels
                         cancellationTokenSource = new CancellationTokenSource();
                     }
                     CancelButtonVisible = false;
-                    Name = "Extracting: " + vpFile.Name.Replace("_", "-"); ;
+                    Name = "Extracting: " + vpFile.Name;
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
@@ -1815,7 +1814,7 @@ namespace Knossos.NET.ViewModels
                     TaskIsSet = true;
                     IsCompleted = true;
                     IsTextTask = true;
-                    Name = msg.Replace("_", "-");
+                    Name = msg;
                     if (tooltip != null)
                     {
                         Tooltip = tooltip.Trim();
@@ -2118,7 +2117,7 @@ namespace Knossos.NET.ViewModels
                         cancellationTokenSource = new CancellationTokenSource();
                     }
                     CancelButtonVisible = false;
-                    Name = "Decompressing: " + vpFile.Name.Replace("_", "-");
+                    Name = "Decompressing: " + vpFile.Name;
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
@@ -2207,7 +2206,7 @@ namespace Knossos.NET.ViewModels
                         cancellationTokenSource = new CancellationTokenSource();
                     }
                     CancelButtonVisible = false;
-                    Name = "Compressing: " + vpFile.Name.Replace("_", "-");
+                    Name = "Compressing: " + vpFile.Name;
 
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
@@ -2289,7 +2288,6 @@ namespace Knossos.NET.ViewModels
                     {
                         CancelButtonVisible = true;
                         Name = "Compressing mod: " + mod.title + " " + mod.version;
-                        Name = Name.Replace("_", "-");
                     }
                     else
                     {
@@ -2480,7 +2478,6 @@ namespace Knossos.NET.ViewModels
                     TaskIsSet = true;
                     CancelButtonVisible = true;
                     Name = "Decompressing mod: " + mod.title + " " + mod.version;
-                    Name = Name.Replace("_", "-");
                     ShowProgressText = false;
                     await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
                     ProgressBarMin = 0;
@@ -2647,7 +2644,7 @@ namespace Knossos.NET.ViewModels
                 {
                     TaskIsSet = true;
                     CancelButtonVisible = false;
-                    Name = "Decompressing " + filename?.Replace("_", "-"); ;
+                    Name = "Decompressing " + filename;
                     ShowProgressText = true;
                     ProgressBarMin = 0;
                     ProgressCurrent = 0;
@@ -2713,7 +2710,7 @@ namespace Knossos.NET.ViewModels
                         cancellationTokenSource = new CancellationTokenSource();
                     }
                     CancelButtonVisible = true;
-                    Name = "Verifying " + mod.ToString().Replace("_", "-");
+                    Name = "Verifying " + mod.ToString();
                     ShowProgressText = false;
                     await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
                     Info = "In Queue";
@@ -2940,7 +2937,7 @@ namespace Knossos.NET.ViewModels
                         cancellationTokenSource = new CancellationTokenSource();
                     }
                     CancelButtonVisible = true;
-                    Name = "Downloading " + mod.ToString().Replace("_", "-"); ;
+                    Name = "Downloading " + mod.ToString();
                     ShowProgressText = false;
                     await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
                     Info = "In Queue";
@@ -2989,7 +2986,7 @@ namespace Knossos.NET.ViewModels
                     if (installed != null) 
                     {
                         installed.ReLoadJson();
-                        Name = "Modify " + mod.ToString().Replace("_", "-"); ;
+                        Name = "Modify " + mod.ToString();
                         compressMod = installed.modSettings.isCompressed;
                     }
 
@@ -3681,9 +3678,9 @@ namespace Knossos.NET.ViewModels
                     }
                     CancelButtonVisible = true;
 
-                    Name = "Downloading " + build.ToString().Replace("_", "-");
+                    Name = "Downloading " + build.ToString();
                     if(modifyPkgs != null)
-                        Name = "Modifying " + build.ToString().Replace("_", "-");
+                        Name = "Modifying " + build.ToString();
                         
                     ShowProgressText = false;
                     await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
@@ -4217,7 +4214,7 @@ namespace Knossos.NET.ViewModels
                         cancellationTokenSource = new CancellationTokenSource();
                     }
                     CancelButtonVisible = showStopButton;
-                    Name = msg.Replace("_", "-");
+                    Name = msg;
                     if (tooltip != null)
                     {
                         Tooltip = tooltip.Trim();

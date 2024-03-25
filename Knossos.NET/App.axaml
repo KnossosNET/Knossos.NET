@@ -1,6 +1,7 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:Knossos.NET"
+             xmlns:conv="using:Knossos.NET.Converters" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 RequestedThemeVariant="Dark"
              x:Class="Knossos.NET.App">
     <Application.Name>
@@ -18,5 +19,6 @@
 
     <Application.Resources>
         <FontFamily x:Key="ContentControlThemeFontFamily">avares://Knossos.NET/Assets/fonts#Inter</FontFamily>
+        <conv:EscapeUnderscoresConverter x:Key="escapeUnderscoresConverter" />
     </Application.Resources>
 </Application>

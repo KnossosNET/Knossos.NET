@@ -935,5 +935,20 @@ namespace Knossos.NET
             }
             return false;
         }
+
+        /// <summary>
+        /// Escapes underscores so that they will show in UI controls
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns>string with "text" underscores escaped</returns>
+        public static string EscapeUnderscores(string? text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return string.Empty;
+            }
+
+            return text.Replace("_", "__");
+        }
     }
 }
