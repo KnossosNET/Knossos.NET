@@ -20,9 +20,9 @@
 					<Button.Flyout>
 						<Flyout Placement="Bottom">
 							<StackPanel>
-								<Button Command="{Binding ChangeSort}" CommandParameter="name" Width="150" Background="Transparent">Sort by Name</Button>
-								<Button Command="{Binding ChangeSort}" CommandParameter="update" Width="150" Background="Transparent">Sort by Update date</Button>
-								<Button Command="{Binding ChangeSort}" CommandParameter="release" Width="150" Background="Transparent">Sort by Release date</Button>
+								<Button Command="{Binding ChangeSort}" CommandParameter="name" Width="165" Background="Transparent">Sort by Name</Button>
+								<Button Command="{Binding ChangeSort}" CommandParameter="update" Width="165" Background="Transparent">Sort by Update date</Button>
+								<Button Command="{Binding ChangeSort}" CommandParameter="release" Width="165" Background="Transparent">Sort by Release date</Button>
 							</StackPanel>
 						</Flyout>
 					</Button.Flyout>
