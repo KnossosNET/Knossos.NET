@@ -1,0 +1,58 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Knossos.NET.Views.DebugFiltersView"
+	    xmlns:v="using:Knossos.NET.Views"
+		xmlns:vm="using:Knossos.NET.ViewModels"
+		x:DataType="vm:DebugFiltersViewModel"
+		Icon="/Assets/knossos-icon.ico"
+		WindowStartupLocation="CenterScreen"
+        Title="Debug Filter Selection" 
+		CanResize="True">
+	
+	<Design.DataContext>
+		<vm:DebugFiltersViewModel/>
+	</Design.DataContext>
+	<ScrollViewer>
+		<StackPanel Margin="10,15,10,15">
+			<WrapPanel HorizontalAlignment="Right">
+				<TextBox Text="{Binding CustomFilter}" Width="200" Margin="10,10,0,0"></TextBox>
+				<Button Command="{Binding AddFilter}" Margin="20,9,10,0" Content="Add Custom Filter" Classes="Primary" ToolTip.Tip="When a filter is missing from this list or a custom build with custom filters is in use, use this button to add this filter to the Custom Filters category.  Note that custom filters can only be 31 characters long to maintain compatibility with all builds."></Button>
+			</WrapPanel>
+			<WrapPanel HorizontalAlignment="Right">
+				
+			</WrapPanel>
+			<StackPanel Margin="30,0,20,10">
+				<ItemsControl ItemsSource="{Binding Categories}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<StackPanel HorizontalAlignment="Stretch" Margin="10,10,0,0">
+								<WrapPanel Background="{StaticResource BackgroundColorPrimary}" >
+									<TextBlock Margin="10" Text="{Binding Typename}"></TextBlock>
+								</WrapPanel>
+								<TreeView ItemsSource="{Binding Filters}">
+									<TreeView.ItemTemplate>
+										<TreeDataTemplate>
+											<StackPanel Margin="10,10,10,10">
+												<WrapPanel Background="{StaticResource BackgroundColorPrimary}">
+													<CheckBox Command="{Binding SaveConfig}" Margin="5,0,0,0" ToolTip.Tip="Enabled or disabled this filter." IsChecked="{Binding Enabled}"></CheckBox>
+													<TextBlock Margin="5,8,0,0" Text="{Binding Filter}" TextWrapping="Wrap"></TextBlock>
+												</WrapPanel>
+												<WrapPanel>
+													<TextBlock Margin="0,10,0,5" Text="{Binding Description}" TextWrapping="Wrap"></TextBlock>
+												</WrapPanel>
+											</StackPanel>
+										</TreeDataTemplate>
+									</TreeView.ItemTemplate>
+								</TreeView>                                    
+							</StackPanel>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			
+			</StackPanel>
+		</StackPanel>
+	</ScrollViewer>
+</Window>

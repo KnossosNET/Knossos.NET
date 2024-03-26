@@ -121,6 +121,11 @@ namespace Knossos.NET.ViewModels
                     {
                         Knossos.globalSettings.DisableIniWatch();
                     }
+                    if (tabIndex == 7) // Debug
+                    {
+//                        LoadDebugRepo
+                    }
+
                 }
             }
         }
@@ -417,6 +422,16 @@ namespace Knossos.NET.ViewModels
             {
                 Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.UploadKnossosConsole", ex);
             }
+        }
+
+        /// <summary>
+        /// Open Debug Filter Dialog
+        /// </summary>
+        internal async void OpenDebugFilterView()
+        {
+            var dialog = new Views.DebugFiltersView();
+            dialog.DataContext = new DebugFiltersViewModel();
+            await dialog.ShowDialog<DebugFiltersView?>(MainWindow.instance!);
         }
 
         internal void applySettingsToList()
