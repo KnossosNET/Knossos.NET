@@ -24,7 +24,7 @@
 											<Label FontWeight="Bold" Content="["/>
 											<Label FontWeight="Bold" Content="{Binding type}"/>
 											<Label FontWeight="Bold" Content="]"/>
-											<Label Content="{Binding title}"/>
+											<Label Content="{Binding title, Converter={StaticResource escapeUnderscoresConverter}}"/>
 										</WrapPanel>
 									</DataTemplate>
 								</ListBox.ItemTemplate>

@@ -26,7 +26,7 @@
 							</WrapPanel>
 							<WrapPanel>
 								<Label Width="150">Folder Name: </Label>
-								<Label Content="{Binding NewPackageFolder}" MinWidth="200"></Label>
+								<Label Content="{Binding NewPackageFolder, Converter={StaticResource escapeUnderscoresConverter}}" MinWidth="200"></Label>
 							</WrapPanel>
 							<Button HorizontalAlignment="Center" Classes="Accept" Command="{Binding CreatePackage}">Create Package</Button>
 						</StackPanel>
@@ -43,7 +43,7 @@
 					<StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 						<WrapPanel>
 							<CheckBox ToolTip.Tip="If package is enabled or disabled. Disabled packages are not used when playing." IsChecked="{Binding IsEnabled}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></CheckBox>
-							<Label MinWidth="250" FontWeight="Bold" FontSize="18" Content="{Binding Package.name}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
+							<Label MinWidth="250" FontWeight="Bold" FontSize="18" Content="{Binding Package.name, Converter={StaticResource escapeUnderscoresConverter}}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
 						</WrapPanel>
 						<WrapPanel Margin="10,0,0,7">
 							<Button Command="{Binding OpenModPackageFolder}" Classes="Quaternary">Open Folder</Button>
@@ -88,7 +88,7 @@
 														<ListBox MinWidth="300" ItemsSource="{Binding Packages}" Margin="8,0,0,0">
 															<ListBox.ItemTemplate>
 																<DataTemplate>
-																	<CheckBox IsEnabled="{Binding isEnabled}" IsChecked="{Binding isSelected}" Content="{Binding name}"></CheckBox>
+																	<CheckBox IsEnabled="{Binding isEnabled}" IsChecked="{Binding isSelected}" Content="{Binding name, Converter={StaticResource escapeUnderscoresConverter}}"></CheckBox>
 																</DataTemplate>
 															</ListBox.ItemTemplate>
 														</ListBox>
@@ -120,8 +120,8 @@
 					<WrapPanel>
 						<Button Command="{Binding FlagUP}" Background="Black">↑</Button>
 						<Button Command="{Binding FlagDown}" Background="Black">↓</Button>
-						<Label IsVisible="{Binding !IsThisMod}" Content="{Binding FlagName}"></Label>
-						<Label IsVisible="{Binding IsThisMod}" Content="{Binding FlagName} (This mod)"></Label>
+						<Label IsVisible="{Binding !IsThisMod}" Content="{Binding FlagName, Converter={StaticResource escapeUnderscoresConverter}}"></Label>
+						<Label IsVisible="{Binding IsThisMod}" Content="{Binding FlagName, Converter={StaticResource escapeUnderscoresConverter}} (This mod)"></Label>
 					</WrapPanel>
 				</DataTemplate>
 			</ListBox.ItemTemplate>

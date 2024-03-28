@@ -26,7 +26,7 @@
 							</WrapPanel>
 							<WrapPanel>
 								<Label Width="150">Folder Name: </Label>
-								<Label Content="{Binding NewPackageFolder}" MinWidth="200"></Label>
+								<Label Content="{Binding NewPackageFolder, Converter={StaticResource escapeUnderscoresConverter}}" MinWidth="200"></Label>
 							</WrapPanel>
 							<Button Classes="Accept" HorizontalAlignment="Center" Command="{Binding CreatePackage}">Create Package</Button>
 						</StackPanel>
@@ -42,7 +42,7 @@
 					<!--Package Item-->
 					<StackPanel>
 						<WrapPanel>
-							<Label MinWidth="150" FontWeight="Bold" FontSize="18" Content="{Binding Package.name}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
+							<Label MinWidth="150" FontWeight="Bold" FontSize="18" Content="{Binding Package.name, Converter={StaticResource escapeUnderscoresConverter}}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"></Label>
 							<Button Command="{Binding OpenPackageFolder}" Margin="10,0,0,0">Open Folder</Button>
 							<Button Command="{Binding AddExecutable}" Margin="10,0,0,0">+Executable</Button>
 							<ComboBox Margin="10,0,0,0" ItemsSource="{Binding Os}" SelectedIndex="{Binding PackageOsIndex}" MinWidth="100" FontWeight="Bold" FontSize="12" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Background="White" Foreground="Black"></ComboBox>

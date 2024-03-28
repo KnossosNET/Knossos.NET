@@ -25,7 +25,7 @@
 								<!--Two versions to better handle spacing-->
 								<!--Download Version-->
 								<WrapPanel IsEnabled="{Binding IsFileDownloadTask}" IsVisible="{Binding IsFileDownloadTask}">
-									<Label Height="22" Width="350" HorizontalContentAlignment="Left" FontSize="14" Margin="5,0,0,0" Content="{Binding Name}" Foreground="{Binding TextColor}"/>
+									<Label Height="22" Width="350" HorizontalContentAlignment="Left" FontSize="14" Margin="5,0,0,0" Content="{Binding Name, Converter={StaticResource escapeUnderscoresConverter}}" Foreground="{Binding TextColor}"/>
 									<WrapPanel IsVisible="{Binding !IsCompleted}">
 										<Button Margin="5,0,0,0" Width="57" Content="{Binding PauseButtonText}" IsVisible="{Binding !IsCancelled }" HorizontalAlignment="Center" Height="24" FontSize="9" Command="{Binding PauseDownloadCommand}"/>
 										<Button Margin="5,0,0,0" Width="53" IsVisible="{Binding !IsCancelled}" HorizontalAlignment="Center" Height="24" FontSize="9" Command="{Binding RestartDownloadCommand}">Restart</Button>
@@ -39,7 +39,7 @@
 								</WrapPanel>
 								<!--Decompression Version-->
 								<WrapPanel IsVisible="{Binding !IsFileDownloadTask}" IsEnabled="{Binding !IsFileDownloadTask}">
-									<Label Height="22" Width="350" HorizontalContentAlignment="Left" FontSize="14" Margin="5,0,0,0" Content="{Binding Name}" Foreground="{Binding TextColor}"/>
+									<Label Height="22" Width="350" HorizontalContentAlignment="Left" FontSize="14" Margin="5,0,0,0" Content="{Binding Name, Converter={StaticResource escapeUnderscoresConverter}}" Foreground="{Binding TextColor}"/>
 									<WrapPanel IsVisible="{Binding !IsCompleted}">
 										<ProgressBar Width="200" IsVisible="{Binding ProgressBarMax}" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="125,0,0,0" Height="20" ShowProgressText="{Binding ShowProgressText}"></ProgressBar>
 										<Label Height="22" FontSize="12" Margin="5,0,0,0" VerticalAlignment="Bottom" Content="{Binding Info}"/>

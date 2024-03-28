@@ -530,8 +530,9 @@ namespace Knossos.NET
         /// Gets the complete size of all files in a folder and subdirectories in bytes
         /// </summary>
         /// <param name="folderPath"></param>
+        /// <param name="recursive"></param>
         /// <returns>size in bytes or 0 if failed</returns>
-        public static async Task<long> GetSizeOfFolderInBytes(string folderPath)
+        public static async Task<long> GetSizeOfFolderInBytes(string folderPath, bool recursive = true)
         {
             return await Task<long>.Run(() =>
             {
@@ -539,7 +540,8 @@ namespace Knossos.NET
                 {
                     if (Directory.Exists(folderPath))
                     {
-                        return Directory.EnumerateFiles(folderPath, "*", SearchOption.AllDirectories).Sum(fileInfo => new FileInfo(fileInfo).Length);
+                        var searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+                        return Directory.EnumerateFiles(folderPath, "*", searchOption).Sum(fileInfo => new FileInfo(fileInfo).Length);
                     }
                 }
                 catch (Exception ex)
@@ -932,6 +934,21 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "KnUtils.SetEnvironmentVariable()", ex);
             }
             return false;
+        }
+
+        /// <summary>
+        /// Escapes underscores so that they will show in UI controls
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns>string with "text" underscores escaped</returns>
+        public static string EscapeUnderscores(string? text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return string.Empty;
+            }
+
+            return text.Replace("_", "__");
         }
     }
 }

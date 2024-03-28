@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Avalonia.Threading;
 using System;
+using System.IO;
 using VP.NET;
 
 namespace Knossos.NET.ViewModels
@@ -144,7 +145,19 @@ namespace Knossos.NET.ViewModels
 
             try
             {
-                ModSize = KnUtils.FormatBytes(await KnUtils.GetSizeOfFolderInBytes(modJson.fullPath));
+                long byteCount = 0;
+                // with retail all regular mods are included in the size, so handle it a little different
+                // to get the correct value
+                if (modJson.id == "FS2")
+                {
+                    byteCount = await KnUtils.GetSizeOfFolderInBytes(modJson.fullPath, false);
+                    byteCount += await KnUtils.GetSizeOfFolderInBytes(Path.Combine(modJson.fullPath, "data"));
+                }
+                else
+                {
+                    byteCount = await KnUtils.GetSizeOfFolderInBytes(modJson.fullPath);
+                }
+                ModSize = KnUtils.FormatBytes(byteCount);
                 if (modJson.modSettings.isCompressed)
                     ModSize += " (Compressed)";
             }catch(Exception ex)
