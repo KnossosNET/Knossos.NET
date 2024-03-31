@@ -27,7 +27,7 @@
 		<ScrollViewer Grid.Row="1">
 			<StackPanel>
 				<!--KNOSSOS SETTINGS-->
-				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18">Knossos</Label>
+				<Label Margin="5,10,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Settings that are specific to Knossos only. These settings do not affect the FSO engine.">Knossos</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Base Path -->
@@ -134,7 +134,7 @@
 					</StackPanel>
 				</Border>
 				<!--VIDEO SETTINGS-->
-				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">Video</Label>
+				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Video settings the FSO engine will use in-game.">Video</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Resolution -->
@@ -234,7 +234,7 @@
 				</Border>
 
 				<!--Audio SETTINGS-->
-				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">Audio</Label>
+				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Audio settings the FSO engine will use in-game.">Audio</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Playback -->
@@ -305,7 +305,7 @@
 				</Border>
 
 				<!--INPUT SETTINGS-->
-				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">Input</Label>
+				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Input settings where you can specify which of your plugged-in devices FSO can use in-game.">Input</Label>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
             <?ignore
@@ -351,7 +351,7 @@
 				</Border>
 		
 				<!--FSO ENGINE SETTINGS-->
-				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18">FSO Engine Settings</Label>
+				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Additional settings that affect how the FSO engine runs.">Specialized</Label>
 				<Border Margin="0,5,0,5" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- FS2 Lang -->

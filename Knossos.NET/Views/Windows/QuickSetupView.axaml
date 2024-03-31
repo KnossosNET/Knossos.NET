@@ -36,7 +36,7 @@
 		<!--Page2-->
 		<StackPanel IsVisible="{Binding Page2}" Grid.Row="0" >
 			<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >Setting up the library folder</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">First, you must set a library folder. Go to the "Settings" tab and under the "Knossos Settings" section click on the "Browse" button and choose or create a folder for Knossos to use. It is highly recommended to set this as an empty folder in a location with a large amount of available storage. Once you have set the folder be sure to click the "Save" button in the upper right corner of the "Settings" tab. </TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">First, you must set a library folder. Go to the "Settings" tab and under the "Knossos" section click on the "Browse" button and choose or create a folder for Knossos to use. It is highly recommended to set this as an empty folder in a location with a large amount of available storage. Once you have set the folder be sure to click the "Save" button in the upper right corner of the "Settings" tab. </TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">The Knossos library folder is where all game and mod data will be saved to. Make sure you always have space available on this drive before installing a new mod or update.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">Current Library Folder</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" Text="{Binding LibraryPath}"></TextBlock>
