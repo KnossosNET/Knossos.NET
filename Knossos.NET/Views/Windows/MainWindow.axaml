@@ -73,7 +73,7 @@
 			</TabItem>
 		</TabControl>
 	
-		<v:TaskView Margin="0,0,0,10" Grid.Column="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Content="{Binding TaskView}"/>
+		<v:TaskView Margin="0,0,0,10" Grid.Column="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Content="{Binding TaskView}"/>
 		<v:TaskInfoButtonView  Width="40" Height="40" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,-3,0" Content="{Binding TaskInfoButton}"/>
 	</Grid>
 </Window>
