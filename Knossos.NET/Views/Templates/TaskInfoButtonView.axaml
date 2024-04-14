@@ -10,7 +10,7 @@
 	
 	<Button Width="40" Height="40" Command="{Binding OpenTaskView}" ToolTip.Tip="Open Task List">
 		<Grid>
-			<Image IsVisible="{Binding Animating}" HorizontalAlignment="Center" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/task-1.png">
+			<Image IsVisible="{Binding Animating}" HorizontalAlignment="Center" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/radar-knossos.png">
 				<Image.Styles>
 					<Style Selector="Image">
 						<Style.Animations>
@@ -26,7 +26,7 @@
 					</Style>
 				</Image.Styles>
 			</Image>
-			<Image IsVisible="{Binding !Animating}" HorizontalAlignment="Center" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/task-2.png"/>
+			<Image IsVisible="{Binding !Animating}" HorizontalAlignment="Center" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/radar-knossos.png"/>
 			<Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="12" Content="{Binding TaskNumber}"/>
 		</Grid>
 	</Button>
