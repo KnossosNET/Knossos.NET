@@ -181,11 +181,11 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string currentMirror = string.Empty;
         [ObservableProperty]
-        internal string pauseButtonText = "Pause";
-        [ObservableProperty]
         internal IBrush textColor = Brushes.White;
         [ObservableProperty]
         internal bool isTextTask = false;
+        [ObservableProperty]
+        internal bool resumeButtonVisible = false;
 
         /* If this task contains subtasks, the subtasks must be added here, from the UIthread */
         [ObservableProperty]
@@ -201,7 +201,7 @@ namespace Knossos.NET.ViewModels
         private bool pauseDownload = false;
 
         public TaskItemViewModel() 
-        { 
+        {
         }
 
         public async Task<bool> InstallTool(Tool tool, Tool? updateFrom, Action<bool> finishedCallback, CancellationTokenSource? cancelSource = null)
@@ -4556,18 +4556,21 @@ namespace Knossos.NET.ViewModels
 
         internal void PauseDownloadCommand()
         {
-            pauseDownload = !pauseDownload;
-            if (pauseDownload)
-                PauseButtonText = "Resume";
-            else
-                PauseButtonText = "Pause";
+            pauseDownload = true;
+            ResumeButtonVisible = true;
+        }
+
+        internal void ResumeDownloadCommand()
+        {
+            pauseDownload = false;
+            ResumeButtonVisible = false;
         }
 
         internal void RestartDownloadCommand()
         {
             restartDownload = true;
-            if (pauseDownload)
-                PauseDownloadCommand();
+            pauseDownload = false;
+            ResumeButtonVisible = false;
         }
     }
 }

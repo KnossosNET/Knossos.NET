@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="40" d:DesignHeight="40"
+             x:Class="Knossos.NET.Views.TaskInfoButtonView"
+	         xmlns:v="using:Knossos.NET.Views"
+	         xmlns:vm="using:Knossos.NET.ViewModels"
+	         x:DataType="vm:TaskInfoButtonViewModel">
+	
+	<Button Width="40" Height="40" Command="{Binding OpenTaskView}" ToolTip.Tip="Open Task List">
+		<Grid>
+			<Image IsVisible="{Binding Animating}" HorizontalAlignment="Center" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/task-1.png">
+				<Image.Styles>
+					<Style Selector="Image">
+						<Style.Animations>
+							<Animation Duration="0:0:5" IterationCount="Infinite">
+								<KeyFrame Cue="0%">
+									<Setter Property="RotateTransform.Angle" Value="0"/>
+								</KeyFrame>
+								<KeyFrame Cue="100%">
+									<Setter Property="RotateTransform.Angle" Value="360"/>
+								</KeyFrame>
+							</Animation>
+						</Style.Animations>
+					</Style>
+				</Image.Styles>
+			</Image>
+			<Image IsVisible="{Binding !Animating}" HorizontalAlignment="Center" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/task-2.png"/>
+			<Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="12" Content="{Binding TaskNumber}"/>
+		</Grid>
+	</Button>
+</UserControl>

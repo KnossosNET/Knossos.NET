@@ -40,6 +40,8 @@ namespace Knossos.NET.ViewModels
         internal CommunityViewModel communityView = new CommunityViewModel();
         [ObservableProperty]
         internal string uiConsoleOutput = string.Empty;
+        [ObservableProperty]
+        internal TaskInfoButtonViewModel? taskInfoButton;
 
         internal string sharedSearch = string.Empty;
 
@@ -133,6 +135,7 @@ namespace Knossos.NET.ViewModels
         public MainWindowViewModel()
         {
             Instance = this;
+            TaskInfoButton = new TaskInfoButtonViewModel(this.TaskView);
             string[] args = Environment.GetCommandLineArgs();
             bool isQuickLaunch = false;
             bool forceUpdate = false;
