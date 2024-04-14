@@ -37,7 +37,7 @@
 											<Button Width="30" ToolTip.Tip="Pause" Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" Height="25" FontSize="9" Command="{Binding PauseDownloadCommand}" IsVisible="{Binding !ResumeButtonVisible}">
 												<Image Height="18" Width="18" Source="/Assets/general/pause.png"/>
 											</Button>
-											<Button Width="30" ToolTip.Tip="Resume" Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" Height="25" FontSize="9" Command="{Binding PauseDownloadCommand}" IsVisible="{Binding ResumeButtonVisible}">
+											<Button Width="30" ToolTip.Tip="Resume" Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" Height="25" FontSize="9" Command="{Binding ResumeDownloadCommand}" IsVisible="{Binding ResumeButtonVisible}">
 												<Image Height="18" Width="18" Source="/Assets/general/resume.png"/>
 											</Button>
 										</StackPanel>
@@ -79,7 +79,7 @@
 							<Button Width="30" ToolTip.Tip="Pause" Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" Height="25" FontSize="9" Command="{Binding PauseDownloadCommand}" IsVisible="{Binding !ResumeButtonVisible}">
 								<Image Height="18" Width="18" Source="/Assets/general/pause.png"/>
 							</Button>
-							<Button Width="30" ToolTip.Tip="Resume" Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" Height="25" FontSize="9" Command="{Binding PauseDownloadCommand}" IsVisible="{Binding ResumeButtonVisible}">
+							<Button Width="30" ToolTip.Tip="Resume" Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" Height="25" FontSize="9" Command="{Binding ResumeDownloadCommand}" IsVisible="{Binding ResumeButtonVisible}">
 								<Image Height="18" Width="18" Source="/Assets/general/resume.png"/>
 							</Button>
 						</StackPanel>
