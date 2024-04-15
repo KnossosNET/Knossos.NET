@@ -185,7 +185,8 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public string GetRunningTaskString()
         {
-            var tmp = "Running Task:\n";
+            var active = "Running Task:\n";
+            var finished = "Finished Tasks:";
             var first = true;
             Dispatcher.UIThread.Invoke(() =>
             {
@@ -193,16 +194,20 @@ namespace Knossos.NET.ViewModels
                 {
                     if (!task.IsCancelled && !task.IsCompleted)
                     {
-                        tmp += task.Name + "\n";
+                        active += task.Name + "\n";
                         if (first)
                         {
-                            tmp += "\n\nPending Tasks:\n";
+                            active += "\n\nPending Tasks:\n";
                             first=false;
                         }
                     }
+                    else
+                    {
+                        finished += "\n" + task.Name;
+                    }
                 }
             });
-            return tmp;
+            return active + "\n" + finished;
         }
 
         /// <summary>

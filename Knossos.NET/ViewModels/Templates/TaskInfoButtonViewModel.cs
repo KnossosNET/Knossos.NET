@@ -41,13 +41,13 @@ namespace Knossos.NET.ViewModels
             {
                 int tasks = TaskViewModel.NumberOfTasks();
                 TaskNumber = tasks;
-                Tooltip = "Open Task List.";
+                
                 if (tasks > 0)
                 {
-                    if(!TaskViewModel.IsSafeState())
+                    Tooltip = "Open Task List\n\n" + TaskViewModel.GetRunningTaskString();
+                    if (!TaskViewModel.IsSafeState())
                     {
                         Animating = true;
-                        Tooltip += "\n\n" + TaskViewModel.GetRunningTaskString();
                     }
                     else
                     {
@@ -57,6 +57,7 @@ namespace Knossos.NET.ViewModels
                 else
                 {
                     Animating = false;
+                    Tooltip = "Open Task List";
                 }
             }
         }
