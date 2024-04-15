@@ -181,6 +181,31 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
+        /// Gets string with currently running and pending taks to use as a tooltip
+        /// </summary>
+        public string GetRunningTaskString()
+        {
+            var tmp = "Running Task:\n";
+            var first = true;
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                foreach (var task in TaskList)
+                {
+                    if (!task.IsCancelled && !task.IsCompleted)
+                    {
+                        tmp += task.Name + "\n";
+                        if (first)
+                        {
+                            tmp += "\n\nPending Tasks:\n";
+                            first=false;
+                        }
+                    }
+                }
+            });
+            return tmp;
+        }
+
+        /// <summary>
         /// Hide the task panel
         /// </summary>
         public void HideCommand()

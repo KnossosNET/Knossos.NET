@@ -12,6 +12,8 @@ namespace Knossos.NET.ViewModels
         internal int taskNumber = 0;
         [ObservableProperty]
         internal bool animating = false;
+        [ObservableProperty]
+        internal string tooltip = "";
 
         public TaskInfoButtonViewModel() 
         {
@@ -39,9 +41,18 @@ namespace Knossos.NET.ViewModels
             {
                 int tasks = TaskViewModel.NumberOfTasks();
                 TaskNumber = tasks;
+                Tooltip = "Open Task List.";
                 if (tasks > 0)
                 {
-                    Animating = !TaskViewModel.IsSafeState();
+                    if(!TaskViewModel.IsSafeState())
+                    {
+                        Animating = true;
+                        Tooltip += "\n\n" + TaskViewModel.GetRunningTaskString();
+                    }
+                    else
+                    {
+                        Animating = false;
+                    }
                 }
                 else
                 {
