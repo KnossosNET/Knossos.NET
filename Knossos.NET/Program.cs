@@ -32,45 +32,52 @@ namespace Knossos.NET
             }
 
             //Start App
-            BuildAvaloniaApp(softwareRendering).StartWithClassicDesktopLifetime(args);
+            if (softwareRendering)
+            {
+                BuildAvaloniaAppSoftware().StartWithClassicDesktopLifetime(args);
+            }
+            else
+            {
+                BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+            }
         }
 
         // Avalonia configuration, don't remove; also used by visual designer.
-        public static AppBuilder BuildAvaloniaApp(bool softwareRendering)
+        public static AppBuilder BuildAvaloniaApp()
         {
-            //Disable Hardware Renderer
-            if(softwareRendering)
-            {
-                return AppBuilder.Configure<App>()
-                       .UsePlatformDetect()
-                       .LogToTrace()
-                       .With(new Win32PlatformOptions
-                       {   //Windows
-                           RenderingMode = new[]
-                           {
-                                Win32RenderingMode.Software
-                           }
-                       })
-                       .With(new X11PlatformOptions
-                       {   //Linux
-                           RenderingMode = new[]
-                           {
-                               X11RenderingMode.Software
-                           }
-                       })
-                       .With(new AvaloniaNativePlatformOptions
-                       {   //MacOS
-                           RenderingMode = new[]
-                           {
-                               AvaloniaNativeRenderingMode.Software
-                           }
-                       });
-            }
-
             //Default
             return AppBuilder.Configure<App>()
                    .UsePlatformDetect()
                    .LogToTrace();
+        }
+
+        public static AppBuilder BuildAvaloniaAppSoftware()
+        {
+            //Disable Hardware Renderer
+            return AppBuilder.Configure<App>()
+                    .UsePlatformDetect()
+                    .LogToTrace()
+                    .With(new Win32PlatformOptions
+                    {   //Windows
+                        RenderingMode = new[]
+                        {
+                            Win32RenderingMode.Software
+                        }
+                    })
+                    .With(new X11PlatformOptions
+                    {   //Linux
+                        RenderingMode = new[]
+                        {
+                            X11RenderingMode.Software
+                        }
+                    })
+                    .With(new AvaloniaNativePlatformOptions
+                    {   //MacOS
+                        RenderingMode = new[]
+                        {
+                            AvaloniaNativeRenderingMode.Software
+                        }
+                    });
         }
     }
 }
