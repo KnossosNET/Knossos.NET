@@ -11,9 +11,11 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal int taskNumber = 0;
         [ObservableProperty]
-        internal bool animating = false;
-        [ObservableProperty]
         internal string tooltip = "";
+        [ObservableProperty]
+        internal bool frame0 = true;
+        [ObservableProperty]
+        internal bool frame1 = false;
 
         public TaskInfoButtonViewModel() 
         {
@@ -25,7 +27,7 @@ namespace Knossos.NET.ViewModels
             TaskViewModel = taskViewModel;
             TaskNumber = taskViewModel.NumberOfTasks();
             System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 2000;
+            timer.Interval = 1500;
             timer.Elapsed += Update;
             timer.Start();
         }
@@ -33,6 +35,20 @@ namespace Knossos.NET.ViewModels
         internal void OpenTaskView()
         {
             TaskViewModel?.ShowCommand();
+        }
+
+        private void Animate()
+        {
+            if(Frame0)
+            {
+                Frame0 = false;
+                Frame1 = true;
+            }
+            else
+            {
+                Frame1 = false;
+                Frame0 = true;
+            }
         }
 
         private void Update(object? _, System.Timers.ElapsedEventArgs __)
@@ -47,16 +63,11 @@ namespace Knossos.NET.ViewModels
                     Tooltip = "Open Task List\n\n" + TaskViewModel.GetRunningTaskString();
                     if (!TaskViewModel.IsSafeState())
                     {
-                        Animating = true;
-                    }
-                    else
-                    {
-                        Animating = false;
+                        Animate();
                     }
                 }
                 else
                 {
-                    Animating = false;
                     Tooltip = "Open Task List";
                 }
             }

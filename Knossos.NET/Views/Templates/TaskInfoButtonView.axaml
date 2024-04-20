@@ -10,23 +10,8 @@
 	
 	<Button Width="40" Height="40" Command="{Binding OpenTaskView}" ToolTip.Tip="{Binding Tooltip}">
 		<Grid>
-			<Image IsVisible="{Binding Animating}" HorizontalAlignment="Center" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/radar-knossos.png">
-				<Image.Styles>
-					<Style Selector="Image">
-						<Style.Animations>
-							<Animation Duration="0:0:5" IterationCount="Infinite">
-								<KeyFrame Cue="0%">
-									<Setter Property="RotateTransform.Angle" Value="0"/>
-								</KeyFrame>
-								<KeyFrame Cue="100%">
-									<Setter Property="RotateTransform.Angle" Value="360"/>
-								</KeyFrame>
-							</Animation>
-						</Style.Animations>
-					</Style>
-				</Image.Styles>
-			</Image>
-			<Image IsVisible="{Binding !Animating}" HorizontalAlignment="Center" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/radar-knossos.png"/>
+			<Image IsVisible="{Binding Frame0}" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/kns-frame-0.png" />
+			<Image IsVisible="{Binding Frame1}" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/kns-frame-1.png" />
 			<Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="12" Content="{Binding TaskNumber}"/>
 		</Grid>
 	</Button>
