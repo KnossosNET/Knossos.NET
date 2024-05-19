@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="40" d:DesignHeight="40"
+             x:Class="Knossos.NET.Views.TaskInfoButtonView"
+	         xmlns:v="using:Knossos.NET.Views"
+	         xmlns:vm="using:Knossos.NET.ViewModels"
+	         x:DataType="vm:TaskInfoButtonViewModel">
+	
+	<Button Width="40" Height="40" Command="{Binding OpenTaskView}" ToolTip.Tip="{Binding Tooltip}">
+		<Grid>
+			<Image IsVisible="{Binding Frame0}" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/kns-frame-0.png" />
+			<Image IsVisible="{Binding Frame1}" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/kns-frame-1.png" />
+			<Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="12" Content="{Binding TaskNumber}"/>
+		</Grid>
+	</Button>
+</UserControl>

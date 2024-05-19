@@ -2,26 +2,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="450"
              x:Class="Knossos.NET.Views.TaskView"
 			 xmlns:v="using:Knossos.NET.Views"
 			 xmlns:vm="using:Knossos.NET.ViewModels"
+			 Background="{StaticResource BackgroundColorPrimary}"
 			 x:DataType="vm:TaskViewModel">
 
 	<Design.DataContext>
 		<vm:TaskViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer IsVisible="{Binding TaskList.Count}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-		<Grid RowDefinitions="*">
-			<Button Grid.Row="0" ZIndex="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5" Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">Clear</Button>
-			<ItemsControl ZIndex="0" Grid.Row="0" VerticalAlignment="Top" ItemsSource="{Binding TaskList}">
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<v:TaskItemView Content="{Binding}"/>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
-		</Grid>
-	</ScrollViewer>
+	<Grid>
+		<StackPanel ZIndex="5" Grid.Column="2" Background="Black" Width="2" HorizontalAlignment="Left"></StackPanel>
+		<ScrollViewer IsVisible="{Binding ShowTaskList}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Auto">
+			<Grid MaxWidth="450" RowDefinitions="Auto,*" HorizontalAlignment="Center">
+				<Grid Grid.Row="0" ColumnDefinitions="100,250,100" Height="50" HorizontalAlignment="Center">
+					<Button Width="80" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5" Command="{Binding HideCommand}" ToolTip.Tip="Hide task panel">>></Button>
+					<Label Grid.Column="1" HorizontalContentAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="24">Tasks</Label>
+					<Button Width="80" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5" Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">Clear</Button>
+				</Grid>
+				<ListBox Grid.Row="1" VerticalAlignment="Top" ItemsSource="{Binding TaskList}">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<v:TaskItemView BorderBrush="White" BorderThickness="1" Content="{Binding}"/>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</Grid>
+		</ScrollViewer>
+	</Grid>
 </UserControl>

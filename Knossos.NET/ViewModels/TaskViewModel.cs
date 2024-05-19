@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System;
 using System.IO;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Avalonia.Controls;
 
 namespace Knossos.NET.ViewModels
 {
@@ -25,6 +27,9 @@ namespace Knossos.NET.ViewModels
         /// Task Execute Queue. Internal use only, must be modified from the UIThread
         /// </summary>
         internal Queue<TaskItemViewModel> taskQueue { get; set; } = new Queue<TaskItemViewModel>();
+
+        [ObservableProperty]
+        public bool showTaskList = false;
 
         public TaskViewModel() 
         {
@@ -173,6 +178,67 @@ namespace Knossos.NET.ViewModels
                     }
                 }
             });
+        }
+
+        /// <summary>
+        /// Gets string with currently running and pending taks to use as a tooltip
+        /// </summary>
+        public string GetRunningTaskString()
+        {
+            var active = "Running Task:\n";
+            var finished = "Finished Tasks:";
+            var first = true;
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                foreach (var task in TaskList)
+                {
+                    if (!task.IsCancelled && !task.IsCompleted)
+                    {
+                        active += task.Name + "\n";
+                        if (first)
+                        {
+                            active += "\n\nPending Tasks:\n";
+                            first=false;
+                        }
+                    }
+                    else
+                    {
+                        finished += "\n" + task.Name;
+                    }
+                }
+            });
+            return active + "\n" + finished;
+        }
+
+        /// <summary>
+        /// Hide the task panel
+        /// </summary>
+        public void HideCommand()
+        {
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                ShowTaskList = false;
+            });
+        }
+
+        /// <summary>
+        /// Show the task panel
+        /// </summary>
+        public void ShowCommand()
+        {
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                ShowTaskList = true;
+            });
+        }
+
+        /// <summary>
+        /// Return number of tasks in list
+        /// </summary>
+        /// <returns></returns>
+        public int NumberOfTasks()
+        {
+            return TaskList.Count;
         }
 
         /// <summary>
