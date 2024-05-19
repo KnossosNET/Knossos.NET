@@ -1049,6 +1049,7 @@ namespace Knossos.NET.Models
         public FsoExecArch arch;
         public FsoExecEnvironment env;
         public bool isValid = false;
+        public bool useWine = false;
         public int score { get; internal set; } = 0;
 
         public FsoFile(string filename, string modpath, FsoExecType type, FsoExecArch arch, FsoExecEnvironment env)
@@ -1090,11 +1091,21 @@ namespace Knossos.NET.Models
 
             if ((env == FsoExecEnvironment.Windows && !KnUtils.IsWindows) || (env == FsoExecEnvironment.Linux && !KnUtils.IsLinux) || (env == FsoExecEnvironment.MacOSX && !KnUtils.IsMacOS))
             {
-                if (modpath != string.Empty)
-                    Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " is not valid for this OS. Detected: " + env);
-                return 0;
+                //Fred2 on Linux over Wine exception
+                //Note: this will only be valid if the exec arch matches the host cpu arch, otherwise DetermineScoreFromArch() will return 0 anyway.
+                //Example: 32 bits Fred2.exe will get 0 score on a x64 cpu
+                if (KnUtils.IsLinux && env == FsoExecEnvironment.Windows && (type == FsoExecType.Fred2 || type == FsoExecType.Fred2Debug))
+                {
+                    useWine = true;
+                }
+                else
+                {
+                    if (modpath != string.Empty)
+                        Log.Add(Log.LogSeverity.Warning, "FsoFile.DetermineScore", "File: " + filePath + " is not valid for this OS. Detected: " + env);
+                    return 0;
+                }
             }
-
+            
             score = FsoBuild.DetermineScoreFromArch(arch);
 
             return score;
