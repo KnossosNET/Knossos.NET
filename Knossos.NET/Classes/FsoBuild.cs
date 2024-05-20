@@ -56,6 +56,12 @@ namespace Knossos.NET.Models
         public bool IsSuccess;
         public string ErrorMessage;
 
+        public FsoResult(WineResult wineResult)
+        {
+            IsSuccess = wineResult.IsSuccess;
+            ErrorMessage = wineResult.ErrorMessage;
+        }
+
         public FsoResult(bool isSuccess, string errorMessage)
         {
             IsSuccess = isSuccess;
@@ -217,30 +223,46 @@ namespace Knossos.NET.Models
         {
             try
             {
-                var execPath = GetExec(executableType);
+                var executable = GetExecutable(executableType);
+                var execPath = GetExecutablePath(executable);
+
                 if (execPath == null)
                 {
                     Log.Add(Log.LogSeverity.Error, "FsoBuild.RunFSO()", "Could not find a executable type for the requested fso build :" + executableType.ToString() + " Requested Type: " + executableType);
                     return new FsoResult(false, "Could not find a executable type for the requested fso build :" + executableType.ToString() + " Requested Type: " + executableType);
                 }
 
-                //In Linux and Mac make sure it is marked as executable
-                if (KnUtils.IsLinux || KnUtils.IsMacOS)
+                if (executable != null && executable.useWine)
                 {
-                    KnUtils.Chmod(execPath, "+x");
-                }
-
-                using (var fso = new Process())
-                {
-                    fso.StartInfo.FileName = execPath;
-                    fso.StartInfo.Arguments = cmdline;
-                    fso.StartInfo.UseShellExecute = false;
-                    if(workingFolder != null)
-                        fso.StartInfo.WorkingDirectory = workingFolder;
-                    fso.Start();
-                    if(waitForExit)
-                        await fso.WaitForExitAsync();
+                    //We can assume we are in Linux and this is a cpu arch compatible Fred2 Windows executable
+                    //Lets TRY to run this with Wine
+                    var wineTask = Wine.RunFred2(execPath, cmdline, workingFolder, executable.arch);
+                    if (waitForExit)
+                    {
+                        return new FsoResult(await wineTask);
+                    }
                     return new FsoResult(true);
+                }
+                else
+                {
+                    //In Linux and Mac make sure it is marked as executable
+                    if (KnUtils.IsLinux || KnUtils.IsMacOS)
+                    {
+                        KnUtils.Chmod(execPath, "+x");
+                    }
+
+                    using (var fso = new Process())
+                    {
+                        fso.StartInfo.FileName = execPath;
+                        fso.StartInfo.Arguments = cmdline;
+                        fso.StartInfo.UseShellExecute = false;
+                        if (workingFolder != null)
+                            fso.StartInfo.WorkingDirectory = workingFolder;
+                        fso.Start();
+                        if (waitForExit)
+                            await fso.WaitForExitAsync();
+                        return new FsoResult(true);
+                    }
                 }
             }
             catch(Exception ex)
@@ -256,25 +278,29 @@ namespace Knossos.NET.Models
         /// <returns>A FlagsJsonV1 structure or null if failed</returns>
         public FlagsJsonV1? GetFlagsV1()
         {
-            var fullpath = GetExec(FsoExecType.Flags);
+            var executable = GetExecutable(FsoExecType.Flags);
+            var fullpath = GetExecutablePath(executable);
             if (fullpath == null)
             {
-                fullpath = GetExec(FsoExecType.Release);
+                executable = GetExecutable(FsoExecType.Release);
+                fullpath = GetExecutablePath(executable);
             }
             if (fullpath == null)
             {
-                fullpath = GetExec(FsoExecType.Debug);
+                executable = GetExecutable(FsoExecType.Debug);
+                fullpath = GetExecutablePath(executable);
             }
             if (fullpath == null)
             {
                 Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlags()", "Unable to find a valid executable for this build: " + this.ToString());
                 return null;
             }
+
             Log.Add(Log.LogSeverity.Information, "FsoBuild.GetFlags()", "Getting FSO Flags from file: " + fullpath);
 
             if(KnUtils.IsLinux || KnUtils.IsMacOS)
             {
-                KnUtils.Chmod(fullpath,"+x");
+                KnUtils.Chmod(fullpath!,"+x");
             }
 
             string output = string.Empty;
@@ -327,15 +353,15 @@ namespace Knossos.NET.Models
         }
 
         /// <summary>
-        /// Return the best executable fullpath that is valid for user system and requested type.
+        /// Return the best FsoFile/executable that is valid for user system and requested type.
         /// </summary>
         /// <param name="type"></param>
-        /// <returns>Fullpath to executable or null if no a valid executable is found</returns>
-        public string? GetExec(FsoExecType type)
+        /// <returns>FsoFile or null if no a valid executable is found</returns>
+        public FsoFile? GetExecutable(FsoExecType type)
         {
             if (directExec != null)
             {
-                return directExec;
+                return null;
             }
 
             var validExecs = executables.Where(b => b.isValid && b.type == type);
@@ -363,9 +389,25 @@ namespace Knossos.NET.Models
                         }
                     }
                 }
-                return folderPath + validExecs.MaxBy(b => b.score)!.filename;
+                return validExecs.MaxBy(b => b.score);
             }
             return null;
+        }
+
+        /// <summary>
+        /// Return the fsofile executable fullpath
+        /// </summary>
+        /// <param name="fsoFile"></param>
+        /// <returns>Fullpath to executable or null</returns>
+        public string? GetExecutablePath(FsoFile? fsoFile)
+        {
+            if (directExec != null)
+            {
+                return directExec;
+            }
+            if (fsoFile == null)
+                return null;
+            return folderPath + fsoFile.filename;
         }
 
         /// <summary>
