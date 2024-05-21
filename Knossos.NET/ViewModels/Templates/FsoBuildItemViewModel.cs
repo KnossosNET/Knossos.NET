@@ -93,12 +93,12 @@ namespace Knossos.NET.ViewModels
                             case FsoExecArch.arm64: if (!CpuArch.Contains("ARM64")) CpuArch += "ARM64   "; break;
                         }
 
-                        if (!BuildType.Contains(exe.type.ToString()))
+                        if (!BuildType.Split(" ").Contains(exe.type.ToString()))
                         {
                             if(!exe.useWine)
                                 BuildType += exe.type.ToString() + "  ";
                             else
-                                BuildType += exe.type.ToString() + " (Wine)  ";
+                                BuildType += exe.type.ToString() + "(Wine)  ";
                         }
                     }
                 }
