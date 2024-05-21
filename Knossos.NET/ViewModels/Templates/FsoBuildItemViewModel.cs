@@ -98,7 +98,7 @@ namespace Knossos.NET.ViewModels
                             if(!exe.useWine)
                                 BuildType += exe.type.ToString() + "  ";
                             else
-                                BuildType += exe.type.ToString() + "(Wine)  ";
+                                BuildType += exe.type.ToString() + " (Wine)  ";
                         }
                     }
                 }
