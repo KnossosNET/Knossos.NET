@@ -3,6 +3,7 @@ using Knossos.NET.Models;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
+using System.ComponentModel;
 
 namespace Knossos.NET.Classes
 {
@@ -39,7 +40,15 @@ namespace Knossos.NET.Classes
                     return new WineResult(false, "Unsupported WINEARCH: " + fsoArch.ToString());
                 }
 
-                await SetWinePrefixFred2(wineArch);
+                var prefixResult = await SetWinePrefixFred2(wineArch);
+                if(!prefixResult.IsSuccess)
+                {
+                    return prefixResult;
+                }
+
+                var winePrefix = GetWinePrefixPath();
+                Log.Add(Log.LogSeverity.Information, "Wine.SetWinePrefixFred2()", "Executing wine with the following cmdline: WINEPREFIX=" + winePrefix +
+                    " WINEARCH=" + wineArch + " wine " + exePath + " " + exeCmdLine);
 
                 using (var wine = new Process())
                 {
@@ -49,7 +58,7 @@ namespace Knossos.NET.Classes
                     {
                         wine.StartInfo.WorkingDirectory = workingFolder;
                     }
-                    wine.StartInfo.EnvironmentVariables["WINEPREFIX"] = GetWinePrefixPath();
+                    wine.StartInfo.EnvironmentVariables["WINEPREFIX"] = winePrefix;
                     wine.StartInfo.EnvironmentVariables["WINEARCH"] = wineArch;
                     wine.StartInfo.UseShellExecute = false;
                     wine.Start();
@@ -57,7 +66,13 @@ namespace Knossos.NET.Classes
                 }
 
                 return new WineResult(true);
-            }catch (Exception ex)
+            }
+            catch (Win32Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Wine.SetWinePrefixFred2()", "Wine not found or another error ocurred: " + ex.Message);
+                return new WineResult(false, "Wine not found or another error ocurred: " + ex.Message);
+            }
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Wine.RunFred2()", ex.ToString());
                 return new WineResult(false, ex.ToString());
@@ -68,24 +83,49 @@ namespace Knossos.NET.Classes
         /// <summary>
         /// Sets the WinePrefix folder with the correct configuration for Fred2
         /// </summary>
-        private static async Task SetWinePrefixFred2(string wineArch)
+        private static async Task<WineResult> SetWinePrefixFred2(string wineArch)
         {
             try
             {
+                var winePrefix = GetWinePrefixPath();
+                Log.Add(Log.LogSeverity.Information,"Wine.SetWinePrefixFred2()","Executing wine with the following cmdline: WINEPREFIX=" + winePrefix +
+                    " WINEARCH=" + wineArch + " WINEDLLOVERRIDES=mscoree=d wine wineboot");
                 using (var wine = new Process())
                 {
                     wine.StartInfo.FileName = "wine";
                     wine.StartInfo.Arguments = "wineboot";
-                    wine.StartInfo.EnvironmentVariables["WINEPREFIX"] = GetWinePrefixPath();
+                    wine.StartInfo.EnvironmentVariables["WINEPREFIX"] = winePrefix;
                     wine.StartInfo.EnvironmentVariables["WINEARCH"] = wineArch;
                     wine.StartInfo.EnvironmentVariables["WINEDLLOVERRIDES"] = "mscoree=d";
                     wine.StartInfo.UseShellExecute = false;
                     wine.Start();
                     await wine.WaitForExitAsync();
+                    //Create a symlink to the Knossos library, this is not critical in case of error
+                    try
+                    {
+                        var libraryPath = Knossos.GetKnossosLibraryPath();
+                        if (libraryPath != null)
+                        {
+                            Directory.CreateSymbolicLink(Path.Combine(winePrefix, "drive_c", "users", Environment.UserName, "Favourites", "KnossosLibrary"), libraryPath);
+                        }
+                    }
+                    catch (Exception ex) 
+                    {
+                        Log.Add(Log.LogSeverity.Warning, "Wine.SetWinePrefixFred2(symlink)", ex.ToString());
+                    }
+                    return new WineResult(true);
                 }
-            }catch (Exception ex)
+
+            }
+            catch (Win32Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Wine.SetWinePrefixFred2()", "Wine not found or another error ocurred: " + ex.Message);
+                return new WineResult(false, "Wine not found or another error ocurred: " + ex.Message);
+            }
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Wine.SetWinePrefixFred2()", ex.ToString());
+                return new WineResult(false, ex.ToString());
             }
         }
 
@@ -101,14 +141,15 @@ namespace Knossos.NET.Classes
                 case FsoExecArch.x86:
                 case FsoExecArch.x86_avx:
                 case FsoExecArch.x86_avx2:
+                case FsoExecArch.arm32:
                     return "win32";
                 case FsoExecArch.x64:
                 case FsoExecArch.x64_avx:
                 case FsoExecArch.x64_avx2:
+                case FsoExecArch.arm64:
                     return "win64";
                 default: 
                     return null;
-
             }
         }
 
