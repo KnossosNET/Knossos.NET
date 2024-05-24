@@ -1746,7 +1746,7 @@ namespace Knossos.NET.Models
                     { new StringContent("None"), "vp_checksum" }
                 };
 
-                var reply = await ApiCall("multiupload/finish", data, true);
+                var reply = await ApiCall("multiupload/finish", data, true, 160);
                 if (reply.HasValue)
                 {
                     if (!reply.Value.result)
