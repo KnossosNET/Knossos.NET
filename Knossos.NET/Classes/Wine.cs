@@ -106,7 +106,9 @@ namespace Knossos.NET.Classes
                         var libraryPath = Knossos.GetKnossosLibraryPath();
                         if (libraryPath != null)
                         {
-                            Directory.CreateSymbolicLink(Path.Combine(winePrefix, "drive_c", "users", Environment.UserName, "Favourites", "KnossosLibrary"), libraryPath);
+                            var linkLocation = Path.Combine(winePrefix, "drive_c", "users", Environment.UserName, "Favourites", "KnossosLibrary");
+                            Directory.CreateDirectory(linkLocation);
+                            Directory.CreateSymbolicLink(linkLocation, libraryPath);
                         }
                     }
                     catch (Exception ex) 
