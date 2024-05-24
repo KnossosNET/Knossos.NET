@@ -100,14 +100,18 @@ namespace Knossos.NET.Classes
                     wine.StartInfo.UseShellExecute = false;
                     wine.Start();
                     await wine.WaitForExitAsync();
-                    //Create a symlink to the Knossos library, this is not critical in case of error
+                    //Create a symlink to the Knossos library, this is not critical
                     try
                     {
                         var libraryPath = Knossos.GetKnossosLibraryPath();
                         if (libraryPath != null)
                         {
-                            var linkLocation = Path.Combine(winePrefix, "drive_c", "users", Environment.UserName, "Favourites", "KnossosLibrary");
-                            Directory.CreateDirectory(linkLocation);
+                            var linkLocation = Path.Combine(winePrefix, "drive_c", "users", Environment.UserName, "Favorites", "KnossosLibrary");
+                            if (Directory.Exists(linkLocation))
+                            {
+                                //Note: This only deletes the symlink not the library folder itself! I tested it.
+                                Directory.Delete(linkLocation);
+                            }
                             Directory.CreateSymbolicLink(linkLocation, libraryPath);
                         }
                     }
