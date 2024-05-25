@@ -185,29 +185,43 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public string GetRunningTaskString()
         {
-            var active = "Running Task:\n";
-            var finished = "Finished Tasks:";
-            var first = true;
-            Dispatcher.UIThread.Invoke(() =>
+            try
             {
-                foreach (var task in TaskList)
+                var active = "Running Task:\n";
+                var finished = "Finished Tasks:";
+                var first = true;
+                Dispatcher.UIThread.Invoke(() =>
                 {
-                    if (!task.IsCancelled && !task.IsCompleted)
+                    try
                     {
-                        active += task.Name + "\n";
-                        if (first)
+                        foreach (var task in TaskList)
                         {
-                            active += "\n\nPending Tasks:\n";
-                            first=false;
+                            if (!task.IsCancelled && !task.IsCompleted)
+                            {
+                                active += task.Name + "\n";
+                                if (first)
+                                {
+                                    active += "\n\nPending Tasks:\n";
+                                    first = false;
+                                }
+                            }
+                            else
+                            {
+                                finished += "\n" + task.Name;
+                            }
                         }
-                    }
-                    else
+                    } catch
                     {
-                        finished += "\n" + task.Name;
+                        //task failed successfully
+                        //usually TaskCancelledException when closing Knet
                     }
-                }
-            });
-            return active + "\n" + finished;
+                });
+                return active + "\n" + finished;
+            }
+            catch 
+            {
+                return "";
+            }
         }
 
         /// <summary>
