@@ -312,7 +312,7 @@ namespace Knossos.NET.ViewModels
             {
                 Screenshots.Clear();
                 //Add Videos
-                if(modVersions[selectedIndex].videos != null && modVersions[selectedIndex].screenshots!.Length > 0)
+                if(modVersions[selectedIndex].videos != null && modVersions[selectedIndex].videos!.Length > 0)
                 {
                     foreach (var vid in modVersions[selectedIndex].videos!)
                     {
