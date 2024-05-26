@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using Avalonia.Threading;
 
 namespace Knossos.NET.ViewModels
 {
@@ -295,27 +296,33 @@ namespace Knossos.NET.ViewModels
 
         /// <summary>
         /// Completely deletes an FSO Build, from UI, from Knossos internal list and also clears physical files
-        /// It forces to re-run mod status checks
+        /// It optionally runs mod status checks, default on
         /// </summary>
         /// <param name="build"></param>
         /// <param name="item"></param>
-        public void DeleteBuild(FsoBuild build, FsoBuildItemViewModel item)
+        public void DeleteBuild(FsoBuild build, FsoBuildItemViewModel? item, bool runModstatusChecks = true)
         {
             try
             {
                 Directory.Delete(build.folderPath,true);
-                if(!StableItems.Remove(item))
-                {
-                    if (!RcItems.Remove(item))
+                if(item != null) 
+                { 
+                    if(!StableItems.Remove(item))
                     {
-                        if (!NightlyItems.Remove(item))
+                        if (!RcItems.Remove(item))
                         {
-                            CustomItems.Remove(item);
+                            if (!NightlyItems.Remove(item))
+                            {
+                                CustomItems.Remove(item);
+                            }
                         }
                     }
                 }
                 Knossos.RemoveBuild(build);
-                MainWindowViewModel.Instance?.RunModStatusChecks();
+                if (runModstatusChecks)
+                {
+                    MainWindowViewModel.Instance?.RunModStatusChecks();
+                }
             }
             catch(Exception ex)
             {
@@ -350,6 +357,57 @@ namespace Knossos.NET.ViewModels
                     AddBuildToUi(new FsoBuild(item));
                 }
                 GC.Collect();
+            }
+        }
+
+        /// <summary>
+        /// Delete all installed Nightlies and re add their UI items
+        /// </summary>
+        internal void CleanNightlies()
+        {
+            //Get all nightlies
+            var installedNL = Knossos.GetInstalledBuildsList("FSO", FsoStability.Nightly);
+            if(installedNL != null && installedNL.Any())
+            {
+                var fsoVersionString = "";
+                //dump all version info to a string
+                installedNL.ForEach( x => fsoVersionString += "\n" + x.ToString() );
+                Dispatcher.UIThread.Invoke(async() =>
+                {
+                    var reply = await MessageBox.Show(MainWindow.instance!, "You are about to delete the following FSO builds:" + fsoVersionString, "Deleting nightlies", MessageBox.MessageBoxButtons.ContinueCancel);
+                    if(reply == MessageBox.MessageBoxResult.Continue)
+                    {
+                        foreach (var build in installedNL)
+                        {
+                            Log.Add(Log.LogSeverity.Information, "FsoBuildItemViewModel.DeleteBuildCommand()", "Deleting FSO build " + build.ToString());
+                            //Find their UI item
+                            var uiItem = NightlyItems.FirstOrDefault(i => i.build == build);
+                            TaskViewModel.Instance!.AddMessageTask("Deleting:" + build);
+                            //Delete build
+                            DeleteBuild(build, uiItem, false);
+                            if (uiItem != null)
+                            {
+                                //Re add the item to the UI
+                                var result = await Nebula.GetModData(build.id, build.version).ConfigureAwait(false);
+                                if(result != null)
+                                {
+                                    Dispatcher.UIThread.Invoke(() =>
+                                    {
+                                        AddBuildToUi(new FsoBuild(result));
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    MainWindowViewModel.Instance?.RunModStatusChecks();
+                });
+            }
+            else
+            {
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    MessageBox.Show(MainWindow.instance!, "There are not installed FSO nightlies to delete", "Error deleting nightlies", MessageBox.MessageBoxButtons.OK);
+                });
             }
         }
     }

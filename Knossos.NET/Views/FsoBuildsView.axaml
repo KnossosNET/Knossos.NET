@@ -33,6 +33,7 @@
 						</ListBox.ItemTemplate>
 					</ListBox>
 					<Button Command="{Binding LoadAllNightlies}" IsVisible="{Binding !AllNightliesLoaded}" HorizontalAlignment="Center" Margin="0,5,0,10" Grid.Row="1">Load All Nightlies</Button>
+					<Button Command="{Binding CleanNightlies}"  HorizontalAlignment="Right" Margin="0,5,0,10" Background="DarkRed" Grid.Row="1">Clean Installed Nightlies</Button>
 				</Grid>
 			</TabItem>
 			<TabItem Header="RC Builds" ToolTip.Tip="Release Candidate builds, used in pre-stable release testing">
