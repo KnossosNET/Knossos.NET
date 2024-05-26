@@ -94,6 +94,8 @@ namespace Knossos.NET.Models
         public bool deleteUploadedFiles { get; set; } = true;
         [JsonPropertyName("decompressor")]
         public Decompressor decompressor { get; set; } = Decompressor.Auto;
+        [JsonPropertyName("dev_mod_sort")]
+        public int devModSort { get; set; } = 0;
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 
@@ -568,6 +570,7 @@ namespace Knossos.NET.Models
                         ttsVoiceName = tempSettings.ttsVoiceName;
                         deleteUploadedFiles = tempSettings.deleteUploadedFiles;
                         decompressor = tempSettings.decompressor;
+                        devModSort = tempSettings.devModSort;
                         
                         if (MainWindowViewModel.Instance != null)
                             MainWindowViewModel.Instance.sharedSortType = tempSettings.sortType;

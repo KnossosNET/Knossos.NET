@@ -16,8 +16,12 @@
 	  <TabItem Header="Mods">
 				<SplitView Margin="0,0,0,5" IsPaneOpen="True" DisplayMode="Inline" OpenPaneLength="350">
 					<SplitView.Pane>
-						<Grid RowDefinitions="*,Auto,Auto,Auto">
-							<ListBox Grid.Row="0" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}">
+						<Grid RowDefinitions="Auto,*,Auto,Auto,Auto">
+							
+							<Button Command="{Binding CreateMod}" Grid.Row="0" Margin="5,5,0,5" HorizontalAlignment="Left">Create New Mod</Button>
+							<ComboBox SelectedIndex="{Binding SortSelectedIndex}" ItemsSource="{Binding SortBoxItems}" Grid.Row="0" Margin="0,5,5,5" Width="150" HorizontalAlignment="Right" ToolTip.Tip="Sort Type"></ComboBox>
+							
+							<ListBox Grid.Row="1" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}">
 								<ListBox.ItemTemplate>
 									<DataTemplate>
 										<WrapPanel>
@@ -29,9 +33,9 @@
 									</DataTemplate>
 								</ListBox.ItemTemplate>
 							</ListBox>
-							<Button Command="{Binding CreateMod}" Grid.Row="1" Margin="0,20,0,10" HorizontalAlignment="Center">Create New Mod</Button>
-							<Button Command="{Binding InstallLatestStable}" Grid.Row="2" Margin="0,0,0,10" HorizontalAlignment="Center" IsEnabled="{Binding !StableInstalled}" IsVisible="{Binding !StableInstalled}" >Get Latest Stable Build</Button>
-							<Button Command="{Binding InstallLatestNightly}" Grid.Row="3" Margin="0,0,0,10" HorizontalAlignment="Center" IsEnabled="{Binding !NightlyInstalled}" IsVisible="{Binding !NightlyInstalled}" >Get Latest Nightly Build</Button>
+							
+							<Button Command="{Binding InstallLatestStable}" Grid.Row="3" Margin="0,10,0,10" HorizontalAlignment="Center" IsEnabled="{Binding !StableInstalled}" IsVisible="{Binding !StableInstalled}" >Get Latest Stable Build</Button>
+							<Button Command="{Binding InstallLatestNightly}" Grid.Row="4" Margin="0,0,0,10" HorizontalAlignment="Center" IsEnabled="{Binding !NightlyInstalled}" IsVisible="{Binding !NightlyInstalled}" >Get Latest Nightly Build</Button>
 							
 						</Grid>
 					</SplitView.Pane>
