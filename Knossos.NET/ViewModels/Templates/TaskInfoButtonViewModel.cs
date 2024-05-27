@@ -32,9 +32,9 @@ namespace Knossos.NET.ViewModels
             timer.Start();
         }
 
-        internal void OpenTaskView()
+        internal void ToggleTaskView()
         {
-            TaskViewModel?.ShowCommand();
+            TaskViewModel?.ToggleCommand();
         }
 
         private void Animate()

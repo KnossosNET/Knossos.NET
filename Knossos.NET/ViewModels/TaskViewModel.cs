@@ -247,6 +247,17 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
+        /// Toggle task panel visibility
+        /// </summary>
+        public void ToggleCommand()
+        {
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                ShowTaskList = !ShowTaskList;
+            });
+        }
+
+        /// <summary>
         /// Return number of tasks in list
         /// </summary>
         /// <returns></returns>
