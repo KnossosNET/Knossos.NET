@@ -52,6 +52,13 @@ namespace Knossos.NET.Models
             public Mod[]? mods { get; set; }
         }
 
+        private struct NebulaCache
+        { 
+            public string modID { get; set; }
+            public string modVersion { get; set; }
+            public string modString { get; set; }
+        }
+
         //https://cf.fsnebula.org/storage/repo.json
         //https://dl.fsnebula.org/storage/repo.json
         //https://aigaion.feralhosting.com/discovery/nebula/repo.json
@@ -69,6 +76,7 @@ namespace Knossos.NET.Models
         public static string? userPass { get { return settings.pass != null ? KnUtils.StringDecryption(settings.pass) : null; } }
         private static Mod[]? privateMods;
         private static string[]? editableIds;
+        private static List<NebulaCache?> nebulaModDataCache = new List<NebulaCache?>();
 
         /// <summary>
         /// Initial method
@@ -83,6 +91,7 @@ namespace Knossos.NET.Models
         {
             try
             {
+                nebulaModDataCache.Clear();
                 repoLoaded = false;
                 if (cancellationToken != null)
                 {
@@ -805,12 +814,42 @@ namespace Knossos.NET.Models
                     }
                 }
 
+                //Check if Mod and version we are looking for is stored in cache
+                var inCache = nebulaModDataCache.FirstOrDefault(cache => cache.HasValue && cache.Value.modID == modid && cache.Value.modVersion == version);
+                if (inCache != null)
+                {
+                    //Get mod data result from cache
+                    try
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.GetModJson", "Data for mod ID: " + modid + " Version: " + version + " was found in cache, skipping api call.");
+                        return JsonSerializer.Deserialize<Mod>(inCache.Value.modString);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.GetModJson", "Error while getting api data from cache, doing the api call instead. " + ex.Message);
+                    }
+                }
+
                 var reply = await ApiCall("mod/json/"+modid+"/"+version, null, false, 30, ApiMethod.GET);
 
                 if (reply.HasValue)
                 {
                     if (reply.Value.result)
                     {
+                        try
+                        {
+                            //Saving result in temp cache
+                            var cache = new NebulaCache();
+                            cache.modID = reply.Value.mod.id;
+                            cache.modVersion = reply.Value.mod.version;
+                            //Note: we need to serialize and save as string to avoid object modification deeper in the code
+                            cache.modString = JsonSerializer.Serialize(reply.Value.mod);
+                            nebulaModDataCache.Add(cache);
+                        }
+                        catch(Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Error, "Nebula.GetModJson", "Error while saving returned api data to cache." + ex.Message);
+                        }
                         return reply.Value.mod;
                     }
                     else
