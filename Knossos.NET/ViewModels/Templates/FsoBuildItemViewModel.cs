@@ -93,8 +93,13 @@ namespace Knossos.NET.ViewModels
                             case FsoExecArch.arm64: if (!CpuArch.Contains("ARM64")) CpuArch += "ARM64   "; break;
                         }
 
-                        if (!BuildType.Contains(exe.type.ToString()))
-                            BuildType += exe.type.ToString() + "  ";
+                        if (!BuildType.Split(" ").Contains(exe.type.ToString()))
+                        {
+                            if(!exe.useWine)
+                                BuildType += exe.type.ToString() + "  ";
+                            else
+                                BuildType += exe.type.ToString() + " (Wine)  ";
+                        }
                     }
                 }
             }
@@ -263,6 +268,33 @@ namespace Knossos.NET.ViewModels
                                 if(!FsoBuild.IsEnviromentStringValidInstall(nebulaPkg.environment))
                                 {
                                     ckb.IsEnabled = false;
+                                    //Fred2 over Wine exception
+                                    try
+                                    {
+                                        if (nebulaPkg.executables != null && KnUtils.IsLinux && nebulaPkg.environment != null && nebulaPkg.environment.ToLower().Contains("windows"))
+                                        {
+                                            foreach (var exec in nebulaPkg.executables)
+                                            {
+                                                var label = FsoBuild.GetExecType(exec.label);
+                                                if (label == FsoExecType.Fred2 || label == FsoExecType.Fred2Debug)
+                                                {
+                                                    var props = FsoBuild.FillProperties(nebulaPkg.environment);
+                                                    var arch = FsoBuild.GetExecArch(props);
+                                                    var score = FsoBuild.DetermineScoreFromArch(arch);
+                                                    if (score > 0)
+                                                    {
+                                                        ToolTip.SetTip(ckb, "This pkg contains Fred2 that can run over Wine.");
+                                                        ckb.IsEnabled = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } 
+                                    catch (Exception ex) 
+                                    {
+                                        Log.Add(Log.LogSeverity.Error, "FsoBuildItemViewModel.LoadPkgData(Fred2 over wine)", ex);
+                                    }
                                 }
                                 BuildPkgs.Add(ckb);
                             }
