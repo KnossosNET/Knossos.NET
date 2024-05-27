@@ -450,5 +450,20 @@ namespace Knossos.NET.ViewModels
             DeveloperModView?.UpdateBuildNames(LatestStable, LatestNightly);
             QuickSetupViewModel.Instance?.UpdateBuildName(LatestStable);
         }
+
+        /// <summary>
+        /// Open screenshot folder button command
+        /// </summary>
+        internal void OpenScreenshotsFolder()
+        {
+            try
+            {
+                KnUtils.OpenFolder(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "screenshots");
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.OpenScreenshotsFolder", ex);
+            }
+        }
     }
 }
