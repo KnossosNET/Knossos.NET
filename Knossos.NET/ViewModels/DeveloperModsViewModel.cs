@@ -6,6 +6,10 @@ using Knossos.NET.ViewModels;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Avalonia.Controls;
+using Avalonia.Threading;
+using System.Globalization;
+using System.Collections.Generic;
 
 namespace Knossos.NET.ViewModels
 {
@@ -14,6 +18,59 @@ namespace Knossos.NET.ViewModels
     /// </summary>
     public partial class DeveloperModsViewModel : ViewModelBase
     {
+        private enum SortType
+        {
+            Default,
+            Name,
+            Mod_Type,
+            Update_Date
+        }
+
+        public int sortSelectedIndex = 0;
+        internal int SortSelectedIndex
+        {
+            get => sortSelectedIndex;
+            set
+            {
+                if (value != sortSelectedIndex)
+                {
+                    this.SetProperty(ref sortSelectedIndex, value);
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        try
+                        {
+                            CloseEditor();
+                            List<Mod>? tempList = null;
+                            switch (value)
+                            {
+                                case (int)SortType.Default: tempList = Mods.OrderBy(x => x.folderName).ToList(); break;
+                                case (int)SortType.Name: tempList = Mods.OrderBy(x => x.title).ToList(); break;
+                                case (int)SortType.Update_Date: tempList = Mods.OrderByDescending(x => x.lastUpdate != null ? DateTime.Parse(x.lastUpdate, CultureInfo.InvariantCulture) : DateTime.MinValue)
+                                                                .ThenBy(x => x.title).ToList(); break;
+                                case (int)SortType.Mod_Type: tempList = Mods.OrderBy(x => x.type.ToString()).ThenBy(x => x.title).ToList(); break;
+                            }
+                            if (tempList != null)
+                            {
+                                for (int i = 0; i < tempList.Count(); i++)
+                                {
+                                    Mods.Move(Mods.IndexOf(tempList[i]), i);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Error, "DevelopersModsViewModel.ChangeSort()", ex);
+                        }
+                    }, DispatcherPriority.Background);
+                    Knossos.globalSettings.devModSort = value;
+                    Knossos.globalSettings.Save(false);
+                }
+            }
+        }
+
+        [ObservableProperty]
+        public ObservableCollection<ComboBoxItem> sortBoxItems = new ObservableCollection<ComboBoxItem>();
+
         public static DeveloperModsViewModel? Instance;
         [ObservableProperty]
         internal ObservableCollection<Mod> mods = new ObservableCollection<Mod>();
@@ -83,10 +140,38 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Fill the mod sorting combobox
+        /// </summary>
+        private void FillSortBox()
+        {
+            foreach(var e in Enum.GetValues(typeof(SortType)))
+            {
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    var cmb = new ComboBoxItem();
+                    cmb.Tag = e;
+                    cmb.Content = e.ToString()?.Replace("_"," ");
+                    SortBoxItems.Add(cmb);
+                }, DispatcherPriority.Background);
+            }
+        }
 
         public DeveloperModsViewModel()
         {
             Instance = this;
+            FillSortBox();
+        }
+
+        /// <summary>
+        /// On entering devmodetab check the sorting is the last selected one
+        /// </summary>
+        public void MaybeChangeSorting()
+        {
+            if (TabIndex == 0 && Knossos.globalSettings.devModSort != SortSelectedIndex)
+            {
+                SortSelectedIndex = Knossos.globalSettings.devModSort;
+            }
         }
 
         /// <summary>
@@ -159,9 +244,16 @@ namespace Knossos.NET.ViewModels
                 }
                 else
                 {
-                    if (SemanticVersion.Compare(exist.version, mod.version) < 1)
+                    //Do not consider DevEnv versions here because they dont have a proper "last update" date for the sorting
+                    //So always replace them if a normal version is found and ignore it if picked up later
+                    if (exist.version == "999.0.0-DevEnv" || mod.version != "999.0.0-DevEnv" && SemanticVersion.Compare(exist.version, mod.version) < 1)
                     {
-                        exist = mod;
+                        var index = Mods.IndexOf(exist);
+                        if (index != -1)
+                        {
+                            Mods.RemoveAt(index);
+                            Mods.Insert(index, mod);
+                        }
                     }
                     if (ModEditor != null && ModEditor.ActiveVersion.id == mod.id)
                     {

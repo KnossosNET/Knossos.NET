@@ -102,6 +102,7 @@ namespace Knossos.NET.ViewModels
                     }
                     if (tabIndex == 3) //Dev Tab
                     {
+                        DeveloperModsViewModel.Instance?.MaybeChangeSorting();
                         DeveloperModView.UpdateBuildInstallButtons();
                     }
                     if (tabIndex == 4) //Community Tab
