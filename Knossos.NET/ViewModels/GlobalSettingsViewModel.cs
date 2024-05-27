@@ -491,16 +491,16 @@ namespace Knossos.NET.ViewModels
                 foreach (var joy in flagData.joysticks)
                 {
                     var item = new ComboBoxItem();
-                    item.Content = joy.name + " - GUID: " + joy.guid + " - ID: " + joy.id;
+                    item.Content = joy.name + " - ID: " + joy.id + "\nGUID: " + joy.guid;
                     item.Tag = joy;
                     var item2 = new ComboBoxItem();
-                    item2.Content = joy.name + " - GUID: " + joy.guid + " - ID: " + joy.id; ;
+                    item2.Content = joy.name + " - ID: " + joy.id + "\nGUID: " + joy.guid;
                     item2.Tag = joy;
                     var item3 = new ComboBoxItem();
-                    item3.Content = joy.name + " - GUID: " + joy.guid + " - ID: " + joy.id; ;
+                    item3.Content = joy.name + " - ID: " + joy.id + "\nGUID: " + joy.guid;
                     item3.Tag = joy;
                     var item4 = new ComboBoxItem();
-                    item4.Content = joy.name + " - GUID: " + joy.guid + " - ID: " + joy.id; ;
+                    item4.Content = joy.name + " - ID: " + joy.id + "\nGUID: " + joy.guid;
                     item4.Tag = joy;
                     Joystick1Items.Add(item);
                     Joystick2Items.Add(item2);
@@ -532,7 +532,7 @@ namespace Knossos.NET.ViewModels
                     if(!found)
                     {
                         var missingItem = new ComboBoxItem();
-                        missingItem.Content = "(Missing) " + Knossos.globalSettings.joystick1.name + " GUID: " + Knossos.globalSettings.joystick1.guid + " ID: " + Knossos.globalSettings.joystick1.id;
+                        missingItem.Content = "(Missing) " + Knossos.globalSettings.joystick1.name + " ID: " + Knossos.globalSettings.joystick1.id + "\nGUID: " + Knossos.globalSettings.joystick1.guid;
                         missingItem.Tag = Knossos.globalSettings.joystick1;
                         Joystick1Items.Add(missingItem);
                         var index = Joystick1Items.IndexOf(missingItem);
@@ -565,7 +565,7 @@ namespace Knossos.NET.ViewModels
                     if (!found)
                     {
                         var missingItem = new ComboBoxItem();
-                        missingItem.Content = "(Missing) " + Knossos.globalSettings.joystick2.name + " GUID: " + Knossos.globalSettings.joystick2.guid + " ID: " + Knossos.globalSettings.joystick2.id;
+                        missingItem.Content = "(Missing) " + Knossos.globalSettings.joystick2.name + " ID: " + Knossos.globalSettings.joystick2.id + "\nGUID: " + Knossos.globalSettings.joystick2.guid;
                         missingItem.Tag = Knossos.globalSettings.joystick2;
                         Joystick2Items.Add(missingItem);
                         var index = Joystick2Items.IndexOf(missingItem);
@@ -598,7 +598,7 @@ namespace Knossos.NET.ViewModels
                     if (!found)
                     {
                         var missingItem = new ComboBoxItem();
-                        missingItem.Content = "(Missing) " + Knossos.globalSettings.joystick3.name + " GUID: " + Knossos.globalSettings.joystick3.guid + " ID: " + Knossos.globalSettings.joystick3.id;
+                        missingItem.Content = "(Missing) " + Knossos.globalSettings.joystick3.name + " ID: " + Knossos.globalSettings.joystick3.id + "\nGUID: " + Knossos.globalSettings.joystick3.guid;
                         missingItem.Tag = Knossos.globalSettings.joystick3;
                         Joystick3Items.Add(missingItem);
                         var index = Joystick3Items.IndexOf(missingItem);
@@ -631,7 +631,7 @@ namespace Knossos.NET.ViewModels
                     if (!found)
                     {
                         var missingItem = new ComboBoxItem();
-                        missingItem.Content = "(Missing) " + Knossos.globalSettings.joystick4.name + " GUID: " + Knossos.globalSettings.joystick4.guid + " ID: " + Knossos.globalSettings.joystick4.id;
+                        missingItem.Content = "(Missing) " + Knossos.globalSettings.joystick4.name + " ID: " + Knossos.globalSettings.joystick4.id + "\nGUID: " + Knossos.globalSettings.joystick4.guid;
                         missingItem.Tag = Knossos.globalSettings.joystick4;
                         Joystick4Items.Add(missingItem);
                         var index = Joystick4Items.IndexOf(missingItem);

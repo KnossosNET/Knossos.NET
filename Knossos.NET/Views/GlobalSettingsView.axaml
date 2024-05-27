@@ -327,25 +327,25 @@
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #0</TextBlock>
 							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
-							<ComboBox Grid.Column="1" SelectedIndex="{Binding Joy1SelectedIndex}" ItemsSource="{Binding Joystick1Items}" IsVisible="{Binding FlagDataLoaded}" Width="500" Margin="10,0,0,0"></ComboBox>
+							<ComboBox Height="50" Grid.Column="1" SelectedIndex="{Binding Joy1SelectedIndex}" ItemsSource="{Binding Joystick1Items}" IsVisible="{Binding FlagDataLoaded}" Width="500" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Joy2 -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #1</TextBlock>
 							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
-							<ComboBox SelectedIndex="{Binding Joy2SelectedIndex}" ItemsSource="{Binding Joystick2Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+							<ComboBox Height="50" SelectedIndex="{Binding Joy2SelectedIndex}" ItemsSource="{Binding Joystick2Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Joy3 -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #2</TextBlock>
 							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
-							<ComboBox SelectedIndex="{Binding Joy3SelectedIndex}" ItemsSource="{Binding Joystick3Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+							<ComboBox Height="50" SelectedIndex="{Binding Joy3SelectedIndex}" ItemsSource="{Binding Joystick3Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Joy4 -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #3</TextBlock>
 							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
-							<ComboBox SelectedIndex="{Binding Joy4SelectedIndex}" ItemsSource="{Binding Joystick4Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+							<ComboBox Height="50" SelectedIndex="{Binding Joy4SelectedIndex}" ItemsSource="{Binding Joystick4Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 					</StackPanel>
 				</Border>
