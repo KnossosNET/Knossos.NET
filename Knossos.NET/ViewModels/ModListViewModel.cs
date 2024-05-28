@@ -103,21 +103,6 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Open screenshot folder button command
-        /// </summary>
-        internal void OpenScreenshotsFolder()
-        {
-            try
-            {
-                KnUtils.OpenFolder(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "screenshots");
-            }
-            catch (Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.OpenScreenshotsFolder", ex);
-            }
-        }
-
-        /// <summary>
         /// Change sorting mode and re-order the list of mods
         /// </summary>
         /// <param name="sort"></param>
