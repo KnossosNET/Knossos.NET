@@ -8,7 +8,7 @@
 	         xmlns:vm="using:Knossos.NET.ViewModels"
 	         x:DataType="vm:TaskInfoButtonViewModel">
 	
-	<Button Width="40" Height="40" Command="{Binding OpenTaskView}" ToolTip.Tip="{Binding Tooltip}">
+	<Button Width="40" Height="40" Command="{Binding ToggleTaskView}" ToolTip.Tip="{Binding Tooltip}">
 		<Grid>
 			<Image IsVisible="{Binding Frame0}" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/kns-frame-0.png" />
 			<Image IsVisible="{Binding Frame1}" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/kns-frame-1.png" />
