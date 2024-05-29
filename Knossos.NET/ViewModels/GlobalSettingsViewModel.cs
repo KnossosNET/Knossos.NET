@@ -810,7 +810,7 @@ namespace Knossos.NET.ViewModels
             {
                 blMirrors.Add("talos.feralhosting.com");
             }
-            if (blMirrors.Any() && blMirrors.Count() != 3 /*Invalid!*/)
+            if (blMirrors.Any() && blMirrors.Count() != 4 /*Invalid!*/)
             {
                 Knossos.globalSettings.mirrorBlacklist = blMirrors.ToArray();
             }
@@ -820,6 +820,7 @@ namespace Knossos.NET.ViewModels
                 BlDlNebula = false;
                 BlCfNebula = false;
                 BlAigaion = false;
+                BlTalos = false;
             }
 
             Knossos.globalSettings.modCompression = ModCompression;
