@@ -252,7 +252,7 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                var selected = ToolItems.FirstOrDefault(x => x.IsSelected);
+                var selected = ToolItems[ToolIndex];
                 if (selected != null)
                 {
                     var tool = selected.DataContext as Tool;
