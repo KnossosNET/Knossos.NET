@@ -4122,7 +4122,7 @@ namespace Knossos.NET.ViewModels
                                                 }
                                                 if (inUse)
                                                 {
-                                                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallMod()", "Cleanup: " + version + " is in use by these mods: " + inUseMods + ". Skipping.");
+                                                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallBuild()", "Cleanup: " + version + " is in use by these mods: " + inUseMods + ". Skipping.");
                                                 }
                                                 else
                                                 {
@@ -4155,7 +4155,7 @@ namespace Knossos.NET.ViewModels
                                             }
                                             else
                                             {
-                                                Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallMod()", "Cleanup: " + version + " is newer than " + build + ". Skipping.");
+                                                Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallBuild()", "Cleanup: " + version + " is newer than " + build + ". Skipping.");
                                             }
                                         }
                                         MainWindowViewModel.Instance?.RunModStatusChecks();
