@@ -605,13 +605,96 @@ namespace Knossos.NET
                     });
 
                     //Enter the nebula
-                    //Note: this has to be done after scanning the local folder
-                    await Task.Run(() => { Nebula.Trinity(); }).ConfigureAwait(false);
+                    //Note: this has to be done after scanning the local folder, fire and forget
+                    await Task.Run(async () => { 
+                        await Nebula.Trinity();
+                        //Auto-Update FSO Builds function, has to run after the repo is loaded
+                        _ = Task.Run(() => AutoUpdateBuilds());
+                    }).ConfigureAwait(false);
                 }
                 else
                 {
                     await QuickLaunch();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Check for updates if FSO Stable, RC and Nightly builds if needed
+        /// Note: RCs are only installed IF they are newer than the newerest stable in nebula
+        /// </summary>
+        private static void AutoUpdateBuilds()
+        {
+            try
+            {
+                //Note: we are getting the data directly from the builds loaded into the UI as repo is already loaded at this point
+                if (Nebula.repoLoaded && FsoBuildsViewModel.Instance != null)
+                {
+                    //Stables
+                    if (globalSettings.autoUpdateBuilds.UpdateStable)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Knossos.AutoUpdateBuilds()", "Checking for new stable FSO builds.");
+
+                        var bestInstalled = GetInstalledBuildsList("FSO", FsoStability.Stable).MaxBy(x => new SemanticVersion(x.version));
+                        var bestNebula = FsoBuildsViewModel.Instance.StableItems.Where(x => !x.IsInstalled && x.build != null).MaxBy(x => new SemanticVersion(x.build!.version));
+
+                        if ((bestInstalled == null && bestNebula != null) || (bestInstalled != null && bestNebula != null && 
+                            new SemanticVersion(bestNebula!.build!.version) > new SemanticVersion(bestInstalled!.version)))
+                        {
+                            //Update
+                            Log.Add(Log.LogSeverity.Information, "Knossos.AutoUpdateBuilds()", "Found a newer stable build, installing: " + bestNebula.build);
+                            if (bestNebula.build!.modData != null)
+                                bestNebula.DownloadBuildExternal(bestNebula.build.modData, globalSettings.autoUpdateBuilds.DeleteOlder);
+                        }
+                    }
+                    //Nightly
+                    if (globalSettings.autoUpdateBuilds.UpdateNightly)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Knossos.AutoUpdateBuilds()", "Checking for new nightly FSO builds.");
+
+                        var bestInstalled = GetInstalledBuildsList("FSO", FsoStability.Nightly).MaxBy(x => new SemanticVersion(x.version));
+                        var bestNebula = FsoBuildsViewModel.Instance.NightlyItems.Where(x => !x.IsInstalled && x.build != null).MaxBy(x => new SemanticVersion(x.build!.version));
+
+                        if ((bestInstalled == null && bestNebula != null) || (bestInstalled != null && bestNebula != null &&
+                            new SemanticVersion(bestNebula!.build!.version) > new SemanticVersion(bestInstalled!.version)))
+                        {
+                            //Update
+                            Log.Add(Log.LogSeverity.Information, "Knossos.AutoUpdateBuilds()", "Found a newer nightly build, installing: " + bestNebula.build);
+                            if (bestNebula.build!.modData != null)
+                                bestNebula.DownloadBuildExternal(bestNebula.build.modData, globalSettings.autoUpdateBuilds.DeleteOlder);
+                        }
+                    }
+                    //RC
+                    if (globalSettings.autoUpdateBuilds.UpdateRC)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Knossos.AutoUpdateBuilds()", "Checking for new RC FSO builds.");
+
+                        var bestInstalled = GetInstalledBuildsList("FSO", FsoStability.RC).MaxBy(x => new SemanticVersion(x.version));
+                        var bestNebula = FsoBuildsViewModel.Instance.RcItems.Where(x => !x.IsInstalled && x.build != null).MaxBy(x => new SemanticVersion(x.build!.version));
+                        var bestNebulaStable = FsoBuildsViewModel.Instance.StableItems.Where(x => x.build != null).MaxBy(x => new SemanticVersion(x.build!.version));
+
+                        if (bestNebulaStable != null && bestInstalled != null && bestNebula != null && 
+                            new SemanticVersion(bestNebula!.build!.version) > new SemanticVersion(bestInstalled!.version))
+                        {
+                            if (new SemanticVersion(bestNebula!.build!.version) > new SemanticVersion(bestNebulaStable.build!.version))
+                            {
+                                //Update
+                                Log.Add(Log.LogSeverity.Information, "Knossos.AutoUpdateBuilds()", "Found a newer RC build, installing: " + bestNebula.build);
+                                if (bestNebula.build!.modData != null)
+                                    bestNebula.DownloadBuildExternal(bestNebula.build.modData, globalSettings.autoUpdateBuilds.DeleteOlder);
+                            }
+                            else
+                            {
+                                //Older than stable, skip
+                                Log.Add(Log.LogSeverity.Information, "Knossos.AutoUpdateBuilds()", "The newer RC build: " + bestNebula.build + " Is older than the newer stable in nebula: " + bestNebulaStable.build + " . Skipping.");
+                            }
+                        }
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Knossos.AutoUpdateBuilds()", ex);
             }
         }
 

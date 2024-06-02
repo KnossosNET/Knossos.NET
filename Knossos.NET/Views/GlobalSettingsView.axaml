@@ -68,8 +68,15 @@
 							<CheckBox IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start."></CheckBox>
 						</WrapPanel>
                         <WrapPanel Margin="5,10,0,0">
-                            <Label Margin="0,5,0,0" Width="205">Auto Update</Label> 
+                            <Label Margin="0,5,0,0" Width="205">Auto Update Knet</Label> 
 							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input."></CheckBox>
+						</WrapPanel>
+						<WrapPanel Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Auto Update FSO Builds</Label>
+							<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateStable}" ToolTip.Tip="Knet will check for newer Stable FSO builds at the start and automatically download them if one is available">Stable</CheckBox>
+							<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateRC}" ToolTip.Tip="Knet will check for newer RCs (Release Candidate) FSO builds at the start and automatically download them if one is available. Note: RC are only downloaded if they are newer than the newerest available Stable.">RC</CheckBox>
+							<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateNightly}" ToolTip.Tip="Knet will check for newer Nightly FSO builds at the start and automatically download them if one is available">Nightly</CheckBox>
+							<CheckBox Margin="5,0,0,0" IsChecked="{Binding DeleteOlder}" ToolTip.Tip="If this option is enabled, after an autoupdate Knet will delete older versions of installed FSO builds if they are not needed by any mod">Delete older versions</CheckBox>
 						</WrapPanel>
                         <WrapPanel Margin="5,10,0,0">
                             <Label Margin="0,5,0,0" Width="205">Delete Uploaded Mod Files</Label> 

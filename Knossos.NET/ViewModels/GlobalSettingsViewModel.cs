@@ -86,6 +86,14 @@ namespace Knossos.NET.ViewModels
         internal bool autoUpdate = false;
         [ObservableProperty]
         internal bool deleteUploadedFiles = true;
+        [ObservableProperty]
+        internal bool updateNightly = false;
+        [ObservableProperty]
+        internal bool updateStable = false;
+        [ObservableProperty]
+        internal bool updateRC = false;
+        [ObservableProperty]
+        internal bool deleteOlder = false;
 
         /*VIDEO*/
         [ObservableProperty]
@@ -269,6 +277,10 @@ namespace Knossos.NET.ViewModels
             CheckUpdates = Knossos.globalSettings.checkUpdate;
             AutoUpdate = Knossos.globalSettings.autoUpdate;
             DeleteUploadedFiles = Knossos.globalSettings.deleteUploadedFiles;
+            UpdateNightly = Knossos.globalSettings.autoUpdateBuilds.UpdateNightly;
+            UpdateRC = Knossos.globalSettings.autoUpdateBuilds.UpdateRC;
+            UpdateStable = Knossos.globalSettings.autoUpdateBuilds.UpdateStable;
+            DeleteOlder = Knossos.globalSettings.autoUpdateBuilds.DeleteOlder;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -821,6 +833,7 @@ namespace Knossos.NET.ViewModels
                 AutoUpdate = false;
             }
             Knossos.globalSettings.autoUpdate = AutoUpdate;
+            Knossos.globalSettings.autoUpdateBuilds = new GlobalSettings.AutoUpdateFsoBuilds(UpdateStable, UpdateRC, UpdateNightly, DeleteOlder);
 
             /* VIDEO */
             //Resolution

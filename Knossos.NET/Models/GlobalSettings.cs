@@ -65,6 +65,26 @@ namespace Knossos.NET.Models
             public uint height { get; set; }
         }
 
+        /// <summary>
+        /// Struc to save fso autoupdate settings
+        /// Note: "UpdateRC = true" should only update RC builds if they are newer than the newest avalible stable
+        /// </summary>
+        public struct AutoUpdateFsoBuilds
+        {
+            public bool UpdateStable { get; set; }
+            public bool UpdateRC { get; set; }
+            public bool UpdateNightly { get; set; }
+            public bool DeleteOlder { get; set; }
+
+            public AutoUpdateFsoBuilds(bool stable = false, bool rc = false, bool nightly = false, bool deleteOlder = false)
+            {
+                UpdateNightly = nightly;
+                UpdateStable = stable;
+                UpdateRC = rc;
+                DeleteOlder = deleteOlder;
+            }
+        }
+
         /* Knossos Settings */
         [JsonPropertyName("base_path")]
         public string? basePath { get; set; } = null;
@@ -96,6 +116,8 @@ namespace Knossos.NET.Models
         public Decompressor decompressor { get; set; } = Decompressor.Auto;
         [JsonPropertyName("dev_mod_sort")]
         public int devModSort { get; set; } = 0;
+        [JsonPropertyName("auto_update_fso_builds")]
+        public AutoUpdateFsoBuilds autoUpdateBuilds { get; set; } = new AutoUpdateFsoBuilds();
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 
@@ -571,6 +593,7 @@ namespace Knossos.NET.Models
                         deleteUploadedFiles = tempSettings.deleteUploadedFiles;
                         decompressor = tempSettings.decompressor;
                         devModSort = tempSettings.devModSort;
+                        autoUpdateBuilds = tempSettings.autoUpdateBuilds;
                         
                         if (MainWindowViewModel.Instance != null)
                             MainWindowViewModel.Instance.sharedSortType = tempSettings.sortType;
