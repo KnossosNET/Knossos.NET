@@ -252,13 +252,16 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                var selected = ToolItems[ToolIndex];
-                if (selected != null)
+                if (ToolIndex != -1 && ToolItems.Count() > ToolIndex)
                 {
-                    var tool = selected.DataContext as Tool;
-                    if (tool != null)
+                    var selected = ToolItems[ToolIndex];
+                    if (selected != null)
                     {
-                        tool.Open(ActiveVersion.fullPath);
+                        var tool = selected.DataContext as Tool;
+                        if (tool != null)
+                        {
+                            tool.Open(ActiveVersion.fullPath);
+                        }
                     }
                 }
             }
@@ -297,8 +300,6 @@ namespace Knossos.NET.ViewModels
                 if (ToolItems.Any())
                 {
                     ToolIndex = 0;
-                    var first = ToolItems.First();
-                    first.IsSelected = true;
                 }
             }catch(Exception ex)
             {
