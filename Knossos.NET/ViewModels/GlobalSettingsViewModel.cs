@@ -39,6 +39,8 @@ namespace Knossos.NET.ViewModels
         internal bool blDlNebula = false;
         [ObservableProperty]
         internal bool blAigaion = false;
+        [ObservableProperty]
+        internal bool blTalos = false;
 
         [ObservableProperty]
         internal bool flagDataLoaded = false;
@@ -261,6 +263,10 @@ namespace Knossos.NET.ViewModels
                 if (Knossos.globalSettings.mirrorBlacklist.Contains("aigaion.feralhosting.com"))
                 {
                     BlAigaion = true;
+                }
+                if (Knossos.globalSettings.mirrorBlacklist.Contains("talos.feralhosting.com"))
+                {
+                    BlTalos = true;
                 }
             }
 
@@ -800,7 +806,11 @@ namespace Knossos.NET.ViewModels
             {
                 blMirrors.Add("aigaion.feralhosting.com");
             }
-            if(blMirrors.Any() && blMirrors.Count() != 3 /*Invalid!*/)
+            if (BlTalos)
+            {
+                blMirrors.Add("talos.feralhosting.com");
+            }
+            if (blMirrors.Any() && blMirrors.Count() != 4 /*Invalid!*/)
             {
                 Knossos.globalSettings.mirrorBlacklist = blMirrors.ToArray();
             }
@@ -810,6 +820,7 @@ namespace Knossos.NET.ViewModels
                 BlDlNebula = false;
                 BlCfNebula = false;
                 BlAigaion = false;
+                BlTalos = false;
             }
 
             Knossos.globalSettings.modCompression = ModCompression;
