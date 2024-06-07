@@ -131,6 +131,11 @@
 								<ComboBoxItem Tag="2">Error</ComboBoxItem>
 							</ComboBox>
 						</WrapPanel>
+						<!-- NoSystemCMD -->
+						<WrapPanel Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Don't Apply Graphics Settings</Label> 
+							<CheckBox IsChecked="{Binding NoSystemCMD}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will not pass the graphics settings configured to FSO."></CheckBox>
+						</WrapPanel>
 					</StackPanel>
 				</Border>
 				<!--VIDEO SETTINGS-->

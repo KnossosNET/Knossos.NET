@@ -86,6 +86,8 @@ namespace Knossos.NET.ViewModels
         internal bool autoUpdate = false;
         [ObservableProperty]
         internal bool deleteUploadedFiles = true;
+        [ObservableProperty]
+        internal bool noSystemCMD = false;
 
         /*VIDEO*/
         [ObservableProperty]
@@ -269,6 +271,7 @@ namespace Knossos.NET.ViewModels
             CheckUpdates = Knossos.globalSettings.checkUpdate;
             AutoUpdate = Knossos.globalSettings.autoUpdate;
             DeleteUploadedFiles = Knossos.globalSettings.deleteUploadedFiles;
+            NoSystemCMD = Knossos.globalSettings.noSystemCMD;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -821,6 +824,7 @@ namespace Knossos.NET.ViewModels
                 AutoUpdate = false;
             }
             Knossos.globalSettings.autoUpdate = AutoUpdate;
+            Knossos.globalSettings.noSystemCMD = NoSystemCMD;
 
             /* VIDEO */
             //Resolution

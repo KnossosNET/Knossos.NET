@@ -976,7 +976,7 @@ namespace Knossos.NET
             {
                 if (!mod.modSettings.ignoreGlobalCmd)
                 {
-                    if (modCmd != null && modCmd.Any())
+                    if (modCmd != null && modCmd.Any() && !globalSettings.noSystemCMD)
                     {
                         foreach(var flag in modCmd.ToList())
                         {
@@ -984,7 +984,8 @@ namespace Knossos.NET
                                 modCmd.Remove(flag);
                         }
                     }
-                    cmdline = KnUtils.CmdLineBuilder(cmdline, systemCmd);
+                    if (!globalSettings.noSystemCMD)
+                        cmdline = KnUtils.CmdLineBuilder(cmdline, systemCmd);
                     cmdline = KnUtils.CmdLineBuilder(cmdline, globalCmd);
                 }
                 cmdline = KnUtils.CmdLineBuilder(cmdline, modCmd?.ToArray());

@@ -96,6 +96,8 @@ namespace Knossos.NET.Models
         public Decompressor decompressor { get; set; } = Decompressor.Auto;
         [JsonPropertyName("dev_mod_sort")]
         public int devModSort { get; set; } = 0;
+        [JsonPropertyName("no_system_cmd")]
+        public bool noSystemCMD { get; set; } = false;
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 
@@ -571,6 +573,7 @@ namespace Knossos.NET.Models
                         deleteUploadedFiles = tempSettings.deleteUploadedFiles;
                         decompressor = tempSettings.decompressor;
                         devModSort = tempSettings.devModSort;
+                        noSystemCMD = tempSettings.noSystemCMD;
                         
                         if (MainWindowViewModel.Instance != null)
                             MainWindowViewModel.Instance.sharedSortType = tempSettings.sortType;
