@@ -98,6 +98,8 @@ namespace Knossos.NET.Models
         public int devModSort { get; set; } = 0;
         [JsonPropertyName("no_system_cmd")]
         public bool noSystemCMD { get; set; } = false;
+        [JsonPropertyName("show_dev_options")]
+        public bool showDevOptions { get; set; } = false;
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 

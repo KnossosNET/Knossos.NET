@@ -88,6 +88,8 @@ namespace Knossos.NET.ViewModels
         internal bool deleteUploadedFiles = true;
         [ObservableProperty]
         internal bool noSystemCMD = false;
+        [ObservableProperty]
+        internal bool showDevOptions = false;
 
         /*VIDEO*/
         [ObservableProperty]
@@ -168,7 +170,6 @@ namespace Knossos.NET.ViewModels
         internal int joy4SelectedIndex = -1;
 
         /* MOD / FS2 */
-        [ObservableProperty]
         internal string globalCmd = string.Empty;
         [ObservableProperty]
         internal int fs2LangSelectedIndex = 0;
@@ -180,6 +181,24 @@ namespace Knossos.NET.ViewModels
         internal uint joystickSensitivity = 9;
         [ObservableProperty]
         internal uint joystickDeadZone = 10;
+
+        // In order to have hidden dev options, we need a setter for globalCMD
+        public string GlobalCmd
+        {
+            get
+            {
+                return globalCmd;
+            }
+            set
+            {
+
+                if (value.Contains("freespace2.com")){                  
+                    ShowDevOptions = true;
+                }
+
+                SetProperty(ref globalCmd, value.Replace("freespace2.com", ""));
+            }
+        }
 
         public GlobalSettingsViewModel()
         {
@@ -272,6 +291,7 @@ namespace Knossos.NET.ViewModels
             AutoUpdate = Knossos.globalSettings.autoUpdate;
             DeleteUploadedFiles = Knossos.globalSettings.deleteUploadedFiles;
             NoSystemCMD = Knossos.globalSettings.noSystemCMD;
+            ShowDevOptions = Knossos.globalSettings.showDevOptions;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -825,6 +845,7 @@ namespace Knossos.NET.ViewModels
             }
             Knossos.globalSettings.autoUpdate = AutoUpdate;
             Knossos.globalSettings.noSystemCMD = NoSystemCMD;
+            Knossos.globalSettings.showDevOptions = ShowDevOptions;
 
             /* VIDEO */
             //Resolution
@@ -1146,6 +1167,16 @@ namespace Knossos.NET.ViewModels
             var dialog = new Views.DebugFiltersView();
             dialog.DataContext = new DebugFiltersViewModel();
             await dialog.ShowDialog<DebugFiltersView?>(MainWindow.instance!);
+        }
+
+        internal void ToggleDeveloperOptions()
+        {
+            ShowDevOptions = !ShowDevOptions;
+
+            // if we are turning off dev options, we need to actually restore to default
+            if (!ShowDevOptions){
+                NoSystemCMD = false;
+            }
         }
 
     }
