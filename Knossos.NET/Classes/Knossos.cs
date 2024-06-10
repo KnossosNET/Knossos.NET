@@ -868,36 +868,87 @@ namespace Knossos.NET
                 }
                 else
                 {
-                    foreach (var depMod in modList)
+                    var depMod = modList.FirstOrDefault(d => d.id == modid);
+                    //Found the modflag id in mod dependencies list
+                    if (depMod != null)
                     {
-                        if (depMod.id == modid)
+                        /* Dev Mode ON */
+                        if (depMod.devMode)
                         {
-                            /* Dev Mode ON */
-                            if (depMod.devMode)
+                            foreach (var pkg in depMod.packages)
                             {
-                                foreach (var pkg in depMod.packages)
+                                if (modFlag.Length > 0)
                                 {
-                                    if (modFlag.Length > 0)
+                                    modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
+                                }
+                                else
+                                {
+                                    modFlag += Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (modFlag.Length > 0)
+                            {
+                                modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath).TrimEnd('/').TrimEnd('\\');
+                            }
+                            else
+                            {
+                                modFlag += Path.GetRelativePath(rootPath, depMod.fullPath).TrimEnd('/').TrimEnd('\\');
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //Unofficial feature
+                        //https://github.com/KnossosNET/Knossos.NET/issues/195
+                        //Try to load a mod thats not on the dependencies list, but it is on the modflag list, if found installed
+                        try
+                        {
+                            var optionalDep = Knossos.GetInstalledModList(modid);
+                            if (optionalDep != null && optionalDep.Count() > 0)
+                            {
+                                var newerOpt = optionalDep.MaxBy(o =>  new SemanticVersion(o.version));
+                                if(newerOpt != null)
+                                {
+                                    Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Loading optional dependency: " + newerOpt);
+                                    /* Dev Mode ON */
+                                    if (newerOpt.devMode)
                                     {
-                                        modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
+                                        foreach (var pkg in newerOpt.packages)
+                                        {
+                                            if (modFlag.Length > 0)
+                                            {
+                                                modFlag += "," + Path.GetRelativePath(rootPath, newerOpt.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
+                                            }
+                                            else
+                                            {
+                                                modFlag += Path.GetRelativePath(rootPath, newerOpt.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
+                                            }
+                                        }
                                     }
                                     else
                                     {
-                                        modFlag += Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
+                                        if (modFlag.Length > 0)
+                                        {
+                                            modFlag += "," + Path.GetRelativePath(rootPath, newerOpt.fullPath).TrimEnd('/').TrimEnd('\\');
+                                        }
+                                        else
+                                        {
+                                            modFlag += Path.GetRelativePath(rootPath, newerOpt.fullPath).TrimEnd('/').TrimEnd('\\');
+                                        }
                                     }
                                 }
                             }
                             else
                             {
-                                if (modFlag.Length > 0)
-                                {
-                                    modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath).TrimEnd('/').TrimEnd('\\');
-                                }
-                                else
-                                {
-                                    modFlag += Path.GetRelativePath(rootPath, depMod.fullPath).TrimEnd('/').TrimEnd('\\');
-                                }
+                                //Mod has a optional dependency but it is not found installed
+                                Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Mod requested a optional dependency that is not found: " + modid + ". This is not critical.");
                             }
+                        }catch(Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod(optional dependency)", ex);
                         }
                     }
                 }
