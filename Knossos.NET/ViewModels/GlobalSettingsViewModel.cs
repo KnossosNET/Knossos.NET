@@ -192,8 +192,8 @@ namespace Knossos.NET.ViewModels
             set
             {
 
-                if (value.Contains("freespace2.com")){                  
-                    ShowDevOptions = true;
+                if (value.Contains("freespace2.com") && !ShowDevOptions){   
+                    ToggleDeveloperOptions();
                 }
 
                 SetProperty(ref globalCmd, value.Replace("freespace2.com", ""));
@@ -291,7 +291,7 @@ namespace Knossos.NET.ViewModels
             AutoUpdate = Knossos.globalSettings.autoUpdate;
             DeleteUploadedFiles = Knossos.globalSettings.deleteUploadedFiles;
             NoSystemCMD = Knossos.globalSettings.noSystemCMD;
-            ShowDevOptions = Knossos.globalSettings.showDevOptions;
+            ShowDevOptions = Knossos.globalSettings.showDevOptions || NoSystemCMD;
 
             /* VIDEO SETTINGS */
             //RESOLUTION

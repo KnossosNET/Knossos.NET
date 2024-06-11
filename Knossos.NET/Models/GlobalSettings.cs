@@ -576,7 +576,8 @@ namespace Knossos.NET.Models
                         decompressor = tempSettings.decompressor;
                         devModSort = tempSettings.devModSort;
                         noSystemCMD = tempSettings.noSystemCMD;
-                        
+                        showDevOptions = tempSettings.showDevOptions;
+
                         if (MainWindowViewModel.Instance != null)
                             MainWindowViewModel.Instance.sharedSortType = tempSettings.sortType;
 
