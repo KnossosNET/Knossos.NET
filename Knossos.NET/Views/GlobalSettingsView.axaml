@@ -396,6 +396,22 @@
 						</Grid>
 					</StackPanel>
 				</Border>
+
+				<!--Developer Settings-->
+				<Label IsVisible="{Binding ShowDevOptions}" Margin="5,15,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Advanced settings used by Hard-light devs.">Developer Options</Label>
+				<Border IsVisible="{Binding ShowDevOptions}" Margin="0,5,0,5" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
+					<StackPanel IsVisible="{Binding ShowDevOptions}" Margin="5">
+						<!-- Developer Options Shutoff-->
+						<WrapPanel IsVisible="{Binding ShowDevOptions}" Margin="5,10,0,0">
+							<Button Content="Turn Off Developer Options" ToolTip.Tip="Restore Dev Options to Default and Close Developer Section.  This should restore normal Knossos.NET operations." Command="{Binding ToggleDeveloperOptions}"></Button>
+						</WrapPanel>
+						<!-- NoSystemCMD -->
+						<WrapPanel IsVisible="{Binding ShowDevOptions}" IsEnabled="{Binding ShowDevOptions}" Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Don't Apply Graphics Settings</Label> 
+							<CheckBox IsChecked="{Binding NoSystemCMD}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will not pass the graphics settings configured to FSO."></CheckBox>
+						</WrapPanel>
+					</StackPanel>
+				</Border>
 			</StackPanel>
 		</ScrollViewer>
 	</Grid>
