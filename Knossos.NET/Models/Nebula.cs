@@ -882,9 +882,16 @@ namespace Knossos.NET.Models
                 var reply = await ApiCall("log/upload", data);
                 if (reply.HasValue)
                 {
-                    Log.Add(Log.LogSeverity.Information, "Nebula.UploadLog", "Uploaded log file to Nebula: " + nebulaURL + "log/" + reply.Value.id);
-                    KnUtils.OpenBrowserURL(nebulaURL + "log/" + reply.Value.id);
-                    return true;
+                    if (reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.UploadLog", "Uploaded log file to Nebula: " + nebulaURL + "log/" + reply.Value.id);
+                        KnUtils.OpenBrowserURL(nebulaURL + "log/" + reply.Value.id);
+                        return true;
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.UploadLog", "Error uploading log to nebula, reason: " + reply.Value.reason);
+                    }
                 }
             }
             catch (Exception ex)
@@ -913,8 +920,16 @@ namespace Knossos.NET.Models
                 var reply = await ApiCall("mod/release/report", data, true);
                 if (reply.HasValue)
                 {
-                    Log.Add(Log.LogSeverity.Information, "Nebula.ReportMod", "Reported Mod: " + mod + " to fsnebula successfully.");
-                    return true;
+                    if (reply.Value.result)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Nebula.ReportMod", "Reported Mod: " + mod + " to fsnebula successfully.");
+                        return true;
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Nebula.ReportMod", "Error reporting mod to nebula, reason: " + reply.Value.reason);
+                    }
+
                 }
             }
             catch (Exception ex)
