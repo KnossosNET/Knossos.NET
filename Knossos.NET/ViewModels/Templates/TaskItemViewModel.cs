@@ -4149,7 +4149,7 @@ namespace Knossos.NET.ViewModels
                                                     }
                                                     else
                                                     {
-                                                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", "Cleanup: Unable to find" + version + " in the UI items, we cant to auto delete.");
+                                                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", "Cleanup: Unable to find" + version + " in the UI items, so we can't auto delete.");
                                                     }
                                                 }
                                             }
