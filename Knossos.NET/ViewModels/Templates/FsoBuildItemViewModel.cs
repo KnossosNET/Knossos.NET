@@ -165,7 +165,7 @@ namespace Knossos.NET.ViewModels
             IsDownloading = false;
         }
 
-        public async void DownloadBuildExternal(Mod  mod)
+        public async void DownloadBuildExternal(Mod  mod, bool cleanupOldVersions = false)
         {
             if (!IsDownloading && !IsInstalled)
             {
@@ -173,12 +173,13 @@ namespace Knossos.NET.ViewModels
                 cancellationTokenSource = new CancellationTokenSource();
                 await mod.LoadFulLNebulaData().ConfigureAwait(false);
                 await Dispatcher.UIThread.InvokeAsync(async () => { 
-                    FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, mod)!;
+                    FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, mod, null, cleanupOldVersions)!;
                     if (newBuild != null)
                     {
                         //Install completed
                         IsInstalled = true;
                         build = newBuild;
+                        UpdateDisplayData(newBuild, true);
                     }
                     IsDownloading = false;
                     cancellationTokenSource?.Dispose();

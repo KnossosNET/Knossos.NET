@@ -87,7 +87,7 @@ namespace Knossos.NET.Models
         /// If user has saved credentials to Nebula, login and check private mods
         /// Displays mods updates to taskview (if any)
         /// </summary>
-        public static async void Trinity()
+        public static async Task Trinity()
         {
             try
             {

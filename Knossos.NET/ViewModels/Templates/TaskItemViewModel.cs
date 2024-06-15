@@ -3660,7 +3660,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null)
+        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false)
         {
             string? modPath = null;
             try
@@ -4082,6 +4082,101 @@ namespace Knossos.NET.ViewModels
 
                         //Re-run Dependencies checks 
                         MainWindowViewModel.Instance?.RunModStatusChecks();
+
+                        // Clean old versions
+                        if (cleanupOldVersions)
+                        {
+                            try
+                            {
+                                var versions = Knossos.GetInstalledBuildsList(build.id, build.stability);
+                                if (versions != null)
+                                {
+                                    versions.Remove(build);
+                                    if (versions.Any())
+                                    {
+                                        foreach (var version in versions.ToList())
+                                        {
+                                            //Check if it is inferior to the one we just installed
+                                            if (SemanticVersion.Compare(build.version, version.version) >= 1)
+                                            {
+                                                bool inUse = false;
+                                                string inUseMods = "";
+                                                foreach (var m in Knossos.GetInstalledModList(null))
+                                                {
+                                                    if (m != null && m.id != build.id)
+                                                    {
+                                                        var deps = m.GetModDependencyList();
+                                                        if (deps != null)
+                                                        {
+                                                            foreach (var dep in deps)
+                                                            {
+                                                                var depMod = dep.SelectBuild();
+                                                                if (depMod == version)
+                                                                {
+                                                                    inUse = true;
+                                                                    inUseMods += m + ", ";
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                if (inUse)
+                                                {
+                                                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallBuild()", "Cleanup: " + version + " is in use by these mods: " + inUseMods + ". Skipping.");
+                                                }
+                                                else
+                                                {
+                                                    //Safe to delete
+                                                    FsoBuildItemViewModel? uiItem = null;
+                                                    switch(version.stability)
+                                                    {
+                                                        case FsoStability.Stable: uiItem = FsoBuildsViewModel.Instance!.StableItems.FirstOrDefault(x => x.build != null && x.build.version == version.version); break;
+                                                        case FsoStability.RC: uiItem = FsoBuildsViewModel.Instance!.RcItems.FirstOrDefault(x => x.build != null && x.build.version == version.version); break;
+                                                        case FsoStability.Nightly: uiItem = FsoBuildsViewModel.Instance!.NightlyItems.FirstOrDefault(x => x.build != null && x.build.version == version.version); break;
+                                                        case FsoStability.Custom: uiItem = FsoBuildsViewModel.Instance!.CustomItems.FirstOrDefault(x => x.build != null && x.build.version == version.version); break;
+                                                    }
+
+                                                    if (uiItem != null)
+                                                    {
+                                                        Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallBuild()", "Cleanup: " + version + " is not in use, deleting...");
+                                                        var msgtask = new TaskItemViewModel();
+                                                        msgtask.ShowMsg("Cleanup: Deleting " + version.version, null);
+                                                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, msgtask));
+                                                        FsoBuildsViewModel.Instance!.DeleteBuild(version, uiItem, false);
+                                                        //If the build is custom and the dev editor is open and loaded this build id, reset it
+                                                        if(version.stability == FsoStability.Custom)
+                                                            await Dispatcher.UIThread.InvokeAsync(() => DeveloperModsViewModel.Instance!.ResetModEditor(version.id));
+                                                    }
+                                                    else
+                                                    {
+                                                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", "Cleanup: Unable to find" + version + " in the UI items, so we can't auto delete.");
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallBuild()", "Cleanup: " + version + " is newer than " + build + ". Skipping.");
+                                            }
+                                        }
+                                        MainWindowViewModel.Instance?.RunModStatusChecks();
+                                    }
+                                    else
+                                    {
+                                        //Nothing to cleanup
+                                        var msgtask = new TaskItemViewModel();
+                                        msgtask.ShowMsg("Cleanup: Nothing to cleanup.", null);
+                                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, msgtask));
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                var msgtask = new TaskItemViewModel();
+                                msgtask.ShowMsg("Cleanup: An error has ocurred, check logs.", null);
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, msgtask));
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", ex);
+                            }
+                        }
 
                         /*
                             Always Dequeue, always check for check size and verify that the first is this TaskItemViewModel object

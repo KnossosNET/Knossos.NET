@@ -89,6 +89,14 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool deleteUploadedFiles = true;
         [ObservableProperty]
+        internal bool updateNightly = false;
+        [ObservableProperty]
+        internal bool updateStable = false;
+        [ObservableProperty]
+        internal bool updateRC = false;
+        [ObservableProperty]
+        internal bool deleteOlder = false;
+        [ObservableProperty]
         internal bool noSystemCMD = false;
         [ObservableProperty]
         internal bool showDevOptions = false;
@@ -296,6 +304,10 @@ namespace Knossos.NET.ViewModels
             CheckUpdates = Knossos.globalSettings.checkUpdate;
             AutoUpdate = Knossos.globalSettings.autoUpdate;
             DeleteUploadedFiles = Knossos.globalSettings.deleteUploadedFiles;
+            UpdateNightly = Knossos.globalSettings.autoUpdateBuilds.UpdateNightly;
+            UpdateRC = Knossos.globalSettings.autoUpdateBuilds.UpdateRC;
+            UpdateStable = Knossos.globalSettings.autoUpdateBuilds.UpdateStable;
+            DeleteOlder = Knossos.globalSettings.autoUpdateBuilds.DeleteOlder;
             NoSystemCMD = Knossos.globalSettings.noSystemCMD;
             ShowDevOptions = Knossos.globalSettings.showDevOptions || NoSystemCMD;
 
@@ -855,6 +867,7 @@ namespace Knossos.NET.ViewModels
                 AutoUpdate = false;
             }
             Knossos.globalSettings.autoUpdate = AutoUpdate;
+            Knossos.globalSettings.autoUpdateBuilds = new GlobalSettings.AutoUpdateFsoBuilds(UpdateStable, UpdateRC, UpdateNightly, DeleteOlder);
             Knossos.globalSettings.noSystemCMD = NoSystemCMD;
             Knossos.globalSettings.showDevOptions = ShowDevOptions;
 
