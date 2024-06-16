@@ -204,6 +204,178 @@ namespace Knossos.NET.ViewModels
         {
         }
 
+        public async Task<bool> TryToCopyFilesFromOldVersions(Mod mod, List<Mod> oldVersions, ModFile file, ModPackage? package, CancellationTokenSource? cancelSource = null)
+        {
+            try
+            {
+                if (!TaskIsSet)
+                {
+                    TaskIsSet = true;
+                    ProgressBarMax = 1;
+                    ProgressCurrent = 0; 
+                    ShowProgressText = false; 
+                    CancelButtonVisible = false;
+                    IsTextTask = false;
+                    IsFileDownloadTask = false;
+                    TextColor = Brushes.White;
+                    Name = "Get "+ file.filename+" from installed versions";
+
+                    var fileHash = "";
+
+                    if (file.checksum != null && file.checksum.Count() >= 1 && file.checksum[0].ToLower() == "sha256")
+                    {
+                        fileHash = file.checksum[1].ToLower();
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "Unable to get the sha256 checksum for file " + file.filename + " for mod " + mod + ". This should not happen.");
+                        Name = "Unable to parse checksum";
+                        return false;
+                    }
+
+                    if (!oldVersions.Any())
+                    {
+                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "No old versions for mod " + mod + ". This should not happen.");
+                        Name = "No old versions";
+                        return false;
+                    }
+                    if (package == null)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "Requested package was null for file " + file.filename + " for mod " + mod + ". This should not happen.");
+                        Name = "Aborted, not package was found";
+                        return false;
+                    }
+                    if (package.filelist == null)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "Requested package had a null filelist for file " + file.filename + " for mod " + mod + ". This should not happen.");
+                        Name = "Aborted, package had no files";
+                        return false;
+                    }
+
+                    if (cancelSource != null)
+                        cancellationTokenSource = cancelSource;
+                    else
+                        cancellationTokenSource = new CancellationTokenSource();
+
+                    if (cancellationTokenSource.IsCancellationRequested) 
+                        throw new TaskCanceledException();
+                    
+                    //Lets try all old versions
+                    foreach (var oldVer in oldVersions)
+                    {
+                        Info = "Checking on version: " + oldVer.version;
+                        if (oldVer.packages != null && oldVer.packages.Any())
+                        {
+                            //Get the old package of the old version if the source nebula file has the same sha256 hash
+                            var oldPkg = oldVer.packages.FirstOrDefault(p => p.files != null && p.files.FirstOrDefault(f => f.checksum != null && f.checksum.Contains(fileHash)) != null);
+
+                            //If we found a package then we have to verify that all files exist and their checksum is ok
+                            if (oldPkg != null)
+                            {
+                                Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "Found match of old files belonging to mod version " + oldVer + " for the requested nebula file " + file.filename + ". Checking individual files...");
+                                //store all old file path and new dest paths to copy later
+                                var copySrcList = new List<string>();
+                                var copyDstList = new List<string>();
+                                foreach (var f in package.filelist)
+                                {
+                                    if (f.filename != null && ( !oldVer.devMode || (oldVer.devMode && oldPkg.folder != null) ))
+                                    {
+                                        var oldPath = oldVer.devMode ? Path.Combine(oldVer.fullPath, oldPkg.folder!, f.filename) : Path.Combine(oldVer.fullPath, f.filename);
+                                        if(File.Exists(oldPath))
+                                        {
+                                            var isCompressed = false;
+                                            //Check if local file is compressed
+                                            using (var input = new FileStream(oldPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                            {
+                                                BinaryReader br = new BinaryReader(input);
+
+                                                //Verify if it is compressed
+                                                if (input.CanRead && Encoding.ASCII.GetString(br.ReadBytes(4)) == "LZ41")
+                                                    isCompressed = true;
+                                            }
+
+                                            //Check sha256
+                                            if (!isCompressed)
+                                            {
+                                                var oldHash = await KnUtils.GetFileHash(oldPath);
+                                                if (f.checksum != null && f.checksum.Count() >= 1 && oldHash != f.checksum[1])
+                                                {
+                                                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "Requested file " + oldPath + " had a sha256 hash: " + oldHash + " . Expected: " + f.checksum[1]);
+                                                    //Verify fail, clear list and break to next modversion
+                                                    copySrcList.Clear();
+                                                    copyDstList.Clear();
+                                                    break;
+                                                }
+                                            }
+
+                                            copySrcList.Add(oldPath);
+                                            var newPath = mod.devMode ? Path.Combine(mod.fullPath, package.folder!, f.filename) : Path.Combine(mod.fullPath, f.filename);
+                                            copyDstList.Add(newPath);
+                                        }
+                                        else
+                                        {
+                                            Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "Requested file "+oldPath+ " was not present on the old mod files. "+oldVer + " cant be used as source of files for "+file.filename);
+                                            //Verify fail, clear list and break to next modversion
+                                            copySrcList.Clear();
+                                            copyDstList.Clear();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                //we can know if the verify completed by checking the copySrcList
+                                if(copySrcList.Any() && copySrcList.Count() == copyDstList.Count())
+                                {
+                                    ProgressBarMax = copySrcList.Count();
+                                    //Copy files
+                                    for (int i = 0; i < copySrcList.Count(); i++)
+                                    {
+                                        Info = "Copy file: " + (i+1).ToString() + " / " + copySrcList.Count() + " ("+Path.GetFileName(copyDstList[i]) +")";
+                                        //Make sure the dest folder structure exist
+                                        Directory.CreateDirectory(Path.GetDirectoryName(copyDstList[i])!);
+                                        ++ProgressCurrent;
+                                        File.Copy(copySrcList[i], copyDstList[i], true);
+                                    }
+                                    //If we get here whiout any exceptions it means it completed successfully
+                                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "All files needed for nebula file "+ file.filename +" were copied from "+ oldVer+ ". Download from nebula was skipped successfully.");
+                                    Info = copySrcList.Count() + " files copied OK";
+                                    //IsCompleted = true;
+                                    ProgressCurrent = ProgressBarMax;
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+
+                    Info = "Not found: Downloading new file";
+                    ProgressCurrent = ProgressBarMax;
+                    return false;
+                }
+                else
+                {
+                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                //Task cancel requested by user
+                IsCompleted = false;
+                IsCancelled = true;
+                Info = "Cancelled";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //An exception has happened during task run
+                IsCompleted = false;
+                CancelButtonVisible = false;
+                IsCancelled = true;
+                Info = "Aborted, check log";
+                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", ex);
+                return false;
+            }
+        }
+
         public async Task<bool> InstallTool(Tool tool, Tool? updateFrom, Action<bool> finishedCallback, CancellationTokenSource? cancelSource = null)
         {
             try
@@ -3192,6 +3364,13 @@ namespace Knossos.NET.ViewModels
                         throw new TaskCanceledException();
                     }
 
+                    var oldVersions = Knossos.GetInstalledModList(mod.id);
+                    //Reload checksum data, because by default it is unloaded after parsing
+                    foreach (var oldVer in oldVersions)
+                    {
+                        oldVer.ReLoadJson();
+                    }
+
                     /*
                         -Use parallel to process this new list, the max parallelism is the max number of concurrent downloads
                         -Always check canceltask before executing something
@@ -3206,75 +3385,101 @@ namespace Knossos.NET.ViewModels
                             throw new TaskCanceledException();
                         }
 
-                        //Download
-                        var fileTask = new TaskItemViewModel();
-                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, fileTask));
-                        if (file.dest == null)
-                        {
-                            file.dest = string.Empty;
-                        }
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
-                        var fileFullPath = modPath + Path.DirectorySeparatorChar + file.filename;
-                        var result = await fileTask.DownloadFile(file.urls!, fileFullPath, "Downloading " + file.filename, false, null, cancellationTokenSource);
 
-                        if (cancellationTokenSource.IsCancellationRequested)
-                        {
-                            throw new TaskCanceledException();
-                        }
+                        bool copiedFromOldVersion = false;
 
-                        if (result.HasValue && result.Value)
+                        if(oldVersions.Any())
                         {
-                            ++ProgressCurrent;
-                            Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
-                        }
-                        else
-                        {
-                            throw new Exception("Error while downloading file: " + fileFullPath);
-                        }
-
-                        //Checksum
-                        if (file.checksum != null && file.checksum.Count() > 0)
-                        {
-                            if (file.checksum[0].ToLower() == "sha256")
+                            //Search for files in old versions
+                            var copyTask = new TaskItemViewModel();
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, copyTask));
+                            mod.fullPath = modPath + Path.DirectorySeparatorChar;
+                            copiedFromOldVersion = await copyTask.TryToCopyFilesFromOldVersions(mod, oldVersions, file, mod.packages.FirstOrDefault(p=> p.files != null && p.files.Contains(file)), cancellationTokenSource);
+                            if (!copiedFromOldVersion)
                             {
-                                using (FileStream? filehash = new FileStream(fileFullPath, FileMode.Open, FileAccess.Read))
-                                {
-                                    using (SHA256 checksum = SHA256.Create())
-                                    {
-                                        filehash.Position = 0;
-                                        var hashValue = BitConverter.ToString(await checksum.ComputeHashAsync(filehash)).Replace("-", String.Empty);
-                                        filehash.Close();
-                                        if (hashValue.ToLower() != file.checksum[1].ToLower())
-                                        {
-                                            throw new Exception("The downloaded file hash was incorrect, expected: " + file.checksum[1] + " Calculated Hash: " + hashValue);
-                                        }
-                                    }
-                                    fileTask.Info = " Checksum OK!";
-                                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Remove(fileTask));
-                                }
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Remove(copyTask));
                             }
                             else
                             {
-                                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.InstallMod()", "Unsupported checksum crypto, skipping checksum check :" + file.checksum[0]);
+                                //yay!, we skipped a download, don't you see me jumping in joy? We saved two steps!
+                                ProgressCurrent += 2;
                             }
                         }
 
-                        if (cancellationTokenSource.IsCancellationRequested)
+                        if (!copiedFromOldVersion)
                         {
-                            throw new TaskCanceledException();
+                            //The good old way: download the file from nebula and extract
+                            //Download
+                            var fileTask = new TaskItemViewModel();
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, fileTask));
+                            if (file.dest == null)
+                            {
+                                file.dest = string.Empty;
+                            }
+                            var fileFullPath = modPath + Path.DirectorySeparatorChar + file.filename;
+                            var result = await fileTask.DownloadFile(file.urls!, fileFullPath, "Downloading " + file.filename, false, null, cancellationTokenSource);
+
+                            if (cancellationTokenSource.IsCancellationRequested)
+                            {
+                                throw new TaskCanceledException();
+                            }
+
+                            if (result.HasValue && result.Value)
+                            {
+                                ++ProgressCurrent;
+                                Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+                            }
+                            else
+                            {
+                                throw new Exception("Error while downloading file: " + fileFullPath);
+                            }
+
+                            //Checksum
+                            if (file.checksum != null && file.checksum.Count() > 0)
+                            {
+                                if (file.checksum[0].ToLower() == "sha256")
+                                {
+                                    using (FileStream? filehash = new FileStream(fileFullPath, FileMode.Open, FileAccess.Read))
+                                    {
+                                        using (SHA256 checksum = SHA256.Create())
+                                        {
+                                            filehash.Position = 0;
+                                            var hashValue = BitConverter.ToString(await checksum.ComputeHashAsync(filehash)).Replace("-", String.Empty);
+                                            filehash.Close();
+                                            if (hashValue.ToLower() != file.checksum[1].ToLower())
+                                            {
+                                                throw new Exception("The downloaded file hash was incorrect, expected: " + file.checksum[1] + " Calculated Hash: " + hashValue);
+                                            }
+                                        }
+                                        fileTask.Info = " Checksum OK!";
+                                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Remove(fileTask));
+                                    }
+                                }
+                                else
+                                {
+                                    Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.InstallMod()", "Unsupported checksum crypto, skipping checksum check :" + file.checksum[0]);
+                                }
+                            }
+
+                            if (cancellationTokenSource.IsCancellationRequested)
+                            {
+                                throw new TaskCanceledException();
+                            }
+
+                            //Decompress
+                            var decompressTask = new TaskItemViewModel();
+                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, decompressTask));
+                            var decompResult = await decompressTask.DecompressNebulaFile(fileFullPath, file.filename, modPath + Path.DirectorySeparatorChar + file.dest, cancellationTokenSource);
+                            if (!decompResult)
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Error while decompressing the file " + fileFullPath);
+                                CancelTaskCommand();
+                            }
+                            File.Delete(fileFullPath);
+                            ++ProgressCurrent;
                         }
 
-                        //Decompress
-                        var decompressTask = new TaskItemViewModel();
-                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, decompressTask));
-                        var decompResult = await decompressTask.DecompressNebulaFile(fileFullPath, file.filename, modPath + Path.DirectorySeparatorChar + file.dest, cancellationTokenSource);
-                        if (!decompResult)
-                        {
-                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Error while decompressing the file " + fileFullPath);
-                            CancelTaskCommand();
-                        }
-                        File.Delete(fileFullPath);
-                        ++ProgressCurrent;
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
 
                         if (cancellationTokenSource.IsCancellationRequested)
@@ -3283,6 +3488,12 @@ namespace Knossos.NET.ViewModels
                         }
                     });
                     files.Clear();
+
+                    //Unload the checksum data we loaded for old versions
+                    foreach (var oldVer in oldVersions)
+                    {
+                        oldVer.ClearUnusedData();
+                    }
 
                     /*
                         -Delete the download token.
