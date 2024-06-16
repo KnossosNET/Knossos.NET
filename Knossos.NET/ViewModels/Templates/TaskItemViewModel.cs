@@ -204,7 +204,28 @@ namespace Knossos.NET.ViewModels
         {
         }
 
-        public async Task<bool> TryToCopyFilesFromOldVersions(Mod mod, List<Mod> oldVersions, ModFile file, ModPackage? package, CancellationTokenSource? cancelSource = null)
+        /// <summary>
+        /// Try to get and copy files for this package from old versions of this mod only if matching files are found
+        /// It will use the nebula file sha256 hash to look for others versions with that same nebula file
+        /// Then it will check each files included in that 7z to see if they are all present and the sha256
+        /// still matches what we expect it to be.
+        /// Note: sha256 check will be skipped for compressed files, as it would not match.
+        /// Only if all files are present and the sha256 matches for all files of the package that the files will be copied
+        /// It will only pick other versions that have the same compression status to the one we are installing, so
+        /// if we are installing a mod whiout compressing it, all other compressed versions of this mod will be ignored.
+        /// 
+        /// If useHardlinks is true, it will try to hardlink files, that would create "copies" of the files whiout increasing
+        /// disk usage, if it fails it will revert to copy files
+        /// </summary>
+        /// <param name="mod"></param>
+        /// <param name="oldVersions"></param>
+        /// <param name="file"></param>
+        /// <param name="package"></param>
+        /// <param name="compressMod"></param>
+        /// <param name="useHardlinks"></param>
+        /// <param name="cancelSource"></param>
+        /// <returns>true if sucessfully copied all files for this package from an old version, false otherwise</returns>
+        public async Task<bool> TryToCopyFilesFromOldVersions(Mod mod, List<Mod> oldVersions, ModFile file, ModPackage? package, bool compressMod, bool useHardlinks, CancellationTokenSource? cancelSource = null)
         {
             try
             {
@@ -264,7 +285,8 @@ namespace Knossos.NET.ViewModels
                     foreach (var oldVer in oldVersions)
                     {
                         Info = "Checking on version: " + oldVer.version;
-                        if (oldVer.packages != null && oldVer.packages.Any())
+                        //Compression rule: Only select mods with the same compression status to the one we want to install
+                        if (oldVer.packages != null && oldVer.packages.Any() && compressMod == oldVer.modSettings.isCompressed)
                         {
                             //Get the old package of the old version if the source nebula file has the same sha256 hash
                             var oldPkg = oldVer.packages.FirstOrDefault(p => p.files != null && p.files.FirstOrDefault(f => f.checksum != null && f.checksum.Contains(fileHash)) != null);
@@ -294,7 +316,7 @@ namespace Knossos.NET.ViewModels
                                                     isCompressed = true;
                                             }
 
-                                            //Check sha256
+                                            //Check sha256 only if not compressed
                                             if (!isCompressed)
                                             {
                                                 var oldHash = await KnUtils.GetFileHash(oldPath);
@@ -330,15 +352,31 @@ namespace Knossos.NET.ViewModels
                                     //Copy files
                                     for (int i = 0; i < copySrcList.Count(); i++)
                                     {
-                                        Info = "Copy file: " + (i+1).ToString() + " / " + copySrcList.Count() + " ("+Path.GetFileName(copyDstList[i]) +")";
                                         //Make sure the dest folder structure exist
                                         Directory.CreateDirectory(Path.GetDirectoryName(copyDstList[i])!);
+                                        //First lets try to hardlink, if one fails or it is disabled, revert to copy files
+                                        if (useHardlinks)
+                                        {
+                                            Info = "Hardlink file: " + (i + 1).ToString() + " / " + copySrcList.Count() + " (" + Path.GetFileName(copyDstList[i]) + ")";
+                                            useHardlinks = HardLink.CreateFileLink(copySrcList[i], copyDstList[i]);
+                                        }
+                                        if (!useHardlinks)
+                                        { 
+                                            Info = "Copy file: " + (i + 1).ToString() + " / " + copySrcList.Count() + " (" + Path.GetFileName(copyDstList[i]) + ")";
+                                            File.Copy(copySrcList[i], copyDstList[i], true);
+                                        }
                                         ++ProgressCurrent;
-                                        File.Copy(copySrcList[i], copyDstList[i], true);
                                     }
                                     //If we get here whiout any exceptions it means it completed successfully
                                     Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "All files needed for nebula file "+ file.filename +" were copied from "+ oldVer+ ". Download from nebula was skipped successfully.");
-                                    Info = copySrcList.Count() + " files copied OK";
+                                    if (!useHardlinks)
+                                    {
+                                        Info = copySrcList.Count() + " files copied OK";
+                                    }
+                                    else
+                                    {
+                                        Info = copySrcList.Count() + " files hard-linked OK";
+                                    }
                                     //IsCompleted = true;
                                     ProgressCurrent = ProgressBarMax;
                                     return true;
@@ -3395,7 +3433,7 @@ namespace Knossos.NET.ViewModels
                             var copyTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, copyTask));
                             mod.fullPath = modPath + Path.DirectorySeparatorChar;
-                            copiedFromOldVersion = await copyTask.TryToCopyFilesFromOldVersions(mod, oldVersions, file, mod.packages.FirstOrDefault(p=> p.files != null && p.files.Contains(file)), cancellationTokenSource);
+                            copiedFromOldVersion = await copyTask.TryToCopyFilesFromOldVersions(mod, oldVersions, file, mod.packages.FirstOrDefault(p=> p.files != null && p.files.Contains(file)), compressMod, true, cancellationTokenSource);
                             if (!copiedFromOldVersion)
                             {
                                 await Dispatcher.UIThread.InvokeAsync(() => TaskList.Remove(copyTask));
