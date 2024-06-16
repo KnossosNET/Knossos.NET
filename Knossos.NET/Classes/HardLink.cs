@@ -5,8 +5,19 @@ using System.Runtime.InteropServices;
 
 namespace Knossos.NET.Classes
 {
+    /// <summary>
+    /// Helper class to create file Hardlinks in Windows, Linux and MacOS
+    /// </summary>
     public static class HardLink
     {
+        /// <summary>
+        /// Creates a file HardLink
+        /// Cross-Platform
+        /// Note: It only works with files, not folders
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="destination"></param>
+        /// <returns>true if successfull, false otherwise</returns>
         public static bool CreateFileLink(string origin, string destination)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -76,7 +87,7 @@ namespace Knossos.NET.Classes
         }
 
         [DllImport("kernel32.dll", EntryPoint = "CreateHardLink", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern bool CreateHardLinkWindows(string dest, string org, int flags = 0);
+        private static extern bool CreateHardLinkWindows(string dest, string org, int flags = 0);
 
         [DllImport("libc", EntryPoint = "link", CharSet = CharSet.Ansi, SetLastError = true)]
         private static extern int CreateHardLinkUnix(string org, string dest);
