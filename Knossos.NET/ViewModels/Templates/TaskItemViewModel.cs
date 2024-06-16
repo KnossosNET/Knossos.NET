@@ -3126,7 +3126,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false)
+        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false)
         {
             string? modPath = null;
             Mod? installed = null;
@@ -3402,13 +3402,13 @@ namespace Knossos.NET.ViewModels
                         throw new TaskCanceledException();
                     }
 
-                    var oldVersions = Knossos.GetInstalledModList(mod.id);
+                    //Do not load old versions if it is a clean install
+                    var oldVersions = cleanInstall ? new List<Mod>() : Knossos.GetInstalledModList(mod.id);
                     //Reload checksum data, because by default it is unloaded after parsing
                     foreach (var oldVer in oldVersions)
                     {
                         oldVer.ReLoadJson();
                     }
-
                     /*
                         -Use parallel to process this new list, the max parallelism is the max number of concurrent downloads
                         -Always check canceltask before executing something

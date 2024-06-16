@@ -71,7 +71,10 @@
 				</StackPanel>
 			</StackPanel>
 		</StackPanel>
-		<CheckBox IsVisible="{Binding CleanupVisible}" IsChecked="{Binding CleanupEnabled}" Grid.Row="4" HorizontalAlignment="Center" ToolTip.Tip="Delete older versions than the one you are installing if its not in use by other mods. Note: This only applies to this mod and not to its dependencies.">Remove old versions of this mod</CheckBox>
+		<WrapPanel  Grid.Row="4" HorizontalAlignment="Center">
+			<CheckBox IsVisible="{Binding CleanupVisible}" IsChecked="{Binding CleanupEnabled}" ToolTip.Tip="Delete older versions than the one you are installing if its not in use by other mods. Note: This only applies to this mod and not to its dependencies.">Remove old versions of this mod</CheckBox>
+			<CheckBox IsVisible="{Binding DataLoaded}" Margin="5,0,0,0" IsChecked="{Binding CleanInstall}" ToolTip.Tip="By default Knet will try to fetch files from older installed versions of this mod if they are identical, and then copy or make hard-links to them if supported and enabled, by forcing a clean installation all files will be downloaded anew from nebula and no existing file will be re-used.">Force clean install</CheckBox>
+		</WrapPanel>
 	</Grid>
 	
 </Window>
