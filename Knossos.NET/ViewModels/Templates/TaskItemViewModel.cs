@@ -3126,7 +3126,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false)
+        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true)
         {
             string? modPath = null;
             Mod? installed = null;
@@ -3433,7 +3433,7 @@ namespace Knossos.NET.ViewModels
                             var copyTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, copyTask));
                             mod.fullPath = modPath + Path.DirectorySeparatorChar;
-                            copiedFromOldVersion = await copyTask.TryToCopyFilesFromOldVersions(mod, oldVersions, file, mod.packages.FirstOrDefault(p=> p.files != null && p.files.Contains(file)), compressMod, true, cancellationTokenSource);
+                            copiedFromOldVersion = await copyTask.TryToCopyFilesFromOldVersions(mod, oldVersions, file, mod.packages.FirstOrDefault(p=> p.files != null && p.files.Contains(file)), compressMod, allowHardlinks, cancellationTokenSource);
                             if (!copiedFromOldVersion)
                             {
                                 await Dispatcher.UIThread.InvokeAsync(() => TaskList.Remove(copyTask));
