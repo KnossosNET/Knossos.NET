@@ -12,15 +12,21 @@
 		<vm:FsoBuildItemViewModel/>
 	</Design.DataContext>
 
-	<Grid Background="{StaticResource BackgroundColorTertiary}" ColumnDefinitions="Auto,Auto,Auto,Auto,*">
-		<Label FontWeight="Bold" Width="150" Grid.Column="0" Content="{Binding Date}" VerticalAlignment="Center"></Label>
-		<Label FontWeight="Bold" Width="350" Grid.Column="1" Content="{Binding Title, Converter={StaticResource escapeUnderscoresConverter}}" VerticalAlignment="Center"></Label>
-
-		<Label Grid.Column="2" IsVisible="{Binding IsValid}" Width="150" Foreground="{StaticResource TertiaryColor}" FontWeight="Bold" Content="{Binding CpuArch}" VerticalAlignment="Center"></Label>
-		<Label Grid.Column="3" IsVisible="{Binding IsValid}" Foreground="{StaticResource PrimaryColor}" FontWeight="Bold" Content="{Binding BuildType}" VerticalAlignment="Center"></Label>
-		<Label Grid.Column="4" Foreground="{StaticResource TertiaryColor}" IsVisible="{Binding !IsValid}" VerticalAlignment="Center" FontWeight="Bold">No valid or usable files were found in this build</Label>
-			
-		<WrapPanel IsEnabled="{Binding !IsDevMode}" IsVisible="{Binding !IsDownloading}" Grid.Column="5" HorizontalAlignment="Right">
+	<Grid Background="{StaticResource BackgroundColorTertiary}" ColumnDefinitions="Auto,Auto,Auto,*">
+		<StackPanel>
+			<WrapPanel HorizontalAlignment="Left">
+				<Label FontWeight="Bold" Grid.Column="0" Content="{Binding Date}" VerticalAlignment="Center"></Label>
+				<Label FontWeight="Bold" Grid.Column="1" Content="{Binding Title, Converter={StaticResource escapeUnderscoresConverter}}" VerticalAlignment="Center"></Label>
+				<Label Grid.Column="2" Foreground="{StaticResource TertiaryColor}" IsVisible="{Binding !IsValid}" VerticalAlignment="Center" FontWeight="Bold">No valid or usable files were found in this build</Label>
+			</WrapPanel>
+			<WrapPanel IsEnabled="{Binding IsInstalled}" IsVisible="{Binding IsInstalled}">
+				<Label Grid.Column="1" IsVisible="{Binding IsValid}" Foreground="{StaticResource PrimaryColor}" FontWeight="Bold" Content="{Binding BuildType}" VerticalAlignment="Center"></Label>
+			</WrapPanel>
+			<WrapPanel IsEnabled="{Binding IsInstalled}" IsVisible="{Binding IsInstalled}">
+				<Label Grid.Column="0" IsVisible="{Binding IsValid}" Foreground="{StaticResource TertiaryColor}" FontWeight="Bold" Content="{Binding CpuArch}" VerticalAlignment="Center"></Label>
+			</WrapPanel>
+		</StackPanel>
+		<WrapPanel IsEnabled="{Binding !IsDevMode}" IsVisible="{Binding !IsDownloading}" Grid.Column="4" HorizontalAlignment="Right">
 			<Button IsVisible="{Binding IsDetailsButtonVisible}" Classes="Settings" Margin="0,0,10,0" Width="100" Command="{Binding ViewBuildDetails}">Details</Button>
 			<WrapPanel IsVisible="{Binding IsInstalled}">
 				<Button IsVisible="{Binding !IsDevMode}" Width="100" Classes="Secondary" Margin="0,0,10,0" Command="{Binding LoadPkgData}" Content="Modify">
