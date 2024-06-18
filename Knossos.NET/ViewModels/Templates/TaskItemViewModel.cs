@@ -343,6 +343,8 @@ namespace Knossos.NET.ViewModels
                                             break;
                                         }
                                     }
+                                    if (cancellationTokenSource.IsCancellationRequested)
+                                        throw new TaskCanceledException();
                                 }
 
                                 //we can know if the verify completed by checking the copySrcList
@@ -366,6 +368,8 @@ namespace Knossos.NET.ViewModels
                                             File.Copy(copySrcList[i], copyDstList[i], true);
                                         }
                                         ++ProgressCurrent;
+                                        if (cancellationTokenSource.IsCancellationRequested)
+                                            throw new TaskCanceledException();
                                     }
                                     //If we get here whiout any exceptions it means it completed successfully
                                     Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "All files needed for nebula file "+ file.filename +" were copied from "+ oldVer+ ". Download from nebula was skipped successfully.");
@@ -3416,6 +3420,7 @@ namespace Knossos.NET.ViewModels
                         -Increase main progress when: 
                          File starts to download, File finishes downloading, Decompression starts, Decompression ends, Image download completed
                     */
+                    mod.fullPath = modPath + Path.DirectorySeparatorChar;
                     await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks }, async (file, token) =>
                     {
                         if (cancellationTokenSource.IsCancellationRequested)
@@ -3432,7 +3437,6 @@ namespace Knossos.NET.ViewModels
                             //Search for files in old versions
                             var copyTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, copyTask));
-                            mod.fullPath = modPath + Path.DirectorySeparatorChar;
                             copiedFromOldVersion = await copyTask.TryToCopyFilesFromOldVersions(mod, oldVersions, file, mod.packages.FirstOrDefault(p=> p.files != null && p.files.Contains(file)), compressMod, allowHardlinks, cancellationTokenSource);
                             if (!copiedFromOldVersion)
                             {
