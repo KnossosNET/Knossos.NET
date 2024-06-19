@@ -371,7 +371,7 @@ namespace Knossos.NET.ViewModels
                                         if (cancellationTokenSource.IsCancellationRequested)
                                             throw new TaskCanceledException();
                                     }
-                                    //If we get here whiout any exceptions it means it completed successfully
+                                    //If we get here without any exceptions it means it completed successfully
                                     Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "All files needed for nebula file "+ file.filename +" were copied from "+ oldVer+ ". Download from nebula was skipped successfully.");
                                     if (!useHardlinks)
                                     {
@@ -379,7 +379,7 @@ namespace Knossos.NET.ViewModels
                                     }
                                     else
                                     {
-                                        Info = copySrcList.Count() + " files hard-linked OK";
+                                        Info = copySrcList.Count() + " files hardlinked OK";
                                     }
                                     //IsCompleted = true;
                                     ProgressCurrent = ProgressBarMax;
@@ -3500,7 +3500,7 @@ namespace Knossos.NET.ViewModels
                                 }
                                 else
                                 {
-                                    Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.InstallMod()", "Unsupported checksum crypto, skipping checksum check :" + file.checksum[0]);
+                                    Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.InstallMod()", "Cryptographic methods besides sha256 are not supported, skipping checksum check :" + file.checksum[0]);
                                 }
                             }
 
