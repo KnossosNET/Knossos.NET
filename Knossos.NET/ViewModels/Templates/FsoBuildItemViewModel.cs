@@ -42,8 +42,8 @@ namespace Knossos.NET.ViewModels
             IsValid = true;
             Title = "Test Build Title";
             Date = "19/12/20";
-            CpuArch = "x86";
-            BuildType = "Release, Fred2";
+            CpuArch = "Architecture: x86";
+            BuildType = "Builds: Release, Fred2";
         }
 
         public FsoBuildItemViewModel (FsoBuild build)
@@ -58,8 +58,8 @@ namespace Knossos.NET.ViewModels
             Date = build.date;
             IsInstalled = build.isInstalled;
             IsValid = false;
-            CpuArch = "";
-            BuildType = "";
+            CpuArch = "Architecture: ";
+            BuildType = "Builds: ";
             if (build.id == "FSO")
             {
                 //No detail button on official FSO builds
