@@ -59,6 +59,10 @@ namespace Knossos.NET.ViewModels
         internal bool cleanupEnabled = true;
         [ObservableProperty]
         internal bool isMetaUpdate = false;
+        [ObservableProperty]
+        internal bool cleanInstall = false;
+        [ObservableProperty]
+        internal bool allowHardlink = true;
         private List<Mod> modCache = new List<Mod>();
 
 
@@ -571,7 +575,7 @@ namespace Knossos.NET.ViewModels
                         cleanOldVersions = true;
                 }
                 if (mod.isSelected)
-                    TaskViewModel.Instance!.InstallMod(mod, null, Compress, cleanOldVersions);
+                    TaskViewModel.Instance!.InstallMod(mod, null, Compress, cleanOldVersions, CleanInstall, AllowHardlink && !CleanInstall);
             }
             ModInstallList.Clear();
 
