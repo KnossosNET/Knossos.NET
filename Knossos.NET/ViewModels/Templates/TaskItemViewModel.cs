@@ -215,7 +215,9 @@ namespace Knossos.NET.ViewModels
         /// if we are installing a mod whiout compressing it, all other compressed versions of this mod will be ignored.
         /// 
         /// If useHardlinks is true, it will try to hardlink files, that would create "copies" of the files whiout increasing
-        /// disk usage, if it fails it will revert to copy files
+        /// disk usage, if it fails it will revert to copy files for this entire package at least.
+        /// 
+        /// Hardlinks failing could be caused by user not having permissions or the filesystem not supporting hardlinks (FAT32, EXFAT).
         /// </summary>
         /// <param name="mod"></param>
         /// <param name="oldVersions"></param>
