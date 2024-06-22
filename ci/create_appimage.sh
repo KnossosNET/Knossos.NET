@@ -59,5 +59,5 @@ docker run --rm \
     -v "$REPO_ROOT":/repo \
     -v "$PUBLISH_DIR":/PublishDir \
     -v "$OUTPUT_DIR":/OutputDir \
-    -t $DOCKER_ARCH/ubuntu \
+    -t $DOCKER_ARCH/ubuntu:jammy \
     /bin/bash -xc "/repo/ci/bundle_appimage.sh"
