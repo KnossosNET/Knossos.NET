@@ -7,12 +7,21 @@ Knossos.NET, also known as KNet, is a multi-platform launcher for Freespace 2 Op
 
 <br /><br />
 ## **Current Status:**<br />
-Version 1.0 has been released!<br />
-Check out our download page: https://knossosnet.github.io/Knossos-Release-Page/<br />
+Version 1.2 has been released!<br />
+Check out our download page: https://knossoslauncher.com/<br />
 
 <br /><br />
 ## **Main Improvements:**<br />
-Knossos.NET offers greatly improved performance and stability over the old Python-based Knossos.  Because it is written in C#, builds can be released much more easily.  Knossos.NET also minimizes the amount of memory and VRAM used, so that slower computers will not suffer performance penalties when running FSO.  Knossos.NET furthermore supports compressed VPs and their creation, reducing hard drive footprint. Finally Knossos.NET has additional features compared to original Knossos, while still maintaining feature parity.  Some of these features are detailed below.
+Knossos.NET offers greatly improved performance and stability over the old Python-based Knossos.  Because it is written in C#, builds can be released much more easily.  Knossos.NET also minimizes the amount of memory and VRAM used, so that slower computers will not suffer performance penalties when running FSO.  Knossos.NET furthermore supports compressed VPs, it can create compressed VPs when using the dev tab, and it can detect duplicate installations and hardlink them, reducing hard drive footprint. Finally Knossos.NET has additional features compared to original Knossos, while still maintaining feature parity.  Some of these features are detailed below.
+
+<br /><br />
+## **Mod Hardlinking:**<br />
+Knossos.Net is able to create hardlinks between duplicate files or packages within the same mod.  If a file has not changed in a new version of an FSO mod, then a hardlink can be created.  Hardlinks are a way to tell the OS that we want the same file referenced in two different folders.  A hardlinked file will appear in both folders that reference it, and it will be counted again with every reference when calculating hard drive space, even though it only exists once on the disk.  Hardlinking can be disabled in Knossos.Net's settings tab, or during mod installation.
+<br /><br />
+This greately minimizes hard drive usage, but comes with two things to keep in mind: 
+<br />
+1) A hardlinked file will only be deleted once all of its references have been deleted.
+2) If one copy of a hardlinked file is altered, then all the references point to the altered file. It really is multiple references to the same file.  If you want to edit a mod's hardlinked file, please create a dev version of it in the dev tab.  This will create a non-hardlinked version that can be safely edited.
 
 <br /><br />
 ## **Quick Launch Cmdline:**<br />
