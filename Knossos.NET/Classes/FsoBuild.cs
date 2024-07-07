@@ -260,8 +260,16 @@ namespace Knossos.NET.Models
                         }
                         else
                         {
-                            fso.StartInfo.FileName = Knossos.globalSettings.prefixCMD;
-                            fso.StartInfo.Arguments = execPath + " " + cmdline;
+                            var prefixCMD = Knossos.globalSettings.prefixCMD.Split(" ", 2);
+                            fso.StartInfo.FileName = prefixCMD[0];
+                            if (prefixCMD.Length > 1)
+                            {
+                                fso.StartInfo.Arguments = prefixCMD[1] + " " + execPath + " " + cmdline;
+                            }
+                            else
+                            {
+                                fso.StartInfo.Arguments = execPath + " " + cmdline;
+                            }
                         }
 
                         fso.StartInfo.UseShellExecute = false;
