@@ -97,8 +97,6 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool deleteOlder = false;
         [ObservableProperty]
-        internal bool noSystemCMD = false;
-        [ObservableProperty]
         internal bool showDevOptions = false;
 
         /*VIDEO*/
@@ -191,6 +189,14 @@ namespace Knossos.NET.ViewModels
         internal uint joystickSensitivity = 9;
         [ObservableProperty]
         internal uint joystickDeadZone = 10;
+        
+        /* DEVELOPER */
+        [ObservableProperty]
+        internal bool noSystemCMD = false;
+        [ObservableProperty]
+        internal string prefixCMD = string.Empty;
+        [ObservableProperty]
+        internal string envVars = string.Empty;
 
         // In order to have hidden dev options, we need a setter for globalCMD
         public string GlobalCmd
@@ -309,6 +315,8 @@ namespace Knossos.NET.ViewModels
             UpdateStable = Knossos.globalSettings.autoUpdateBuilds.UpdateStable;
             DeleteOlder = Knossos.globalSettings.autoUpdateBuilds.DeleteOlder;
             NoSystemCMD = Knossos.globalSettings.noSystemCMD;
+            PrefixCMD = Knossos.globalSettings.prefixCMD;
+            EnvVars = Knossos.globalSettings.envVars;
             ShowDevOptions = Knossos.globalSettings.showDevOptions || NoSystemCMD;
 
             /* VIDEO SETTINGS */
@@ -869,6 +877,8 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.autoUpdate = AutoUpdate;
             Knossos.globalSettings.autoUpdateBuilds = new GlobalSettings.AutoUpdateFsoBuilds(UpdateStable, UpdateRC, UpdateNightly, DeleteOlder);
             Knossos.globalSettings.noSystemCMD = NoSystemCMD;
+            Knossos.globalSettings.prefixCMD = PrefixCMD;
+            Knossos.globalSettings.envVars = EnvVars;
             Knossos.globalSettings.showDevOptions = ShowDevOptions;
 
             /* VIDEO */

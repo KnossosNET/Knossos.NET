@@ -118,10 +118,6 @@ namespace Knossos.NET.Models
         public int devModSort { get; set; } = 0;
         [JsonPropertyName("auto_update_fso_builds")]
         public AutoUpdateFsoBuilds autoUpdateBuilds { get; set; } = new AutoUpdateFsoBuilds();
-        [JsonPropertyName("no_system_cmd")]
-        public bool noSystemCMD { get; set; } = false;
-        [JsonPropertyName("show_dev_options")]
-        public bool showDevOptions { get; set; } = false;
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 
@@ -221,6 +217,16 @@ namespace Knossos.NET.Models
         [JsonPropertyName("last_sort_type"), JsonConverter(typeof(JsonStringEnumConverter))]
         public MainWindowViewModel.SortType sortType { get; set; } = MainWindowViewModel.SortType.name;
 
+        /* Developer Settings */
+        [JsonPropertyName("no_system_cmd")]
+        public bool noSystemCMD { get; set; } = false;
+        [JsonPropertyName("prefix_cmd")]
+        public string prefixCMD { get; set; } = string.Empty;
+        [JsonPropertyName("env_vars")]
+        public string envVars { get; set; } = string.Empty;
+        [JsonPropertyName("show_dev_options")]
+        public bool showDevOptions { get; set; } = false;
+        
         [JsonIgnore]
         private FileSystemWatcher? iniWatcher = null;
 
@@ -599,6 +605,8 @@ namespace Knossos.NET.Models
                         devModSort = tempSettings.devModSort;
                         autoUpdateBuilds = tempSettings.autoUpdateBuilds;
                         noSystemCMD = tempSettings.noSystemCMD;
+                        prefixCMD = tempSettings.prefixCMD;
+                        envVars = tempSettings.envVars;
                         showDevOptions = tempSettings.showDevOptions;
 
                         if (MainWindowViewModel.Instance != null)
