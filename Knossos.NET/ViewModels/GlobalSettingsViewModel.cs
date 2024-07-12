@@ -799,10 +799,12 @@ namespace Knossos.NET.ViewModels
                         LoadData();
                     }
                 } 
-                catch (Exception Ex) 
+                catch (Exception ex) 
                 {
                     Log.Add(Log.LogSeverity.Error, "GlobalSettings.BrowseFolderCommand() - test read/write was not successful: ", ex);
-
+                    await Dispatcher.UIThread.Invoke(async () => {
+                        result = await MessageBox.Show(null, null, "Knossos was not able to write to this folder.  Please select another library folder.", MessageBox.MessageBoxButtons.Ok);
+                    }).ConfigureAwait(false);
                 }
             }
         }
