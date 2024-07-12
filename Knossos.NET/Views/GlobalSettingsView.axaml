@@ -417,6 +417,16 @@
 							<Label Margin="0,5,0,0" Width="205">Don't Apply Graphics Settings</Label> 
 							<CheckBox IsChecked="{Binding NoSystemCMD}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will not pass the graphics settings configured to FSO."></CheckBox>
 						</WrapPanel>
+						<!-- PrefixCMD -->
+						<WrapPanel IsVisible="{Binding ShowDevOptions}" IsEnabled="{Binding ShowDevOptions}" Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Pass FSO launch command as argument to other command</Label> 
+							<TextBox Text="{Binding PrefixCMD}" Margin="5,0,0,0" ToolTip.Tip="This will be prepended to the launch command for FSO and FRED." Width="500"></TextBox>
+						</WrapPanel>
+						<!-- EnvVars -->
+						<WrapPanel IsVisible="{Binding ShowDevOptions}" IsEnabled="{Binding ShowDevOptions}" Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Pass environment variables to FSO</Label> 
+							<TextBox Text="{Binding EnvVars}" Margin="5,0,0,0" ToolTip.Tip="Expects a comma-seperated list." Width="500"></TextBox>
+						</WrapPanel>
 					</StackPanel>
 				</Border>
 			</StackPanel>

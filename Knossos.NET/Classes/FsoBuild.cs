@@ -253,11 +253,38 @@ namespace Knossos.NET.Models
 
                     using (var fso = new Process())
                     {
-                        fso.StartInfo.FileName = execPath;
-                        fso.StartInfo.Arguments = cmdline;
+                        if (Knossos.globalSettings.prefixCMD == "")
+                        {
+                            fso.StartInfo.FileName = execPath;
+                            fso.StartInfo.Arguments = cmdline;
+                        }
+                        else
+                        {
+                            var prefixCMD = Knossos.globalSettings.prefixCMD.Split(" ", 2);
+                            fso.StartInfo.FileName = prefixCMD[0];
+                            if (prefixCMD.Length > 1)
+                            {
+                                fso.StartInfo.Arguments = prefixCMD[1] + " " + execPath + " " + cmdline;
+                            }
+                            else
+                            {
+                                fso.StartInfo.Arguments = execPath + " " + cmdline;
+                            }
+                        }
+
                         fso.StartInfo.UseShellExecute = false;
                         if (workingFolder != null)
                             fso.StartInfo.WorkingDirectory = workingFolder;
+                        if (Knossos.globalSettings.envVars != "")
+                        {
+                            foreach (var envVar in Knossos.globalSettings.envVars.Split(","))
+                            {
+                                var envVarComponents = envVar.Split("=");
+                                if (envVarComponents.Length != 2)
+                                    continue;
+                                fso.StartInfo.EnvironmentVariables.Add(envVarComponents[0], envVarComponents[1]);
+                            }
+                        }
                         fso.Start();
                         if (waitForExit)
                             await fso.WaitForExitAsync();
