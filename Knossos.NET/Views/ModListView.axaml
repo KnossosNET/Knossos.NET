@@ -51,18 +51,24 @@
 			</WrapPanel>
 		</Grid>
 		<ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-			<ItemsControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Mods}">
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<v:ModCardView Margin="5" Content="{Binding}"/>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-				<ItemsControl.ItemsPanel>
-					<ItemsPanelTemplate>
-						<WrapPanel />
-					</ItemsPanelTemplate>
-				</ItemsControl.ItemsPanel>
-			</ItemsControl>
+			<StackPanel>
+				<StackPanel>
+					<v:LoadingIconView IsEnabled="{Binding Sorting}" IsVisible="{Binding Sorting}" Width="80" Height="80" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="50,50,0,0" Content="{Binding LoadingAnimation}"/>
+					<Label FontWeight="Bold" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding Sorting}" Margin="60,0,0,0">Loading...</Label>
+				</StackPanel>
+				<ItemsControl IsEnabled="{Binding !Sorting}" IsVisible="{Binding !Sorting}"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Mods}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<v:ModCardView Margin="5" Content="{Binding}"/>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<WrapPanel />
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+				</ItemsControl>
+			</StackPanel>
 		</ScrollViewer>
 	</Grid>
 </UserControl>

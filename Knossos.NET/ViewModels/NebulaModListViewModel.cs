@@ -27,8 +27,30 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal bool IsTabOpen = false;
 
+        private bool _isLoading = true;
+        internal bool isLoading{
+            get { return _isLoading; }
+            set { 
+                _isLoading = value;
+                ShowTiles = !sorting && !isLoading;}
+            }
+
+        private bool _sorting = true;
+        internal bool sorting {
+            get { return _sorting; }
+            set { 
+                _sorting = value;
+                ShowTiles = !sorting && !isLoading;}
+            }
+
+        /// <summary>
+        /// For the UI to detmerine whether to show mod tiles.  It needs to check more than one property, so this gets updated when sorting or isLoading do.
+        /// </summary>
         [ObservableProperty]
-        internal bool isLoading = true;
+        internal bool showTiles = false;
+
+        [ObservableProperty]
+        internal LoadingIconViewModel loadingAnimation = new LoadingIconViewModel();
 
         /// <summary>
         /// Search string
@@ -39,6 +61,7 @@ namespace Knossos.NET.ViewModels
             get { return search; }
             set 
             {
+                sorting = true;
                 if (value != Search){
                     this.SetProperty(ref search, value);
                     if (value.Trim() != string.Empty)
@@ -60,6 +83,7 @@ namespace Knossos.NET.ViewModels
                         Mods.ForEach(m => m.Visible = true);
                     }
                 }
+                sorting = false;
             }
         }
 
@@ -76,7 +100,7 @@ namespace Knossos.NET.ViewModels
         public async void OpenTab(string newSearch, MainWindowViewModel.SortType newSortType)
         {
             Search = newSearch;
-            if (IsLoading)
+            if (isLoading)
             {
                 IsTabOpen = true;
                 return;
@@ -85,6 +109,8 @@ namespace Knossos.NET.ViewModels
             if (!IsTabOpen)
             {
                 IsTabOpen = true;
+                // This should remain true until we get to Change Sort.  It is guaranteed to be finished then
+                sorting = true;
 
                 try
                 {
@@ -92,7 +118,7 @@ namespace Knossos.NET.ViewModels
                     List<NebulaModCardViewModel>? modsInView = null;
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        IsLoading = false;
+                        isLoading = false;
                         modsInView = Mods.ToList();
                     });
                     if (modsInView != null)
@@ -156,7 +182,7 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 var card = new NebulaModCardViewModel(modJson);
-                if (!IsLoading)
+                if (!isLoading)
                 {
                     if (Search.Trim() == string.Empty || card.Name != null && card.Name.ToLower().Contains(Search.ToLower()))
                     {
@@ -178,7 +204,7 @@ namespace Knossos.NET.ViewModels
         /// <param name="modList"></param>
         public async void AddMods(List<Mod> modList)
         {
-            IsLoading = true;
+            isLoading = true;
             await Task.Delay(20).ConfigureAwait(false);
             var newModCardList = new ObservableCollection<NebulaModCardViewModel>();
             foreach (Mod? mod in modList)
@@ -208,7 +234,7 @@ namespace Knossos.NET.ViewModels
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Mods = newModCardList;
-                IsLoading = false;
+                isLoading = false;
                 if (IsTabOpen)
                 {
                     IsTabOpen = false;
@@ -235,17 +261,22 @@ namespace Knossos.NET.ViewModels
 
                 if (newSort != sortType)
                 {
+                    if (sortType != MainWindowViewModel.SortType.unsorted)
+                    {
+                        sorting = true;
+                    }
+
                     Dispatcher.UIThread.Invoke( () =>
                     {
                         sortType = newSort;
                         var tempList = Mods.ToList();
                         tempList.Sort(CompareMods);
-                        IsLoading = true;
+                        isLoading = true;
                         for (int i = 0; i < tempList.Count; i++)
                         {
                             Mods.Move(Mods.IndexOf(tempList[i]), i);
                         }
-                        IsLoading = false;
+                        isLoading = false;
                         GC.Collect();
                     },DispatcherPriority.Background);
                 }
@@ -253,6 +284,10 @@ namespace Knossos.NET.ViewModels
             {
                 Log.Add(Log.LogSeverity.Error, "ModListViewModel.ChangeSort()", ex);
             }
+
+            // There is no reason to keep this on, whether in success or fail, and some of the functions that call this
+            // set sorting to true.
+            sorting = false;
         }
 
         private int CompareMods(NebulaModCardViewModel x, NebulaModCardViewModel y)
