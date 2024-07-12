@@ -787,11 +787,11 @@ namespace Knossos.NET.ViewModels
                     {
                         
                         // Test if we can write to the new library directory
-                        using (StreamWriter writer = new StreamWriter(result[0].Path + Path.DirectorySeparatorChar + "test.txt"))
+                        using (StreamWriter writer = new StreamWriter(Path.Combine(result[0].Path, Path.DirectorySeparatorChar, "test.txt")))
                         {
                             writer.WriteLine("test");
                         }
-                        File.Delete(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "test.txt");
+                        File.Delete(Path.Combine(result[0].Path, Path.DirectorySeparatorChar, "test.txt"));
                     
                         Knossos.globalSettings.basePath = result[0].Path.LocalPath.ToString();
                         Knossos.globalSettings.Save();
@@ -803,7 +803,7 @@ namespace Knossos.NET.ViewModels
                 {
                     Log.Add(Log.LogSeverity.Error, "GlobalSettings.BrowseFolderCommand() - test read/write was not successful: ", ex);
                     await Dispatcher.UIThread.Invoke(async () => {
-                        result = await MessageBox.Show(null, null, "Knossos was not able to write to this folder.  Please select another library folder.", MessageBox.MessageBoxButtons.Ok);
+                        result = await MessageBox.Show(null, null, "Knossos was not able to write to this folder.  Please select another library folder.", MessageBox.MessageBoxButtons.OK);
                     }).ConfigureAwait(false);
                 }
             }
