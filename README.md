@@ -70,14 +70,15 @@ On KnossosNET there are multiples sources of Command Line arguments that are eve
 
 <br /><br />
 ## **Current NuGet Packages:**<br />
-- Avalonia 11.0.3<br />
-- Avalonia.Desktop 11.0.3<br />
-- Avalonia.Diagnostics 11.0.3<br />
-- Avalonia.Themes.Fluent 11.0.3<br />
+- Avalonia 11.0.5<br />
+- Avalonia.Desktop 11.0.5<br />
+- Avalonia.Diagnostics 11.0.5<br />
+- Avalonia.Themes.Fluent 11.0.5<br />
 - Avalonia.HtmlRenderer 11.0.0<br />
 - CommunityToolkit.Mvvm 8.2.1<br />
 - ini-parser-netstandard 2.5.2<br />
 - SharpCompress 0.33.0<br />
+- AnimatedImage.Avalonia 1.0.7<br />
 
 <br /><br />
 ## **Compiling for Linux and Mac:**<br />
