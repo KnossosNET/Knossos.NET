@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="40" d:DesignHeight="40"
+			 xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
              x:Class="Knossos.NET.Views.TaskInfoButtonView"
 	         xmlns:v="using:Knossos.NET.Views"
 	         xmlns:vm="using:Knossos.NET.ViewModels"
@@ -10,8 +11,8 @@
 	
 	<Button Width="40" Height="40" Command="{Binding ToggleTaskView}" ToolTip.Tip="{Binding Tooltip}">
 		<Grid>
-			<Image IsVisible="{Binding Frame0}" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/kns-frame-0.png" />
-			<Image IsVisible="{Binding Frame1}" VerticalAlignment="Center" Height="35" Width="35" Source="/Assets/general/kns-frame-1.png" />
+			<Image Width="41" Stretch="UniformToFill" anim:ImageBehavior.SpeedRatio="{Binding Animate}" anim:ImageBehavior.AnimatedSource="avares://Knossos.NET/Assets/general/knossos-1.gif" />
+			<Image Width="40" Stretch="UniformToFill" anim:ImageBehavior.SpeedRatio="{Binding Animate}" anim:ImageBehavior.AnimatedSource="avares://Knossos.NET/Assets/general/knossos-2.gif" />
 			<Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="12" Content="{Binding TaskNumber}"/>
 		</Grid>
 	</Button>

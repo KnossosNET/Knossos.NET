@@ -11,6 +11,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal int taskNumber = 0;
         [ObservableProperty]
+        internal int animate = 0;
+        [ObservableProperty]
         internal string tooltip = "";
         [ObservableProperty]
         internal bool frame0 = true;
@@ -37,20 +39,6 @@ namespace Knossos.NET.ViewModels
             TaskViewModel?.ToggleCommand();
         }
 
-        private void Animate()
-        {
-            if(Frame0)
-            {
-                Frame0 = false;
-                Frame1 = true;
-            }
-            else
-            {
-                Frame1 = false;
-                Frame0 = true;
-            }
-        }
-
         private void Update(object? _, System.Timers.ElapsedEventArgs __)
         {
             if(TaskViewModel != null)
@@ -63,12 +51,17 @@ namespace Knossos.NET.ViewModels
                     Tooltip = "Open Task List\n\n" + TaskViewModel.GetRunningTaskString();
                     if (!TaskViewModel.IsSafeState())
                     {
-                        Animate();
+                        Animate = 1;
+                    }
+                    else
+                    {
+                        Animate = 0;
                     }
                 }
                 else
                 {
                     Tooltip = "Open Task List";
+                    Animate = 0;
                 }
             }
         }
