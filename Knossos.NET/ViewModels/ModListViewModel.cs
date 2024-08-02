@@ -134,6 +134,7 @@ namespace Knossos.NET.ViewModels
 
                 if (newSort != sortType)
                 {
+                    LoadingAnimation.Animate = 1;
                     Sorting = true;
                     Dispatcher.UIThread.Invoke( () =>
                     {
@@ -149,12 +150,14 @@ namespace Knossos.NET.ViewModels
                         }
                         GC.Collect();
                         Sorting = false;
+                        LoadingAnimation.Animate = 0;
                     },DispatcherPriority.Background);
 
                 }
             }catch(Exception ex)
             {
                 Sorting = false;
+                LoadingAnimation.Animate = 0;                
                 Log.Add(Log.LogSeverity.Error, "ModListViewModel.ChangeSort()", ex);
             }
         }

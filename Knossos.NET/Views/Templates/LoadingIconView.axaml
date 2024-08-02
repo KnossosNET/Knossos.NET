@@ -10,7 +10,7 @@
 	         x:DataType="vm:LoadingIconViewModel">
 	
     <Grid>
-        <Image Width="62" Stretch="UniformToFill" anim:ImageBehavior.AnimatedSource="avares://Knossos.NET/Assets/general/knossos-1.gif" />
-	    <Image Width="60" Stretch="UniformToFill" anim:ImageBehavior.AnimatedSource="avares://Knossos.NET/Assets/general/knossos-2.gif" />    
+        <Image Width="62" Stretch="UniformToFill" anim:ImageBehavior.SpeedRatio="{Binding Animate}" anim:ImageBehavior.AnimatedSource="avares://Knossos.NET/Assets/general/knossos-1.gif" />
+	    <Image Width="60" Stretch="UniformToFill" anim:ImageBehavior.SpeedRatio="{Binding Animate}" anim:ImageBehavior.AnimatedSource="avares://Knossos.NET/Assets/general/knossos-2.gif" />    
     </Grid>
 </UserControl>

@@ -32,16 +32,35 @@ namespace Knossos.NET.ViewModels
             get { return _isLoading; }
             set { 
                 _isLoading = value;
-                ShowTiles = !sorting && !isLoading;}
+                ShowTiles = !sorting && !isLoading;
+                if (ShowTiles)
+                {
+                    LoadingAnimation.Animate = 0;
+                } 
+                else  
+                {
+                    LoadingAnimation.Animate = 1;
+                }        
             }
+        }
 
         private bool _sorting = true;
         internal bool sorting {
             get { return _sorting; }
             set { 
                 _sorting = value;
-                ShowTiles = !sorting && !isLoading;}
+                ShowTiles = !sorting && !isLoading;
+
+                if (ShowTiles)
+                {
+                    LoadingAnimation.Animate = 0;                
+                } 
+                else  
+                {
+                    LoadingAnimation.Animate = 1;
+                }
             }
+        }
 
         /// <summary>
         /// For the UI to detmerine whether to show mod tiles.  It needs to check more than one property, so this gets updated when sorting or isLoading do.
@@ -62,6 +81,8 @@ namespace Knossos.NET.ViewModels
             set 
             {
                 sorting = true;
+                LoadingAnimation.Animate = 1;
+
                 if (value != Search){
                     this.SetProperty(ref search, value);
                     if (value.Trim() != string.Empty)
@@ -84,6 +105,7 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 sorting = false;
+                LoadingAnimation.Animate = 1;
             }
         }
 
