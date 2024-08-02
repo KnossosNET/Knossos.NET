@@ -782,12 +782,29 @@ namespace Knossos.NET.ViewModels
 
                 var result = await MainWindow.instance.StorageProvider.OpenFolderPickerAsync(options);
 
-                if (result != null && result.Count > 0)
+                try {
+                    if (result != null && result.Count > 0)
+                    {
+                        
+                        // Test if we can write to the new library directory
+                        using (StreamWriter writer = new StreamWriter(result[0].Path.AbsolutePath.ToString() + Path.DirectorySeparatorChar + "test.txt"))
+                        {
+                            writer.WriteLine("test");
+                        }
+                        File.Delete(Path.Combine(result[0].Path.AbsolutePath.ToString() + Path.DirectorySeparatorChar + "test.txt"));
+                    
+                        Knossos.globalSettings.basePath = result[0].Path.LocalPath.ToString();
+                        Knossos.globalSettings.Save();
+                        Knossos.ResetBasePath();
+                        LoadData();
+                    }
+                } 
+                catch (Exception ex) 
                 {
-                    Knossos.globalSettings.basePath = result[0].Path.LocalPath.ToString();
-                    Knossos.globalSettings.Save();
-                    Knossos.ResetBasePath();
-                    LoadData();
+                    Log.Add(Log.LogSeverity.Error, "GlobalSettings.BrowseFolderCommand() - test read/write was not successful: ", ex);
+                    await Dispatcher.UIThread.Invoke(async () => {
+                        await MessageBox.Show(null, "Knossos was not able to write to this folder.  Please select another library folder.", "Cannot Select Folder", MessageBox.MessageBoxButtons.OK);
+                    }).ConfigureAwait(false);
                 }
             }
         }
