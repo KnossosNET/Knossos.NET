@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="40" d:DesignHeight="40"             
+                xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
+             x:Class="Knossos.NET.Views.LoadingIconView"
+	         xmlns:v="using:Knossos.NET.Views"
+	         xmlns:vm="using:Knossos.NET.ViewModels"
+	         x:DataType="vm:LoadingIconViewModel">
+	
+    <Grid>
+        <Image Width="62" Stretch="UniformToFill" anim:ImageBehavior.SpeedRatio="{Binding Animate}" anim:ImageBehavior.AnimatedSource="avares://Knossos.NET/Assets/general/knossos-1.gif" />
+	    <Image Width="60" Stretch="UniformToFill" anim:ImageBehavior.SpeedRatio="{Binding Animate}" anim:ImageBehavior.AnimatedSource="avares://Knossos.NET/Assets/general/knossos-2.gif" />    
+    </Grid>
+</UserControl>

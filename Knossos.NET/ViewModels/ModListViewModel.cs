@@ -15,6 +15,18 @@ namespace Knossos.NET.ViewModels
     public partial class ModListViewModel : ViewModelBase
     {
         /// <summary>
+        /// Is this tab in the middle of sorting or filtering mod tiles
+        /// </summary>
+        [ObservableProperty]
+        internal bool sorting = false;
+
+        /// <summary>
+        /// For the knossos Loading animation 
+        /// </summary>
+        [ObservableProperty]
+        internal LoadingIconViewModel loadingAnimation;
+
+        /// <summary>
         /// Current Sort Mode
         /// </summary>
         internal MainWindowViewModel.SortType sortType = MainWindowViewModel.SortType.unsorted;
@@ -54,6 +66,8 @@ namespace Knossos.NET.ViewModels
 
         public ModListViewModel()
         {
+            LoadingAnimation = new LoadingIconViewModel();
+
         }
 
 
@@ -120,6 +134,8 @@ namespace Knossos.NET.ViewModels
 
                 if (newSort != sortType)
                 {
+                    LoadingAnimation.Animate = 1;
+                    Sorting = true;
                     Dispatcher.UIThread.Invoke( () =>
                     {
                         var tempList = Mods.ToList();
@@ -133,10 +149,15 @@ namespace Knossos.NET.ViewModels
                             }
                         }
                         GC.Collect();
+                        Sorting = false;
+                        LoadingAnimation.Animate = 0;
                     },DispatcherPriority.Background);
+
                 }
             }catch(Exception ex)
             {
+                Sorting = false;
+                LoadingAnimation.Animate = 0;                
                 Log.Add(Log.LogSeverity.Error, "ModListViewModel.ChangeSort()", ex);
             }
         }
