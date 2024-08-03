@@ -7,7 +7,7 @@ Knossos.NET, also known as KNet, is a multi-platform launcher for Freespace 2 Op
 
 <br /><br />
 ## **Current Status:**<br />
-Version 1.2 has been released!<br />
+Version 1.2.1 has been released!<br />
 Check out our download page: https://knossoslauncher.com/<br />
 
 <br /><br />
