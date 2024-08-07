@@ -787,11 +787,11 @@ namespace Knossos.NET.ViewModels
                     {
                         
                         // Test if we can write to the new library directory
-                        using (StreamWriter writer = new StreamWriter(result[0].Path.AbsolutePath.ToString() + Path.DirectorySeparatorChar + "test.txt"))
+                        using (StreamWriter writer = new StreamWriter(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"))
                         {
                             writer.WriteLine("test");
                         }
-                        File.Delete(Path.Combine(result[0].Path.AbsolutePath.ToString() + Path.DirectorySeparatorChar + "test.txt"));
+                        File.Delete(Path.Combine(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"));
                     
                         Knossos.globalSettings.basePath = result[0].Path.LocalPath.ToString();
                         Knossos.globalSettings.Save();
