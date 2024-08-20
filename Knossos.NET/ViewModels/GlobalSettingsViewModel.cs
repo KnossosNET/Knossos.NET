@@ -81,7 +81,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal CompressionSettings modCompression = CompressionSettings.Manual;
         [ObservableProperty]
-        internal int compressionMaxParallelism = 4;
+        internal int compressionMaxParallelism = 2;
         [ObservableProperty]
         internal bool checkUpdates = true;
         [ObservableProperty]
