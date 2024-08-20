@@ -1378,15 +1378,15 @@ namespace Knossos.NET.ViewModels
                                         throw new TaskCanceledException();
                                     }
                                     //CRC CHECK
-                                    crcResult = await compressor.VerifyFile(zipPath);
+                                    crcResult = await compressor.VerifyFile(zipPath + ".tar.gz");
                                     if (!crcResult)
                                     {
                                         if (crcAttempt >= maxCrcAttempts)
                                         {
-                                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Max attempts reached, cancelling upload...");
+                                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ".tar.gz. Max attempts reached, cancelling upload...");
                                             throw new TaskCanceledException();
                                         }
-                                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Retrying...");
+                                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ".tar.gz. Retrying...");
                                         ProgressBarMax = 100;
                                         ProgressCurrent = 0;
                                         Info = "Retry: Compressing (.tar.gz)";
