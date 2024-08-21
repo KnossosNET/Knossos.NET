@@ -66,7 +66,7 @@
 			<!--Special Icons-->
 			<WrapPanel Margin="0,0,0,8" ZIndex="2" HorizontalAlignment="Center" VerticalAlignment="Center">
 				<Image IsVisible="{Binding IsCustomConfig}" ToolTip.Tip="This mod is configured to run with user custom settings" Height="15" Width="15" Source="/Assets/general/custom-config-icon.png"/>
-				<Image IsVisible="{Binding UpdateAvailable}" Margin="5,0,0,0" ToolTip.Tip="A update is available!" Height="15" Width="15" Source="/Assets/general/upd_icon.png"/>
+				<Image IsVisible="{Binding UpdateAvailable}" Margin="5,0,0,0" ToolTip.Tip="An update is available!" Height="15" Width="15" Source="/Assets/general/upd_icon.png"/>
 			</WrapPanel>
 		</StackPanel>
 	</Grid>
