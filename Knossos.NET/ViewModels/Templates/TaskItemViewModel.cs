@@ -1302,6 +1302,7 @@ namespace Knossos.NET.ViewModels
                                         throw new TaskCanceledException();
                                     }
                                     //CRC CHECK
+                                    Info = "CRC Check";
                                     crcResult = await compressor.VerifyFile(zipPath);
                                     if(!crcResult)
                                     {
@@ -1378,6 +1379,7 @@ namespace Knossos.NET.ViewModels
                                         throw new TaskCanceledException();
                                     }
                                     //CRC CHECK
+                                    Info = "CRC Check";
                                     crcResult = await compressor.VerifyFile(zipPath + ".tar.gz");
                                     if (!crcResult)
                                     {
@@ -1412,6 +1414,7 @@ namespace Knossos.NET.ViewModels
                                         throw new TaskCanceledException();
                                     }
                                     //CRC CHECK
+                                    Info = "CRC Check";
                                     crcResult = await compressor.VerifyFile(zipPath);
                                     if (!crcResult)
                                     {
