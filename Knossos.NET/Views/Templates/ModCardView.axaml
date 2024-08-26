@@ -29,7 +29,10 @@
 		<!--Default-->
 		<Image VerticalAlignment="Top" Source="{Binding Image}" Width="150" Height="225"></Image>
 		<TextBlock Margin="0,222,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Width="150" Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" TextAlignment="Center" FontSize="14" Foreground="White"/>
-
+		<Border IsVisible="{Binding UpdateAvailable}" Margin="0,-2,-5,0" ZIndex="0" Opacity="0.7" HorizontalAlignment="Right" CornerRadius="5" VerticalAlignment="Top" Background="{StaticResource ModCardBorderUpdate}">
+			<Label FontWeight="Bold" FontSize="12">Update Available</Label>
+		</Border>
+		
 		<StackPanel Name="Overlay" ZIndex="1" Background="Black" Height="225" Width="150" VerticalAlignment="Top">
 			<Label Content="{Binding ModVersion}" FontWeight="Bold" FontSize="14" Width="150" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 			<!--Installed Overlay-->
@@ -61,8 +64,10 @@
 				</TabItem>
 			</TabControl>
 			<!--Special Icons-->
-			<Image IsVisible="{Binding IsCustomConfig}" Margin="0,0,0,8" ZIndex="2" ToolTip.Tip="This mod is configured to run with user custom settings" HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Width="15" Source="/Assets/general/custom-config-icon.png"/>
-
+			<WrapPanel Margin="0,0,0,8" ZIndex="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+				<Image IsVisible="{Binding IsCustomConfig}" ToolTip.Tip="This mod is configured to run with user custom settings" Height="15" Width="15" Source="/Assets/general/custom-config-icon.png"/>
+				<Image IsVisible="{Binding UpdateAvailable}" Margin="5,0,0,0" ToolTip.Tip="An update is available!" Height="15" Width="15" Source="/Assets/general/upd_icon.png"/>
+			</WrapPanel>
 		</StackPanel>
 	</Grid>
 </UserControl>
