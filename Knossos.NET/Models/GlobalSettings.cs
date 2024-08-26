@@ -105,7 +105,7 @@ namespace Knossos.NET.Models
         [JsonPropertyName("mod_compression")]
         public CompressionSettings modCompression { get; set; } = CompressionSettings.Manual;
         [JsonPropertyName("compression_max_parallelism")]
-        public int compressionMaxParallelism { get; set; } = 4;
+        public int compressionMaxParallelism { get; set; } = 2;
         [JsonPropertyName("auto_update")]
         public bool autoUpdate { get; set; } = false;
         [JsonPropertyName("check_updates")]
