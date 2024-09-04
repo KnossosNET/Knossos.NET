@@ -432,7 +432,7 @@ namespace Knossos.NET.ViewModels
                         {
                             if(!await Nebula.IsModEditable(mod.id))
                             {
-                                await MessageBox.Show(MainWindow.instance!, "You dont have write permissions to this mod.", "Basic Check Fail", MessageBox.MessageBoxButtons.OK);
+                                await MessageBox.Show(MainWindow.instance!, "You do not have write permissions to this mod.", "Basic Check Fail", MessageBox.MessageBoxButtons.OK);
                                 ButtonsEnabled = true;
                                 return;
                             }
