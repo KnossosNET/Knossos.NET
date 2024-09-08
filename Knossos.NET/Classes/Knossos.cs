@@ -152,8 +152,10 @@ namespace Knossos.NET
             string[] args = Environment.GetCommandLineArgs();
             string modid = string.Empty;
             string modver = string.Empty;
+            string modExecType = string.Empty;
             bool saveID = false;
             bool saveVer = false;
+            bool saveExecType = false;
 
             foreach (var arg in args)
             {
@@ -168,6 +170,11 @@ namespace Knossos.NET
                     saveVer = false;
                     modver = arg;
                 }
+                if (saveExecType)
+                {
+                    saveExecType = false;
+                    modExecType = arg;
+                }
                 if (arg.ToLower() == "-playmod")
                 {
                     saveID = true;
@@ -176,16 +183,31 @@ namespace Knossos.NET
                 {
                     saveVer = true;
                 }
+                if (arg.ToLower() == "-exec")
+                {
+                    saveExecType = true;
+                }
             }
 
             if(modid != string.Empty)
             {
-                if(modver != string.Empty)
+                var execType = FsoExecType.Release;
+                if (modExecType != string.Empty && modExecType.ToLower() != "default")
+                {
+                    execType = FsoBuild.GetExecType(modExecType);
+                    if(execType == FsoExecType.Unknown)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Knossos.QuickLaunch", "Quick launch was used but the exec type used was invalid, reverted to Release. Used exec type: " + modExecType);
+                        execType = FsoExecType.Release;
+                    }
+                }
+                if (modver != string.Empty)
                 {
                     var mod = GetInstalledMod(modid, modver);
+
                     if(mod != null)
                     {
-                        PlayMod(mod, FsoExecType.Release);
+                        PlayMod(mod, execType);
                     }
                     else
                     {
@@ -195,7 +217,7 @@ namespace Knossos.NET
                 else
                 {
                     var modlist = GetInstalledModList(modid);
-                    if(modlist != null && modlist.Count() > 0)
+                    if (modlist != null && modlist.Count() > 0)
                     {
                         Mod? mod = null;
                         if (modlist.Count() > 1)
@@ -215,7 +237,7 @@ namespace Knossos.NET
 
                         if(mod != null)
                         {
-                            PlayMod(mod, FsoExecType.Release);
+                            PlayMod(mod, execType);
                         }
                     }
                     else

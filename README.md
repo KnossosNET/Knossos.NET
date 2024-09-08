@@ -28,10 +28,19 @@ This greately minimizes hard drive usage, but comes with two things to keep in m
 KnossosNET supports direct mod launch by adding a Command Line argument, this will open the launcher, and will launch FSO to play a mod with all the current settings and configurations, and close the launcher.<br />
 Example:<br />
 <br />
-KnossosNET.exe -playmod mod-id -version mod-version (optional)<br />
+KnossosNET.exe -playmod mod-id -version mod-version (optional) -exec fso-exec-type (optional)<br />
 <br />
 If no version is given (KnossosNET.exe -playmod mod-id) the highest version of the mod will be launched.<br />
-The "Mod Settings" window displays the Command Line to play that mod directly via quick launch.<br />
+If no fso-exec-type is given or "Default", or an invalid type is passed "Release" will be used instead. <br />
+Exec type options:<br />
+-Default<br />
+-Release<br />
+-Debug<br />
+-Fred2<br />
+-Fred2Debug<br />
+-QtFred<br />
+-QtFredDebug<br />
+The "Mod Settings" window displays the Command Line to play that mod directly via quick launch. Then you can use that to create a shortcut.<br />
 
 <br /><br />
 ## **Software Rendering Mode:**<br />
