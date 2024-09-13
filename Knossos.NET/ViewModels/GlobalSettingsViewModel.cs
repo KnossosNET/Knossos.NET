@@ -566,7 +566,7 @@ namespace Knossos.NET.ViewModels
                         if(item.Tag != null)
                         {
                             var joystick = (Joystick)item.Tag;
-                            if (joystick.guid == Knossos.globalSettings.joystick1.guid)
+                            if (joystick.guid == Knossos.globalSettings.joystick1.guid && joystick.id == Knossos.globalSettings.joystick1.id)
                             {
                                 var index = Joystick1Items.IndexOf(item);
                                 if (index != -1)
@@ -599,7 +599,7 @@ namespace Knossos.NET.ViewModels
                         if (item.Tag != null)
                         {
                             var joystick = (Joystick)item.Tag;
-                            if (joystick.guid == Knossos.globalSettings.joystick2.guid)
+                            if (joystick.guid == Knossos.globalSettings.joystick2.guid && joystick.id == Knossos.globalSettings.joystick2.id)
                             {
                                 var index = Joystick2Items.IndexOf(item);
                                 if (index != -1)
@@ -632,7 +632,7 @@ namespace Knossos.NET.ViewModels
                         if (item.Tag != null)
                         {
                             var joystick = (Joystick)item.Tag;
-                            if (joystick.guid == Knossos.globalSettings.joystick3.guid)
+                            if (joystick.guid == Knossos.globalSettings.joystick3.guid && joystick.id == Knossos.globalSettings.joystick3.id)
                             {
                                 var index = Joystick3Items.IndexOf(item);
                                 if (index != -1)
@@ -665,7 +665,7 @@ namespace Knossos.NET.ViewModels
                         if (item.Tag != null)
                         {
                             var joystick = (Joystick)item.Tag;
-                            if (joystick.guid == Knossos.globalSettings.joystick4.guid)
+                            if (joystick.guid == Knossos.globalSettings.joystick4.guid && joystick.id == Knossos.globalSettings.joystick4.id)
                             {
                                 var index = Joystick4Items.IndexOf(item);
                                 if (index != -1)
