@@ -1,0 +1,66 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+        x:Class="Knossos.NET.Views.DevModAdvancedUploadView"
+		xmlns:v="using:Knossos.NET.Views"
+		Icon="/Assets/knossos-icon.ico"
+		xmlns:vm="using:Knossos.NET.ViewModels"
+		x:DataType="vm:DevModAdvancedUploadViewModel"
+		Width="1100"
+		Height="700"
+		WindowStartupLocation="CenterOwner"
+		Title="{Binding Title}"
+		CanResize="True">
+
+  	<Design.DataContext>
+		<vm:DevModAdvancedUploadViewModel/>
+	</Design.DataContext>
+
+	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Visible">
+		<Grid RowDefinitions="Auto, Auto, *, Auto" >
+			<Label IsVisible="{Binding Loading}" Grid.Row="0" FontWeight="Bold" FontSize="18" Padding="60,130,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">LOADING...</Label>
+			<v:LoadingIconView Grid.Row="0" IsVisible="{Binding Loading}" Width="80" Height="80" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="50,50,0,0" />
+
+			<WrapPanel Grid.Row="0">
+				<WrapPanel IsVisible="{Binding !Loading}" HorizontalAlignment="Left" ToolTip.Tip="Number of simultanous mod package compression. Recommended: 1 or 2. Warning: Very heavy cpu and ram usage.">
+					<Label FontSize="14" VerticalContentAlignment="Center" Margin="20">Parallel Compression Tasks</Label>
+					<NumericUpDown Background="{StaticResource BackgroundColorPrimary}" Increment="1" Width="110" Value="{Binding ParallelCompressing}" Minimum="1" Maximum="6" VerticalContentAlignment="Center" Margin="20"></NumericUpDown>
+				</WrapPanel>
+		
+				<WrapPanel IsVisible="{Binding !Loading}" HorizontalAlignment="Right" ToolTip.Tip="Number of simultanous mod packages uploads to Nebula. Recommended: 1">
+					<Label FontSize="14" VerticalContentAlignment="Center" Margin="20">Parallel Upload Tasks</Label>
+					<NumericUpDown Background="{StaticResource BackgroundColorPrimary}" Increment="1" Width="110" Value="{Binding ParallelUploads}" Minimum="1" Maximum="2" VerticalContentAlignment="Center" Margin="20"></NumericUpDown>
+				</WrapPanel>
+			</WrapPanel>
+
+			<Label IsVisible="{Binding !Loading}" FontSize="14" Grid.Row="2" Margin="0,-5,0,0" HorizontalAlignment="Center">Package Selection</Label>
+			<DataGrid IsVisible="{Binding !Loading}" ItemsSource="{Binding ModPackagesData}" Grid.Row="2" Margin="20" CanUserResizeColumns="True" CanUserSortColumns="False" GridLinesVisibility="All" BorderThickness="1" BorderBrush="White">
+				<DataGrid.Columns>
+					<DataGridTextColumn IsReadOnly="True" MinWidth="200" Header="Package" Binding="{Binding PackageName}" />
+
+					<DataGridTemplateColumn MinWidth="85" MaxWidth="85" Header="Upload" IsReadOnly="False">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<CheckBox Margin="32,0,0,0" ToolTip.Tip="This package will be compressed and uploaded to nebula, the hash will be calculated after compression. You can disable uploading this package if it dosent have changes from the previous version and provide a file hash from an older version that will be used instead." VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsChecked="{Binding Upload}"/>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+					
+					<DataGridTemplateColumn Header="Get Hash" MinWidth="100" IsReadOnly="False">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedIndex="{Binding OtherVersionsSelectedIndex}" ItemsSource="{Binding OtherVersions}"/>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+					
+					<DataGridTextColumn Header="File Hash" MinWidth="150" Width="680" Binding="{Binding CustomHash}"/>
+				</DataGrid.Columns>
+			</DataGrid>
+
+			<Button Grid.Row="3" Width="146" Margin="20" HorizontalAlignment="Center" IsVisible="{Binding !Loading}" Command="{Binding UploadMod}" Classes="Settings">Upload to Nebula</Button>
+		</Grid>
+	</ScrollViewer>
+</Window>

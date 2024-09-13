@@ -48,9 +48,10 @@
 				</ListBox.ItemTemplate>
 			</ListBox>
 		</Grid>
-		<Label Grid.Row="1" Margin="0,5,0,0" HorizontalAlignment="Center">Actions for Active Version</Label>
+		<Label Grid.Row="1" Margin="0,0,0,0" HorizontalAlignment="Center">Actions for Active Version</Label>
 		<WrapPanel Grid.Row="2" Margin="0,4,0,0" HorizontalAlignment="Center" IsEnabled="{Binding ButtonsEnabled}">
-			<Button Width="146" IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding UploadMod}" Classes="Settings">Upload to Nebula</Button>
+			<Button Width="146" Margin="0,0,20,0" IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding UploadMod}" Classes="Settings">Upload to Nebula</Button>
+			<Button Width="146" IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding UploadModAdvanced}" Classes="Secondary">Advanced Upload</Button>
 			<Button IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding ChangeVisibility}" Content="{Binding VisibilityButtonText}" Classes="Settings" Margin="24,0,0,0"/>
 		</WrapPanel>
 		<WrapPanel Grid.Row="3" Margin="0,8,0,0" HorizontalAlignment="Center" IsEnabled="{Binding ButtonsEnabled}">

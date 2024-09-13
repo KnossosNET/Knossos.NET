@@ -70,6 +70,7 @@
   <ItemGroup>
     <PackageReference Include="AnimatedImage.Avalonia" Version="1.0.7" />
     <PackageReference Include="Avalonia" Version="11.0.5" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.5" />
     <PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.5" />
@@ -89,6 +90,9 @@
     </Compile>
     <Compile Update="Views\DeveloperModsView.axaml.cs">
       <DependentUpon>DeveloperModsView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Windows\DevModAdvancedUploadView.axaml.cs">
+      <DependentUpon>DevModAdvancedUploadView.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Windows\MessageBox.axaml.cs">
       <DependentUpon>MessageBox.axaml</DependentUpon>
