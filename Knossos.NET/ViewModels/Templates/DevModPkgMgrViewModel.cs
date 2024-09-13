@@ -457,9 +457,9 @@ namespace Knossos.NET.ViewModels
                         if (PkgMgr.editor != null && oldIndex <= DependencyItems.Count())
                             DependencyItems.Insert(oldIndex, new EditorDependencyItem(dependency.Dependency, this, PkgMgr.editor.ActiveVersion.id, PkgMgr.editor.ActiveVersion.parent));
                     }
-                    catch
+                    catch (Exception ex)
                     {
-
+                        Log.Add(Log.LogSeverity.Error, "EditorModPackageItem.ReloadDependency()", ex);
                     }
                 }
                 else
