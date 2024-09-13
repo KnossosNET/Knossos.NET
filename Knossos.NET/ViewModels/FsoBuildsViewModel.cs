@@ -319,6 +319,7 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 Knossos.RemoveBuild(build);
+                DeveloperModsViewModel.Instance?.UpdateListedFsoBuildVersionsInEditor();
                 if (runModstatusChecks)
                 {
                     MainWindowViewModel.Instance?.RunModStatusChecks();

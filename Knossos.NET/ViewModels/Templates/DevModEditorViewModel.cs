@@ -344,5 +344,16 @@ namespace Knossos.NET.ViewModels
             if(VersionsView != null && (modid == null || ActiveVersion.id == modid) )
                 VersionsView?.HackUpdateModList();
         }
+
+        /// <summary>
+        /// If the mod editor is open this will refresh the listed build options in the Fso Settings tabs
+        /// </summary>
+        public void UpdateFsoSettingsComboBox()
+        {
+            if (FsoSettingsView != null)
+            {
+                FsoSettingsView.UpdateFsoPicker();
+            }
+        }
     }
 }

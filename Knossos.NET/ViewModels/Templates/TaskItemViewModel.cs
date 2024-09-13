@@ -4401,7 +4401,9 @@ namespace Knossos.NET.ViewModels
                         FsoBuild newBuild = new FsoBuild(modJson);
                         if (modifyPkgs == null)
                         {
+                            //New Build
                             Knossos.AddBuild(newBuild);
+                            DeveloperModsViewModel.Instance?.UpdateListedFsoBuildVersionsInEditor();
                         }
                         if (modJson.devMode)
                         {

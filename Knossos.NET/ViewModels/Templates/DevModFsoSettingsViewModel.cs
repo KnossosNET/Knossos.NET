@@ -26,40 +26,48 @@ namespace Knossos.NET.ViewModels
         public DevModFsoSettingsViewModel(DevModEditorViewModel devModEditorViewModel)
         {
             editor = devModEditorViewModel;
-            if (editor.ActiveVersion.modSettings.customBuildId == null)
+            LoadFsoPicker();
+        }
+
+        private void LoadFsoPicker()
+        {
+            if (editor != null)
             {
-                fsoPicker = new FsoBuildPickerViewModel(null);
-            }
-            else
-            {
-                if (editor.ActiveVersion.modSettings.customBuildExec != null)
+                if (editor.ActiveVersion.modSettings.customBuildId == null)
                 {
-                    fsoPicker = new FsoBuildPickerViewModel(new FsoBuild(editor.ActiveVersion.modSettings.customBuildExec));
+                    FsoPicker = new FsoBuildPickerViewModel(null);
                 }
                 else
                 {
-                    var matchingBuilds = Knossos.GetInstalledBuildsList(editor.ActiveVersion.modSettings.customBuildId);
-                    if (matchingBuilds.Any())
+                    if (editor.ActiveVersion.modSettings.customBuildExec != null)
                     {
-                        var theBuild = matchingBuilds.FirstOrDefault(build => build.version == editor.ActiveVersion.modSettings.customBuildVersion);
-                        if (theBuild != null)
-                        {
-                            fsoPicker = new FsoBuildPickerViewModel(theBuild);
-                        }
-                        else
-                        {
-                            Log.Add(Log.LogSeverity.Warning, "DevModFsoSettingsViewModel.Constructor()", "Missing user-saved build version for mod: " + editor.ActiveVersion.tile + " - " + editor.ActiveVersion.version + " requested build id: " + editor.ActiveVersion.modSettings.customBuildId + " and version: " + editor.ActiveVersion.modSettings.customBuildVersion);
-                            fsoPicker = new FsoBuildPickerViewModel(null);
-                        }
+                        FsoPicker = new FsoBuildPickerViewModel(new FsoBuild(editor.ActiveVersion.modSettings.customBuildExec));
                     }
                     else
                     {
-                        Log.Add(Log.LogSeverity.Warning, "DevModFsoSettingsViewModel.Constructor()", "Missing user-saved build id for mod: " + editor.ActiveVersion.tile + " - " + editor.ActiveVersion.version + " requested build id: " + editor.ActiveVersion.modSettings.customBuildId);
-                        fsoPicker = new FsoBuildPickerViewModel(null);
+                        var matchingBuilds = Knossos.GetInstalledBuildsList(editor.ActiveVersion.modSettings.customBuildId);
+                        if (matchingBuilds.Any())
+                        {
+                            var theBuild = matchingBuilds.FirstOrDefault(build => build.version == editor.ActiveVersion.modSettings.customBuildVersion);
+                            if (theBuild != null)
+                            {
+                                FsoPicker = new FsoBuildPickerViewModel(theBuild);
+                            }
+                            else
+                            {
+                                Log.Add(Log.LogSeverity.Warning, "DevModFsoSettingsViewModel.Constructor()", "Missing user-saved build version for mod: " + editor.ActiveVersion.tile + " - " + editor.ActiveVersion.version + " requested build id: " + editor.ActiveVersion.modSettings.customBuildId + " and version: " + editor.ActiveVersion.modSettings.customBuildVersion);
+                                FsoPicker = new FsoBuildPickerViewModel(null);
+                            }
+                        }
+                        else
+                        {
+                            Log.Add(Log.LogSeverity.Warning, "DevModFsoSettingsViewModel.Constructor()", "Missing user-saved build id for mod: " + editor.ActiveVersion.tile + " - " + editor.ActiveVersion.version + " requested build id: " + editor.ActiveVersion.modSettings.customBuildId);
+                            FsoPicker = new FsoBuildPickerViewModel(null);
+                        }
                     }
                 }
+                CmdLine = editor.ActiveVersion.cmdline;
             }
-            CmdLine = editor.ActiveVersion.cmdline; 
         }
 
         internal void ConfigureBuild()
@@ -147,6 +155,16 @@ namespace Knossos.NET.ViewModels
                 editor.ActiveVersion.modSettings.Save();
                 editor.ActiveVersion.SaveJson();
             }
+        }
+
+        /// <summary>
+        /// Updates the FSO picker combobox to display changes to installed fso builds
+        /// Note: it actually destroys the current fso picker and it replaces it with a new one.
+        /// </summary>
+        public void UpdateFsoPicker()
+        {
+            //Run from UI thread
+            Dispatcher.UIThread.Invoke(()=> { LoadFsoPicker(); });
         }
     }
 }

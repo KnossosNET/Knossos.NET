@@ -203,6 +203,14 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
+        /// If the mod editor is open this will refresh the listed build options in the Fso Settings tabs
+        /// </summary>
+        public void UpdateListedFsoBuildVersionsInEditor()
+        {
+            ModEditor?.UpdateFsoSettingsComboBox();
+        }
+
+        /// <summary>
         /// Resets the mod editor
         /// Reloads the currently loaded mod in editor if it matches the passed id, null for always
         /// </summary>
