@@ -40,7 +40,7 @@ Exec type options:<br />
 -Fred2Debug<br />
 -QtFred<br />
 -QtFredDebug<br />
-The "Mod Settings" window displays the Command Line to play that mod directly via quick launch. Then you can use that to create a shortcut.<br />
+The "Settings" window on a mod displays the Command Line to play that mod directly via Quick Launch. You can copy that Quick Launch Command Line and use it to create a shortcut to easily launch that mod. <br />
 
 <br /><br />
 ## **Software Rendering Mode:**<br />
