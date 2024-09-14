@@ -436,7 +436,10 @@ namespace Knossos.NET.ViewModels
         /// <param name="mod"></param>
         /// <param name="isNewMod"></param>
         /// <param name="metadataonly"></param>
-        public async void UploadModVersion(Mod mod, bool isNewMod, bool metadataonly = false)
+        /// <param name="advData"></param>
+        /// <param name="parallelCompression"></param>
+        /// <param name="parallelUploads"></param>
+        public async void UploadModVersion(Mod mod, bool isNewMod, bool metadataonly = false, int parallelCompression = 1, int parallelUploads = 1, List<DevModAdvancedUploadData>? advData = null )
         {
             using (var cancelSource = new CancellationTokenSource())
             {
@@ -446,7 +449,7 @@ namespace Knossos.NET.ViewModels
                     TaskList.Add(newTask);
                     taskQueue.Enqueue(newTask);
                 });
-                await newTask.UploadModVersion(mod, isNewMod, metadataonly, cancelSource).ConfigureAwait(false);
+                await newTask.UploadModVersion(mod, isNewMod, metadataonly, cancelSource, parallelCompression, parallelUploads, advData).ConfigureAwait(false);
             }
         }
 

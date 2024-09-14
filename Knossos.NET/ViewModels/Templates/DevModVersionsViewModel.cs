@@ -228,7 +228,7 @@ namespace Knossos.NET.ViewModels
                     if (mod.type == ModType.mod || mod.type == ModType.tc)
                     {
                         var dialog = new DevModAdvancedUploadView();
-                        dialog.DataContext = new DevModAdvancedUploadViewModel(mod, dialog);
+                        dialog.DataContext = new DevModAdvancedUploadViewModel(mod, dialog, this);
                         await dialog.ShowDialog<DevModAdvancedUploadView?>(MainWindow.instance!);
                     }
                     else
@@ -243,12 +243,19 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        //For UI button
         internal async void UploadMod()
         {
             await UploadProcess();
         }
 
-        internal async Task UploadProcess()
+        //for the advanced upload window
+        public void AdvancedUpload(List<DevModAdvancedUploadData> advData, int parallelCompression, int parallelUploads)
+        {
+            _ = UploadProcess(advData, parallelCompression, parallelUploads);
+        }
+
+        private async Task UploadProcess(List<DevModAdvancedUploadData>? advData = null, int parallelCompression = 1, int parallelUploads = 1)
         {
             /* 
              *  Pre-Upload Checks:
@@ -533,7 +540,7 @@ namespace Knossos.NET.ViewModels
 
                         //Basic check finish, create task
                         ButtonsEnabled = true;
-                        TaskViewModel.Instance!.UploadModVersion(mod, isNewMod, metaUpdOnly);
+                        TaskViewModel.Instance!.UploadModVersion(mod, isNewMod, metaUpdOnly, parallelCompression, parallelUploads, advData);
                     }
                 }
                 catch(Exception ex)

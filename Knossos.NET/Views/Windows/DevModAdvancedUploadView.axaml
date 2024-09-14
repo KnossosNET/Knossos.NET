@@ -56,7 +56,7 @@
 						</DataGridTemplateColumn.CellTemplate>
 					</DataGridTemplateColumn>
 					
-					<DataGridTextColumn Header="File Hash" MinWidth="150" Width="680" Binding="{Binding CustomHash}"/>
+					<DataGridTextColumn Header="File Hash" MinWidth="150" Width="680" IsReadOnly="True" Binding="{Binding CustomHash}"/>
 				</DataGrid.Columns>
 			</DataGrid>
 

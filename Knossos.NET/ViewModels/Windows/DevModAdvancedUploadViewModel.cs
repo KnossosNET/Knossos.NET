@@ -26,36 +26,63 @@ namespace Knossos.NET.ViewModels
                 if (otherVersionsSelectedIndex != value)
                 {
                     this.SetProperty(ref otherVersionsSelectedIndex, value);
-                    if (value <= 1 ) //Manual Input // Auto
+                    if (value == 0 ) // Auto
                     {
                         CustomHash = "";
                     }
                     else
                     {
+                        if(package == null)
+                        {
+                            CustomHash = "Error: Local package was null, this should not happen.";
+                            return;
+                        }
                         try
                         {
-                            //Mod class is saved in the datacontext for each version
-                            if (OtherVersions[value].DataContext != null)
+                            //Get package data from nebula and let the cache do its thing
+                            if (packageInNebula == null)
                             {
-                                var modPackage = (ModPackage)OtherVersions[value].DataContext!;
-                                if (modPackage != null && modPackage.files != null)
+                                if (OtherVersions[value].DataContext == null)
                                 {
-                                    CustomHash = modPackage.files.FirstOrDefault()!.checksum![1].ToString();
+                                    CustomHash = "Error: Datacontext was null";
+                                    return;
                                 }
-                                else
+                                CustomHash = "Loading...";
+                                var m = (Mod)OtherVersions[value].DataContext!;
+                                Task.Run(async () =>
                                 {
-                                    CustomHash = "Error getting hash";
-                                }
+                                    try
+                                    {
+                                        var modTask = await Nebula.GetModData(mod!.id, m.version);
+                                        if (modTask == null)
+                                        {
+                                            CustomHash = "Error: Unable to get data from Nebula";
+                                            return;
+                                        }
+                                        packageInNebula = modTask.packages.FirstOrDefault(p => p.name == package.name);
+                                        if (packageInNebula == null)
+                                        {
+                                            CustomHash = "Error: Package was not found on selected version, or Nebula error.";
+                                            return;
+                                        }
+                                        CustomHash = packageInNebula!.files!.FirstOrDefault()!.checksum![1].ToString();
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Add(Log.LogSeverity.Error, "DevModAdvancedUploadData(OtherVersionsSelectedIndex.Setter2)", ex);
+                                        CustomHash = "Error in getting data from Nebula";
+                                    };
+                                });
                             }
                             else
                             {
-                                CustomHash = "Error getting hash";
+                                CustomHash = packageInNebula!.files!.FirstOrDefault()!.checksum![1].ToString();
                             }
                         }
                         catch (Exception ex)
                         {
                             CustomHash = "Error getting hash";
-                            Log.Add(Log.LogSeverity.Error, "DevModAdvancedUploadData(OtherVersionsSelectedIndex.Setter)", ex);
+                            Log.Add(Log.LogSeverity.Error, "DevModAdvancedUploadData(OtherVersionsSelectedIndex.Setter3)", ex);
                         }
                     }
                 }
@@ -103,6 +130,9 @@ namespace Knossos.NET.ViewModels
         internal string customHash = "";
 
         public ModPackage? package;
+        public ModPackage? packageInNebula = null;
+        private Mod? mod;
+
         public string PackageName
         {
             get
@@ -115,9 +145,10 @@ namespace Knossos.NET.ViewModels
         }
 
 
-        public DevModAdvancedUploadData(ModPackage package, Mod mod)
+        public DevModAdvancedUploadData(ModPackage package, Mod mod, List<Mod> allVersionsOfMod)
         {
             this.package = package;
+            this.mod = mod;
 
             //Fill Get Hash Combobox
             var auto = new ComboBoxItem();
@@ -125,41 +156,17 @@ namespace Knossos.NET.ViewModels
             auto.IsEnabled = true;
             OtherVersions.Add(auto);
 
-            var manual = new ComboBoxItem();
-            manual.Content = "Manual Input";
-            manual.IsEnabled = false;
-            OtherVersions.Add(manual);
-
-            //Get all local versions of this ID that are uploaded to nebula, that devmode is enabled and contains this package name
-            var versions = Knossos.GetInstalledModList(mod.id).Where( m => m.devMode && m.inNebula && m.packages != null && m.packages.FirstOrDefault(p => p.name == package.name) != null);
-
-            if (versions != null)
+            foreach (var o in allVersionsOfMod)
             {
-                //Reload json data to get the hashes
-                versions.ForEach(m => m.ReLoadJson());
-                foreach (var o in versions)
+                if (o.version != mod.version)
                 {
-                    if (o != mod)
-                    {
-                        try
-                        {
-                            //List version in the combobox
-                            var p = o.packages.FirstOrDefault(p => p.name == package.name);
-                            if (p != null && p.files != null && p.files.Any() && p.files.FirstOrDefault()?.checksum?.Length > 0)
-                            {
-                                var item = new ComboBoxItem();
-                                item.DataContext = p;
-                                item.Content = o.version.ToString();
-                                item.IsEnabled = false;
-                                item.Foreground = o.isPrivate ? Brushes.Red : Brushes.Cyan;
-                                OtherVersions.Add(item);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Add(Log.LogSeverity.Error, "DevModAdvancedUploadData(contructor)", ex);
-                        }
-                    }
+                    //List version in the combobox
+                    var item = new ComboBoxItem();
+                    item.DataContext = o;
+                    item.Content = o.version.ToString();
+                    item.IsEnabled = false;
+                    item.Foreground = o.isPrivate ? Brushes.Red : Brushes.Cyan;
+                    OtherVersions.Add(item);
                 }
             }
             OtherVersionsSelectedIndex = 0;
@@ -183,28 +190,31 @@ namespace Knossos.NET.ViewModels
 
         private Mod? uploadMod = null;
         private DevModAdvancedUploadView? dialog = null;
-
+        private DevModVersionsViewModel? versionsViewModel = null;
         public DevModAdvancedUploadViewModel() 
         {
         }
 
-        public DevModAdvancedUploadViewModel(Mod mod, DevModAdvancedUploadView dialog)
+        public DevModAdvancedUploadViewModel(Mod mod, DevModAdvancedUploadView? dialog, DevModVersionsViewModel? versionsViewModel)
         {
             this.dialog = dialog;
+            this.versionsViewModel = versionsViewModel;
             Title = "Advanced Nebula Upload: " + mod;
             uploadMod = mod;
             _ = Task.Run(() => { LazyLoading(); });
+            this.versionsViewModel = versionsViewModel;
         }
 
-        private void LazyLoading()
+        private async void LazyLoading()
         {
             if (uploadMod != null && uploadMod.packages != null)
             {
+                var allVersionsOfThisMod = await Nebula.GetAllModsWithID(uploadMod.id);
                 foreach (var package in uploadMod.packages)
                 {
                     Dispatcher.UIThread.Invoke(() =>
                     {
-                        var data = new DevModAdvancedUploadData(package, uploadMod);
+                        var data = new DevModAdvancedUploadData(package, uploadMod, allVersionsOfThisMod);
                         ModPackagesData.Add(data);
                     });
                 }
@@ -230,10 +240,18 @@ namespace Knossos.NET.ViewModels
                         //ensure it is in lowercase
                         data.CustomHash = data.CustomHash.ToLower();
                     }
+
+                    if(data.packageInNebula == null)
+                    {
+                        _ = MessageBox.Show(MainWindow.instance!, "Package: " + data.PackageName + " is not set to upload but it lacks the package data from Nebula. Operation cancelled.", "Missing package data", MessageBox.MessageBoxButtons.OK);
+                        return;
+                    }
                 }
             }
 
             //Check with nebula
+            //Disabled, moved to PerPackage
+            /*
             foreach (var data in ModPackagesData)
             {
                 if (!data.upload)
@@ -242,10 +260,18 @@ namespace Knossos.NET.ViewModels
                     {
                         _ = MessageBox.Show(MainWindow.instance!, "The provided sha256 hash for package: " + data.PackageName + " is not valid or not uploaded to Nebula, operation cancelled. Passed hash:" + data.CustomHash, "File hash is not uploaded to nebula (or it is incorrect)", MessageBox.MessageBoxButtons.OK);
                         Log.Add(Log.LogSeverity.Error,"DevModAdvancedUploadViewModel.UploadMod", "The provided sha256 hash for package: " + data.PackageName + " is not valid or not uploaded to Nebula, operation cancelled. Passed hash:"+data.CustomHash);
+                        return;
                     }
                     await Task.Delay(1000);
                 }
             }
+            */
+
+            //Send to upload and close window
+            await Dispatcher.UIThread.InvokeAsync( ()=> { 
+                versionsViewModel?.AdvancedUpload(ModPackagesData, ParallelCompressing, ParallelUploads);
+                dialog?.Close();
+            });
         }
     }
 }
