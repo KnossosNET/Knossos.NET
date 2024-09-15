@@ -1631,6 +1631,7 @@ namespace Knossos.NET.ViewModels
                                             pkg.checkNotes = uploadedPkg.checkNotes;
                                             pkg.files?.ForEach(f => f.urls = null); //Cant send urls to Nebula or it gets rejected
                                             skipPkg = true;
+                                            Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.UploadModVersion()", "Skipping package preparation for :" + pkg.name + ". Data was loaded from Nebula.");
                                         }
                                     }
                                 }
@@ -1653,9 +1654,18 @@ namespace Knossos.NET.ViewModels
                             {
                                 bool skipPkg = false;
                                 //We should skip this?
-                                if (advData != null && advData.FirstOrDefault(p => p.packageInNebula != null && p.packageInNebula!.name == pkg.name) != null && !advData.FirstOrDefault(p => p.packageInNebula != null && p.packageInNebula!.name == pkg.name)!.Upload)
+                                if (advData != null)
                                 {
-                                    skipPkg = true;
+                                    var advDataPkg = advData.FirstOrDefault(p => p.packageInNebula != null && p.packageInNebula!.name == pkg.name);
+                                    if (advDataPkg != null && !advDataPkg.Upload)
+                                    {
+                                        var uploadedPkg = advDataPkg.packageInNebula;
+                                        if (uploadedPkg != null)
+                                        {
+                                            skipPkg = true;
+                                            Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.UploadModVersion()", "Skipping package upload for :" + pkg.name + ". Used the one in Nebula instead, file hash: " + advDataPkg.CustomHash );
+                                        }
+                                    }
                                 }
                                 if (!skipPkg)
                                 {
