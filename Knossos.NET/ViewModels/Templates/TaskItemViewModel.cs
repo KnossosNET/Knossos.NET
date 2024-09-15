@@ -1613,21 +1613,25 @@ namespace Knossos.NET.ViewModels
                                 //We should skip this?
                                 if(advData != null)
                                 {
-                                    var uploadedPkg = advData.FirstOrDefault(p => p.packageInNebula!.name == pkg.name)?.packageInNebula;
-                                    if (uploadedPkg != null)
+                                    var advDataPkg = advData.FirstOrDefault(p => p.packageInNebula != null && p.packageInNebula!.name == pkg.name);
+                                    if (advDataPkg != null && !advDataPkg.Upload)
                                     {
-                                        pkg.notes = uploadedPkg.notes;
-                                        pkg.isVp = uploadedPkg.isVp;
-                                        pkg.status = uploadedPkg.status;
-                                        pkg.filelist = uploadedPkg.filelist;
-                                        pkg.files = uploadedPkg.files;
-                                        pkg.dependencies = uploadedPkg.dependencies;
-                                        pkg.environment = uploadedPkg.environment;
-                                        pkg.executables = uploadedPkg.executables;
-                                        pkg.folder = uploadedPkg.folder;
-                                        pkg.checkNotes = uploadedPkg.checkNotes;
-                                        pkg.files?.ForEach(f => f.urls = null); //Cant send urls to Nebula or it gets rejected
-                                        skipPkg = true;
+                                        var uploadedPkg = advDataPkg.packageInNebula;
+                                        if (uploadedPkg != null)
+                                        {
+                                            pkg.notes = uploadedPkg.notes;
+                                            pkg.isVp = uploadedPkg.isVp;
+                                            pkg.status = uploadedPkg.status;
+                                            pkg.filelist = uploadedPkg.filelist;
+                                            pkg.files = uploadedPkg.files;
+                                            pkg.dependencies = uploadedPkg.dependencies;
+                                            pkg.environment = uploadedPkg.environment;
+                                            pkg.executables = uploadedPkg.executables;
+                                            pkg.folder = uploadedPkg.folder;
+                                            pkg.checkNotes = uploadedPkg.checkNotes;
+                                            pkg.files?.ForEach(f => f.urls = null); //Cant send urls to Nebula or it gets rejected
+                                            skipPkg = true;
+                                        }
                                     }
                                 }
                                 if (!skipPkg)
@@ -1649,7 +1653,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 bool skipPkg = false;
                                 //We should skip this?
-                                if (advData != null && advData.FirstOrDefault(p => p.packageInNebula!.name == pkg.name) != null)
+                                if (advData != null && advData.FirstOrDefault(p => p.packageInNebula != null && p.packageInNebula!.name == pkg.name) != null && !advData.FirstOrDefault(p => p.packageInNebula != null && p.packageInNebula!.name == pkg.name)!.Upload)
                                 {
                                     skipPkg = true;
                                 }
