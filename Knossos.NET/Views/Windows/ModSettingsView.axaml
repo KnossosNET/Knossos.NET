@@ -34,6 +34,10 @@
 					<!--Quick Launch-->
 					<Label Margin="0,5,0,0" FontWeight="Black" FontSize="20">QUICK LAUNCH</Label>
 					<TextBox Margin="5" Foreground="White" IsReadOnly="True" Text="{Binding QuickLaunch}"></TextBox>
+					<WrapPanel Margin="5,0,0,0">
+						<Label Foreground="White">Available exec type options: </Label>
+						<Label Foreground="Orange">Default, Release, Debug, Fred2, Fred2Debug, QtFred, QtFredDebug</Label>
+					</WrapPanel>
 					<!--FSO Build Settings -->
 					<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">FSO BUILD</Label>
 					<v:FsoBuildPickerView Content="{Binding FsoPicker}"/>

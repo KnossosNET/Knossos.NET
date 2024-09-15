@@ -67,11 +67,11 @@ namespace Knossos.NET.ViewModels
             {
                 if(!KnUtils.IsAppImage)
                 {
-                    QuickLaunch = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName + " -playmod " + modJson.id + " -version " + modJson.version;
+                    QuickLaunch = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName + " -playmod " + modJson.id + " -version " + modJson.version + " -exec Default";
                 }
                 else
                 {
-                    QuickLaunch = KnUtils.AppImagePath + " -playmod " + modJson.id + " -version " + modJson.version;
+                    QuickLaunch = KnUtils.AppImagePath + " -playmod " + modJson.id + " -version " + modJson.version + " -exec Default";
                 }
             }catch { }
             this.modJson = modJson;
