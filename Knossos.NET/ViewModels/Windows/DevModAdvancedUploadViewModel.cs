@@ -249,8 +249,8 @@ namespace Knossos.NET.ViewModels
                 }
             }
 
-            //Check with nebula
-            //Disabled, moved to PerPackage
+            //Check with nebula if the file is uploaded
+            //Disabled, no need since we are getting the file hash from nebula the file HAS to be uploaded.
             /*
             foreach (var data in ModPackagesData)
             {
