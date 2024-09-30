@@ -104,7 +104,7 @@ namespace Knossos.NET.ViewModels
                             }
                             if (KnUtils.CpuArch == "RiscV64")
                             {
-                                innoPath += "innoextract.riscv54";
+                                innoPath += "innoextract.riscv64";
                             }
                         }
                         else
