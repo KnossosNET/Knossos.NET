@@ -285,6 +285,11 @@ namespace Knossos.NET
                                             releaseAsset = a;
                                             break;
                                         }
+                                        if ((KnUtils.CpuArch.ToLower() == "riscv32" && a.name.EndsWith("riscv32.AppImage")) || (KnUtils.CpuArch.ToLower() == "riscv64" && a.name.EndsWith("riscv64.AppImage")))
+                                        {
+                                            releaseAsset = a;
+                                            break;
+                                        }
                                     }
                                 }
                                 else if (KnUtils.WasInstallerUsed())

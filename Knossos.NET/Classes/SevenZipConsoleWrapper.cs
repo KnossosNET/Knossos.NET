@@ -245,6 +245,24 @@ namespace Knossos.NET
                                 }
                             }
                         }
+                        if (KnUtils.CpuArch == "RiscV64")
+                        {
+                            execPath += "7zzs";
+                            if (!File.Exists(execPath) || new FileInfo(execPath).Length == 0)
+                            {
+                                using (var fileStream = File.Create(execPath))
+                                {
+                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/linux-riscv64/7zzs")).CopyTo(fileStream);
+                                    fileStream.Close();
+                                    KnUtils.Chmod(execPath, "+x");
+                                }
+                                using (var fileStream = File.Create(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "7z.License.txt"))
+                                {
+                                    AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/utils/linux-riscv64/7z.License.txt")).CopyTo(fileStream);
+                                    fileStream.Close();
+                                }
+                            }
+                        }
                     }
                     else
                     {
