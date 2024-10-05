@@ -20,6 +20,7 @@
 
 	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Visible">
 		<Grid RowDefinitions="Auto, Auto, *, Auto" >
+			<Label Margin="0,-3,0,0" HorizontalAlignment="Center" Foreground="Yellow">Advanced Mod Upload is still a experimental feature, use with caution. Ask on Discord if you have questions.</Label>
 			<Label IsVisible="{Binding Loading}" Grid.Row="0" FontWeight="Bold" FontSize="18" Padding="60,130,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">LOADING...</Label>
 			<v:LoadingIconView Grid.Row="0" IsVisible="{Binding Loading}" Width="80" Height="80" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="50,50,0,0" />
 
