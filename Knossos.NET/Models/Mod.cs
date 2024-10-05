@@ -779,6 +779,7 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// To use with the List .Sort()
+        /// Retuns a list that is sort from older to newer
         /// </summary>
         /// <param name="mod1"></param>
         /// <param name="mod2"></param>
@@ -786,6 +787,18 @@ namespace Knossos.NET.Models
         {
             //inverted
             return SemanticVersion.Compare(mod1.version, mod2.version);
+        }
+
+        /// <summary>
+        /// To use with the List .Sort()
+        /// Retuns a list that is sort from newer to older
+        /// </summary>
+        /// <param name="mod1"></param>
+        /// <param name="mod2"></param>
+        public static int CompareVersionNewerToOlder(Mod mod1, Mod mod2)
+        {
+            //inverted
+            return SemanticVersion.Compare(mod2.version, mod1.version);
         }
 
         /// <summary>

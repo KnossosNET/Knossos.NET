@@ -210,6 +210,7 @@ namespace Knossos.NET.ViewModels
             if (uploadMod != null && uploadMod.packages != null)
             {
                 var allVersionsOfThisMod = await Nebula.GetAllModsWithID(uploadMod.id);
+                allVersionsOfThisMod.Sort(Mod.CompareVersionNewerToOlder);
                 foreach (var package in uploadMod.packages)
                 {
                     Dispatcher.UIThread.Invoke(() =>
