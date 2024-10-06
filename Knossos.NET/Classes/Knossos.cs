@@ -11,7 +11,6 @@ using System.IO;
 using System.Linq;
 using Avalonia.Platform;
 using VP.NET;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Knossos.NET
 {
