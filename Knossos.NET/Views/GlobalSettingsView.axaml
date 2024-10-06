@@ -143,6 +143,7 @@
 				</Border>
 				<!--VIDEO SETTINGS-->
 				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Video settings the FSO engine will use in-game.">Video</Label>
+				<TextBox BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,0,5,0" Foreground="Yellow">As of FSO version 24.2 video settings not longer have any effect and is only intended to use with old versions. On 24.2 or newer you can change settings ingame by going to "Options" and pressing F3 to display all settings.</TextBox>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Resolution -->
@@ -243,6 +244,7 @@
 
 				<!--Audio SETTINGS-->
 				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Audio settings the FSO engine will use in-game.">Audio</Label>
+				<TextBox BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,0,5,0" Foreground="Yellow">As of FSO version 24.2 audio settings not longer have any effect and is only intended to use with old versions. On 24.2 or newer you can change settings ingame by going to "Options" and pressing F3 to display all settings.</TextBox>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
 						<!-- Playback -->
@@ -314,6 +316,7 @@
 
 				<!--INPUT SETTINGS-->
 				<Label Margin="5,15,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Input settings where you can specify which of your plugged-in devices FSO can use in-game.">Input</Label>
+				<TextBox BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,0,5,0" Foreground="Yellow">As of FSO version 24.2 input settings not longer have any effect and is only intended to use with old versions. On 24.2 or newer you can change settings ingame by going to "Options" and pressing F3 to display all settings.</TextBox>
 				<Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
 					<StackPanel Margin="5">
             <?ignore
