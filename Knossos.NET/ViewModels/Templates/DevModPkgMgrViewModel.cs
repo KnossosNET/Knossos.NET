@@ -280,6 +280,11 @@ namespace Knossos.NET.ViewModels
                 EditorPackageItem.DeleteDependency(this);
             }
 
+            internal void ReloadDependency()
+            {
+                EditorPackageItem.ReloadDependency(this);
+            }
+
             public ModDependency? GetDependency()
             {
                 try
@@ -439,6 +444,29 @@ namespace Knossos.NET.ViewModels
                 {
                     Log.Add(Log.LogSeverity.Error, "EditorModPackageItem.DeleteDependency()", ex);
                 }
+            }
+
+            public void ReloadDependency(EditorDependencyItem dependency)
+            {
+                int oldIndex = DependencyItems.IndexOf(dependency);
+                if (oldIndex != -1)
+                {
+                    DeleteDependency(dependency);
+                    try
+                    {
+                        if (PkgMgr.editor != null && oldIndex <= DependencyItems.Count())
+                            DependencyItems.Insert(oldIndex, new EditorDependencyItem(dependency.Dependency, this, PkgMgr.editor.ActiveVersion.id, PkgMgr.editor.ActiveVersion.parent));
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "EditorModPackageItem.ReloadDependency()", ex);
+                    }
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "EditorModPackageItem.ReloadDependency()", "Got -1 on DeprendencyItems.IndexOf(dependency) for some reason.");
+                }
+
             }
 
             internal void DeleteModPkg()

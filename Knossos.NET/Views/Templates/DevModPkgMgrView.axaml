@@ -71,7 +71,7 @@
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
 									<!--Pkg Dependency Item-->
-									<Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto">
+									<Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto">
 										<Label Margin="30,0,0,0" Grid.Column="0" FontSize="18" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">&#x21B3;</Label>
 										<ComboBox SelectedIndex="{Binding ModSelectedIndex}" ItemsSource="{Binding ModItems}" Grid.Column="1" HorizontalAlignment="Stretch" Margin="5,2,2,2" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black"></ComboBox>
 										<ComboBox SelectedIndex="{Binding VersionTypeIndex}" Grid.Column="2" MinWidth="60" Margin="2" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Background="White" Foreground="Black">
@@ -97,7 +97,10 @@
 											</Button.Flyout>
 										</Button>
 										<!--End Packages-->
-										<Button Command="{Binding DeleteDependency}" Grid.Column="5" Margin="10,0,0,0" Classes="Cancel" ToolTip.Tip="Remove this dependency">									
+										<Button Command="{Binding ReloadDependency}" Grid.Column="5" Margin="10,0,0,0" Classes="Secondary" ToolTip.Tip="Reload Dependency versions. If you just downloaded a new version and it is not listed, use this to refresh the version list">
+											<Image Height="14" Width="14" Source="/Assets/general/refresh.png"></Image>
+										</Button>
+										<Button Command="{Binding DeleteDependency}" Grid.Column="6" Margin="10,0,0,0" Classes="Cancel" ToolTip.Tip="Remove this dependency">									
 											<Image Height="14" Width="14" Source="/Assets/general/x.png"></Image>
 										</Button>
 									</Grid>
