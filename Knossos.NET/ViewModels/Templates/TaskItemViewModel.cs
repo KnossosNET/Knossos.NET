@@ -1215,7 +1215,7 @@ namespace Knossos.NET.ViewModels
                     IsTextTask = false;
                     IsFileDownloadTask = false;
                     Name = "Prepare Pkg: " + pkg.name;
-                    var maxCrcAttempts = 5; //How many times try to compress a pkg with 7z in case of CRC error
+                    //var maxCrcAttempts = 5; //How many times try to compress a pkg with 7z in case of CRC error (LIMIT DISABLED)
 
                     if (cancelSource != null)
                         cancellationTokenSource = cancelSource;
@@ -1299,27 +1299,31 @@ namespace Knossos.NET.ViewModels
                                     if (!await compressor.CompressFile(vpPath, modFullPath + Path.DirectorySeparatorChar + "kn_upload" + Path.DirectorySeparatorChar + "vps", zipPath, true))
                                     {
                                         Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
-                                        throw new TaskCanceledException();
+                                        //Disable failing and instead delete the file if it exists
+                                        //throw new TaskCanceledException();
+                                        KnUtils.DeleteFileSafe(zipPath);
                                     }
-                                    //CRC CHECK
-                                    Info = "CRC Check";
-                                    crcResult = await compressor.VerifyFile(zipPath);
-                                    if(!crcResult)
+                                    else
                                     {
-                                        if(crcAttempt >= maxCrcAttempts)
+                                        //CRC CHECK
+                                        Info = "CRC Check";
+                                        crcResult = await compressor.VerifyFile(zipPath);
+                                        if (!crcResult)
                                         {
-                                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Max attempts reached, cancelling upload...");
-                                            throw new TaskCanceledException();
+                                            /*
+                                            if(crcAttempt >= maxCrcAttempts)
+                                            {
+                                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Max attempts reached, cancelling upload...");
+                                                throw new TaskCanceledException();
+                                            }
+                                            */
+                                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Retrying...");
+                                            ProgressBarMax = 100;
+                                            ProgressCurrent = 0;
+                                            Info = "Retry: Compressing (7z)";
+                                            KnUtils.DeleteFileSafe(zipPath);
+                                            crcAttempt++;
                                         }
-                                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Retrying...");
-                                        ProgressBarMax = 100;
-                                        ProgressCurrent = 0;
-                                        Info = "Retry: Compressing (7z)";
-                                        if (File.Exists(zipPath))
-                                        {
-                                            File.Delete(zipPath);
-                                        }
-                                        crcAttempt++;
                                     }
                                 } while (!crcResult);
                                 Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.PrepareModPkg()", "CRC Verify OK on File: " + zipPath);
@@ -1376,27 +1380,31 @@ namespace Knossos.NET.ViewModels
                                     if (!await compressor.CompressFolderTarGz(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
                                     {
                                         Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
-                                        throw new TaskCanceledException();
+                                        //Disable failing and instead delete the file if it exists
+                                        //throw new TaskCanceledException();
+                                        KnUtils.DeleteFileSafe(zipPath + ".tar.gz");
                                     }
-                                    //CRC CHECK
-                                    Info = "CRC Check";
-                                    crcResult = await compressor.VerifyFile(zipPath + ".tar.gz");
-                                    if (!crcResult)
+                                    else
                                     {
-                                        if (crcAttempt >= maxCrcAttempts)
+                                        //CRC CHECK
+                                        Info = "CRC Check";
+                                        crcResult = await compressor.VerifyFile(zipPath + ".tar.gz");
+                                        if (!crcResult)
                                         {
-                                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ".tar.gz. Max attempts reached, cancelling upload...");
-                                            throw new TaskCanceledException();
+                                            /*
+                                            if (crcAttempt >= maxCrcAttempts)
+                                            {
+                                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ".tar.gz. Max attempts reached, cancelling upload...");
+                                                throw new TaskCanceledException();
+                                            }
+                                            */
+                                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ".tar.gz. Retrying...");
+                                            ProgressBarMax = 100;
+                                            ProgressCurrent = 0;
+                                            Info = "Retry: Compressing (.tar.gz)";
+                                            KnUtils.DeleteFileSafe(zipPath + ".tar.gz");
+                                            crcAttempt++;
                                         }
-                                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ".tar.gz. Retrying...");
-                                        ProgressBarMax = 100;
-                                        ProgressCurrent = 0;
-                                        Info = "Retry: Compressing (.tar.gz)";
-                                        if (File.Exists(zipPath))
-                                        {
-                                            File.Delete(zipPath);
-                                        }
-                                        crcAttempt++;
                                     }
                                 } while (!crcResult);
                                 zipPath += ".tar.gz";
@@ -1411,32 +1419,43 @@ namespace Knossos.NET.ViewModels
                                     if (!await compressor.CompressFolder(modFullPath + Path.DirectorySeparatorChar + pkg.folder, zipPath))
                                     {
                                         Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
-                                        throw new TaskCanceledException();
+                                        //Disable failing and instead delete the file if it exists
+                                        //throw new TaskCanceledException();
+                                        KnUtils.DeleteFileSafe(zipPath);
                                     }
-                                    //CRC CHECK
-                                    Info = "CRC Check";
-                                    crcResult = await compressor.VerifyFile(zipPath);
-                                    if (!crcResult)
+                                    else
                                     {
-                                        if (crcAttempt >= maxCrcAttempts)
+                                        //CRC CHECK
+                                        Info = "CRC Check";
+                                        crcResult = await compressor.VerifyFile(zipPath);
+                                        if (!crcResult)
                                         {
-                                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Max attempts reached, cancelling upload...");
-                                            throw new TaskCanceledException();
+                                            /*
+                                            if (crcAttempt >= maxCrcAttempts)
+                                            {
+                                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Max attempts reached, cancelling upload...");
+                                                throw new TaskCanceledException();
+                                            }
+                                            */
+                                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Retrying...");
+                                            ProgressBarMax = 100;
+                                            ProgressCurrent = 0;
+                                            Info = "Retry: Compressing (7z)";
+                                            KnUtils.DeleteFileSafe(zipPath);
+                                            crcAttempt++;
                                         }
-                                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Retrying...");
-                                        ProgressBarMax = 100;
-                                        ProgressCurrent = 0;
-                                        Info = "Retry: Compressing (7z)";
-                                        if (File.Exists(zipPath))
-                                        {
-                                            File.Delete(zipPath);
-                                        }
-                                        crcAttempt++;
                                     }
                                 } while (!crcResult);
                             }
                             Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.PrepareModPkg()", "CRC Verify OK on File: " + zipPath);
                         }
+                    }
+
+                    //Wait for file to be closed
+                    while(KnUtils.IsFileInUse(zipPath))
+                    {
+                        Info = "Waiting for file to be closed";
+                        Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.PrepareModPkg()", "Waiting for file to be closed: " + zipPath);
                     }
 
                     Info = "Getting Hash";

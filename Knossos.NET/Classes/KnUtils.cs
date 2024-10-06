@@ -950,5 +950,52 @@ namespace Knossos.NET
 
             return text.Replace("_", "__");
         }
+
+        /// <summary>
+        /// Checks if a file is currently in use
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns>true or false</returns>
+        public static bool IsFileInUse(string filePath)
+        {
+            try
+            {
+                using (FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    stream.Close();
+                }
+            }
+            catch (IOException)
+            {
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.IsFileInUse()", ex);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Deletes a file checking if it exists first and then waits for the file to be closed. 
+        /// </summary>
+        public static void DeleteFileSafe(string filePath)
+        {
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    while (IsFileInUse(filePath))
+                    {
+                        Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.PrepareModPkg()", "Waiting for file to be closed to delete it: " + filePath);
+                    }
+                    File.Delete(filePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.DeleteFileSafe()", ex);
+            }
+        }
     }
 }
