@@ -51,6 +51,10 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool arm64 = false;
         [ObservableProperty]
+        internal bool riscv32 = false;
+        [ObservableProperty]
+        internal bool riscv64 = false;
+        [ObservableProperty]
         internal bool modCreated = false;
         [ObservableProperty]
         internal int copyProgress = 0;
@@ -193,6 +197,14 @@ namespace Knossos.NET.ViewModels
             if (filename.ToLower().Contains("arm64"))
             {
                 Arm64 = true;
+            }
+            if (filename.ToLower().Contains("riscv64"))
+            {
+                Riscv64 = true;
+            }
+            if (filename.ToLower().Contains("riscv32"))
+            {
+                Riscv32 = true;
             }
         }
 
@@ -383,6 +395,14 @@ namespace Knossos.NET.ViewModels
                     {
                         package.environment += " && arm64";
                     }
+                    if (Riscv32)
+                    {
+                        package.environment += " && riscv32";
+                    }
+                    if (Riscv64)
+                    {
+                        package.environment += " && riscv64";
+                    }
                     package.folder = buildId;
                     package.isVp = false;
                     package.executables = new List<ModExecutable>();
@@ -390,6 +410,8 @@ namespace Knossos.NET.ViewModels
                     var properties = new ModProperties();
                     properties.arm64 = Arm64;
                     properties.arm32 = Arm32;
+                    properties.riscv32 = Riscv32;
+                    properties.riscv64 = Riscv64;
                     if (!Arm32 && !Arm64)
                     {
                         if (!AVX && !AVX2)
@@ -470,7 +492,7 @@ namespace Knossos.NET.ViewModels
 
         private bool Verify()
         { 
-            if(!X86 && !X64 && !AVX && !Arm32 && !Arm64)
+            if(!X86 && !X64 && !AVX && !Arm32 && !Arm64 && !Riscv32 && !Riscv64)
             {
                 if(MainWindow.instance != null)
                 {
