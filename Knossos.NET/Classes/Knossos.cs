@@ -1173,9 +1173,9 @@ namespace Knossos.NET
                         await Dispatcher.UIThread.InvokeAsync(async () => {
                             try
                             {
-                                var res = await MessageBox.Show(MainWindow.instance, "Starting from FSO version 24.2.0 a new in-game settings system was implemented,\n" +
-                                    "Launcher settings, like video, audio or input, and cmdline arguments of those categories not longer have an effect.\n" +
-                                    "Settings must be changed ingame by going to 'Options' and then pressing the F3 key.", "New FSO settings system", MessageBox.MessageBoxButtons.DontWarnAgainOK);
+                                var res = await MessageBox.Show(MainWindow.instance, "Starting from FSO version 24.2.0 a new in-game settings system was implemented.\n" +
+                                    "Launcher settings, such as video, audio or input, and Command Line arguments of those categories no longer have an effect by default.\n" +
+                                    "Settings for most mods using FSO version 24.2.0 or higher must be now changed in-game by going to the 'Options' menu, where you will see additional methods for accessing and setting these new in-game options.", "New FSO settings system", MessageBox.MessageBoxButtons.DontWarnAgainOK);
 
                                 if (res == MessageBox.MessageBoxResult.DontWarnAgain)
                                 {
