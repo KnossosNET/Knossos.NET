@@ -1541,7 +1541,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public async Task<bool> UploadModVersion(Mod mod, bool isNewMod, bool metaOnly, CancellationTokenSource? cancelSource = null)
+        public async Task<bool> UploadModVersion(Mod mod, bool isNewMod, bool metaOnly, CancellationTokenSource? cancelSource = null, int parallelCompression = 1, int parallelUploads = 1, List<DevModAdvancedUploadData>? advData = null )
         {
             try
             {
@@ -1626,13 +1626,42 @@ namespace Knossos.NET.ViewModels
                             Info = "Prepare Packages";
                             Directory.CreateDirectory(mod.fullPath + Path.DirectorySeparatorChar + "kn_upload");
                             //Prepare packages, update data on mod
-                            await Parallel.ForEachAsync(mod.packages, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism }, async (pkg, token) =>
+                            await Parallel.ForEachAsync(mod.packages, new ParallelOptions { MaxDegreeOfParallelism = parallelCompression }, async (pkg, token) =>
                             {
-                                if (mod.type != ModType.mod && mod.type != ModType.tc) //Just to be sure
-                                    pkg.isVp = false;
-                                var newTask = new TaskItemViewModel();
-                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, newTask));
-                                await newTask.PrepareModPkg(pkg, mod.fullPath, cancellationTokenSource);
+                                bool skipPkg = false;
+                                //We should skip this?
+                                if(advData != null)
+                                {
+                                    var advDataPkg = advData.FirstOrDefault(p => p.packageInNebula != null && p.packageInNebula!.name == pkg.name);
+                                    if (advDataPkg != null && !advDataPkg.Upload)
+                                    {
+                                        var uploadedPkg = advDataPkg.packageInNebula;
+                                        if (uploadedPkg != null)
+                                        {
+                                            pkg.notes = uploadedPkg.notes;
+                                            pkg.isVp = uploadedPkg.isVp;
+                                            pkg.status = uploadedPkg.status;
+                                            pkg.filelist = uploadedPkg.filelist;
+                                            pkg.files = uploadedPkg.files;
+                                            pkg.dependencies = uploadedPkg.dependencies;
+                                            pkg.environment = uploadedPkg.environment;
+                                            pkg.executables = uploadedPkg.executables;
+                                            pkg.folder = uploadedPkg.folder;
+                                            pkg.checkNotes = uploadedPkg.checkNotes;
+                                            pkg.files?.ForEach(f => f.urls = null); //Cant send urls to Nebula or it gets rejected
+                                            skipPkg = true;
+                                            Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.UploadModVersion()", "Skipping package preparation for :" + pkg.name + ". Data was loaded from Nebula.");
+                                        }
+                                    }
+                                }
+                                if (!skipPkg)
+                                {
+                                    if (mod.type != ModType.mod && mod.type != ModType.tc) //Just to be sure
+                                        pkg.isVp = false;
+                                    var newTask = new TaskItemViewModel();
+                                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, newTask));
+                                    await newTask.PrepareModPkg(pkg, mod.fullPath, cancellationTokenSource);
+                                }
                                 ProgressCurrent++;
                                 if (cancellationTokenSource.IsCancellationRequested)
                                     throw new TaskCanceledException();
@@ -1640,11 +1669,29 @@ namespace Knossos.NET.ViewModels
 
                             Info = "Upload Packages";
                             //Upload Packages
-                            await Parallel.ForEachAsync(mod.packages, new ParallelOptions { MaxDegreeOfParallelism = 1 }, async (pkg, token) =>
+                            await Parallel.ForEachAsync(mod.packages, new ParallelOptions { MaxDegreeOfParallelism = parallelUploads }, async (pkg, token) =>
                             {
-                                var newTask = new TaskItemViewModel();
-                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, newTask));
-                                await newTask.UploadModPkg(pkg, mod.fullPath, cancellationTokenSource);
+                                bool skipPkg = false;
+                                //We should skip this?
+                                if (advData != null)
+                                {
+                                    var advDataPkg = advData.FirstOrDefault(p => p.packageInNebula != null && p.packageInNebula!.name == pkg.name);
+                                    if (advDataPkg != null && !advDataPkg.Upload)
+                                    {
+                                        var uploadedPkg = advDataPkg.packageInNebula;
+                                        if (uploadedPkg != null)
+                                        {
+                                            skipPkg = true;
+                                            Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.UploadModVersion()", "Skipping package upload for :" + pkg.name + ". Used the one in Nebula instead, file hash: " + advDataPkg.CustomHash );
+                                        }
+                                    }
+                                }
+                                if (!skipPkg)
+                                {
+                                    var newTask = new TaskItemViewModel();
+                                    await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, newTask));
+                                    await newTask.UploadModPkg(pkg, mod.fullPath, cancellationTokenSource);
+                                }
                                 ProgressCurrent++;
                                 if (cancellationTokenSource.IsCancellationRequested)
                                     throw new TaskCanceledException();

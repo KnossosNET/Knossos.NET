@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
@@ -217,7 +218,44 @@ namespace Knossos.NET.ViewModels
             Mods = Mods.ToList();
         }
 
+        internal async void UploadModAdvanced()
+        {
+            var mod = editor?.ActiveVersion;
+            if (mod != null)
+            {
+                if (!mod.inNebula)
+                {
+                    if (mod.type == ModType.mod || mod.type == ModType.tc)
+                    {
+                        var dialog = new DevModAdvancedUploadView();
+                        dialog.DataContext = new DevModAdvancedUploadViewModel(mod, dialog, this);
+                        await dialog.ShowDialog<DevModAdvancedUploadView?>(MainWindow.instance!);
+                    }
+                    else
+                    {
+                        _ = MessageBox.Show(MainWindow.instance!, "Advanced uploading is only available for Mods and TCs.", "Unsupported for type: " + mod.type, MessageBox.MessageBoxButtons.OK);
+                    }
+                }
+                else
+                {
+                    _ = MessageBox.Show(MainWindow.instance!, "This mod version is already uploaded to nebula, if you want to update the metadata use the basic upload", "Mod already uploaded", MessageBox.MessageBoxButtons.OK);
+                }
+            }
+        }
+
+        //For UI button
         internal async void UploadMod()
+        {
+            await UploadProcess();
+        }
+
+        //for the advanced upload window
+        public void AdvancedUpload(List<DevModAdvancedUploadData> advData, int parallelCompression, int parallelUploads)
+        {
+            _ = UploadProcess(advData, parallelCompression, parallelUploads);
+        }
+
+        private async Task UploadProcess(List<DevModAdvancedUploadData>? advData = null, int parallelCompression = 1, int parallelUploads = 1)
         {
             /* 
              *  Pre-Upload Checks:
@@ -502,7 +540,7 @@ namespace Knossos.NET.ViewModels
 
                         //Basic check finish, create task
                         ButtonsEnabled = true;
-                        TaskViewModel.Instance!.UploadModVersion(mod, isNewMod, metaUpdOnly);
+                        TaskViewModel.Instance!.UploadModVersion(mod, isNewMod, metaUpdOnly, parallelCompression, parallelUploads, advData);
                     }
                 }
                 catch(Exception ex)
