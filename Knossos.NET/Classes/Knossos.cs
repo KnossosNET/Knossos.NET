@@ -1162,6 +1162,40 @@ namespace Knossos.NET
 
             Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used cmdLine : " + cmdline);
 
+            if (MainWindow.instance != null && globalSettings.warnNewSettingsSystem)
+            {
+                try
+                {
+                    var fsoVersion = new SemanticVersion(fsoBuild.version);
+                    var newSettingsVersion = new SemanticVersion("24.2.0-RC");
+                    if(fsoVersion >= newSettingsVersion)
+                    {
+                        await Dispatcher.UIThread.InvokeAsync(async () => {
+                            try
+                            {
+                                var res = await MessageBox.Show(MainWindow.instance, "Starting from FSO version 24.2.0 a new in-game settings system was implemented.\n" +
+                                    "Launcher settings, such as video, audio or input, and Command Line arguments of those categories no longer have an effect by default.\n" +
+                                    "Settings for most mods using FSO version 24.2.0 or higher must be now changed in-game by going to the 'Options' menu, where you will see additional methods for accessing and setting these new in-game options.", "New FSO settings system", MessageBox.MessageBoxButtons.DontWarnAgainOK);
+
+                                if (res == MessageBox.MessageBoxResult.DontWarnAgain)
+                                {
+                                    globalSettings.warnNewSettingsSystem = false;
+                                    globalSettings.Save();
+                                }
+                            }
+                            catch
+                            {
+                                //fail silently, this is not important
+                            }
+                        });
+                    }
+                }
+                catch 
+                {
+                    //fail silently, this is not important
+                }
+            }
+
             //Launch FSO!!!
             var fsoResult = await fsoBuild.RunFSO(fsoExecType, cmdline, rootPath, false);
 

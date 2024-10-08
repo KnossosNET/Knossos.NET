@@ -17,7 +17,8 @@ namespace Knossos.NET.Views
             ContinueCancel,
             Details,
             DetailsOKCancel,
-            DetailsContinueCancel
+            DetailsContinueCancel,
+            DontWarnAgainOK
         }
 
         public enum MessageBoxResult
@@ -27,7 +28,8 @@ namespace Knossos.NET.Views
             Yes,
             No,
             Continue,
-            Details
+            Details,
+            DontWarnAgain
         }
 
         public MessageBox()
@@ -49,7 +51,7 @@ namespace Knossos.NET.Views
 
             var result = MessageBoxResult.OK;
 
-            void AddButton(string caption, MessageBoxResult r, bool def = false, string classes = "")
+            void AddButton(string caption, MessageBoxResult r, bool def = false, string classes = "", int buttonWidth = -1)
             {                
                 var button = new Button { Content = caption, Width = 100};
                 button.Click += (_, __) => {
@@ -59,6 +61,10 @@ namespace Knossos.NET.Views
                 if(classes != "")
                 {
                     button.Classes.Add(classes);
+                }
+                if (buttonWidth != -1)
+                {
+                    button.Width = buttonWidth;
                 }
                 buttonPanel.Children.Add(button);
                 if (def)
@@ -91,6 +97,12 @@ namespace Knossos.NET.Views
             if (buttons == MessageBoxButtons.Details || buttons == MessageBoxButtons.DetailsOKCancel || buttons == MessageBoxButtons.DetailsContinueCancel)
             {
                 AddButton("Details", MessageBoxResult.Details, false, "Option");
+            }
+
+            if (buttons == MessageBoxButtons.DontWarnAgainOK)
+            {
+                AddButton("OK", MessageBoxResult.OK, true, "Accept");
+                AddButton("Don't warn again", MessageBoxResult.DontWarnAgain, false, "Option", 150);
             }
 
             var tcs = new TaskCompletionSource<MessageBoxResult>();

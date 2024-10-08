@@ -118,6 +118,8 @@ namespace Knossos.NET.Models
         public int devModSort { get; set; } = 0;
         [JsonPropertyName("auto_update_fso_builds")]
         public AutoUpdateFsoBuilds autoUpdateBuilds { get; set; } = new AutoUpdateFsoBuilds();
+        [JsonPropertyName("warn_new_settings_system")]
+        public bool warnNewSettingsSystem { get; set; } = true;
 
         /* FSO Settings that use the fs2_open.ini are json ignored */
 
@@ -608,6 +610,7 @@ namespace Knossos.NET.Models
                         prefixCMD = tempSettings.prefixCMD;
                         envVars = tempSettings.envVars;
                         showDevOptions = tempSettings.showDevOptions;
+                        warnNewSettingsSystem = tempSettings.warnNewSettingsSystem;
 
                         if (MainWindowViewModel.Instance != null)
                             MainWindowViewModel.Instance.sharedSortType = tempSettings.sortType;
