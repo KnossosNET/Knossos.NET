@@ -91,6 +91,8 @@ namespace Knossos.NET.ViewModels
                             case FsoExecArch.x64_avx: if (!CpuArch.Contains("X64")) CpuArch += "X64   "; if (!CpuArch.Contains("AVX ")) CpuArch += "AVX   "; break;
                             case FsoExecArch.arm32: if (!CpuArch.Contains("ARM32")) CpuArch += "ARM32   "; break;
                             case FsoExecArch.arm64: if (!CpuArch.Contains("ARM64")) CpuArch += "ARM64   "; break;
+                            case FsoExecArch.riscv32: if (!CpuArch.Contains("RISCV32")) CpuArch += "RISCV32   "; break;
+                            case FsoExecArch.riscv64: if (!CpuArch.Contains("RISCV64")) CpuArch += "RISCV64   "; break;
                         }
 
                         if (!BuildType.Split(" ").Contains(exe.type.ToString()))

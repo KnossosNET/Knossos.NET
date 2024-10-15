@@ -58,6 +58,7 @@ namespace Knossos.NET
         private static readonly bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         private static readonly bool isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
         private static readonly bool isAppImage = isLinux && !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPIMAGE"));
+        private static readonly string cpuArch = RuntimeInformation.OSArchitecture.ToString();
         private static readonly bool cpuAVX = Avx.IsSupported;
         private static readonly bool cpuAVX2 = Avx2.IsSupported;
         private static string fsoPrefPath = string.Empty;
@@ -66,6 +67,16 @@ namespace Knossos.NET
         public static bool IsWindows => isWindows;
         public static bool IsLinux => isLinux;
         public static bool IsMacOS => isMacOS;
+        /// <summary>
+        /// <para>Possible Values:</para>
+        /// <para>Arm	  //A 32-bit ARM processor architecture.</para>
+        /// <para>Armv6 //A 32-bit ARMv6 processor architecture.</para>
+        /// <para>Arm64 //A 64-bit ARM processor architecture.</para>
+        /// <para>X64   //An Intel-based 64-bit processor architecture.</para>
+        /// <para>X86   //An Intel-based 32-bit processor architecture.</para>
+        /// <para>RiscV64 //A 64 bits RISC-V processor</para>
+        /// <para>https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.architecture?view=net-9.0</para>
+        /// </summary>
         public static string CpuArch => cpuArch;
         public static bool CpuAVX => cpuAVX;
         public static bool CpuAVX2 => cpuAVX2;
@@ -94,17 +105,6 @@ namespace Knossos.NET
                 }
             }
         }
-
-        /// <summary>
-        /// Possible Values:
-        /// Arm	  //A 32-bit ARM processor architecture.
-        /// Armv6 //A 32-bit ARMv6 processor architecture.
-        /// Arm64 //A 64-bit ARM processor architecture.
-        /// X64   //An Intel-based 64-bit processor architecture.
-        /// X86   //An Intel-based 32-bit processor architecture.
-        /// https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.architecture?view=net-6.0
-        /// </summary>
-        private static readonly string cpuArch = RuntimeInformation.OSArchitecture.ToString();
 
         /// <summary>
         /// The full path to KNET data folder

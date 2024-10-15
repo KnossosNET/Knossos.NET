@@ -227,7 +227,12 @@ namespace Knossos.NET.Classes
                         {
                             foreach(var arch in archs)
                             {
-                                if(arch == "x64" && KnUtils.CpuArch == "X64" || arch == "x86" && KnUtils.CpuArch == "X86" || arch == "arm64" && KnUtils.CpuArch == "Arm64")
+                                if(arch == "x64" && KnUtils.CpuArch == "X64" ||
+                                   arch == "x86" && KnUtils.CpuArch == "X86" ||
+                                   arch == "arm64" && KnUtils.CpuArch == "Arm64" ||
+                                   arch == "arm32" && KnUtils.CpuArch != "Arm64"  && (KnUtils.CpuArch == "Arm" || KnUtils.CpuArch == "Armv6") ||
+                                   arch == "riscv64" && KnUtils.CpuArch == "RiscV64" ||
+                                   arch == "riscv32" && KnUtils.CpuArch == "RiscV32")
                                 {
                                     pkg.score = 100;
                                     continue;
@@ -239,12 +244,12 @@ namespace Knossos.NET.Classes
                                         pkg.score = 50;
                                         continue;
                                     }
-                                    if (arch == "x86" && KnUtils.CpuArch == "Arm64")
+                                    if (arch == "x86" && (KnUtils.CpuArch == "Arm64" || KnUtils.CpuArch == "RiscV64"))
                                     {
                                         pkg.score = 20;
                                         continue;
                                     }
-                                    if (arch == "x64" && KnUtils.CpuArch == "Arm64")
+                                    if (arch == "x64" && (KnUtils.CpuArch == "Arm64" || KnUtils.CpuArch == "RiscV64"))
                                     {
                                         pkg.score = 70;
                                         continue;

@@ -33,6 +33,8 @@
 					<CheckBox IsChecked="{Binding AVX2}" Margin="5">AVX2</CheckBox>
 					<CheckBox IsChecked="{Binding Arm32}" Margin="5">ARM32</CheckBox>
 					<CheckBox IsChecked="{Binding Arm64}" Margin="5">ARM64</CheckBox>
+					<CheckBox IsChecked="{Binding Riscv32}" Margin="5">RISCV32</CheckBox>
+					<CheckBox IsChecked="{Binding Riscv64}" Margin="5">RISCV64</CheckBox>
 				</WrapPanel>
 				<Label Margin="0,10,0,0" FontWeight="Bold">Release</Label>
 				<TextBlock TextWrapping="Wrap" Text="{Binding Release}"></TextBlock>
