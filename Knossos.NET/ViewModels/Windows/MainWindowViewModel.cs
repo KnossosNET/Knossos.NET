@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Windows.Markup;
+using Avalonia.Threading;
 
 namespace Knossos.NET.ViewModels
 {
@@ -92,27 +93,29 @@ namespace Knossos.NET.ViewModels
                     forceUpdate = true;
                 }
             }
-            FillMenuItemsNormalMode();
-            if (MenuItems != null && MenuItems.Any())
-            {
-                SelectedMenuItem = MenuItems.FirstOrDefault();
-            }
+            FillMenuItemsNormalMode(1);
             Knossos.StartUp(isQuickLaunch, forceUpdate);
         }
 
-        public void FillMenuItemsNormalMode()
+        public void FillMenuItemsNormalMode(int defaultSelectedIndex)
         {
-            MenuItems = new ObservableCollection<MainViewMenuItem>{
-                new MainViewMenuItem(InstalledModsView, "avares://Knossos.NET/Assets/general/menu_play.png", "Play", "View and run installed Freepsace Open games and modifications"),
-                new MainViewMenuItem(NebulaModsView, "avares://Knossos.NET/Assets/general/menu_explore.png", "Explore", "Search and install Freespace Open games and modifications"),
-                new MainViewMenuItem(FsoBuildsView, "avares://Knossos.NET/Assets/general/menu_engine.png", "Engine", "Download new Freespace Open engine builds"),
-                new MainViewMenuItem(DeveloperModView, "avares://Knossos.NET/Assets/general/menu_develop.png", "Develop", "Develop new games and modifications for the Freespace Open Engine"),
-                new MainViewMenuItem(CommunityView, "avares://Knossos.NET/Assets/general/menu_community.png", "Community", "FAQs and Community Resources"),
-                new MainViewMenuItem(PxoView, "avares://Knossos.NET/Assets/general/menu_multiplayer.png", "Multiplayer", "View multiplayer games using PXO servers"),
-                new MainViewMenuItem(GlobalSettingsView, "avares://Knossos.NET/Assets/general/menu_settings.png", "Settings", "Change global Freespace Open and Knossos.NET settings"),
-                new MainViewMenuItem(DebugView, "avares://Knossos.NET/Assets/general/menu_debug.png", "Debug", "Debug info"),
-                new MainViewMenuItem(TaskView, null, "Tasks", "Overview of current running tasks")
-            };
+            Dispatcher.UIThread.Invoke(new Action(() => { 
+                MenuItems = new ObservableCollection<MainViewMenuItem>{
+                    new MainViewMenuItem(TaskView, null, "Tasks", "Overview of current running tasks"),
+                    new MainViewMenuItem(InstalledModsView, "avares://Knossos.NET/Assets/general/menu_play.png", "Play", "View and run installed Freepsace Open games and modifications"),
+                    new MainViewMenuItem(NebulaModsView, "avares://Knossos.NET/Assets/general/menu_explore.png", "Explore", "Search and install Freespace Open games and modifications"),
+                    new MainViewMenuItem(FsoBuildsView, "avares://Knossos.NET/Assets/general/menu_engine.png", "Engine", "Download new Freespace Open engine builds"),
+                    new MainViewMenuItem(DeveloperModView, "avares://Knossos.NET/Assets/general/menu_develop.png", "Develop", "Develop new games and modifications for the Freespace Open Engine"),
+                    new MainViewMenuItem(CommunityView, "avares://Knossos.NET/Assets/general/menu_community.png", "Community", "FAQs and Community Resources"),
+                    new MainViewMenuItem(PxoView, "avares://Knossos.NET/Assets/general/menu_multiplayer.png", "Multiplayer", "View multiplayer games using PXO servers"),
+                    new MainViewMenuItem(GlobalSettingsView, "avares://Knossos.NET/Assets/general/menu_settings.png", "Settings", "Change global Freespace Open and Knossos.NET settings"),
+                    new MainViewMenuItem(DebugView, "avares://Knossos.NET/Assets/general/menu_debug.png", "Debug", "Debug info")
+                };
+                if (MenuItems != null && MenuItems.Count() - 1 > defaultSelectedIndex)
+                {
+                    SelectedMenuItem = MenuItems[defaultSelectedIndex];
+                }
+            }));
         }
 
         /// <summary>
