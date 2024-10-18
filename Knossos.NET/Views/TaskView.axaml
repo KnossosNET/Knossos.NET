@@ -15,11 +15,9 @@
 
 	<Grid>
 		<StackPanel ZIndex="5" Grid.Column="2" Background="Black" Width="2" HorizontalAlignment="Left"></StackPanel>
-		<ScrollViewer IsVisible="{Binding ShowTaskList}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Auto">
-			<Grid MaxWidth="450" RowDefinitions="Auto,*" HorizontalAlignment="Center">
+		<ScrollViewer VerticalAlignment="Stretch" HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Auto">
+			<Grid RowDefinitions="Auto,*" HorizontalAlignment="Center">
 				<Grid Grid.Row="0" ColumnDefinitions="100,250,100" Height="50" HorizontalAlignment="Center">
-					<Button Width="80" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5" Command="{Binding HideCommand}" ToolTip.Tip="Hide task panel">>></Button>
-					<Label Grid.Column="1" HorizontalContentAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="24">Tasks</Label>
 					<Button Width="80" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5" Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">Clear</Button>
 				</Grid>
 				<ListBox Grid.Row="1" VerticalAlignment="Top" ItemsSource="{Binding TaskList}">
