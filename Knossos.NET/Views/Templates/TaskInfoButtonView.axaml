@@ -9,11 +9,11 @@
 	         xmlns:vm="using:Knossos.NET.ViewModels"
 	         x:DataType="vm:TaskInfoButtonViewModel">
 	
-	<Button Width="40" Height="40" Command="{Binding ToggleTaskView}" ToolTip.Tip="{Binding Tooltip}">
+
 		<Grid>
 			<Image Width="41" Stretch="UniformToFill" anim:ImageBehavior.SpeedRatio="{Binding Animate}" anim:ImageBehavior.AnimatedSource="avares://Knossos.NET/Assets/general/knossos-1.gif" />
 			<Image Width="40" Stretch="UniformToFill" anim:ImageBehavior.SpeedRatio="{Binding Animate}" anim:ImageBehavior.AnimatedSource="avares://Knossos.NET/Assets/general/knossos-2.gif" />
 			<Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="12" Content="{Binding TaskNumber}"/>
 		</Grid>
-	</Button>
+
 </UserControl>

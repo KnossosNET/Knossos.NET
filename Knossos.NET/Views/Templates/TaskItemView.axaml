@@ -20,7 +20,7 @@
 		<TreeView Margin="1,0,0,0" IsVisible="{Binding TaskRoot.Count}" ItemsSource="{Binding TaskRoot}">
 			<TreeView.DataTemplates>
 				<TreeDataTemplate DataType="vm:TaskItemViewModel" ItemsSource="{Binding TaskList}">
-					<WrapPanel MaxWidth="400">
+					<WrapPanel>
 						<Label>-</Label>
 						<!--Two versions to better handle spacing-->
 						<!--Download Version-->
