@@ -16,7 +16,7 @@
 		<Grid Grid.Row="0">
 			<WrapPanel Margin="10" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
 				<Button ToolTip.Tip="Sort by" Margin="0,0,5,0" HorizontalAlignment="Right">
-					<Image Height="20" Width="20" Source="/Assets/general/sort-icon.png"/>
+					<Image Height="30" Width="30" Source="/Assets/general/sort-icon.png"/>
 					<Button.Flyout>
 						<Flyout Placement="Bottom">
 							<StackPanel>
@@ -27,11 +27,11 @@
 						</Flyout>
 					</Button.Flyout>
 				</Button>
-				<TextBox Text="{Binding Search}" FontSize="16" Width="300"></TextBox>
+				<TextBox VerticalContentAlignment="Center" Text="{Binding Search}" FontSize="16" Width="300"></TextBox>
 			</WrapPanel>
 			<WrapPanel Margin="10" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">
 				<Button ToolTip.Tip="View Color Codes" HorizontalAlignment="Right">
-					<Image Height="20" Width="20" Source="/Assets/general/questionmark.png"></Image>
+					<Image Height="30" Width="30" Source="/Assets/general/questionmark.png"></Image>
 					<Button.Flyout>
 						<Flyout Placement="Left">
 							<WrapPanel>

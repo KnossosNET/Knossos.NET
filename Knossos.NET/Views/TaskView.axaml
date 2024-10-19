@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="Knossos.NET.Views.TaskView"
 			 xmlns:v="using:Knossos.NET.Views"
 			 xmlns:vm="using:Knossos.NET.ViewModels"
@@ -13,14 +13,13 @@
 		<vm:TaskViewModel/>
 	</Design.DataContext>
 
-	<Grid>
-		<StackPanel ZIndex="5" Grid.Column="2" Background="Black" Width="2" HorizontalAlignment="Left"></StackPanel>
+	<Grid Margin="5">
 		<ScrollViewer VerticalAlignment="Stretch" HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Auto">
-			<Grid RowDefinitions="Auto,*" HorizontalAlignment="Center">
-				<Grid Grid.Row="0" ColumnDefinitions="100,250,100" Height="50" HorizontalAlignment="Center">
-					<Button Width="80" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5" Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">Clear</Button>
-				</Grid>
-				<ListBox Grid.Row="1" VerticalAlignment="Top" ItemsSource="{Binding TaskList}">
+			<Grid RowDefinitions="Auto,*" HorizontalAlignment="Stretch">
+				<Button HorizontalAlignment="Left" Grid.Row="0" Margin="5" Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">
+					<Image Width="30" Height="30" Source="avares://Knossos.NET/Assets/general/clean.png"/>
+				</Button>
+				<ListBox Margin="0,5,0,0" Grid.Row="1" VerticalAlignment="Top" ItemsSource="{Binding TaskList}">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<v:TaskItemView BorderBrush="White" BorderThickness="1" Content="{Binding}"/>
