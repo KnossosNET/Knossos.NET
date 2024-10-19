@@ -315,7 +315,6 @@ namespace Knossos.NET.ViewModels
                 modJson.modSettings.ignoreGlobalCmd = IgnoreGlobalCmd;
 
                 modJson.modSettings.Save();
-                Knossos.globalSettings.Save(false);
                 if(modCardViewModel != null)
                 {
                     modCardViewModel.CheckDependencyActiveVersion();

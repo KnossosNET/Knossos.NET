@@ -19,12 +19,8 @@
 	</Design.DataContext>
 
 	<Grid Background="{StaticResource BackgroundColorPrimary}">
-		<Grid RowDefinitions="Auto,*">
-			<Grid ColumnDefinitions="Auto,Auto" HorizontalAlignment="Center" Grid.Row="0">
-				<Button Command="{Binding SaveSettingsCommand}" Grid.Column="1" FontSize="18" Classes="Accept" Margin="5">Save</Button>
-				<Button Command="{Binding ResetSettingsCommand}" Grid.Column="0" FontSize="18" Classes="Cancel" Foreground="White" Margin="5">Reset</Button>
-			</Grid>
-			<ScrollViewer Grid.Row="1">
+		<Grid RowDefinitions="*,Auto">
+			<ScrollViewer Grid.Row="0">
 				<StackPanel>
 					<!--Compression-->
 					<Label Margin="0,5,0,0" FontWeight="Black" FontSize="20">DISK USAGE</Label>
@@ -63,6 +59,9 @@
 					<!--Dependencies End-->
 				</StackPanel>
 			</ScrollViewer>
+			<Grid ColumnDefinitions="Auto,Auto" HorizontalAlignment="Center" Grid.Row="1">
+				<Button Command="{Binding ResetSettingsCommand}" Grid.Column="0" FontSize="18" Classes="Cancel" Foreground="White" Margin="5">Reset to defaults</Button>
+			</Grid>
 		</Grid>
 	</Grid>
 </Window>
