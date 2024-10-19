@@ -7,16 +7,31 @@ namespace Knossos.NET.Views
     public partial class MainWindow : Window
     {
         public static MainWindow? instance;
+        private static bool canClose = false;
+
         public MainWindow()
         {
             instance = this;
             InitializeComponent();
-            this.Closing += MainWindow_StopTTS;
         }
 
-        private void MainWindow_StopTTS(object? sender, CancelEventArgs e)
+        protected override async void OnClosing(WindowClosingEventArgs e)
         {
-            Knossos.Tts(string.Empty);
+            //Intercept closing, do stuff, then re-call close
+            if (!canClose)
+            {
+                e.Cancel = true;
+
+                await Task.Run(() => {
+                    Knossos.Tts(string.Empty);
+                    Knossos.globalSettings.SaveSettingsOnAppClose();
+                    canClose = true;
+                });
+
+                if (canClose) 
+                    this.Close(); 
+            }
+            base.OnClosing(e);
         }
     }
 }

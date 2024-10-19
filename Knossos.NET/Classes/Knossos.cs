@@ -72,10 +72,7 @@ namespace Knossos.NET
 
                 //Load knossos config
                 globalSettings.Load();
-                
-                if (MainWindowViewModel.Instance != null){
-                    MainWindowViewModel.Instance.applySettingsToList();
-                }
+                MainWindowViewModel.Instance?.ApplySettings();
 
 
                 //Print Decompressor Type

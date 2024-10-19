@@ -69,7 +69,21 @@ namespace Knossos.NET.ViewModels
             unsorted
         }
 
-        internal SortType sharedSortType = SortType.name;
+        private SortType _sortType = SortType.name; //do not use directly
+        internal SortType sharedSortType
+        {
+            get { return _sortType; }
+            set
+            {
+                if (_sortType != value)
+                {
+                    //change sort and update globalsettings value
+                    //to be saved at app close
+                    this.SetProperty(ref _sortType, value);
+                    Knossos.globalSettings.sortType = value;
+                }
+            }
+        }
 
         public MainWindowViewModel()
         {
@@ -126,23 +140,10 @@ namespace Knossos.NET.ViewModels
                 if (CurrentViewModel == InstalledModsView) //Exiting the Play tab.
                 {
                     sharedSearch = InstalledModsView.Search;
-
-                    // Change and save to the new sort type.
-                    if (sharedSortType != InstalledModsView.sortType && InstalledModsView.sortType != SortType.unsorted)
-                    {
-                        sharedSortType = InstalledModsView.sortType;
-                        Knossos.globalSettings.Save(false);
-                    }
                 }
                 if (CurrentViewModel == NebulaModsView) //Exiting the Nebula tab.
                 {
                     sharedSearch = NebulaModsView.Search;
-
-                    if (sharedSortType != NebulaModsView.sortType && NebulaModsView.sortType != SortType.unsorted)
-                    {
-                        sharedSortType = NebulaModsView.sortType;
-                        Knossos.globalSettings.Save(false);
-                    }
                 }
 
                 CurrentViewModel = value.vm;
@@ -302,12 +303,14 @@ namespace Knossos.NET.ViewModels
             GlobalSettingsView.LoadData();
         }
 
-        internal void applySettingsToList()
+        internal void ApplySettings()
         {
-            if (InstalledModsView != null)
-            {
-                InstalledModsView.ChangeSort(sharedSortType);
-            }
+            Dispatcher.UIThread.Invoke(() => {
+                IsMenuOpen = Knossos.globalSettings.mainMenuOpen;
+                sharedSortType = Knossos.globalSettings.sortType;
+                InstalledModsView?.ChangeSort(sharedSortType);
+                NebulaModsView.sortType = sharedSortType;
+            });
         }
 
         public void UpdateBuildInstallButtons(){
@@ -342,6 +345,7 @@ namespace Knossos.NET.ViewModels
         internal void TriggerMenuCommand()
         {
             IsMenuOpen = !IsMenuOpen;
+            Knossos.globalSettings.mainMenuOpen = IsMenuOpen;
         }
     }
 }
