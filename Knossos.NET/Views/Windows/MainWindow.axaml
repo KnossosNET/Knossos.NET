@@ -58,7 +58,7 @@
 			</SplitView.Pane>
 
 			<SplitView.Content>
-				<TransitioningContentControl Content="{Binding CurrentViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+				<TransitioningContentControl PageTransition="{x:Null}" Content="{Binding CurrentViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 			</SplitView.Content>
 		</SplitView>
 	</Grid>
