@@ -4,13 +4,9 @@ using Knossos.NET.Views;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Collections.ObjectModel;
-using Avalonia.Controls;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using System.Windows.Markup;
 using Avalonia.Threading;
 
 namespace Knossos.NET.ViewModels
@@ -152,40 +148,38 @@ namespace Knossos.NET.ViewModels
                 CurrentViewModel = value.vm;
 
                 //Run code when entering a new view
-                switch(value.label)
+                if (CurrentViewModel == InstalledModsView) //Play Tab
                 {
-                    // Things to do on tab entrance
-                    case "Play":
-                        InstalledModsView.Search = sharedSearch;
-                        InstalledModsView.ChangeSort(sharedSortType);
-                        Knossos.globalSettings.DisableIniWatch();
-                        break;
-                    case "Explore":
-                        NebulaModsView.OpenTab(sharedSearch, sharedSortType);
-                        Knossos.globalSettings.DisableIniWatch();
-                        break;
-                    case "Engine":
-                        Knossos.globalSettings.DisableIniWatch();
-                        break;
-                    case "Develop":
-                        DeveloperModsViewModel.Instance?.MaybeChangeSorting();
-                        DeveloperModView.UpdateBuildInstallButtons();
-                        Knossos.globalSettings.DisableIniWatch();
-                        break;
-                    case "Community":
-                        Task.Run(async () => { await CommunityView.LoadFAQRepo(); });
-                        Knossos.globalSettings.DisableIniWatch();
-                        break;
-                    case "Multiplayer":
-                        PxoViewModel.Instance!.InitialLoad();
-                        Knossos.globalSettings.DisableIniWatch();
-                        break;
-                    case "Settings":
-                        Knossos.globalSettings.Load();
-                        GlobalSettingsView.LoadData();
-                        Knossos.globalSettings.EnableIniWatch();
-                        GlobalSettingsView.UpdateImgCacheSize();
-                        break;
+                    InstalledModsView.Search = sharedSearch;
+                    InstalledModsView.ChangeSort(sharedSortType);
+                }
+                if (CurrentViewModel == NebulaModsView) //Nebula Mods
+                {
+                    NebulaModsView.OpenTab(sharedSearch, sharedSortType);
+                }
+                if (CurrentViewModel == DeveloperModView) //Dev Tab
+                {
+                    DeveloperModsViewModel.Instance?.MaybeChangeSorting();
+                    DeveloperModView.UpdateBuildInstallButtons();
+                }
+                if (CurrentViewModel == CommunityView) //Community Tab
+                {
+                    Task.Run(async () => { await CommunityView.LoadFAQRepo(); });
+                }
+                if (CurrentViewModel == PxoView) //PXO
+                {
+                    PxoViewModel.Instance!.InitialLoad();
+                }
+                if (CurrentViewModel == GlobalSettingsView) //Settings
+                {
+                    Knossos.globalSettings.Load();
+                    GlobalSettingsView.LoadData();
+                    Knossos.globalSettings.EnableIniWatch();
+                    GlobalSettingsView.UpdateImgCacheSize();
+                }
+                else
+                {
+                    Knossos.globalSettings.DisableIniWatch();
                 }
             }
         }
