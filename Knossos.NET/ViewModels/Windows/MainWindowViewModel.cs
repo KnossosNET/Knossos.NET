@@ -145,6 +145,10 @@ namespace Knossos.NET.ViewModels
                 {
                     sharedSearch = NebulaModsView.Search;
                 }
+                if(CurrentViewModel == GlobalSettingsView) //Exiting the settings view
+                {
+                    GlobalSettingsView.CommitPendingChanges();
+                }
 
                 CurrentViewModel = value.vm;
 
@@ -175,12 +179,12 @@ namespace Knossos.NET.ViewModels
                 {
                     Knossos.globalSettings.Load();
                     GlobalSettingsView.LoadData();
-                    Knossos.globalSettings.EnableIniWatch();
+                    //Knossos.globalSettings.EnableIniWatch();
                     GlobalSettingsView.UpdateImgCacheSize();
                 }
                 else
                 {
-                    Knossos.globalSettings.DisableIniWatch();
+                    //Knossos.globalSettings.DisableIniWatch();
                 }
             }
         }

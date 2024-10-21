@@ -1,6 +1,6 @@
 using Avalonia.Controls;
-using System.ComponentModel;
-using System.Threading.Tasks;
+using Avalonia.Threading;
+using Knossos.NET.ViewModels;
 
 namespace Knossos.NET.Views
 {
@@ -22,8 +22,9 @@ namespace Knossos.NET.Views
             {
                 e.Cancel = true;
 
-                await Task.Run(() => {
+                await Dispatcher.UIThread.InvokeAsync(() => {
                     Knossos.Tts(string.Empty);
+                    MainWindowViewModel.Instance?.GlobalSettingsView.CommitPendingChanges();
                     Knossos.globalSettings.SaveSettingsOnAppClose();
                     canClose = true;
                 });

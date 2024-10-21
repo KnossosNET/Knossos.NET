@@ -320,8 +320,13 @@ namespace Knossos.NET.Models
         /// </summary>
         public void EnableIniWatch()
         {
-            if(iniWatcher != null) 
+            if (iniWatcher != null)
                 iniWatcher.EnableRaisingEvents = true;
+            else
+            {
+                StartWatchingDirectory();
+                EnableIniWatch();
+            }
         }
 
         /// <summary>
@@ -348,12 +353,6 @@ namespace Knossos.NET.Models
                 var parser = new FileIniDataParser();
                 var data = parser.ReadFile(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
                 data.Configuration.AssigmentSpacer = string.Empty;
-
-                if(iniWatcher == null)
-                {
-                    StartWatchingDirectory();
-                }
-
 
                 //LEGACY ENTRIES, mostly read only by fso
                 /* Default Section */

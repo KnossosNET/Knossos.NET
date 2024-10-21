@@ -19,6 +19,8 @@ namespace Knossos.NET.ViewModels
     /// </summary>
     public partial class GlobalSettingsViewModel : ViewModelBase
     {
+        private bool UnCommitedChanges = false;
+
         /* Limiters definition */
         private const long speedUnlimited = 0;
         private const long speedHalfMB = 850000;
@@ -33,14 +35,7 @@ namespace Knossos.NET.ViewModels
         private const long speed9MB = 155000000;
         private const long speed10MB = 170000000;
 
-        [ObservableProperty]
-        internal bool blCfNebula = false;
-        [ObservableProperty]
-        internal bool blDlNebula = false;
-        [ObservableProperty]
-        internal bool blAigaion = false;
-        [ObservableProperty]
-        internal bool blTalos = false;
+        /* For display only */
 
         [ObservableProperty]
         internal bool flagDataLoaded = false;
@@ -48,16 +43,8 @@ namespace Knossos.NET.ViewModels
         internal bool enable16BitColor = false;
         [ObservableProperty]
         internal bool windowsOS = false;
-
-        /* Knossos */
         [ObservableProperty]
         internal string imgCacheSize = "0 MB";
-        [ObservableProperty]
-        internal string basePath = string.Empty;
-        [ObservableProperty]
-        internal bool enableLogFile = true;
-        [ObservableProperty]
-        internal int logLevel = 1;
         [ObservableProperty]
         internal bool fs2RootPack = false;
         [ObservableProperty]
@@ -72,132 +59,448 @@ namespace Knossos.NET.ViewModels
         internal bool isAVX = false;
         [ObservableProperty]
         internal bool isAVX2 = false;
+
+        /* Knossos Settings */
+
         [ObservableProperty]
-        internal bool forceSSE2 = false;
-        [ObservableProperty]
-        internal int maxConcurrentSubtasks = 3;
-        [ObservableProperty]
-        internal long maxDownloadSpeedIndex = 0;
-        [ObservableProperty]
-        internal CompressionSettings modCompression = CompressionSettings.Manual;
-        [ObservableProperty]
-        internal int compressionMaxParallelism = 2;
-        [ObservableProperty]
-        internal bool checkUpdates = true;
-        [ObservableProperty]
-        internal bool autoUpdate = false;
-        [ObservableProperty]
-        internal bool deleteUploadedFiles = true;
-        [ObservableProperty]
-        internal bool updateNightly = false;
-        [ObservableProperty]
-        internal bool updateStable = false;
-        [ObservableProperty]
-        internal bool updateRC = false;
-        [ObservableProperty]
-        internal bool deleteOlder = false;
-        [ObservableProperty]
-        internal bool showDevOptions = false;
+        internal string basePath = string.Empty; //When this is changed settings are saved immediately.
+
+        private bool blCfNebula = false;
+        internal bool BlCfNebula
+        {
+            get { return blCfNebula; }
+            set { if (blCfNebula != value) { this.SetProperty(ref blCfNebula, value); UnCommitedChanges = true; } }
+        }
+
+        private bool blDlNebula = false;
+        internal bool BlDlNebula
+        {
+            get { return blDlNebula; }
+            set { if (blDlNebula != value) { this.SetProperty(ref blDlNebula, value); UnCommitedChanges = true; } }
+        }
+
+        private bool blAigaion = false;
+        internal bool BlAigaion
+        {
+            get { return blAigaion; }
+            set { if (blAigaion != value) { this.SetProperty(ref blAigaion, value); UnCommitedChanges = true; } }
+        }
+
+        private bool blTalos = false;
+        internal bool BlTalos
+        {
+            get { return blTalos; }
+            set { if (blTalos != value) { this.SetProperty(ref blTalos, value); UnCommitedChanges = true; } }
+        }
+
+        private bool enableLogFile = true;
+        internal bool EnableLogFile
+        {
+            get { return enableLogFile; }
+            set { if (enableLogFile != value) { this.SetProperty(ref enableLogFile, value); UnCommitedChanges = true; } }
+        }
+
+        private int logLevel = 1;
+        internal int LogLevel
+        {
+            get { return logLevel; }
+            set { if (logLevel != value) { this.SetProperty(ref logLevel, value); UnCommitedChanges = true; } }
+        }
+
+        private bool forceSSE2 = false;
+        internal bool ForceSSE2
+        {
+            get { return forceSSE2; }
+            set { if (forceSSE2 != value) { this.SetProperty(ref forceSSE2, value); UnCommitedChanges = true; } }
+        }
+
+        private int maxConcurrentSubtasks = 3;
+        internal int MaxConcurrentSubtasks
+        {
+            get { return maxConcurrentSubtasks; }
+            set { if (maxConcurrentSubtasks != value) { this.SetProperty(ref maxConcurrentSubtasks, value); UnCommitedChanges = true; } }
+        }
+
+        private long maxDownloadSpeedIndex = 0;
+        internal long MaxDownloadSpeedIndex
+        {
+            get { return maxDownloadSpeedIndex; }
+            set { if (maxDownloadSpeedIndex != value) { this.SetProperty(ref maxDownloadSpeedIndex, value); UnCommitedChanges = true; } }
+        }
+
+        private CompressionSettings modCompression = CompressionSettings.Manual;
+        internal CompressionSettings ModCompression
+        {
+            get { return modCompression; }
+            set { if (modCompression != value) { this.SetProperty(ref modCompression, value); UnCommitedChanges = true; } }
+        }
+
+        private int compressionMaxParallelism = 2;
+        internal int CompressionMaxParallelism
+        {
+            get { return compressionMaxParallelism; }
+            set { if (compressionMaxParallelism != value) { this.SetProperty(ref compressionMaxParallelism, value); UnCommitedChanges = true; } }
+        }
+
+        private bool checkUpdates = true;
+        internal bool CheckUpdates
+        {
+            get { return checkUpdates; }
+            set { if (checkUpdates != value) { this.SetProperty(ref checkUpdates, value); UnCommitedChanges = true; } }
+        }
+
+        private bool autoUpdate = false;
+        internal bool AutoUpdate
+        {
+            get { return autoUpdate; }
+            set { if (autoUpdate != value) { this.SetProperty(ref autoUpdate, value); UnCommitedChanges = true; } }
+        }
+
+        private bool deleteUploadedFiles = true;
+        internal bool DeleteUploadedFiles
+        {
+            get { return deleteUploadedFiles; }
+            set { if (deleteUploadedFiles != value) { this.SetProperty(ref deleteUploadedFiles, value); UnCommitedChanges = true; } }
+        }
+
+        private bool updateNightly = false;
+        internal bool UpdateNightly
+        {
+            get { return updateNightly; }
+            set { if (updateNightly != value) { this.SetProperty(ref updateNightly, value); UnCommitedChanges = true; } }
+        }
+
+        private bool updateStable = false;
+        internal bool UpdateStable
+        {
+            get { return updateStable; }
+            set { if (updateStable != value) { this.SetProperty(ref updateStable, value); UnCommitedChanges = true; } }
+        }
+
+        private bool updateRC = false;
+        internal bool UpdateRC
+        {
+            get { return updateRC; }
+            set { if (updateRC != value) { this.SetProperty(ref updateRC, value); UnCommitedChanges = true; } }
+        }
+
+        private bool deleteOlder = false;
+        internal bool DeleteOlder
+        {
+            get { return deleteOlder; }
+            set { if (deleteOlder != value) { this.SetProperty(ref deleteOlder, value); UnCommitedChanges = true; } }
+        }
+
+        private bool showDevOptions = false;
+        internal bool ShowDevOptions
+        {
+            get { return showDevOptions; }
+            set { if (showDevOptions != value) { this.SetProperty(ref showDevOptions, value); UnCommitedChanges = true; } }
+        }
 
         /*VIDEO*/
-        [ObservableProperty]
-        internal int bitsSelectedIndex = 0;
-        [ObservableProperty]
-        internal int resolutionSelectedIndex = 0;
-        [ObservableProperty]
-        internal int textureSelectedIndex = 0;
+        private int bitsSelectedIndex = 0;
+        internal int BitsSelectedIndex
+        {
+            get { return bitsSelectedIndex; }
+            set { if (bitsSelectedIndex != value) { this.SetProperty(ref bitsSelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
+        private int resolutionSelectedIndex = 0;
+        internal int ResolutionSelectedIndex
+        {
+            get { return resolutionSelectedIndex; }
+            set { if (resolutionSelectedIndex != value) { this.SetProperty(ref resolutionSelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
+        private int textureSelectedIndex = 0;
+        internal int TextureSelectedIndex
+        {
+            get { return textureSelectedIndex; }
+            set { if (textureSelectedIndex != value) { this.SetProperty(ref textureSelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
         internal ObservableCollection<ComboBoxItem> ResolutionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
-        [ObservableProperty]
-        internal int shadowQualitySelectedIndex = 0;
-        [ObservableProperty]
-        internal int aaSelectedIndex = 5;
-        [ObservableProperty]
-        internal int msaaSelectedIndex = 0;
-        [ObservableProperty]
-        internal bool enableSoftParticles = true;
-        [ObservableProperty]
-        internal bool enableDeferredLighting = true;
-        [ObservableProperty]
-        internal int windowMode = 2;
-        [ObservableProperty]
-        internal bool vsync = true;
-        [ObservableProperty]
-        internal bool postProcess = true;
-        [ObservableProperty]
-        internal bool noFpsCapping = false;
-        [ObservableProperty]
-        internal bool showFps = false;
+
+        private int shadowQualitySelectedIndex = 0;
+        internal int ShadowQualitySelectedIndex
+        {
+            get { return shadowQualitySelectedIndex; }
+            set { if (shadowQualitySelectedIndex != value) { this.SetProperty(ref shadowQualitySelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
+        private int aaSelectedIndex = 5;
+        internal int AaSelectedIndex
+        {
+            get { return aaSelectedIndex; }
+            set { if (aaSelectedIndex != value) { this.SetProperty(ref aaSelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
+        private int msaaSelectedIndex = 0;
+        internal int MsaaSelectedIndex
+        {
+            get { return msaaSelectedIndex; }
+            set { if (msaaSelectedIndex != value) { this.SetProperty(ref msaaSelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
+        private bool enableSoftParticles = true;
+        internal bool EnableSoftParticles
+        {
+            get { return enableSoftParticles; }
+            set { if (enableSoftParticles != value) { this.SetProperty(ref enableSoftParticles, value); UnCommitedChanges = true; } }
+        }
+
+        private bool enableDeferredLighting = true;
+        internal bool EnableDeferredLighting
+        {
+            get { return enableDeferredLighting; }
+            set { if (enableDeferredLighting != value) { this.SetProperty(ref enableDeferredLighting, value); UnCommitedChanges = true; } }
+        }
+
+        private int windowMode = 2;
+        internal int WindowMode
+        {
+            get { return windowMode; }
+            set { if (windowMode != value) { this.SetProperty(ref windowMode, value); UnCommitedChanges = true; } }
+        }
+
+        private bool vsync = true;
+        internal bool Vsync
+        {
+            get { return vsync; }
+            set { if (vsync != value) { this.SetProperty(ref vsync, value); UnCommitedChanges = true; } }
+        }
+
+        private bool postProcess = true;
+        internal bool PostProcess
+        {
+            get { return postProcess; }
+            set { if (postProcess != value) { this.SetProperty(ref postProcess, value); UnCommitedChanges = true; } }
+        }
+
+        private bool noFpsCapping = false;
+        internal bool NoFpsCapping
+        {
+            get { return noFpsCapping; }
+            set { if (noFpsCapping != value) { this.SetProperty(ref noFpsCapping, value); UnCommitedChanges = true; } }
+        }
+
+        private bool showFps = false;
+        internal bool ShowFps
+        {
+            get { return showFps; }
+            set { if (showFps != value) { this.SetProperty(ref showFps, value); UnCommitedChanges = true; } }
+        }
 
         /*AUDIO*/
-        [ObservableProperty]
-        internal int playbackSelectedIndex = 0;
+        private int playbackSelectedIndex = 0;
+        internal int PlaybackSelectedIndex
+        {
+            get { return playbackSelectedIndex; }
+            set { if (playbackSelectedIndex != value) { this.SetProperty(ref playbackSelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
         internal ObservableCollection<ComboBoxItem> PlaybackItems { get; set; } = new ObservableCollection<ComboBoxItem>();
-        [ObservableProperty]
-        internal int captureSelectedIndex = 0;
+
+        private int captureSelectedIndex = 0;
+        internal int CaptureSelectedIndex
+        {
+            get { return captureSelectedIndex; }
+            set { if (captureSelectedIndex != value) { this.SetProperty(ref captureSelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
         internal ObservableCollection<ComboBoxItem> CaptureItems { get; set; } = new ObservableCollection<ComboBoxItem>();
-        [ObservableProperty]
-        internal int sampleRateSelectedIndex = 0;
-        [ObservableProperty]
-        internal bool enableEFX = false;
-        [ObservableProperty]
-        internal bool disableAudio = false;
-        [ObservableProperty]
-        internal bool disableMusic = false;
-        [ObservableProperty]
-        internal bool enableTTS = true;
-        [ObservableProperty]
-        internal int voiceSelectedIndex = 0;
+
+        private int sampleRateSelectedIndex = 0;
+        internal int SampleRateSelectedIndex
+        {
+            get { return sampleRateSelectedIndex; }
+            set { if (sampleRateSelectedIndex != value) { this.SetProperty(ref sampleRateSelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
+        private bool enableEFX = false;
+        internal bool EnableEFX
+        {
+            get { return enableEFX; }
+            set { if (enableEFX != value) { this.SetProperty(ref enableEFX, value); UnCommitedChanges = true; } }
+        }
+
+        private bool disableAudio = false;
+        internal bool DisableAudio
+        {
+            get { return disableAudio; }
+            set { if (disableAudio != value) { this.SetProperty(ref disableAudio, value); UnCommitedChanges = true; } }
+        }
+
+        private bool disableMusic = false;
+        internal bool DisableMusic
+        {
+            get { return disableMusic; }
+            set { if (disableMusic != value) { this.SetProperty(ref disableMusic, value); UnCommitedChanges = true; } }
+        }
+
+        private bool enableTTS = true;
+        internal bool EnableTTS
+        {
+            get { return enableTTS; }
+            set { if (enableTTS != value) { this.SetProperty(ref enableTTS, value); UnCommitedChanges = true; } }
+        }
+
+        private int voiceSelectedIndex = 0;
+        internal int VoiceSelectedIndex
+        {
+            get { return voiceSelectedIndex; }
+            set { if (voiceSelectedIndex != value) { this.SetProperty(ref voiceSelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
         internal ObservableCollection<ComboBoxItem> VoiceItems { get; set; } = new ObservableCollection<ComboBoxItem>();
-        [ObservableProperty]
-        internal bool ttsTechroom = true;
-        [ObservableProperty]
-        internal bool ttsBriefings = true;
-        [ObservableProperty]
-        internal bool ttsIngame = true;
-        [ObservableProperty]
-        internal bool ttsMulti = true;
-        [ObservableProperty]
-        internal bool ttsDescription = true;
-        [ObservableProperty]
-        internal int ttsVolume = 100;
-        [ObservableProperty]
-        internal bool playingTTS = false;
+
+        private bool ttsTechroom = true;
+        internal bool TtsTechroom
+        {
+            get { return ttsTechroom; }
+            set { if (ttsTechroom != value) { this.SetProperty(ref ttsTechroom, value); UnCommitedChanges = true; } }
+        }
+
+        private bool ttsBriefings = true;
+        internal bool TtsBriefings
+        {
+            get { return ttsBriefings; }
+            set { if (ttsBriefings != value) { this.SetProperty(ref ttsBriefings, value); UnCommitedChanges = true; } }
+        }
+
+        private bool ttsIngame = true;
+        internal bool TtsIngame
+        {
+            get { return ttsIngame; }
+            set { if (ttsIngame != value) { this.SetProperty(ref ttsIngame, value); UnCommitedChanges = true; } }
+        }
+
+        private bool ttsMulti = true;
+        internal bool TtsMulti
+        {
+            get { return ttsMulti; }
+            set { if (ttsMulti != value) { this.SetProperty(ref ttsMulti, value); UnCommitedChanges = true; } }
+        }
+
+        private bool ttsDescription = true;
+        internal bool TtsDescription
+        {
+            get { return ttsDescription; }
+            set { if (ttsDescription != value) { this.SetProperty(ref ttsDescription, value); UnCommitedChanges = true; } }
+        }
+
+        private int ttsVolume = 100;
+        internal int TtsVolume
+        {
+            get { return ttsVolume; }
+            set { if (ttsVolume != value) { this.SetProperty(ref ttsVolume, value); UnCommitedChanges = true; } }
+        }
+
+        private bool playingTTS = false;
+        internal bool PlayingTTS
+        {
+            get { return playingTTS; }
+            set { if (playingTTS != value) { this.SetProperty(ref playingTTS, value); UnCommitedChanges = true; } }
+        }
 
         /*JOYSTICK*/
         internal ObservableCollection<ComboBoxItem> Joystick1Items { get; set; } = new ObservableCollection<ComboBoxItem>();
         internal ObservableCollection<ComboBoxItem> Joystick2Items { get; set; } = new ObservableCollection<ComboBoxItem>();
         internal ObservableCollection<ComboBoxItem> Joystick3Items { get; set; } = new ObservableCollection<ComboBoxItem>();
         internal ObservableCollection<ComboBoxItem> Joystick4Items { get; set; } = new ObservableCollection<ComboBoxItem>();
-        [ObservableProperty]
-        internal int joy1SelectedIndex = -1;
-        [ObservableProperty]
-        internal int joy2SelectedIndex = -1;
-        [ObservableProperty]
-        internal int joy3SelectedIndex = -1;
-        [ObservableProperty]
-        internal int joy4SelectedIndex = -1;
+
+        private int joy1SelectedIndex = -1;
+        internal int Joy1SelectedIndex
+        {
+            get { return joy1SelectedIndex; }
+            set { if (joy1SelectedIndex != value) { this.SetProperty(ref joy1SelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
+        private int joy2SelectedIndex = -1;
+        internal int Joy2SelectedIndex
+        {
+            get { return joy2SelectedIndex; }
+            set { if (joy2SelectedIndex != value) { this.SetProperty(ref joy2SelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
+        private int joy3SelectedIndex = -1;
+        internal int Joy3SelectedIndex
+        {
+            get { return joy3SelectedIndex; }
+            set { if (joy3SelectedIndex != value) { this.SetProperty(ref joy3SelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
+        private int joy4SelectedIndex = -1;
+        internal int Joy4SelectedIndex
+        {
+            get { return joy4SelectedIndex; }
+            set { if (joy4SelectedIndex != value) { this.SetProperty(ref joy4SelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
 
         /* MOD / FS2 */
-        internal string globalCmd = string.Empty;
-        [ObservableProperty]
-        internal int fs2LangSelectedIndex = 0;
-        [ObservableProperty]
-        internal uint multiPort = 7808;
-        [ObservableProperty]
-        internal uint mouseSensitivity = 5;
-        [ObservableProperty]
-        internal uint joystickSensitivity = 9;
-        [ObservableProperty]
-        internal uint joystickDeadZone = 10;
-        
-        /* DEVELOPER */
-        [ObservableProperty]
-        internal bool noSystemCMD = false;
-        [ObservableProperty]
-        internal string prefixCMD = string.Empty;
-        [ObservableProperty]
-        internal string envVars = string.Empty;
 
+
+        private int fs2LangSelectedIndex = 0; 
+        internal int Fs2LangSelectedIndex
+        {
+            get { return fs2LangSelectedIndex; }
+            set { if (fs2LangSelectedIndex != value) { this.SetProperty(ref fs2LangSelectedIndex, value); UnCommitedChanges = true; } }
+        }
+
+        private uint multiPort = 7808;
+        internal uint MultiPort
+        {
+            get { return multiPort; }
+            set { if (multiPort != value) { this.SetProperty(ref multiPort, value); UnCommitedChanges = true; } }
+        }
+
+        private uint mouseSensitivity = 5;
+        internal uint MouseSensitivity
+        {
+            get { return mouseSensitivity; }
+            set { if (mouseSensitivity != value) { this.SetProperty(ref mouseSensitivity, value); UnCommitedChanges = true; } }
+        }
+
+        private uint joystickSensitivity = 9;
+        internal uint JoystickSensitivity
+        {
+            get { return joystickSensitivity; }
+            set { if (joystickSensitivity != value) { this.SetProperty(ref joystickSensitivity, value); UnCommitedChanges = true; } }
+        }
+
+        private uint joystickDeadZone = 10;
+        internal uint JoystickDeadZone
+        {
+            get { return joystickDeadZone; }
+            set { if (joystickDeadZone != value) { this.SetProperty(ref joystickDeadZone, value); UnCommitedChanges = true; } }
+        }
+
+
+        /* DEVELOPER */
+        private bool noSystemCMD = false;
+        internal bool NoSystemCMD
+        {
+            get { return noSystemCMD; }
+            set { if (noSystemCMD != value) { this.SetProperty(ref noSystemCMD, value); UnCommitedChanges = true; } }
+        }
+
+        private string prefixCMD = string.Empty;
+        internal string PrefixCMD
+        {
+            get { return prefixCMD; }
+            set { if (prefixCMD != value) { this.SetProperty(ref prefixCMD, value); UnCommitedChanges = true; } }
+        }
+
+        private string envVars = string.Empty;
+        internal string EnvVars
+        {
+            get { return envVars; }
+            set { if (envVars != value) { this.SetProperty(ref envVars, value); UnCommitedChanges = true; } }
+        }
+
+        internal string globalCmd = string.Empty;
         // In order to have hidden dev options, we need a setter for globalCMD
         public string GlobalCmd
         {
@@ -213,11 +516,24 @@ namespace Knossos.NET.ViewModels
                 }
 
                 SetProperty(ref globalCmd, value.Replace("freespace2.com", ""));
+                UnCommitedChanges = true;
             }
         }
 
         public GlobalSettingsViewModel()
         {
+        }
+
+        /// <summary>
+        /// Check if the settings where changed from the ones in the GlobalSettings instance compared to the ones here
+        /// If they did change update data stored in GlobalSettings and save file
+        /// </summary>
+        public void CommitPendingChanges()
+        {
+            if(UnCommitedChanges)
+            {
+                SaveCommand();
+            }
         }
 
         /// <summary>
@@ -285,6 +601,10 @@ namespace Knossos.NET.ViewModels
                 default: MaxDownloadSpeedIndex = 0; break;
             }
 
+            BlDlNebula = false;
+            BlCfNebula = false;
+            BlAigaion = false;
+            BlTalos = false;
             if (Knossos.globalSettings.mirrorBlacklist != null)
             {
                 if (Knossos.globalSettings.mirrorBlacklist.Contains("dl.fsnebula.org"))
@@ -716,6 +1036,8 @@ namespace Knossos.NET.ViewModels
 
             //Multi Port
             MultiPort = Knossos.globalSettings.multiPort;
+
+            UnCommitedChanges = false;
         }
 
         private FlagsJsonV1? GetFlagData()
@@ -1043,6 +1365,7 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.multiPort = MultiPort;
 
             Knossos.globalSettings.Save();
+            UnCommitedChanges = false;
         }
 
         /// <summary>
