@@ -78,7 +78,7 @@
 	<!--Color Resource Definition-->
 	<Styles.Resources>
 		<SolidColorBrush x:Key="BackgroundColorPrimary">#18191A</SolidColorBrush>
-		<SolidColorBrush x:Key="BackgroundColorSecondary">#422626</SolidColorBrush>
+		<SolidColorBrush x:Key="BackgroundColorSecondary">#2d2d2d</SolidColorBrush>
 		<SolidColorBrush x:Key="BackgroundColorTertiary">#131414</SolidColorBrush>
 		
 		<SolidColorBrush x:Key="PrimaryColor">#257200</SolidColorBrush>

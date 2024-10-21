@@ -25,17 +25,17 @@
 	<Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 		<SplitView IsPaneOpen="{Binding IsMenuOpen}" CompactPaneLength="60" DisplayMode="CompactInline" OpenPaneLength="150" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 			<SplitView.Pane>
-				<ScrollViewer>
+				<ScrollViewer  Background="{StaticResource BackgroundColorTertiary}">
 					<StackPanel Orientation="Vertical" Spacing="5" HorizontalAlignment="Stretch" VerticalAlignment="Top">
 						<Grid ColumnDefinitions="Auto, Auto">
-							<Button Grid.Column="0" HorizontalAlignment="Left" Width="40" Height="40" Margin="11 10" Command="{Binding TriggerMenuCommand}" ToolTip.Tip="Expand or collapse the menu">
+							<Button Grid.Column="0" HorizontalAlignment="Left" Width="40" Height="40" Margin="10 10" Command="{Binding TriggerMenuCommand}" ToolTip.Tip="Expand or collapse the menu">
 								<PathIcon Height="15" Data="{StaticResource 3LinesRegular}" />
 							</Button>
 							<Button Grid.Column="1" Margin="15,0,0,0" Width="40" Height="40" HorizontalAlignment="Right" Command="{Binding OpenScreenshotsFolder}" ToolTip.Tip="Open screenshots folder">
 								<Image Height="30" Width="30" Source="/Assets/general/screenshot.png"></Image>
 							</Button>
 						</Grid>
-						<Grid Background="{StaticResource BackgroundColorSecondary}" RowDefinitions="Auto, Auto">
+						<Grid RowDefinitions="Auto, Auto">
 							<v:TaskInfoButtonView ZIndex="0" Margin="9,0,0,0" Grid.Row="0" Width="40" Height="45" HorizontalAlignment="Left" Content="{Binding TaskInfoButton}"/>
 							<ListBox ZIndex="1" Background="Transparent" Grid.Row="1" Margin="2 -45 -100 0" Padding="0" ItemsSource="{Binding MenuItems}" SelectedItem="{Binding SelectedMenuItem}">
 								<ListBox.Styles>
