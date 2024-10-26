@@ -29,6 +29,32 @@ namespace Knossos.NET
         public static bool flagDataLoaded = false;
         private static object? ttsObject = null;
         private static bool forceUpdateDownload = false; //Only intended to test the update system!
+        public static bool inPortableMode { get; private set; } = false;
+        public static bool isKnDataFolderReadOnly { get; private set; } = false;
+
+        /// <summary>
+        /// Static constructor
+        /// </summary>
+        static Knossos()
+        {
+            try
+            {
+                //We are in portable mode? if so set everything up ahead of all else
+                var pathToExec = KnUtils.KnetFolderPath;
+                if (pathToExec != null)
+                {
+                    if (Directory.Exists(Path.Combine(pathToExec, "kn_portable")))
+                    {
+                        inPortableMode = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //At this stage we can only log to console
+                Log.WriteToConsole("Knossos() - " + ex.Message);
+            }
+        }
 
         /// <summary>
         /// StartUp sequence
@@ -58,14 +84,29 @@ namespace Knossos.NET
                 }
                 catch (Exception ex)
                 {
+                    isKnDataFolderReadOnly = true;
                     Log.Add(Log.LogSeverity.Error, "Knossos.StartUp()", ex);
                     if (MainWindow.instance != null)
                     {
-                        await MessageBox.Show(MainWindow.instance, "Unable to write to KnossosNET data folder.", "KnossosNET Error", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(MainWindow.instance, "Unable to write to KnossosNET data folder:\n'"+ KnUtils.GetKnossosDataFolderPath()+"'\nSome functions may not work correctly.", "KnossosNET Error", MessageBox.MessageBoxButtons.OK);
                     }
                 }
 
                 Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "=== KnossosNET v" + AppVersion + " Start ===");
+
+                if (inPortableMode)
+                {
+                    Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "Running in PORTABLE MODE.");
+                    try
+                    {
+                        Directory.CreateDirectory(Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen"));
+                        Directory.CreateDirectory(Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "Library"));
+                    }
+                    catch (Exception ex) 
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Knossos.Startup()", ex);
+                    }
+                }
 
                 //Load language files
                 Lang.LoadFiles();
@@ -1157,7 +1198,7 @@ namespace Knossos.NET
                 cmdline += " -mod " + modFlag;
             }
 
-            Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used cmdLine : " + cmdline);
+            
 
             if (MainWindow.instance != null && globalSettings.warnNewSettingsSystem)
             {
@@ -1192,6 +1233,35 @@ namespace Knossos.NET
                     //fail silently, this is not important
                 }
             }
+
+            //Portable mode and limitations in unsupported fso versions
+            if (inPortableMode)
+            {
+                try
+                {
+                    var fsoVersion = new SemanticVersion(fsoBuild.version);
+                    var newPortableModeVersion = new SemanticVersion("24.2.1");
+                    if (fsoVersion < newPortableModeVersion)
+                    {
+                        cmdline = "-portable_mode " + cmdline;
+                        try
+                        {
+                            //older portable mode uses working path to pickup the .ini and store pilots
+                            globalSettings.WriteFS2IniValues(Path.Combine(rootPath, "fs2_open.ini"));
+                        } 
+                        catch (Exception ex) 
+                        {
+                            Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", ex);
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", ex);
+                }
+            }
+
+            Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used cmdLine : " + cmdline);
 
             //Launch FSO!!!
             var fsoResult = await fsoBuild.RunFSO(fsoExecType, cmdline, rootPath, false);

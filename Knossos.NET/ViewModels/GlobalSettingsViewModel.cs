@@ -36,7 +36,8 @@ namespace Knossos.NET.ViewModels
         private const long speed10MB = 170000000;
 
         /* For display only */
-
+		[ObservableProperty]
+        internal bool isPortableMode = false;
         [ObservableProperty]
         internal bool flagDataLoaded = false;
         [ObservableProperty]
@@ -61,7 +62,6 @@ namespace Knossos.NET.ViewModels
         internal bool isAVX2 = false;
 
         /* Knossos Settings */
-
         [ObservableProperty]
         internal string basePath = string.Empty; //When this is changed settings are saved immediately.
 
@@ -522,6 +522,7 @@ namespace Knossos.NET.ViewModels
 
         public GlobalSettingsViewModel()
         {
+            isPortableMode = Knossos.inPortableMode;
         }
 
         /// <summary>

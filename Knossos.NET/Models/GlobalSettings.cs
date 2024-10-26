@@ -684,13 +684,19 @@ namespace Knossos.NET.Models
             {
                 Log.Add(Log.LogSeverity.Error, "GlobalSettings.Load()", ex);
             }
+            if(Knossos.inPortableMode)
+            {
+                basePath = Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "Library");
+            }
         }
 
         /// <summary>
         /// Save setting data to the fs2_open.ini
         /// Stops the ini-watcher if it was enabled and re-enables it to avoid triggering a read
+        /// Optional: Specific path to write the .ini to, need to be FULL PATH
         /// </summary>
-        public void WriteFS2IniValues()
+        /// <param name="customPath"></param>
+        public void WriteFS2IniValues(string? customFullPath = null)
         {
             try
             {
@@ -850,10 +856,20 @@ namespace Knossos.NET.Models
                     wasWatchingIni = iniWatcher.EnableRaisingEvents;
                     iniWatcher.EnableRaisingEvents = false;
                 }
-                parser.WriteFile(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini", data, new UTF8Encoding(false));
-                if(iniWatcher!= null && wasWatchingIni)
+                if (customFullPath == null)
+                {
+                    parser.WriteFile(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini", data, new UTF8Encoding(false));
+                    Log.Add(Log.LogSeverity.Information, "GlobalSettings.WriteFS2IniValues", "Writen ini: " + KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
+                }
+                else
+                {
+
+                    parser.WriteFile(customFullPath, data, new UTF8Encoding(false));
+                    Log.Add(Log.LogSeverity.Information, "GlobalSettings.WriteFS2IniValues", "Writen ini: " + customFullPath);
+                }
+
+                if (iniWatcher!= null && wasWatchingIni)
                     iniWatcher.EnableRaisingEvents = true;
-                Log.Add(Log.LogSeverity.Information, "GlobalSettings.WriteFS2IniValues","Writen ini: "+ KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
             }
             catch (Exception ex)
             {

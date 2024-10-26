@@ -275,6 +275,12 @@ namespace Knossos.NET.Models
                         fso.StartInfo.UseShellExecute = false;
                         if (workingFolder != null)
                             fso.StartInfo.WorkingDirectory = workingFolder;
+                        if(Knossos.inPortableMode)
+                        {
+                            var prefPath = Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen") + Path.DirectorySeparatorChar;
+                            Log.Add(Log.LogSeverity.Information, "FsoBuild.RunFSO()", "Used preferences path: " + prefPath);
+                            fso.StartInfo.EnvironmentVariables.Add("FSO_PREFERENCES_PATH", prefPath);
+                        }
                         if (Knossos.globalSettings.envVars != "")
                         {
                             foreach (var envVar in Knossos.globalSettings.envVars.Split(","))
@@ -343,6 +349,10 @@ namespace Knossos.NET.Models
                     cmd.StartInfo.RedirectStandardInput = true;
                     cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
                     cmd.StartInfo.WorkingDirectory = folderPath;
+                    if (Knossos.inPortableMode)
+                    {
+                        cmd.StartInfo.EnvironmentVariables.Add("FSO_PREFERENCES_PATH", Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen"));
+                    }
                     cmd.Start();
                     string result = cmd.StandardOutput.ReadToEnd();
                     output = result;
