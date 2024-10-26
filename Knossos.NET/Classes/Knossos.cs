@@ -1244,15 +1244,8 @@ namespace Knossos.NET
                     if (fsoVersion < newPortableModeVersion)
                     {
                         cmdline = "-portable_mode " + cmdline;
-                        try
-                        {
-                            //older portable mode uses working path to pickup the .ini and store pilots
-                            globalSettings.WriteFS2IniValues(Path.Combine(rootPath, "fs2_open.ini"));
-                        } 
-                        catch (Exception ex) 
-                        {
-                            Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", ex);
-                        }
+                        //older portable mode uses working path to pickup the .ini and store pilots
+                        globalSettings.WriteFS2IniValues(Path.Combine(rootPath, "fs2_open.ini"));
                     }
                 }
                 catch(Exception ex)

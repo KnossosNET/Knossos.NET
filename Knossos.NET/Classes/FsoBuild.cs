@@ -351,7 +351,7 @@ namespace Knossos.NET.Models
                     cmd.StartInfo.WorkingDirectory = folderPath;
                     if (Knossos.inPortableMode)
                     {
-                        cmd.StartInfo.EnvironmentVariables.Add("FSO_PREFERENCES_PATH", Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen"));
+                        cmd.StartInfo.EnvironmentVariables.Add("FSO_PREFERENCES_PATH", Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen") + Path.DirectorySeparatorChar);
                     }
                     cmd.Start();
                     string result = cmd.StandardOutput.ReadToEnd();
