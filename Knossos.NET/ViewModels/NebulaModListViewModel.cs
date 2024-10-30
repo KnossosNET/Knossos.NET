@@ -327,7 +327,7 @@ namespace Knossos.NET.ViewModels
                 switch (sortType)
                 {
                     case MainWindowViewModel.SortType.name:
-                        return String.Compare(modA.title, modB.title);
+                        return CompareTitles(modA.title, modB.title);
                     case MainWindowViewModel.SortType.release:
                         if (modA.firstRelease == modB.firstRelease)
                             return 0;
@@ -370,7 +370,12 @@ namespace Knossos.NET.ViewModels
                 return 0; 
             }
         }
-        
+
+        private int CompareTitles(string title1, string title2)
+        {
+            return String.Compare(KnUtils.RemoveArticles(title1), KnUtils.RemoveArticles(title2));
+        }
+
         /// <summary>
         /// Changes a modcard to "installing" mode
         /// </summary>
