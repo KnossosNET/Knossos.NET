@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net60</TargetFrameworks>
+		<TargetFrameworks>net8.0</TargetFrameworks>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<PackageId>IonKiwi.lz4.managed</PackageId>
 		<Version>1.0.7</Version>
