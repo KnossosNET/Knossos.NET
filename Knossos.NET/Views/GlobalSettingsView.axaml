@@ -369,6 +369,11 @@
 								<ComboBoxItem>Polish</ComboBoxItem>
 							</ComboBox>
 						</Grid>
+						<!-- Portable FSO Preferences -->
+						<WrapPanel IsVisible="{Binding IsPortableMode}">
+							<Label Margin="4,5,0,0" Width="200" ToolTip.Tip="Store FSO pilots and settings in a portable location. Only if the launcher is in portable mode">Portable FSO Data</Label>
+							<ToggleSwitch Margin="11,0,0,0" IsChecked="{Binding PortableFsoPreferences}"></ToggleSwitch>
+						</WrapPanel>
 						<!-- Sys Info -->
 						<WrapPanel Margin="9,0,0,0">
 							<TextBlock VerticalAlignment="Center" Width="201">Detected Build Settings </TextBlock>

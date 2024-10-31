@@ -1235,7 +1235,7 @@ namespace Knossos.NET
             }
 
             //Portable mode and limitations in unsupported fso versions
-            if (inPortableMode)
+            if (inPortableMode && globalSettings.portableFsoPreferences)
             {
                 try
                 {

@@ -261,6 +261,8 @@ namespace Knossos.NET.Models
         public string pxoLogin { get; set; } = "";
         [JsonIgnore]
         public string pxoPassword { get; set; } = "";
+        [JsonPropertyName("portable_fso_preferences")]
+        public bool portableFsoPreferences { get; set; } = true;
 
         /* Developer Settings */
         [JsonPropertyName("no_system_cmd")]
@@ -667,6 +669,7 @@ namespace Knossos.NET.Models
                         warnNewSettingsSystem = tempSettings.warnNewSettingsSystem;
                         mainMenuOpen = tempSettings.mainMenuOpen;
                         sortType = tempSettings.sortType;
+                        portableFsoPreferences = tempSettings.portableFsoPreferences;
 
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings have been loaded");

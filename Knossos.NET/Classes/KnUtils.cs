@@ -131,7 +131,7 @@ namespace Knossos.NET
         /// <returns>fullpath as string</returns>
         public static string GetFSODataFolderPath()
         {
-            if (Knossos.inPortableMode)
+            if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences)
             {
                 return Path.Combine(KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen"); //If inPortableMode = true, KnetFolderPath is not null
             }
