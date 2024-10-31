@@ -32,7 +32,6 @@ namespace Knossos.NET.ViewModels
                 {
                     this.SetProperty(ref hideRC, value);
                     Knossos.globalSettings.hideBuildRC = value;
-                    Knossos.globalSettings.Save(false);
                     BuildItems.ForEach(buildItem => { 
                         if(buildItem.Tag != null && buildItem.Tag?.ToString() == "rc")
                             buildItem.IsVisible = !value;
@@ -53,7 +52,6 @@ namespace Knossos.NET.ViewModels
                 if (hideCustom != value)
                 {
                     Knossos.globalSettings.hideBuildCustom = value;
-                    Knossos.globalSettings.Save(false);
                     this.SetProperty(ref hideCustom, value);
                     BuildItems.ForEach(buildItem => {
                         if (buildItem.Tag != null && buildItem.Tag?.ToString() == "custom")
@@ -76,7 +74,6 @@ namespace Knossos.NET.ViewModels
                 {
                     this.SetProperty(ref hideNightly, value);
                     Knossos.globalSettings.hideBuildNightly = value;
-                    Knossos.globalSettings.Save(false);
                     BuildItems.ForEach(buildItem => {
                         if (buildItem.Tag != null && buildItem.Tag?.ToString() == "nightly")
                             buildItem.IsVisible = !value;

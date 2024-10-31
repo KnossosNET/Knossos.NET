@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="2000"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="2500"
              x:Class="Knossos.NET.Views.GlobalSettingsView"
 			 xmlns:v="using:Knossos.NET.Views"
 			 xmlns:vm="using:Knossos.NET.ViewModels"
@@ -13,17 +13,11 @@
 	</Design.DataContext>
 
 	<Grid RowDefinitions="Auto,*">
-		<Border Margin="0,5,0,5" Grid.Row="0" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
-			<StackPanel>
-				<WrapPanel Margin="0,10,0,0">
-					<Button Command="{Binding QuickSetupCommand}" FontSize="20" Classes="Quaternary" Margin="5,0,0,0">Quick Setup Guide</Button>
-					<Button Command="{Binding ResetCommand}" FontWeight="Bold" FontSize="20" Margin="510,0,0,0" Classes="Cancel">Reset</Button>
-					<Button Command="{Binding ReloadFlagData}" FontSize="20" Margin="10,0,0,0">Reload Data</Button>
-					<Button Command="{Binding SaveCommand}"  FontWeight="Bold" FontSize="20" Classes="Accept" Margin="10,0,0,0">Save</Button>
-				</WrapPanel>
-				<TextBlock Margin="10,15,3,3" TextWrapping="Wrap" FontSize="16" VerticalAlignment="Center" >Please navigate to another tab before playing, as this tab constantly scans for option file changes.</TextBlock>
-			</StackPanel>
-		</Border>
+		<WrapPanel Margin="5,5,0,5" Grid.Row="0" VerticalAlignment="Center">
+			<Button Margin="0,5,30,0" Command="{Binding QuickSetupCommand}" FontSize="20" ToolTip.Tip="Open the initial 'Getting Started' guide window" Classes="Quaternary">Quick Setup Guide</Button>
+			<Button Margin="0,5,30,0" Command="{Binding ResetCommand}" FontWeight="Bold" FontSize="20" ToolTip.Tip="Reset all settings to defaults" Classes="Cancel">Reset to defaults</Button>
+			<Button Margin="0,5,30,0" Command="{Binding ReloadFlagData}" FontSize="20" ToolTip.Tip="Reload all settings from the configuration file and reload system data.">Reload Data</Button>
+		</WrapPanel>
 		<ScrollViewer Grid.Row="1">
 			<StackPanel>
 				<!--KNOSSOS SETTINGS-->
@@ -64,12 +58,12 @@
 						</WrapPanel>
 						<!-- AutoUpdates -->
                         <WrapPanel Margin="5,10,0,0">
-                            <Label Margin="0,5,0,0" Width="205">Check for updates at startup</Label> 
-							<CheckBox IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start."></CheckBox>
+                            <Label Margin="0,5,0,0" Width="205">Check for updates at startup</Label>
+							<ToggleSwitch IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start."></ToggleSwitch>
 						</WrapPanel>
                         <WrapPanel Margin="5,10,0,0">
-                            <Label Margin="0,5,0,0" Width="205">Auto Update Knet</Label> 
-							<CheckBox IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input."></CheckBox>
+                            <Label Margin="0,5,0,0" Width="205">Auto Update Knet</Label>
+							<ToggleSwitch IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input."></ToggleSwitch>
 						</WrapPanel>
 						<WrapPanel Margin="5,10,0,0">
 							<Label Margin="0,5,0,0" Width="205">Auto Update FSO Builds</Label>
@@ -79,8 +73,8 @@
 							<CheckBox Margin="5,0,0,0" IsChecked="{Binding DeleteOlder}" ToolTip.Tip="If this option is enabled, after an autoupdate Knet will delete older versions of installed FSO builds if they are not needed by any mod">Delete older versions</CheckBox>
 						</WrapPanel>
                         <WrapPanel Margin="5,10,0,0">
-                            <Label Margin="0,5,0,0" Width="205">Delete Uploaded Mod Files</Label> 
-							<CheckBox Margin="5,0,0,0" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successfull upload. You con choose to disable this option if you need to take a closer look or debug a problem."></CheckBox>
+                            <Label Margin="0,5,0,0" Width="205">Delete Uploaded Mod Files</Label>
+							<ToggleSwitch Margin="5,0,0,0" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successfull upload. You con choose to disable this option if you need to take a closer look or debug a problem."></ToggleSwitch>
 						</WrapPanel>
 						<!-- Image Cache -->
 						<WrapPanel Margin="5,10,0,0">
@@ -128,8 +122,8 @@
 						</Grid>
 						<!-- Log File -->
 						<WrapPanel Margin="5,10,0,0">
-                            <Label Margin="0,5,0,0" Width="210">Enable Logging</Label> 
-							<CheckBox Margin="1,0,0,0" IsChecked="{Binding EnableLogFile}"></CheckBox>
+                            <Label Margin="0,5,0,0" Width="210">Enable Logging</Label>
+							<ToggleSwitch Margin="1,0,0,0" IsChecked="{Binding EnableLogFile}"></ToggleSwitch>
 						</WrapPanel>
 						<WrapPanel Margin="5,10,0,0">
                             <Label Margin="0,5,0,0" Width="200">Logging Level</Label> 
@@ -210,34 +204,34 @@
 						</Grid>
 						<!-- Enable deferred lighting -->
 						<WrapPanel>
-							<Label Margin="5,5,0,0" Width="210">Deferred Lighting</Label> 
-							<CheckBox ToolTip.Tip="Enables dynamic lighting, such as from weapons, explosions, and ships. Enabled by default." Tag="-no_deferred" IsChecked="{Binding EnableDeferredLighting}"></CheckBox>
+							<Label Margin="5,5,0,0" Width="210">Deferred Lighting</Label>
+							<ToggleSwitch ToolTip.Tip="Enables dynamic lighting, such as from weapons, explosions, and ships. Enabled by default." Tag="-no_deferred" IsChecked="{Binding EnableDeferredLighting}"></ToggleSwitch>
 						</WrapPanel>
 						<!-- Enable soft particles -->
 						<WrapPanel>
-							<Label Margin="5,5,0,0" Width="210">Soft Particles</Label> 
-							<CheckBox ToolTip.Tip="Enables softer, more natural blending of overlapping effects. Enabled by default." Tag="-soft_particles" IsChecked="{Binding EnableSoftParticles}"></CheckBox>
+							<Label Margin="5,5,0,0" Width="210">Soft Particles</Label>
+							<ToggleSwitch ToolTip.Tip="Enables softer, more natural blending of overlapping effects. Enabled by default." Tag="-soft_particles" IsChecked="{Binding EnableSoftParticles}"></ToggleSwitch>
 						</WrapPanel>
 						<!-- Enable Post Processing -->
 						<WrapPanel>
-							<Label Margin="5,5,0,0" Width="210">Post Processing</Label> 
-							<CheckBox ToolTip.Tip="Enable basic Post Processing, which helps ensure visuals are balanced. Enabled by default." Tag="-no_post_process" IsChecked="{Binding PostProcess}"></CheckBox>
+							<Label Margin="5,5,0,0" Width="210">Post Processing</Label>
+							<ToggleSwitch ToolTip.Tip="Enable basic Post Processing, which helps ensure visuals are balanced. Enabled by default." Tag="-no_post_process" IsChecked="{Binding PostProcess}"></ToggleSwitch>
 						</WrapPanel>
 
 						<!-- VSYNC -->
 						<WrapPanel>
-							<Label Margin="5,5,0,0" Width="210">VSync</Label> 
-							<CheckBox ToolTip.Tip="Enable vertical sync, which ensures the game FPS matches the monitor FPS. Enabled by default." Tag="-no_vsync" IsChecked="{Binding Vsync}"></CheckBox>
+							<Label Margin="5,5,0,0" Width="210">VSync</Label>
+							<ToggleSwitch ToolTip.Tip="Enable vertical sync, which ensures the game FPS matches the monitor FPS. Enabled by default." Tag="-no_vsync" IsChecked="{Binding Vsync}"></ToggleSwitch>
 						</WrapPanel>
 						<!-- FPS Cap -->
 						<WrapPanel>
-							<Label Margin="5,5,0,0" Width="210">Limit to 120 FPS</Label> 
-							<CheckBox ToolTip.Tip="Caps the frames-per-second (FPS) of FSO to 120. Enabled by default." Tag="-no_fps_capping" IsChecked="{Binding !NoFpsCapping}"></CheckBox>
+							<Label Margin="5,5,0,0" Width="210">Limit to 120 FPS</Label>
+							<ToggleSwitch ToolTip.Tip="Caps the frames-per-second (FPS) of FSO to 120. Enabled by default." Tag="-no_fps_capping" IsChecked="{Binding !NoFpsCapping}"></ToggleSwitch>
 						</WrapPanel>
 						<!-- Show FPS -->
 						<WrapPanel>
-							<Label Margin="5,5,0,0" Width="210">Display FPS</Label> 
-							<CheckBox ToolTip.Tip="Displays a counter of the frames-per-second (FPS) in the upper left corner of the screen during missions. Disabled by default." Tag="-fps" IsChecked="{Binding ShowFps}"></CheckBox>
+							<Label Margin="5,5,0,0" Width="210">Display FPS</Label>
+							<ToggleSwitch ToolTip.Tip="Displays a counter of the frames-per-second (FPS) in the upper left corner of the screen during missions. Disabled by default." Tag="-fps" IsChecked="{Binding ShowFps}"></ToggleSwitch>
 						</WrapPanel>
 					</StackPanel>
 				</Border>
@@ -271,23 +265,23 @@
 						</Grid>
 						<!-- Enable EFX -->
                         <WrapPanel>
-                            <Label Margin="4,5,0,0" Width="200">Enable EFX</Label> 
-							<CheckBox Tag="efx" Margin="11,0,0,0" IsChecked="{Binding EnableEFX}" ToolTip.Tip="Enables in-mission sound effects to play with an extra sound environment filter set by the mission designer. By default, this filter adds a reverb effect."></CheckBox>
+                            <Label Margin="4,5,0,0" Width="200">Enable EFX</Label>
+							<ToggleSwitch Tag="efx" Margin="11,0,0,0" IsChecked="{Binding EnableEFX}" ToolTip.Tip="Enables in-mission sound effects to play with an extra sound environment filter set by the mission designer. By default, this filter adds a reverb effect."></ToggleSwitch>
 						</WrapPanel>
 						<!-- Disable Audio -->
                         <WrapPanel>
-                            <Label Margin="4,5,0,0" Width="200">Disable Audio</Label> 
-							<CheckBox Tag="-nosound" Margin="11,0,0,0" IsChecked="{Binding DisableAudio}"></CheckBox>
+                            <Label Margin="4,5,0,0" Width="200">Disable Audio</Label>
+							<ToggleSwitch Tag="-nosound" Margin="11,0,0,0" IsChecked="{Binding DisableAudio}"></ToggleSwitch>
 						</WrapPanel>
 						<!-- Disable Music -->
                         <WrapPanel>
-                            <Label Margin="4,5,0,0" Width="200">Disable Music</Label> 
-							<CheckBox Tag="-nomusic" Margin="11,0,0,0" IsChecked="{Binding DisableMusic}"></CheckBox>
+                            <Label Margin="4,5,0,0" Width="200">Disable Music</Label>
+							<ToggleSwitch Tag="-nomusic" Margin="11,0,0,0" IsChecked="{Binding DisableMusic}"></ToggleSwitch>
 						</WrapPanel>
 						<!-- TTS -->
                         <WrapPanel>
-                            <Label Margin="4,5,0,0" Width="200">Enable Text to Speech</Label> 
-							<CheckBox IsChecked="{Binding EnableTTS}" Margin="11,0,0,0"></CheckBox>
+                            <Label Margin="4,5,0,0" Width="200">Enable Text to Speech</Label>
+							<ToggleSwitch IsChecked="{Binding EnableTTS}" Margin="11,0,0,0"></ToggleSwitch>
 						</WrapPanel>
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Voice</TextBlock>
@@ -417,8 +411,8 @@
 						</WrapPanel>
 						<!-- NoSystemCMD -->
 						<WrapPanel IsVisible="{Binding ShowDevOptions}" IsEnabled="{Binding ShowDevOptions}" Margin="5,10,0,0">
-							<Label Margin="0,5,0,0" Width="205">Don't Apply Graphics Settings</Label> 
-							<CheckBox IsChecked="{Binding NoSystemCMD}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will not pass the graphics settings configured to FSO."></CheckBox>
+							<Label Margin="0,5,0,0" Width="205">Don't Apply Graphics Settings</Label>
+							<ToggleSwitch IsChecked="{Binding NoSystemCMD}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will not pass the graphics settings configured to FSO."></ToggleSwitch>
 						</WrapPanel>
 						<!-- PrefixCMD -->
 						<WrapPanel IsVisible="{Binding ShowDevOptions}" IsEnabled="{Binding ShowDevOptions}" Margin="5,10,0,0">

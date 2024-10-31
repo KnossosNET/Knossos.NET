@@ -28,9 +28,6 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal Queue<TaskItemViewModel> taskQueue { get; set; } = new Queue<TaskItemViewModel>();
 
-        [ObservableProperty]
-        public bool showTaskList = false;
-
         public TaskViewModel() 
         {
             Instance = this;
@@ -222,39 +219,6 @@ namespace Knossos.NET.ViewModels
             {
                 return "";
             }
-        }
-
-        /// <summary>
-        /// Hide the task panel
-        /// </summary>
-        public void HideCommand()
-        {
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                ShowTaskList = false;
-            });
-        }
-
-        /// <summary>
-        /// Show the task panel
-        /// </summary>
-        public void ShowCommand()
-        {
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                ShowTaskList = true;
-            });
-        }
-
-        /// <summary>
-        /// Toggle task panel visibility
-        /// </summary>
-        public void ToggleCommand()
-        {
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                ShowTaskList = !ShowTaskList;
-            });
         }
 
         /// <summary>

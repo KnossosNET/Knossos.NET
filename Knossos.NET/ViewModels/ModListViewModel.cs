@@ -134,6 +134,10 @@ namespace Knossos.NET.ViewModels
 
                 if (newSort != sortType)
                 {
+                    if (MainWindowViewModel.Instance != null && newSort != MainWindowViewModel.SortType.unsorted  && MainWindowViewModel.Instance.sharedSortType != newSort )
+                    {
+                        MainWindowViewModel.Instance.sharedSortType = newSort;
+                    }
                     LoadingAnimation.Animate = 1;
                     Sorting = true;
                     Dispatcher.UIThread.Invoke( () =>

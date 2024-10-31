@@ -20,7 +20,7 @@
 		<TreeView Margin="1,0,0,0" IsVisible="{Binding TaskRoot.Count}" ItemsSource="{Binding TaskRoot}">
 			<TreeView.DataTemplates>
 				<TreeDataTemplate DataType="vm:TaskItemViewModel" ItemsSource="{Binding TaskList}">
-					<WrapPanel MaxWidth="400">
+					<WrapPanel>
 						<Label>-</Label>
 						<!--Two versions to better handle spacing-->
 						<!--Download Version-->
@@ -32,7 +32,7 @@
 										<Button Width="30" ToolTip.Tip="Restart" Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" Height="25" FontSize="9" Command="{Binding RestartDownloadCommand}" IsVisible="{Binding IsFileDownloadTask}">
 											<Image Height="20" Width="20" Source="/Assets/general/restart.png"/>
 										</Button>
-										<ProgressBar Width="250" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="True"></ProgressBar>
+										<ProgressBar Width="350" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="True"></ProgressBar>
 										<StackPanel>
 											<Button Width="30" ToolTip.Tip="Pause" Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" Height="25" FontSize="9" Command="{Binding PauseDownloadCommand}" IsVisible="{Binding !ResumeButtonVisible}">
 												<Image Height="18" Width="18" Source="/Assets/general/pause.png"/>
@@ -54,7 +54,7 @@
 						<StackPanel IsVisible="{Binding !IsFileDownloadTask}" IsEnabled="{Binding !IsFileDownloadTask}">
 							<TextBlock HorizontalAlignment="Left" Height="22" FontSize="16" Margin="5,0,0,0" TextWrapping="Wrap" Text="{Binding Name, Converter={StaticResource escapeUnderscoresConverter}}" Foreground="{Binding TextColor}"/>
 							<StackPanel IsVisible="{Binding !IsCompleted}">
-								<ProgressBar Width="240" IsVisible="{Binding ProgressBarMax}" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="{Binding ShowProgressText}"></ProgressBar>
+								<ProgressBar Width="350" IsVisible="{Binding ProgressBarMax}" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="{Binding ShowProgressText}"></ProgressBar>
 								<Label Height="22" FontSize="12" Margin="5,0,0,0" VerticalAlignment="Center" Content="{Binding Info, Converter={StaticResource escapeUnderscoresConverter}}}"/>
 							</StackPanel>
 							<StackPanel IsVisible="{Binding !IsTextTask}">
@@ -74,7 +74,7 @@
 						<Button Width="30" ToolTip.Tip="Restart" Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" Height="25" FontSize="9" Command="{Binding RestartDownloadCommand}" IsVisible="{Binding IsFileDownloadTask}">
 							<Image Height="20" Width="20" Source="/Assets/general/restart.png"/>
 						</Button>
-						<ProgressBar Width="250" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="True"></ProgressBar>
+						<ProgressBar Width="350" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="True"></ProgressBar>
 						<StackPanel>
 							<Button Width="30" ToolTip.Tip="Pause" Margin="5,0,0,0" IsEnabled="{Binding !IsCancelled}" Height="25" FontSize="9" Command="{Binding PauseDownloadCommand}" IsVisible="{Binding !ResumeButtonVisible}">
 								<Image Height="18" Width="18" Source="/Assets/general/pause.png"/>

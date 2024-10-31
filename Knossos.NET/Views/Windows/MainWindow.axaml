@@ -9,75 +9,57 @@
         x:Class="Knossos.NET.Views.MainWindow"
         Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterScreen"
-        Title="{Binding AppTitle}">
+		Background="{StaticResource BackgroundColorPrimary}"
+        Title="{Binding AppTitle}"
+		xmlns:cvt="clr-namespace:Knossos.NET.Converters;assembly=Knossos.NET">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-	
 
-	<!-- Main View -->
-	<Grid Background="{StaticResource BackgroundColorPrimary}">
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="*"></ColumnDefinition>
-			<ColumnDefinition Width="4"></ColumnDefinition>
-			<ColumnDefinition Width="Auto" MaxWidth="450"></ColumnDefinition>
-		</Grid.ColumnDefinitions>
-		<TabControl Grid.Column="0" SelectedIndex="{Binding TabIndex}">
-			<!--Installed Mods / Home-->
-			<TabItem ToolTip.Tip="View and run installed Freepsace Open games and modifications" Header="Play">
-				<v:ModListView Content="{Binding InstalledModsView}"/>
-			</TabItem>
-			<!--Nebula Mods / Explore-->
-			<TabItem ToolTip.Tip="Search and install Freespace Open games and modifications" Header="Explore">
-				<v:NebulaModListView Content="{Binding NebulaModsView}"/>
-			</TabItem>
-			<!--FSO Builds-->
-			<TabItem ToolTip.Tip="Download new Freespace Open engine builds" Header="Engine">
-				<v:FsoBuildsView Margin="10" Content="{Binding FsoBuildsView}"/>
-			</TabItem>
-			<!--Dev-->
-			<TabItem ToolTip.Tip="Develop new games and modifications for the Freespace Open Engine" Header="Develop">
-				<v:DeveloperModsView Content="{Binding DeveloperModView}"/>
-			</TabItem>
-			<!--Community-->
-			<TabItem ToolTip.Tip="FAQs and Community Resources" Header="Community">
-				<v:CommunityView Content="{Binding CommunityView}"/>
-			</TabItem>
-			<!--PXO-->
-			<TabItem ToolTip.Tip="View multiplayer games using PXO servers" Header="Multiplayer">
-				<v:PxoView Content="{Binding PxoView}"/>
-			</TabItem>
-			<!--Global Settings-->
-			<TabItem ToolTip.Tip="Change global Freespace Open and Knossos.NET settings" Header="Settings">
-				<v:GlobalSettingsView Content="{Binding GlobalSettingsView}"/>
-			</TabItem>
-			<!--Debug-->
-			<TabItem Header="Debug">
-				<Grid RowDefinitions="Auto,*">
-					<StackPanel>
-						<WrapPanel Grid.Row="0" Margin="5">
-							<Button Margin="5" Classes="Primary" Command="{Binding OpenFS2Log}">View fs2__open.log</Button>
-							<Button Margin="5" Classes="Primary" Command="{Binding UploadFS2Log}">Upload fs2__open.log</Button>
-							<Button Margin="5" Classes="Settings" Command="{Binding OpenDebugFilterView}">Adjust Debug Filters</Button>
-							<Button Margin="5" Classes="Settings" Command="{Binding OpenFS2Ini}">View fs2__open.ini</Button>
-						</WrapPanel>
-						<WrapPanel Grid.Row="0" Margin="5">
-							<Button Margin="5" Classes="Settings" Command="{Binding UploadKnossosConsole}">Upload Knossos Console</Button>
-							<Button Margin="5" Classes="Settings" Command="{Binding OpenLog}">View Knossos Logfile</Button>
-							<Button Margin="5" Classes="Settings" Command="{Binding OpenSettings}">View Knossos Settings File</Button>
-						</WrapPanel>
-					</StackPanel>
-					<TextBox Grid.Row="1" Text="{Binding UiConsoleOutput}" IsReadOnly="True"></TextBox>
-				</Grid>
-			</TabItem>
-		</TabControl>
+	<Window.Resources>
+		<cvt:BitmapAssetValueConverter x:Key="iconImageConverter"/>
+	</Window.Resources>
 	
-		<v:TaskView Margin="0,0,0,10" Grid.Column="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Content="{Binding TaskView}"/>
-		<v:TaskInfoButtonView  Width="40" Height="40" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,-3,0" Content="{Binding TaskInfoButton}"/>
-		<Button Margin="0,5,45,0" Grid.Column="0" Command="{Binding OpenScreenshotsFolder}" ToolTip.Tip="Open screenshots folder" VerticalAlignment="Top" HorizontalAlignment="Right">
-			<Image Height="27" Width="20" Source="/Assets/general/screenshot.png"></Image>
-		</Button>
-		
+	<!-- Main View -->
+	<Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+		<SplitView IsPaneOpen="{Binding IsMenuOpen}" CompactPaneLength="60" DisplayMode="CompactInline" OpenPaneLength="150" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+			<SplitView.Pane>
+				<ScrollViewer  Background="{StaticResource BackgroundColorTertiary}">
+					<StackPanel Orientation="Vertical" Spacing="5" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+						<Grid ColumnDefinitions="Auto, Auto">
+							<Button Grid.Column="0" HorizontalAlignment="Left" Width="40" Height="40" Margin="10 10" Command="{Binding TriggerMenuCommand}" ToolTip.Tip="Expand or collapse the menu">
+								<PathIcon Height="15" Data="{StaticResource 3LinesRegular}" />
+							</Button>
+							<Button Grid.Column="1" Margin="15,0,0,0" Width="40" Height="40" HorizontalAlignment="Right" Command="{Binding OpenScreenshotsFolder}" ToolTip.Tip="Open screenshots folder">
+								<Image Height="30" Width="30" Source="/Assets/general/screenshot.png"></Image>
+							</Button>
+						</Grid>
+						<Grid RowDefinitions="Auto, Auto">
+							<v:TaskInfoButtonView ZIndex="0" Margin="9,0,0,0" Grid.Row="0" Width="40" Height="45" HorizontalAlignment="Left" Content="{Binding TaskInfoButton}"/>
+							<ListBox ZIndex="1" Background="Transparent" Grid.Row="1" Margin="2 -45 -100 0" Padding="0" ItemsSource="{Binding MenuItems}" SelectedItem="{Binding SelectedMenuItem}">
+								<ListBox.Styles>
+									<Style Selector="ListBoxItem">
+										<Setter Property="Padding" Value="12 8"></Setter>
+									</Style>
+								</ListBox.Styles>
+								<ListBox.ItemTemplate> 
+									<DataTemplate DataType="{x:Type vm:MainViewMenuItem}">
+										<StackPanel Height="29" Spacing="18" Orientation="Horizontal" ToolTip.Tip="{Binding tooltip}">
+											<Image Width="30" Source="{Binding iconRoute, Converter={StaticResource iconImageConverter}}"/>
+											<TextBlock VerticalAlignment="Center" Text="{Binding label}"/>
+										</StackPanel>
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+						</Grid>
+					</StackPanel>
+				</ScrollViewer>
+			</SplitView.Pane>
+
+			<SplitView.Content>
+				<TransitioningContentControl PageTransition="{x:Null}" Content="{Binding CurrentViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+			</SplitView.Content>
+		</SplitView>
 	</Grid>
 </Window>

@@ -34,11 +34,6 @@ namespace Knossos.NET.ViewModels
             timer.Start();
         }
 
-        internal void ToggleTaskView()
-        {
-            TaskViewModel?.ToggleCommand();
-        }
-
         private void Update(object? _, System.Timers.ElapsedEventArgs __)
         {
             if(TaskViewModel != null)
