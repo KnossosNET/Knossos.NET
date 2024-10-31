@@ -69,7 +69,7 @@ On KnossosNET there are multiples sources of Command Line arguments that are eve
 <br /><br />
 ## **Dev Environment:**<br />
 - MSVC 2022<br />
-- .NET 6.0.406 SDK https://dotnet.microsoft.com/en-us/download/dotnet/6.0<br />
+- .NET 8.0.403 SDK https://dotnet.microsoft.com/en-us/download/dotnet/8.0<br />
 - Avalonia Extension for Visual Studio https://marketplace.visualstudio.com/items?itemName=AvaloniaTeam.AvaloniaVS<br />
 
 <br /><br />
