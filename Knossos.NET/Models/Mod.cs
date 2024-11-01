@@ -779,19 +779,18 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// To use with the List .Sort()
-        /// Retuns a list that is sort from older to newer
+        /// Orders the two mods from older to newer
         /// </summary>
         /// <param name="mod1"></param>
         /// <param name="mod2"></param>
         public static int CompareVersion(Mod mod1, Mod mod2)
         {
-            //inverted
             return SemanticVersion.Compare(mod1.version, mod2.version);
         }
 
         /// <summary>
         /// To use with the List .Sort()
-        /// Retuns a list that is sort from newer to older
+        /// Orders the two mods from newer to older
         /// </summary>
         /// <param name="mod1"></param>
         /// <param name="mod2"></param>
@@ -799,6 +798,17 @@ namespace Knossos.NET.Models
         {
             //inverted
             return SemanticVersion.Compare(mod2.version, mod1.version);
+        }
+
+        /// <summary>
+        /// To use with the List .Sort()
+        /// Orders the two titles using a regular case-insensitive string comparison, but ignoring any leading 'A', 'An', or 'The' articles
+        /// </summary>
+        /// <param name="title1"></param>
+        /// <param name="title2"></param>
+        public static int CompareTitles(string title1, string title2)
+        {
+            return String.Compare(KnUtils.RemoveArticles(title1), KnUtils.RemoveArticles(title2), StringComparison.CurrentCultureIgnoreCase);
         }
 
         /// <summary>

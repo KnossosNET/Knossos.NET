@@ -177,7 +177,7 @@ namespace Knossos.NET.ViewModels
                 switch (sortType)
                 {
                     case MainWindowViewModel.SortType.name:
-                        return CompareTitles(modA.title, modB.title);
+                        return Mod.CompareTitles(modA.title, modB.title);
                     case MainWindowViewModel.SortType.release:
                         if (modA.firstRelease == modB.firstRelease)
                             return 0;
@@ -219,11 +219,6 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Warning, "ModListViewModel.CompareMods()",ex.Message);
                 return 0; 
             }
-        }
-
-        private int CompareTitles(string title1, string title2)
-        {
-            return String.Compare(KnUtils.RemoveArticles(title1), KnUtils.RemoveArticles(title2));
         }
 
         /// <summary>
