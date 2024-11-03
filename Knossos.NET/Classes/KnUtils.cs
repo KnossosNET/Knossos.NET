@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
@@ -949,6 +950,20 @@ namespace Knossos.NET
             }
 
             return text.Replace("_", "__");
+        }
+
+        /// <summary>
+        /// Gets rid of 'A', 'An', and 'The' at the beginning of a string, case-insensitively
+        /// </summary>
+        /// <param name="text">A string</param>
+        /// <returns>The string with any articles removed from the beginning</returns>
+        public static string RemoveArticles(string title)
+        {
+            var match = Regex.Match(title, "((A)|(An)|(The))\\s+", RegexOptions.IgnoreCase);
+            if (match.Index == 0 && match.Length > 0)
+                return title.Substring(match.Length);
+            else
+                return title;
         }
 
         /// <summary>

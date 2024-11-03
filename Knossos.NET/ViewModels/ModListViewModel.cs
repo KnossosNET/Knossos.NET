@@ -181,7 +181,7 @@ namespace Knossos.NET.ViewModels
                 switch (sortType)
                 {
                     case MainWindowViewModel.SortType.name:
-                        return String.Compare(modA.title, modB.title);
+                        return Mod.CompareTitles(modA.title, modB.title);
                     case MainWindowViewModel.SortType.release:
                         if (modA.firstRelease == modB.firstRelease)
                             return 0;
