@@ -32,6 +32,8 @@ namespace Knossos.NET.Models
         x64_avx2,
         arm32,
         arm64,
+        riscv32,
+        riscv64,
         other
     }
 
@@ -497,6 +499,16 @@ namespace Knossos.NET.Models
                 properties.arm32 = true;
                 return properties;
             }
+            if (environment.ToLower().Contains("riscv64"))
+            {
+                properties.riscv64 = true;
+                return properties;
+            }
+            if (environment.ToLower().Contains("riscv32"))
+            {
+                properties.riscv32 = true;
+                return properties;
+            }
             if (!environment.ToLower().Contains("avx"))
             {
                 properties.sse2 = true;
@@ -551,6 +563,14 @@ namespace Knossos.NET.Models
                 return true;
             }
             if (enviroment.ToLower().Contains("arm32") && (KnUtils.CpuArch == "Armv6" || KnUtils.CpuArch == "Arm"))
+            {
+                return true;
+            }
+            if (enviroment.ToLower().Contains("riscv64") && KnUtils.CpuArch == "RiscV64")
+            {
+                return true;
+            }
+            if (enviroment.ToLower().Contains("riscv32") && KnUtils.CpuArch == "RiscV32")
             {
                 return true;
             }
@@ -613,6 +633,12 @@ namespace Knossos.NET.Models
 
             if (properties.arm64)
                 return FsoExecArch.arm64;
+
+            if (properties.riscv32)
+                return FsoExecArch.riscv32;
+
+            if (properties.riscv64)
+                return FsoExecArch.riscv64;
 
             if (properties.x64)
             {
@@ -747,6 +773,8 @@ namespace Knossos.NET.Models
                 case FsoExecArch.x64_avx2: env += " && x86_64 && avx2"; break;
                 case FsoExecArch.arm32: env += " && arm32"; break;
                 case FsoExecArch.arm64: env += " && arm64"; break;
+                case FsoExecArch.riscv32: env += " && riscv32"; break;
+                case FsoExecArch.riscv64: env += " && riscv64"; break;
             }
 
             return env;
@@ -851,6 +879,10 @@ namespace Knossos.NET.Models
                             case "Arm":
                             case "Armv6":
                                 break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                break;
                         }
                         break;
                     case FsoExecArch.x64_avx:
@@ -866,6 +898,10 @@ namespace Knossos.NET.Models
                                 break;
                             case "Arm":
                             case "Armv6":
+                                break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
                                 break;
                         }
                         break;
@@ -885,6 +921,10 @@ namespace Knossos.NET.Models
                             case "Arm":
                             case "Armv6":
                                 break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                break;
                         }
                         break;
                     case FsoExecArch.x86_avx2:
@@ -902,6 +942,10 @@ namespace Knossos.NET.Models
                             case "Arm":
                             case "Armv6":
                                 break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                break;
                         }
                         break;
                     case FsoExecArch.x86_avx:
@@ -918,6 +962,10 @@ namespace Knossos.NET.Models
                                 break;
                             case "Arm":
                             case "Armv6":
+                                break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
                                 break;
                         }
                         break;
@@ -940,6 +988,10 @@ namespace Knossos.NET.Models
                             case "Arm":
                             case "Armv6":
                                 break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                break;
                         }
                         break;
                     case FsoExecArch.arm64:
@@ -955,6 +1007,10 @@ namespace Knossos.NET.Models
                             case "Arm":
                             case "Armv6":
                                 break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                break;
                         }
                         break;
                     case FsoExecArch.arm32:
@@ -969,6 +1025,48 @@ namespace Knossos.NET.Models
                             case "Arm":
                             case "Armv6":
                                 score += 100;
+                                break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.riscv32:
+                        switch (KnUtils.CpuArch)
+                        {
+                            case "X64":
+                                break;
+                            case "X86":
+                                break;
+                            case "RiscV64":
+                                break;
+                            case "RiscV32":
+                                score += 100;
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.riscv64:
+                        switch (KnUtils.CpuArch)
+                        {
+                            case "X64":
+                                break;
+                            case "X86":
+                                break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                score += 100;
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
                                 break;
                         }
                         break;
@@ -995,6 +1093,10 @@ namespace Knossos.NET.Models
                             case "Arm":
                             case "Armv6":
                                 break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                break;
                         }
                         break;
                     case FsoExecArch.x64_avx:
@@ -1009,6 +1111,10 @@ namespace Knossos.NET.Models
                                 break;
                             case "Arm":
                             case "Armv6":
+                                break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
                                 break;
                         }
                         break;
@@ -1025,6 +1131,10 @@ namespace Knossos.NET.Models
                             case "Arm":
                             case "Armv6":
                                 break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                break;
                         }
                         break;
                     case FsoExecArch.x86_avx2:
@@ -1039,6 +1149,10 @@ namespace Knossos.NET.Models
                                 break;
                             case "Arm":
                             case "Armv6":
+                                break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
                                 break;
                         }
                         break;
@@ -1055,6 +1169,10 @@ namespace Knossos.NET.Models
                             case "Arm":
                             case "Armv6":
                                 break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                break;
                         }
                         break;
                     case FsoExecArch.x86:
@@ -1069,6 +1187,10 @@ namespace Knossos.NET.Models
                                 break;
                             case "Arm":
                             case "Armv6":
+                                break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
                                 break;
                         }
                         break;
@@ -1085,6 +1207,10 @@ namespace Knossos.NET.Models
                             case "Arm":
                             case "Armv6":
                                 break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                break;
                         }
                         break;
                     case FsoExecArch.arm32:
@@ -1098,6 +1224,48 @@ namespace Knossos.NET.Models
                                 break;
                             case "Arm":
                             case "Armv6":
+                                score += 100;
+                                break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.riscv32:
+                        switch (KnUtils.CpuArch)
+                        {
+                            case "X64":
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                            case "RiscV32":
+                                score += 100;
+                                break;
+                            case "RiscV64":
+                                break;
+                        }
+                        break;
+                    case FsoExecArch.riscv64:
+                        switch (KnUtils.CpuArch)
+                        {
+                            case "X64":
+                                break;
+                            case "X86":
+                                break;
+                            case "Arm64":
+                                break;
+                            case "Arm":
+                            case "Armv6":
+                                break;
+                            case "RiscV32":
+                                break;
+                            case "RiscV64":
                                 score += 100;
                                 break;
                         }

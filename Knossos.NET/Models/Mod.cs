@@ -1236,7 +1236,9 @@ namespace Knossos.NET.Models
 
         /* Knossos.NET added */
         public bool arm64 { get; set; }
-        public bool arm32 { get; set; } 
+        public bool arm32 { get; set; }
+        public bool riscv32 {  get; set; }
+        public bool riscv64 { get; set; }
         public bool other { get; set; }
     }
 }

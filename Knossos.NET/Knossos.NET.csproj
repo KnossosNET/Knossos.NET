@@ -51,6 +51,9 @@
   <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('win'))">
     <AvaloniaResource Include="Assets\utils\win\**" />
   </ItemGroup>
+    <ItemGroup Condition="$(RuntimeIdentifier.Equals('linux-riscv64'))">
+    <AvaloniaResource Include="Assets\utils\linux-riscv64\**" />
+  </ItemGroup>
   <ItemGroup Condition="$(RuntimeIdentifier.Equals('linux-arm64'))">
     <AvaloniaResource Include="Assets\utils\linux-arm64\**" />
   </ItemGroup>

@@ -148,11 +148,13 @@ namespace Knossos.NET.Classes
                 case FsoExecArch.x86_avx:
                 case FsoExecArch.x86_avx2:
                 case FsoExecArch.arm32:
+                case FsoExecArch.riscv32:
                     return "win32";
                 case FsoExecArch.x64:
                 case FsoExecArch.x64_avx:
                 case FsoExecArch.x64_avx2:
                 case FsoExecArch.arm64:
+                case FsoExecArch.riscv64:
                     return "win64";
                 default: 
                     return null;
