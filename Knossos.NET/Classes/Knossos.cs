@@ -1240,7 +1240,7 @@ namespace Knossos.NET
                 try
                 {
                     var fsoVersion = new SemanticVersion(fsoBuild.version);
-                    var newPortableModeVersion = new SemanticVersion("24.2.1");
+                    var newPortableModeVersion = new SemanticVersion("25.0.0");
                     if (fsoVersion < newPortableModeVersion)
                     {
                         cmdline = "-portable_mode " + cmdline;
