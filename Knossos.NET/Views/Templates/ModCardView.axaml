@@ -70,6 +70,7 @@
 						<Button Command="{Binding ButtonCommand}" CommandParameter="debug" Content="FSO Debug" Classes="Primary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="115" ></Button>
 						<Button Command="{Binding ButtonCommand}" CommandParameter="fred2debug" Content="Fred2 Debug" Classes="Secondary Rounded" HorizontalAlignment="Center" Margin="0,2,0,0" Width="115" ></Button>
 						<Button Command="{Binding ButtonCommand}" CommandParameter="qtfreddebug" Content="QtFred Debug" Classes="Settings Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="115" ></Button>
+						<Button Command="{Binding ButtonCommand}" CommandParameter="logfile" Content="Open Logfile" Classes="Quaternary Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="115" ></Button>
 					</StackPanel>
 				</TabItem>
 			</TabControl>
