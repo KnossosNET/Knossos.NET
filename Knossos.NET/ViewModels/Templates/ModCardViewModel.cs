@@ -222,9 +222,12 @@ namespace Knossos.NET.ViewModels
             switch((string)command)
             {
                 case "play" : Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release); break;
+                case "playvr": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release, false, 0, true); break;
                 case "fred2": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2); break;
+                case "fred2debug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2Debug); break;
                 case "debug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Debug); break;
                 case "qtfred": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.QtFred); break;
+                case "qtfreddebug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.QtFredDebug); break;
                 case "update": ButtonCommandUpdate(); break;
                 case "modify": ButtonCommandModify(); break;
                 case "delete": ButtonCommandDelete(); break;
