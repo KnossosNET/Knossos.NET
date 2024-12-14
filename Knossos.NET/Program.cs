@@ -13,6 +13,7 @@ namespace Knossos.NET
         public static void Main(string[] args)
         {
             bool softwareRendering = false;
+            bool isQuickLaunch = false;
 
             //Check app args
             foreach (var arg in args)
@@ -21,24 +22,36 @@ namespace Knossos.NET
                 {
                     softwareRendering = true;
                 }
+                if (arg.ToLower() == "-playmod")
+                {
+                    isQuickLaunch = true;
+                }
             }
 
-            //Check enviroment variables
-            var renderMode = KnUtils.GetEnvironmentVariable("KNET_RENDER_MODE");
 
-            if (renderMode != null && renderMode.ToLower() == "software")
+            if (isQuickLaunch)
             {
-                softwareRendering = true;
-            }
-
-            //Start App
-            if (softwareRendering)
-            {
-                BuildAvaloniaAppSoftware().StartWithClassicDesktopLifetime(args);
+                Knossos.StartUp(true, false);
             }
             else
             {
-                BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+                //Check enviroment variables
+                var renderMode = KnUtils.GetEnvironmentVariable("KNET_RENDER_MODE");
+
+                if (renderMode != null && renderMode.ToLower() == "software")
+                {
+                    softwareRendering = true;
+                }
+
+                //Start App
+                if (softwareRendering)
+                {
+                    BuildAvaloniaAppSoftware().StartWithClassicDesktopLifetime(args);
+                }
+                else
+                {
+                    BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+                }
             }
         }
 
