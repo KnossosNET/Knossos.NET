@@ -741,7 +741,7 @@ namespace Knossos.NET
         /// <param name="fsoExecType"></param>
         /// <param name="standaloneServer"></param>
         /// <param name="standalonePort"></param>
-        public static async void PlayMod(Mod mod, FsoExecType fsoExecType, bool standaloneServer = false, int standalonePort = 0)
+        public static async void PlayMod(Mod mod, FsoExecType fsoExecType, bool standaloneServer = false, int standalonePort = 0, bool vrMode = false)
         {
             if (TaskViewModel.Instance?.IsSafeState() == false)
             {
@@ -803,6 +803,12 @@ namespace Knossos.NET
             var modFlag = string.Empty;
             var modList = new List<Mod>();
             FsoBuild? fsoBuild = null;
+
+            /* VR Mode Stuff */
+            if(vrMode)
+            {
+                cmdline += " -vr";
+            }
 
             /* Resolve Dependencies should be all valid at this point */
             var dependencyList = mod.GetModDependencyList(false,true);
