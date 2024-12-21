@@ -165,7 +165,7 @@ namespace Knossos.NET
             if (disposed)
                 throw new ObjectDisposedException("This object was already disposed.");
             string cmdline = "t ";
-            return await Run(cmdline + file);
+            return await Run(cmdline + "\"" + file + "\"");
         }
 
         public void KillProcess()
