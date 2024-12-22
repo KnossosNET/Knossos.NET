@@ -276,7 +276,40 @@ namespace Knossos.NET.Models
             }
             else
             {
-                return modFlag;
+                if (!devMode)
+                {
+                    return modFlag;
+                }
+                else
+                {
+                    try
+                    {
+                        //Check if the modflag belongs to a disabled pkg, if so skip it if not enabled pkg also reffers it
+                        var flagList = new List<string>();
+                        foreach (var flag in modFlag)
+                        {
+                            var foundDisabled = packages.FirstOrDefault(d => !d.isEnabled && d.dependencies != null && d.dependencies.FirstOrDefault(dp => dp.id == flag) != null);
+
+                            if (foundDisabled != null)
+                            {
+                                var foundEnabled = packages.FirstOrDefault(e => e.isEnabled && e.dependencies != null && e.dependencies.FirstOrDefault(ep => ep.id == flag) != null);
+                                if (foundEnabled != null)
+                                {
+                                    flagList.Add(flag);
+                                }
+                            }
+                            else
+                            {
+                                flagList.Add(flag);
+                            }
+                        }
+                        return flagList;
+                    }catch(Exception ex)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Mod.GetModFlagList()", ex);
+                        return modFlag;
+                    }
+                }
             }
         }
 
