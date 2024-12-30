@@ -353,7 +353,7 @@ namespace Knossos.NET.ViewModels
                         modCache.Add(modDep);
                     }
 
-                    //If this is a engine build check if contains valid executables
+                    //If this is an engine build then check if contains valid executables
                     if (modDep.type == ModType.engine)
                     {
                         //Set a max amount of attempts to get an alternative version in case we need an alternative version

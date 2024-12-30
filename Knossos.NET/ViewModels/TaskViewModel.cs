@@ -276,7 +276,7 @@ namespace Knossos.NET.ViewModels
 
             if (mod.type == ModType.engine)
             {
-                //If this is a engine build call the UI element to do the build install process instead
+                //If this is an engine build, call the UI element to do the build install process instead
                 FsoBuildsViewModel.Instance?.RelayInstallBuild(mod);
             }
             else
