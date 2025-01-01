@@ -79,13 +79,6 @@ namespace Knossos.NET.ViewModels
             set { if (blDlNebula != value) { this.SetProperty(ref blDlNebula, value); UnCommitedChanges = true; } }
         }
 
-        private bool blAigaion = false;
-        internal bool BlAigaion
-        {
-            get { return blAigaion; }
-            set { if (blAigaion != value) { this.SetProperty(ref blAigaion, value); UnCommitedChanges = true; } }
-        }
-
         private bool blTalos = false;
         internal bool BlTalos
         {
@@ -603,7 +596,6 @@ namespace Knossos.NET.ViewModels
 
             BlDlNebula = false;
             BlCfNebula = false;
-            BlAigaion = false;
             BlTalos = false;
             if (Knossos.globalSettings.mirrorBlacklist != null)
             {
@@ -614,10 +606,6 @@ namespace Knossos.NET.ViewModels
                 if (Knossos.globalSettings.mirrorBlacklist.Contains("cf.fsnebula.org"))
                 {
                     BlCfNebula = true;
-                }
-                if (Knossos.globalSettings.mirrorBlacklist.Contains("aigaion.feralhosting.com"))
-                {
-                    BlAigaion = true;
                 }
                 if (Knossos.globalSettings.mirrorBlacklist.Contains("talos.feralhosting.com"))
                 {
@@ -1184,15 +1172,11 @@ namespace Knossos.NET.ViewModels
             {
                 blMirrors.Add("cf.fsnebula.org");
             }
-            if (BlAigaion)
-            {
-                blMirrors.Add("aigaion.feralhosting.com");
-            }
             if (BlTalos)
             {
                 blMirrors.Add("talos.feralhosting.com");
             }
-            if (blMirrors.Any() && blMirrors.Count() != 4 /*Invalid!*/)
+            if (blMirrors.Any() && blMirrors.Count() != 3 /*Invalid!*/)
             {
                 Knossos.globalSettings.mirrorBlacklist = blMirrors.ToArray();
             }
@@ -1201,7 +1185,6 @@ namespace Knossos.NET.ViewModels
                 Knossos.globalSettings.mirrorBlacklist = null;
                 BlDlNebula = false;
                 BlCfNebula = false;
-                BlAigaion = false;
                 BlTalos = false;
             }
 
