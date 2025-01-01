@@ -116,7 +116,6 @@
 							<WrapPanel Grid.Column="1" Margin="8,0,0,0">
 								<CheckBox Margin="0,0,0,0" IsChecked="{Binding !BlDlNebula}">dl.fsnebula.org</CheckBox>
 								<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlCfNebula}">cf.fsnebula.org</CheckBox>
-								<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlAigaion}">aigaion.feralhosting.com</CheckBox>
 								<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlTalos}">talos.feralhosting.com</CheckBox>
 							</WrapPanel>
 						</Grid>
