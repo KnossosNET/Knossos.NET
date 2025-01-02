@@ -100,6 +100,13 @@ namespace Knossos.NET
                 {
                     return Path.GetDirectoryName(KnUtils.AppImagePath);
                 }
+                else if (IsMacOS && WasInstallerUsed())
+                {
+                    var execFullPath = Environment.ProcessPath;
+                    var cutOff = execFullPath!.IndexOf(".app") + 4;
+                    var realName = execFullPath![..cutOff];
+                    return Path.GetDirectoryName(realName);
+                }
                 else
                 {
                     return AppDomain.CurrentDomain.BaseDirectory;
@@ -113,7 +120,14 @@ namespace Knossos.NET
         /// <returns>fullpath as a string</returns>
         public static string GetKnossosDataFolderPath()
         {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET");
+            if (!Knossos.inPortableMode)
+            {
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET");
+            }
+            else
+            {
+                return Path.Combine(KnetFolderPath!, "kn_portable", "KnossosNET"); //If inPortableMode = true, KnetFolderPath is not null
+            }
         }
 
         /// <summary>
@@ -125,20 +139,28 @@ namespace Knossos.NET
         /// <returns>fullpath as string</returns>
         public static string GetFSODataFolderPath()
         {
-            if (!string.IsNullOrEmpty(fsoPrefPath))
+            if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences)
             {
-                return fsoPrefPath;
+                return Path.Combine(KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen"); //If inPortableMode = true, KnetFolderPath is not null
             }
             else
             {
-                if (KnUtils.isMacOS){
-                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "HardLightProductions", "FreeSpaceOpen");
-                }
-                if(IsLinux)
+                if (!string.IsNullOrEmpty(fsoPrefPath))
                 {
-                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "HardLightProductions", "FreeSpaceOpen");
+                    return fsoPrefPath;
                 }
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "HardLightProductions", "FreeSpaceOpen");
+                else
+                {
+                    if (KnUtils.isMacOS)
+                    {
+                        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "HardLightProductions", "FreeSpaceOpen");
+                    }
+                    if (IsLinux)
+                    {
+                        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "HardLightProductions", "FreeSpaceOpen");
+                    }
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "HardLightProductions", "FreeSpaceOpen");
+                }
             }
 
         }

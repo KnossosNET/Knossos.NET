@@ -24,6 +24,9 @@ namespace Knossos.NET.ViewModels
         internal bool lastPage = false;
 
         [ObservableProperty]
+        internal bool isPortableMode = false;
+
+        [ObservableProperty]
         internal string? libraryPath = null;
 
         [ObservableProperty]
@@ -49,12 +52,14 @@ namespace Knossos.NET.ViewModels
         public static QuickSetupViewModel? Instance;
 
         public QuickSetupViewModel() 
-        { 
+        {
+            isPortableMode = Knossos.inPortableMode;
         }
 
         public QuickSetupViewModel(Window dialog) 
         {
             this.dialog = dialog;
+            isPortableMode = Knossos.inPortableMode;
             Instance = this;
             UpdateBuildName(MainWindowViewModel.Instance!.LatestStable);
             TrackRepoStatus();
