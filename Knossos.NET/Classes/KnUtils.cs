@@ -88,6 +88,13 @@ namespace Knossos.NET
                 {
                     return Path.GetDirectoryName(KnUtils.AppImagePath);
                 }
+                else if (IsMacOS && WasInstallerUsed())
+                {
+                    var execFullPath = Environment.ProcessPath;
+                    var cutOff = execFullPath!.IndexOf(".app") + 4;
+                    var realName = execFullPath![..cutOff];
+                    return Path.GetDirectoryName(realName);
+                }
                 else
                 {
                     return AppDomain.CurrentDomain.BaseDirectory;
