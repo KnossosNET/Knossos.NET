@@ -28,7 +28,7 @@
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
 							<TextBox Text="{Binding BasePath}" Margin="10,0,0,0" Grid.Column="1" IsReadOnly="True" Width="500"></TextBox>
-							<Button Margin="5,0,0,0" Grid.Column="2" Classes="Quaternary" Command="{Binding BrowseFolderCommand}">Browse</Button>
+							<Button IsVisible="{Binding !IsPortableMode}" Margin="5,0,0,0" Grid.Column="2" Classes="Quaternary" Command="{Binding BrowseFolderCommand}">Browse</Button>
 						</Grid>
 						<!-- Lib Info -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="6,10,0,0">
@@ -369,6 +369,11 @@
 								<ComboBoxItem>Polish</ComboBoxItem>
 							</ComboBox>
 						</Grid>
+						<!-- Portable FSO Preferences -->
+						<WrapPanel IsVisible="{Binding IsPortableMode}">
+							<Label Margin="4,5,0,0" Width="200" ToolTip.Tip="Store FSO pilots and settings in a portable location. Only if the launcher is in portable mode">Portable FSO Data</Label>
+							<ToggleSwitch Margin="11,0,0,0" IsChecked="{Binding PortableFsoPreferences}"></ToggleSwitch>
+						</WrapPanel>
 						<!-- Sys Info -->
 						<WrapPanel Margin="9,0,0,0">
 							<TextBlock VerticalAlignment="Center" Width="201">Detected Build Settings </TextBlock>

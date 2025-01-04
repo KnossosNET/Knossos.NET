@@ -36,7 +36,8 @@ namespace Knossos.NET.ViewModels
         private const long speed10MB = 170000000;
 
         /* For display only */
-
+		[ObservableProperty]
+        internal bool isPortableMode = false;
         [ObservableProperty]
         internal bool flagDataLoaded = false;
         [ObservableProperty]
@@ -61,7 +62,6 @@ namespace Knossos.NET.ViewModels
         internal bool isAVX2 = false;
 
         /* Knossos Settings */
-
         [ObservableProperty]
         internal string basePath = string.Empty; //When this is changed settings are saved immediately.
 
@@ -500,6 +500,14 @@ namespace Knossos.NET.ViewModels
             set { if (envVars != value) { this.SetProperty(ref envVars, value); UnCommitedChanges = true; } }
         }
 
+        /* MISC */
+        private bool portableFsoPreferences = true;
+        internal bool PortableFsoPreferences
+        {
+            get { return portableFsoPreferences; }
+            set { if (portableFsoPreferences != value) { this.SetProperty(ref portableFsoPreferences, value); UnCommitedChanges = true; } }
+        }
+
         internal string globalCmd = string.Empty;
         // In order to have hidden dev options, we need a setter for globalCMD
         public string GlobalCmd
@@ -522,6 +530,7 @@ namespace Knossos.NET.ViewModels
 
         public GlobalSettingsViewModel()
         {
+            isPortableMode = Knossos.inPortableMode;
         }
 
         /// <summary>
@@ -1037,6 +1046,9 @@ namespace Knossos.NET.ViewModels
             //Multi Port
             MultiPort = Knossos.globalSettings.multiPort;
 
+            //MISC
+            PortableFsoPreferences = Knossos.globalSettings.portableFsoPreferences;
+
             UnCommitedChanges = false;
         }
 
@@ -1363,6 +1375,9 @@ namespace Knossos.NET.ViewModels
 
             //Multi port
             Knossos.globalSettings.multiPort = MultiPort;
+
+            //MISC
+            Knossos.globalSettings.portableFsoPreferences = PortableFsoPreferences;
 
             Knossos.globalSettings.Save();
             UnCommitedChanges = false;
