@@ -146,6 +146,11 @@ namespace Knossos.NET.ViewModels
                     MenuItems.Add(new MainViewMenuItem(NebulaLoginVM, "avares://Knossos.NET/Assets/general/menu_nebula.png", "Nebula", "Log in with your nebula account"));
                 }
 
+                if (CustomLauncher.MenuDisplayGlobalSettingsEntry)
+                {
+                    MenuItems.Add(new MainViewMenuItem(GlobalSettingsView, "avares://Knossos.NET/Assets/general/menu_settings.png", "Config", "Change launcher and FSO engine settings"));
+                }
+
                 if (CustomLauncher.MenuDisplayDebugEntry)
                 {
                     MenuItems.Add(new MainViewMenuItem(DebugView, "avares://Knossos.NET/Assets/general/menu_debug.png", "Debug", "Debug info"));
