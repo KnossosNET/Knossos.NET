@@ -674,13 +674,9 @@ namespace Knossos.NET.Models
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings have been loaded");
 
-                        pendingChangesOnAppClose = false;
+                        SetCustomModeValues();
 
-                        if(CustomLauncher.IsCustomMode)
-                        {
-                            checkUpdate = CustomLauncher.AllowLauncherUpdates;
-                            autoUpdate = false;
-                        }
+                        pendingChangesOnAppClose = false;
                     }
 
                 }
@@ -696,6 +692,19 @@ namespace Knossos.NET.Models
             if(Knossos.inPortableMode)
             {
                 basePath = Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "Library");
+            }
+        }
+
+        /// <summary>
+        /// Values controlled by CustomLauncher.cs in single tc mode
+        /// </summary>
+        private void SetCustomModeValues()
+        {
+            if (CustomLauncher.IsCustomMode)
+            {
+                checkUpdate = CustomLauncher.AllowLauncherUpdates;
+                enableLogFile = CustomLauncher.WriteLogFile;
+                autoUpdate = false;
             }
         }
 
@@ -893,6 +902,7 @@ namespace Knossos.NET.Models
         /// <param name="writeIni"></param>
         public void Save(bool writeIni = true) 
         {
+            SetCustomModeValues();
             if (writeIni)
             {
                 WriteFS2IniValues();

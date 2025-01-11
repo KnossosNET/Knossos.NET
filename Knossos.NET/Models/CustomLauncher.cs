@@ -76,6 +76,31 @@ namespace Knossos.NET.Models
         public static bool MenuDisplayNebulaLoginEntry { get; private set; } = false;
 
         /// <summary>
+        /// Display the regular Knossos settings menu item
+        /// If you do this you may want to add "-no_ingame_options" to the custom cmdline
+        /// </summary>
+        public static bool MenuDisplayGlobalSettingsEntry { get; private set; } = false;
+
+        /// <summary>
+        /// Yet another cmdline option, pass it as a string array. 
+        /// It has the lowest priority, same options can be overriden by mod cmdline.
+        /// </summary>
+        public static string[]? CustomCmdlineArray { get; private set; }
+
+        /// <summary>
+        /// Disabling this disconnects the launcher from Nebula completely. Meaning.
+        /// It can not install, update or modify installations. And it cant do api calls and will not get repo_minimal.json
+        /// It is only good to provide static game files not meant to be changed or be updated by a 3rd party app or service
+        /// </summary>
+        public static bool UseNebulaServices { get; private set; } = true;
+
+        /// <summary>
+        /// Whatever to write or not the Knossos.log file to the datafolder, disabling it will prevent this file from be written.
+        /// But the output to the debug console will still be there if you use it.
+        /// </summary>
+        public static bool WriteLogFile { get; private set; } = true;
+
+        /// <summary>
         /// Call this AFTER checking if we are in portable mode or not.
         /// The first time it runs it will try to load the "custom_launcher.json" if ModID is null
         /// </summary>
@@ -142,6 +167,17 @@ namespace Knossos.NET.Models
                     if (customData.MenuDisplayNebulaLoginEntry.HasValue)
                         MenuDisplayNebulaLoginEntry = customData.MenuDisplayNebulaLoginEntry.Value;
 
+                    if (customData.MenuDisplayGlobalSettingsEntry.HasValue)
+                        MenuDisplayGlobalSettingsEntry = customData.MenuDisplayGlobalSettingsEntry.Value;
+
+                    CustomCmdlineArray = customData.CustomCmdlineArray;
+
+                    if (customData.UseNebulaServices.HasValue)
+                        UseNebulaServices = customData.UseNebulaServices.Value;
+
+                    if (customData.WriteLogFile.HasValue)
+                        WriteLogFile = customData.WriteLogFile.Value;
+
                     jsonFile.Close();
                 }
             }
@@ -162,6 +198,10 @@ namespace Knossos.NET.Models
             public bool? MenuDisplayEngineEntry { get; set; }
             public bool? MenuDisplayDebugEntry { get; set; }
             public bool? MenuDisplayNebulaLoginEntry { get; set; }
+            public bool? MenuDisplayGlobalSettingsEntry { get; set; }
+            public string[]? CustomCmdlineArray { get; set; }
+            public bool? UseNebulaServices { get; set; }
+            public bool? WriteLogFile { get; set; }
         }
     }
 }

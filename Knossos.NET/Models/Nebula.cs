@@ -89,6 +89,13 @@ namespace Knossos.NET.Models
         /// </summary>
         public static async Task Trinity()
         {
+            //Custom mode with no nebula services
+            if(Knossos.inSingleTCMode && !CustomLauncher.UseNebulaServices)
+            {
+                Log.Add(Log.LogSeverity.Warning, "Nebula.Trinity()", "Nebula services has been disabled.");
+                repoLoaded = true;
+                return;
+            }
             try
             {
                 nebulaModDataCache.Clear();
@@ -696,6 +703,12 @@ namespace Knossos.NET.Models
         /// </returns>
         private static async Task<ApiReply?> ApiCall(string resourceUrl, HttpContent? data, bool needsLogIn = false, int timeoutSeconds = 45, ApiMethod method = ApiMethod.POST)
         {
+            //Custom mode with no nebula services
+            if (Knossos.inSingleTCMode && !CustomLauncher.UseNebulaServices)
+            {
+                Log.Add(Log.LogSeverity.Warning, "Nebula.Trinity()", "Nebula services has been disabled.");
+                return null;
+            }
             try
             {
                 var client = KnUtils.GetHttpClient();

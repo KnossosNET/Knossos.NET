@@ -1216,6 +1216,10 @@ namespace Knossos.NET
                     cmdline = KnUtils.CmdLineBuilder(cmdline, globalCmd);
                 }
                 cmdline = KnUtils.CmdLineBuilder(cmdline, modCmd?.ToArray());
+                if (inSingleTCMode && CustomLauncher.CustomCmdlineArray != null && CustomLauncher.CustomCmdlineArray.Any())
+                {
+                    cmdline = KnUtils.CmdLineBuilder(cmdline, CustomLauncher.CustomCmdlineArray);
+                }
             }
             else
             {
