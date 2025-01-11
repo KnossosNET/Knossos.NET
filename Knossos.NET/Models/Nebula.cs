@@ -154,7 +154,7 @@ namespace Knossos.NET.Models
                 else
                 {
                     //No update is needed
-                    Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance!.AddMessageTask("Nebula: repo_minimal.json is up to date!"), DispatcherPriority.Background);
+                    Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask("Nebula: repo_minimal.json is up to date!"), DispatcherPriority.Background);
                     Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "repo_minimal.json is up to date!");
                     displayUpdates = false;
                     repoLoaded = true;
@@ -171,7 +171,7 @@ namespace Knossos.NET.Models
                     {
                         try
                         {
-                            Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance!.AddDisplayUpdatesTask(updates), DispatcherPriority.Background);
+                            Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddDisplayUpdatesTask(updates), DispatcherPriority.Background);
                         }
                         catch { }
                     }
@@ -227,7 +227,7 @@ namespace Knossos.NET.Models
                                 {
                                     isInstalled.modData.inNebula = true;
                                     if (isInstalled.modData.devMode)
-                                        DeveloperModsViewModel.Instance!.UpdateVersionManager(isInstalled.modData.id);
+                                        DeveloperModsViewModel.Instance?.UpdateVersionManager(isInstalled.modData.id);
                                 }
                             }
                         }
@@ -248,11 +248,11 @@ namespace Knossos.NET.Models
                                     Dispatcher.UIThread.Invoke(() => MainWindowViewModel.Instance?.MarkAsUpdateAvailable(mod.id), DispatcherPriority.Background);
                                 }
                                 if(isInstalled.First().devMode)
-                                    DeveloperModsViewModel.Instance!.UpdateVersionManager(isInstalled.First().id);
+                                    DeveloperModsViewModel.Instance?.UpdateVersionManager(isInstalled.First().id);
                             }
                             else
                             {
-                                Dispatcher.UIThread.Invoke(() => MainWindowViewModel.Instance!.AddNebulaMod(mod), DispatcherPriority.Background);
+                                Dispatcher.UIThread.Invoke(() => MainWindowViewModel.Instance?.AddNebulaMod(mod), DispatcherPriority.Background);
                             }
                         }
                     }
@@ -429,7 +429,7 @@ namespace Knossos.NET.Models
                     }
                 };
 
-                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.BulkLoadNebulaMods(modsTcs, true), DispatcherPriority.Background);
+                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.BulkLoadNebulaMods(modsTcs, true), DispatcherPriority.Background);
 
                 //Engine Builds
                 var builds = allModsInRepo.Where(m => m.type == ModType.engine).ToList();
@@ -463,10 +463,10 @@ namespace Knossos.NET.Models
 
                 // If the latest of either of these is not installed, signal the main window
                 var installed = Knossos.GetInstalledBuild("FSO", newestStableVersion);
-                MainWindowViewModel.Instance!.AddMostRecent((installed == null) ? newestStableVersion! : "", false);
+                MainWindowViewModel.Instance?.AddMostRecent((installed == null) ? newestStableVersion! : "", false);
                 installed = Knossos.GetInstalledBuild("FSO", newestNightlyVersion);
-                MainWindowViewModel.Instance!.AddMostRecent((installed == null) ? newestNightlyVersion! : "", true);
-                MainWindowViewModel.Instance!.UpdateBuildInstallButtons();
+                MainWindowViewModel.Instance?.AddMostRecent((installed == null) ? newestNightlyVersion! : "", true);
+                MainWindowViewModel.Instance?.UpdateBuildInstallButtons();
 
                 await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.BulkLoadNebulaBuilds(builds), DispatcherPriority.Background);
 

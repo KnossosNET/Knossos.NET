@@ -26,6 +26,10 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string appTitle = "Knossos.NET v" + Knossos.AppVersion;
         [ObservableProperty]
+        internal int? windowWidth = null; // null = auto on windows? must verify dosent crash on linux/mac 
+        [ObservableProperty]
+        internal int? windowHeight = null; // null = auto on windows? must verify dosent crash on linux/mac 
+        [ObservableProperty]
         internal ModListViewModel installedModsView = new ModListViewModel();
         [ObservableProperty]
         internal NebulaModListViewModel nebulaModsView = new NebulaModListViewModel();
@@ -103,11 +107,45 @@ namespace Knossos.NET.ViewModels
                     forceUpdate = true;
                 }
             }
-            FillMenuItemsNormalMode(1);
+            if (!CustomLauncher.IsCustomMode)
+            {
+                FillMenuItemsNormalMode(1);
+            }
+            else
+            {
+                //Apply customization for Single TC Mode
+                AppTitle = CustomLauncher.WindowTitle + " v" + Knossos.AppVersion;
+                WindowHeight = CustomLauncher.WindowHeight;
+                WindowWidth = CustomLauncher.WindowWidth;
+                FillMenuItemsCustomMode(1);
+            }
             Knossos.StartUp(isQuickLaunch, forceUpdate);
         }
 
-        public void FillMenuItemsNormalMode(int defaultSelectedIndex)
+        private void FillMenuItemsCustomMode(int defaultSelectedIndex)
+        {
+            Dispatcher.UIThread.Invoke(new Action(() => {
+                MenuItems = new ObservableCollection<MainViewMenuItem>{
+                    new MainViewMenuItem(TaskView, null, "Tasks", "Overview of current running tasks")
+                };
+
+                if (CustomLauncher.MenuDisplayEngineEntry)
+                    MenuItems.Add(new MainViewMenuItem(FsoBuildsView, "avares://Knossos.NET/Assets/general/menu_engine.png", "Engine", "Download new Freespace Open engine builds"));
+
+                if (CustomLauncher.MenuDisplayDebugEntry)
+                {
+                    MenuItems.Add(new MainViewMenuItem(DebugView, "avares://Knossos.NET/Assets/general/menu_debug.png", "Debug", "Debug info"));
+                }
+
+
+                if (MenuItems != null && MenuItems.Count() - 1 > defaultSelectedIndex)
+                {
+                    SelectedMenuItem = MenuItems[defaultSelectedIndex];
+                }
+            }));
+        }
+
+        private void FillMenuItemsNormalMode(int defaultSelectedIndex)
         {
             Dispatcher.UIThread.Invoke(new Action(() => { 
                 MenuItems = new ObservableCollection<MainViewMenuItem>{
