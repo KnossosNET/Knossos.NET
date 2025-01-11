@@ -180,7 +180,7 @@ namespace Knossos.NET.Models
                 {
                     throw new TaskCanceledException();
                 }
-                if (userIsLoggedIn)
+                if (userIsLoggedIn && !Knossos.inSingleTCMode || userIsLoggedIn && Knossos.inSingleTCMode && CustomLauncher.MenuDisplayNebulaLoginEntry)
                 {
                     await LoadPrivateMods(cancellationToken).ConfigureAwait(false);
                 }

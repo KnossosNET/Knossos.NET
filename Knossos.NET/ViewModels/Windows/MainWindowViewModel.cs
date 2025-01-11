@@ -22,6 +22,11 @@ namespace Knossos.NET.ViewModels
     {
         public static MainWindowViewModel? Instance { get; set; }
 
+        /* Single TC mode specific stuff */
+        [ObservableProperty]
+        internal NebulaLoginViewModel? nebulaLoginVM;
+        /**/
+
         /* UI Bindings, use the uppercase version, otherwise changes will not register */
         [ObservableProperty]
         internal string appTitle = "Knossos.NET v" + Knossos.AppVersion;
@@ -130,13 +135,21 @@ namespace Knossos.NET.ViewModels
                 };
 
                 if (CustomLauncher.MenuDisplayEngineEntry)
+                {
                     MenuItems.Add(new MainViewMenuItem(FsoBuildsView, "avares://Knossos.NET/Assets/general/menu_engine.png", "Engine", "Download new Freespace Open engine builds"));
+                }
+
+                if(CustomLauncher.MenuDisplayNebulaLoginEntry)
+                {
+                    if(NebulaLoginVM == null)
+                        NebulaLoginVM = new NebulaLoginViewModel();
+                    MenuItems.Add(new MainViewMenuItem(NebulaLoginVM, "avares://Knossos.NET/Assets/general/menu_nebula.png", "Nebula", "Log in with your nebula account"));
+                }
 
                 if (CustomLauncher.MenuDisplayDebugEntry)
                 {
                     MenuItems.Add(new MainViewMenuItem(DebugView, "avares://Knossos.NET/Assets/general/menu_debug.png", "Debug", "Debug info"));
                 }
-
 
                 if (MenuItems != null && MenuItems.Count() - 1 > defaultSelectedIndex)
                 {
@@ -212,6 +225,10 @@ namespace Knossos.NET.ViewModels
                 if (CurrentViewModel == PxoView) //PXO
                 {
                     PxoViewModel.Instance!.InitialLoad();
+                }
+                if (CurrentViewModel != null && CurrentViewModel == NebulaLoginVM) //Nebula Login (Single TC mode)
+                {
+                    NebulaLoginVM.UpdateUI();
                 }
                 if (CurrentViewModel == GlobalSettingsView) //Settings
                 {
