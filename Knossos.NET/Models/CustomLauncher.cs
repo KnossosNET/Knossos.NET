@@ -58,14 +58,22 @@ namespace Knossos.NET.Models
         public static int? WindowHeight { get; private set; } = 540;
 
         /// <summary>
-        /// Show the regular FSO engine view to the menu
+        /// Add the regular FSO engine view to the menu
         /// </summary>
         public static bool MenuDisplayEngineEntry { get; private set; } = true;
 
         /// <summary>
-        /// Show the regular Knet debug view to the menu
+        /// Add the regular Knet debug view to the menu
         /// </summary>
         public static bool MenuDisplayDebugEntry { get; private set; } = true;
+
+        /// <summary>
+        /// Add the regular Knet Nebula Login view to the menu
+        /// This is intended to allow nebula user creation and login
+        /// To download private versions of the TC, normally you do not want this
+        /// buts its there as an option
+        /// </summary>
+        public static bool MenuDisplayNebulaLoginEntry { get; private set; } = false;
 
         /// <summary>
         /// Call this AFTER checking if we are in portable mode or not.
@@ -131,6 +139,9 @@ namespace Knossos.NET.Models
                     if (customData.MenuDisplayDebugEntry.HasValue)
                         MenuDisplayDebugEntry = customData.MenuDisplayDebugEntry.Value;
 
+                    if (customData.MenuDisplayNebulaLoginEntry.HasValue)
+                        MenuDisplayNebulaLoginEntry = customData.MenuDisplayNebulaLoginEntry.Value;
+
                     jsonFile.Close();
                 }
             }
@@ -150,6 +161,7 @@ namespace Knossos.NET.Models
             public int? WindowHeight { get; set; }
             public bool? MenuDisplayEngineEntry { get; set; }
             public bool? MenuDisplayDebugEntry { get; set; }
+            public bool? MenuDisplayNebulaLoginEntry { get; set; }
         }
     }
 }
