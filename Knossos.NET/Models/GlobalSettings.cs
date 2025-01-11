@@ -675,6 +675,12 @@ namespace Knossos.NET.Models
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings have been loaded");
 
                         pendingChangesOnAppClose = false;
+
+                        if(CustomLauncher.IsCustomMode)
+                        {
+                            checkUpdate = CustomLauncher.AllowLauncherUpdates;
+                            autoUpdate = false;
+                        }
                     }
 
                 }

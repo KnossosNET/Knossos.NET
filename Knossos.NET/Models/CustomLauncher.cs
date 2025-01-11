@@ -1,0 +1,155 @@
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using static Knossos.NET.ViewModels.MainWindowViewModel;
+
+namespace Knossos.NET.Models
+{
+    /// <summary>
+    /// Class to handle the configuration options and optional save file of the SingleTC mode
+    /// </summary>
+    public static class CustomLauncher
+    {
+        private static bool _customFileLoaded = false;
+
+        /// <summary>
+        /// If left empty Knet will try to pick up the "custom_launcher.json" file.
+        /// Change it to a mod id to hardcode SingleTC ON using the default settings set here.
+        /// </summary>
+        public static string? ModID { get; private set; } = null;
+
+        /// <summary>
+        /// If enabled, the FSO data folder will changed to use the ModID instead "FreeSpaceOpen"
+        /// This gives this TC its own settings and pilot saving location.
+        /// </summary>
+        public static bool UseCustomFSODataFolder { get; private set; } = true;
+
+        /// <summary>
+        /// This allows Knet to search for launcher updates (or not) at the start.
+        /// Disabling it will completely disable launcher updates.
+        /// If you are forking this and want to provide your own repo to check for updates
+        /// change "GitHubUpdateRepoURL" in Knossos.cs
+        /// </summary>
+        public static bool AllowLauncherUpdates { get; private set; } = true;
+
+        /// <summary>
+        /// Custom title for the launcher window. It is recommended to add the mod name to it
+        /// Launcher version is auto-added at the end
+        /// </summary>
+        public static string WindowTitle { get; private set; } = "Knet Launcher";
+
+        /// <summary>
+        /// Starting width size of the launcher window
+        /// null for auto
+        /// </summary>
+        public static int? WindowWidth { get; private set; } = 960;
+
+        /// <summary>
+        /// Starting height size of the launcher window
+        /// null for auto
+        /// </summary>
+        public static int? WindowHeight { get; private set; } = 540;
+
+        /// <summary>
+        /// Show the regular FSO engine view to the menu
+        /// </summary>
+        public static bool MenuDisplayEngineEntry { get; private set; } = true;
+
+        /// <summary>
+        /// Show the regular Knet debug view to the menu
+        /// </summary>
+        public static bool MenuDisplayDebugEntry { get; private set; } = true;
+
+        /// <summary>
+        /// Call this AFTER checking if we are in portable mode or not.
+        /// The first time it runs it will try to load the "custom_launcher.json" if ModID is null
+        /// </summary>
+        public static bool IsCustomMode
+        {
+            get
+            {
+                if (ModID == null && !_customFileLoaded)
+                {
+                    ReadCustomFile();
+                }
+                return ModID != null;
+            }
+        }
+
+        /// <summary>
+        /// Try read "custom_launcher.json"
+        /// Possible paths:
+        /// Portable mode ON:
+        /// "./kn_portable/KnossosNET/custom_launcher.json"
+        /// Portable mode OFF
+        /// "./custom_launcher.json"
+        /// (same path as the launcher executable)
+        /// Normal data folder is not used in this case to avoid conflict with multiple custom launchers
+        /// </summary>
+        private static void ReadCustomFile()
+        {
+            try
+            {
+                _customFileLoaded = true;
+                var filePath = Knossos.inPortableMode ? Path.Combine(KnUtils.GetKnossosDataFolderPath(), "custom_launcher.json") : 
+                    Path.Combine(KnUtils.KnetFolderPath!, "custom_launcher.json");
+                
+                if (File.Exists(filePath))
+                {
+                    Log.Add(Log.LogSeverity.Information, "CustomLauncher.ReadCustomFile()", "Loading custom launcher data...");
+                    using FileStream jsonFile = File.OpenRead(filePath);
+                    var customData = JsonSerializer.Deserialize<CustomFileData>(jsonFile)!;
+
+                    if(customData.ModID != null)
+                        ModID = customData.ModID;
+
+                    if(customData.UseCustomFSODataFolder.HasValue)
+                        UseCustomFSODataFolder = customData.UseCustomFSODataFolder.Value;
+
+                    if (customData.AllowLauncherUpdates.HasValue)
+                        AllowLauncherUpdates = customData.AllowLauncherUpdates.Value;
+
+                    if (customData.WindowTitle != null)
+                        WindowTitle = customData.WindowTitle;
+
+                    if (customData.WindowWidth != null)
+                        WindowWidth = customData.WindowWidth;
+
+                    if (customData.WindowHeight != null)
+                        WindowHeight = customData.WindowHeight;
+
+                    if (customData.MenuDisplayEngineEntry.HasValue)
+                        MenuDisplayEngineEntry = customData.MenuDisplayEngineEntry.Value;
+
+                    if (customData.MenuDisplayDebugEntry.HasValue)
+                        MenuDisplayDebugEntry = customData.MenuDisplayDebugEntry.Value;
+
+                    jsonFile.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "CustomLauncher.ReadCustomFile()", ex);
+            }
+        }
+
+        struct CustomFileData
+        {
+            public string? ModID { get; set; }
+            public bool? UseCustomFSODataFolder { get; set; }
+            public bool? AllowLauncherUpdates { get; set; }
+            public string? WindowTitle { get; set; }
+            public int? WindowWidth { get; set; }
+            public int? WindowHeight { get; set; }
+            public bool? MenuDisplayEngineEntry { get; set; }
+            public bool? MenuDisplayDebugEntry { get; set; }
+        }
+    }
+}

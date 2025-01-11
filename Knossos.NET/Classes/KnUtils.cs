@@ -120,14 +120,20 @@ namespace Knossos.NET
         /// <returns>fullpath as a string</returns>
         public static string GetKnossosDataFolderPath()
         {
+            var path = string.Empty;
             if (!Knossos.inPortableMode)
             {
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET");
+                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET");
             }
             else
             {
-                return Path.Combine(KnetFolderPath!, "kn_portable", "KnossosNET"); //If inPortableMode = true, KnetFolderPath is not null
+                path = Path.Combine(KnetFolderPath!, "kn_portable", "KnossosNET"); //If inPortableMode = true, KnetFolderPath is not null
             }
+            if(CustomLauncher.IsCustomMode)
+            {
+                path = Path.Combine(path, CustomLauncher.ModID!);
+            }
+            return path;
         }
 
         /// <summary>
@@ -139,30 +145,59 @@ namespace Knossos.NET
         /// <returns>fullpath as string</returns>
         public static string GetFSODataFolderPath()
         {
+            var fsoID = "FreeSpaceOpen";
+            if(CustomLauncher.IsCustomMode && CustomLauncher.UseCustomFSODataFolder)
+            {
+                fsoID = CustomLauncher.ModID!;
+            }
             if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences)
             {
-                return Path.Combine(KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen"); //If inPortableMode = true, KnetFolderPath is not null
+                return Path.Combine(KnetFolderPath!, "kn_portable", "HardLightProductions", fsoID); //If inPortableMode = true, KnetFolderPath is not null
             }
             else
             {
                 if (!string.IsNullOrEmpty(fsoPrefPath))
                 {
-                    return fsoPrefPath;
+                    if (CustomLauncher.IsCustomMode && CustomLauncher.UseCustomFSODataFolder)
+                    {
+                        return ReplaceLast(fsoPrefPath, "FreeSpaceOpen", fsoID);
+                    }
+                    else
+                    {
+                        return fsoPrefPath;
+                    }
                 }
                 else
                 {
                     if (KnUtils.isMacOS)
                     {
-                        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "HardLightProductions", "FreeSpaceOpen");
+                        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "HardLightProductions", fsoID);
                     }
                     if (IsLinux)
                     {
-                        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "HardLightProductions", "FreeSpaceOpen");
+                        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "HardLightProductions", fsoID);
                     }
-                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "HardLightProductions", "FreeSpaceOpen");
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "HardLightProductions", fsoID);
                 }
             }
 
+        }
+
+        /// <summary>
+        /// Replace last ocurrence of a word in a string
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="find"></param>
+        /// <param name="replace"></param>
+        /// <returns></returns>
+        public static string ReplaceLast(string source, string find, string replace)
+        {
+            int index = source.LastIndexOf(find);
+
+            if (index == -1)
+                return source;
+
+            return source.Remove(index, find.Length).Insert(index, replace);
         }
 
         /// <summary>
