@@ -61,8 +61,9 @@ namespace Knossos.NET.Models
 
         //https://cf.fsnebula.org/storage/repo.json
         //https://dl.fsnebula.org/storage/repo.json
-        //https://aigaion.feralhosting.com/discovery/nebula/repo.json
         //https://fsnebula.org/storage/repo.json"
+
+        public static string[] nebulaMirrors = { "cf.fsnebula.org", "dl.fsnebula.org", "fsnebula.org", "talos.feralhosting.com", "fsnebula.global.ssl.fastly.net" }; //lowercase, last one is the image host
         private static readonly string repoUrl = @"https://fsnebula.org/storage/repo_minimal.json";
         private static readonly string apiURL = @"https://api.fsnebula.org/api/1/";
         private static readonly string nebulaURL = @"https://fsnebula.org/";
@@ -125,7 +126,7 @@ namespace Knossos.NET.Models
             try
             {
                 bool displayUpdates = settings.NewerModsVersions.Any() ? true : false;
-                var webEtag = await GetRepoEtag().ConfigureAwait(false);
+                var webEtag = await KnUtils.GetUrlFileEtag(repoUrl).ConfigureAwait(false);
                 if (!File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json") || settings.etag != webEtag)
                 {
                     //Download the repo_minimal.json
@@ -594,30 +595,6 @@ namespace Knossos.NET.Models
                     return;
                 }
                 await WaitForFileAccess(filename);
-            }
-        }
-
-        /// <summary>
-        /// Reads the current repo ETAG on nebula
-        /// </summary>
-        /// <returns>etag string or null</returns>
-        private static async Task<string?> GetRepoEtag()
-        {
-            try
-            {
-                string? newEtag = null;
-                Log.Add(Log.LogSeverity.Information, "Nebula.GetRepoEtag()", "Getting repo_minimal.json etag.");
-                
-                var result = await KnUtils.GetHttpClient().GetAsync(repoUrl, HttpCompletionOption.ResponseHeadersRead);
-                newEtag = result.Headers?.ETag?.ToString().Replace("\"", "");
-
-                Log.Add(Log.LogSeverity.Information, "Nebula.GetRepoEtag()", "repo_minimal.json etag: " + newEtag);
-                return newEtag;
-            }
-            catch (Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error, "Nebula.GetRepoEtag()", ex);
-                return null;
             }
         }
 

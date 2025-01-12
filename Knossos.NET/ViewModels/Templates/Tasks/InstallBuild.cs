@@ -313,7 +313,7 @@ namespace Knossos.NET.ViewModels
                         {
                             Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                             var uri = new Uri(modJson.tile);
-                            using (var fs = await KnUtils.GetImageStream(modJson.tile))
+                            using (var fs = await KnUtils.GetRemoteResourceStream(modJson.tile))
                             {
                                 var tileTask = new TaskItemViewModel();
                                 await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
@@ -343,7 +343,7 @@ namespace Knossos.NET.ViewModels
                         {
                             Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                             var uri = new Uri(modJson.banner);
-                            using (var fs = await KnUtils.GetImageStream(modJson.banner))
+                            using (var fs = await KnUtils.GetRemoteResourceStream(modJson.banner))
                             {
                                 var bannerTask = new TaskItemViewModel();
                                 await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
@@ -378,7 +378,7 @@ namespace Knossos.NET.ViewModels
                                     throw new TaskCanceledException();
                                 }
                                 var uri = new Uri(sc);
-                                using (var fs = await KnUtils.GetImageStream(sc))
+                                using (var fs = await KnUtils.GetRemoteResourceStream(sc))
                                 {
                                     var scTask = new TaskItemViewModel();
                                     await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));

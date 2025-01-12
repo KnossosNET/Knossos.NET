@@ -117,7 +117,7 @@ namespace Knossos.NET.ViewModels
                 {
                     var temp = BackgroundImage;
                     BackgroundImage = "";
-                    var imageFile = await KnUtils.GetImagePath(temp).ConfigureAwait(false);
+                    var imageFile = await KnUtils.GetRemoteResource(temp).ConfigureAwait(false);
                     Dispatcher.UIThread.Invoke(() =>
                     {
                         if (imageFile != null)

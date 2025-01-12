@@ -96,6 +96,20 @@ namespace Knossos.NET
                     }
                 }
 
+                //Rename the old cache folder
+                try
+                {
+                    var oldCachePath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "image_cache");
+                    if (!Directory.Exists(KnUtils.GetCachePath()) && Directory.Exists(oldCachePath))
+                    {
+                        Directory.Move(oldCachePath, KnUtils.GetCachePath());
+                    }
+                }
+                catch(Exception ex) 
+                {
+                    Log.Add(Log.LogSeverity.Error, "Knossos.Startup()", ex);
+                }
+
                 Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "=== KnossosNET v" + AppVersion + " Start ===");
 
                 if (inPortableMode)
