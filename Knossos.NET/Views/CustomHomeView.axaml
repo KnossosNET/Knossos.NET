@@ -15,14 +15,14 @@
 	</Design.DataContext>
 
 	<UserControl.Resources>
-		<cvt:BitmapAssetValueConverter x:Key="iconImageConverter"/>
+		<cvt:BitmapAssetValueConverter x:Key="imageConverter"/>
 	</UserControl.Resources>
 	
 	<ScrollViewer HorizontalScrollBarVisibility="Visible">
 		<Grid>
 			<Image ZIndex="0" Stretch="UniformToFill" 
 				   anim:ImageBehavior.SpeedRatio="{Binding Animate}" 
-				   Source="{Binding BackgroundImage, Converter={StaticResource iconImageConverter}}" 
+				   Source="{Binding BackgroundImage, Converter={StaticResource imageConverter}}" 
 				   anim:ImageBehavior.AnimatedSource="{Binding BackgroundImage}" />
 		</Grid>
 	</ScrollViewer>
