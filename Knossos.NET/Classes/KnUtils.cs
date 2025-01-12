@@ -670,6 +670,50 @@ namespace Knossos.NET
         }
 
         /// <summary>
+        /// Downloads a image from a URL, stores it in cache and passes the local image path
+        /// If the image is already in cache, no download is done
+        /// </summary>
+        /// <param name="imageURL"></param>
+        /// <param name="attempt"></param>
+        /// <returns>string path or null</returns>
+        public static async Task<string?> GetImagePath(string imageURL, int attempt = 1)
+        {
+            try
+            {
+                return await Task.Run(async () =>
+                {
+                    var imageName = Path.GetFileName(imageURL);
+                    var imageInCachePath = Path.Combine(GetImageCachePath(), imageName);
+
+                    if (!File.Exists(imageInCachePath) || File.Exists(imageInCachePath)  && new FileInfo(imageInCachePath).Length > 0)
+                    {
+                        //Download to cache and copy
+                        Directory.CreateDirectory(Path.Combine(GetKnossosDataFolderPath(), "image_cache"));
+                        using (var imageStream = await GetHttpClient().GetStreamAsync(imageURL))
+                        {
+                            var fileStream = new FileStream(imageInCachePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                            await imageStream.CopyToAsync(fileStream);
+                            imageStream.Close();
+                            fileStream.Close();
+                            fileStream.Dispose();
+                        }
+                    }
+                    return imageInCachePath;
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.GetImagePath()", ex);
+                if (attempt <= 2)
+                {
+                    await Task.Delay(1000);
+                    return await GetImagePath(imageURL, attempt + 1);
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Check FreeSpace available on the disk/partion of path
         /// </summary>
         /// <param name="path"></param>

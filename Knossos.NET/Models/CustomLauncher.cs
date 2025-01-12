@@ -101,6 +101,20 @@ namespace Knossos.NET.Models
         public static bool WriteLogFile { get; private set; } = true;
 
         /// <summary>
+        /// Path to the background image for the home view
+        /// Supports local image in the Knet data folder, a local full path, harcoded image or remote https:// URL
+        /// Supports APNGs, GIF, PNG and JPG
+        /// Examples:
+        /// Harcoded Image:
+        /// "avares://Knossos.NET/Assets/fs2_res/kn_screen_0.jpg"
+        /// Data Folder image (same path to were the repo_minimal.json is downloaded for the current running mode):
+        /// "GgqNPDqW0AAMR80.png"
+        /// Remote Image (will be cached locally):
+        /// "https://video-meta.humix.com/poster/h2YKfXkqITvJ/pKvBUijWRO2_IChwVu.jpg"
+        /// </summary>
+        public static string? HomeBackgroundImage { get; private set; } = "avares://Knossos.NET/Assets/general/custom_home_background.jpg";
+
+        /// <summary>
         /// Call this AFTER checking if we are in portable mode or not.
         /// The first time it runs it will try to load the "custom_launcher.json" if ModID is null
         /// </summary>
@@ -178,6 +192,9 @@ namespace Knossos.NET.Models
                     if (customData.WriteLogFile.HasValue)
                         WriteLogFile = customData.WriteLogFile.Value;
 
+                    if (customData.HomeBackgroundImage != null)
+                        HomeBackgroundImage = customData.HomeBackgroundImage;
+
                     jsonFile.Close();
                 }
             }
@@ -202,6 +219,7 @@ namespace Knossos.NET.Models
             public string[]? CustomCmdlineArray { get; set; }
             public bool? UseNebulaServices { get; set; }
             public bool? WriteLogFile { get; set; }
+            public string? HomeBackgroundImage { get; set; }
         }
     }
 }
