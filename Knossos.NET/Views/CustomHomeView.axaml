@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.CustomHomeView"
+			 xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+			 xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
+		     x:DataType="vm:CustomHomeViewModel"
+		     Background="{StaticResource BackgroundColorPrimary}"
+		     xmlns:cvt="clr-namespace:Knossos.NET.Converters;assembly=Knossos.NET">
+	<Design.DataContext>
+		<vm:CustomHomeViewModel/>
+	</Design.DataContext>
+
+	<UserControl.Resources>
+		<cvt:BitmapAssetValueConverter x:Key="iconImageConverter"/>
+	</UserControl.Resources>
+	
+	<ScrollViewer HorizontalScrollBarVisibility="Visible">
+		<Grid>
+			<Image ZIndex="0" Stretch="UniformToFill" 
+				   anim:ImageBehavior.SpeedRatio="{Binding Animate}" 
+				   Source="{Binding BackgroundImage, Converter={StaticResource iconImageConverter}}" 
+				   anim:ImageBehavior.AnimatedSource="{Binding BackgroundImage}" />
+		</Grid>
+	</ScrollViewer>
+</UserControl>
+ 

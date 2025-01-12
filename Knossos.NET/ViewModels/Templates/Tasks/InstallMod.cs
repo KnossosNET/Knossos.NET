@@ -45,7 +45,7 @@ namespace Knossos.NET.ViewModels
                     bool compressMod = false;
 
                     //Set Mod card as "installing"
-                    MainWindowViewModel.Instance?.NebulaModsView.SetInstalling(mod.id, cancellationTokenSource);
+                    MainWindowViewModel.Instance?.NebulaModsView?.SetInstalling(mod.id, cancellationTokenSource);
 
                     //Wait in Queue
                     while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
@@ -602,7 +602,7 @@ namespace Knossos.NET.ViewModels
                     //Remove Mod card, unmark update available, re-run dependencies checks
                     if (installed == null)
                     {
-                        MainWindowViewModel.Instance?.NebulaModsView.RemoveMod(mod.id);
+                        MainWindowViewModel.Instance?.NebulaModsView?.RemoveMod(mod.id);
                         Knossos.AddMod(mod);
                         await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(mod), DispatcherPriority.Background);
                         //We cant determine if the version we are installing is the newer one at this point, but this will determine if it is newer than anything was was installed previously, what is good enoght
