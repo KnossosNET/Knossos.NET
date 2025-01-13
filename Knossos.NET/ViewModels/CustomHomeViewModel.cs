@@ -86,7 +86,7 @@ namespace Knossos.NET.ViewModels
 
         private async void Install()
         {
-            if (nebulaModVersions.Any())
+            if (nebulaModVersions.Any() && CustomLauncher.UseNebulaServices)
             {
                 var dialog = new ModInstallView();
                 dialog.DataContext = new ModInstallViewModel(nebulaModVersions.First(), dialog);

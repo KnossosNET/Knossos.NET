@@ -131,6 +131,7 @@ namespace Knossos.NET.ViewModels
             else
             {
                 //Apply customization for Single TC Mode
+                Knossos.globalSettings.mainMenuOpen = CustomLauncher.MenuOpenFirstTime;
                 AppTitle = CustomLauncher.WindowTitle + " v" + Knossos.AppVersion;
                 WindowHeight = CustomLauncher.WindowHeight;
                 WindowWidth = CustomLauncher.WindowWidth;
