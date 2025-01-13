@@ -109,7 +109,7 @@ namespace Knossos.NET.ViewModels
         /// <param name="preSelectedVersion"></param>
         private async void InitialLoad(string id, string? preSelectedVersion = null)
         {
-            if (Nebula.userIsLoggedIn)
+            if (Nebula.userIsLoggedIn && !Knossos.inSingleTCMode || Nebula.userIsLoggedIn && Knossos.inSingleTCMode && CustomLauncher.MenuDisplayNebulaLoginEntry)
             {
                 var ids = await Nebula.GetEditableModIDs();
                 if (ids != null && ids.Any() && ids.FirstOrDefault(x => x == id) != null)

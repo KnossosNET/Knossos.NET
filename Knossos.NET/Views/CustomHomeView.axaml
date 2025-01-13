@@ -24,6 +24,37 @@
 				   anim:ImageBehavior.SpeedRatio="{Binding Animate}" 
 				   Source="{Binding BackgroundImage, Converter={StaticResource imageConverter}}" 
 				   anim:ImageBehavior.AnimatedSource="{Binding BackgroundImage}" />
+
+			<Grid ZIndex="1" ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto, *, Auto" Opacity="0.8">
+				<!--=============================Right Panel========================================-->
+					<!-- Installed -->
+					<StackPanel IsVisible="{Binding Installed}" Grid.Row="2" Grid.Column="2" Margin="20">
+						<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="play" 
+								Content="Launch" Classes="Accept" HorizontalAlignment="Center" 
+								Margin="0,2,0,0" Height="50" Width="150" FontSize="24"></Button>
+						<ComboBox SelectedIndex="{Binding ActiveVersionIndex}" 
+								  ItemsSource="{Binding VersionItems}" 
+								  MinWidth="150" Margin="5" FontWeight="Bold" FontSize="12" 
+								  VerticalAlignment="Top" VerticalContentAlignment="Center" 
+								  HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
+					</StackPanel>
+					<!--Not Installed-->
+					<StackPanel IsVisible="{Binding !Installed}" Grid.Row="2" Grid.Column="2" Margin="20">
+						<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="install"
+								Content="Install" Classes="Option" HorizontalAlignment="Center"
+								Margin="0,2,0,0" Height="50" Width="150" FontSize="24" 
+								IsVisible="{Binding !Installing}"></Button>
+						<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="cancel"
+								Content="Cancel" Classes="Cancel" HorizontalAlignment="Center"
+								Margin="0,2,0,0" Height="50" Width="150" FontSize="24"
+								IsVisible="{Binding Installing}"></Button>
+					</StackPanel>
+				<!--================================================================================-->
+				<!--=============================Center Panel=======================================-->
+				<!--================================================================================-->
+				<!--=============================Left Panel=========================================-->
+				<!--================================================================================-->
+			</Grid>
 		</Grid>
 	</ScrollViewer>
 </UserControl>
