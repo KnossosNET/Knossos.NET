@@ -2,24 +2,38 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
+using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Knossos.NET.ViewModels
 {
     public partial class CustomHomeViewModel : ViewModelBase
     {
         private List<Mod> modVersions = new List<Mod>();
-        private int activeVersionIndex = 0;
-
         private List<Mod> nebulaModVersions = new List<Mod>();
+        private CancellationTokenSource? cancellationTokenSource = null;
 
         [ObservableProperty]
-        internal string? modVersion;
+        internal int activeVersionIndex = 0;
+
+        internal ObservableCollection<string> VersionItems { get; set; } = new ObservableCollection<string>();
+
+        [ObservableProperty]
+        internal bool installed = false;
+
+        [ObservableProperty]
+        internal bool installing = false;
+
+        [ObservableProperty]
+        internal bool update = false;
+
+        [ObservableProperty]
+        internal bool nebulaVersionsAvailable = false;
 
         [ObservableProperty]
         internal string? backgroundImage = CustomLauncher.HomeBackgroundImage;
@@ -31,10 +45,65 @@ namespace Knossos.NET.ViewModels
         {
         }
 
+        internal void HardcodedButtonCommand(object cmd)
+        {
+            if (ActiveVersionIndex == -1)
+            {
+                Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.HardcodedButtonCommand()", "Crash prevented: ActiveVersionIndex was " + ActiveVersionIndex + " and modVersions.Count() was " + modVersions.Count());
+                ActiveVersionIndex = 0;
+            }
+            switch ((string)cmd)
+            {
+                case "play": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.Release); break;
+                case "playvr": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.Release, false, 0, true); break;
+                case "fred2": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.Fred2); break;
+                case "fred2debug": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.Fred2Debug); break;
+                case "debug": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.Debug); break;
+                case "qtfred": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.QtFred); break;
+                case "qtfreddebug": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.QtFredDebug); break;
+                case "install": Install(); break;
+                case "cancel": Cancel(); break;
+                case "update":  break;
+                case "modify":  break;
+                case "delete": break;
+                case "details": break;
+                case "settings":  break;
+                case "logfile":  break;
+            }
+        }
+
+        private void Cancel()
+        {
+            Installing = false;
+            try
+            {
+                cancellationTokenSource?.Cancel();
+            }
+            catch { }
+            cancellationTokenSource = null;
+            TaskViewModel.Instance?.CancelAllInstallTaskWithID(CustomLauncher.ModID!, null);
+        }
+
+        private async void Install()
+        {
+            if (nebulaModVersions.Any())
+            {
+                var dialog = new ModInstallView();
+                dialog.DataContext = new ModInstallViewModel(nebulaModVersions.First(), dialog);
+                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
+            }
+            else
+            {
+                Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.Install()", "Tried to install but no nebula versions were loaded.");
+            }
+        }
+
         public void RemoveInstalledModVersion(Mod mod)
         {
             if (CustomLauncher.ModID == mod.id)
             {
+                Installed = modVersions.Any();
+                Installing = false;
             }
         }
 
@@ -42,6 +111,8 @@ namespace Knossos.NET.ViewModels
         {
             if (CustomLauncher.ModID == id)
             {
+                Installed = false;
+                Installing = false;
             }
         }
 
@@ -49,7 +120,14 @@ namespace Knossos.NET.ViewModels
         {
             if (CustomLauncher.ModID == id)
             {
+                Cancel();
             }
+        }
+
+        public void SetInstalling(string id, CancellationTokenSource cancelToken)
+        {
+            cancellationTokenSource = cancelToken;
+            Installing = true;
         }
 
         /// <summary>
@@ -62,15 +140,32 @@ namespace Knossos.NET.ViewModels
             if (modJson.id == CustomLauncher.ModID)
             {
                 Log.Add(Log.LogSeverity.Information, "CustomHomeViewModel.AddModVersion()", "Adding additional version for mod id: " + CustomLauncher.ModID + " -> " + modJson.folderName);
-                string currentVersion = modVersions[activeVersionIndex].version;
-                modVersions.Add(modJson);
-                modVersions.Sort((o1, o2) => -SemanticVersion.Compare(o1.version, o2.version));
-                if (SemanticVersion.Compare(modJson.version, currentVersion) > 0)
+                if (modVersions.Any())
                 {
-                    Log.Add(Log.LogSeverity.Information, "CustomHomeViewModel.AddModVersion()", "Changing active version for " + modJson.title + " from " + modVersions[activeVersionIndex].version + " to " + modJson.version);
-                    activeVersionIndex = modVersions.FindIndex((m) => m.version.Equals(modJson.version));
-                    ModVersion = modJson.version + " (+" + (modVersions.Count - 1) + ")";
+                    string currentVersion = modVersions[ActiveVersionIndex].version;
+                    modVersions.Add(modJson);
+                    modVersions.Sort((o1, o2) => -SemanticVersion.Compare(o1.version, o2.version));
+                    if (SemanticVersion.Compare(modJson.version, currentVersion) > 0)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "CustomHomeViewModel.AddModVersion()", "Changing active version for " + modJson.title + " from " + modVersions[ActiveVersionIndex].version + " to " + modJson.version);
+                        VersionItems.Clear();
+                        modVersions.ForEach(x => VersionItems.Add(x.version));
+                        ActiveVersionIndex = -1;
+                        ActiveVersionIndex = modVersions.FindIndex((m) => m.version.Equals(modJson.version));
+                    }
+                    else
+                    {
+                        VersionItems.Add(modJson.version);
+                    }
                 }
+                else
+                {
+                    ActiveVersionIndex = -1;
+                    modVersions.Add(modJson);
+                    VersionItems.Add(modJson.version);
+                    ActiveVersionIndex = 0;
+                }
+                Installed = modVersions.Any();
             }
         }
 
@@ -86,6 +181,7 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Information, "CustomHomeViewModel.AddNebulaModVersion()", "Adding additional nebula version for mod id: " + CustomLauncher.ModID + " -> " + modJson.version);
                 nebulaModVersions.Add(modJson);
                 nebulaModVersions.Sort((o1, o2) => -SemanticVersion.Compare(o1.version, o2.version));
+                NebulaVersionsAvailable = true;
             }
         }
 
@@ -99,7 +195,7 @@ namespace Knossos.NET.ViewModels
         {
             if (id == CustomLauncher.ModID)
             {
-
+                Update = value;
             }
         }
 

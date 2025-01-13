@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Collections.ObjectModel;
 using Avalonia.Threading;
+using System.Threading;
+using Knossos.NET.Classes;
 
 namespace Knossos.NET.ViewModels
 {
@@ -454,6 +456,15 @@ namespace Knossos.NET.ViewModels
         {
             IsMenuOpen = !IsMenuOpen;
             Knossos.globalSettings.mainMenuOpen = IsMenuOpen;
+        }
+
+        /// <summary>
+        /// Sets a mod id as "installing" so the proper info can be displayed on the UI
+        /// </summary>
+        public void SetInstalling(string id, CancellationTokenSource cancelToken)
+        {
+            NebulaModsView?.SetInstalling(id, cancelToken);
+            CustomHomeVM?.SetInstalling(id, cancelToken);
         }
     }
 }

@@ -45,7 +45,7 @@ namespace Knossos.NET.ViewModels
                     bool compressMod = false;
 
                     //Set Mod card as "installing"
-                    MainWindowViewModel.Instance?.NebulaModsView?.SetInstalling(mod.id, cancellationTokenSource);
+                    MainWindowViewModel.Instance?.SetInstalling(mod.id, cancellationTokenSource);
 
                     //Wait in Queue
                     while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)

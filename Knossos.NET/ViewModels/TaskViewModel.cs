@@ -49,6 +49,7 @@ namespace Knossos.NET.ViewModels
 
         /// <summary>
         /// Cancel a ModInstall or Verify mod by mod ID and version
+        /// Null version will cancel all tasks with the same id
         /// </summary>
         /// <param name="id"></param>
         /// <param name="version"></param>
@@ -58,7 +59,7 @@ namespace Knossos.NET.ViewModels
             {
                 foreach (var task in TaskList)
                 {
-                    if (!task.IsCompleted && task.installID == id && task.installVersion == version)
+                    if (!task.IsCompleted && task.installID == id && (version == null || task.installVersion == version))
                     {
                         task.CancelTaskCommand();
                     }
