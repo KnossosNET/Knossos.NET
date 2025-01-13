@@ -125,7 +125,7 @@ namespace Knossos.NET.Models
             }
             try
             {
-                bool displayUpdates = settings.NewerModsVersions.Any() ? true : false;
+                bool displayUpdates = settings.NewerModsVersions.Any() && !CustomLauncher.IsCustomMode ? true : false;
                 var webEtag = await KnUtils.GetUrlFileEtag(repoUrl).ConfigureAwait(false);
                 if (!File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json") || settings.etag != webEtag)
                 {

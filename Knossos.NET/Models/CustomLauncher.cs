@@ -58,6 +58,12 @@ namespace Knossos.NET.Models
         public static int? WindowHeight { get; private set; } = 540;
 
         /// <summary>
+        /// The first time the user opens the launcher, the main menu should be expanded or collapsed?
+        /// After that it will use the saved state
+        /// </summary>
+        public static bool MenuOpenFirstTime { get; private set; } = false;
+
+        /// <summary>
         /// Add the regular FSO engine view to the menu
         /// </summary>
         public static bool MenuDisplayEngineEntry { get; private set; } = true;
@@ -172,6 +178,9 @@ namespace Knossos.NET.Models
                     if (customData.WindowHeight != null)
                         WindowHeight = customData.WindowHeight;
 
+                    if (customData.MenuOpenFirstTime.HasValue)
+                        MenuOpenFirstTime = customData.MenuOpenFirstTime.Value;
+
                     if (customData.MenuDisplayEngineEntry.HasValue)
                         MenuDisplayEngineEntry = customData.MenuDisplayEngineEntry.Value;
 
@@ -212,6 +221,7 @@ namespace Knossos.NET.Models
             public string? WindowTitle { get; set; }
             public int? WindowWidth { get; set; }
             public int? WindowHeight { get; set; }
+            public bool? MenuOpenFirstTime { get; set; }
             public bool? MenuDisplayEngineEntry { get; set; }
             public bool? MenuDisplayDebugEntry { get; set; }
             public bool? MenuDisplayNebulaLoginEntry { get; set; }
