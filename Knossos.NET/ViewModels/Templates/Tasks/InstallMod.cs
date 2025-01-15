@@ -555,7 +555,7 @@ namespace Knossos.NET.ViewModels
                         mod.ClearUnusedData();
                     }
 
-                    mod.modSettings.Load(mod.fullPath);
+                    mod.modSettings.SetInitialFilePath(mod.fullPath);
 
                     //We have to compress?
                     if (compressMod)

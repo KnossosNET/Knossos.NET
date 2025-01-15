@@ -70,6 +70,16 @@ namespace Knossos.NET.Models
         }
 
         /// <summary>
+        /// Sets the filepath to the mod folder for the mod settings system, if it is not already set.
+        /// </summary>
+        /// <param name="modFullPath"></param>
+        public void SetInitialFilePath(string modFullPath)
+        {
+            if (filePath == null)
+                filePath = modFullPath + Path.DirectorySeparatorChar + "mod_settings.json";
+        }
+
+        /// <summary>
         /// Load mod_settings.json data 
         /// Any new variabled must be added here or it will not be loaded
         /// </summary>
