@@ -6,6 +6,8 @@ using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +17,22 @@ namespace Knossos.NET.ViewModels
     public partial class CustomHomeViewModel : ViewModelBase
     {
         private List<Mod> modVersions = new List<Mod>();
+        private Mod? GetActiveInstalledModVersion
+        {
+            get
+            {
+                if(ActiveVersionIndex >= 0 && ActiveVersionIndex < modVersions.Count())
+                {
+                    return modVersions[ActiveVersionIndex];
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.GetActiveInstalledModVersion()", "ActiveVersionIndex was " + ActiveVersionIndex + " and modVersions.Count() was " + modVersions.Count());
+                    return null;
+                }
+            }
+        }
+
         private List<Mod> nebulaModVersions = new List<Mod>();
         private CancellationTokenSource? cancellationTokenSource = null;
 
@@ -30,7 +48,7 @@ namespace Knossos.NET.ViewModels
         internal bool installing = false;
 
         [ObservableProperty]
-        internal bool update = false;
+        internal bool isUpdateReady = false;
 
         [ObservableProperty]
         internal bool nebulaVersionsAvailable = false;
@@ -41,37 +59,42 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal int animate = 0;
 
+        [ObservableProperty]
+        internal bool nebulaServices = CustomLauncher.UseNebulaServices;
+
         public CustomHomeViewModel()
         {
         }
 
+        /// <summary>
+        /// Handler for the hardcoded UI buttons
+        /// </summary>
+        /// <param name="cmd"></param>
         internal void HardcodedButtonCommand(object cmd)
         {
-            if (ActiveVersionIndex == -1)
-            {
-                Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.HardcodedButtonCommand()", "Crash prevented: ActiveVersionIndex was " + ActiveVersionIndex + " and modVersions.Count() was " + modVersions.Count());
-                ActiveVersionIndex = 0;
-            }
             switch ((string)cmd)
             {
-                case "play": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.Release); break;
-                case "playvr": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.Release, false, 0, true); break;
-                case "fred2": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.Fred2); break;
-                case "fred2debug": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.Fred2Debug); break;
-                case "debug": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.Debug); break;
-                case "qtfred": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.QtFred); break;
-                case "qtfreddebug": Knossos.PlayMod(modVersions[ActiveVersionIndex], FsoExecType.QtFredDebug); break;
+                case "play": if(GetActiveInstalledModVersion != null) Knossos.PlayMod(GetActiveInstalledModVersion, FsoExecType.Release); break;
+                case "playvr": if (GetActiveInstalledModVersion != null) Knossos.PlayMod(GetActiveInstalledModVersion, FsoExecType.Release, false, 0, true); break;
+                case "fred2": if (GetActiveInstalledModVersion != null) Knossos.PlayMod(GetActiveInstalledModVersion, FsoExecType.Fred2); break;
+                case "fred2debug": if (GetActiveInstalledModVersion != null) Knossos.PlayMod(GetActiveInstalledModVersion, FsoExecType.Fred2Debug); break;
+                case "debug": if (GetActiveInstalledModVersion != null) Knossos.PlayMod(GetActiveInstalledModVersion, FsoExecType.Debug); break;
+                case "qtfred": if (GetActiveInstalledModVersion != null) Knossos.PlayMod(GetActiveInstalledModVersion, FsoExecType.QtFred); break;
+                case "qtfreddebug": if (GetActiveInstalledModVersion != null) Knossos.PlayMod(GetActiveInstalledModVersion, FsoExecType.QtFredDebug); break;
                 case "install": Install(); break;
                 case "cancel": Cancel(); break;
-                case "update":  break;
-                case "modify":  break;
-                case "delete": break;
-                case "details": break;
-                case "settings":  break;
-                case "logfile":  break;
+                case "update": Update(); break;
+                case "modify": Modify(); break;
+                case "delete": if (GetActiveInstalledModVersion != null) RemoveInstalledModVersion(GetActiveInstalledModVersion);  break;
+                case "details": Details();  break;
+                case "settings": Settings(); break;
+                case "logfile": OpenFS2Log(); break;
             }
         }
 
+        /// <summary>
+        /// Calls to cancel running install tasks
+        /// </summary>
         private void Cancel()
         {
             Installing = false;
@@ -84,6 +107,9 @@ namespace Knossos.NET.ViewModels
             TaskViewModel.Instance?.CancelAllInstallTaskWithID(CustomLauncher.ModID!, null);
         }
 
+        /// <summary>
+        /// Opens mod install window for this mod id
+        /// </summary>
         private async void Install()
         {
             if (nebulaModVersions.Any() && CustomLauncher.UseNebulaServices)
@@ -98,24 +124,182 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public void RemoveInstalledModVersion(Mod mod)
+        /// <summary>
+        /// Opens mod install window for this mod id in modify active version mode
+        /// </summary>
+        private async void Modify()
         {
-            if (CustomLauncher.ModID == mod.id)
+            if (GetActiveInstalledModVersion != null && CustomLauncher.UseNebulaServices)
             {
-                Installed = modVersions.Any();
-                Installing = false;
+                var dialog = new ModInstallView();
+                dialog.DataContext = new ModInstallViewModel(GetActiveInstalledModVersion, dialog, GetActiveInstalledModVersion.version);
+                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
+            }
+            else
+            {
+                Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.Modify()", "GetActiveInstalledModVersion was null. ActiveVersionIndex: " + ActiveVersionIndex + " modVerions.count()" + modVersions.Count());
             }
         }
 
+        /// <summary>
+        /// Opens mod install window for this mod id
+        /// </summary>
+        private async void Update()
+        {
+            if (GetActiveInstalledModVersion != null && CustomLauncher.UseNebulaServices)
+            {
+                var dialog = new ModInstallView();
+                dialog.DataContext = new ModInstallViewModel(GetActiveInstalledModVersion, dialog);
+                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
+            }
+            else
+            {
+                Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.Update()", "GetActiveInstalledModVersion was null. ActiveVersionIndex: " + ActiveVersionIndex + " modVerions.count()" + modVersions.Count());
+            }
+        }
+
+        /// <summary>
+        /// Opens this mod details dialog
+        /// </summary>
+        private async void Details()
+        {
+            if (MainWindow.instance != null)
+            {
+                var dialog = new ModDetailsView();
+                var mod = GetActiveInstalledModVersion != null ? GetActiveInstalledModVersion : nebulaModVersions.FirstOrDefault();
+                if (mod != null)
+                {
+                    dialog.DataContext = new ModDetailsViewModel(mod, dialog);
+                    await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.Details()", "Mod was null, not installed or nebulas versions of this modid were found.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Opens this mod settings dialog
+        /// </summary>
+        internal async void Settings()
+        {
+            if (MainWindow.instance != null)
+            {
+                if (GetActiveInstalledModVersion != null)
+                {
+                    var dialog = new ModSettingsView();
+                    dialog.DataContext = new ModSettingsViewModel(GetActiveInstalledModVersion);
+                    await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
+                }
+                else
+                {
+                    Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.Settings()", "Mod was null, not installed versions of this modid were found.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Opens the fs_open.log file, if it exists.
+        /// </summary>
+        private void OpenFS2Log()
+        {
+            if (File.Exists(Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log")))
+            {
+                try
+                {
+                    var cmd = new Process();
+                    cmd.StartInfo.FileName = Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log");
+                    cmd.StartInfo.UseShellExecute = true;
+                    cmd.Start();
+                    cmd.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.OpenFS2Log", ex);
+                }
+            }
+            else
+            {
+                if (MainWindow.instance != null)
+                    MessageBox.Show(MainWindow.instance, "Log File " + Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log") + " not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+            }
+        }
+
+        /// <summary>
+        /// Removes ONE installed mod version from the disk
+        /// </summary>
+        /// <param name="mod"></param>
+        public async void RemoveInstalledModVersion(Mod mod)
+        {
+            try
+            {
+                if (CustomLauncher.ModID == mod.id)
+                {
+                    if (TaskViewModel.Instance!.IsSafeState())
+                    {
+                        if (GetActiveInstalledModVersion != null)
+                        {
+                            if (modVersions.Count > 1)
+                            {
+                                var resp = await MessageBox.Show(MainWindow.instance!, "You are about to delete version " + GetActiveInstalledModVersion.version + ", this will remove this version only. Do you want to continue?", "Delete version", MessageBox.MessageBoxButtons.YesNo);
+                                if (resp == MessageBox.MessageBoxResult.Yes)
+                                {
+                                    var delete = modVersions[ActiveVersionIndex];
+                                    var verDel = VersionItems[ActiveVersionIndex];
+                                    modVersions.Remove(delete);
+                                    Knossos.RemoveMod(delete);
+                                    VersionItems.Remove(verDel);
+                                    ActiveVersionIndex = modVersions.Count() - 1;
+                                }
+                            }
+                            else
+                            {
+                                var resp = await MessageBox.Show(MainWindow.instance!, "You are about to delete the last installed version. Do you want to continue?", "Delete last version", MessageBox.MessageBoxButtons.YesNo);
+                                if (resp == MessageBox.MessageBoxResult.Yes)
+                                {
+                                    //Last version
+                                    modVersions[0].installed = false;
+                                    MainWindowViewModel.Instance?.AddNebulaMod(modVersions[0]);
+                                    Knossos.RemoveMod(modVersions[0].id);
+                                    Installed = false;
+                                    Installing = false;
+                                    modVersions.Clear();
+                                    VersionItems.Clear();
+                                    ActiveVersionIndex = 0;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        await MessageBox.Show(MainWindow.instance!, "You can not delete a mod while other install tasks are running, wait until they finish and try again.", "Tasks are running", MessageBox.MessageBoxButtons.OK);
+                    }
+                }
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.RemoveInstalledModVersion()", ex);
+            }
+        }
+
+        /// <summary>
+        /// This deletes all versions of this mod
+        /// Not implemented or needed
+        /// </summary>
+        /// <param name="id"></param>
         public void RemoveMod(string id)
         {
             if (CustomLauncher.ModID == id)
             {
-                Installed = false;
-                Installing = false;
+                //Installed = false;
+                //Installing = false;
             }
         }
 
+        /// <summary>
+        /// Remove starts cancellation of a install taks with this mod id
+        /// </summary>
+        /// <param name="id"></param>
         public void CancelModInstall(string id)
         {
             if (CustomLauncher.ModID == id)
@@ -124,10 +308,18 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Sets the install mode, so the cancel tasks button can be displayed
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="cancelToken"></param>
         public void SetInstalling(string id, CancellationTokenSource cancelToken)
         {
-            cancellationTokenSource = cancelToken;
-            Installing = true;
+            if (CustomLauncher.ModID == id)
+            {
+                cancellationTokenSource = cancelToken;
+                Installing = true;
+            }
         }
 
         /// <summary>
@@ -195,7 +387,7 @@ namespace Knossos.NET.ViewModels
         {
             if (id == CustomLauncher.ModID)
             {
-                Update = value;
+                IsUpdateReady = value;
             }
         }
 

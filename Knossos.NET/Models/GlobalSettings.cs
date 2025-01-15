@@ -705,6 +705,10 @@ namespace Knossos.NET.Models
                 checkUpdate = CustomLauncher.AllowLauncherUpdates;
                 enableLogFile = CustomLauncher.WriteLogFile;
                 autoUpdate = false;
+                if (!CustomLauncher.MenuDisplayGlobalSettingsEntry)
+                {
+                    warnNewSettingsSystem = false;
+                }
             }
         }
 
