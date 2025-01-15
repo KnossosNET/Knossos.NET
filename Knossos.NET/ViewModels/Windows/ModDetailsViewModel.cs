@@ -86,6 +86,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool isLocalMod = false;
         [ObservableProperty]
+        internal bool nebulaServices = !CustomLauncher.IsCustomMode || (CustomLauncher.IsCustomMode && CustomLauncher.UseNebulaServices) ? true : false;
+        [ObservableProperty]
         internal ObservableCollection<ScreenshotItem> screenshots = new ObservableCollection<ScreenshotItem>();
         internal ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 

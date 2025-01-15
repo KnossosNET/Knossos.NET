@@ -71,7 +71,7 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// Load mod_settings.json data 
-        /// Any new variabled must be added here or it will not be loaded
+        /// Any new variables must be added here or it will not be loaded
         /// </summary>
         /// <param name="modFolderPath"></param>
         public void Load(string modFolderPath)

@@ -24,26 +24,52 @@
 				   anim:ImageBehavior.SpeedRatio="{Binding Animate}" 
 				   Source="{Binding BackgroundImage, Converter={StaticResource imageConverter}}" 
 				   anim:ImageBehavior.AnimatedSource="{Binding BackgroundImage}" />
-
-			<Grid ZIndex="1" ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto, *, Auto" Opacity="0.8">
+			<!--==========================================Botton Panel========================================-->
+			<Grid ZIndex="1" ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto, *, Auto" Opacity="0.75">
 				<!--=============================Right Panel========================================-->
 					<!-- Installed -->
-					<StackPanel IsVisible="{Binding Installed}" Grid.Row="2" Grid.Column="2" Margin="20">
-						<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="play" 
-								Content="Launch" Classes="Accept" HorizontalAlignment="Center" 
-								Margin="0,2,0,0" Height="50" Width="150" FontSize="24"></Button>
-						<ComboBox SelectedIndex="{Binding ActiveVersionIndex}" 
-								  ItemsSource="{Binding VersionItems}" 
-								  MinWidth="150" Margin="5" FontWeight="Bold" FontSize="12" 
-								  VerticalAlignment="Top" VerticalContentAlignment="Center" 
-								  HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
+					<StackPanel IsVisible="{Binding Installed}" Grid.Row="2" Grid.Column="2" Margin="20" VerticalAlignment="Center">
+						<WrapPanel Margin="5" HorizontalAlignment="Right">
+							<Button Grid.Column="0" HorizontalAlignment="Left" Width="16" Height="50"
+								Margin="1" ToolTip.Tip="Advanced Options" Background="{StaticResource PrimaryColor}">
+								<PathIcon Height="15" Width="10" Data="{StaticResource ChevronLeftRegular}" />
+								<Button.Flyout>
+									<Flyout Placement="Left">
+										<StackPanel>
+											<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="playvr" Content="Play in VR" HorizontalAlignment="Center" Margin="0,2,0,0" Width="115" ></Button>
+											<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="fred2" Content="Fred2" HorizontalAlignment="Center" Margin="0,2,0,0" Width="115" ></Button>
+											<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="qtfred" Content="QtFred" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="115" ></Button>
+											<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="debug" Content="FSO Debug" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="115" ></Button>
+											<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="fred2debug" Content="Fred2 Debug" HorizontalAlignment="Center" Margin="0,2,0,0" Width="115" ></Button>
+											<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="qtfreddebug" Content="QtFred Debug" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="115" ></Button>
+											<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="logfile" Content="Open Logfile" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="115" ></Button>
+										</StackPanel>
+									</Flyout>
+								</Button.Flyout>
+							</Button>
+							<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="play"
+								Content="Launch" Classes="Accept" 
+								Height="50" Width="160" FontSize="24"></Button>
+						</WrapPanel>
+						<Button Margin="5,2,5,2" HorizontalAlignment="Right" Command="{Binding HardcodedButtonCommand}" 
+								CommandParameter="modify" Content="Modify" Classes="Quaternary" Width="160"
+								IsVisible="{Binding !IsUpdateReady}">
+						</Button>
+						<Button Margin="5,2,5,2" HorizontalAlignment="Right" Command="{Binding HardcodedButtonCommand}"
+								CommandParameter="update" Content="Download Update" Classes="Quaternary" Width="160"
+								IsVisible="{Binding IsUpdateReady}">
+						</Button>
 					</StackPanel>
 					<!--Not Installed-->
 					<StackPanel IsVisible="{Binding !Installed}" Grid.Row="2" Grid.Column="2" Margin="20">
 						<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="install"
 								Content="Install" Classes="Option" HorizontalAlignment="Center"
 								Margin="0,2,0,0" Height="50" Width="150" FontSize="24" 
-								IsVisible="{Binding !Installing}"></Button>
+								IsVisible="{Binding !Installing}" IsEnabled="{Binding NebulaServices}"></Button>
+						<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="details"
+								Content="More info" Classes="Quaternary" HorizontalAlignment="Center"
+								Margin="0,2,0,0" Height="30" Width="150"
+								IsVisible="{Binding !Installing}" IsEnabled="{Binding NebulaServices}"></Button>
 						<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="cancel"
 								Content="Cancel" Classes="Cancel" HorizontalAlignment="Center"
 								Margin="0,2,0,0" Height="50" Width="150" FontSize="24"
@@ -53,6 +79,28 @@
 				<!--=============================Center Panel=======================================-->
 				<!--================================================================================-->
 				<!--=============================Left Panel=========================================-->
+				<StackPanel IsVisible="{Binding Installed}" Grid.Row="2" Grid.Column="0" Margin="20" VerticalAlignment="Center">
+					<WrapPanel Margin="5" HorizontalAlignment="Left">
+						<Button Margin="0,0,2,0" Classes="Cancel" Content="X" CommandParameter="delete"
+								Width="20" Command="{Binding HardcodedButtonCommand}"
+								ToolTip.Tip="Delete this version" IsVisible="{Binding NebulaServices}">
+								<Image Height="19" Width="12" Source="/Assets/general/x.png"/>
+						</Button>
+						<ComboBox SelectedIndex="{Binding ActiveVersionIndex}"
+								ItemsSource="{Binding VersionItems}"
+								MinWidth="155"  FontWeight="Bold" FontSize="12"
+								VerticalAlignment="Top" VerticalContentAlignment="Center"
+								HorizontalContentAlignment="Center" Foreground="White"></ComboBox>
+					</WrapPanel>
+					<WrapPanel Margin="5" HorizontalAlignment="Left">
+						<Button Content="Details" Classes="Option" CommandParameter="details"
+								Width="86" Command="{Binding HardcodedButtonCommand}">
+						</Button>
+						<Button Margin="5,0,0,0" Classes="Settings" Content="Settings" CommandParameter="settings"
+								Width="86" Command="{Binding HardcodedButtonCommand}">
+						</Button>
+					</WrapPanel>
+				</StackPanel>
 				<!--================================================================================-->
 			</Grid>
 		</Grid>
