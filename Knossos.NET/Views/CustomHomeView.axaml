@@ -77,6 +77,9 @@
 					</StackPanel>
 				<!--================================================================================-->
 				<!--=============================Center Panel=======================================-->
+				<TransitioningContentControl MaxHeight="120" Grid.Column="1" Grid.Row="2" Margin="0" 
+							HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+							PageTransition="{x:Null}" Content="{Binding TaskVM}"/>
 				<!--================================================================================-->
 				<!--=============================Left Panel=========================================-->
 				<StackPanel IsVisible="{Binding Installed}" Grid.Row="2" Grid.Column="0" Margin="20" VerticalAlignment="Center">

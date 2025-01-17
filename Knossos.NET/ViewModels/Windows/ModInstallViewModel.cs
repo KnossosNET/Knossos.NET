@@ -162,7 +162,8 @@ namespace Knossos.NET.ViewModels
             {
                 await SelectedMod.LoadFulLNebulaData();
             }
-            if(SelectedMod != null && !SelectedMod.GetMissingDependenciesList().Any())
+            //load all dependencies mods in singletc mode so they can be modified too at any time
+            if(SelectedMod != null && !SelectedMod.GetMissingDependenciesList().Any() && !Knossos.inSingleTCMode)
             {
                 allMods = ModVersions.ToList();
             }
@@ -327,167 +328,171 @@ namespace Knossos.NET.ViewModels
         {
             if (processed == null)
                 processed = new List<Mod>();
-            var dependencies = mod.GetMissingDependenciesList(false, true);
+            //load all dependencies mods in singletc mode so they can be modified too at any time
+            var dependencies = Knossos.inSingleTCMode ? mod.GetModDependencyList(false, true) : mod.GetMissingDependenciesList(false, true);
             //Display this mod on install list
             AddModToList(mod);
             //Add this mod here to avoid possible looping
             processed.Add(mod);
-            foreach (var dep in dependencies)
+            if (dependencies != null)
             {
-                var modDep = await dep.SelectModNebula(allMods);
-                if (modDep != null)
+                foreach (var dep in dependencies)
                 {
-                    //Is this dependecy mod already is installed?
-                    var modInstalled = Knossos.GetInstalledMod(modDep.id, modDep.version);
+                    var modDep = await dep.SelectModNebula(allMods);
+                    if (modDep != null)
+                    {
+                        //Is this dependecy mod already is installed?
+                        var modInstalled = Knossos.GetInstalledMod(modDep.id, modDep.version);
 
-                    //Check Cache
-                    var modInCache = modCache.FirstOrDefault(x => x.id == modDep.id && x.version == modDep.version);
-                    if (modInCache != null)
-                    {
-                        modDep = modInCache;
-                    }
-                    else
-                    {
-                        //Load Nebula data first to check the packages and add to cache
-                        await modDep.LoadFulLNebulaData();
-                        modCache.Add(modDep);
-                    }
-
-                    //If this is an engine build then check if contains valid executables
-                    if (modDep.type == ModType.engine)
-                    {
-                        //Set a max amount of attempts to get an alternative version in case we need an alternative version
-                        //This is because if user request "FSO" builds with an an incompatible cpu arch this is going to try
-                        //with every FSO build in nebula that sastifies the dependency, incluiding nightlies.
-                        var attempt = 0;
-                        var maxAttempts = 10;
-                        while (modDep != null && ++attempt < maxAttempts && modDep.packages.Any(x => FsoBuild.IsEnviromentStringValidInstall(x.environment)) == false)
+                        //Check Cache
+                        var modInCache = modCache.FirstOrDefault(x => x.id == modDep.id && x.version == modDep.version);
+                        if (modInCache != null)
                         {
-                            //This build is not valid for this pc, delete from allmods list and resend to process
-                            var remove = allMods.FirstOrDefault(x => x.id == modDep.id && x.version == modDep.version);
-                            if (remove != null)
+                            modDep = modInCache;
+                        }
+                        else
+                        {
+                            //Load Nebula data first to check the packages and add to cache
+                            await modDep.LoadFulLNebulaData();
+                            modCache.Add(modDep);
+                        }
+
+                        //If this is an engine build then check if contains valid executables
+                        if (modDep.type == ModType.engine)
+                        {
+                            //Set a max amount of attempts to get an alternative version in case we need an alternative version
+                            //This is because if user request "FSO" builds with an an incompatible cpu arch this is going to try
+                            //with every FSO build in nebula that sastifies the dependency, incluiding nightlies.
+                            var attempt = 0;
+                            var maxAttempts = 10;
+                            while (modDep != null && ++attempt < maxAttempts && modDep.packages.Any(x => FsoBuild.IsEnviromentStringValidInstall(x.environment)) == false)
                             {
-                                allMods.Remove(remove);
-                                var alternativeVersion = await dep.SelectModNebula(allMods);
-                                if (alternativeVersion != null)
+                                //This build is not valid for this pc, delete from allmods list and resend to process
+                                var remove = allMods.FirstOrDefault(x => x.id == modDep.id && x.version == modDep.version);
+                                if (remove != null)
                                 {
-                                    //Check Cache
-                                    modInCache = modCache.FirstOrDefault(x => x.id == alternativeVersion.id && x.version == alternativeVersion.version);
-                                    if (modInCache != null)
+                                    allMods.Remove(remove);
+                                    var alternativeVersion = await dep.SelectModNebula(allMods);
+                                    if (alternativeVersion != null)
                                     {
-                                        alternativeVersion = modInCache;
+                                        //Check Cache
+                                        modInCache = modCache.FirstOrDefault(x => x.id == alternativeVersion.id && x.version == alternativeVersion.version);
+                                        if (modInCache != null)
+                                        {
+                                            alternativeVersion = modInCache;
+                                        }
+                                        else
+                                        {
+                                            //Load Nebula data first to check the packages and add to cache
+                                            await alternativeVersion.LoadFulLNebulaData();
+                                            modCache.Add(alternativeVersion);
+                                        }
+                                    }
+                                    modDep = alternativeVersion;
+                                }
+                                else
+                                {
+                                    //if for some reason we cant find modDep on allMods (it should never happen) we have to break or we are going to loop
+                                    break;
+                                }
+                            }
+                            //if we cant find a alternative version in nebula, we have to skip the rest.
+                            if (modDep == null || attempt == maxAttempts)
+                                continue;
+                        }
+
+                        //Make sure to mark all needed pkgs this mod need as required
+                        modDep.isEnabled = true;
+                        modDep.isSelected = true;
+
+                        foreach (var pkg in modDep.packages)
+                        {
+                            if (dep != null && dep.packages != null)
+                            {
+                                //Auto select needed packages and inform via tooltip, updating the foreground
+                                var depPkg = dep.packages.FirstOrDefault(dp => dp == pkg.name);
+                                if (depPkg != null && pkg.status != "required")
+                                {
+                                    pkg.isEnabled = true;
+                                    pkg.isSelected = true;
+                                    pkg.isRequired = true;
+
+                                    var originalPkg = mod.FindPackageWithDependency(dep.originalDependency);
+                                    if (originalPkg != null)
+                                    {
+                                        if (!pkg.tooltip.Contains(mod + "\nPKG: " + originalPkg.name))
+                                        {
+                                            pkg.tooltip += "\n\nRequired by MOD: " + mod + "\nPKG: " + originalPkg.name;
+                                        }
                                     }
                                     else
                                     {
-                                        //Load Nebula data first to check the packages and add to cache
-                                        await alternativeVersion.LoadFulLNebulaData();
-                                        modCache.Add(alternativeVersion);
-                                    }
-                                }
-                                modDep = alternativeVersion;
-                            }
-                            else
-                            {
-                                //if for some reason we cant find modDep on allMods (it should never happen) we have to break or we are going to loop
-                                break;
-                            }
-                        }
-                        //if we cant find a alternative version in nebula, we have to skip the rest.
-                        if (modDep == null || attempt == maxAttempts)
-                            continue;
-                    }
-
-                    //Make sure to mark all needed pkgs this mod need as required
-                    modDep.isEnabled = true;
-                    modDep.isSelected = true;
-
-                    foreach (var pkg in modDep.packages)
-                    {
-                        if (dep != null && dep.packages != null)
-                        {
-                            //Auto select needed packages and inform via tooltip, updating the foreground
-                            var depPkg = dep.packages.FirstOrDefault(dp => dp == pkg.name);
-                            if (depPkg != null && pkg.status != "required")
-                            {
-                                pkg.isEnabled = true;
-                                pkg.isSelected = true;
-                                pkg.isRequired = true;
-
-                                var originalPkg = mod.FindPackageWithDependency(dep.originalDependency);
-                                if(originalPkg != null)
-                                {
-                                    if (!pkg.tooltip.Contains(mod + "\nPKG: " + originalPkg.name))
-                                    {
-                                        pkg.tooltip += "\n\nRequired by MOD: " + mod + "\nPKG: " + originalPkg.name;
+                                        if (!pkg.tooltip.Contains(mod.ToString()))
+                                        {
+                                            pkg.tooltip += "\n\nRequired by MOD: " + mod;
+                                        }
                                     }
                                 }
                                 else
                                 {
-                                    if (!pkg.tooltip.Contains(mod.ToString()))
+                                    switch (pkg.status)
                                     {
-                                        pkg.tooltip += "\n\nRequired by MOD: " + mod;
+                                        case "required":
+                                            pkg.isEnabled = false;
+                                            pkg.isSelected = true;
+                                            break;
+                                        case "recommended":
+                                            pkg.isSelected = true;
+                                            break;
+                                        case "optional":
+                                            //No need to do anything here
+                                            break;
                                     }
                                 }
                             }
-                            else
+
+                            //If mod is already installed, non-installed pkgs are all unselected
+                            //and all installed ones are selected
+                            if (modInstalled != null && modInstalled.packages != null)
                             {
-                                switch(pkg.status)
+                                var packageIsInstalled = modInstalled.packages.FirstOrDefault(m => m.name == pkg.name);
+                                if (packageIsInstalled != null)
                                 {
-                                    case "required":
+                                    //Pkg is installed
+                                    if (pkg.status == "required")
+                                    {
                                         pkg.isEnabled = false;
-                                        pkg.isSelected = true;
-                                        break;
-                                    case "recommended":
-                                        pkg.isSelected = true;
-                                        break;
-                                    case "optional":
-                                        //No need to do anything here
-                                        break;
-                                }
-                            }
-                        }
-
-                        //If mod is already installed, non-installed pkgs are all unselected
-                        //and all installed ones are selected
-                        if (modInstalled != null && modInstalled.packages != null)
-                        {
-                            var packageIsInstalled = modInstalled.packages.FirstOrDefault(m => m.name == pkg.name);
-                            if (packageIsInstalled != null)
-                            {
-                                //Pkg is installed
-                                if (pkg.status == "required")
-                                {
-                                    pkg.isEnabled = false;
+                                    }
+                                    else
+                                    {
+                                        pkg.isEnabled = true;
+                                    }
+                                    pkg.isSelected = true;
                                 }
                                 else
                                 {
-                                    pkg.isEnabled = true;
-                                }
-                                pkg.isSelected = true;
-                            }
-                            else
-                            {
-                                //Pkg is not installed
-                                //ONLY if the currently selected mod is also installed
-                                //For new mod or new mod version installs only if the package is not needed
-                                if (IsInstalled || !IsInstalled && !pkg.isRequired)
-                                {
-                                    pkg.isEnabled = true;
-                                    pkg.isSelected = false;
+                                    //Pkg is not installed
+                                    //ONLY if the currently selected mod is also installed
+                                    //For new mod or new mod version installs only if the package is not needed
+                                    if (IsInstalled || !IsInstalled && !pkg.isRequired)
+                                    {
+                                        pkg.isEnabled = true;
+                                        pkg.isSelected = false;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    //If process this depmod own dependencies if we havent done already
-                    //Otherwise re-add it to the list to enabled any potential new pkg needed
-                    if (processed.IndexOf(modDep) == -1)
-                    {
-                        await ProcessMod(modDep, allMods, processed);
-                    }
-                    else
-                    {
-                        AddModToList(modDep);
+                        //If process this depmod own dependencies if we havent done already
+                        //Otherwise re-add it to the list to enabled any potential new pkg needed
+                        if (processed.IndexOf(modDep) == -1)
+                        {
+                            await ProcessMod(modDep, allMods, processed);
+                        }
+                        else
+                        {
+                            AddModToList(modDep);
+                        }
                     }
                 }
             }
@@ -564,6 +569,8 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal void InstallMod()
         {
+            if(Knossos.inSingleTCMode)
+                TaskViewModel.Instance?.CleanCommand();
             foreach (var mod in ModInstallList)
             {
                 var cleanOldVersions = false;

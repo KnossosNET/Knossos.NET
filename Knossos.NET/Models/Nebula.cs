@@ -253,7 +253,7 @@ namespace Knossos.NET.Models
                                 var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
                                 if (newer != null && ( new SemanticVersion(newer.version) < new SemanticVersion(mod.version) || newer.version == mod.version && newer.lastUpdate != mod.lastUpdate))
                                 {
-                                    Dispatcher.UIThread.Invoke(() => MainWindowViewModel.Instance?.MarkAsUpdateAvailable(mod.id), DispatcherPriority.Background);
+                                    Dispatcher.UIThread.Invoke(() => MainWindowViewModel.Instance?.MarkAsUpdateAvailable(mod.id, true, mod.version), DispatcherPriority.Background);
                                 }
                                 if(isInstalled.First().devMode)
                                     DeveloperModsViewModel.Instance?.UpdateVersionManager(isInstalled.First().id);
@@ -426,7 +426,7 @@ namespace Knossos.NET.Models
                             var newer = isInstalled.MaxBy(x => new SemanticVersion(x.version));
                             if (newer != null && ( new SemanticVersion(newer.version) < new SemanticVersion(m.version) || newer.version == m.version && newer.lastUpdate != m.lastUpdate ))
                             {
-                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvailable(m.id), DispatcherPriority.Background);
+                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.MarkAsUpdateAvailable(m.id, true, m.version), DispatcherPriority.Background);
                             }
                             modsTcs.Remove(m);
                         }
