@@ -120,20 +120,22 @@ namespace Knossos.NET
         /// <returns>fullpath as a string</returns>
         public static string GetKnossosDataFolderPath()
         {
-            var path = string.Empty;
             if (!Knossos.inPortableMode)
             {
-                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET");
+                if (CustomLauncher.IsCustomMode)
+                {
+                    //In custom mode store config files inside modid a subfolder
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET", CustomLauncher.ModID!);
+                }
+                else
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET");
+                }
             }
             else
             {
-                path = Path.Combine(KnetFolderPath!, "kn_portable", "KnossosNET"); //If inPortableMode = true, KnetFolderPath is not null
+                return Path.Combine(KnetFolderPath!, "kn_portable", "KnossosNET"); //If inPortableMode = true, KnetFolderPath is not null
             }
-            if(CustomLauncher.IsCustomMode)
-            {
-                path = Path.Combine(path, CustomLauncher.ModID!);
-            }
-            return path;
         }
 
         /// <summary>
