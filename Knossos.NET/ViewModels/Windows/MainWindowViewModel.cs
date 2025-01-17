@@ -229,6 +229,8 @@ namespace Knossos.NET.ViewModels
                 }
                 if (CurrentViewModel != null && CurrentViewModel == CustomHomeVM) //CustomHomeView
                 {
+                    CustomHomeVM.TaskVM = null;
+                    TaskView?.ShowButtons(true);
                     CustomHomeVM.ViewClosed();
                 }
 
@@ -263,6 +265,8 @@ namespace Knossos.NET.ViewModels
                 }
                 if (CurrentViewModel != null && CurrentViewModel == CustomHomeVM) //CustomHomeView
                 {
+                    CustomHomeVM.TaskVM = TaskView;
+                    TaskView?.ShowButtons(false);
                     CustomHomeVM.ViewOpened();
                 }
                 if (CurrentViewModel == GlobalSettingsView) //Settings
@@ -313,10 +317,10 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         /// <param name="id"></param>
         /// <param name="value"></param>
-        public void MarkAsUpdateAvailable(string id, bool value = true)
+        public void MarkAsUpdateAvailable(string id, bool value = true, string? newVersion = null)
         {
             InstalledModsView?.UpdateIsAvailable(id, value);
-            CustomHomeVM?.UpdateIsAvailable(id, value);
+            CustomHomeVM?.UpdateIsAvailable(id, value, newVersion);
         }
 
         /// <summary>

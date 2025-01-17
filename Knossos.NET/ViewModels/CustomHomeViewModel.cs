@@ -62,6 +62,12 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool nebulaServices = CustomLauncher.UseNebulaServices;
 
+        /// <summary>
+        /// Handled in mainview, displays a small task viewer in the home screen
+        /// </summary>
+        [ObservableProperty]
+        public ViewModelBase? taskVM;
+
         public CustomHomeViewModel()
         {
         }
@@ -250,7 +256,7 @@ namespace Knossos.NET.ViewModels
                                     modVersions.Remove(delete);
                                     Knossos.RemoveMod(delete);
                                     VersionItems.Remove(verDel);
-                                    ActiveVersionIndex = modVersions.Count() - 1;
+                                    ActiveVersionIndex = 0;
                                 }
                             }
                             else
@@ -383,11 +389,15 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         /// <param name="id"></param>
         /// <param name="value"></param>
-        public void UpdateIsAvailable(string id, bool value)
+        public void UpdateIsAvailable(string id, bool value, string? newVersion)
         {
             if (id == CustomLauncher.ModID)
             {
                 IsUpdateReady = value;
+                if (IsUpdateReady && newVersion != null)
+                {
+                    Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask("An update is available! " + newVersion), DispatcherPriority.Background);
+                }
             }
         }
 

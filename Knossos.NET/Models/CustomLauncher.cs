@@ -49,7 +49,7 @@ namespace Knossos.NET.Models
         /// Starting width size of the launcher window
         /// null for auto
         /// </summary>
-        public static int? WindowWidth { get; private set; } = 960;
+        public static int? WindowWidth { get; private set; } = 1024;
 
         /// <summary>
         /// Starting height size of the launcher window
