@@ -28,16 +28,42 @@
 				   Source="{Binding BackgroundImage, Converter={StaticResource imageConverter}}" 
 				   anim:ImageBehavior.AnimatedSource="{Binding BackgroundImage}" />
 			<Grid ZIndex="1" RowDefinitions="Auto, *, Auto">
-				<!--==========================================Top========================================-->
-
-
-				<!--==========================================Center========================================-->
-				<ScrollViewer Grid.Row="1" Margin="50,0,50,0" Opacity="0.80">
+				<!--==========================================Top============================================-->
+				<WrapPanel Grid.Row="0" HorizontalAlignment="Right" Margin="10" Name="LinkButtons">
+					<!--Links buttons are code-generated in CustomHomeView.axaml.cs-->
+					<WrapPanel.Styles>
+						<Style Selector="Button">
+							<Setter Property="Margin" Value="5"/>
+							<Setter Property="Width" Value="40"/>
+							<Setter Property="Height" Value="40"/>
+							<Setter Property="Opacity" Value="0.80"/>
+							<Setter Property="HorizontalContentAlignment" Value="Center"/>
+							<Setter Property="VerticalContentAlignment" Value="Center"/>
+						</Style>
+					</WrapPanel.Styles>
+				</WrapPanel>
+				<!--==========================================Center=========================================-->
+				<ScrollViewer IsVisible="{Binding !ShowBasePathSelector}" Grid.Row="1" Margin="{Binding WelcomeMargin}" Opacity="0.80">
 					<HtmlRenderer:HtmlPanel Text="{Binding WelcomeHtml, Converter={StaticResource textFileConverter}}}"
 								HorizontalAlignment="Center" VerticalAlignment="Center"/>
 				</ScrollViewer>
+				<!--==========================================No Base Path====================================================-->
+				<Border IsVisible="{Binding ShowBasePathSelector}" Grid.Row="2" CornerRadius="20" Margin="20"
+						Background="{StaticResource BackgroundColorSecondary}">
+					<StackPanel Margin="20">
+						<Label HorizontalAlignment="Center" FontSize="18">Select a folder to install the game files</Label>
+						<WrapPanel HorizontalAlignment="Center">
+							<TextBox Text="{Binding NewBasePath}" Margin="4" Grid.Column="1" IsReadOnly="True" Width="500"></TextBox>
+							<Button Margin="5,0,0,0" Grid.Column="2" Classes="Quaternary" 
+									Command="{Binding BrowseFolderCommand}">Browse</Button>
+						</WrapPanel>
+						<Button IsVisible="{Binding ChangeBasePathButtonVisible}" HorizontalAlignment="Center" Width="100" Classes="Accept" 
+								Command="{Binding ChangeBasePath}">Save</Button>
+					</StackPanel>
+				</Border>
+				<!--==========================================================================================================-->
 				<!--==========================================Botton========================================-->
-				<Grid ZIndex="1" Grid.Row="2" ColumnDefinitions="Auto, *, Auto"  Opacity="0.75">
+				<Grid IsVisible="{Binding !ShowBasePathSelector}" Grid.Row="2" ColumnDefinitions="Auto, *, Auto" Opacity="0.75">
 					<!--=============================Right Panel========================================-->
 						<!-- Installed -->
 						<StackPanel IsVisible="{Binding Installed}" Grid.Column="2" Margin="20" VerticalAlignment="Center">

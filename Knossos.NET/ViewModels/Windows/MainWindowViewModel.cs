@@ -147,6 +147,7 @@ namespace Knossos.NET.ViewModels
                 FillMenuItemsCustomMode(1);
             }
             Knossos.StartUp(isQuickLaunch, forceUpdate);
+            CustomHomeVM?.CheckBasePath();
         }
 
         private void FillMenuItemsCustomMode(int defaultSelectedIndex)

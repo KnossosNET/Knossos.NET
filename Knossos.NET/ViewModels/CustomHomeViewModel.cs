@@ -1,4 +1,6 @@
-﻿using Avalonia.Threading;
+﻿using Avalonia;
+using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
@@ -10,7 +12,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
@@ -63,10 +64,19 @@ namespace Knossos.NET.ViewModels
         internal bool nebulaServices = CustomLauncher.UseNebulaServices;
 
         [ObservableProperty]
-        internal bool welcomeVisible = false;
+        internal string? welcomeHtml = CustomLauncher.HomeWelcomeHtml;
 
         [ObservableProperty]
-        internal string? welcomeHtml = CustomLauncher.HomeWelcomeHtml;
+        internal Thickness welcomeMargin = new Thickness(50, 50, 50, 0);
+
+        [ObservableProperty]
+        internal bool showBasePathSelector = false;
+
+        [ObservableProperty]
+        internal string newBasePath = string.Empty;
+
+        [ObservableProperty]
+        internal bool changeBasePathButtonVisible = false;
 
         /// <summary>
         /// Handled in mainview, displays a small task viewer in the home screen
@@ -76,6 +86,28 @@ namespace Knossos.NET.ViewModels
 
         public CustomHomeViewModel()
         {
+            if (CustomLauncher.HomeWelcomeMargin != null)
+            {
+                try
+                {
+                    WelcomeMargin = Thickness.Parse(CustomLauncher.HomeWelcomeMargin);
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.Constructor()", ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Check if we are in normal mode, but we dont have a saved base path
+        /// </summary>
+        public void CheckBasePath()
+        {
+            if (!Knossos.inPortableMode && Knossos.GetKnossosLibraryPath() == null)
+            {
+                ShowBasePathSelector = true;
+            }
         }
 
         /// <summary>
@@ -413,37 +445,6 @@ namespace Knossos.NET.ViewModels
         public void ViewOpened()
         {
             Animate = 1;
-
-            //download remote image if we have to
-            if (BackgroundImage != null && BackgroundImage.ToLower().StartsWith("http"))
-            {
-                _ = Task.Factory.StartNew(async () =>
-                {
-                    var temp = BackgroundImage;
-                    BackgroundImage = "";
-                    var imageFile = await KnUtils.GetRemoteResource(temp).ConfigureAwait(false);
-                    Dispatcher.UIThread.Invoke(() =>
-                    {
-                        if (imageFile != null)
-                            BackgroundImage = imageFile;
-                    });
-                });
-            }
-            //download remote WelcomeHTML
-            if (WelcomeHtml != null && WelcomeHtml.ToLower().StartsWith("http"))
-            {
-                _ = Task.Factory.StartNew(async () =>
-                {
-                    var temp = WelcomeHtml;
-                    WelcomeHtml = "";
-                    var htmlFile = await KnUtils.GetRemoteResource(temp).ConfigureAwait(false);
-                    Dispatcher.UIThread.Invoke(() =>
-                    {
-                        if (htmlFile != null)
-                            WelcomeHtml = htmlFile;
-                    });
-                });
-            }
         }
 
         /// <summary>
@@ -452,6 +453,56 @@ namespace Knossos.NET.ViewModels
         public void ViewClosed()
         {
             Animate = 0;
+        }
+
+        /// <summary>
+        /// Changes the knossos library path, reloads settings and nebula repo
+        /// </summary>
+        internal async void BrowseFolderCommand()
+        {
+            if (MainWindow.instance != null)
+            {
+                ChangeBasePathButtonVisible = false;
+                NewBasePath = string.Empty;
+                FolderPickerOpenOptions options = new FolderPickerOpenOptions();
+                options.AllowMultiple = false;
+
+                var result = await MainWindow.instance.StorageProvider.OpenFolderPickerAsync(options);
+
+                try
+                {
+                    if (result != null && result.Count > 0)
+                    {
+
+                        // Test if we can write to the new library directory
+                        using (StreamWriter writer = new StreamWriter(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"))
+                        {
+                            writer.WriteLine("test");
+                        }
+                        File.Delete(Path.Combine(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"));
+                        NewBasePath = result[0].Path.LocalPath.ToString();
+                        ChangeBasePathButtonVisible = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.BrowseFolderCommand() - test read/write was not successful: ", ex);
+                    await Dispatcher.UIThread.Invoke(async () => {
+                        await MessageBox.Show(null, "We were not able to write to this folder.  Please select another library folder.", "Cannot Select Folder", MessageBox.MessageBoxButtons.OK);
+                    }).ConfigureAwait(false);
+                }
+            }
+        }
+
+        internal void ChangeBasePath()
+        {
+            if (NewBasePath != string.Empty)
+            {
+                Knossos.globalSettings.basePath = NewBasePath;
+                Knossos.globalSettings.Save();
+                Knossos.ResetBasePath();
+                ShowBasePathSelector = false;
+            }
         }
     }
 }
