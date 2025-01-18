@@ -47,12 +47,14 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// Starting width size of the launcher window
+        /// This is also the min width
         /// null for auto
         /// </summary>
         public static int? WindowWidth { get; private set; } = 1024;
 
         /// <summary>
         /// Starting height size of the launcher window
+        /// This is also the min height
         /// null for auto
         /// </summary>
         public static int? WindowHeight { get; private set; } = 540;
@@ -108,6 +110,7 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// Path to the background image for the home view
+        /// It is recommended this image to be about 200px less in width than the starting WindowWidth
         /// Supports local image in the Knet data folder, a local full path, harcoded image or remote https:// URL
         /// Supports APNGs, GIF, PNG and JPG
         /// Examples:
@@ -119,6 +122,13 @@ namespace Knossos.NET.Models
         /// "https://video-meta.humix.com/poster/h2YKfXkqITvJ/pKvBUijWRO2_IChwVu.jpg"
         /// </summary>
         public static string? HomeBackgroundImage { get; private set; } = "avares://Knossos.NET/Assets/general/custom_home_background.jpg";
+
+        /// <summary>
+        /// Set a path to the welcome HTML message on home screen
+        /// Uses the same path rules as HomeBackgroundImage
+        /// null to disable or put a path to a empty file if you want to display it at some point
+        /// </summary>
+        public static string? HomeWelcomeHtml { get; private set; } = null;
 
         /// <summary>
         /// Call this AFTER checking if we are in portable mode or not.
@@ -204,6 +214,9 @@ namespace Knossos.NET.Models
                     if (customData.HomeBackgroundImage != null)
                         HomeBackgroundImage = customData.HomeBackgroundImage;
 
+                    if (customData.HomeWelcomeHtml != null)
+                        HomeWelcomeHtml = customData.HomeWelcomeHtml;
+
                     jsonFile.Close();
                 }
             }
@@ -230,6 +243,7 @@ namespace Knossos.NET.Models
             public bool? UseNebulaServices { get; set; }
             public bool? WriteLogFile { get; set; }
             public string? HomeBackgroundImage { get; set; }
+            public string? HomeWelcomeHtml { get; set; }
         }
     }
 }

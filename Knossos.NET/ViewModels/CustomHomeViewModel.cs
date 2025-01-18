@@ -62,6 +62,12 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool nebulaServices = CustomLauncher.UseNebulaServices;
 
+        [ObservableProperty]
+        internal bool welcomeVisible = false;
+
+        [ObservableProperty]
+        internal string? welcomeHtml = CustomLauncher.HomeWelcomeHtml;
+
         /// <summary>
         /// Handled in mainview, displays a small task viewer in the home screen
         /// </summary>
@@ -420,6 +426,21 @@ namespace Knossos.NET.ViewModels
                     {
                         if (imageFile != null)
                             BackgroundImage = imageFile;
+                    });
+                });
+            }
+            //download remote WelcomeHTML
+            if (WelcomeHtml != null && WelcomeHtml.ToLower().StartsWith("http"))
+            {
+                _ = Task.Factory.StartNew(async () =>
+                {
+                    var temp = WelcomeHtml;
+                    WelcomeHtml = "";
+                    var htmlFile = await KnUtils.GetRemoteResource(temp).ConfigureAwait(false);
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        if (htmlFile != null)
+                            WelcomeHtml = htmlFile;
                     });
                 });
             }
