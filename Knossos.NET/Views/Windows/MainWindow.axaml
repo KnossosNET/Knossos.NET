@@ -6,6 +6,8 @@
 	    xmlns:v="using:Knossos.NET.Views"
 		Width="{Binding WindowWidth}"
 		Height="{Binding WindowHeight}"
+		MinWidth="{Binding WindowWidth}"
+		MinHeight="{Binding WindowHeight}"
 		x:DataType="vm:MainWindowViewModel"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="900"
         x:Class="Knossos.NET.Views.MainWindow"
