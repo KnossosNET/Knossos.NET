@@ -1,17 +1,19 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using static Knossos.NET.ViewModels.MainWindowViewModel;
 
 namespace Knossos.NET.Models
 {
+    /// <summary>
+    /// Data struct for the custom mode dynamic link button
+    /// </summary>
+    public struct LinkButton
+    {
+        public string ToolTip { get; set; }
+        public string IconPath { get; set; }
+        public string LinkURL { get; set; }
+    }
+
     /// <summary>
     /// Class to handle the configuration options and optional save file of the SingleTC mode
     /// </summary>
@@ -131,6 +133,19 @@ namespace Knossos.NET.Models
         public static string? HomeWelcomeHtml { get; private set; } = null;
 
         /// <summary>
+        /// Thickness string to use as margin for the WelcomeHTML display
+        /// left, up, right, down
+        /// </summary>
+        public static string? HomeWelcomeMargin { get; private set; } = "50,50,50,0";
+
+        /// <summary>
+        /// Optional Link buttons that are displayed in the home screen that
+        /// if clicked opens a external web link in user browser
+        /// Icon path follows the same rules as HomeBackgroundImage, so URL, embedded and local images are supported.
+        /// </summary>
+        public static LinkButton[]? HomeLinkButtons { get; private set; }
+
+        /// <summary>
         /// Call this AFTER checking if we are in portable mode or not.
         /// The first time it runs it will try to load the "custom_launcher.json" if ModID is null
         /// </summary>
@@ -217,6 +232,11 @@ namespace Knossos.NET.Models
                     if (customData.HomeWelcomeHtml != null)
                         HomeWelcomeHtml = customData.HomeWelcomeHtml;
 
+                    if (customData.HomeWelcomeMargin != null)
+                        HomeWelcomeMargin = customData.HomeWelcomeMargin;
+
+                    HomeLinkButtons = customData.HomeLinkButtons;
+
                     jsonFile.Close();
                 }
             }
@@ -244,6 +264,8 @@ namespace Knossos.NET.Models
             public bool? WriteLogFile { get; set; }
             public string? HomeBackgroundImage { get; set; }
             public string? HomeWelcomeHtml { get; set; }
+            public string? HomeWelcomeMargin { get; set; }
+            public LinkButton[]? HomeLinkButtons { get; set; }
         }
     }
 }

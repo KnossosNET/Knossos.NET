@@ -4,6 +4,7 @@ using System.Globalization;
 using Avalonia.Platform;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.Converters
 {
@@ -11,7 +12,7 @@ namespace Knossos.NET.Converters
     {
         public static TextFileToStringConverter Instance { get; } = new();
 
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo? culture)
         {
             try
             {
@@ -36,9 +37,13 @@ namespace Knossos.NET.Converters
                         }
                     }
                 }
-                else if(rawUri.ToLower().StartsWith("http"))
+                else if (rawUri.ToLower().StartsWith("http"))
                 {
-                    return null;
+                    var localPath = Task.Run(() => KnUtils.GetRemoteResource(rawUri)).Result;
+                    if (localPath != null)
+                    {
+                        return File.ReadAllText(localPath);
+                    }
                 }
                 else if (File.Exists(Path.Combine(KnUtils.GetKnossosDataFolderPath(), rawUri)))
                 {
