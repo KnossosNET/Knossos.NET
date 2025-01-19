@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Knossos.NET.Views.HtmlContentView"
+			 xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+			 x:DataType="vm:HtmlContentViewModel"
+			 Background="{StaticResource BackgroundColorPrimary}"
+			 xmlns:cvt="clr-namespace:Knossos.NET.Converters;assembly=Knossos.NET"
+			 xmlns:HtmlRenderer="clr-namespace:TheArtOfDev.HtmlRenderer.Avalonia;assembly=Avalonia.HtmlRenderer">
+	
+	<Design.DataContext>
+		<vm:HtmlContentViewModel/>
+	</Design.DataContext>
+
+	<UserControl.Resources>
+		<cvt:TextFileToStringConverter x:Key="textFileConverter"/>
+	</UserControl.Resources>
+	
+	<ScrollViewer Margin="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+		<HtmlRenderer:HtmlPanel Text="{Binding HtmlData, Converter={StaticResource textFileConverter}}}"
+					HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+	</ScrollViewer>
+	
+</UserControl>

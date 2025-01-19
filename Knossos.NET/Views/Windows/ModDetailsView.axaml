@@ -30,13 +30,13 @@
 					<Button Command="{Binding ButtonCommandPlay}" IsVisible="{Binding !Build}" IsEnabled="{Binding !Build}" Content="Play" Grid.Column="0" Classes="Accept Rounded" Margin="5" Width="100" ></Button>
 					<Button Command="{Binding ButtonCommandFred2}" IsVisible="{Binding !Build}" IsEnabled="{Binding !Build}" Content="Fred2" Grid.Column="0" Classes="Secondary Rounded" Margin="5" Width="100" ></Button>
 					<Button Command="{Binding ButtonCommandSettings}" IsVisible="{Binding !Build}" IsEnabled="{Binding !Build}" Content="Settings" Classes="Quaternary Rounded" Margin="5" Width="100" ></Button>
-					<Button IsVisible="{Binding !IsLocalMod}" Command="{Binding ButtonCommandReport}" Content="Report" Classes="Settings Rounded" Margin="5" Width="100" ></Button>
+					<Button IsEnabled="{Binding NebulaServices}" IsVisible="{Binding !IsLocalMod}" Command="{Binding ButtonCommandReport}" Content="Report" Classes="Settings Rounded" Margin="5" Width="100" ></Button>
 				</WrapPanel>
 				<WrapPanel Grid.Row="1" Grid.Column="0">
 					<Button Command="{Binding ButtonCommandPlayDebug}" IsVisible="{Binding !Build}" IsEnabled="{Binding !Build}" Content="Debug" Grid.Column="0" Classes="Tertiary Rounded" Margin="5" Width="100" ></Button>
 					<Button Command="{Binding ButtonCommandQtFred}" IsVisible="{Binding !Build}" IsEnabled="{Binding !Build}" Content="QtFred" Grid.Column="0" Margin="5" Width="100" Classes="Settings Rounded"></Button>
 					<Button Command="{Binding ButtonCommandForum}" Content="Forum" IsVisible="{Binding ForumAvailable}" Classes="Settings Rounded" Margin="5" Width="100" ></Button>
-					<Button IsVisible="{Binding !devMode}" Command="{Binding ButtonCommandDelete}" Content="Delete" Classes="Cancel Rounded" Margin="5" Width="100" ></Button>
+					<Button IsEnabled="{Binding NebulaServices}" IsVisible="{Binding !devMode}" Command="{Binding ButtonCommandDelete}" Content="Delete" Classes="Cancel Rounded" Margin="5" Width="100" ></Button>
 				</WrapPanel>
 				<Label Content="Version" Grid.Column="3" Margin="20,0,20,0" Grid.Row="0" FontWeight="Bold" FontSize="14" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"/>
 				<ComboBox IsEnabled="{Binding !Build}" IsVisible="{Binding !Build}" SelectedIndex="{Binding ItemSelectedIndex}" ItemsSource="{Binding VersionItems}" MinWidth="125" Margin="20,5,20,0" Grid.Column="3" Grid.Row="1" FontWeight="Bold" FontSize="12" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="White"></ComboBox>

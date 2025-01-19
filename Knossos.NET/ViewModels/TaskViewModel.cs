@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Avalonia.Controls;
+using System.Linq;
 
 namespace Knossos.NET.ViewModels
 {
@@ -27,6 +28,9 @@ namespace Knossos.NET.ViewModels
         /// Task Execute Queue. Internal use only, must be modified from the UIThread
         /// </summary>
         internal Queue<TaskItemViewModel> taskQueue { get; set; } = new Queue<TaskItemViewModel>();
+
+        [ObservableProperty]
+        internal bool buttonsVisible = true;
 
         public TaskViewModel() 
         {
@@ -49,6 +53,7 @@ namespace Knossos.NET.ViewModels
 
         /// <summary>
         /// Cancel a ModInstall or Verify mod by mod ID and version
+        /// Null version will cancel all tasks with the same id
         /// </summary>
         /// <param name="id"></param>
         /// <param name="version"></param>
@@ -56,9 +61,9 @@ namespace Knossos.NET.ViewModels
         {
             Dispatcher.UIThread.Invoke(() =>
             {
-                foreach (var task in TaskList)
+                foreach (var task in TaskList.ToList())
                 {
-                    if (!task.IsCompleted && task.installID == id && task.installVersion == version)
+                    if (!task.IsCompleted && task.installID == id && (version == null || task.installVersion == version))
                     {
                         task.CancelTaskCommand();
                     }
@@ -67,12 +72,21 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
+        /// SHow or hide buttons on taskview
+        /// </summary>
+        /// <param name="state"></param>
+        public void ShowButtons(bool state)
+        {
+            ButtonsVisible = state;
+        }
+
+        /// <summary>
         /// Checks if all tasks in queue are mark as cancelled or completed
         /// </summary>
         /// <returns>true if all completed or cancelled, false if there is running tasks</returns>
         public bool IsSafeState()
         {
-            foreach (var task in TaskList)
+            foreach (var task in TaskList.ToList())
             {
                 if (!task.IsCancelled && !task.IsCompleted)
                 {
@@ -253,7 +267,20 @@ namespace Knossos.NET.ViewModels
                 TaskList.Add(newTask);
                 taskQueue.Enqueue(newTask);
             });
-            return await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson, modifyPkgs, cleanupOldVersions).ConfigureAwait(false);
+            var res = await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson, modifyPkgs, cleanupOldVersions).ConfigureAwait(false);
+            if (res != null && Knossos.inSingleTCMode)
+            {
+                try
+                {
+                    TaskList.Remove(newTask);
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "TaskViewModel.InstallBuild()", ex);
+                }
+                Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask("Completed: " + newTask.Name), DispatcherPriority.Background);
+            }
+            return res;
         }
 
         /// <summary>
@@ -289,7 +316,19 @@ namespace Knossos.NET.ViewModels
                         TaskList.Add(newTask);
                         taskQueue.Enqueue(newTask);
                     });
-                    await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress, cleanupOldVersions, cleanInstall, allowHardlinks).ConfigureAwait(false);
+                    var res = await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress, cleanupOldVersions, cleanInstall, allowHardlinks).ConfigureAwait(false);
+                    if(res && Knossos.inSingleTCMode)
+                    {
+                        try
+                        {
+                            TaskList.Remove(newTask);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Error, "TaskViewModel.InstallMod()", ex);
+                        }
+                        Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask("Completed: " + newTask.Name), DispatcherPriority.Background);
+                    }
                 }
             }
         }
@@ -316,7 +355,19 @@ namespace Knossos.NET.ViewModels
                         TaskList.Add(newTask);
                         taskQueue.Enqueue(newTask);
                     });
-                    await newTask.CompressMod(mod, cancelSource).ConfigureAwait(false);
+                    var res = await newTask.CompressMod(mod, cancelSource).ConfigureAwait(false);
+                    if (res && Knossos.inSingleTCMode)
+                    {
+                        try
+                        {
+                            TaskList.Remove(newTask);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Error, "TaskViewModel.CompressMod()", ex);
+                        }
+                        Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask("Completed: " + newTask.Name), DispatcherPriority.Background);
+                    }
                 }
             }
         }
@@ -342,7 +393,19 @@ namespace Knossos.NET.ViewModels
                         TaskList.Add(newTask);
                         taskQueue.Enqueue(newTask);
                     });
-                    await newTask.DecompressMod(mod, cancelSource).ConfigureAwait(false);
+                    var res = await newTask.DecompressMod(mod, cancelSource).ConfigureAwait(false);
+                    if (res && Knossos.inSingleTCMode)
+                    {
+                        try
+                        {
+                            TaskList.Remove(newTask);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Error, "TaskViewModel.DecompressMod()", ex);
+                        }
+                        Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask("Completed: " + newTask.Name), DispatcherPriority.Background);
+                    }
                 }
             }
         }

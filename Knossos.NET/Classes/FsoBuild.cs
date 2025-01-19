@@ -277,9 +277,14 @@ namespace Knossos.NET.Models
                         fso.StartInfo.UseShellExecute = false;
                         if (workingFolder != null)
                             fso.StartInfo.WorkingDirectory = workingFolder;
-                        if(Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences)
+                        if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences ||
+                            CustomLauncher.IsCustomMode && CustomLauncher.UseCustomFSODataFolder)
                         {
-                            var prefPath = Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen") + Path.DirectorySeparatorChar;
+                            var prefPath = KnUtils.GetFSODataFolderPath();
+                            if (!prefPath.EndsWith(Path.DirectorySeparatorChar))
+                            {
+                                prefPath += Path.DirectorySeparatorChar;
+                            }
                             Log.Add(Log.LogSeverity.Information, "FsoBuild.RunFSO()", "Used preferences path: " + prefPath);
                             fso.StartInfo.EnvironmentVariables.Add("FSO_PREFERENCES_PATH", prefPath);
                         }
@@ -351,10 +356,17 @@ namespace Knossos.NET.Models
                     cmd.StartInfo.RedirectStandardInput = true;
                     cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
                     cmd.StartInfo.WorkingDirectory = folderPath;
-                    if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences)
+                    if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences ||
+                        CustomLauncher.IsCustomMode && CustomLauncher.UseCustomFSODataFolder)
                     {
-                        cmd.StartInfo.EnvironmentVariables.Add("FSO_PREFERENCES_PATH", Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen") + Path.DirectorySeparatorChar);
+                        var prefPath = KnUtils.GetFSODataFolderPath();
+                        if (!prefPath.EndsWith(Path.DirectorySeparatorChar))
+                        {
+                            prefPath += Path.DirectorySeparatorChar;
+                        }
+                        cmd.StartInfo.EnvironmentVariables.Add("FSO_PREFERENCES_PATH", prefPath);
                     }
+
                     cmd.Start();
                     string result = cmd.StandardOutput.ReadToEnd();
                     output = result;

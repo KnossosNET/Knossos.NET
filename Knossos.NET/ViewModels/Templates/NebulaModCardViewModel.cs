@@ -145,10 +145,11 @@ namespace Knossos.NET.ViewModels
                     {
                         Task.Run(async () =>
                         {
-                            using (var fs = await KnUtils.GetImageStream(tileString).ConfigureAwait(false))
+                            using (var fs = await KnUtils.GetRemoteResourceStream(tileString).ConfigureAwait(false))
                             {
-                                Dispatcher.UIThread.Invoke(() => { 
-                                    if(fs != null)
+                                Dispatcher.UIThread.Invoke(() =>
+                                {
+                                    if (fs != null)
                                         TileImage = new Bitmap(fs);
                                 });
                             }

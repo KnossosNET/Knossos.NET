@@ -1489,7 +1489,7 @@ namespace Knossos.NET.ViewModels
             await Task.Run(() => {
                 try
                 {
-                    var path = KnUtils.GetImageCachePath();
+                    var path = KnUtils.GetCachePath();
                     Directory.Delete(path, true);
                     UpdateImgCacheSize();
                 
@@ -1509,7 +1509,7 @@ namespace Knossos.NET.ViewModels
             Task.Run(async () => {
                 try
                 {
-                    var path = KnUtils.GetImageCachePath();
+                    var path = KnUtils.GetCachePath();
                     if (Directory.Exists(path))
                     {
                         var sizeInBytes = await KnUtils.GetSizeOfFolderInBytes(path).ConfigureAwait(false);

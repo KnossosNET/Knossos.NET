@@ -78,7 +78,7 @@
 						</WrapPanel>
 						<!-- Image Cache -->
 						<WrapPanel Margin="5,10,0,0">
-							<Label VerticalAlignment="Center" Width="200" Content="Image Cache"/>
+							<Label VerticalAlignment="Center" Width="200" Content="Resource Cache"/>
 							<Label Margin="10,0,0,0" VerticalAlignment="Center" Content="{Binding ImgCacheSize}"/>
 							<Button Command="{Binding ClearImageCache}" Margin="5,0,0,0" Classes="Quaternary">Clear</Button>
 						</WrapPanel>

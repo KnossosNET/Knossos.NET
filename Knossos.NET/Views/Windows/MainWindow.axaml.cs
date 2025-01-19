@@ -24,7 +24,7 @@ namespace Knossos.NET.Views
 
                 await Dispatcher.UIThread.InvokeAsync(() => {
                     Knossos.Tts(string.Empty);
-                    MainWindowViewModel.Instance?.GlobalSettingsView.CommitPendingChanges();
+                    MainWindowViewModel.Instance?.GlobalSettingsView?.CommitPendingChanges();
                     Knossos.globalSettings.SaveSettingsOnAppClose();
                     canClose = true;
                 });
