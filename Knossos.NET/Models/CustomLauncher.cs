@@ -14,6 +14,15 @@ namespace Knossos.NET.Models
         public string LinkURL { get; set; }
     }
 
+    public struct CustomMenuButton
+    {
+        public string Name { get; set; }
+        public string ToolTip { get; set; }
+        public string IconPath { get; set; }
+        public string Type { get; set; } //HtmlContent
+        public string LinkURL { get; set; }
+    }
+
     /// <summary>
     /// Class to handle the configuration options and optional save file of the SingleTC mode
     /// </summary>
@@ -90,6 +99,11 @@ namespace Knossos.NET.Models
         /// If you do this you may want to add "-no_ingame_options" to the custom cmdline
         /// </summary>
         public static bool MenuDisplayGlobalSettingsEntry { get; private set; } = false;
+
+        /// <summary>
+        /// Add custom buttons to the menu
+        /// </summary>
+        public static CustomMenuButton[]? CustomMenuButtons { get; private set; }
 
         /// <summary>
         /// Yet another cmdline option, pass it as a string array. 
@@ -218,6 +232,8 @@ namespace Knossos.NET.Models
                     if (customData.MenuDisplayGlobalSettingsEntry.HasValue)
                         MenuDisplayGlobalSettingsEntry = customData.MenuDisplayGlobalSettingsEntry.Value;
 
+                    CustomMenuButtons = customData.CustomMenuButtons;
+
                     CustomCmdlineArray = customData.CustomCmdlineArray;
 
                     if (customData.UseNebulaServices.HasValue)
@@ -266,6 +282,7 @@ namespace Knossos.NET.Models
             public string? HomeWelcomeHtml { get; set; }
             public string? HomeWelcomeMargin { get; set; }
             public LinkButton[]? HomeLinkButtons { get; set; }
+            public CustomMenuButton[]? CustomMenuButtons { get; set; }
         }
     }
 }
