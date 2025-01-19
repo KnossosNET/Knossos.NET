@@ -60,6 +60,8 @@ namespace Knossos.NET.ViewModels
         internal bool isAVX = false;
         [ObservableProperty]
         internal bool isAVX2 = false;
+        [ObservableProperty]
+        internal bool displaySettingsWarning = false;
 
         /* Knossos Settings */
         [ObservableProperty]
@@ -524,6 +526,24 @@ namespace Knossos.NET.ViewModels
         public GlobalSettingsViewModel()
         {
             isPortableMode = Knossos.inPortableMode;
+        }
+
+        public void CheckDisplaySettingsWarning()
+        {
+            if(Knossos.inSingleTCMode)
+            {
+                DisplaySettingsWarning = true;
+                if(CustomLauncher.CustomCmdlineArray != null && CustomLauncher.CustomCmdlineArray.FirstOrDefault(x => x.ToLower() == "no_ingame_options") != null )
+                {
+                    DisplaySettingsWarning = false;
+                    return;
+                }
+                var res = MainWindowViewModel.Instance?.CustomHomeVM?.ActiveVersionHasCmdline("no_ingame_options");
+                if (res.HasValue) 
+                {
+                    DisplaySettingsWarning = !res.Value;
+                }
+            }
         }
 
         /// <summary>
