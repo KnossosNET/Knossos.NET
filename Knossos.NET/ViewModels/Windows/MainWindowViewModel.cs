@@ -159,6 +159,28 @@ namespace Knossos.NET.ViewModels
 
                 MenuItems.Add(new MainViewMenuItem(CustomHomeVM!, "avares://Knossos.NET/Assets/general/menu_home.png", "Home", "Home"));
 
+                if(CustomLauncher.CustomMenuButtons != null && CustomLauncher.CustomMenuButtons.Any())
+                {
+                    foreach(var button in CustomLauncher.CustomMenuButtons)
+                    {
+                        try
+                        {
+                            switch (button.Type.ToLower())
+                            {
+                                case "htmlcontent" :
+                                    MenuItems.Add(new MainViewMenuItem(new HtmlContentViewModel(button.LinkURL), button.IconPath, button.Name, button.ToolTip));
+                                    break;
+                                default:
+                                    throw new NotImplementedException("button type: "+ button.Type + " is not supported.");
+                            }
+                        }
+                        catch (Exception ex) 
+                        {
+                            Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.FillMenuItemsCustomMode()", ex);
+                        }
+                    }
+                }
+
                 if (CustomLauncher.MenuDisplayEngineEntry && FsoBuildsView != null)
                 {
                     MenuItems.Add(new MainViewMenuItem(FsoBuildsView, "avares://Knossos.NET/Assets/general/menu_engine.png", "Engine", "Download new Freespace Open engine builds"));
@@ -280,6 +302,15 @@ namespace Knossos.NET.ViewModels
                 else
                 {
                     //Knossos.globalSettings.DisableIniWatch();
+                }
+
+                //Custom Views
+                if (CurrentViewModel != null && CustomLauncher.IsCustomMode)
+                {
+                    if (CurrentViewModel.GetType() == typeof(HtmlContentViewModel))
+                    {
+                        ((HtmlContentViewModel)CurrentViewModel).Navigate();
+                    }
                 }
             }
         }
