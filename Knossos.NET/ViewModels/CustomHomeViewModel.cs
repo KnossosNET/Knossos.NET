@@ -111,6 +111,22 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
+        /// Checks if the current active mod version is passing a cmdline argument to fso
+        /// </summary>
+        /// <param name="cmdlineToCheck"></param>
+        /// <returns></returns>
+        public bool ActiveVersionHasCmdline(string cmdlineToCheck)
+        {
+            if(GetActiveInstalledModVersion != null)
+            {
+                var res = GetActiveInstalledModVersion.GetModCmdLine()?.ToLower().Contains(cmdlineToCheck.ToLower());
+                if (res.HasValue)
+                    return res.Value;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Handler for the hardcoded UI buttons
         /// </summary>
         /// <param name="cmd"></param>

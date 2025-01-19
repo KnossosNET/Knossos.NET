@@ -301,6 +301,10 @@ namespace Knossos.NET.ViewModels
                 }
                 if (CurrentViewModel == GlobalSettingsView) //Settings
                 {
+                    if(Knossos.inSingleTCMode)
+                    {
+                        GlobalSettingsView?.CheckDisplaySettingsWarning();
+                    }
                     Knossos.globalSettings.Load();
                     GlobalSettingsView?.LoadData();
                     //Knossos.globalSettings.EnableIniWatch();
