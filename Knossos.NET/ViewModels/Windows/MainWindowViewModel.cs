@@ -142,6 +142,8 @@ namespace Knossos.NET.ViewModels
                     GlobalSettingsView = new GlobalSettingsViewModel();
                 if(CustomLauncher.MenuDisplayDebugEntry)
                     DebugView = new DebugViewModel();
+                if (CustomLauncher.MenuDisplayCommunityEntry)
+                    CommunityView = new CommunityViewModel();
                 if (CustomLauncher.MenuDisplayNebulaLoginEntry)
                     NebulaLoginVM = new NebulaLoginViewModel();
                 FillMenuItemsCustomMode(1);
@@ -189,6 +191,11 @@ namespace Knossos.NET.ViewModels
                 if(CustomLauncher.MenuDisplayNebulaLoginEntry && NebulaLoginVM != null)
                 {
                     MenuItems.Add(new MainViewMenuItem(NebulaLoginVM, "avares://Knossos.NET/Assets/general/menu_nebula.png", "Nebula", "Log in with your nebula account"));
+                }
+
+                if (CustomLauncher.MenuDisplayCommunityEntry && CommunityView != null)
+                {
+                    MenuItems.Add(new MainViewMenuItem(CommunityView!, "avares://Knossos.NET/Assets/general/menu_community.png", "Community", "FAQs and Community Resources"));
                 }
 
                 if (CustomLauncher.MenuDisplayGlobalSettingsEntry && GlobalSettingsView != null)

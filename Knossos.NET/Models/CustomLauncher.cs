@@ -95,6 +95,11 @@ namespace Knossos.NET.Models
         public static bool MenuDisplayNebulaLoginEntry { get; private set; } = false;
 
         /// <summary>
+        /// Display the regular Knossos community menu item
+        /// </summary>
+        public static bool MenuDisplayCommunityEntry { get; private set; } = false;
+
+        /// <summary>
         /// Display the regular Knossos settings menu item
         /// If you do this you may want to add "-no_ingame_options" to the custom cmdline
         /// </summary>
@@ -232,6 +237,9 @@ namespace Knossos.NET.Models
                     if (customData.MenuDisplayGlobalSettingsEntry.HasValue)
                         MenuDisplayGlobalSettingsEntry = customData.MenuDisplayGlobalSettingsEntry.Value;
 
+                    if (customData.MenuDisplayCommunityEntry.HasValue)
+                        MenuDisplayCommunityEntry = customData.MenuDisplayCommunityEntry.Value;
+
                     CustomMenuButtons = customData.CustomMenuButtons;
 
                     CustomCmdlineArray = customData.CustomCmdlineArray;
@@ -275,6 +283,7 @@ namespace Knossos.NET.Models
             public bool? MenuDisplayDebugEntry { get; set; }
             public bool? MenuDisplayNebulaLoginEntry { get; set; }
             public bool? MenuDisplayGlobalSettingsEntry { get; set; }
+            public bool? MenuDisplayCommunityEntry { get; set; }
             public string[]? CustomCmdlineArray { get; set; }
             public bool? UseNebulaServices { get; set; }
             public bool? WriteLogFile { get; set; }
