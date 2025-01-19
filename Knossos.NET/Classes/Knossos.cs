@@ -117,14 +117,7 @@ namespace Knossos.NET
                     Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "Running in PORTABLE MODE.");
                     try
                     {
-                        if (!inSingleTCMode)
-                        {
-                            Directory.CreateDirectory(Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen"));
-                        }
-                        else
-                        {
-                            Directory.CreateDirectory(Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "HardLightProductions", CustomLauncher.ModID!));
-                        }
+                        Directory.CreateDirectory(KnUtils.GetFSODataFolderPath());
                         Directory.CreateDirectory(Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "Library"));
                     }
                     catch (Exception ex) 

@@ -671,9 +671,9 @@ namespace Knossos.NET.ViewModels
                                                 //Remove the mod version from Knossos and physical files
                                                 await Task.Run(() => Knossos.RemoveMod(version));
                                                 //Remove mod version from UI mod versions list
-                                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.RemoveInstalledModVersion(version));
+                                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.RemoveInstalledModVersion(version));
                                                 //If the dev editor is open and loaded this mod id, reset it
-                                                await Dispatcher.UIThread.InvokeAsync(() => DeveloperModsViewModel.Instance!.ResetModEditor(mod.id));
+                                                await Dispatcher.UIThread.InvokeAsync(() => DeveloperModsViewModel.Instance?.ResetModEditor(mod.id));
                                             }
                                         }
                                         else
