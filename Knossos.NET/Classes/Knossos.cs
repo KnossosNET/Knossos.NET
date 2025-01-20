@@ -601,9 +601,9 @@ namespace Knossos.NET
                 }
                 else
                 {
-                    Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", "Get latest version from github resulted in null or tag_name being null.");
+                    Log.Add(Log.LogSeverity.Error, "Knossos.CheckKnetUpdates()", "Get latest version from GitHub resulted in null or tag_name being null.");
                     if (forceUpdateDownload)
-                        Console.WriteLine("Update Error! Get latest version from github resulted in null or tag_name being null.");
+                        Console.WriteLine("Update Error! Get latest version from GitHub resulted in null or tag_name being null.");
                 }
             }
             catch (Exception ex)
@@ -881,7 +881,7 @@ namespace Knossos.NET
                 var queryConflict = dependencyList.GroupBy(x => x.id).Where(g => g.Count() > 1).ToList();
                 if (queryConflict.Count() > 0)
                 {
-                    var outputString = "There is a dependency conflict for this mod: " + mod + " Knet will try to adjust but the mod may present issues or not work at all. \nThis may be be resolved manually using custom dependencies for this mod.\n";
+                    var outputString = "There is a dependency conflict for this mod: " + mod + " KnossosNET will try to adjust but the mod may present issues or not work at all. \nThis may be be resolved manually using custom dependencies for this mod.\n";
                     foreach (var conflictGroup in queryConflict)
                     {
                         foreach (var conflictDep in conflictGroup)

@@ -43,7 +43,7 @@
 			<ComboBox IsVisible="{Binding !TypeSelectedIndex}" Width="460" Grid.Row="4" SelectedIndex="{Binding ParentSelectedIndex}" Grid.Column="1" ItemsSource="{Binding ParentComboBoxItems}" Margin="5"></ComboBox>
 			<!--Button-->
 			<Button Command="{Binding CreateMod}" Grid.Row="5" HorizontalAlignment="Left" Margin="165,40,0,0" Grid.Column="1" Classes="Accept">Create</Button>
-			<Label Margin="-45,0,0,0" Grid.Column="1" Grid.Row="6" IsVisible="{Binding !LoggedInNebula}" Foreground="Yellow">You are not logged in to Nebula, mod ID avalibly cannot be properly verified.</Label>
+			<Label Margin="-45,0,0,0" Grid.Column="1" Grid.Row="6" IsVisible="{Binding !LoggedInNebula}" Foreground="Yellow">You are not logged in to Nebula, mod ID availability cannot be properly verified.</Label>
 		</Grid>
 	</ScrollViewer>
 	

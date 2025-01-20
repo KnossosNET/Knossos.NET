@@ -70,7 +70,7 @@ namespace Knossos.NET.ViewModels
         {
             if(Knossos.GetKnossosLibraryPath() == null)
             {
-                await MessageBox.Show(MainWindow.instance!, "The Knossos library path is not set, first set the library path in the settings tab before installing FS2 Retail.", "Library path is null", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance!, "The KnossosNET library path is not set, first set the library path in the settings tab before installing FS2 Retail.", "Library path is null", MessageBox.MessageBoxButtons.OK);
                 return;
             }
             
@@ -310,7 +310,7 @@ namespace Knossos.NET.ViewModels
                         }
                     }
                     catch { }
-                    InstallText = "Install Complete!, Knossos is reloading the library...";
+                    InstallText = "Install Complete!, KnossosNET is reloading the library...";
                     Knossos.ResetBasePath();
                     if(gogExe != null)
                     {

@@ -9,7 +9,7 @@
 		x:DataType="vm:CleanupKnossosLibraryViewModel"
 		Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterScreen"
-        Title="Knossos Library Cleanup" 
+        Title="KnossosNET Library Cleanup" 
 		SizeToContent="WidthAndHeight" 
 		CanResize="False">
 	

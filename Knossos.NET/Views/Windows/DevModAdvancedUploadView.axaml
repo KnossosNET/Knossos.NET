@@ -25,12 +25,12 @@
 			<v:LoadingIconView Grid.Row="0" IsVisible="{Binding Loading}" Width="80" Height="80" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="50,50,0,0" />
 
 			<WrapPanel Grid.Row="0">
-				<WrapPanel IsVisible="{Binding !Loading}" HorizontalAlignment="Left" ToolTip.Tip="Number of simultanous mod package compression. Recommended: 1 or 2. Warning: Very heavy cpu and ram usage.">
+				<WrapPanel IsVisible="{Binding !Loading}" HorizontalAlignment="Left" ToolTip.Tip="Number of simultaneous mod package compression. Recommended: 1 or 2. Warning: Very heavy cpu and ram usage.">
 					<Label FontSize="14" VerticalContentAlignment="Center" Margin="20">Parallel Compression Tasks</Label>
 					<NumericUpDown Background="{StaticResource BackgroundColorPrimary}" Increment="1" Width="110" Value="{Binding ParallelCompressing}" Minimum="1" Maximum="6" VerticalContentAlignment="Center" Margin="20"></NumericUpDown>
 				</WrapPanel>
 		
-				<WrapPanel IsVisible="{Binding !Loading}" HorizontalAlignment="Right" ToolTip.Tip="Number of simultanous mod packages uploads to Nebula. Recommended: 1">
+				<WrapPanel IsVisible="{Binding !Loading}" HorizontalAlignment="Right" ToolTip.Tip="Number of simultaneous mod packages uploads to Nebula. Recommended: 1">
 					<Label FontSize="14" VerticalContentAlignment="Center" Margin="20">Parallel Upload Tasks</Label>
 					<NumericUpDown Background="{StaticResource BackgroundColorPrimary}" Increment="1" Width="110" Value="{Binding ParallelUploads}" Minimum="1" Maximum="2" VerticalContentAlignment="Center" Margin="20"></NumericUpDown>
 				</WrapPanel>
@@ -44,7 +44,7 @@
 					<DataGridTemplateColumn MinWidth="85" MaxWidth="85" Header="Upload" IsReadOnly="False">
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
-								<CheckBox Margin="32,0,0,0" ToolTip.Tip="This package will be compressed and uploaded to nebula, the hash will be calculated after compression. You can disable uploading this package if it dosent have changes from the previous version and provide a file hash from an older version that will be used instead." VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsChecked="{Binding Upload}"/>
+								<CheckBox Margin="32,0,0,0" ToolTip.Tip="This package will be compressed and uploaded to nebula, the hash will be calculated after compression. You can disable uploading this package if it does not have changes from the previous version and provide a file hash from an older version that will be used instead." VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsChecked="{Binding Upload}"/>
 							</DataTemplate>
 						</DataGridTemplateColumn.CellTemplate>
 					</DataGridTemplateColumn>

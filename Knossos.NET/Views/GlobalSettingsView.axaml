@@ -23,7 +23,7 @@
 				<!--KNOSSOS SETTINGS-->
           <Expander VerticalAlignment="Top" Margin="5" MinWidth="400">
             <Expander.Header>
-							<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Settings that are specific to Knossos only. These settings do not affect the FSO engine.">
+							<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Settings that are specific to KnossosNET only. These settings do not affect the FSO engine.">
                 Knossos Settings
               </Label>
             </Expander.Header>
@@ -38,7 +38,7 @@
 							<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="6,10,0,0">
 								<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Width="200">Stats</TextBlock>
 								<WrapPanel Grid.Column="1" Grid.Row="0"  Margin="8,2,0,0">
-									<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications (collectively known as mods) are installed in your Knossos library.">Mods:</Label>
+									<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications (collectively known as mods) are installed in your KnossosNET library.">Mods:</Label>
 									<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
 									<Label Margin="40,5,0,0" FontWeight="Bold">Builds:</Label>
 									<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfBuilds}"></TextBlock>
@@ -52,7 +52,7 @@
 							</WrapPanel>
 							<WrapPanel Margin="8,10,0,0">
 								<TextBlock VerticalAlignment="Center" Width="200">Mod Compression</TextBlock>
-								<ComboBox SelectedIndex="{Binding ModCompression}" ToolTip.Tip="Knossos can try to compress mod files in order to save disk space, and in some cases reduce loading times. 'Manual' means you will have to change a modpack's compression from mod settings or during installation. 'Always' means Knossos will compress all mods during install. 'Mod Support' means Knossos will compress the files only if the mod FSO engine dependency set by the mod is over the minimum, and if the mod uses an official build." Grid.Column="1" Width="150" Margin="10,0,0,0">
+								<ComboBox SelectedIndex="{Binding ModCompression}" ToolTip.Tip="KnossosNET can try to compress mod files in order to save disk space, and in some cases reduce loading times. 'Manual' means you will have to change a modpack's compression from mod settings or during installation. 'Always' means Knossos will compress all mods during install. 'Mod Support' means Knossos will compress the files only if the mod FSO engine dependency set by the mod is over the minimum, and if the mod uses an official build." Grid.Column="1" Width="150" Margin="10,0,0,0">
 									<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
 									<ComboBoxItem Tag="1">Manual</ComboBoxItem>
 									<ComboBoxItem Tag="2">Always</ComboBoxItem>
@@ -66,19 +66,19 @@
 								<ToggleSwitch IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start."></ToggleSwitch>
 							</WrapPanel>
 							<WrapPanel Margin="5,10,0,0">
-								<Label Margin="0,5,0,0" Width="205">Auto Update Knet</Label>
+								<Label Margin="0,5,0,0" Width="205">Auto Update KnosssosNET</Label>
 								<ToggleSwitch IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input."></ToggleSwitch>
 							</WrapPanel>
 							<WrapPanel Margin="5,10,0,0">
 								<Label Margin="0,5,0,0" Width="205">Auto Update FSO Builds</Label>
-								<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateStable}" ToolTip.Tip="Knet will check for newer Stable FSO builds at the start and automatically download them if one is available">Stable</CheckBox>
-								<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateRC}" ToolTip.Tip="Knet will check for newer RCs (Release Candidate) FSO builds at the start and automatically download them if one is available. Note: RC are only downloaded if they are newer than the newerest available Stable.">RC</CheckBox>
-								<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateNightly}" ToolTip.Tip="Knet will check for newer Nightly FSO builds at the start and automatically download them if one is available">Nightly</CheckBox>
-								<CheckBox Margin="5,0,0,0" IsChecked="{Binding DeleteOlder}" ToolTip.Tip="If this option is enabled, after an autoupdate Knet will delete older versions of installed FSO builds if they are not needed by any mod">Delete older versions</CheckBox>
+								<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateStable}" ToolTip.Tip="KnossosNET will check for newer Stable FSO builds at the start and automatically download them if one is available">Stable</CheckBox>
+								<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateRC}" ToolTip.Tip="KnossosNET will check for newer RCs (Release Candidate) FSO builds at the start and automatically download them if one is available. Note: RC are only downloaded if they are newer than the newest available Stable.">RC</CheckBox>
+								<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateNightly}" ToolTip.Tip="KnossosNET will check for newer Nightly FSO builds at the start and automatically download them if one is available">Nightly</CheckBox>
+								<CheckBox Margin="5,0,0,0" IsChecked="{Binding DeleteOlder}" ToolTip.Tip="If this option is enabled, after an autoupdate KnossosNET will delete older versions of installed FSO builds if they are not needed by any mod">Delete older versions</CheckBox>
 							</WrapPanel>
 							<WrapPanel Margin="5,10,0,0">
 								<Label Margin="0,5,0,0" Width="205">Delete Uploaded Mod Files</Label>
-								<ToggleSwitch Margin="5,0,0,0" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successfull upload. You con choose to disable this option if you need to take a closer look or debug a problem."></ToggleSwitch>
+								<ToggleSwitch Margin="5,0,0,0" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successful upload. You con choose to disable this option if you need to take a closer look or debug a problem."></ToggleSwitch>
 							</WrapPanel>
 							<!-- Image Cache -->
 							<WrapPanel Margin="5,10,0,0">
@@ -151,7 +151,7 @@
               Note, video settings for most mods using FSO version 24.2.0 or higher will need to be changed in-game by default.
               To change these new settings, play a modern mod and then go to the in-game "Options" menu.
 						</TextBox>
-            <!-- Performance Tips (keep on separte row to ensure resizing looks better) -->
+            <!-- Performance Tips (keep on separate row to ensure resizing looks better) -->
 						<Button Margin="5" Command="{Binding OpenPerformanceHelp}" Classes="Quaternary" Content="Tips to Optimize Game Performance" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
 						<!-- Resolution -->
 						<WrapPanel Margin="5">
@@ -455,7 +455,7 @@
 						<!-- EnvVars -->
 						<WrapPanel IsVisible="{Binding ShowDevOptions}" IsEnabled="{Binding ShowDevOptions}" Margin="5,10,0,0">
 							<Label Margin="0,5,0,0" Width="205">Pass environment variables to FSO</Label> 
-							<TextBox Text="{Binding EnvVars}" Margin="5,0,0,0" ToolTip.Tip="Expects a comma-seperated list." Width="500"></TextBox>
+							<TextBox Text="{Binding EnvVars}" Margin="5,0,0,0" ToolTip.Tip="Expects a comma-separated list." Width="500"></TextBox>
 						</WrapPanel>
 					</StackPanel>
 				</Border>
