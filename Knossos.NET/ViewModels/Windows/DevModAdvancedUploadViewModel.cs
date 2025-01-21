@@ -107,7 +107,10 @@ namespace Knossos.NET.ViewModels
                             OtherVersions[0].IsEnabled = false; // Disable "auto"
                             CustomHash = "";
                             //Select what should be the latest version of a mod id
-                            OtherVersionsSelectedIndex = OtherVersions.Count() - 1;
+                            if(OtherVersions.Count() >= 2)
+                                OtherVersionsSelectedIndex = 1;
+                            else
+                                OtherVersionsSelectedIndex = 0;
                         }
                         else
                         {
