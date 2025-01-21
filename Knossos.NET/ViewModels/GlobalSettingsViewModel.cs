@@ -61,7 +61,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool isAVX2 = false;
         [ObservableProperty]
-        internal bool displaySettingsWarning = false;
+        internal bool displaySettingsWarning = true;
 
         /* Knossos Settings */
         [ObservableProperty]
