@@ -195,7 +195,7 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public bool enableDeferredLighting { get; set; } = true;
         [JsonIgnore]
-        public int windowMode { get; set; } = 2;
+        public int windowMode { get; set; } = 0;
         [JsonIgnore]
         public bool vsync { get; set; } = true;
         [JsonIgnore]
@@ -219,7 +219,7 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public bool enableEfx { get; set; } = false;
         [JsonPropertyName("enable_tts")]
-        public bool enableTts { get; set; } = true;
+        public bool enableTts { get; set; } = false;
         [JsonIgnore]
         public int? ttsVoice { get; set; } = null;
         public string? ttsVoiceName { get; set; } = null;
