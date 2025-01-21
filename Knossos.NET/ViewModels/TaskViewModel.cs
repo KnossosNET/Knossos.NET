@@ -423,7 +423,7 @@ namespace Knossos.NET.ViewModels
         /// <param name="tool"></param>
         /// <param name="updateFrom"></param>
         /// <param name="finishedCallback"></param>
-        public async void DownloadTool(Tool tool, Tool? updateFrom, Action<bool> finishedCallback)
+        public async Task<bool> DownloadTool(Tool tool, Tool? updateFrom, Action<bool> finishedCallback)
         {
             using (var cancelSource = new CancellationTokenSource())
             {
@@ -433,7 +433,7 @@ namespace Knossos.NET.ViewModels
                     TaskList.Add(newTask);
                     taskQueue.Enqueue(newTask);
                 });
-                await newTask.InstallTool(tool, updateFrom, finishedCallback, cancelSource).ConfigureAwait(false);
+                return await newTask.InstallTool(tool, updateFrom, finishedCallback, cancelSource).ConfigureAwait(false);
             }
         }
     }

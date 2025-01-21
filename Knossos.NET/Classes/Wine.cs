@@ -30,24 +30,24 @@ namespace Knossos.NET.Classes
     /// </summary>
     public static class Wine
     {
-        public static async Task<WineResult> RunFred2(string exePath, string exeCmdLine, string? workingFolder, FsoExecArch fsoArch)
+        public static async Task<WineResult> RunTool(string exePath, string exeCmdLine, string? workingFolder, string arch)
         {
             try
             {
-                var wineArch = GetWineArch(fsoArch);
+                var wineArch = GetWineArch(arch.ToLower());
                 if (wineArch == null)
                 {
-                    return new WineResult(false, "Unsupported WINEARCH: " + fsoArch.ToString());
+                    return new WineResult(false, "Unsupported WINEARCH: " + arch);
                 }
 
-                var prefixResult = await SetWinePrefixFred2(wineArch);
-                if(!prefixResult.IsSuccess)
+                var prefixResult = await SetWinePrefixFred2(wineArch); //use the same settings for fred2
+                if (!prefixResult.IsSuccess)
                 {
                     return prefixResult;
                 }
 
                 var winePrefix = GetWinePrefixPath();
-                Log.Add(Log.LogSeverity.Information, "Wine.SetWinePrefixFred2()", "Executing wine with the following cmdline: WINEPREFIX=" + winePrefix +
+                Log.Add(Log.LogSeverity.Information, "Wine.RunTool()", "Executing wine with the following cmdline: WINEPREFIX=" + winePrefix +
                     " WINEARCH=" + wineArch + " wine " + exePath + " " + exeCmdLine);
 
                 using (var wine = new Process())
@@ -69,7 +69,56 @@ namespace Knossos.NET.Classes
             }
             catch (Win32Exception ex)
             {
-                Log.Add(Log.LogSeverity.Error, "Wine.SetWinePrefixFred2()", "Wine not found or another error ocurred: " + ex.Message);
+                Log.Add(Log.LogSeverity.Error, "Wine.RunTool()", "Wine not found or another error ocurred: " + ex.Message);
+                return new WineResult(false, "Wine not found or another error ocurred: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Wine.RunTool()", ex.ToString());
+                return new WineResult(false, ex.ToString());
+            }
+        }
+
+        public static async Task<WineResult> RunFred2(string exePath, string exeCmdLine, string? workingFolder, FsoExecArch fsoArch)
+        {
+            try
+            {
+                var wineArch = GetWineArch(fsoArch);
+                if (wineArch == null)
+                {
+                    return new WineResult(false, "Unsupported WINEARCH: " + fsoArch.ToString());
+                }
+
+                var prefixResult = await SetWinePrefixFred2(wineArch);
+                if(!prefixResult.IsSuccess)
+                {
+                    return prefixResult;
+                }
+
+                var winePrefix = GetWinePrefixPath();
+                Log.Add(Log.LogSeverity.Information, "Wine.RunFred2()", "Executing wine with the following cmdline: WINEPREFIX=" + winePrefix +
+                    " WINEARCH=" + wineArch + " wine " + exePath + " " + exeCmdLine);
+
+                using (var wine = new Process())
+                {
+                    wine.StartInfo.FileName = "wine";
+                    wine.StartInfo.Arguments = exePath + " " + exeCmdLine;
+                    if (workingFolder != null)
+                    {
+                        wine.StartInfo.WorkingDirectory = workingFolder;
+                    }
+                    wine.StartInfo.EnvironmentVariables["WINEPREFIX"] = winePrefix;
+                    wine.StartInfo.EnvironmentVariables["WINEARCH"] = wineArch;
+                    wine.StartInfo.UseShellExecute = false;
+                    wine.Start();
+                    await wine.WaitForExitAsync();
+                }
+
+                return new WineResult(true);
+            }
+            catch (Win32Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Wine.RunFred2()", "Wine not found or another error ocurred: " + ex.Message);
                 return new WineResult(false, "Wine not found or another error ocurred: " + ex.Message);
             }
             catch (Exception ex)
@@ -157,6 +206,26 @@ namespace Knossos.NET.Classes
                 case FsoExecArch.riscv64:
                     return "win64";
                 default: 
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Determine WINEARCH from Arch string (tools)
+        /// </summary>
+        /// <param name="fsoArch"></param>
+        /// <returns>WineArch compatible string or null</returns>
+        private static string? GetWineArch(string archString)
+        {
+            switch (archString)
+            {
+                case "x86":
+                    return "win32";
+                case "x64":
+                case "arm64":
+                case "riscv64":
+                    return "win64";
+                default:
                     return null;
             }
         }

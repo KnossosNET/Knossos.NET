@@ -17,6 +17,10 @@ namespace Knossos.NET.ViewModels
         public partial class ToolItem : ObservableObject
         {
             [ObservableProperty]
+            internal bool wine = false;
+            [ObservableProperty]
+            internal bool shortcutEnabled = KnUtils.IsWindows;
+            [ObservableProperty]
             internal IBrush favoriteColor = Brushes.White;
             [ObservableProperty]
             internal bool disableButtons = false;
@@ -27,18 +31,25 @@ namespace Knossos.NET.ViewModels
             [ObservableProperty]
             internal string updateTooltip = "";
             [ObservableProperty]
-            internal string toolTip = "";
+            internal string description = "";
             [ObservableProperty]
             public Tool tool;
             public Tool? repo;
+            private DevToolManagerViewModel? toolMgr;
 
-            public ToolItem(Tool tool) 
+            public ToolItem(Tool tool, DevToolManagerViewModel? toolMgr) 
             { 
                 this.tool = tool;
-                ToolTip = tool.description + "\n\n\nLast Updated: " + tool.lastUpdate;
+                Description = tool.description + "\n\n\nLast Updated: " + tool.lastUpdate;
                 IsInstalled = tool.isInstalled;
                 if (Tool.isFavorite)
                     FavoriteColor = Brushes.Yellow;
+                this.toolMgr = toolMgr;
+                if(KnUtils.IsLinux)
+                {
+                    var checkStatus = tool.GetBestPackage()?.wineSupport;
+                    Wine = checkStatus.HasValue ? checkStatus.Value : false;
+                }
             }
 
             internal void ToggleFavorite()
@@ -64,11 +75,11 @@ namespace Knossos.NET.ViewModels
                 }
             }
 
-            internal void Update()
+            internal async void Update()
             {
                 DisableButtons = true;
                 if(repo != null)
-                    TaskViewModel.Instance!.DownloadTool(repo, Tool, Callback);
+                    await TaskViewModel.Instance!.DownloadTool(repo, Tool, Callback);
             }
 
             internal void Delete()
@@ -85,19 +96,35 @@ namespace Knossos.NET.ViewModels
                         IsInstalled = Tool.isInstalled;
                     }
                     IsInstalled = false;
+                    toolMgr?.SortTools();
                 }
                 catch { }
             }
 
-            internal void Install()
+            internal async void Install()
             {
                 DisableButtons = true;
-                TaskViewModel.Instance!.DownloadTool(Tool,null,Callback);
+                await TaskViewModel.Instance!.DownloadTool(Tool,null,Callback);
+                toolMgr?.SortTools();
+            }
+
+            internal void Shortcut()
+            {
+                var execPath = Tool.GetExecutableFullPath();
+                var knPath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
+                if (execPath != null && knPath != null)
+                {
+                    if (KnUtils.IsAppImage)
+                    {
+                        knPath = KnUtils.AppImagePath;
+                    }
+                    KnUtils.CreateDesktopShortcut(Tool.name, knPath, "-tool "+ "\"" + Tool.name + "\"", execPath);
+                }
             }
 
             internal void Open()
             {
-                Tool.Open();
+                _= Tool.Open();
             }
 
             internal void Callback(bool _)
@@ -111,6 +138,22 @@ namespace Knossos.NET.ViewModels
                     repo = null;
                 }
                 IsInstalled = Tool.isInstalled;
+            }
+
+            /// <summary>
+            /// To use with List .Sort()
+            /// </summary>
+            public static int CompareTools(ToolItem t1, ToolItem t2)
+            {
+                if (t1.IsInstalled && !t2.IsInstalled)
+                {
+                    return -1;
+                }
+                if (!t1.IsInstalled && t2.IsInstalled)
+                {
+                    return 1;
+                }
+                return string.Compare(t1.Tool.name, t2.Tool.name);
             }
         }
         /**/
@@ -135,6 +178,19 @@ namespace Knossos.NET.ViewModels
                 await LoadToolRepo().ConfigureAwait(false);
                 toolsRepoLoaded = true;
             }
+        }
+
+        internal void SortTools()
+        {
+            Dispatcher.UIThread.Invoke(new Action(() => {
+                var list = Tools.ToList();
+                list.Sort((x, y) => ToolItem.CompareTools(x,y));
+                Tools.Clear();
+                foreach (var item in list)
+                {
+                    Tools.Add(item);
+                }
+            }));
         }
 
         private async Task LoadToolRepo()
@@ -176,16 +232,19 @@ namespace Knossos.NET.ViewModels
             int i;
             for (i = 0; i < Tools.Count; i++)
             {
-                if(Tools[i].Tool.isFavorite == tool.isFavorite && String.Compare(Tools[i].Tool.name, tool.name) > 0)
+                if (!Tools[i].Tool.isInstalled && tool.isInstalled)
                 {
                     break;
                 }
-                if (!Tools[i].Tool.isFavorite && tool.isFavorite)
+                if (Tools[i].Tool.isInstalled == tool.isInstalled)
                 {
-                    break;
+                    if (String.Compare(Tools[i].Tool.name, tool.name) > 0)
+                    {
+                        break;
+                    }
                 }
             }
-            Tools.Insert(i, new ToolItem(tool));
+            Tools.Insert(i, new ToolItem(tool, this));
         }
     }
 }

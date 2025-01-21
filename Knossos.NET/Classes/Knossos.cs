@@ -191,13 +191,20 @@ namespace Knossos.NET
             string modid = string.Empty;
             string modver = string.Empty;
             string modExecType = string.Empty;
+            string toolName = string.Empty;
             bool saveID = false;
             bool saveVer = false;
             bool saveExecType = false;
+            bool toolID = false;
 
             foreach (var arg in args)
             {
                 Log.Add(Log.LogSeverity.Information, "Knossos.StartUp", "Knet Cmdline Arg: " + arg);
+                if (toolID)
+                {
+                    toolID = false;
+                    toolName = arg;
+                }
                 if (saveID)
                 {
                     saveID = false;
@@ -217,6 +224,10 @@ namespace Knossos.NET
                 {
                     saveID = true;
                 }
+                if (arg.ToLower() == "-tool")
+                {
+                    toolID = true;
+                }
                 if (arg.ToLower() == "-version")
                 {
                     saveVer = true;
@@ -224,6 +235,26 @@ namespace Knossos.NET
                 if (arg.ToLower() == "-exec")
                 {
                     saveExecType = true;
+                }
+            }
+
+            if (toolName != string.Empty)
+            {
+                var tool = GetTools().FirstOrDefault(x=> x.name.ToLower() == toolName.ToLower());
+                try
+                {
+                    if (tool != null)
+                    {
+                        _ = tool.Open();
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Knossos.QuickLaunch", "Quick launch was used but the tool was not found. Used tool name: " + toolName);
+                    }
+                }
+                catch(Exception ex) 
+                {
+                    Log.Add(Log.LogSeverity.Error, "Knossos.QuickLaunch", ex);
                 }
             }
 

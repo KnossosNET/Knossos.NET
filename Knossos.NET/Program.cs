@@ -22,7 +22,7 @@ namespace Knossos.NET
                 {
                     softwareRendering = true;
                 }
-                if (arg.ToLower() == "-playmod")
+                if (arg.ToLower() == "-playmod" || arg.ToLower() ==  "-tool")
                 {
                     isQuickLaunch = true;
                 }
