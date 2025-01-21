@@ -62,7 +62,7 @@
 								<ComboBoxItem ToolTip.Tip="Automatically selected for installation, but the user can skip them">Recommended</ComboBoxItem>
 								<ComboBoxItem ToolTip.Tip="Not automatically selected, but user can add them during the install process">Optional</ComboBoxItem>
 							</ComboBox>
-							<CheckBox FontSize="12" IsChecked="{Binding PackVP}" Margin="10,0,0,0" ToolTip.Tip="Whether Knossos should pack the files in a VP on upload.&#x0a;Warning: VPs have a 2GB total size limit.">Make VP</CheckBox>
+							<CheckBox FontSize="12" IsChecked="{Binding PackVP}" Margin="10,0,0,0" ToolTip.Tip="Whether KnossosNET should pack the files in a VP on upload.&#x0a;Warning: VPs have a 2GB total size limit.">Make VP</CheckBox>
 							<Label FontSize="16" Margin="5,6,5,5" ToolTip.Tip="Current package folder size" Content="{Binding DiskSpace}"/>
 							<Button HorizontalAlignment="Right" Command="{Binding DeleteModPkg}" Margin="10,0,0,10" Classes="Cancel">Delete</Button>
 						</WrapPanel>

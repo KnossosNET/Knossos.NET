@@ -56,7 +56,7 @@ namespace Knossos.NET.ViewModels
 
                     using (StreamWriter writer = new StreamWriter(newDir + Path.DirectorySeparatorChar + "knossos_net_download.token"))
                     {
-                        writer.WriteLine("Warning: This token indicates an incomplete folder copy. If this token is present on the next Knet startup this folder WILL BE DELETED.");
+                        writer.WriteLine("Warning: This token indicates an incomplete folder copy. If this token is present on the next KnossosNET startup this folder WILL BE DELETED.");
                     }
 
                     await KnUtils.CopyDirectoryAsync(currentDir.FullName, newDir, true, cancellationTokenSource, copyCallback);

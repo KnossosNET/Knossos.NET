@@ -55,7 +55,7 @@ namespace Knossos.NET.ViewModels
                     var libPath = Knossos.GetKnossosLibraryPath();
 
                     if (string.IsNullOrEmpty(libPath))
-                        throw new TaskCanceledException("Knossos library path is empty!");
+                        throw new TaskCanceledException("KnossosNET library path is empty!");
 
                     var toolPath = Path.Combine(libPath, "tools", tool.name);
                     if (updateFrom != null)

@@ -20,9 +20,9 @@
 		<TextBlock Margin="10" TextWrapping="Wrap">Freespace 2 Open uses Windows SAPI as TTS engine. SAPI is now legacy and Windows 10/11 uses a new TTS system. Most of the voices for the new system can still be used by SAPI and FSO. In order to use it you will need to copy the registry entries, KnossosNET can do this for you.</TextBlock>
 		<Label Margin="10">First download the new voices for Windows in Speech Settings menu.</Label>
 		<Button Classes="Secondary" Command="{Binding OpenSpeechSettings}" Margin="10,0,0,0">Open Speech Settings</Button>
-		<Label Margin="10,0,0,0" FontSize="12" FontWeight="Bold">Recomended: Microsoft David (US) and Microsoft Mark (US) are the best ones.</Label>
-		<TextBlock TextWrapping="Wrap" Margin="10">Once the voices have finished installing click on the following button to copy the OneCore registry keys to the Sapi one</TextBlock>
-		<TextBlock TextWrapping="Wrap" Margin="10">The first time you do this a backup of the original sapi keys will be saved to the knossos data folder in cae you ever need it.</TextBlock>
+		<Label Margin="10,0,0,0" FontSize="12" FontWeight="Bold">Recommended: Microsoft David (US) and Microsoft Mark (US) are the best ones.</Label>
+		<TextBlock TextWrapping="Wrap" Margin="10">Once the voices have finished installing click on the following button to copy the OneCore registry keys to the SAPI one</TextBlock>
+		<TextBlock TextWrapping="Wrap" Margin="10">The first time you do this a backup of the original SAPI keys will be saved to the KnossosNET data folder in case you ever need it.</TextBlock>
 		<TextBlock TextWrapping="Wrap" Margin="10">Your user must have admin rights in order to work.</TextBlock>
 		<Button Classes="Secondary" Command="{Binding CopyKeys}" Margin="10,0,0,0">Copy Registry Keys</Button>
 		<TextBlock TextWrapping="Wrap" Margin="10">Thats it! Press "Reload Data" button on the settings tab to update the list of installed voices</TextBlock>

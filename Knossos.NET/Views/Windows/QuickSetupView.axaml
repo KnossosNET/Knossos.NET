@@ -27,9 +27,9 @@
 		<!--Page1-->
 		<StackPanel IsVisible="{Binding Page1}" Grid.Row="0">
 			<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >Welcome To Knossos.NET</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >This quick setup guide will help you through the basics of configuring the Knossos launcher for the first time. If you already know how to configure the launcher you can close this window.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >This quick setup guide will help you through the basics of configuring the KnossosNET launcher for the first time. If you already know how to configure the launcher you can close this window.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >Note, you can reopen this guide at any time, just go to the "Settings" tab and click the "Quick Setup Guide" button.</TextBlock>
-      <TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >If at any point you ever need assistance with Knossos plese ask on the Knossos Discord channel linked below.</TextBlock>
+      <TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >If you ever need assistance with KnossosNET please ask on the Knossos Discord channel linked below.</TextBlock>
       <Button Margin="20, 10" Command="{Binding OpenDiscordQuickSetup}">Discord Help for Knossos</Button>
 		</StackPanel>
 		
@@ -37,15 +37,15 @@
 		<StackPanel IsVisible="{Binding Page2}" Grid.Row="0" >
 			<StackPanel IsVisible="{Binding !IsPortableMode}">
 				<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >Setting up the library folder</TextBlock>
-				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">First, you must set a library folder. Go to the "Settings" tab and under the "Knossos" section click on the "Browse" button and choose or create a folder for Knossos to use. It is highly recommended to set this as an empty folder in a location with a large amount of available storage. Once you have set the folder be sure to click the "Save" button in the upper right corner of the "Settings" tab. </TextBlock>
-				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">The Knossos library folder is where all game and mod data will be saved to. Make sure you always have space available on this drive before installing a new mod or update.</TextBlock>
+				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">First, you must set a library folder. Go to the "Settings" tab and under the "KnossosNET" section click on the "Browse" button and choose or create a folder for Knossos to use. It is highly recommended to set this as an empty folder in a location with a large amount of available storage. Once you have set the folder be sure to click the "Save" button in the upper right corner of the "Settings" tab. </TextBlock>
+				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">The KnossosNET library folder is where all game and mod data will be saved to. Make sure you always have space available on this drive before installing a new mod or update.</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">Current Library Folder</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" Text="{Binding LibraryPath}"></TextBlock>
 				<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Go to the "Settings" tab and set the library folder to continue.</TextBlock>
 			</StackPanel>
 			<StackPanel IsVisible="{Binding IsPortableMode}">
-				<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >Knet is running in portable mode</TextBlock>
-				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">This means Knet settings and FSO pilots, settings and data are saved inside the 'kn_portable' folder, you can not set a library folder in this mode. </TextBlock>
+				<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >KnossosNET is running in portable mode</TextBlock>
+				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">This means KnossosNET settings and FSO pilots, settings and data are saved inside the 'kn_portable' folder, you can not set a library folder in this mode. </TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">If you ever need to stop using the portable mode move, rename or delete the 'kn_portable' folder</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">Current Library Folder</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" Text="{Binding LibraryPath}"></TextBlock>
@@ -57,8 +57,8 @@
 			<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left">Download an FSO engine build</TextBlock>
 			<TextBlock IsVisible="{Binding !RepoDownloaded}" Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">Wait for repo_minimal.json to finish downloading before you continue...</TextBlock>
 			<StackPanel IsVisible="{Binding RepoDownloaded}">
-				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Now you need a game engine build, which are known as "FSO Builds". These builds are what mods run on, and Knossos also uses it to get and display system data. This is why you are not going to be able to set most of the settings in the "Settings" tab before downloading one. </TextBlock>
-				<TextBlock IsVisible="{Binding BuildAvailable}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Click the button below to download the lastest stable build, which is what most casual players use. You can also go to the "Engine" tab, and pick a specific build. The most recent build should be always the top one on the list.</TextBlock>
+				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Now you need a game engine build, which are known as "FSO Builds". These builds are what mods run on, and KnossosNET also uses it to get and display system data. This is why you are not going to be able to set most of the settings in the "Settings" tab before downloading one. </TextBlock>
+				<TextBlock IsVisible="{Binding BuildAvailable}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Click the button below to download the latest stable build, which is what most casual players use. You can also go to the "Engine" tab, and pick a specific build. The most recent build should be always the top one on the list.</TextBlock>
 				<TextBlock IsVisible="{Binding !BuildAvailable}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Go to the "Engine" tab, select "Stable Builds" and download the newest stable, it should be always the top one on the list.</TextBlock>
 				<Button IsVisible="{Binding BuildAvailable}" Margin="0,10,0,10" HorizontalAlignment="Center" Classes="Primary" Content="Download Latest Stable Build" Command="{Binding DownloadLatestStable}"/>
 				<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">A FSO build must be downloaded before you continue...</TextBlock>
@@ -70,9 +70,9 @@
 		<!--Page4-->
 		<StackPanel IsVisible="{Binding Page4}" Grid.Row="0" >
 			<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left">Freespace 2 Retail (Optional)</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">In order to have access to Freespace 1 and 2 content and visual improvements you need to install Freespace 2 Retail in Knossos. If you do not install Freespace 2 Retail, then any content that needs the full Freespace 2 retail files will not be displayed on the "Explore" tab.</TextBlock>
-      <TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">If you do not have the retail FS2 installed into Knossos you can still play total conversion mods, which are mods that are compeltely standalone and do not depend on any of the Freespace content.</TextBlock>
-      <TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">To install Freespace 2 go to the "Settings" tab and open the "FS2 Retail Installer" button under the "Knossos Settings" section. Then follow the instructions there. If you already have FS2 installed this button is not available.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">In order to have access to Freespace 1 and 2 content and visual improvements you need to install Freespace 2 Retail in KnossosNET. If you do not install Freespace 2 Retail, then any content that needs the full Freespace 2 retail files will not be displayed on the "Explore" tab.</TextBlock>
+      <TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">If you do not have the retail FS2 installed into KnossosNET you can still play total conversion mods, which are mods that are completely standalone and do not depend on any of the Freespace content.</TextBlock>
+      <TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">To install Freespace 2 go to the "Settings" tab and open the "FS2 Retail Installer" button under the "KnossosNET Settings" section. Then follow the instructions there. If you already have FS2 installed this button is not available.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">This step is optional and you can continue at any time.</TextBlock>
 		</StackPanel>
 

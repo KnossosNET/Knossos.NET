@@ -103,7 +103,7 @@ namespace Knossos.NET.ViewModels
             //Is library set?
             if(Knossos.GetKnossosLibraryPath() == null )
             {
-                await MessageBox.Show(MainWindow.instance, "Knossos library path is not set. Go to the settings tab and set the Knossos libreary location.", "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "KnossosNET library path is not set. Go to the settings tab and set the KnossosNET library location.", "Validation error", MessageBox.MessageBoxButtons.OK);
                 return false;
             }
             //Version

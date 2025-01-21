@@ -26,7 +26,7 @@
 					<Button Classes="Quaternary" IsEnabled="{Binding !IsInstalling}" Margin="10" Command="{Binding LoadFolderCommand}">Browse Folder</Button>
 					<Label Margin="5" FontWeight="Bold">Required File List:</Label>
 					<TextBlock Margin="10,0,0,0" Text="root_fs2.vp, smarty_fs2.vp, sparky_fs2.vp, sparky_hi_fs2.vp, stu_fs2.vp, tango1_fs2.vp, tango2_fs2.vp, tango3_fs2.vp, warble_fs2.vp" TextWrapping="Wrap"></TextBlock>
-					<Label Margin="5" FontWeight="Bold">After copying the files to the Knossos library, the original install is not longer needed.</Label>
+					<Label Margin="5" FontWeight="Bold">After copying the files to the KnossosNET library, the original install is not longer needed.</Label>
 				</StackPanel>
 			</Border>
 			
