@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Knossos.NET.Converters;
 using Knossos.NET.Models;
@@ -68,6 +69,43 @@ public partial class CustomHomeView : UserControl
             }
         }
         catch(Exception ex)
+        {
+            Log.Add(Log.LogSeverity.Error, "CustomHomeView.Constructor()", ex);
+        }
+
+        //Home Buttons Custimizations
+        try
+        {
+            if (CustomLauncher.HomeButtonConfigs != null && CustomLauncher.HomeButtonConfigs.Any())
+            {
+                foreach(var config in CustomLauncher.HomeButtonConfigs)
+                {
+                    if (config.ButtonID == null)
+                        continue;
+                    var button = this.FindControl<Button>(config.ButtonID!)!;
+                    if (button != null)
+                    {
+                        if (config.DisplayText != null)
+                            button.Content = config.DisplayText;
+                        if (config.ToolTip != null)
+                            ToolTip.SetTip(button, config.ToolTip);
+                        if (config.FontSize != null)
+                            button.FontSize = config.FontSize.Value;
+                        if (config.BackgroundHexColor != null)
+                            button.Background = SolidColorBrush.Parse(config.BackgroundHexColor);
+                        if (config.ForegroundHexColor != null)
+                            button.Foreground = SolidColorBrush.Parse(config.ForegroundHexColor);
+                        if (config.BorderHexColer != null)
+                            button.BorderBrush = SolidColorBrush.Parse(config.BorderHexColer);
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "CustomHomeView.Constructor()", "Unable to find home button id: " + config.ButtonID + " to apply customizations.");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
         {
             Log.Add(Log.LogSeverity.Error, "CustomHomeView.Constructor()", ex);
         }

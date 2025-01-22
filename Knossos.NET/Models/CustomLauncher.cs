@@ -14,6 +14,21 @@ namespace Knossos.NET.Models
         public string LinkURL { get; set; }
     }
 
+    public struct HomeCustomButtonConfig
+    {
+        public HomeCustomButtonConfig()
+        {
+        }
+
+        public string? ButtonID { get; set; } = null; //ButtonLaunch, ButtonModify, ButtonUpdate, ButtonInstall, ButtonInfo, ButtonDetails, ButtonSettings
+        public string? DisplayText { get; set; } = null;
+        public string? ToolTip { get; set; } = null;
+        public int? FontSize { get; set; } = null;
+        public string? BackgroundHexColor { get; set; } = null; //#CD3632 hex color value
+        public string? ForegroundHexColor { get; set; } = null; //#CD3632 hex color value
+        public string? BorderHexColer { get; set; } = null; //#CD3632 hex color value
+    }
+
     public struct CustomMenuButton
     {
         public string Name { get; set; }
@@ -165,6 +180,11 @@ namespace Knossos.NET.Models
         public static LinkButton[]? HomeLinkButtons { get; private set; }
 
         /// <summary>
+        /// Costumisable data for home screen buttons
+        /// </summary>
+        public static HomeCustomButtonConfig[]? HomeButtonConfigs { get; private set; }
+
+        /// <summary>
         /// Call this AFTER checking if we are in portable mode or not.
         /// The first time it runs it will try to load the "custom_launcher.json" if ModID is null
         /// </summary>
@@ -261,6 +281,8 @@ namespace Knossos.NET.Models
 
                     HomeLinkButtons = customData.HomeLinkButtons;
 
+                    HomeButtonConfigs = customData.HomeButtonConfigs;
+
                     jsonFile.Close();
                 }
             }
@@ -292,6 +314,7 @@ namespace Knossos.NET.Models
             public string? HomeWelcomeMargin { get; set; }
             public LinkButton[]? HomeLinkButtons { get; set; }
             public CustomMenuButton[]? CustomMenuButtons { get; set; }
+            public HomeCustomButtonConfig[]? HomeButtonConfigs { get; set; }
         }
     }
 }
