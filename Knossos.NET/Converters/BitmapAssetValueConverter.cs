@@ -18,9 +18,19 @@ namespace Knossos.NET.Converters
             {
                 if (value == null) return null;
 
-                if (value is not string rawUri || !targetType.IsAssignableFrom(typeof(Bitmap)))
-                {
+                if(!targetType.IsAssignableFrom(typeof(Bitmap)))
                     throw new NotSupportedException();
+
+                if (value is not string rawUri)
+                {
+                    if(parameter is string)
+                    {
+                        rawUri = (string)parameter;
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
                 }
 
                 Uri uri;

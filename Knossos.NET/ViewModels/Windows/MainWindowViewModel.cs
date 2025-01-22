@@ -9,7 +9,6 @@ using System.Linq;
 using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using System.Threading;
-using Knossos.NET.Classes;
 
 namespace Knossos.NET.ViewModels
 {
@@ -66,7 +65,10 @@ namespace Knossos.NET.ViewModels
         private MainViewMenuItem? selectedMenuItem;
         [ObservableProperty]
         internal ViewModelBase? currentViewModel;
-
+        [ObservableProperty]
+        internal int taskButtomRow = 0;
+        [ObservableProperty]
+        internal int buttomListRow = 1;
 
 
         internal string sharedSearch = string.Empty;
@@ -146,7 +148,14 @@ namespace Knossos.NET.ViewModels
                     CommunityView = new CommunityViewModel();
                 if (CustomLauncher.MenuDisplayNebulaLoginEntry)
                     NebulaLoginVM = new NebulaLoginViewModel();
-                FillMenuItemsCustomMode(1);
+                FillMenuItemsCustomMode(CustomLauncher.MenuTaskButtonAtTheEnd ? 0 : 1);
+                if(CustomLauncher.MenuTaskButtonAtTheEnd)
+                {
+                    //Fix the UI for task on the bottom
+                    TaskButtomRow = 1;
+                    ButtomListRow = 0;
+                    MainWindow.instance?.FixMarginButtomTasks();
+                }
             }
             Knossos.StartUp(isQuickLaunch, forceUpdate);
             CustomHomeVM?.CheckBasePath();
@@ -155,13 +164,22 @@ namespace Knossos.NET.ViewModels
         private void FillMenuItemsCustomMode(int defaultSelectedIndex)
         {
             Dispatcher.UIThread.Invoke(new Action(() => {
-                MenuItems = new ObservableCollection<MainViewMenuItem>{
-                    new MainViewMenuItem(TaskView, null, "Tasks", "Overview of current running tasks")
-                };
 
-                MenuItems.Add(new MainViewMenuItem(CustomHomeVM!, "avares://Knossos.NET/Assets/general/menu_home.png", "Home", "Home"));
+                if (CustomLauncher.MenuTaskButtonAtTheEnd)
+                {
+                    MenuItems = new ObservableCollection<MainViewMenuItem>{
+                        new MainViewMenuItem(CustomHomeVM!, "avares://Knossos.NET/Assets/general/menu_home.png", "Home", "Home")
+                    };
+                }
+                else
+                {
+                    MenuItems = new ObservableCollection<MainViewMenuItem>{
+                        new MainViewMenuItem(TaskView, null, "Tasks", "Overview of current running tasks"),
+                        new MainViewMenuItem(CustomHomeVM!, "avares://Knossos.NET/Assets/general/menu_home.png", "Home", "Home")
+                    };
+                }
 
-                if(CustomLauncher.CustomMenuButtons != null && CustomLauncher.CustomMenuButtons.Any())
+                if (CustomLauncher.CustomMenuButtons != null && CustomLauncher.CustomMenuButtons.Any())
                 {
                     foreach(var button in CustomLauncher.CustomMenuButtons)
                     {
@@ -171,6 +189,9 @@ namespace Knossos.NET.ViewModels
                             {
                                 case "htmlcontent" :
                                     MenuItems.Add(new MainViewMenuItem(new HtmlContentViewModel(button.LinkURL), button.IconPath, button.Name, button.ToolTip));
+                                    break;
+                                case "axamlcontent":
+                                    MenuItems.Add(new MainViewMenuItem(new AxamlExternalContentViewModel(button.LinkURL, button.Name), button.IconPath, button.Name, button.ToolTip));
                                     break;
                                 default:
                                     throw new NotImplementedException("button type: "+ button.Type + " is not supported.");
@@ -206,6 +227,11 @@ namespace Knossos.NET.ViewModels
                 if (CustomLauncher.MenuDisplayDebugEntry && DebugView != null)
                 {
                     MenuItems.Add(new MainViewMenuItem(DebugView, "avares://Knossos.NET/Assets/general/menu_debug.png", "Debug", "Debug info"));
+                }
+
+                if (CustomLauncher.MenuTaskButtonAtTheEnd)
+                {
+                    MenuItems.Add(new MainViewMenuItem(TaskView, null, "Tasks", "Overview of current running tasks"));
                 }
 
                 if (MenuItems != null && MenuItems.Count() - 1 > defaultSelectedIndex)

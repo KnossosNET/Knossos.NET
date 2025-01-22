@@ -40,8 +40,8 @@
 							</Button>
 						</Grid>
 						<Grid RowDefinitions="Auto, Auto">
-							<v:TaskInfoButtonView ZIndex="0" Margin="9,0,0,0" Grid.Row="0" Width="40" Height="45" HorizontalAlignment="Left" Content="{Binding TaskInfoButton}"/>
-							<ListBox ZIndex="1" Background="Transparent" Grid.Row="1" Margin="2 -45 -100 0" Padding="0" ItemsSource="{Binding MenuItems}" SelectedItem="{Binding SelectedMenuItem}">
+							<v:TaskInfoButtonView Name="TaskButtom" ZIndex="0" Margin="9,0,0,0" Grid.Row="{Binding TaskButtomRow}" Width="40" Height="45" HorizontalAlignment="Left" Content="{Binding TaskInfoButton}"/>
+							<ListBox Name="ButtomList" ZIndex="1" Background="Transparent" Grid.Row="{Binding ButtomListRow}" Margin="2, -45, -100, 0" Padding="0" ItemsSource="{Binding MenuItems}" SelectedItem="{Binding SelectedMenuItem}">
 								<ListBox.Styles>
 									<Style Selector="ListBoxItem">
 										<Setter Property="Padding" Value="12 8"></Setter>

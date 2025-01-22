@@ -23,7 +23,7 @@
 	<!--Home buttons costumizations are applied in CustomHomeView.axaml.cs-->
 
 		<Grid>
-			<Image ZIndex="0" Stretch="Fill" 
+			<Image ZIndex="0" Stretch="{Binding StretchMode}" 
 				   anim:ImageBehavior.SpeedRatio="{Binding Animate}" 
 				   Source="{Binding BackgroundImage, Converter={StaticResource imageConverter}}" 
 				   anim:ImageBehavior.AnimatedSource="{Binding BackgroundImage}" />

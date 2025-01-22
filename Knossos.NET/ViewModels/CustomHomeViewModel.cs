@@ -78,6 +78,9 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool changeBasePathButtonVisible = false;
 
+        [ObservableProperty]
+        internal string stretchMode = CustomLauncher.HomeBackgroundStretchMode;
+
         /// <summary>
         /// Handled in mainview, displays a small task viewer in the home screen
         /// </summary>

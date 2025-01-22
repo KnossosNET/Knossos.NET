@@ -22,7 +22,7 @@ public partial class CustomHomeView : UserControl
         {
             if (CustomLauncher.HomeLinkButtons != null && CustomLauncher.HomeLinkButtons.Any())
             {
-                var buttonPanel = this.FindControl<WrapPanel>("LinkButtons")!;
+                var buttonPanel = this.FindControl<WrapPanel>("LinkButtons");
                 if (buttonPanel != null)
                 {
                     int index = 0;
@@ -82,7 +82,7 @@ public partial class CustomHomeView : UserControl
                 {
                     if (config.ButtonID == null)
                         continue;
-                    var button = this.FindControl<Button>(config.ButtonID!)!;
+                    var button = this.FindControl<Button>(config.ButtonID!);
                     if (button != null)
                     {
                         if (config.DisplayText != null)

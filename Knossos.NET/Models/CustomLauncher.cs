@@ -34,7 +34,7 @@ namespace Knossos.NET.Models
         public string Name { get; set; }
         public string ToolTip { get; set; }
         public string IconPath { get; set; }
-        public string Type { get; set; } //HtmlContent
+        public string Type { get; set; } //HtmlContent, AxamlContent
         public string LinkURL { get; set; }
     }
 
@@ -84,6 +84,12 @@ namespace Knossos.NET.Models
         /// null for auto
         /// </summary>
         public static int? WindowHeight { get; private set; } = 540;
+
+        /// <summary>
+        /// Configurable option to show the task buttom at the end of the menu buttom list
+        /// instead of at the beginning.
+        /// </summary>
+        public static bool MenuTaskButtonAtTheEnd { get; private set; } = false;
 
         /// <summary>
         /// The first time the user opens the launcher, the main menu should be expanded or collapsed?
@@ -160,6 +166,13 @@ namespace Knossos.NET.Models
         public static string? HomeBackgroundImage { get; private set; } = "avares://Knossos.NET/Assets/general/custom_home_background.jpg";
 
         /// <summary>
+        /// Change background scretch mode
+        /// Possible Values:
+        /// None, Fill, Uniform, UniformToFill
+        /// </summary>
+        public static string HomeBackgroundStretchMode { get; private set; } = "Fill";
+
+        /// <summary>
         /// Set a path to the welcome HTML message on home screen
         /// Uses the same path rules as HomeBackgroundImage
         /// null to disable or put a path to a empty file if you want to display it at some point
@@ -181,6 +194,7 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// Costumisable data for home screen buttons
+        /// Allows to change home buttons display text, color and tooltips
         /// </summary>
         public static HomeCustomButtonConfig[]? HomeButtonConfigs { get; private set; }
 
@@ -242,6 +256,9 @@ namespace Knossos.NET.Models
                     if (customData.WindowHeight != null)
                         WindowHeight = customData.WindowHeight;
 
+                    if (customData.MenuTaskButtonAtTheEnd.HasValue)
+                        MenuTaskButtonAtTheEnd = customData.MenuTaskButtonAtTheEnd.Value;
+
                     if (customData.MenuOpenFirstTime.HasValue)
                         MenuOpenFirstTime = customData.MenuOpenFirstTime.Value;
 
@@ -279,6 +296,9 @@ namespace Knossos.NET.Models
                     if (customData.HomeWelcomeMargin != null)
                         HomeWelcomeMargin = customData.HomeWelcomeMargin;
 
+                    if(customData.HomeBackgroundStretchMode != null)
+                        HomeBackgroundStretchMode = customData.HomeBackgroundStretchMode;
+
                     HomeLinkButtons = customData.HomeLinkButtons;
 
                     HomeButtonConfigs = customData.HomeButtonConfigs;
@@ -300,6 +320,7 @@ namespace Knossos.NET.Models
             public string? WindowTitle { get; set; }
             public int? WindowWidth { get; set; }
             public int? WindowHeight { get; set; }
+            public bool? MenuTaskButtonAtTheEnd { get; set; }
             public bool? MenuOpenFirstTime { get; set; }
             public bool? MenuDisplayEngineEntry { get; set; }
             public bool? MenuDisplayDebugEntry { get; set; }
@@ -310,8 +331,9 @@ namespace Knossos.NET.Models
             public bool? UseNebulaServices { get; set; }
             public bool? WriteLogFile { get; set; }
             public string? HomeBackgroundImage { get; set; }
-            public string? HomeWelcomeHtml { get; set; }
             public string? HomeWelcomeMargin { get; set; }
+            public string? HomeWelcomeHtml { get; set; }
+            public string? HomeBackgroundStretchMode { get; set; }
             public LinkButton[]? HomeLinkButtons { get; set; }
             public CustomMenuButton[]? CustomMenuButtons { get; set; }
             public HomeCustomButtonConfig[]? HomeButtonConfigs { get; set; }
