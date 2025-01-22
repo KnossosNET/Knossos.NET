@@ -193,7 +193,7 @@ namespace Knossos.NET.Models
         public static LinkButton[]? HomeLinkButtons { get; private set; }
 
         /// <summary>
-        /// Costumisable data for home screen buttons
+        /// Customisable data for home screen buttons
         /// Allows to change home buttons display text, color and tooltips
         /// </summary>
         public static HomeCustomButtonConfig[]? HomeButtonConfigs { get; private set; }
