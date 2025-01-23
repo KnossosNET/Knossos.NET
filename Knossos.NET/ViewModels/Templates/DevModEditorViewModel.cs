@@ -248,7 +248,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal void OpenTool()
+        internal async void OpenTool()
         {
             try
             {
@@ -260,7 +260,7 @@ namespace Knossos.NET.ViewModels
                         var tool = selected.DataContext as Tool;
                         if (tool != null)
                         {
-                            tool.Open(ActiveVersion.fullPath);
+                            await tool.Open(ActiveVersion.fullPath);
                         }
                     }
                 }

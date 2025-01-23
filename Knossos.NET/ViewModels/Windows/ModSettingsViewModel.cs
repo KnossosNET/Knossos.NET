@@ -25,6 +25,8 @@ namespace Knossos.NET.ViewModels
 
         /* UI Variables with ObervableProperty*/
         [ObservableProperty]
+        internal bool shortcutEnabled = KnUtils.IsWindows;
+        [ObservableProperty]
         internal bool configureBuildOpen = false;
         [ObservableProperty]
         internal string title = string.Empty;
@@ -131,6 +133,22 @@ namespace Knossos.NET.ViewModels
 
             //Size
             Task.Factory.StartNew(() => UpdateModSize());
+        }
+
+        /// <summary>
+        /// Generate mod shortcut on windows
+        /// </summary>
+        internal void Shortcut()
+        {
+            var knPath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
+            if (knPath != null)
+            {
+                if (KnUtils.IsAppImage)
+                {
+                    knPath = KnUtils.AppImagePath;
+                }
+                KnUtils.CreateDesktopShortcut(modJson!.title, knPath, "-playmod " + modJson.id + " -version " + modJson.version + " -exec Default");
+            }
         }
 
         /// <summary>

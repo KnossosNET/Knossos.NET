@@ -6,6 +6,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.Classes
 {
@@ -70,25 +71,39 @@ namespace Knossos.NET.Classes
         /// </summary>
         /// <param name="workingFolder"></param>
         /// <returns>true or false depending if the process start was successfull</returns>
-        public bool Open(string? workingFolder = null)
+        public async Task<bool> Open(string? workingFolder = null)
         {
-            var best = GetBestPackage();
-            if (folderpath != string.Empty && best != null)
+            var bestPkg = GetBestPackage();
+            var path = GetExecutableFullPath(bestPkg);
+            if (path != null)
             {
                 try
                 {
                     if (!KnUtils.IsWindows)
-                        KnUtils.Chmod(Path.Combine(folderpath, best.executablePath));
-                    using (var process = new Process())
+                        KnUtils.Chmod(path);
+
+                    if(bestPkg != null && bestPkg.wineSupport && bestPkg.os.ToLower() == "windows" && KnUtils.IsLinux)
                     {
-                        process.StartInfo.FileName = Path.Combine(folderpath, best.executablePath);
-                        if(cmdline != string.Empty)
-                            process.StartInfo.Arguments = cmdline;
-                        if(workingFolder != null)
-                            process.StartInfo.WorkingDirectory = workingFolder;
-                        process.StartInfo.UseShellExecute = true;
-                        process.Start();
-                        return true;
+                        Log.Add(Log.LogSeverity.Information, "Tool.Open()", "Executing Wine to run this tool: " + path);
+                        //Wine
+                        var res = await Wine.RunTool(path,cmdline, workingFolder, bestPkg.cpuArch);
+                        return res.IsSuccess;
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Information, "Tool.Open()", "Running tool: " + path);
+                        //Normal
+                        using (var process = new Process())
+                        {
+                            process.StartInfo.FileName = path;
+                            if (cmdline != string.Empty)
+                                process.StartInfo.Arguments = cmdline;
+                            if (workingFolder != null)
+                                process.StartInfo.WorkingDirectory = workingFolder;
+                            process.StartInfo.UseShellExecute = true;
+                            process.Start();
+                            return true;
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -96,11 +111,25 @@ namespace Knossos.NET.Classes
                     Log.Add(Log.LogSeverity.Error, "Tool.Open()", ex);
                 }
             }
+            return false;
+        }
+
+        /// <summary>
+        /// Gets full path to the best executable for this tool on this platform
+        /// </summary>
+        /// <returns>fullpath string or null</returns>
+        public string? GetExecutableFullPath(ToolPackage? toolPackage = null)
+        {
+            var best = toolPackage == null ? GetBestPackage() : toolPackage;
+            if (folderpath != string.Empty && best != null)
+            {
+                return Path.Combine(folderpath, best.executablePath);
+            }
             else
             {
-                Log.Add(Log.LogSeverity.Error, "Tool.Open()", "Invalid platform or folderpath is empty. Tool: " + name);
+                Log.Add(Log.LogSeverity.Error, "Tool.GetExecutableFullPath()", "Invalid platform or folderpath is empty. Tool: " + name);
             }
-            return false;
+            return null;
         }
 
         /// <summary>
@@ -257,6 +286,26 @@ namespace Knossos.NET.Classes
                                 }
                             }
                         }
+                        else
+                        {
+                            //Wine
+                            if(pkg.wineSupport && pkg.os.ToLower() == "windows" && KnUtils.IsLinux)
+                            {
+                                foreach (var arch in archs)
+                                {
+                                    if (arch == "x64" && KnUtils.CpuArch == "X64" ||
+                                       arch == "x86" && KnUtils.CpuArch == "X86" ||
+                                       arch == "arm64" && KnUtils.CpuArch == "Arm64" ||
+                                       arch == "arm32" && KnUtils.CpuArch != "Arm64" && (KnUtils.CpuArch == "Arm" || KnUtils.CpuArch == "Armv6") ||
+                                       arch == "riscv64" && KnUtils.CpuArch == "RiscV64" ||
+                                       arch == "riscv32" && KnUtils.CpuArch == "RiscV32")
+                                    {
+                                        pkg.score = 5;
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
                     }
                     scoresSet = true;
                 }
@@ -276,5 +325,7 @@ namespace Knossos.NET.Classes
         public string executablePath { get; set; } = string.Empty;
         [JsonIgnore]
         public int score { get; set; } = 0;
+        [JsonPropertyName("wine_support")]
+        public bool wineSupport { get; set; } = false;
     }
 }

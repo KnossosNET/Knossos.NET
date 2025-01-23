@@ -23,6 +23,7 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Microsoft.Win32;
+using WindowsShortcutFactory;
 
 namespace Knossos.NET
 {
@@ -1188,6 +1189,36 @@ namespace Knossos.NET
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtils.DeleteFileSafe()", ex);
+            }
+        }
+
+        /// <summary>
+        /// Creates a shortcut into the user desktop
+        /// optional diferent icon path, if null is passed the destfilepath icon will be used
+        /// Only Windows
+        /// </summary>
+        /// <param name="shortcutName"></param>
+        /// <param name="destFileFullPath"></param>
+        /// <param name="iconFilePath"></param>
+        public static void CreateDesktopShortcut(string shortcutName, string destFileFullPath, string arguments = "", string? iconFilePath = null)
+        {
+            try
+            {
+                if (IsWindows)
+                {
+                    using var shortcut = new WindowsShortcut
+                    {
+                        Path = @destFileFullPath,
+                        Description = "KnossosNET quicklaunch to " + shortcutName,
+                        IconLocation = iconFilePath == null ? destFileFullPath : iconFilePath,
+                        Arguments = arguments
+                    };
+
+                    shortcut.Save(@Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + Path.DirectorySeparatorChar + shortcutName + ".lnk");
+                }
+            }catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.CreateDesktopShortcut()", ex);
             }
         }
     }

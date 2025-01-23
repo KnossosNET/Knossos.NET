@@ -12,20 +12,54 @@
 		<vm:DevToolManagerViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer Background="{StaticResource BackgroundColorSecondary}">
+	<ScrollViewer Background="{StaticResource BackgroundColorSecondary}" Margin="5">
 		<ListBox ItemsSource="{Binding Tools}">
 			<ListBox.ItemTemplate>
 				<DataTemplate>
-					<Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
-						<Button IsEnabled="{Binding !DisableButtons}" IsVisible="{Binding IsInstalled}" Command="{Binding ToggleFavorite}" Grid.Column="0" FontSize="24" Height="50" Width="50" Background="Transparent" BorderBrush="Transparent" Foreground="{Binding FavoriteColor}" Margin="0,0,0,0">&#9733;</Button>
-						<WrapPanel Grid.Column="1" ToolTip.Tip="{Binding ToolTip}">
+					<Grid ColumnDefinitions="Auto,*,Auto,Auto">
+						<!--Description-->
+						<Button Grid.Column="0" Margin="5" Width="35" Height="35" Classes="Option" ToolTip.Tip="{Binding Description}">
+							<Image Width="30" Height="30" Source="avares://Knossos.NET/Assets/general/questionmark.png" />
+						</Button>
+						<!--Name and Version-->
+						<WrapPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left">
 							<Label Margin="5" FontSize="22" Content="{Binding Tool.name}"></Label>
 							<Label Margin="0,5,5,5" FontSize="22" Content="{Binding Tool.version}"></Label>
 						</WrapPanel>
-						<Button IsEnabled="{Binding !DisableButtons}" Command="{Binding Update}" ToolTip.Tip="{Binding UpdateTooltip}" IsVisible="{Binding UpdateAvailable}" Grid.Column="3" FontSize="20" Width="100" Classes="Option" Margin="10,5,20,5">Update</Button>
-						<Button IsEnabled="{Binding !DisableButtons}" ToolTip.Tip="{Binding ToolTip}" Command="{Binding Install}" IsVisible="{Binding !IsInstalled}" Grid.Column="4" FontSize="20" Width="100" Classes="Accept" Margin="10,5,20,5">Install</Button>
-						<Button IsEnabled="{Binding !DisableButtons}" Command="{Binding Delete}" IsVisible="{Binding IsInstalled}" Grid.Column="2" FontSize="20" Width="100" Classes="Cancel" Margin="10,5,20,5">Delete</Button>
-						<Button IsEnabled="{Binding !DisableButtons}" ToolTip.Tip="{Binding ToolTip}" Command="{Binding Open}" IsVisible="{Binding IsInstalled}" Grid.Column="4" FontSize="20" Width="100" Classes="Primary" Margin="10,5,20,5">Open</Button>
+						<!--Wine-->
+						<Label Grid.Column="2" IsVisible="{Binding Wine}" Margin="5" VerticalContentAlignment="Center" FontWeight="Bold" Foreground="Yellow"
+							   ToolTip.Tip="This tool works only over Wine, make sure you have a working Wine version first.">
+							WINE
+						</Label>
+						<!--Button Panel-->
+						<WrapPanel IsEnabled="{Binding !DisableButtons}" Grid.Column="3">
+							<Button IsVisible="{Binding IsInstalled}" Command="{Binding ToggleFavorite}"
+									Height="35" Width="35" Background="Transparent"
+									BorderBrush="Transparent" ToolTip.Tip="Toggle favorite tool">
+								<PathIcon Foreground="{Binding FavoriteColor}" Height="30" Data="{StaticResource StarRegular}" />
+							</Button>
+							<Button Command="{Binding Open}" IsVisible="{Binding IsInstalled}"
+									Height="35" Width="35" Classes="Primary" Margin="5" ToolTip.Tip="Open">
+								<PathIcon Height="30" Data="{StaticResource OpenRegular}" />
+							</Button>
+							<Button Command="{Binding Shortcut}" IsVisible="{Binding IsInstalled}" IsEnabled="{Binding ShortcutEnabled}"
+								Height="35" Width="35" Classes="Option" Margin="5" ToolTip.Tip="Create desktop shortcut">
+								<PathIcon Height="30" Data="{StaticResource DocumentArrowLeftRegular}" />
+							</Button>
+							<Button Command="{Binding Update}" ToolTip.Tip="{Binding UpdateTooltip}"
+									Height="35" Width="35" IsVisible="{Binding UpdateAvailable}" 
+									Classes="Quaternary" Margin="5">
+								<PathIcon Height="30" Data="{StaticResource ArrowUpRegular}" />
+							</Button>
+							<Button Command="{Binding Install}" IsVisible="{Binding !IsInstalled}" 
+									Height="35" Width="35" Classes="Quaternary" Margin="5" ToolTip.Tip="Install">
+								<PathIcon Height="30" Data="{StaticResource ArrowDownloadRegular}" />
+							</Button>
+							<Button Command="{Binding Delete}" IsVisible="{Binding IsInstalled}"
+									Height="35" Width="35" Classes="Cancel" Margin="5" ToolTip.Tip="Delete">
+								<PathIcon Height="30" Data="{StaticResource DeleteRegular}" />
+							</Button>
+						</WrapPanel>
 					</Grid>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
