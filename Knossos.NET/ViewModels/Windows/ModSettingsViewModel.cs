@@ -400,7 +400,7 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Reset settings to DEFAULT on UI BUT it does not save them, the user must click save
+        /// Reset settings to DEFAULT on UI
         /// </summary>
         internal void ResetSettingsCommand()
         {

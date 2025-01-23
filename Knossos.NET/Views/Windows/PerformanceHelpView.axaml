@@ -12,8 +12,7 @@
 		CanResize="False">
 	
 	<StackPanel MaxWidth="500" Background="{StaticResource BackgroundColorPrimary}">
-		<TextBlock Margin="10,20,20,10" TextWrapping="Wrap">If in-game performance is slow, close the game and then try disabling "Extra Multisample AA" and "Shadows". Note, "Extra Multisample AA" is an added, more expensive anti-aliasing step and if it is disabled then "Post-processing AA" will still be be applied. </TextBlock>
-		<TextBlock Margin="10,10,20,10" TextWrapping="Wrap">The next best options to disable are "Deferred Lighting" and then "Post-processing AA".</TextBlock>
-		<TextBlock Margin="10,10,20,20" TextWrapping="Wrap">And always remember to click the "Save" button!</TextBlock>
+		<TextBlock Margin="10,20,20,10" TextWrapping="Wrap">If in-game performance is slow, close the game and then disable "Extra Multisample AA" and "Shadows". Note, "Extra Multisample AA" is an added, more expensive anti-aliasing step and if it is disabled then "Post-processing AA" will still be be applied. </TextBlock>
+		<TextBlock Margin="10,10,20,10" TextWrapping="Wrap">If performance remains slow the next best options to disable are "Deferred Lighting" and then "Post-processing AA".</TextBlock>
 	</StackPanel>
 </Window>
