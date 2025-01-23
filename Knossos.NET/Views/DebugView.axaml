@@ -16,9 +16,9 @@
 				<Button Margin="5" Classes="Settings" Command="{Binding OpenFS2Ini}">View fs2__open.ini</Button>
 			</WrapPanel>
 			<WrapPanel Grid.Row="0" Margin="5">
-				<Button Margin="5" Classes="Settings" Command="{Binding UploadKnossosConsole}">Upload Knossos Console</Button>
-				<Button Margin="5" Classes="Settings" Command="{Binding OpenLog}">View Knossos Logfile</Button>
-				<Button Margin="5" Classes="Settings" Command="{Binding OpenSettings}">View Knossos Settings File</Button>
+				<Button Margin="5" Classes="Settings" Command="{Binding UploadKnossosConsole}">Upload KnossosNET Console</Button>
+				<Button Margin="5" Classes="Settings" Command="{Binding OpenLog}">View KnossosNET Logfile</Button>
+				<Button Margin="5" Classes="Settings" Command="{Binding OpenSettings}">View KnossosNET Settings File</Button>
 			</WrapPanel>
 		</StackPanel>
 		<TextBox Grid.Row="1" Text="{Binding UiConsoleOutput}" IsReadOnly="True"></TextBox>
