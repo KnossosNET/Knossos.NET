@@ -195,7 +195,7 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public bool enableDeferredLighting { get; set; } = true;
         [JsonIgnore]
-        public int windowMode { get; set; } = 2;
+        public int windowMode { get; set; } = 0;
         [JsonIgnore]
         public bool vsync { get; set; } = true;
         [JsonIgnore]
@@ -219,7 +219,7 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public bool enableEfx { get; set; } = false;
         [JsonPropertyName("enable_tts")]
-        public bool enableTts { get; set; } = true;
+        public bool enableTts { get; set; } = false;
         [JsonIgnore]
         public int? ttsVoice { get; set; } = null;
         public string? ttsVoiceName { get; set; } = null;
@@ -674,6 +674,8 @@ namespace Knossos.NET.Models
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings have been loaded");
 
+                        SetCustomModeValues();
+
                         pendingChangesOnAppClose = false;
                     }
 
@@ -690,6 +692,23 @@ namespace Knossos.NET.Models
             if(Knossos.inPortableMode)
             {
                 basePath = Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "Library");
+            }
+        }
+
+        /// <summary>
+        /// Values controlled by CustomLauncher.cs in single tc mode
+        /// </summary>
+        private void SetCustomModeValues()
+        {
+            if (CustomLauncher.IsCustomMode)
+            {
+                checkUpdate = CustomLauncher.AllowLauncherUpdates;
+                enableLogFile = CustomLauncher.WriteLogFile;
+                autoUpdate = false;
+                if (!CustomLauncher.MenuDisplayGlobalSettingsEntry)
+                {
+                    warnNewSettingsSystem = false;
+                }
             }
         }
 
@@ -887,6 +906,7 @@ namespace Knossos.NET.Models
         /// <param name="writeIni"></param>
         public void Save(bool writeIni = true) 
         {
+            SetCustomModeValues();
             if (writeIni)
             {
                 WriteFS2IniValues();

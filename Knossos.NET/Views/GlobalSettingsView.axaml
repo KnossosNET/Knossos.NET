@@ -82,7 +82,7 @@
 							</WrapPanel>
 							<!-- Image Cache -->
 							<WrapPanel Margin="5,10,0,0">
-								<Label VerticalAlignment="Center" Width="200" Content="Image Cache"/>
+								<Label VerticalAlignment="Center" Width="200" Content="Resource Cache"/>
 								<Label Margin="10,0,0,0" VerticalAlignment="Center" Content="{Binding ImgCacheSize}"/>
 								<Button Command="{Binding ClearImageCache}" Margin="5,0,0,0" Classes="Quaternary">Clear</Button>
 							</WrapPanel>
@@ -147,7 +147,7 @@
             </Label>
           </Expander.Header>
 					<StackPanel Margin="5">
-						<TextBox BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,-5,5,5" Foreground="Yellow" MaxWidth="600" HorizontalAlignment="Left">
+						<TextBox IsVisible="{Binding DisplaySettingsWarning}" BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,-5,5,5" Foreground="Yellow" MaxWidth="600" HorizontalAlignment="Left">
               Note, video settings for most mods using FSO version 24.2.0 or higher will need to be changed in-game by default.
               To change these new settings, play a modern mod and then go to the in-game "Options" menu.
 						</TextBox>
@@ -255,7 +255,7 @@
             </Label>
           </Expander.Header>
 					<StackPanel Margin="5">
-				    <TextBox BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,-5,5,0" Foreground="Yellow" MaxWidth="600" HorizontalAlignment="Left">
+				    <TextBox IsVisible="{Binding DisplaySettingsWarning}"  BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,-5,5,0" Foreground="Yellow" MaxWidth="600" HorizontalAlignment="Left">
               Note, audio settings for most mods using FSO version 24.2.0 or higher will need to be changed in-game by default. 
               To change these new settings, play a modern mod and then go to the in-game "Options" menu.
             </TextBox>
@@ -334,7 +334,7 @@
             </Label>
           </Expander.Header>
 					<StackPanel Margin="5">
-				    <TextBox BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,0,5,0" Foreground="Yellow" MaxWidth="600" HorizontalAlignment="Left">
+				    <TextBox IsVisible="{Binding DisplaySettingsWarning}" BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,0,5,0" Foreground="Yellow" MaxWidth="600" HorizontalAlignment="Left">
               Note, input settings for most mods using FSO version 24.2.0 or higher will need to be changed in-game by default. To change these new settings, play a modern mod and then go to the in-game "Options" menu.
             </TextBox>
             <?ignore

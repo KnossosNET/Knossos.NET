@@ -31,6 +31,7 @@ namespace Knossos.NET
         private static bool forceUpdateDownload = false; //Only intended to test the update system!
         public static bool inPortableMode { get; private set; } = false;
         public static bool isKnDataFolderReadOnly { get; private set; } = false;
+        public static bool inSingleTCMode { get; private set; } = false;
 
         /// <summary>
         /// Static constructor
@@ -54,6 +55,9 @@ namespace Knossos.NET
                 //At this stage we can only log to console
                 Log.WriteToConsole("Knossos() - " + ex.Message);
             }
+            //Important!!! The first time it needs to be ran after checking if we are in portable mode or not
+            //Due to the Knossos data folder path changing
+            inSingleTCMode = CustomLauncher.IsCustomMode;
         }
 
         /// <summary>
@@ -92,6 +96,20 @@ namespace Knossos.NET
                     }
                 }
 
+                //Rename the old cache folder
+                try
+                {
+                    var oldCachePath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "image_cache");
+                    if (!Directory.Exists(KnUtils.GetCachePath()) && Directory.Exists(oldCachePath))
+                    {
+                        Directory.Move(oldCachePath, KnUtils.GetCachePath());
+                    }
+                }
+                catch(Exception ex) 
+                {
+                    Log.Add(Log.LogSeverity.Error, "Knossos.Startup()", ex);
+                }
+
                 Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "=== KnossosNET v" + AppVersion + " Start ===");
 
                 if (inPortableMode)
@@ -99,7 +117,7 @@ namespace Knossos.NET
                     Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "Running in PORTABLE MODE.");
                     try
                     {
-                        Directory.CreateDirectory(Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen"));
+                        Directory.CreateDirectory(KnUtils.GetFSODataFolderPath());
                         Directory.CreateDirectory(Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "Library"));
                     }
                     catch (Exception ex) 
@@ -135,14 +153,14 @@ namespace Knossos.NET
                 }
 
                 //Load base path from knossos legacy
-                if (globalSettings.basePath == null)
+                if (globalSettings.basePath == null && !inSingleTCMode)
                 {
                     globalSettings.basePath = KnUtils.GetBasePathFromKnossosLegacy();
                 }
 
                 LoadBasePath(isQuickLaunch);
 
-                if (globalSettings.basePath == null && !isQuickLaunch)
+                if (globalSettings.basePath == null && !isQuickLaunch && !inSingleTCMode)
                     OpenQuickSetup();
 
             }catch(Exception ex)
@@ -1236,6 +1254,10 @@ namespace Knossos.NET
                     cmdline = KnUtils.CmdLineBuilder(cmdline, globalCmd);
                 }
                 cmdline = KnUtils.CmdLineBuilder(cmdline, modCmd?.ToArray());
+                if (inSingleTCMode && CustomLauncher.CustomCmdlineArray != null && CustomLauncher.CustomCmdlineArray.Any())
+                {
+                    cmdline = KnUtils.CmdLineBuilder(cmdline, CustomLauncher.CustomCmdlineArray);
+                }
             }
             else
             {

@@ -45,7 +45,7 @@ namespace Knossos.NET.ViewModels
                     bool compressMod = false;
 
                     //Set Mod card as "installing"
-                    MainWindowViewModel.Instance?.NebulaModsView.SetInstalling(mod.id, cancellationTokenSource);
+                    MainWindowViewModel.Instance?.SetInstalling(mod.id, cancellationTokenSource);
 
                     //Wait in Queue
                     while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
@@ -445,7 +445,7 @@ namespace Knossos.NET.ViewModels
                     {
                         Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         var uri = new Uri(mod.tile);
-                        using (var fs = await KnUtils.GetImageStream(mod.tile))
+                        using (var fs = await KnUtils.GetRemoteResourceStream(mod.tile))
                         {
                             var tileTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, tileTask));
@@ -474,7 +474,7 @@ namespace Knossos.NET.ViewModels
                         Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + "kn_images");
                         var uri = new Uri(mod.banner);
-                        using (var fs = await KnUtils.GetImageStream(mod.banner))
+                        using (var fs = await KnUtils.GetRemoteResourceStream(mod.banner))
                         {
                             var bannerTask = new TaskItemViewModel();
                             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, bannerTask));
@@ -509,7 +509,7 @@ namespace Knossos.NET.ViewModels
                                 throw new TaskCanceledException();
                             }
                             var uri = new Uri(sc);
-                            using (var fs = await KnUtils.GetImageStream(sc))
+                            using (var fs = await KnUtils.GetRemoteResourceStream(sc))
                             {
                                 var scTask = new TaskItemViewModel();
                                 await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, scTask));
@@ -602,7 +602,7 @@ namespace Knossos.NET.ViewModels
                     //Remove Mod card, unmark update available, re-run dependencies checks
                     if (installed == null)
                     {
-                        MainWindowViewModel.Instance?.NebulaModsView.RemoveMod(mod.id);
+                        MainWindowViewModel.Instance?.NebulaModsView?.RemoveMod(mod.id);
                         Knossos.AddMod(mod);
                         await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(mod), DispatcherPriority.Background);
                         //We cant determine if the version we are installing is the newer one at this point, but this will determine if it is newer than anything was was installed previously, what is good enoght
@@ -671,9 +671,9 @@ namespace Knossos.NET.ViewModels
                                                 //Remove the mod version from Knossos and physical files
                                                 await Task.Run(() => Knossos.RemoveMod(version));
                                                 //Remove mod version from UI mod versions list
-                                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.RemoveInstalledModVersion(version));
+                                                await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.RemoveInstalledModVersion(version));
                                                 //If the dev editor is open and loaded this mod id, reset it
-                                                await Dispatcher.UIThread.InvokeAsync(() => DeveloperModsViewModel.Instance!.ResetModEditor(mod.id));
+                                                await Dispatcher.UIThread.InvokeAsync(() => DeveloperModsViewModel.Instance?.ResetModEditor(mod.id));
                                             }
                                         }
                                         else

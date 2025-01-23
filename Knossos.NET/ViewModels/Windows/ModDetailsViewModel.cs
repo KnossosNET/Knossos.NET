@@ -86,6 +86,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool isLocalMod = false;
         [ObservableProperty]
+        internal bool nebulaServices = !CustomLauncher.IsCustomMode || (CustomLauncher.IsCustomMode && CustomLauncher.UseNebulaServices) ? true : false;
+        [ObservableProperty]
         internal ObservableCollection<ScreenshotItem> screenshots = new ObservableCollection<ScreenshotItem>();
         internal ObservableCollection<ComboBoxItem> VersionItems { get; set; } = new ObservableCollection<ComboBoxItem>();
 
@@ -280,7 +282,7 @@ namespace Knossos.NET.ViewModels
                             Banner = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/loading.png")));
                             Task.Run(async () =>
                             {
-                                using (var fs = await KnUtils.GetImageStream(url).ConfigureAwait(false))
+                                using (var fs = await KnUtils.GetRemoteResourceStream(url).ConfigureAwait(false))
                                 {
                                     Dispatcher.UIThread.Invoke(() => { 
                                         if (fs != null)
@@ -345,7 +347,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 Task.Run(async () =>
                                 {
-                                    using (var fs = await KnUtils.GetImageStream(scn))
+                                    using (var fs = await KnUtils.GetRemoteResourceStream(scn))
                                     {
                                         if (fs != null)
                                         {
