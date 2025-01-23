@@ -2,15 +2,15 @@
 using System;
 using System.Globalization;
 using Avalonia.Platform;
-using Avalonia.Media.Imaging;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.Converters
 {
-    public class BitmapAssetValueConverter : IValueConverter
+    public class TextFileToStringConverter : IValueConverter
     {
-        public static BitmapAssetValueConverter Instance { get; } = new();
+        public static TextFileToStringConverter Instance { get; } = new();
 
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo? culture)
         {
@@ -18,19 +18,9 @@ namespace Knossos.NET.Converters
             {
                 if (value == null) return null;
 
-                if(!targetType.IsAssignableFrom(typeof(Bitmap)))
-                    throw new NotSupportedException();
-
-                if (value is not string rawUri)
+                if (value is not string rawUri || !targetType.IsAssignableFrom(typeof(String)))
                 {
-                    if(parameter is string)
-                    {
-                        rawUri = (string)parameter;
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
+                    throw new NotSupportedException();
                 }
 
                 Uri uri;
@@ -39,23 +29,29 @@ namespace Knossos.NET.Converters
                 {
                     uri = new Uri(rawUri);
                     var asset = AssetLoader.Open(uri);
-                    return new Bitmap(asset);
+                    if (asset != null)
+                    {
+                        using (var reader = new StreamReader(asset, Encoding.UTF8))
+                        {
+                            return reader.ReadToEnd();
+                        }
+                    }
                 }
-                else if(rawUri.ToLower().StartsWith("http"))
+                else if (rawUri.ToLower().StartsWith("http"))
                 {
                     var localPath = Task.Run(() => KnUtils.GetRemoteResource(rawUri)).Result;
                     if (localPath != null)
                     {
-                        return new Bitmap(localPath);
+                        return File.ReadAllText(localPath);
                     }
                 }
                 else if (File.Exists(Path.Combine(KnUtils.GetKnossosDataFolderPath(), rawUri)))
                 {
-                    return new Bitmap(Path.Combine(KnUtils.GetKnossosDataFolderPath(), rawUri));
+                    return File.ReadAllText(Path.Combine(KnUtils.GetKnossosDataFolderPath(), rawUri));
                 }
                 else if (File.Exists(rawUri))
                 {
-                    return new Bitmap(rawUri);
+                    return File.ReadAllText(rawUri);
                 }
             }
             catch (Exception ex)

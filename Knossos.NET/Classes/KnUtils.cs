@@ -122,7 +122,15 @@ namespace Knossos.NET
         {
             if (!Knossos.inPortableMode)
             {
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET");
+                if (CustomLauncher.IsCustomMode)
+                {
+                    //In custom mode store config files inside modid a subfolder
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET", CustomLauncher.ModID!);
+                }
+                else
+                {
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET");
+                }
             }
             else
             {
@@ -139,30 +147,59 @@ namespace Knossos.NET
         /// <returns>fullpath as string</returns>
         public static string GetFSODataFolderPath()
         {
+            var fsoID = "FreeSpaceOpen";
+            if(CustomLauncher.IsCustomMode && CustomLauncher.UseCustomFSODataFolder)
+            {
+                fsoID = CustomLauncher.ModID!;
+            }
             if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences)
             {
-                return Path.Combine(KnetFolderPath!, "kn_portable", "HardLightProductions", "FreeSpaceOpen"); //If inPortableMode = true, KnetFolderPath is not null
+                return Path.Combine(KnetFolderPath!, "kn_portable", "HardLightProductions", fsoID); //If inPortableMode = true, KnetFolderPath is not null
             }
             else
             {
                 if (!string.IsNullOrEmpty(fsoPrefPath))
                 {
-                    return fsoPrefPath;
+                    if (CustomLauncher.IsCustomMode && CustomLauncher.UseCustomFSODataFolder)
+                    {
+                        return ReplaceLast(fsoPrefPath, "FreeSpaceOpen", fsoID);
+                    }
+                    else
+                    {
+                        return fsoPrefPath;
+                    }
                 }
                 else
                 {
                     if (KnUtils.isMacOS)
                     {
-                        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "HardLightProductions", "FreeSpaceOpen");
+                        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "HardLightProductions", fsoID);
                     }
                     if (IsLinux)
                     {
-                        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "HardLightProductions", "FreeSpaceOpen");
+                        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "HardLightProductions", fsoID);
                     }
-                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "HardLightProductions", "FreeSpaceOpen");
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "HardLightProductions", fsoID);
                 }
             }
 
+        }
+
+        /// <summary>
+        /// Replace last ocurrence of a word in a string
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="find"></param>
+        /// <param name="replace"></param>
+        /// <returns></returns>
+        public static string ReplaceLast(string source, string find, string replace)
+        {
+            int index = source.LastIndexOf(find);
+
+            if (index == -1)
+                return source;
+
+            return source.Remove(index, find.Length).Insert(index, replace);
         }
 
         /// <summary>
@@ -579,59 +616,178 @@ namespace Knossos.NET
         /// Gets the fullpath to image storage cache
         /// </summary>
         /// <returns></returns>
-        public static string GetImageCachePath()
+        public static string GetCachePath()
         {
             try
             {
-                return Path.Combine(GetKnossosDataFolderPath(), "image_cache");
+                return Path.Combine(GetKnossosDataFolderPath(), "cache");
             }
             catch { return string.Empty; }
         }
 
         /// <summary>
-        /// Downloads a image from a URL, stores it in cache and serves the filestream
-        /// If the image is already in cache, no download is done
+        /// Downloads a file from a URL, stores it in cache and serves the filestream
+        /// If the file is already in cache, a check is done to make sure it has no changed.
+        /// If it has changed it is re-downloaded
         /// </summary>
-        /// <param name="imageURL"></param>
-        /// <returns>Cached image filestream or null if failed</returns>
-        public static async Task<FileStream?> GetImageStream(string imageURL, int attempt = 1)
+        /// <param name="resourceURL"></param>
+        /// <returns>Cached filestream or null if failed</returns>
+        public static async Task<FileStream?> GetRemoteResourceStream(string resourceURL)
         {
             try
             {
-                return await Task.Run(async () =>
+                var localFile = await GetRemoteResource(resourceURL);
+                if (localFile != null)
                 {
-                    var imageName = Path.GetFileName(imageURL);
-                    var imageInCachePath = Path.Combine(GetImageCachePath(), imageName);
-
-                    if (File.Exists(imageInCachePath) && new FileInfo(imageInCachePath).Length > 0)
-                    {
-                        return new FileStream(imageInCachePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    }
-                    else
-                    {
-                        //Download to cache and copy
-                        Directory.CreateDirectory(Path.Combine(GetKnossosDataFolderPath(), "image_cache"));
-                        using (var imageStream = await GetHttpClient().GetStreamAsync(imageURL))
-                        {
-                            var fileStream = new FileStream(imageInCachePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-                            await imageStream.CopyToAsync(fileStream);
-                            imageStream.Close();
-                            fileStream.Seek(0, SeekOrigin.Begin);
-                            return fileStream;
-                        }
-                    }
-                });
+                    var fileStream = new FileStream(localFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    if(fileStream.Length == 0)
+                        return null;
+                    return fileStream;
+                }
             }
             catch (Exception ex)
             {
-                Log.Add(Log.LogSeverity.Error, "KnUtils.GetImageStream()", ex);
-                if (attempt <= 2)
+                Log.Add(Log.LogSeverity.Error, "KnUtils.GetRemoteResourceStream()", ex);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Downloads a file from a URL, stores it in cache and returns the local path
+        /// If the file is already in cache, a check is done to make sure it has no changed.
+        /// If it has changed it is updated
+        /// </summary>
+        /// <param name="imageURL"></param>
+        /// <param name="attempt"></param>
+        /// <returns>string path or null</returns>
+        public static async Task<string?> GetRemoteResource(string resourceURL, int attempt = 1)
+        {
+            string fileInCachePath = string.Empty;
+            bool cacheFileIsValid = false;
+            try
+            {
+                Directory.CreateDirectory(GetCachePath()); //make sure the cache dir exists
+                var fileName = Path.GetFileName(resourceURL);
+                fileInCachePath = Path.Combine(GetCachePath(), fileName);
+                var fileInCacheEtagPath = fileInCachePath + ".etag";
+                string? remoteEtag = null;
+                bool cacheFileExists = File.Exists(fileInCachePath);
+                Uri uri = new Uri(resourceURL);
+                bool isNebulaFile = Nebula.nebulaMirrors.Contains(uri.Host.ToLower());
+                cacheFileIsValid = cacheFileExists && new FileInfo(fileInCachePath).Length > 0 ? true : false;
+
+                //file exists in cache? check it
+                if (cacheFileIsValid && cacheFileExists)
+                {
+                    bool cacheFileEtagExists = File.Exists(fileInCacheEtagPath);
+                    if (isNebulaFile)
+                    {
+                        //This is a nebula file, nebula files are stored by their checksum so they never update
+                        return fileInCachePath;
+                    }
+                    else if (cacheFileEtagExists)
+                    {
+                        //etag info exist, check it
+                        var cachedEtag = await File.ReadAllTextAsync(fileInCacheEtagPath);
+                        remoteEtag = await GetUrlFileEtag(resourceURL);
+                        if (cachedEtag != null && cachedEtag == remoteEtag)
+                        {
+                            //cache is up to date
+                            return fileInCachePath;
+                        }
+                        else
+                        {
+                            Log.Add(Log.LogSeverity.Information, "KnUtils.GetRemoteResource()", "File: "+ fileName + " from cache is outdated, re-download. Cache etag: " + cachedEtag + " Remove etag: " + remoteEtag);
+                        }
+                    }
+                    //not etag info or it has changed, re-download
+                }
+
+                Log.Add(Log.LogSeverity.Information, "KnUtils.GetRemoteResource()", "Downloading: " + resourceURL + " to local cache.");
+                //download to cache
+                using (var imageStream = await GetHttpClient().GetStreamAsync(resourceURL))
+                {
+                    using (var fileStream = new FileStream(fileInCachePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                    {
+                        await imageStream.CopyToAsync(fileStream);
+                    }
+                }
+                //save etag
+                if (!isNebulaFile)
+                {
+                    try
+                    {
+                        if (remoteEtag == null)
+                        {
+                            remoteEtag = await GetUrlFileEtag(resourceURL);
+                        }
+                        if (remoteEtag != null)
+                        {
+                            File.WriteAllText(fileInCacheEtagPath, remoteEtag, Encoding.UTF8);
+                        }
+                        else
+                        {
+                            Log.Add(Log.LogSeverity.Error, "KnUtils.GetRemoteResource()", "Could not save etag information for file " + resourceURL + " remoteEtag value was null.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "KnUtils.GetRemoteResource()", ex);
+                    }
+                }
+                return fileInCachePath;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.GetImagePath()", ex);
+                if (attempt < 3)
                 {
                     await Task.Delay(1000);
-                    return await GetImageStream(imageURL, attempt + 1);
+                    return await GetRemoteResource(resourceURL, attempt + 1);
+                }
+                else
+                {
+                    //If the download somehow fails, but we have a valid local version of this file, pass it, no matter if it is outdated
+                    if (cacheFileIsValid)
+                    {
+                        return fileInCachePath;
+                    }
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Reads etag data from a url file
+        /// </summary>
+        /// <returns>etag string or null</returns>
+        public static async Task<string?> GetUrlFileEtag(string url)
+        {
+            try
+            {
+                string? newEtag = null;
+                Log.Add(Log.LogSeverity.Information, "KnUtils.GetUrlFileEtag()", "Getting " + url + " etag.");
+
+                var result = await KnUtils.GetHttpClient().GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                newEtag = result.Headers?.ETag?.ToString().Replace("\"", "");
+                try
+                {
+                    //workaround because it was not always working on some urls
+                    if (newEtag == null && result.Headers != null)
+                    {
+                        var etagHeader = result.Headers.FirstOrDefault(x => x.Key != null && x.Key.ToLower() == "etag");
+                        newEtag = etagHeader.Value.FirstOrDefault();
+                    }
+                }
+                catch { }
+                Log.Add(Log.LogSeverity.Information, "KnUtils.GetUrlFileEtag()", Path.GetFileName(url) + " etag: " + newEtag);
+                return newEtag;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.GetUrlFileEtag()", ex);
+                return null;
+            }
         }
 
         /// <summary>
