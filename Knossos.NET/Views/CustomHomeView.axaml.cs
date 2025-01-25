@@ -73,7 +73,7 @@ public partial class CustomHomeView : UserControl
             Log.Add(Log.LogSeverity.Error, "CustomHomeView.Constructor()", ex);
         }
 
-        //Home Buttons Custimizations
+        //Home Buttons Customizations
         try
         {
             if (CustomLauncher.HomeButtonConfigs != null && CustomLauncher.HomeButtonConfigs.Any())
