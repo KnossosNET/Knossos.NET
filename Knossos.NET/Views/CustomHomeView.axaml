@@ -105,7 +105,7 @@
 									Margin="0,2,0,0" Height="50" Width="150" FontSize="24" 
 									IsVisible="{Binding !Installing}" IsEnabled="{Binding NebulaServices}"></Button>
 							<Button Command="{Binding HardcodedButtonCommand}" Name="ButtonInfo" CommandParameter="details"
-									Content="More info" Classes="Quaternary" HorizontalAlignment="Center"
+									Content="More Info" Classes="Quaternary" HorizontalAlignment="Center"
 									Margin="0,2,0,0" Height="30" Width="150"
 									IsVisible="{Binding !Installing}" IsEnabled="{Binding NebulaServices}"></Button>
 							<Button Command="{Binding HardcodedButtonCommand}" CommandParameter="cancel"

@@ -72,6 +72,24 @@ namespace Knossos.NET.Models
         public static string WindowTitle { get; private set; } = "Knet Launcher";
 
         /// <summary>
+        /// Custom text for the message that states when Nebula is downloading the repo_minimal.json on the Home Screen.
+        /// By default this is "Nebula: repo_minimal.json is up to date!"
+        /// </summary>
+        public static string NebulaTextDownloading { get; private set; } = "Downloading repo_minimal.json";
+
+        /// <summary>
+        /// Custom text for the message that states when Nebula is up-to-date for the repo_minimal.json on the Home Screen.
+        /// By default this is "Nebula: repo_minimal.json is up to date!"
+        /// </summary>
+        public static string NebulaTextUpToDate { get; private set; } = "Nebula: repo_minimal.json is up to date!";
+
+        /// <summary>
+        /// Custom text for the tool tip that shows when hovering over the Nebula status on the Home Screen.
+        /// By default this is "The repo_minimal.json file contains info on all the mods available in Nebula, without this you will not be able to install new mods or engine builds"
+        /// </summary>
+        public static string NebulaTextToolTip { get; private set; } = "The repo_minimal.json file contains info on all the mods available in Nebula, without this you will not be able to install new mods or engine builds";
+
+        /// <summary>
         /// Starting width size of the launcher window
         /// This is also the min width
         /// null for auto
@@ -250,6 +268,15 @@ namespace Knossos.NET.Models
                     if (customData.WindowTitle != null)
                         WindowTitle = customData.WindowTitle;
 
+                    if (customData.NebulaTextDownloading != null)
+                        NebulaTextDownloading = customData.NebulaTextDownloading;
+
+                    if (customData.NebulaTextUpToDate != null)
+                        NebulaTextUpToDate = customData.NebulaTextUpToDate;
+
+                    if (customData.NebulaTextToolTip != null)
+                        NebulaTextToolTip = customData.NebulaTextToolTip;
+
                     if (customData.WindowWidth != null)
                         WindowWidth = customData.WindowWidth;
 
@@ -318,6 +345,9 @@ namespace Knossos.NET.Models
             public bool? UseCustomFSODataFolder { get; set; }
             public bool? AllowLauncherUpdates { get; set; }
             public string? WindowTitle { get; set; }
+            public string? NebulaTextDownloading { get; set; }
+            public string? NebulaTextUpToDate { get; set; }
+            public string? NebulaTextToolTip { get; set; }
             public int? WindowWidth { get; set; }
             public int? WindowHeight { get; set; }
             public bool? MenuTaskButtonAtTheEnd { get; set; }

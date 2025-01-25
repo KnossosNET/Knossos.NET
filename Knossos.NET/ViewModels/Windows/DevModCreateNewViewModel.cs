@@ -122,22 +122,22 @@ namespace Knossos.NET.ViewModels
             //ID
             if (ModId.Replace(" ", "").Length <= 2)
             {
-                await MessageBox.Show(MainWindow.instance, "Mod id cant be empty or be less than 3 characters: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Mod ID cant be empty or be less than 3 characters: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
                 return false;
             }
             if (ModId.ToLower() == "tools" || ModId.ToLower() == "fso")
             {
-                await MessageBox.Show(MainWindow.instance, "Mod id: " + ModId+" is a reserved value", "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Mod ID: " + ModId+" is a reserved value", "Validation error", MessageBox.MessageBoxButtons.OK);
                 return false;
             }
             if (await Nebula.IsModIdInNebula(ModId))
             {
-                await MessageBox.Show(MainWindow.instance, "Mod id already exist in Nebula: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Mod ID already exist in Nebula: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
                 return false;
             }
             if (Knossos.GetInstalledModList(ModId).Any() || Knossos.GetInstalledBuildsList(ModId).Any())
             {
-                await MessageBox.Show(MainWindow.instance, "Mod id already exist locally: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Mod ID already exist locally: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
                 return false;
             }
             //If modtype = Mod it has to have a parent mod
