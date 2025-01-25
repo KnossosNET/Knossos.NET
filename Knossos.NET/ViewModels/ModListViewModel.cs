@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using Avalonia.Threading;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
+using ObservableCollections;
 
 namespace Knossos.NET.ViewModels
 {
@@ -14,11 +13,8 @@ namespace Knossos.NET.ViewModels
     /// </summary>
     public partial class ModListViewModel : ViewModelBase
     {
-        /// <summary>
-        /// Is this tab in the middle of sorting or filtering mod tiles
-        /// </summary>
         [ObservableProperty]
-        internal bool sorting = false;
+        internal bool sorting = true;
 
         /// <summary>
         /// For the knossos Loading animation 
@@ -29,47 +25,112 @@ namespace Knossos.NET.ViewModels
         /// <summary>
         /// Current Sort Mode
         /// </summary>
-        internal MainWindowViewModel.SortType sortType = MainWindowViewModel.SortType.unsorted;
+        internal ModSortType localSort = ModSortType.name;
 
         internal string search = string.Empty;
         internal string Search
         {
             get { return search; }
-            set 
+            set
             {
-                if (value != Search){
+                if (value != Search)
+                {
                     this.SetProperty(ref search, value);
-                    if (value.Trim() != string.Empty)
-                    {
-                        foreach(var mod in Mods)
-                        {
-                            if( mod.Name != null && mod.Name.ToLower().Contains(value.ToLower()))
-                            {
-                                mod.Visible = true;
-                            }
-                            else
-                            {
-                                mod.Visible = false;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Mods.ForEach(m => m.Visible = true);
-                    }
+                    ApplyFilters();
                 }
             }
         }
 
-        [ObservableProperty]
-        internal ObservableCollection<ModCardViewModel> mods = new ObservableCollection<ModCardViewModel>();
+        //The actual collection were the mods are
+        private ObservableList<ModCardViewModel> Mods = new ObservableList<ModCardViewModel>();
+        //A hook for the UI, do not access directly
+        internal NotifyCollectionChangedSynchronizedViewList<ModCardViewModel> CardsView { get; set; }
 
         public ModListViewModel()
         {
             LoadingAnimation = new LoadingIconViewModel();
-
+            CardsView = Mods.ToNotifyCollectionChangedSlim(SynchronizationContextCollectionEventDispatcher.Current);
         }
 
+        public void ApplyTagFilter(int tagIndex)
+        {
+            if (MainWindowViewModel.Instance != null)
+            {
+                var tags = ModTags.GetListAllTags();
+                if (tags.Count() > tagIndex)
+                {
+                    MainWindowViewModel.Instance.tagFilter.Add(tags[tagIndex]);
+                    MainWindowViewModel.Instance.tagFilterChanged = true;
+                }
+                ApplyFilters();
+            }
+        }
+
+        public void RemoveTagFilter(int tagIndex)
+        {
+            if (MainWindowViewModel.Instance != null)
+            {
+                var tags = ModTags.GetListAllTags();
+                if (tags.Count() > tagIndex)
+                {
+                    MainWindowViewModel.Instance.tagFilter.Remove(tags[tagIndex]);
+                    MainWindowViewModel.Instance.tagFilterChanged = true;
+                }
+                ApplyFilters();
+            }
+        }
+
+        private void ApplyFilters()
+        {
+            Parallel.ForEach(Mods, new ParallelOptions { MaxDegreeOfParallelism = 4 }, card =>
+            {
+                bool visibility = true;
+                //By search
+                if (Search.Trim() != string.Empty)
+                {
+                    if (card.Name == null || !card.Name.Contains(Search, StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        visibility = false;
+                    }
+                }
+                //Tags
+                if (visibility && MainWindowViewModel.Instance != null && MainWindowViewModel.Instance.tagFilter.Any())
+                {
+                    visibility = false;
+                    foreach (var tag in MainWindowViewModel.Instance.tagFilter)
+                    {
+                        if (card.ID != null && ModTags.IsTagPresentInModID(card.ID, tag))
+                        {
+                            visibility = true;
+                            break;
+                        }
+                    }
+                }
+                card.Visible = visibility;
+            });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void OpenTab()
+        {
+            if (MainWindowViewModel.Instance != null)
+            {
+                Search = MainWindowViewModel.Instance.sharedSearch;
+                if (MainWindowViewModel.Instance.tagFilterChanged)
+                {
+                    ApplyFilters();
+                    MainWindowViewModel.Instance.tagFilterChanged = false;
+                }
+            }
+        }
+
+        public void CloseTab()
+        {
+            if (MainWindowViewModel.Instance != null)
+                MainWindowViewModel.Instance.sharedSearch = Search;
+        }
 
         /// <summary>
         /// Clears all mods in view
@@ -102,13 +163,14 @@ namespace Knossos.NET.ViewModels
                 {
                     if (Mods[i].ActiveVersion != null)
                     {
-                        if(CompareMods(Mods[i].ActiveVersion!,modJson) > 0)
+                        if(Mod.SortMods(Mods[i].ActiveVersion!,modJson) > 0)
                         {
                             break;
                         }
                     }
                 }
                 Mods.Insert(i, new ModCardViewModel(modJson));
+                ModTags.AddModTagsRuntime(modJson);
             }
             else
             {
@@ -122,107 +184,25 @@ namespace Knossos.NET.ViewModels
         /// <param name="sort"></param>
         internal void ChangeSort(object sort)
         {
-            try
+            Sorting = true;
+            LoadingAnimation.Animate = 1;
+            var newSort = ModSortType.unsorted;
+            if (sort is ModSortType)
             {
-                MainWindowViewModel.SortType newSort;
-
-                if (sort is MainWindowViewModel.SortType){
-                    newSort = (MainWindowViewModel.SortType)sort;
-                } else {
-                    newSort = (MainWindowViewModel.SortType)Enum.Parse(typeof(MainWindowViewModel.SortType), (string)sort);
-                }
-
-                if (newSort != sortType)
-                {
-                    if (MainWindowViewModel.Instance != null && newSort != MainWindowViewModel.SortType.unsorted  && MainWindowViewModel.Instance.sharedSortType != newSort )
-                    {
-                        MainWindowViewModel.Instance.sharedSortType = newSort;
-                    }
-                    LoadingAnimation.Animate = 1;
-                    Sorting = true;
-                    Dispatcher.UIThread.Invoke( () =>
-                    {
-                        var tempList = Mods.ToList();
-                        // Only sort and update to the new sort type if we have mods to sort!
-                        if (tempList.Any()){
-                            sortType = newSort;
-                            tempList.Sort(CompareMods);
-                            for (int i = 0; i < tempList.Count; i++)
-                            {
-                                Mods.Move(Mods.IndexOf(tempList[i]), i);
-                            }
-                        }
-                        GC.Collect();
-                        Sorting = false;
-                        LoadingAnimation.Animate = 0;
-                    },DispatcherPriority.Background);
-
-                }
-            }catch(Exception ex)
-            {
-                Sorting = false;
-                LoadingAnimation.Animate = 0;                
-                Log.Add(Log.LogSeverity.Error, "ModListViewModel.ChangeSort()", ex);
+                newSort = (ModSortType)sort;
             }
-        }
-
-        private int CompareMods(ModCardViewModel x, ModCardViewModel y)
-        {
-            if (x.ActiveVersion != null && y.ActiveVersion != null)
-                return CompareMods(x.ActiveVersion, y.ActiveVersion);
             else
-                return 0;
-        }
-
-        private int CompareMods(Mod modA,Mod modB)
-        {
-            try
             {
-                switch (sortType)
-                {
-                    case MainWindowViewModel.SortType.name:
-                        return Mod.CompareTitles(modA.title, modB.title);
-                    case MainWindowViewModel.SortType.release:
-                        if (modA.firstRelease == modB.firstRelease)
-                            return 0;
-                        if (modA.firstRelease != null && modB.firstRelease != null)
-                        {
-                            if (DateTime.Parse(modA.firstRelease, CultureInfo.InvariantCulture) < DateTime.Parse(modB.firstRelease, CultureInfo.InvariantCulture))
-                                return 1;
-                            else
-                                return -1;
-                        }
-                        else
-                        {
-                            if (modA.firstRelease == null)
-                                return -1;
-                            else
-                                return 1;
-                        }
-                    case MainWindowViewModel.SortType.update:
-                        if (modA.lastUpdate == modB.lastUpdate)
-                            return 0;
-                        if (modA.lastUpdate != null && modB.lastUpdate != null)
-                        {
-                            if (DateTime.Parse(modA.lastUpdate, CultureInfo.InvariantCulture) < DateTime.Parse(modB.lastUpdate, CultureInfo.InvariantCulture))
-                                return 1;
-                            else
-                                return -1;
-                        }
-                        else
-                        {
-                            if (modA.lastUpdate == null)
-                                return 1;
-                            else
-                                return -1;
-                        }
-                    default: return 0;
-                }
-            }catch(Exception ex)
-            { 
-                Log.Add(Log.LogSeverity.Warning, "ModListViewModel.CompareMods()",ex.Message);
-                return 0; 
+                newSort = (ModSortType)Enum.Parse(typeof(ModSortType), (string)sort);
             }
+            if (newSort != localSort)
+            {
+                localSort = newSort;
+                Knossos.globalSettings.sortType = newSort;
+                Mods.Sort(); //It will use ModCardViewModel.CompareTo()
+            }
+            LoadingAnimation.Animate = 0;
+            Sorting = false;
         }
 
         /// <summary>

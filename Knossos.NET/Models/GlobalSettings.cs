@@ -165,9 +165,9 @@ namespace Knossos.NET.Models
         }
 
         [JsonIgnore]
-        private MainWindowViewModel.SortType _sortType = MainWindowViewModel.SortType.name;
+        private ModSortType _sortType = ModSortType.name;
         [JsonPropertyName("last_sort_type"), JsonConverter(typeof(JsonStringEnumConverter))]
-        public MainWindowViewModel.SortType sortType
+        public ModSortType sortType
         {
             get { return _sortType; }
             set { if (_sortType != value) { _sortType = value; pendingChangesOnAppClose = true; } }
@@ -915,7 +915,7 @@ namespace Knossos.NET.Models
             {
                 // Quickly update the sort type which is managed elsewhere
                 if (MainWindowViewModel.Instance != null){
-                    sortType = MainWindowViewModel.Instance.sharedSortType;
+                    sortType = Knossos.globalSettings.sortType;
                 }
 
                 var options = new JsonSerializerOptions

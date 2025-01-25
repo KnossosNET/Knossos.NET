@@ -15,7 +15,7 @@ using System.Diagnostics;
 
 namespace Knossos.NET.ViewModels
 {
-    public partial class ModCardViewModel : ViewModelBase
+    public partial class ModCardViewModel : ViewModelBase, IComparable<ModCardViewModel>
     {
         /* General Mod variables */
         private ModDetailsView? detailsView = null;
@@ -359,6 +359,13 @@ namespace Knossos.NET.ViewModels
             {
                 Log.Add(Log.LogSeverity.Warning, "ModCardViewModel.LoadImage", ex);
             }
+        }
+
+        public int CompareTo(ModCardViewModel? other)
+        {
+            if (other == null)
+                return -1;
+            return Mod.SortMods(ActiveVersion, other.ActiveVersion);
         }
     }
 }

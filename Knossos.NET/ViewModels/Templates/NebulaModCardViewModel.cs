@@ -5,14 +5,13 @@ using Knossos.NET.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Views;
 using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Threading;
 using Avalonia.Threading;
 
 namespace Knossos.NET.ViewModels
 {
-    public partial class NebulaModCardViewModel : ViewModelBase
+    public partial class NebulaModCardViewModel : ViewModelBase, IComparable<NebulaModCardViewModel>
     {
         private CancellationTokenSource? cancellationTokenSource = null;
         public Mod? modJson { get; set; }
@@ -23,27 +22,8 @@ namespace Knossos.NET.ViewModels
         internal string? ModVersion { get { return modJson != null ? modJson.version : null; } }
         [ObservableProperty]
         internal Bitmap? tileImage;
-        internal bool visible = false;
-        internal bool Visible
-        {
-            get 
-            { 
-                return visible; 
-            }
-            set
-            {
-                if(visible != value)
-                {
-                    SetProperty(ref visible, value);
-                    if(value && TileImage == null && modJson != null)
-                    {
-                        Dispatcher.UIThread.Invoke(() => {
-                            LoadImage(modJson.fullPath, modJson.tile);
-                        });
-                    }
-                }
-            }
-        }
+        [ObservableProperty]
+        internal bool visible = true;
         [ObservableProperty]
         internal bool isInstalling = false;
 
@@ -63,8 +43,19 @@ namespace Knossos.NET.ViewModels
             Log.Add(Log.LogSeverity.Information, "NebulaModCardViewModel(Constructor)", "Creating mod card for " + modJson);
             modJson.ClearUnusedData();
             this.modJson = modJson;
-            //Moved to load when visible only
+            //Moved to load by external call only
             //LoadImage(modJson.fullPath, modJson.tile);
+        }
+
+        /// <summary>
+        /// Calls to load the tile image
+        /// </summary>
+        public async Task LoadImage()
+        {
+            if (TileImage == null && modJson != null)
+            {
+                await LoadImage(modJson.fullPath, modJson.tile);
+            }
         }
 
         /* Button Commands */
@@ -128,7 +119,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void LoadImage(string modFullPath, string? tileString)
+        private async Task LoadImage(string modFullPath, string? tileString)
         {
             TileImage?.Dispose();
             TileImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
@@ -143,17 +134,11 @@ namespace Knossos.NET.ViewModels
                     }
                     else
                     {
-                        Task.Run(async () =>
+                        using (var fs = await KnUtils.GetRemoteResourceStream(tileString).ConfigureAwait(false))
                         {
-                            using (var fs = await KnUtils.GetRemoteResourceStream(tileString).ConfigureAwait(false))
-                            {
-                                Dispatcher.UIThread.Invoke(() =>
-                                {
-                                    if (fs != null)
-                                        TileImage = new Bitmap(fs);
-                                });
-                            }
-                        }).ConfigureAwait(false); 
+                            if (fs != null)
+                                TileImage = new Bitmap(fs);
+                        }
                     }
                 }
             }
@@ -161,6 +146,13 @@ namespace Knossos.NET.ViewModels
             {
                 Log.Add(Log.LogSeverity.Warning, "NebulaModCardViewModel.LoadImage", ex);
             }
+        }
+
+        public int CompareTo(NebulaModCardViewModel? other)
+        {
+            if (other == null)
+                return -1;
+            return Mod.SortMods(modJson, other.modJson);
         }
     }
 }

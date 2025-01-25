@@ -14,6 +14,14 @@ namespace Knossos.NET.ViewModels
 {
     public record MainViewMenuItem(ViewModelBase vm, string? iconRoute, string label, string tooltip);
 
+    public enum ModSortType
+    {
+        name,
+        release,
+        update,
+        unsorted
+    }
+
     /// <summary>
     /// Main Windows View Mode
     /// Everything starts here
@@ -70,35 +78,11 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal int buttomListRow = 1;
 
-
-        internal string sharedSearch = string.Empty;
-
+        public string sharedSearch = string.Empty;
         public string LatestNightly = string.Empty;
         public string LatestStable = string.Empty;
-
-        public enum SortType
-        {
-            name,
-            release,
-            update,
-            unsorted
-        }
-
-        private SortType _sortType = SortType.name; //do not use directly
-        internal SortType sharedSortType
-        {
-            get { return _sortType; }
-            set
-            {
-                if (_sortType != value)
-                {
-                    //change sort and update globalsettings value
-                    //to be saved at app close
-                    this.SetProperty(ref _sortType, value);
-                    Knossos.globalSettings.sortType = value;
-                }
-            }
-        }
+        public List<string> tagFilter { get; private set; } = new List<string>();
+        public bool tagFilterChanged = false;
 
         public MainWindowViewModel()
         {
@@ -273,11 +257,11 @@ namespace Knossos.NET.ViewModels
                 // Things to do on tab exit
                 if (InstalledModsView != null && CurrentViewModel == InstalledModsView) //Exiting the Play tab.
                 {
-                    sharedSearch = InstalledModsView.Search;
+                    InstalledModsView.CloseTab();
                 }
                 if (NebulaModsView != null &&  CurrentViewModel == NebulaModsView) //Exiting the Nebula tab.
                 {
-                    sharedSearch = NebulaModsView.Search;
+                    NebulaModsView.CloseTab();
                 }
                 if(GlobalSettingsView != null &&  CurrentViewModel == GlobalSettingsView) //Exiting the settings view
                 {
@@ -295,12 +279,11 @@ namespace Knossos.NET.ViewModels
                 //Run code when entering a new view
                 if (CurrentViewModel == InstalledModsView) //Play Tab
                 {
-                    InstalledModsView.Search = sharedSearch;
-                    InstalledModsView.ChangeSort(sharedSortType);
+                    InstalledModsView.OpenTab();
                 }
                 if (CurrentViewModel == NebulaModsView) //Nebula Mods
                 {
-                    NebulaModsView.OpenTab(sharedSearch, sharedSortType);
+                    NebulaModsView.OpenTab();
                 }
                 if (CurrentViewModel == DeveloperModView) //Dev Tab
                 {
@@ -488,10 +471,8 @@ namespace Knossos.NET.ViewModels
         {
             Dispatcher.UIThread.Invoke(() => {
                 IsMenuOpen = Knossos.globalSettings.mainMenuOpen;
-                sharedSortType = Knossos.globalSettings.sortType;
-                InstalledModsView?.ChangeSort(sharedSortType);
-                if(NebulaModsView != null)
-                    NebulaModsView.sortType = sharedSortType;
+                InstalledModsView?.ChangeSort(Knossos.globalSettings.sortType);
+                NebulaModsView?.ChangeSort(Knossos.globalSettings.sortType);
             });
         }
 
