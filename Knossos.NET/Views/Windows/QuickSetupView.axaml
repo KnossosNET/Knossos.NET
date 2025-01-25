@@ -29,15 +29,15 @@
 			<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >Welcome To Knossos.NET</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >This quick setup guide will help you through the basics of configuring the KnossosNET launcher for the first time. If you already know how to configure the launcher you can close this window.</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >Note, you can reopen this guide at any time, just go to the "Settings" tab and click the "Quick Setup Guide" button.</TextBlock>
-      <TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >If you ever need assistance with KnossosNET please ask on the Knossos Discord channel linked below.</TextBlock>
-      <Button Margin="20, 10" Command="{Binding OpenDiscordQuickSetup}">Discord Help for Knossos</Button>
+      <TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" >If you ever need assistance with KnossosNET please ask on the Discord channel linked below.</TextBlock>
+      <Button Margin="20, 10" Command="{Binding OpenDiscordQuickSetup}">Discord Help for KnossosNET</Button>
 		</StackPanel>
 		
 		<!--Page2-->
 		<StackPanel IsVisible="{Binding Page2}" Grid.Row="0" >
 			<StackPanel IsVisible="{Binding !IsPortableMode}">
 				<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >Setting up the library folder</TextBlock>
-				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">First, you must set a library folder. Go to the "Settings" tab and under the "KnossosNET" section click on the "Browse" button and choose or create a folder for Knossos to use. It is highly recommended to set this as an empty folder in a location with a large amount of available storage. Once you have set the folder be sure to click the "Save" button in the upper right corner of the "Settings" tab. </TextBlock>
+				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">First, you must set a library folder. Go to the "Settings" tab and under the "KnossosNET" section click on the "Browse" button and choose or create a folder for KnossosNET to use. It is highly recommended to set this as an empty folder in a location with a large amount of available storage. </TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">The KnossosNET library folder is where all game and mod data will be saved to. Make sure you always have space available on this drive before installing a new mod or update.</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">Current Library Folder</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" Text="{Binding LibraryPath}"></TextBlock>
@@ -45,8 +45,8 @@
 			</StackPanel>
 			<StackPanel IsVisible="{Binding IsPortableMode}">
 				<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >KnossosNET is running in portable mode</TextBlock>
-				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">This means KnossosNET settings and FSO pilots, settings and data are saved inside the 'kn_portable' folder, you can not set a library folder in this mode. </TextBlock>
-				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">If you ever need to stop using the portable mode move, rename or delete the 'kn_portable' folder</TextBlock>
+				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">This means KnossosNET settings and FSO pilots, settings and data are saved inside the 'kn_portable' folder, you cannot set a library folder in this mode. </TextBlock>
+				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">If you ever need to stop using the portable mode move, rename or delete the 'kn_portable' folder.</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">Current Library Folder</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" Text="{Binding LibraryPath}"></TextBlock>
 			</StackPanel>
@@ -91,8 +91,8 @@
 		<!--Page6-->
 		<StackPanel IsVisible="{Binding Page6}" Grid.Row="0" >
 			<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left">Finishing</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Finally, before launching a mod go to the "Settings" tab and configure video and audio settings, as well as any joysticks you may have installed. Always remember to click "Save" after changing any values.</TextBlock>
-			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">It is recommended to run in windowed mode at the same resolution as your system display. There is no need to enable the borderless mode, as windowed mode is already borderless at native resolution.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Finally, before launching a mod go to the "Settings" tab and configure video and audio settings, as well as any joysticks you may have installed.</TextBlock>
+      <!--<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">It is recommended to run in windowed mode at the same resolution as your system display. There is no need to enable the borderless mode, as windowed mode is already borderless at native resolution.</TextBlock>-->
 		</StackPanel>
 		
 		<!--Navigation-->
