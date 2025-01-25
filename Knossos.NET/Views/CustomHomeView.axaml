@@ -137,7 +137,7 @@
 							<Button Content="Details" Name="ButtonDetails" Classes="Option" CommandParameter="details"
 									Width="86" Command="{Binding HardcodedButtonCommand}">
 							</Button>
-							<Button Margin="5,0,0,0" Name="ButtonSettings" Classes="Settings" Content="Settings" CommandParameter="settings"
+							<Button Margin="5,0,0,0" Name="ButtonSettings" Classes="Settings" Content="Advanced" CommandParameter="settings"
 									Width="86" Command="{Binding HardcodedButtonCommand}">
 							</Button>
 						</WrapPanel>

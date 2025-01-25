@@ -221,7 +221,7 @@ namespace Knossos.NET.ViewModels
 
                 if (CustomLauncher.MenuDisplayGlobalSettingsEntry && GlobalSettingsView != null)
                 {
-                    MenuItems.Add(new MainViewMenuItem(GlobalSettingsView, "avares://Knossos.NET/Assets/general/menu_settings.png", "Options", "Change launcher and FSO engine settings"));
+                    MenuItems.Add(new MainViewMenuItem(GlobalSettingsView, "avares://Knossos.NET/Assets/general/menu_settings.png", "Settings", "Change launcher and FSO engine settings"));
                 }
 
                 if (CustomLauncher.MenuDisplayDebugEntry && DebugView != null)
