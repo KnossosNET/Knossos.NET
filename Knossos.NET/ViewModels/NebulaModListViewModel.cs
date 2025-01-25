@@ -71,6 +71,7 @@ namespace Knossos.NET.ViewModels
 
         public NebulaModListViewModel()
         {
+            LoadingAnimation.Animate = 1;
             CardsView = Mods.ToNotifyCollectionChangedSlim(SynchronizationContextCollectionEventDispatcher.Current);
         }
 
