@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
@@ -42,10 +40,6 @@ namespace Knossos.NET.ViewModels
                 }
             }
         }
-        /// <summary>
-        /// Placeholder tile image for mod cards
-        /// </summary>
-        public static Bitmap? placeholderTileImage { get; private set; }
 
         //The actual collection were the mods are
         private ObservableList<ModCardViewModel> Mods = new ObservableList<ModCardViewModel>();
@@ -56,7 +50,6 @@ namespace Knossos.NET.ViewModels
         {
             LoadingAnimation = new LoadingIconViewModel();
             CardsView = Mods.ToNotifyCollectionChangedSlim(SynchronizationContextCollectionEventDispatcher.Current);
-            placeholderTileImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
         }
 
         public void ApplyTagFilter(int tagIndex)
