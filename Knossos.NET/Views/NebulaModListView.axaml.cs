@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Knossos.NET.Classes;
 using Knossos.NET.ViewModels;
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -142,7 +143,9 @@ namespace Knossos.NET.Views
                     {
                         foreach (var tag in tags.Select((x, i) => new { Value = x, Index = i }))
                         {
-                            var button = new Button { Content = tag.Value.Replace("_", " "), Tag = tag.Index, Width = 150, Margin = new Thickness(2) };
+                            TextInfo myTI = new CultureInfo("en-US", false).TextInfo;
+                            var displayName = myTI.ToTitleCase(tag.Value.Replace("_", " "));
+                            var button = new Button { Content = displayName, Tag = tag.Index, Width = 150, Margin = new Thickness(2) };
                             button.Click += (_, __) =>
                             {
                                 //This code runs when the button is clicked

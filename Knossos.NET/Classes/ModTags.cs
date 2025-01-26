@@ -148,7 +148,11 @@ namespace Knossos.NET.Classes
         /// <param name="mod"></param>
         public static void AddModTagsRuntime(Mod? mod)
         {
-            if(mod == null || mod.id.ToLower() == "fs2") return;
+            if(mod == null) return;
+            if(mod.id.ToLower() == "fs2")
+            {
+                AddModTag(mod.id, Tags.Retail_FS2.ToString());
+            }
             if(mod.parent == null)
             {
                 AddModTag(mod.id,Tags.Total_Conversion.ToString());
