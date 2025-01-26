@@ -226,7 +226,7 @@ namespace Knossos.NET.Classes
             AddModTag("frontlines", Tags.FS1_MOD.ToString());
             AddModTag("jad", Tags.FS2_MOD.ToString());
 
-            AddModTag("BTA_Standalone", Tags.FS2_MOD.ToString());
+            AddModTag("BTA_Standalone", Tags.Total_Conversion.ToString());
             AddModTag("BtA", Tags.FS2_MOD.ToString());
             AddModTag("BtA", Tags.TC_MOD.ToString());
 
