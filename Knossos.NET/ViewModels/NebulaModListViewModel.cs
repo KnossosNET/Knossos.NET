@@ -83,7 +83,6 @@ namespace Knossos.NET.ViewModels
                 if(tags.Count() > tagIndex)
                 {
                     MainWindowViewModel.Instance.tagFilter.Add(tags[tagIndex]);
-                    MainWindowViewModel.Instance.tagFilterChanged = true;
                 }
                 ApplyFilters();
             }
@@ -97,7 +96,6 @@ namespace Knossos.NET.ViewModels
                 if (tags.Count() > tagIndex)
                 {
                     MainWindowViewModel.Instance.tagFilter.Remove(tags[tagIndex]);
-                    MainWindowViewModel.Instance.tagFilterChanged = true;
                 }
                 ApplyFilters();
             }
@@ -146,13 +144,16 @@ namespace Knossos.NET.ViewModels
                     ShowTiles = false;
                     if (MainWindowViewModel.Instance != null)
                     {
-                        Search = MainWindowViewModel.Instance.sharedSearch;
-                        if (MainWindowViewModel.Instance.tagFilterChanged)
+                        if (Search != MainWindowViewModel.Instance.sharedSearch)
+                        {
+                            Search = MainWindowViewModel.Instance.sharedSearch;
+                        }
+                        else
                         {
                             ApplyFilters();
-                            MainWindowViewModel.Instance.tagFilterChanged = false;
                         }
                     }
+                    
                     ChangeSort(Knossos.globalSettings.sortType);
                     Parallel.ForEach(Mods, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async card =>
                     {
@@ -173,6 +174,10 @@ namespace Knossos.NET.ViewModels
             {
                 MainWindowViewModel.Instance.sharedSearch = Search;
             }
+            Parallel.ForEach(Mods, new ParallelOptions { MaxDegreeOfParallelism = 4 }, card =>
+            {
+                card.Visible = false;
+            });
         }
 
         /// <summary>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
@@ -40,6 +42,10 @@ namespace Knossos.NET.ViewModels
                 }
             }
         }
+        /// <summary>
+        /// Placeholder tile image for mod cards
+        /// </summary>
+        public static Bitmap? placeholderTileImage { get; private set; }
 
         //The actual collection were the mods are
         private ObservableList<ModCardViewModel> Mods = new ObservableList<ModCardViewModel>();
@@ -50,6 +56,7 @@ namespace Knossos.NET.ViewModels
         {
             LoadingAnimation = new LoadingIconViewModel();
             CardsView = Mods.ToNotifyCollectionChangedSlim(SynchronizationContextCollectionEventDispatcher.Current);
+            placeholderTileImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
         }
 
         public void ApplyTagFilter(int tagIndex)
@@ -60,7 +67,6 @@ namespace Knossos.NET.ViewModels
                 if (tags.Count() > tagIndex)
                 {
                     MainWindowViewModel.Instance.tagFilter.Add(tags[tagIndex]);
-                    MainWindowViewModel.Instance.tagFilterChanged = true;
                 }
                 ApplyFilters();
             }
@@ -74,7 +80,6 @@ namespace Knossos.NET.ViewModels
                 if (tags.Count() > tagIndex)
                 {
                     MainWindowViewModel.Instance.tagFilter.Remove(tags[tagIndex]);
-                    MainWindowViewModel.Instance.tagFilterChanged = true;
                 }
                 ApplyFilters();
             }
@@ -117,11 +122,13 @@ namespace Knossos.NET.ViewModels
         {
             if (MainWindowViewModel.Instance != null)
             {
-                Search = MainWindowViewModel.Instance.sharedSearch;
-                if (MainWindowViewModel.Instance.tagFilterChanged)
+                if (Search != MainWindowViewModel.Instance.sharedSearch)
+                {
+                    Search = MainWindowViewModel.Instance.sharedSearch;
+                }
+                else
                 {
                     ApplyFilters();
-                    MainWindowViewModel.Instance.tagFilterChanged = false;
                 }
             }
         }
@@ -130,6 +137,10 @@ namespace Knossos.NET.ViewModels
         {
             if (MainWindowViewModel.Instance != null)
                 MainWindowViewModel.Instance.sharedSearch = Search;
+            Parallel.ForEach(Mods, new ParallelOptions { MaxDegreeOfParallelism = 4 }, card =>
+            {
+                card.Visible = false;
+            });
         }
 
         /// <summary>

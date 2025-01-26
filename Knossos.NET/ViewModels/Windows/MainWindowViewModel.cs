@@ -9,6 +9,8 @@ using System.Linq;
 using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using System.Threading;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 
 namespace Knossos.NET.ViewModels
 {
@@ -82,7 +84,10 @@ namespace Knossos.NET.ViewModels
         public string LatestNightly = string.Empty;
         public string LatestStable = string.Empty;
         public List<string> tagFilter { get; private set; } = new List<string>();
-        public bool tagFilterChanged = false;
+        /// <summary>
+        /// Placeholder tile image for mod cards
+        /// </summary>
+        public Bitmap? placeholderTileImage;
 
         public MainWindowViewModel()
         {
@@ -104,6 +109,7 @@ namespace Knossos.NET.ViewModels
             }
             if (!CustomLauncher.IsCustomMode)
             {
+                placeholderTileImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
                 InstalledModsView = new ModListViewModel();
                 NebulaModsView = new NebulaModListViewModel();
                 FsoBuildsView = new FsoBuildsViewModel();
