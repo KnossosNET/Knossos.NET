@@ -142,6 +142,7 @@ namespace Knossos.NET.ViewModels
                 Task.Run(() =>
                 {
                     ShowTiles = false;
+                    LoadingAnimation.Animate = 1;
                     if (MainWindowViewModel.Instance != null)
                     {
                         if (Search != MainWindowViewModel.Instance.sharedSearch)
@@ -159,6 +160,7 @@ namespace Knossos.NET.ViewModels
                     {
                         await card.LoadImage();
                     });
+                    LoadingAnimation.Animate = 0;
                     ShowTiles = true;
                 });
             }
