@@ -78,7 +78,7 @@
 				<ItemsControl IsVisible="{Binding !Sorting}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding CardsView}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
-							<v:ModCardView Margin="5" Content="{Binding}"/>
+							<v:ModCardView Margin="2.5" Content="{Binding}"/>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 					<ItemsControl.ItemsPanel>
