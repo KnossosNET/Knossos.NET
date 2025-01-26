@@ -35,6 +35,7 @@ namespace Knossos.NET.Models
             public string? pass { get; set; }
             public bool logged { get; set; }
             public List<NewerModVersionsData> NewerModsVersions { get; set; }
+            public NebulaModTagJson[] modtags { get; set; }
 
 
             public NebulaSettings()
@@ -44,6 +45,7 @@ namespace Knossos.NET.Models
                 pass = null;
                 logged = false;
                 NewerModsVersions = new List<NewerModVersionsData>();
+                modtags = new NebulaModTagJson[0];
             }
         }
 
@@ -58,6 +60,14 @@ namespace Knossos.NET.Models
             public string modVersion { get; set; }
             public string modString { get; set; }
         }
+
+        public struct NebulaModTagJson
+        {
+            public string modid { get; set; }
+            public string[] tags { get; set; }
+        }
+
+        private readonly static string ModTagsURL = "https://raw.githubusercontent.com/KnossosNET/KNet-General-Resources-Repo/main/modtags.json";
 
         //https://cf.fsnebula.org/storage/repo.json
         //https://dl.fsnebula.org/storage/repo.json
@@ -174,6 +184,27 @@ namespace Knossos.NET.Models
                 var updates = await InitialRepoLoad().ConfigureAwait(false);
                 if (updates != null && updates.Any())
                 {
+                    /**************************************************************************************************************************/
+                    //If we have a repo update lets update modtags as well
+                    //This part of the code should be replaced once modtags are integrated into nebula
+                    if (!CustomLauncher.IsCustomMode)
+                    {
+                        try
+                        {
+                            HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(ModTagsURL).ConfigureAwait(false);
+                            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            var tagsRepo = JsonSerializer.Deserialize<NebulaModTagJson[]>(json)!;
+                            if (tagsRepo != null)
+                            {
+                                settings.modtags = tagsRepo;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Error, "Nebula.Trinity()", ex);
+                        }
+                    }
+                    /**************************************************************************************************************************/
                     SaveSettings();
                     if (displayUpdates)
                     {
@@ -191,6 +222,17 @@ namespace Knossos.NET.Models
                 if (userIsLoggedIn && !Knossos.inSingleTCMode || userIsLoggedIn && Knossos.inSingleTCMode && CustomLauncher.MenuDisplayNebulaLoginEntry)
                 {
                     await LoadPrivateMods(cancellationToken).ConfigureAwait(false);
+                }
+                //Load mod tags
+                if (!CustomLauncher.IsCustomMode)
+                {
+                    foreach (var modtag in settings.modtags)
+                    {
+                        foreach (var tag in modtag.tags)
+                        {
+                            ModTags.AddModTag(modtag.modid, tag);
+                        }
+                    }
                 }
                 repoLoaded = true;
             }
