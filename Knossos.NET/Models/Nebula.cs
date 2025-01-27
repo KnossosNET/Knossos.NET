@@ -64,6 +64,7 @@ namespace Knossos.NET.Models
         public struct NebulaModTagJson
         {
             public string modid { get; set; }
+            public string[] filters { get; set; }
             public string[] tags { get; set; }
         }
 
@@ -228,9 +229,19 @@ namespace Knossos.NET.Models
                 {
                     foreach (var modtag in settings.modtags)
                     {
-                        foreach (var tag in modtag.tags)
+                        if (modtag.filters != null)
                         {
-                            ModTags.AddModTag(modtag.modid, tag);
+                            foreach (var filter in modtag.filters)
+                            {
+                                ModTags.AddModFilter(modtag.modid, filter);
+                            }
+                        }
+                        if (modtag.tags != null)
+                        {
+                            foreach (var tag in modtag.tags)
+                            {
+                                ModTags.AddModTag(modtag.modid, tag);
+                            }
                         }
                     }
                 }

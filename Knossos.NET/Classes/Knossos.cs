@@ -703,10 +703,10 @@ namespace Knossos.NET
             if (globalSettings.basePath != null)
             {
                 //Clear Mod Tags
-                ModTags.ClearTags();
+                ModTags.Clear();
                 MainWindowViewModel.Instance?.tagFilter.Clear();
                 //Load Hardcoded tags
-                ModTags.AddHardcodedModTags();
+                ModTags.AddHardcodedModFilters();
 
                 await FolderSearchRecursive(globalSettings.basePath, isQuickLaunch).ConfigureAwait(false);
 

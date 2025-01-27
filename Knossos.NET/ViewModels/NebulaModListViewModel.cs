@@ -79,7 +79,7 @@ namespace Knossos.NET.ViewModels
         {
             if (MainWindowViewModel.Instance != null)
             {
-                var tags = ModTags.GetListAllTags();
+                var tags = ModTags.GetListAllFilters();
                 if(tags.Count() > tagIndex)
                 {
                     MainWindowViewModel.Instance.tagFilter.Add(tags[tagIndex]);
@@ -92,7 +92,7 @@ namespace Knossos.NET.ViewModels
         {
             if (MainWindowViewModel.Instance != null)
             {
-                var tags = ModTags.GetListAllTags();
+                var tags = ModTags.GetListAllFilters();
                 if (tags.Count() > tagIndex)
                 {
                     MainWindowViewModel.Instance.tagFilter.Remove(tags[tagIndex]);
@@ -111,16 +111,17 @@ namespace Knossos.NET.ViewModels
                 {
                     if (card.Name == null || !card.Name.Contains(Search, StringComparison.CurrentCultureIgnoreCase))
                     {
-                        visibility = false;
+                        //if it dosent passes title search check tags
+                        visibility = ModTags.IsTagPresentInModID(card.ID!, search);
                     }
                 }
-                //Tags
+                //Filters
                 if (visibility && MainWindowViewModel.Instance != null && MainWindowViewModel.Instance.tagFilter.Any())
                 {
                     visibility = false;
-                    foreach (var tag in MainWindowViewModel.Instance.tagFilter)
+                    foreach (var filter in MainWindowViewModel.Instance.tagFilter)
                     {
-                        if(card.ID != null && ModTags.IsTagPresentInModID(card.ID,tag))
+                        if(card.ID != null && ModTags.IsFilterPresentInModID(card.ID, filter))
                         {
                             visibility = true;
                             break;
@@ -208,7 +209,7 @@ namespace Knossos.NET.ViewModels
             if (modCard == null)
             {
                 var card = new NebulaModCardViewModel(modJson);
-                ModTags.AddModTagsRuntime(modJson);
+                ModTags.AddModFiltersRuntime(modJson);
                 Mods.Add(card);
                 Mods.Sort();
                 if(IsTabOpen)
@@ -241,7 +242,7 @@ namespace Knossos.NET.ViewModels
                 }
                 foreach(var mod in modList)
                 {
-                    ModTags.AddModTagsRuntime(mod);
+                    ModTags.AddModFiltersRuntime(mod);
                 }
                 isLoading = false;
             });

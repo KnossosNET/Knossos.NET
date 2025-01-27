@@ -71,7 +71,7 @@ namespace Knossos.NET.Views
                 {
                     if (MainWindowViewModel.Instance.tagFilter.Any())
                     {
-                        var tags = ModTags.GetListAllTags();
+                        var tags = ModTags.GetListAllFilters();
                         foreach (var item in filterPanel.Children)
                         {
                             if (item is Button button && button.Tag is int tagIndex)
@@ -140,7 +140,7 @@ namespace Knossos.NET.Views
                 if (filterPanel != null)
                 {
                     filterPanel.Children.Clear();
-                    var tags = ModTags.GetListAllTags();
+                    var tags = ModTags.GetListAllFilters();
                     if (tags != null && tags.Any())
                     {
                         foreach (var tag in tags.Select((x, i) => new { Value = x, Index = i }))
