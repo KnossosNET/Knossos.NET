@@ -97,10 +97,10 @@ public partial class CustomHomeView : UserControl
                             button.Background = SolidColorBrush.Parse(config.BackgroundHexColor);
                         if (config.ForegroundHexColor != null)
                             button.Foreground = SolidColorBrush.Parse(config.ForegroundHexColor);
-                        if (config.BorderHexColer != null)
-                            button.BorderBrush = SolidColorBrush.Parse(config.BorderHexColer);
+                        if (config.BorderHexColor != null)
+                            button.BorderBrush = SolidColorBrush.Parse(config.BorderHexColor);
 
-                        if (config.MouseOverBackgroundHexColor != null || config.MouseOverForegroundHexColor != null || config.MouseOverBorderHexColer != null)
+                        if (config.MouseOverBackgroundHexColor != null || config.MouseOverForegroundHexColor != null || config.MouseOverBorderHexColor != null)
                         {
                             Style style = new Style(x => x.OfType<Button>().Class(":pointerover").Template().OfType<ContentPresenter>());
                             if(config.MouseOverBackgroundHexColor != null)
@@ -111,9 +111,9 @@ public partial class CustomHomeView : UserControl
                             {
                                 style.Setters.Add(new Setter(Button.ForegroundProperty, SolidColorBrush.Parse(config.MouseOverForegroundHexColor)));
                             }
-                            if (config.MouseOverBorderHexColer != null)
+                            if (config.MouseOverBorderHexColor != null)
                             {
-                                style.Setters.Add(new Setter(Button.BorderBrushProperty, SolidColorBrush.Parse(config.MouseOverBorderHexColer)));
+                                style.Setters.Add(new Setter(Button.BorderBrushProperty, SolidColorBrush.Parse(config.MouseOverBorderHexColor)));
                             }
                             button.Styles.Add(style);
                         }

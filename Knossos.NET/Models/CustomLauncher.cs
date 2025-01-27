@@ -30,10 +30,10 @@ namespace Knossos.NET.Models
         public int? FontSize { get; set; } = null;
         public string? BackgroundHexColor { get; set; } = null; //#CD3632 hex color value
         public string? ForegroundHexColor { get; set; } = null; //#CD3632 hex color value
-        public string? BorderHexColer { get; set; } = null; //#CD3632 hex color value
+        public string? BorderHexColor { get; set; } = null; //#CD3632 hex color value
         public string? MouseOverBackgroundHexColor { get; set; } = null; //#CD3632 hex color value
         public string? MouseOverForegroundHexColor { get; set; } = null; //#CD3632 hex color value
-        public string? MouseOverBorderHexColer { get; set; } = null; //#CD3632 hex color value
+        public string? MouseOverBorderHexColor { get; set; } = null; //#CD3632 hex color value
     }
 
     public struct CustomMenuButton
