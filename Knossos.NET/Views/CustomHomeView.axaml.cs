@@ -1,6 +1,8 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Styling;
 using Knossos.NET.Converters;
 using Knossos.NET.Models;
 using System;
@@ -85,7 +87,7 @@ public partial class CustomHomeView : UserControl
                     var button = this.FindControl<Button>(config.ButtonID!);
                     if (button != null)
                     {
-                        if (config.DisplayText != null)
+                        if (config.DisplayText != null && config.ButtonID != "ButtonLaunchAdvanced")
                             button.Content = config.DisplayText;
                         if (config.ToolTip != null)
                             ToolTip.SetTip(button, config.ToolTip);
@@ -97,6 +99,24 @@ public partial class CustomHomeView : UserControl
                             button.Foreground = SolidColorBrush.Parse(config.ForegroundHexColor);
                         if (config.BorderHexColer != null)
                             button.BorderBrush = SolidColorBrush.Parse(config.BorderHexColer);
+
+                        if (config.MouseOverBackgroundHexColor != null || config.MouseOverForegroundHexColor != null || config.MouseOverBorderHexColer != null)
+                        {
+                            Style style = new Style(x => x.OfType<Button>().Class(":pointerover").Template().OfType<ContentPresenter>());
+                            if(config.MouseOverBackgroundHexColor != null)
+                            {
+                                style.Setters.Add(new Setter(Button.BackgroundProperty, SolidColorBrush.Parse(config.MouseOverBackgroundHexColor)));
+                            }
+                            if(config.MouseOverForegroundHexColor != null)
+                            {
+                                style.Setters.Add(new Setter(Button.ForegroundProperty, SolidColorBrush.Parse(config.MouseOverForegroundHexColor)));
+                            }
+                            if (config.MouseOverBorderHexColer != null)
+                            {
+                                style.Setters.Add(new Setter(Button.BorderBrushProperty, SolidColorBrush.Parse(config.MouseOverBorderHexColer)));
+                            }
+                            button.Styles.Add(style);
+                        }
                     }
                     else
                     {
