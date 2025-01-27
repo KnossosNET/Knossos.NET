@@ -127,12 +127,15 @@ namespace Knossos.NET.Models
             {
                 bool displayUpdates = settings.NewerModsVersions.Any() && !CustomLauncher.IsCustomMode ? true : false;
                 var webEtag = await KnUtils.GetUrlFileEtag(repoUrl).ConfigureAwait(false);
+                var neb_text_downloading = CustomLauncher.IsCustomMode ? CustomLauncher.NebulaTextDownloading : "Downloading repo_minimal.json";
+                var neb_text_uptodate = CustomLauncher.IsCustomMode ? CustomLauncher.NebulaTextUpToDate : "Nebula: repo_minimal.json is up to date!";
+                var neb_text_tooltip = CustomLauncher.IsCustomMode ? CustomLauncher.NebulaTextToolTip : "The repo_minimal.json file contains info on all the mods available in Nebula, without this you will not be able to install new mods or engine builds";
                 if (!File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal.json") || settings.etag != webEtag)
                 {
                     //Download the repo_minimal.json
                     if (TaskViewModel.Instance != null)
                     {
-                        var result = await Dispatcher.UIThread.InvokeAsync(async()=>await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal_temp.json", "Downloading repo_minimal.json", true, "The repo_minimal.json file contains info on all the mods available in Nebula, without this you will not be able to install new mods or engine builds"), DispatcherPriority.Background).ConfigureAwait(false);
+                        var result = await Dispatcher.UIThread.InvokeAsync(async()=>await TaskViewModel.Instance.AddFileDownloadTask(repoUrl, KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "repo_minimal_temp.json", neb_text_downloading, true, neb_text_tooltip), DispatcherPriority.Background).ConfigureAwait(false);
 
                         if (cancellationToken!.IsCancellationRequested)
                         {
@@ -162,7 +165,7 @@ namespace Knossos.NET.Models
                 else
                 {
                     //No update is needed
-                    Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask("Nebula: repo_minimal.json is up to date!"), DispatcherPriority.Background);
+                    Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask(neb_text_uptodate, neb_text_tooltip), DispatcherPriority.Background);
                     Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "repo_minimal.json is up to date!");
                     displayUpdates = false;
                     repoLoaded = true;
@@ -880,7 +883,7 @@ namespace Knossos.NET.Models
                     }
                     else
                     {
-                        Log.Add(Log.LogSeverity.Error, "Nebula.UploadLog", "Error uploading log to nebula, reason: " + reply.Value.reason);
+                        Log.Add(Log.LogSeverity.Error, "Nebula.UploadLog", "Error uploading log to Nebula, reason: " + reply.Value.reason);
                     }
                 }
             }
@@ -1248,7 +1251,7 @@ namespace Knossos.NET.Models
                             {
                                 members += item.user + "(" + item.role.ToString() + ") ";
                             }
-                            Log.Add(Log.LogSeverity.Information, "Nebula.GetTeamMembers", "Mod id: " + modid + " members: " + members);
+                            Log.Add(Log.LogSeverity.Information, "Nebula.GetTeamMembers", "Mod ID: " + modid + " members: " + members);
                         }
                     }
                     else
