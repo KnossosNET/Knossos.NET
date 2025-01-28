@@ -704,6 +704,8 @@ namespace Knossos.NET
             {
                 await FolderSearchRecursive(globalSettings.basePath, isQuickLaunch).ConfigureAwait(false);
 
+                Log.Add(Log.LogSeverity.Information, "Knossos.LoadBasePath()", "Loaded: " + installedMods.Count() +" installed mods or tcs and " + engineBuilds.Count() + " engine builds." );
+
                 if (!isQuickLaunch)
                 {
                     //Sort/Re-sort installed mods
