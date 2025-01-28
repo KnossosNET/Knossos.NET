@@ -224,6 +224,7 @@ namespace Knossos.NET.Models
                 {
                     await LoadPrivateMods(cancellationToken).ConfigureAwait(false);
                 }
+                int filters = 0, tags = 0;
                 //Load mod tags
                 if (!CustomLauncher.IsCustomMode)
                 {
@@ -231,20 +232,24 @@ namespace Knossos.NET.Models
                     {
                         if (modtag.filters != null)
                         {
-                            foreach (var filter in modtag.filters)
+                            foreach (var f in modtag.filters)
                             {
-                                ModTags.AddModFilter(modtag.modid, filter);
+                                ModTags.AddModFilter(modtag.modid, f);
+                                filters++;
                             }
                         }
                         if (modtag.tags != null)
                         {
-                            foreach (var tag in modtag.tags)
+                            foreach (var t in modtag.tags)
                             {
-                                ModTags.AddModTag(modtag.modid, tag);
+                                ModTags.AddModTag(modtag.modid, t);
+                                tags++;
                             }
                         }
                     }
                 }
+
+                Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "ModTags has loaded: " + filters + " filters (" + ModTags.GetListAllFilters().Count() + " unique) and " + tags + " mod tags.");
                 repoLoaded = true;
             }
             catch (TaskCanceledException)

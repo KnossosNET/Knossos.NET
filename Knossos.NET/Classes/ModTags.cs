@@ -83,7 +83,7 @@ namespace Knossos.NET.Classes
             Asset_Pack,
             Demo,
             Multiplayer,
-            Testing
+            Test
         }
 
         /// <summary>
@@ -272,14 +272,14 @@ namespace Knossos.NET.Classes
             AddModFilter("VRGC", Filters.VR_MOD.ToString());
             AddModFilter("CP_m", Filters.Utility.ToString());
             AddModFilter("CP_M_FS1", Filters.Utility.ToString());
-            AddModFilter("mlteset", Filters.Testing.ToString());
-            AddModFilter("ParticlesStressTesting", Filters.Testing.ToString());
-            AddModFilter("STIG", Filters.Testing.ToString());
-            AddModFilter("qaz_1", Filters.Testing.ToString());
-            AddModFilter("itsatestnumbnuts", Filters.Testing.ToString());
-            AddModFilter("FSPcustom", Filters.Testing.ToString());
-            AddModFilter("Stress_Test_Multi_With_Silly_mission", Filters.Testing.ToString());
-            AddModFilter("UITest", Filters.Testing.ToString());
+            AddModFilter("mlteset", Filters.Test.ToString());
+            AddModFilter("ParticlesStressTesting", Filters.Test.ToString());
+            AddModFilter("STIG", Filters.Test.ToString());
+            AddModFilter("qaz_1", Filters.Test.ToString());
+            AddModFilter("itsatestnumbnuts", Filters.Test.ToString());
+            AddModFilter("FSPcustom", Filters.Test.ToString());
+            AddModFilter("Stress_Test_Multi_With_Silly_mission", Filters.Test.ToString());
+            AddModFilter("UITest", Filters.Test.ToString());
         }
 
     }
