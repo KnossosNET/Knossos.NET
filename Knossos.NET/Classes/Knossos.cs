@@ -423,12 +423,22 @@ namespace Knossos.NET
 
                             if (releaseAsset != null && releaseAsset.browser_download_url != null)
                             {
+                                if(globalSettings.ignoredLauncherUpdates.Contains(latest.tag_name))
+                                {
+                                    Log.Add(Log.LogSeverity.Information, "Knossos.CheckKnetUpdates()", "Launcher update: " + latest.tag_name + " is available, but it was skipped because it is on the ignore list.");
+                                    return;
+                                }
                                 if (!forceUpdateDownload && !globalSettings.autoUpdate)
                                 {
                                     MessageBox.MessageBoxResult result = MessageBox.MessageBoxResult.Cancel;
                                     await Dispatcher.UIThread.Invoke(async () => {
-                                        result = await MessageBox.Show(null, "Knossos.NET " + latest.tag_name + ":\n" + latest.body + "\n\n\nIf you continue Knossos.NET will be re-started after download.", "An update is available", MessageBox.MessageBoxButtons.ContinueCancel);
+                                        result = await MessageBox.Show(null, "Knossos.NET " + latest.tag_name + ":\n" + latest.body + "\n\n\nIf you continue Knossos.NET will be re-started after download.", "An update is available", MessageBox.MessageBoxButtons.ContinueCancelSkipVersion);
                                     }).ConfigureAwait(false);
+                                    if(result == MessageBox.MessageBoxResult.SkipVersion)
+                                    {
+                                        globalSettings.ignoredLauncherUpdates.Add(latest.tag_name);
+                                        globalSettings.Save();
+                                    }
                                     if (result != MessageBox.MessageBoxResult.Continue)
                                     {
                                         return;
