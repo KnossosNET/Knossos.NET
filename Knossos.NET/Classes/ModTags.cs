@@ -24,12 +24,25 @@ namespace Knossos.NET.Classes
                 Filters.Remove("fs2_mod");
             if (filter.ToLower() == "fs2_mod" && FilterExist("fs1_mod"))
                 return;
-            Filters.Add(filter.ToLower());
+            Filters.Add(filter);
         }
 
+        /// <summary>
+        /// Check if a filter exist in this modid filterlist
+        /// Case insensitive
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns>true/false</returns>
         public bool FilterExist(string filter)
         {
-            return Filters.Contains(filter.ToLower());
+            for (int i = 0; i < Filters.Count(); i++)
+            {
+                if(string.Compare(Filters[i], filter, true) == 0)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public List<string> GetFilters()
@@ -39,15 +52,25 @@ namespace Knossos.NET.Classes
 
         public void AddTag(string tag)
         {
-            Tags.Add(tag.ToLower());
+            Tags.Add(tag);
         }
 
+        /// <summary>
+        /// Check if a tag exist in this modid taglist
+        /// Case insensitive
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns>true/false</returns>
         public bool TagExist(string tag)
         {
-            if(Tags.Any())
-                return Tags.Contains(tag.ToLower());
-            else
-                return false;
+            for (int i = 0; i < Tags.Count(); i++)
+            {
+                if (string.Compare(Tags[i], tag, true) == 0)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public string ModID { get; private set; } = string.Empty;
@@ -214,6 +237,7 @@ namespace Knossos.NET.Classes
             if(mod.id.ToLower() == "fs2")
             {
                 AddModFilter(mod.id, Filters.Retail_FS2.ToString());
+                return;
             }
             if(mod.parent == null)
             {
@@ -237,49 +261,6 @@ namespace Knossos.NET.Classes
                     AddModFilter(mod.id, Filters.TC_MOD.ToString());
                 }
             }
-        }
-
-        /// <summary>
-        /// List of harcoded filters, this is temporal until tags are implemented in nebula
-        /// </summary>
-        public static void AddHardcodedModFilters()
-        {
-            AddModFilter("FS2", Filters.Retail_FS2.ToString());
-            AddModFilter("fsport", Filters.FS1_MOD.ToString());
-            AddModFilter("fsport-mediavps", Filters.FS1_MOD.ToString());
-            AddModFilter("fsport-mediavps", Filters.Asset_Pack.ToString());
-            AddModFilter("str", Filters.FS1_MOD.ToString());
-            AddModFilter("denebiii", Filters.FS1_MOD.ToString());
-            AddModFilter("awakenings", Filters.FS1_MOD.ToString());
-            AddModFilter("the_aftermath_ribos", Filters.FS1_MOD.ToString());
-            AddModFilter("RetreatfromDenebCinematic", Filters.FS1_MOD.ToString());
-            AddModFilter("tombaugh_attack_cinematic", Filters.FS1_MOD.ToString());
-            AddModFilter("MjnMHs", Filters.Dependency.ToString());
-            AddModFilter("SCPUI", Filters.Dependency.ToString());
-            AddModFilter("MVPS", Filters.Asset_Pack.ToString());
-            AddModFilter("BWO_Demo", Filters.Demo.ToString());
-            AddModFilter("fs2_demo", Filters.Demo.ToString());
-            AddModFilter("fs2_org_demo", Filters.Demo.ToString());
-            AddModFilter("WCIV_Demo", Filters.Demo.ToString());
-            AddModFilter("fs1coopup", Filters.FS1_MOD.ToString());
-            AddModFilter("fs1coopup", Filters.Multiplayer.ToString());
-            AddModFilter("fs2coopup", Filters.Multiplayer.ToString());
-            AddModFilter("strcoopup", Filters.FS1_MOD.ToString());
-            AddModFilter("strcoopup", Filters.Multiplayer.ToString());
-            AddModFilter("frontlines", Filters.FS1_MOD.ToString());
-            AddModFilter("vr_mvps", Filters.VR_MOD.ToString());
-            AddModFilter("vr_mvps_fsport", Filters.VR_MOD.ToString());
-            AddModFilter("VRGC", Filters.VR_MOD.ToString());
-            AddModFilter("CP_m", Filters.Utility.ToString());
-            AddModFilter("CP_M_FS1", Filters.Utility.ToString());
-            AddModFilter("mlteset", Filters.Test.ToString());
-            AddModFilter("ParticlesStressTesting", Filters.Test.ToString());
-            AddModFilter("STIG", Filters.Test.ToString());
-            AddModFilter("qaz_1", Filters.Test.ToString());
-            AddModFilter("itsatestnumbnuts", Filters.Test.ToString());
-            AddModFilter("FSPcustom", Filters.Test.ToString());
-            AddModFilter("Stress_Test_Multi_With_Silly_mission", Filters.Test.ToString());
-            AddModFilter("UITest", Filters.Test.ToString());
         }
 
     }

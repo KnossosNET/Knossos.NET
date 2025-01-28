@@ -705,8 +705,6 @@ namespace Knossos.NET
                 //Clear Mod Tags
                 ModTags.Clear();
                 MainWindowViewModel.Instance?.tagFilter.Clear();
-                //Load Hardcoded tags
-                ModTags.AddHardcodedModFilters();
 
                 await FolderSearchRecursive(globalSettings.basePath, isQuickLaunch).ConfigureAwait(false);
 
