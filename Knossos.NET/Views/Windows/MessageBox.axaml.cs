@@ -18,7 +18,8 @@ namespace Knossos.NET.Views
             Details,
             DetailsOKCancel,
             DetailsContinueCancel,
-            DontWarnAgainOK
+            DontWarnAgainOK,
+            ContinueCancelSkipVersion,
         }
 
         public enum MessageBoxResult
@@ -29,7 +30,8 @@ namespace Knossos.NET.Views
             No,
             Continue,
             Details,
-            DontWarnAgain
+            DontWarnAgain,
+            SkipVersion
         }
 
         public MessageBox()
@@ -84,12 +86,12 @@ namespace Knossos.NET.Views
                 AddButton("No", MessageBoxResult.No, true, "Cancel");
             }
 
-            if (buttons == MessageBoxButtons.Continue || buttons == MessageBoxButtons.ContinueCancel || buttons == MessageBoxButtons.DetailsContinueCancel)
+            if (buttons == MessageBoxButtons.Continue || buttons == MessageBoxButtons.ContinueCancel || buttons == MessageBoxButtons.DetailsContinueCancel || buttons == MessageBoxButtons.ContinueCancelSkipVersion)
             {
                 AddButton("Continue", MessageBoxResult.Continue, false, "Accept");
             }
 
-            if (buttons == MessageBoxButtons.OKCancel || buttons == MessageBoxButtons.YesNoCancel || buttons == MessageBoxButtons.ContinueCancel || buttons == MessageBoxButtons.DetailsOKCancel || buttons == MessageBoxButtons.DetailsContinueCancel)
+            if (buttons == MessageBoxButtons.OKCancel || buttons == MessageBoxButtons.YesNoCancel || buttons == MessageBoxButtons.ContinueCancel || buttons == MessageBoxButtons.DetailsOKCancel || buttons == MessageBoxButtons.DetailsContinueCancel || buttons == MessageBoxButtons.ContinueCancelSkipVersion)
             {
                 AddButton("Cancel", MessageBoxResult.Cancel, true, "Cancel");
             }
@@ -103,6 +105,11 @@ namespace Knossos.NET.Views
             {
                 AddButton("OK", MessageBoxResult.OK, true, "Accept");
                 AddButton("Don't warn again", MessageBoxResult.DontWarnAgain, false, "Option", 150);
+            }
+
+            if (buttons == MessageBoxButtons.ContinueCancelSkipVersion)
+            {
+                AddButton("Skip this version", MessageBoxResult.SkipVersion, false, "Option", 150);
             }
 
             var tcs = new TaskCompletionSource<MessageBoxResult>();
