@@ -15,15 +15,34 @@
 	<Grid RowDefinitions="Auto,*">
 		<Grid Grid.Row="0">
 			<WrapPanel Margin="10" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
-				<Button ToolTip.Tip="Sort by" Margin="0,0,5,0" HorizontalAlignment="Right">
-					<Image Height="30" Width="30" Source="/Assets/general/sort-icon.png"/>
+				<Button Name="FilterFlyout" ToolTip.Tip="Sort by" Margin="0,0,5,0" HorizontalAlignment="Right">
+					<PathIcon Height="30" Width="30" Data="{StaticResource FilterRegular}"/>
 					<Button.Flyout>
-						<Flyout Placement="Bottom">
-							<StackPanel>
-								<Button Command="{Binding ChangeSort}" CommandParameter="name" Width="165" Background="Transparent">Sort by Name</Button>
-								<Button Command="{Binding ChangeSort}" CommandParameter="update" Width="165" Background="Transparent">Sort by Update date</Button>
-								<Button Command="{Binding ChangeSort}" CommandParameter="release" Width="165" Background="Transparent">Sort by Release date</Button>
-							</StackPanel>
+						<Flyout Flyout.FlyoutPresenterClasses="filterFlyout" Placement="BottomEdgeAlignedLeft">
+							<WrapPanel VerticalAlignment="Top" HorizontalAlignment="Left">
+								<!--================================SORTS====================================-->
+								<Expander Margin="2" IsExpanded="True" VerticalAlignment="Top">
+									<Expander.Header>
+										Sort by
+									</Expander.Header>
+									<StackPanel Name="SortPanel">
+										<Button Command="{Binding ChangeSort}" CommandParameter="name" Width="120">Name</Button>
+										<Button Command="{Binding ChangeSort}" CommandParameter="update" Width="120">Update date</Button>
+										<Button Command="{Binding ChangeSort}" CommandParameter="release" Width="120">Release date</Button>
+									</StackPanel>
+								</Expander>
+								<!--================================FILTERS==================================-->
+								<Expander Margin="2" IsExpanded="True" VerticalAlignment="Top">
+									<Expander.Header>
+										Filters
+									</Expander.Header>
+									<ScrollViewer MaxWidth="650" MaxHeight="700">
+										<WrapPanel Name="FilterPanel" MaxWidth="630">
+											<!--Buttons to be added by code on the view-->
+										</WrapPanel>
+									</ScrollViewer>
+								</Expander>
+							</WrapPanel>
 						</Flyout>
 					</Button.Flyout>
 				</Button>
@@ -37,14 +56,14 @@
 		</Grid>
 		<ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 			<StackPanel>
-				<StackPanel>
-					<v:LoadingIconView IsEnabled="{Binding !ShowTiles}" IsVisible="{Binding !ShowTiles}" Width="80" Height="80" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="50,50,0,0" Content="{Binding LoadingAnimation}"/>
-					<Label FontWeight="Bold" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding !ShowTiles}" Margin="60,0,0,0">Loading...</Label>
+				<StackPanel IsVisible="{Binding !ShowTiles}">
+					<v:LoadingIconView Width="80" Height="80" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="50,50,0,0" Content="{Binding LoadingAnimation}"/>
+					<Label FontWeight="Bold" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="60,0,0,0">Loading...</Label>
 				</StackPanel>
-				<ItemsControl IsEnabled="{Binding ShowTiles}" IsVisible="{Binding ShowTiles}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding Mods}">
+				<ItemsControl IsVisible="{Binding ShowTiles}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding CardsView}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
-							<v:NebulaModCardView Margin="5" Content="{Binding}"/>
+							<v:NebulaModCardView Margin="2.5" Content="{Binding}"/>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
 					<ItemsControl.ItemsPanel>
