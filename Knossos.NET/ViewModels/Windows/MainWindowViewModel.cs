@@ -38,6 +38,10 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal int? windowHeight = null;
         [ObservableProperty]
+        internal int? minWindowWidth = null;
+        [ObservableProperty]
+        internal int? minWindowHeight = null;
+        [ObservableProperty]
         internal ModListViewModel? installedModsView;
         [ObservableProperty]
         internal NebulaModListViewModel? nebulaModsView;
@@ -120,6 +124,8 @@ namespace Knossos.NET.ViewModels
             }
             if (!CustomLauncher.IsCustomMode)
             {
+                MinWindowWidth = 900;
+                MinWindowHeight = 500;
                 InstalledModsView = new ModListViewModel();
                 NebulaModsView = new NebulaModListViewModel();
                 FsoBuildsView = new FsoBuildsViewModel();
@@ -137,6 +143,8 @@ namespace Knossos.NET.ViewModels
                 AppTitle = CustomLauncher.WindowTitle + " v" + Knossos.AppVersion;
                 WindowHeight = CustomLauncher.WindowHeight;
                 WindowWidth = CustomLauncher.WindowWidth;
+                MinWindowWidth = CustomLauncher.MinWindowWidth;
+                MinWindowHeight = CustomLauncher.MinWindowHeight;
                 CustomHomeVM = new CustomHomeViewModel();
                 if (CustomLauncher.MenuDisplayEngineEntry)
                     FsoBuildsView = new FsoBuildsViewModel();
