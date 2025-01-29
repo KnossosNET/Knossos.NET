@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using IniParser;
 using System.Linq;
+using Knossos.NET.ViewModels;
+using System.Globalization;
 
 namespace Knossos.NET.Models
 {
@@ -842,6 +844,71 @@ namespace Knossos.NET.Models
         public static int CompareTitles(string title1, string title2)
         {
             return String.Compare(KnUtils.RemoveArticles(title1), KnUtils.RemoveArticles(title2), StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        /// <summary>
+        /// Does mod sorting based on the global Knossos.globalSettings.sortType variable
+        /// Returns:
+        /// Less than zero if modA precedes modB
+        /// Zero if they are equal
+        /// Higher than zero if modA follows mobB
+        /// </summary>
+        /// <param name="modA"></param>
+        /// <param name="modB"></param>
+        /// <returns></returns>
+        public static int SortMods(Mod? modA, Mod? modB)
+        {
+            if (modA == null && modB == null) return 0;
+            if (modA == null && modB != null) return 1;
+            if (modA != null && modB == null) return -1;
+            try
+            {
+                switch (Knossos.globalSettings.sortType)
+                {
+                    case ModSortType.name:
+                        return Mod.CompareTitles(modA!.title, modB!.title);
+                    case ModSortType.release:
+                        if (modA!.firstRelease == modB!.firstRelease)
+                            return 0;
+                        if (modA.firstRelease != null && modB.firstRelease != null)
+                        {
+                            if (DateTime.Parse(modA.firstRelease, CultureInfo.InvariantCulture) < DateTime.Parse(modB.firstRelease, CultureInfo.InvariantCulture))
+                                return 1;
+                            else
+                                return -1;
+                        }
+                        else
+                        {
+                            if (modA.firstRelease == null)
+                                return -1;
+                            else
+                                return 1;
+                        }
+                    case ModSortType.update:
+                        if (modA!.lastUpdate == modB!.lastUpdate)
+                            return 0;
+                        if (modA.lastUpdate != null && modB.lastUpdate != null)
+                        {
+                            if (DateTime.Parse(modA.lastUpdate, CultureInfo.InvariantCulture) < DateTime.Parse(modB.lastUpdate, CultureInfo.InvariantCulture))
+                                return 1;
+                            else
+                                return -1;
+                        }
+                        else
+                        {
+                            if (modA.lastUpdate == null)
+                                return 1;
+                            else
+                                return -1;
+                        }
+                    default: return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Warning, "NebulaModCardViewModel.CompareMods()", ex.Message);
+                return 0;
+            }
         }
 
         /// <summary>

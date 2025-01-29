@@ -35,6 +35,7 @@ namespace Knossos.NET.Models
             public string? pass { get; set; }
             public bool logged { get; set; }
             public List<NewerModVersionsData> NewerModsVersions { get; set; }
+            public NebulaModTagJson[] modtags { get; set; }
 
 
             public NebulaSettings()
@@ -44,6 +45,7 @@ namespace Knossos.NET.Models
                 pass = null;
                 logged = false;
                 NewerModsVersions = new List<NewerModVersionsData>();
+                modtags = new NebulaModTagJson[0];
             }
         }
 
@@ -58,6 +60,15 @@ namespace Knossos.NET.Models
             public string modVersion { get; set; }
             public string modString { get; set; }
         }
+
+        public struct NebulaModTagJson
+        {
+            public string modid { get; set; }
+            public string[] filters { get; set; }
+            public string[] tags { get; set; }
+        }
+
+        private readonly static string ModTagsURL = "https://raw.githubusercontent.com/KnossosNET/KNet-General-Resources-Repo/main/modtags.json";
 
         //https://cf.fsnebula.org/storage/repo.json
         //https://dl.fsnebula.org/storage/repo.json
@@ -177,6 +188,27 @@ namespace Knossos.NET.Models
                 var updates = await InitialRepoLoad().ConfigureAwait(false);
                 if (updates != null && updates.Any())
                 {
+                    /**************************************************************************************************************************/
+                    //If we have a repo update lets update modtags as well
+                    //This part of the code should be replaced once modtags are integrated into nebula
+                    if (!CustomLauncher.IsCustomMode)
+                    {
+                        try
+                        {
+                            HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(ModTagsURL).ConfigureAwait(false);
+                            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            var tagsRepo = JsonSerializer.Deserialize<NebulaModTagJson[]>(json)!;
+                            if (tagsRepo != null)
+                            {
+                                settings.modtags = tagsRepo;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Add(Log.LogSeverity.Error, "Nebula.Trinity()", ex);
+                        }
+                    }
+                    /**************************************************************************************************************************/
                     SaveSettings();
                     if (displayUpdates)
                     {
@@ -195,6 +227,32 @@ namespace Knossos.NET.Models
                 {
                     await LoadPrivateMods(cancellationToken).ConfigureAwait(false);
                 }
+                int filters = 0, tags = 0;
+                //Load mod tags
+                if (!CustomLauncher.IsCustomMode)
+                {
+                    foreach (var modtag in settings.modtags)
+                    {
+                        if (modtag.filters != null)
+                        {
+                            foreach (var f in modtag.filters)
+                            {
+                                ModTags.AddModFilter(modtag.modid, f);
+                                filters++;
+                            }
+                        }
+                        if (modtag.tags != null)
+                        {
+                            foreach (var t in modtag.tags)
+                            {
+                                ModTags.AddModTag(modtag.modid, t);
+                                tags++;
+                            }
+                        }
+                    }
+                }
+
+                Log.Add(Log.LogSeverity.Information, "Nebula.Trinity()", "ModTags has loaded: " + filters + " filters (" + ModTags.GetListAllFilters().Count() + " unique) and " + tags + " mod tags.");
                 repoLoaded = true;
             }
             catch (TaskCanceledException)

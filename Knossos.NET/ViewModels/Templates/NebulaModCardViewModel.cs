@@ -5,14 +5,12 @@ using Knossos.NET.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Views;
 using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Threading;
-using Avalonia.Threading;
 
 namespace Knossos.NET.ViewModels
 {
-    public partial class NebulaModCardViewModel : ViewModelBase
+    public partial class NebulaModCardViewModel : ViewModelBase, IComparable<NebulaModCardViewModel>
     {
         private CancellationTokenSource? cancellationTokenSource = null;
         public Mod? modJson { get; set; }
@@ -23,30 +21,40 @@ namespace Knossos.NET.ViewModels
         internal string? ModVersion { get { return modJson != null ? modJson.version : null; } }
         [ObservableProperty]
         internal Bitmap? tileImage;
-        internal bool visible = false;
-        internal bool Visible
+
+        private Bitmap? tileModBitmap;
+
+        private bool visible = true;
+        /// <summary>
+        /// External property to enable/disable mod card visibility
+        /// </summary>
+        public bool Visible
         {
-            get 
-            { 
+            get { 
                 return visible; 
             }
-            set
-            {
-                if(visible != value)
+            set {
+                if (visible != value)
                 {
-                    SetProperty(ref visible, value);
-                    if(value && TileImage == null && modJson != null)
+                    visible = value;
+                    CardVisible = value;
+                    if(CardVisible)
                     {
-                        Dispatcher.UIThread.Invoke(() => {
-                            LoadImage(modJson.fullPath, modJson.tile);
-                        });
+                       _ = LazyReLoadTileImageAsync();
+                    }
+                    else
+                    {
+                        TileImage = MainWindowViewModel.Instance?.placeholderTileImage;
                     }
                 }
             }
         }
+
         [ObservableProperty]
         internal bool isInstalling = false;
 
+        [ObservableProperty]
+        internal bool cardVisible = true;
 
         /* Should only be used by the editor preview */
         public NebulaModCardViewModel()
@@ -63,8 +71,29 @@ namespace Knossos.NET.ViewModels
             Log.Add(Log.LogSeverity.Information, "NebulaModCardViewModel(Constructor)", "Creating mod card for " + modJson);
             modJson.ClearUnusedData();
             this.modJson = modJson;
-            //Moved to load when visible only
+            //Moved to load by external call only
             //LoadImage(modJson.fullPath, modJson.tile);
+        }
+
+        /// <summary>
+        /// Calls to load the tile image
+        /// </summary>
+        public async Task LoadImage()
+        {
+            if (TileImage == null && modJson != null)
+            {
+                await LoadImage(modJson.fullPath, modJson.tile);
+            }
+        }
+
+        /// <summary>
+        /// Reloads the tile image to the view at a random time
+        /// after the mod card itseft becomes visible
+        /// </summary>
+        private async Task LazyReLoadTileImageAsync()
+        {
+            await Task.Delay(new Random().Next(200,700));
+            TileImage = tileModBitmap != null? tileModBitmap : MainWindowViewModel.Instance?.placeholderTileImage;
         }
 
         /* Button Commands */
@@ -128,10 +157,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void LoadImage(string modFullPath, string? tileString)
+        private async Task LoadImage(string modFullPath, string? tileString)
         {
-            TileImage?.Dispose();
-            TileImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
+            TileImage = MainWindowViewModel.Instance?.placeholderTileImage;
 
             try
             {
@@ -139,21 +167,19 @@ namespace Knossos.NET.ViewModels
                 {
                     if (!tileString.ToLower().Contains("http"))
                     {
-                        TileImage = new Bitmap(modFullPath + Path.DirectorySeparatorChar + tileString);
+                        tileModBitmap = new Bitmap(modFullPath + Path.DirectorySeparatorChar + tileString);
                     }
                     else
                     {
-                        Task.Run(async () =>
+                        using (var fs = await KnUtils.GetRemoteResourceStream(tileString).ConfigureAwait(false))
                         {
-                            using (var fs = await KnUtils.GetRemoteResourceStream(tileString).ConfigureAwait(false))
-                            {
-                                Dispatcher.UIThread.Invoke(() =>
-                                {
-                                    if (fs != null)
-                                        TileImage = new Bitmap(fs);
-                                });
-                            }
-                        }).ConfigureAwait(false); 
+                            if (fs != null)
+                                tileModBitmap = new Bitmap(fs);
+                        }
+                    }
+                    if (tileModBitmap != null)
+                    {
+                        TileImage = tileModBitmap;
                     }
                 }
             }
@@ -161,6 +187,13 @@ namespace Knossos.NET.ViewModels
             {
                 Log.Add(Log.LogSeverity.Warning, "NebulaModCardViewModel.LoadImage", ex);
             }
+        }
+
+        public int CompareTo(NebulaModCardViewModel? other)
+        {
+            if (other == null)
+                return -1;
+            return Mod.SortMods(modJson, other.modJson);
         }
     }
 }

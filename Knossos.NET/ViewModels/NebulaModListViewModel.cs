@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
+using ObservableCollections;
 
 namespace Knossos.NET.ViewModels
 {
@@ -16,12 +15,6 @@ namespace Knossos.NET.ViewModels
     /// </summary>
     public partial class NebulaModListViewModel : ViewModelBase
     {
-
-        /// <summary>
-        /// Current Sort Mode
-        /// </summary>
-        internal MainWindowViewModel.SortType sortType = MainWindowViewModel.SortType.unsorted;
-
         /// <summary>
         /// The user has opened this tab in this session?
         /// </summary>
@@ -32,7 +25,7 @@ namespace Knossos.NET.ViewModels
             get { return _isLoading; }
             set { 
                 _isLoading = value;
-                ShowTiles = !sorting && !isLoading;
+                ShowTiles = !isLoading;
                 if (ShowTiles)
                 {
                     LoadingAnimation.Animate = 0;
@@ -44,29 +37,11 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private bool _sorting = true;
-        internal bool sorting {
-            get { return _sorting; }
-            set { 
-                _sorting = value;
-                ShowTiles = !sorting && !isLoading;
-
-                if (ShowTiles)
-                {
-                    LoadingAnimation.Animate = 0;                
-                } 
-                else  
-                {
-                    LoadingAnimation.Animate = 1;
-                }
-            }
-        }
-
         /// <summary>
-        /// For the UI to detmerine whether to show mod tiles.  It needs to check more than one property, so this gets updated when sorting or isLoading do.
+        /// For the UI to detmerine whether to show mod tiles.  It needs to check more than one property
         /// </summary>
         [ObservableProperty]
-        internal bool showTiles = false;
+        public bool showTiles = false;
 
         [ObservableProperty]
         internal LoadingIconViewModel loadingAnimation = new LoadingIconViewModel();
@@ -80,91 +55,132 @@ namespace Knossos.NET.ViewModels
             get { return search; }
             set 
             {
-                sorting = true;
-                LoadingAnimation.Animate = 1;
-
-                if (value != Search){
+                if (value != Search) 
+                {
                     this.SetProperty(ref search, value);
-                    if (value.Trim() != string.Empty)
-                    {
-                        foreach(var mod in Mods)
-                        {
-                            if( mod.Name != null && mod.Name.ToLower().Contains(value.ToLower()))
-                            {
-                                mod.Visible = true;
-                            }
-                            else
-                            {
-                                mod.Visible = false;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Mods.ForEach(m => m.Visible = true);
-                    }
+                    ApplyFilters();
                 }
-                sorting = false;
-                LoadingAnimation.Animate = 1;
             }
         }
 
-        [ObservableProperty]
-        internal ObservableCollection<NebulaModCardViewModel> mods = new ObservableCollection<NebulaModCardViewModel>();
+        private ModSortType localSort = ModSortType.name;
+        //The actual collection were the mods are
+        private ObservableList<NebulaModCardViewModel> Mods = new ObservableList<NebulaModCardViewModel>();
+        //A hook for the UI, do not access directly
+        internal NotifyCollectionChangedSynchronizedViewList<NebulaModCardViewModel> CardsView { get; set; }
 
         public NebulaModListViewModel()
         {
+            LoadingAnimation.Animate = 1;
+            CardsView = Mods.ToNotifyCollectionChangedSlim(SynchronizationContextCollectionEventDispatcher.Current);
         }
 
-        /// <summary>
-        /// Open the tab and slowly display modcards to avoid ui lock
-        /// </summary>
-        public async void OpenTab(string newSearch, MainWindowViewModel.SortType newSortType)
+        public void ApplyTagFilter(int tagIndex)
         {
-            Search = newSearch;
-            if (isLoading)
+            if (MainWindowViewModel.Instance != null)
             {
-                IsTabOpen = true;
-                return;
-            }
-
-            if (!IsTabOpen)
-            {
-                IsTabOpen = true;
-                // This should remain true until we get to Change Sort.  It is guaranteed to be finished then
-                sorting = true;
-
-                try
+                var tags = ModTags.GetListAllFilters();
+                if(tags.Count() > tagIndex)
                 {
-                    await Task.Delay(200).ConfigureAwait(false);
-                    List<NebulaModCardViewModel>? modsInView = null;
-                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    MainWindowViewModel.Instance.tagFilter.Add(tags[tagIndex]);
+                }
+                ApplyFilters();
+            }
+        }
+
+        public void RemoveTagFilter(int tagIndex)
+        {
+            if (MainWindowViewModel.Instance != null)
+            {
+                var tags = ModTags.GetListAllFilters();
+                if (tags.Count() > tagIndex)
+                {
+                    MainWindowViewModel.Instance.tagFilter.Remove(tags[tagIndex]);
+                }
+                ApplyFilters();
+            }
+        }
+
+        private void ApplyFilters()
+        {
+            Parallel.ForEach(Mods, new ParallelOptions { MaxDegreeOfParallelism = 4 }, card =>
+            {
+                bool visibility = true;
+                //By search
+                if (Search.Trim() != string.Empty)
+                {
+                    if (card.Name == null || !card.Name.Contains(Search, StringComparison.CurrentCultureIgnoreCase))
                     {
-                        isLoading = false;
-                        modsInView = Mods.ToList();
-                    });
-                    if (modsInView != null)
+                        //if it dosent passes title search check tags
+                        visibility = ModTags.IsTagPresentInModID(card.ID!, search);
+                    }
+                }
+                //Filters
+                if (visibility && MainWindowViewModel.Instance != null && MainWindowViewModel.Instance.tagFilter.Any())
+                {
+                    visibility = false;
+                    foreach (var filter in MainWindowViewModel.Instance.tagFilter)
                     {
-                        foreach (var m in modsInView)
+                        if(card.ID != null && ModTags.IsFilterPresentInModID(card.ID, filter))
                         {
-                            await Dispatcher.UIThread.InvokeAsync(() =>
-                            {
-                                if (Search.Trim() == string.Empty || m.Name != null && m.Name.ToLower().Contains(Search.ToLower()))
-                                {
-                                    m.Visible = true;
-                                }
-                            });
-                            await Task.Delay(1).ConfigureAwait(false);
+                            visibility = true;
+                            break;
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "NebulaModListViewModel.OpenTab", ex);
-                }
+                card.Visible = visibility;
+            });
+        }
 
+        /// <summary>
+        /// Open the tab code
+        /// </summary>
+        public void OpenTab()
+        {
+            IsTabOpen = true;
+            if (!isLoading)
+            {
+                Task.Run(() =>
+                {
+                    ShowTiles = false;
+                    LoadingAnimation.Animate = 1;
+                    if (MainWindowViewModel.Instance != null)
+                    {
+                        if (Search != MainWindowViewModel.Instance.sharedSearch)
+                        {
+                            Search = MainWindowViewModel.Instance.sharedSearch;
+                        }
+                        else
+                        {
+                            ApplyFilters();
+                        }
+                    }
+                    
+                    ChangeSort(Knossos.globalSettings.sortType);
+                    Parallel.ForEach(Mods, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async card =>
+                    {
+                        await card.LoadImage();
+                    });
+                    LoadingAnimation.Animate = 0;
+                    ShowTiles = true;
+                });
             }
-            ChangeSort(newSortType);
+        }
+
+        /// <summary>
+        /// Close the tab code
+        /// </summary>
+        public void CloseTab()
+        {
+            ShowTiles = false;
+            if (MainWindowViewModel.Instance != null)
+            {
+                MainWindowViewModel.Instance.sharedSearch = Search;
+            }
+            Parallel.ForEach(Mods, new ParallelOptions { MaxDegreeOfParallelism = 4 }, card =>
+            {
+                card.Visible = false;
+            });
         }
 
         /// <summary>
@@ -192,26 +208,12 @@ namespace Knossos.NET.ViewModels
             var modCard = Mods.FirstOrDefault(m => m.ID == modJson.id);
             if (modCard == null)
             {
-                int i;
-                for (i = 0; i < Mods.Count; i++)
-                {
-                    if (Mods[i].modJson != null)
-                    {
-                        if(CompareMods(Mods[i].modJson!,modJson) > 0)
-                        {
-                            break;
-                        }
-                    }
-                }
                 var card = new NebulaModCardViewModel(modJson);
-                if (!isLoading)
-                {
-                    if (Search.Trim() == string.Empty || card.Name != null && card.Name.ToLower().Contains(Search.ToLower()))
-                    {
-                        card.Visible = true;
-                    }
-                }
-                Mods.Insert(i, card);
+                ModTags.AddModFiltersRuntime(modJson);
+                Mods.Add(card);
+                Mods.Sort();
+                if(IsTabOpen)
+                    _ = card.LoadImage();
             }
             else
             {
@@ -220,48 +222,29 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Adds a new list of mods into the, in a more efficient way that loading one by one
-        /// It replaces all mods, all old mods are deleted, intended only for the first big load of mods
+        /// Adds a new list of mods into the view
         /// </summary>
         /// <param name="modList"></param>
-        public async void AddMods(List<Mod> modList)
+        public void AddMods(List<Mod> modList)
         {
-            isLoading = true;
-            await Task.Delay(20).ConfigureAwait(false);
-            var newModCardList = new ObservableCollection<NebulaModCardViewModel>();
-            foreach (Mod? mod in modList)
-            {
-                var modCard = newModCardList.FirstOrDefault(m => m.ID == mod.id);
-                if (modCard == null)
+            Task.Factory.StartNew(() => {
+                Parallel.ForEach(modList, new ParallelOptions { MaxDegreeOfParallelism = 4 }, mod =>
                 {
-                    int i;
-                    for (i = 0; i < newModCardList.Count; i++)
+                    Mods.Add(new NebulaModCardViewModel(mod));
+                });
+                Mods.Sort();
+                if(IsTabOpen)
+                {
+                    Parallel.ForEach(Mods, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async card =>
                     {
-                        if (newModCardList[i].modJson != null)
-                        {
-                            if (CompareMods(newModCardList[i].modJson!, mod) > 0)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    var card = new NebulaModCardViewModel(mod);
-                    newModCardList.Insert(i, card);
+                        await card.LoadImage();
+                    });
                 }
-                else
+                foreach(var mod in modList)
                 {
-                    //Update? Should NOT be needed for Nebula mods
+                    ModTags.AddModFiltersRuntime(mod);
                 }
-            }
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                Mods = newModCardList;
                 isLoading = false;
-                if (IsTabOpen)
-                {
-                    IsTabOpen = false;
-                    OpenTab(Search, sortType);
-                }
             });
         }
 
@@ -271,107 +254,20 @@ namespace Knossos.NET.ViewModels
         /// <param name="sort"></param>
         internal void ChangeSort(object sort)
         {
-            try
+            var newSort = ModSortType.unsorted;
+            if (sort is ModSortType)
             {
-                MainWindowViewModel.SortType newSort;
-
-                if (sort is MainWindowViewModel.SortType){
-                    newSort = (MainWindowViewModel.SortType)sort;
-                } else {
-                    newSort = (MainWindowViewModel.SortType)Enum.Parse(typeof(MainWindowViewModel.SortType), (string)sort);
-                }
-
-                if (newSort != sortType)
-                {
-                    if (MainWindowViewModel.Instance != null && newSort != MainWindowViewModel.SortType.unsorted && MainWindowViewModel.Instance.sharedSortType != newSort)
-                    {
-                        MainWindowViewModel.Instance.sharedSortType = newSort;
-                    }
-                    if (sortType != MainWindowViewModel.SortType.unsorted)
-                    {
-                        sorting = true;
-                    }
-
-                    Dispatcher.UIThread.Invoke( () =>
-                    {
-                        sortType = newSort;
-                        var tempList = Mods.ToList();
-                        tempList.Sort(CompareMods);
-                        isLoading = true;
-                        for (int i = 0; i < tempList.Count; i++)
-                        {
-                            Mods.Move(Mods.IndexOf(tempList[i]), i);
-                        }
-                        isLoading = false;
-                        GC.Collect();
-                    },DispatcherPriority.Background);
-                }
-            }catch(Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error, "ModListViewModel.ChangeSort()", ex);
+                newSort = (ModSortType)sort;
             }
-
-            // There is no reason to keep this on, whether in success or fail, and some of the functions that call this
-            // set sorting to true.
-            sorting = false;
-        }
-
-        private int CompareMods(NebulaModCardViewModel x, NebulaModCardViewModel y)
-        {
-            if (x.modJson != null && y.modJson != null)
-                return CompareMods(x.modJson, y.modJson);
             else
-                return 0;
-        }
-
-        private int CompareMods(Mod modA,Mod modB)
-        {
-            try
             {
-                switch (sortType)
-                {
-                    case MainWindowViewModel.SortType.name:
-                        return Mod.CompareTitles(modA.title, modB.title);
-                    case MainWindowViewModel.SortType.release:
-                        if (modA.firstRelease == modB.firstRelease)
-                            return 0;
-                        if (modA.firstRelease != null && modB.firstRelease != null)
-                        {
-                            if (DateTime.Parse(modA.firstRelease, CultureInfo.InvariantCulture) < DateTime.Parse(modB.firstRelease, CultureInfo.InvariantCulture))
-                                return 1;
-                            else
-                                return -1;
-                        }
-                        else
-                        {
-                            if (modA.firstRelease == null)
-                                return -1;
-                            else
-                                return 1;
-                        }
-                    case MainWindowViewModel.SortType.update:
-                        if (modA.lastUpdate == modB.lastUpdate)
-                            return 0;
-                        if (modA.lastUpdate != null && modB.lastUpdate != null)
-                        {
-                            if (DateTime.Parse(modA.lastUpdate, CultureInfo.InvariantCulture) < DateTime.Parse(modB.lastUpdate, CultureInfo.InvariantCulture))
-                                return 1;
-                            else
-                                return -1;
-                        }
-                        else
-                        {
-                            if (modA.lastUpdate == null)
-                                return 1;
-                            else
-                                return -1;
-                        }
-                    default: return 0;
-                }
-            }catch(Exception ex)
-            { 
-                Log.Add(Log.LogSeverity.Warning, "NebulaModListViewModel.CompareMods()",ex.Message);
-                return 0; 
+                newSort = (ModSortType)Enum.Parse(typeof(ModSortType), (string)sort);
+            }
+            if (newSort != localSort)
+            {
+                localSort = newSort;
+                Knossos.globalSettings.sortType = newSort;
+                Mods.Sort(); //It will use NebulaModCardViewModel.CompareTo()
             }
         }
 

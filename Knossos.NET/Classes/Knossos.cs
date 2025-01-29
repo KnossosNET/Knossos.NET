@@ -702,12 +702,16 @@ namespace Knossos.NET
         {
             if (globalSettings.basePath != null)
             {
+                //Clear Mod Tags
+                ModTags.Clear();
+                MainWindowViewModel.Instance?.tagFilter.Clear();
+
                 await FolderSearchRecursive(globalSettings.basePath, isQuickLaunch).ConfigureAwait(false);
 
                 if (!isQuickLaunch)
                 {
                     //Sort/Re-sort installed mods
-                    MainWindowViewModel.Instance?.InstalledModsView?.ChangeSort(MainWindowViewModel.Instance?.sharedSortType!);
+                    MainWindowViewModel.Instance?.InstalledModsView?.ChangeSort(globalSettings.sortType);
 
                     //Red border for mod with missing deps
                     Dispatcher.UIThread.Invoke(() =>
@@ -733,6 +737,13 @@ namespace Knossos.NET
                 {
                     await QuickLaunch();
                 }
+
+                //generate mod tag buttons
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    NebulaModListView.Instance?.GenerateFilterButtons();
+                    ModListView.Instance?.GenerateFilterButtons();
+                });
             }
         }
 
