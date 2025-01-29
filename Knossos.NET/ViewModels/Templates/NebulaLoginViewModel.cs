@@ -1,7 +1,10 @@
-﻿using Avalonia.Threading;
+﻿using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Knossos.NET.ViewModels
 {
@@ -26,10 +29,10 @@ namespace Knossos.NET.ViewModels
         internal string userEmail = string.Empty;
 
         [ObservableProperty]
-        internal string editableIDs = string.Empty;
+        internal ObservableCollection<string> editableIDs = new ObservableCollection<string>();
 
         [ObservableProperty]
-        internal string privateMods = string.Empty;
+        internal ObservableCollection<ListBoxItem> privateMods = new ObservableCollection<ListBoxItem>();
 
         public async void UpdateUI()
         {
@@ -37,16 +40,20 @@ namespace Knossos.NET.ViewModels
             RegisterNewUser = false;
             UserName = Nebula.userName;
             UserPass = Nebula.userPass;
-            PrivateMods = string.Empty;
+            EditableIDs.Clear();
+            PrivateMods.Clear();
             if(UserLoggedIn) 
             { 
                 var ids = await Nebula.GetEditableModIDs().ConfigureAwait(false);
                 if (ids != null)
                 {
-                    Dispatcher.UIThread.Invoke(() =>
+                    foreach (var id in ids)
                     {
-                        EditableIDs = string.Join(", ", ids);
-                    });
+                        Dispatcher.UIThread.Invoke(() =>
+                        {
+                            EditableIDs.Add(id);
+                        });
+                    }
                 }
                 var privMods = await Nebula.GetPrivateMods(true).ConfigureAwait(false);
                 if (privMods != null)
@@ -55,10 +62,36 @@ namespace Knossos.NET.ViewModels
                     {
                         Dispatcher.UIThread.Invoke(() =>
                         {
-                            PrivateMods += mod + ", ";
+                            var item = new ListBoxItem();
+                            item.Tag = mod;
+                            item.Content = mod.ToString();
+                            PrivateMods.Add(item);
                         });
                     }
                 }
+            }
+        }
+
+        internal async void Install()
+        {
+            var selected = PrivateMods.FirstOrDefault(x => x.IsSelected);
+            if (selected != null)
+            {
+                if (selected.Tag is Mod mod)
+                {
+                    if (CustomLauncher.IsCustomMode && CustomLauncher.ModID != mod.id)
+                    {
+                        await MessageBox.Show(MainWindow.instance, "You can not install different mod id than the defined TC id in custom launcher mode.", "Different mod or tc", MessageBox.MessageBoxButtons.OK);
+                        return;
+                    }
+                    var dialog = new ModInstallView();
+                    dialog.DataContext = new ModInstallViewModel(mod, dialog, mod.version);
+                    await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
+                }
+            }
+            else
+            {
+                await MessageBox.Show(MainWindow.instance, "Select a private mod from the list first.", "No selected mod", MessageBox.MessageBoxButtons.OK);
             }
         }
 
