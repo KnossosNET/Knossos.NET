@@ -274,6 +274,17 @@
 			<Setter Property="Background" Value="{StaticResource QuaternaryColorMouseOver}"/>
 			<Setter Property="Foreground" Value="{StaticResource ForegroundColorMouseOver}"/>
 		</Style>
+	
+		<!--Transparent-->
+		<Style Selector="Button.Transparent">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button.Transparent:pointerover /template/ ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
 		<!--END BUTTONS-->
 
 	<!--Generic Progress Bar-->
