@@ -12,16 +12,22 @@
 			 Width="1070"
 			 WindowStartupLocation="CenterOwner"
 			 Title="{Binding Name}"
-			 CanResize="True">
+			 CanResize="True"
+			 xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
+			 xmlns:cvt="clr-namespace:Knossos.NET.Converters;assembly=Knossos.NET">
 	
 	<Design.DataContext>
 		<vm:ModDetailsViewModel/>
 	</Design.DataContext>
 
+	<Window.Resources>
+		<cvt:BitmapAssetValueConverter x:Key="imageConverter"/>
+	</Window.Resources>
+
 	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}">
 	<Grid RowDefinitions="Auto,Auto,*,Auto">
 		<StackPanel Grid.Row="0" Margin="25">
-			<Image Source="{Binding Banner}" HorizontalAlignment="Stretch" Height="300" IsVisible="{Binding HasBanner}"></Image>
+			<Image Source="{Binding Banner, Converter={StaticResource imageConverter}}" anim:ImageBehavior.AnimatedSource="{Binding Banner}" HorizontalAlignment="Stretch" Height="300" IsVisible="{Binding HasBanner}"></Image>
 			<Label Content="{Binding Name, Converter={StaticResource escapeUnderscoresConverter}}" FontWeight="Bold" FontSize="24" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 			
 			<!--Buttons and Mod info-->
@@ -78,8 +84,8 @@
 		</ScrollViewer>
 
 		<!--Screenshots/Video-->
-		<Grid MaxWidth="1600" ColumnDefinitions="Auto,*,Auto" Grid.Row="3" Margin="20" IsVisible="{Binding Screenshots.Count}">
-			<Button Name="left" Grid.Column="0" VerticalAlignment="Center" Padding="10,20" Margin="4">
+		<Grid HorizontalAlignment="Center" ColumnDefinitions="Auto,*,Auto" Grid.Row="3" Margin="50" IsVisible="{Binding Screenshots.Count}">
+			<Button Name="left" Grid.Column="0" VerticalAlignment="Center" Margin="4">
 				<Path Data="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" Fill="White"/>
 			</Button>
 			<Carousel Name="carousel" Grid.Column="1" ItemsSource="{Binding Screenshots}">
@@ -89,15 +95,17 @@
 				<Carousel.DataTemplates>
 					<DataTemplate DataType="vm:ScreenshotItem">
 						<Grid>
-							<Image ZIndex="0" Source="{Binding image}"/>
-							<Button IsVisible="{Binding video}" ZIndex="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" Command="{Binding OpenVideo}" CommandParameter="{Binding url}"  >
+							<Button Command="{Binding OpenImage}" Classes="Transparent">
+								<Image Width="640" Height="360" Source="{Binding image, Converter={StaticResource imageConverter}}" anim:ImageBehavior.AnimatedSource="{Binding image}"/>
+							</Button>
+							<Button IsVisible="{Binding video}" Classes="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding OpenVideo}">
 								<Image HorizontalAlignment="Center" VerticalAlignment="Center" Height="125" Width="125" Source="/Assets/general/play-button.png"/>
 							</Button>
 						</Grid>
 					</DataTemplate>
 				</Carousel.DataTemplates>
 			</Carousel>
-			<Button Name="right" Grid.Column="2" VerticalAlignment="Center" Padding="10,20" Margin="4">
+			<Button Name="right" Grid.Column="2" VerticalAlignment="Center" Margin="4">
 				<Path Data="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" Fill="White"/>
 			</Button>
 		</Grid>
