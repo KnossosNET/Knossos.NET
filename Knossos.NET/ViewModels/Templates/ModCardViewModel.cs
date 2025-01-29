@@ -93,7 +93,6 @@ namespace Knossos.NET.ViewModels
 
         public ModCardViewModel(Mod modJson)
         {
-            Log.Add(Log.LogSeverity.Information, "ModCardViewModel(Constructor)", "Creating mod card for " + modJson.title +" "+ modJson.version);
             modJson.ClearUnusedData();
             modVersions.Add(modJson);
             Name = modJson.title;
@@ -139,7 +138,7 @@ namespace Knossos.NET.ViewModels
             modVersions.Sort((o1, o2) => -SemanticVersion.Compare(o1.version, o2.version));
             if (SemanticVersion.Compare(modJson.version, currentVersion) > 0)
             {
-                Log.Add(Log.LogSeverity.Information, "ModCardViewModel.AddModVersion()", "Changing active version for " + modJson.title + " from " + modVersions[activeVersionIndex].version + " to " + modJson.version);
+                Log.Add(Log.LogSeverity.Information, "ModCardViewModel.AddModVersion()", "Changing active version for " + modJson.title + " from " + currentVersion + " to " + modJson.version);
                 activeVersionIndex = modVersions.FindIndex((m) => m.version.Equals(modJson.version));
                 Name = modJson.title;
                 ModVersion = modJson.version + " (+" + (modVersions.Count - 1) + ")";

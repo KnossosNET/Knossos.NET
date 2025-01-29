@@ -68,7 +68,6 @@ namespace Knossos.NET.ViewModels
 
         public NebulaModCardViewModel(Mod modJson)
         {
-            Log.Add(Log.LogSeverity.Information, "NebulaModCardViewModel(Constructor)", "Creating mod card for " + modJson);
             modJson.ClearUnusedData();
             this.modJson = modJson;
             //Moved to load by external call only
