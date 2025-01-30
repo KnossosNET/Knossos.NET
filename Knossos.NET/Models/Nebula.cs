@@ -736,6 +736,13 @@ namespace Knossos.NET.Models
                             }
                             else
                             {
+                                /* Nebula responds with a HTTP status code 401 for expired tokens, so lets try this again */
+                                if(needsLogIn && apiUserToken != null && response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                                {
+                                    Log.Add(Log.LogSeverity.Information, "Nebula.ApiCall()", "Nebula: User login token is expired.");
+                                    apiUserToken = null;
+                                    return await ApiCall(resourceUrl, data, needsLogIn, timeoutSeconds, method);
+                                }
                                 /* Upload/Update/delete Mod Timeout Hack */
                                 if(response.StatusCode.ToString() == "GatewayTimeout" && (resourceUrl == "mod/release" || resourceUrl == "mod/release/update" || resourceUrl == "mod/release/delete"))
                                 {
@@ -771,6 +778,16 @@ namespace Knossos.NET.Models
                                     }
 
                                     return reply;
+                                }
+                            }
+                            else
+                            {
+                                /* Nebula responds with a HTTP status code 401 for expired tokens, so lets try this again */
+                                if (needsLogIn && apiUserToken != null && response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                                {
+                                    Log.Add(Log.LogSeverity.Information, "Nebula.ApiCall()", "Nebula: User login token is expired.");
+                                    apiUserToken = null;
+                                    return await ApiCall(resourceUrl, data, needsLogIn, timeoutSeconds, method);
                                 }
                             }
                             Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api GET call: " + response.StatusCode + "(" + (int)response.StatusCode + ").");
