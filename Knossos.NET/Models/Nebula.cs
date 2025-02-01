@@ -787,7 +787,7 @@ namespace Knossos.NET.Models
                                 if (jsonReply != null)
                                 {
                                     var reply = JsonSerializer.Deserialize<ApiReply>(jsonReply);
-                                    if (!reply.result)
+                                    if (!reply.result && resourceUrl != "mod/check_id")
                                         Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api POST call: " + response.StatusCode + "(" + (int)response.StatusCode + ")\n" + data);
 
                                     return reply;
@@ -1223,7 +1223,7 @@ namespace Knossos.NET.Models
                 if(editableIds != null)
                     return editableIds;
 
-                var reply = await ApiCall("mod/editable", null, true, 30, ApiMethod.GET);
+                var reply = await ApiCall("mod/editable", null, true, 45, ApiMethod.GET);
                 if (reply.HasValue)
                 { 
                     if (reply.Value.mods != null && reply.Value.mods.Any())
@@ -1261,7 +1261,7 @@ namespace Knossos.NET.Models
                 if (tryUseCache && privateMods != null)
                     return privateMods;
 
-                var reply = await ApiCall("mod/list_private", null, true, 30, ApiMethod.GET);
+                var reply = await ApiCall("mod/list_private", null, true, 45, ApiMethod.GET);
                 if (reply.Value.mods != null && reply.Value.mods.Any())
                 {
                     var mods = reply.Value.mods.Select(x => x.Deserialize<Mod>()!).ToArray()!;
