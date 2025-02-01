@@ -93,15 +93,9 @@ namespace Knossos.NET.ViewModels
         {
             Instance = this;
             TaskInfoButton = new TaskInfoButtonViewModel(this.TaskView);
-            string[] args = Environment.GetCommandLineArgs();
-            bool isQuickLaunch = false;
             bool forceUpdate = false;
-            foreach (var arg in args)
+            foreach (var arg in Environment.GetCommandLineArgs())
             {
-                if (arg.ToLower() == "-playmod")
-                {
-                    isQuickLaunch = true;
-                }
                 if (arg.ToLower() == "-forceupdate")
                 {
                     forceUpdate = true;
@@ -147,7 +141,14 @@ namespace Knossos.NET.ViewModels
                     MainWindow.instance?.FixMarginButtomTasks();
                 }
             }
-            Knossos.StartUp(isQuickLaunch, forceUpdate);
+            if (!Knossos.initIsComplete)
+            {
+                Knossos.StartUp(false, forceUpdate);
+            }
+            else
+            {
+                Knossos.LoadBasePath();
+            }
             CustomHomeVM?.CheckBasePath();
         }
 
