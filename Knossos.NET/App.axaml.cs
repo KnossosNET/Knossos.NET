@@ -102,6 +102,7 @@ namespace Knossos.NET
                 /*****************************PLAY***********************************/
                 var play = new NativeMenuItem("Play") { Menu = new NativeMenu(), Icon = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/menu_play.png"))) };
                 var mods = Knossos.GetInstalledModList(null);
+                mods.Sort(Mod.CompareTitles);
                 var filters = ModTags.GetListAllFilters();
                 foreach (var filter in filters)
                 {
