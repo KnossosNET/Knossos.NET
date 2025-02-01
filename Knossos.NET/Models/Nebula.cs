@@ -545,6 +545,7 @@ namespace Knossos.NET.Models
                     cancellationToken = null;
                 }
                 GC.Collect();
+                Log.Add(Log.LogSeverity.Information, "Nebula.InitialRepoLoad()", "Loaded: " + allModsInRepo.Count() + " repo entries. Engine builds: "+ builds.Count() + ", Mods: " + modsByID.Count() + ", TCs: " + modsTcs.Count() + "." );
                 return modUpdates;
             }
             catch (TaskCanceledException)
@@ -1228,7 +1229,7 @@ namespace Knossos.NET.Models
                     if (reply.Value.mods != null && reply.Value.mods.Any())
                     {
                         var ids = reply.Value.mods.Select(x => x.Deserialize<string>()!).ToArray()!;
-                        Log.Add(Log.LogSeverity.Information, "Nebula.GetEditableMods", "Editable mods in Nebula: " + string.Join(", ", ids));
+                        Log.Add(Log.LogSeverity.Information, "Nebula.GetEditableMods", "Editable mod ids in Nebula: " + string.Join(",", ids));
                         editableIds = ids;
                         return ids;
                     }
@@ -1266,7 +1267,7 @@ namespace Knossos.NET.Models
                     var mods = reply.Value.mods.Select(x => x.Deserialize<Mod>()!).ToArray()!;
                     foreach (var mod in mods)
                     {
-                        Log.Add(Log.LogSeverity.Information, "Nebula.GetPrivateMods", "Private mod in Nebula with access: " + mod);
+                        Log.Add(Log.LogSeverity.Information, "Nebula.GetPrivateMods", mod.ToString());
                     }
                     return mods;
                 }
