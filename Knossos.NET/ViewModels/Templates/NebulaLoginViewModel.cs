@@ -81,7 +81,7 @@ namespace Knossos.NET.ViewModels
                 {
                     if (CustomLauncher.IsCustomMode && CustomLauncher.ModID != mod.id)
                     {
-                        await MessageBox.Show(MainWindow.instance, "You can not install different mod id than the defined TC id in custom launcher mode.", "Different mod or tc", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(MainWindow.instance, "You cannot install a different mod ID than the defined Total Conversion ID while in Custom Launcher mode.", "Different mod or Total Conversion", MessageBox.MessageBoxButtons.OK);
                         return;
                     }
                     var dialog = new ModInstallView();
