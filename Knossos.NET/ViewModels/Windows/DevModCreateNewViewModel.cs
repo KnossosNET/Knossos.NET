@@ -100,6 +100,7 @@ namespace Knossos.NET.ViewModels
 
         private async Task<bool> Verify()
         {
+            bool displayWarningID = false;
             //Is library set?
             if(Knossos.GetKnossosLibraryPath() == null )
             {
@@ -132,8 +133,16 @@ namespace Knossos.NET.ViewModels
             }
             if (await Nebula.IsModIdInNebula(ModId))
             {
-                await MessageBox.Show(MainWindow.instance, "Mod ID already exist in Nebula: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
-                return false;
+                var editableIds = await Nebula.GetEditableModIDs();
+                if (editableIds != null && editableIds.Contains(ModId))
+                {
+                    displayWarningID = true;
+                }
+                else
+                {
+                    await MessageBox.Show(MainWindow.instance, "Mod id already exist in Nebula: " + ModId, "Validation error", MessageBox.MessageBoxButtons.OK);
+                    return false;
+                }
             }
             if (Knossos.GetInstalledModList(ModId).Any() || Knossos.GetInstalledBuildsList(ModId).Any())
             {
@@ -207,6 +216,13 @@ namespace Knossos.NET.ViewModels
                     }
                 }
             }
+
+            if(displayWarningID)
+            {
+                var res = await MessageBox.Show(MainWindow.instance, "This mod id already exists in Nebula, if there are uploaded versions of this mod you WILL override metadata for those versions if you try to upload something.", "ModID exists and you have write access to it", MessageBox.MessageBoxButtons.ContinueCancel);
+                return res == MessageBox.MessageBoxResult.Continue;
+            }
+
             return true;
         }
 
