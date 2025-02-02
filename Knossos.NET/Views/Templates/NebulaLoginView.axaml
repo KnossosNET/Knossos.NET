@@ -12,7 +12,7 @@
 	</Design.DataContext>
 
 	<ScrollViewer Background="Transparent">
-		<StackPanel Background="Transparent" HorizontalAlignment="Center">
+		<StackPanel Background="Transparent" HorizontalAlignment="Center" Name="MainPanel">
 			<Label Content="{Binding Title}" HorizontalContentAlignment="Center" FontWeight="Black" FontSize="24"/>
 			<TextBox Text="{Binding UserName}" Watermark="Username" Width="300" Margin="5"></TextBox>
 			<TextBox Text="{Binding UserPass}" Watermark="Password" PasswordChar="*" Width="300" Margin="5"></TextBox>
@@ -26,10 +26,15 @@
 				<Button IsVisible="{Binding RegisterNewUser}" Width="135" Command="{Binding SwitchToLogin}" Margin="5" Classes="Cancel">Cancel</Button>
 				<Button IsVisible="{Binding RegisterNewUser}" Width="135" Command="{Binding Register}" Margin="5" Classes="Accept">Register</Button>
 			</WrapPanel>
-			<Label HorizontalAlignment="Center" IsVisible="{Binding UserLoggedIn}" Margin="20" FontSize="20">Mods IDs you have write access to</Label>
-			<TextBox Background="Transparent" IsReadOnly="True" IsVisible="{Binding UserLoggedIn}" TextWrapping="Wrap" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Text="{Binding EditableIDs}"></TextBox>
-			<Label HorizontalAlignment="Center" IsVisible="{Binding UserLoggedIn}" Margin="20" FontSize="20">Private mods you have access to</Label>
-			<TextBox Background="Transparent" IsReadOnly="True" IsVisible="{Binding UserLoggedIn}" TextWrapping="Wrap" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Text="{Binding PrivateMods}"></TextBox>
+			<Grid HorizontalAlignment="Center" ColumnDefinitions="Auto, Auto" RowDefinitions="Auto,*">
+				<Label HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0" IsVisible="{Binding UserLoggedIn}" Margin="20" FontSize="20">Mods IDs you have write access to</Label>
+				<ListBox MaxHeight="700" Grid.Row="1" Margin="5" Grid.Column="0" Background="Transparent" IsVisible="{Binding UserLoggedIn}" ItemsSource="{Binding EditableIDs}"></ListBox>
+				<Label HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" IsVisible="{Binding UserLoggedIn}" Margin="20" FontSize="20">Private mods you have access to</Label>
+				<StackPanel Grid.Row="1" Grid.Column="1" IsVisible="{Binding UserLoggedIn}">
+					<ListBox MaxHeight="700" Margin="5" Background="Transparent" ItemsSource="{Binding PrivateMods}"/>
+					<Button Command="{Binding Install}" HorizontalAlignment="Center" Classes="Accept" Margin="5">Install Selected</Button>
+				</StackPanel>
+			</Grid>
 		</StackPanel>
 	</ScrollViewer>
 </UserControl>
