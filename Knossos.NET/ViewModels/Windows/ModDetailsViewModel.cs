@@ -23,27 +23,39 @@ namespace Knossos.NET.ViewModels
     /// </summary>
     public class ScreenshotItem
     {
-        public Bitmap image { get; set; }
+        public string image { get; set; }
         public bool video { get; set; } = false;
 
         public string url { get; set; }
 
-        public ScreenshotItem(Bitmap image, bool isVideo = false)
+        public ScreenshotItem(string image, bool isVideo = false)
         {
             this.image = image;
             this.video = isVideo;
             this.url = string.Empty;
         }
 
-        internal void OpenVideo(object url)
+        internal void OpenVideo()
         {
             try
             {
-                KnUtils.OpenBrowserURL((string)url);
+                KnUtils.OpenBrowserURL(url);
             }
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "ScreenshotItem.OpenVideo", ex);
+            }
+        }
+
+        internal void OpenImage()
+        {
+            try
+            {
+                KnUtils.OpenBrowserURL(image);
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "ScreenshotItem.OpenImage", ex);
             }
         }
     }
@@ -72,7 +84,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string? description = string.Empty;
         [ObservableProperty]
-        internal Bitmap? banner = null;
+        internal string? banner = null;
         [ObservableProperty]
         internal bool forumAvailable = false;
         [ObservableProperty]
@@ -271,24 +283,19 @@ namespace Knossos.NET.ViewModels
                     HasBanner = true;
                     if (System.IO.File.Exists(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner))
                     {
-                        Banner = new Bitmap(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner);
+                        Banner = modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner;
                     }
                     else
                     {
                         var url = modVersions[selectedIndex].banner;
-                        if (url != null && url.ToLower().Contains("http"))
+                        if (url != null && url.ToLower().StartsWith("http"))
                         {
-                            Banner?.Dispose();
-                            Banner = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/loading.png")));
                             Task.Run(async () =>
                             {
-                                using (var fs = await KnUtils.GetRemoteResourceStream(url).ConfigureAwait(false))
-                                {
-                                    Dispatcher.UIThread.Invoke(() => { 
-                                        if (fs != null)
-                                            Banner = new Bitmap(fs);
-                                    });
-                                }
+                                var fs = await KnUtils.GetRemoteResource(url).ConfigureAwait(false);
+                                Dispatcher.UIThread.Invoke(() => { 
+                                        Banner = fs;
+                                });
                             }).ConfigureAwait(false);
                         }
                     }
@@ -338,8 +345,7 @@ namespace Knossos.NET.ViewModels
                             if (System.IO.File.Exists(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + scn))
                             {
                                 Dispatcher.UIThread.Invoke(() => {
-                                    var bitmap = new Bitmap(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + scn);
-                                    var item = new ScreenshotItem(bitmap);
+                                    var item = new ScreenshotItem(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + scn);
                                     Screenshots.Add(item);
                                 });
                             }
@@ -347,15 +353,13 @@ namespace Knossos.NET.ViewModels
                             {
                                 Task.Run(async () =>
                                 {
-                                    using (var fs = await KnUtils.GetRemoteResourceStream(scn))
+                                    var fs = await KnUtils.GetRemoteResource(scn);
+                                    if (fs != null)
                                     {
-                                        if (fs != null)
-                                        {
-                                            Dispatcher.UIThread.Invoke(() => { 
-                                                var item = new ScreenshotItem(new Bitmap(fs));
-                                                Screenshots.Add(item);
-                                            });
-                                        }
+                                        Dispatcher.UIThread.Invoke(() => { 
+                                            var item = new ScreenshotItem(fs);
+                                            Screenshots.Add(item);
+                                        });
                                     }
                                 }).ConfigureAwait(false);
                             }
@@ -392,33 +396,24 @@ namespace Knossos.NET.ViewModels
 
                 if (imageUrl != string.Empty)
                 {
-                    HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(imageUrl).ConfigureAwait(false);
-                    byte[] content = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-                    Stream stream = new MemoryStream(content);
-                    var item = new ScreenshotItem(new Bitmap(stream), true);
+                    var img = await KnUtils.GetRemoteResource(imageUrl);
+                    var item = new ScreenshotItem(img != null? img : "avares://Knossos.NET/Assets/general/loading.png", true);
                     item.url = url;
                     Dispatcher.UIThread.Invoke(() => {
                         Screenshots.Add(item);
                     });
-                }
-                else
-                {
-                    var item = new ScreenshotItem(new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/loading.png"))), true);
-                    item.url = url;
-                    Dispatcher.UIThread.Invoke(() => {
-                        Screenshots.Add(item);
-                    });
+                    return;
                 }
             }
             catch (Exception ex)
             {
-                var item = new ScreenshotItem(new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/loading.png"))), true);
-                item.url = url;
-                Dispatcher.UIThread.Invoke(() => {
-                    Screenshots.Add(item);
-                });
                 Log.Add(Log.LogSeverity.Warning, "ModDetailsViewModel.DownloadVideoThumbnail", ex);
             }
+            var itemFail = new ScreenshotItem("avares://Knossos.NET/Assets/general/loading.png", true);
+            itemFail.url = url;
+            Dispatcher.UIThread.Invoke(() => {
+                Screenshots.Add(itemFail);
+            });
         }
 
         /// <summary>
