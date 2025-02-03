@@ -86,14 +86,14 @@ namespace Knossos.NET
         public static string AppImagePath => appImagePath;
 
         /// <summary>
-        /// Keeps a list of remote resources loaded to cache(or checked) during this session
+        /// Keeps a list of remote resources loaded to cache (or checked) during this session
         /// So we don't constantly query these remote URLs for changes
         /// </summary>
         private static List<string> remoteResourceLoadedToCache = new List<string>();
 
         /// <summary>
         /// Clear list of remote url resources downloaded to cache (or checked) during this session
-        /// So they can be checked and redownloaded again whiout restarting if they are outdated.
+        /// So they can be checked and redownloaded again without restarting if they are outdated.
         /// </summary>
         public static void ClearDownloadedRemoteResourceList()
         {
