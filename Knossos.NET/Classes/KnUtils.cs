@@ -86,6 +86,21 @@ namespace Knossos.NET
         public static string AppImagePath => appImagePath;
 
         /// <summary>
+        /// Keeps a list of remote resources loaded to cache (or checked) during this session
+        /// So we don't constantly query these remote URLs for changes
+        /// </summary>
+        private static List<string> remoteResourceLoadedToCache = new List<string>();
+
+        /// <summary>
+        /// Clear list of remote url resources downloaded to cache (or checked) during this session
+        /// So they can be checked and redownloaded again without restarting if they are outdated.
+        /// </summary>
+        public static void ClearDownloadedRemoteResourceList()
+        {
+            remoteResourceLoadedToCache.Clear();
+        }
+
+        /// <summary>
         /// Full path to AppImage file
         /// </summary>
         private static readonly string appImagePath = Environment.GetEnvironmentVariable("APPIMAGE")!;
@@ -673,6 +688,7 @@ namespace Knossos.NET
                 var fileInCacheEtagPath = fileInCachePath + ".etag";
                 string? remoteEtag = null;
                 bool cacheFileExists = File.Exists(fileInCachePath);
+                bool cachedOrCheckedDuringThisSession = remoteResourceLoadedToCache.Contains(resourceURL);
                 Uri uri = new Uri(resourceURL);
                 bool isNebulaFile = Nebula.nebulaMirrors.Contains(uri.Host.ToLower());
                 cacheFileIsValid = cacheFileExists && new FileInfo(fileInCachePath).Length > 0 ? true : false;
@@ -681,9 +697,10 @@ namespace Knossos.NET
                 if (cacheFileIsValid && cacheFileExists)
                 {
                     bool cacheFileEtagExists = File.Exists(fileInCacheEtagPath);
-                    if (isNebulaFile)
+                    if (isNebulaFile || cachedOrCheckedDuringThisSession)
                     {
                         //This is a nebula file, nebula files are stored by their checksum so they never update
+                        //Or we already downloaded or checked this file during this session, lets not do it again
                         return fileInCachePath;
                     }
                     else if (cacheFileEtagExists)
@@ -694,6 +711,7 @@ namespace Knossos.NET
                         if (cachedEtag != null && cachedEtag == remoteEtag)
                         {
                             //cache is up to date
+                            remoteResourceLoadedToCache.Add(resourceURL);
                             return fileInCachePath;
                         }
                         else
@@ -736,6 +754,7 @@ namespace Knossos.NET
                         Log.Add(Log.LogSeverity.Error, "KnUtils.GetRemoteResource()", ex);
                     }
                 }
+                remoteResourceLoadedToCache.Add(resourceURL);
                 return fileInCachePath;
             }
             catch (Exception ex)

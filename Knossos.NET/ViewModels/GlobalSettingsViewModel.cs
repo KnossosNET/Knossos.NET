@@ -64,6 +64,7 @@ namespace Knossos.NET.ViewModels
         internal bool displaySettingsWarning = true;
         [ObservableProperty]
         internal bool quickStartButtonVisibility = true;
+        internal bool expandKnossosSettings = false;
 
         /* Knossos Settings */
         [ObservableProperty]
@@ -1572,6 +1573,14 @@ namespace Knossos.NET.ViewModels
             if (!ShowDevOptions){
                 NoSystemCMD = false;
             }
+        }
+
+        /// <summary>
+        /// Expand Knossos settings section
+        /// </summary>
+        public void ExpandKnossosSection()
+        {
+            ExpandKnossosSettings = true;
         }
 
     }

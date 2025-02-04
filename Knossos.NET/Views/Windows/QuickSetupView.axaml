@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="500"
         x:Class="Knossos.NET.Views.QuickSetupView"
 		x:Name="QSWindow"
 		xmlns:v="using:Knossos.NET.Views"
@@ -42,6 +42,7 @@
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">Current Library Folder</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" Text="{Binding LibraryPath}"></TextBlock>
 				<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Go to the "Settings" tab and set the library folder to continue.</TextBlock>
+				<Button IsVisible="{Binding !CanContinue}" Command="{Binding ClickSettingsButton}" Margin="20,0,0,0" Classes="Quaternary">Show me where</Button>
 			</StackPanel>
 			<StackPanel IsVisible="{Binding IsPortableMode}">
 				<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >KnossosNET is running in portable mode</TextBlock>
@@ -62,6 +63,7 @@
 				<TextBlock IsVisible="{Binding !BuildAvailable}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Go to the "Engine" tab, select "Stable Builds" and download the newest stable, it should be always the top one on the list.</TextBlock>
 				<Button IsVisible="{Binding BuildAvailable}" Margin="0,10,0,10" HorizontalAlignment="Center" Classes="Primary" Content="Download Latest Stable Build" Command="{Binding DownloadLatestStable}"/>
 				<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">A FSO build must be downloaded before you continue...</TextBlock>
+				<Button IsVisible="{Binding !CanContinue}" Command="{Binding ClickEngineButton}" Margin="20,0,0,0" Classes="Quaternary">Show me where</Button>
 				<TextBlock IsVisible="{Binding CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">Engine build detected!</TextBlock>
 				<TextBlock IsVisible="{Binding CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Keep in mind that some mods may download and run on different versions of the FSO engine. This is because some mods cannot run on newer builds or they require a specific FSO build version. You can always change the FSO build used by a mod by opening the "Mod Settings" on the mod card, but keep in mind not all mods can run on all engine builds.</TextBlock>
 			</StackPanel>
@@ -71,8 +73,9 @@
 		<StackPanel IsVisible="{Binding Page4}" Grid.Row="0" >
 			<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left">Freespace 2 Retail (Optional)</TextBlock>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">In order to have access to Freespace 1 and 2 content and visual improvements you need to install Freespace 2 Retail in KnossosNET. If you do not install Freespace 2 Retail, then any content that needs the full Freespace 2 retail files will not be displayed on the "Explore" tab.</TextBlock>
-      <TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">If you do not have the retail FS2 installed into KnossosNET you can still play total conversion mods, which are mods that are completely standalone and do not depend on any of the Freespace content.</TextBlock>
-      <TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">To install Freespace 2 go to the "Settings" tab and open the "FS2 Retail Installer" button under the "KnossosNET Settings" section. Then follow the instructions there. If you already have FS2 installed this button is not available.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">If you do not have the retail FS2 installed into KnossosNET you can still play total conversion mods, which are mods that are completely standalone and do not depend on any of the Freespace content.</TextBlock>
+			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">To install Freespace 2 go to the "Settings" tab and open the "FS2 Retail Installer" button under the "KnossosNET Settings" section. Then follow the instructions there. If you already have FS2 installed this button is not available.</TextBlock>
+			<Button Command="{Binding ClickSettingsButton}" Margin="20,0,0,0" Classes="Quaternary">Show me where</Button>
 			<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">This step is optional and you can continue at any time.</TextBlock>
 		</StackPanel>
 

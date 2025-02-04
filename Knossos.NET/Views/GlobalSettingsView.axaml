@@ -21,137 +21,137 @@
 		<ScrollViewer Grid.Row="1">
 			<StackPanel>
 				<!--KNOSSOS SETTINGS-->
-          <Expander VerticalAlignment="Top" Margin="5" MinWidth="400">
-            <Expander.Header>
-							<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Settings that are specific to KnossosNET only. These settings do not affect the FSO engine.">
-                KnossosNET Settings
-              </Label>
-            </Expander.Header>
-            <StackPanel Margin="5">
-							<!-- Base Path -->
-							<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
-								<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
-								<TextBox Text="{Binding BasePath}" Margin="10,0,0,0" Grid.Column="1" IsReadOnly="True" Width="500"></TextBox>
-								<Button IsVisible="{Binding !IsPortableMode}" Margin="5,0,0,0" Grid.Column="2" Classes="Quaternary" Command="{Binding BrowseFolderCommand}">Browse</Button>
-							</Grid>
-							<!-- Lib Info -->
-							<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="6,10,0,0">
-								<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Width="200">Stats</TextBlock>
-								<WrapPanel Grid.Column="1" Grid.Row="0"  Margin="8,2,0,0">
-									<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications (collectively known as mods) are installed in your KnossosNET library.">Mods:</Label>
-									<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
-									<Label Margin="40,5,0,0" FontWeight="Bold">Builds:</Label>
-									<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfBuilds}"></TextBlock>
-									<Button Margin="40,0,0,0" Classes="Settings" Command="{Binding CleanupLibraryCommand}">Remove Unused Dependencies</Button>
-								</WrapPanel>
-							</Grid>
-							<WrapPanel Margin="6,10,0,0">	
-								<Label Margin="0,5,0,0" Width="200">Retail Freespace 2</Label>
-								<CheckBox Margin="10,0,0,0" IsVisible="{Binding Fs2RootPack}" IsEnabled="False" IsChecked="{Binding Fs2RootPack}"></CheckBox>
-								<Button Classes="Quaternary" Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Margin="10,0,0,0">Installer</Button>
+				<Expander IsExpanded="{Binding ExpandKnossosSettings}" VerticalAlignment="Top" Margin="5" MinWidth="740">
+					<Expander.Header>
+						<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Settings that are specific to KnossosNET only. These settings do not affect the FSO engine.">
+							KnossosNET Settings
+						</Label>
+					</Expander.Header>
+					<StackPanel Margin="5">
+						<!-- Base Path -->
+						<WrapPanel Margin="7,10,0,0">
+							<TextBlock VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
+							<TextBox HorizontalAlignment="Left" Width="400" Text="{Binding BasePath}" Margin="10,0,0,0" IsReadOnly="True" ></TextBox>
+							<Button IsVisible="{Binding !IsPortableMode}" Margin="5,0,0,0" Classes="Quaternary" Command="{Binding BrowseFolderCommand}">Browse</Button>
+						</WrapPanel>
+						<!-- Lib Info -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="6,10,0,0">
+							<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Width="200">Stats</TextBlock>
+							<WrapPanel Grid.Column="1" Grid.Row="0"  Margin="8,2,0,0">
+								<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications (collectively known as mods) are installed in your KnossosNET library.">Mods:</Label>
+								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
+								<Label Margin="40,5,0,0" FontWeight="Bold">Builds:</Label>
+								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfBuilds}"></TextBlock>
+								<Button Margin="40,0,0,0" Classes="Settings" Command="{Binding CleanupLibraryCommand}">Remove Unused Dependencies</Button>
 							</WrapPanel>
-							<WrapPanel Margin="8,10,0,0">
-								<TextBlock VerticalAlignment="Center" Width="200">Mod Compression</TextBlock>
-								<ComboBox SelectedIndex="{Binding ModCompression}" ToolTip.Tip="KnossosNET can try to compress mod files in order to save disk space, and in some cases reduce loading times. 'Manual' means you will have to change a modpack's compression from mod settings or during installation. 'Always' means KnossosNET will compress all mods during install. 'Mod Support' means KnossosNET will compress the files only if the mod FSO engine dependency set by the mod is over the minimum, and if the mod uses an official build." Grid.Column="1" Width="150" Margin="10,0,0,0">
-									<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
-									<ComboBoxItem Tag="1">Manual</ComboBoxItem>
-									<ComboBoxItem Tag="2">Always</ComboBoxItem>
-									<ComboBoxItem Tag="3">Mod Support</ComboBoxItem>
-								</ComboBox>
-								<NumericUpDown IsEnabled="{Binding ModCompression}" Margin="10,0,0,0" Width="120" Grid.Column="2" Minimum="1" Maximum="8" Value="{Binding CompressionMaxParallelism}" ToolTip.Tip="Max number of parallel compression tasks"></NumericUpDown>
+						</Grid>
+						<WrapPanel Margin="6,10,0,0">	
+							<Label Margin="0,5,0,0" Width="200">Retail Freespace 2</Label>
+							<CheckBox Margin="10,0,0,0" IsVisible="{Binding Fs2RootPack}" IsEnabled="False" IsChecked="{Binding Fs2RootPack}"></CheckBox>
+							<Button Classes="Quaternary" Command="{Binding InstallFS2Command}" IsVisible="{Binding !Fs2RootPack}" Margin="10,0,0,0">Installer</Button>
+						</WrapPanel>
+						<WrapPanel Margin="8,10,0,0">
+							<TextBlock VerticalAlignment="Center" Width="200">Mod Compression</TextBlock>
+							<ComboBox SelectedIndex="{Binding ModCompression}" ToolTip.Tip="KnossosNET can try to compress mod files in order to save disk space, and in some cases reduce loading times. 'Manual' means you will have to change a modpack's compression from mod settings or during installation. 'Always' means KnossosNET will compress all mods during install. 'Mod Support' means KnossosNET will compress the files only if the mod FSO engine dependency set by the mod is over the minimum, and if the mod uses an official build." Grid.Column="1" Width="150" Margin="10,0,0,0">
+								<ComboBoxItem Tag="0">Disabled</ComboBoxItem>
+								<ComboBoxItem Tag="1">Manual</ComboBoxItem>
+								<ComboBoxItem Tag="2">Always</ComboBoxItem>
+								<ComboBoxItem Tag="3">Mod Support</ComboBoxItem>
+							</ComboBox>
+							<NumericUpDown IsEnabled="{Binding ModCompression}" Margin="10,0,0,0" Width="120" Grid.Column="2" Minimum="1" Maximum="8" Value="{Binding CompressionMaxParallelism}" ToolTip.Tip="Max number of parallel compression tasks"></NumericUpDown>
+						</WrapPanel>
+						<!-- AutoUpdates -->
+						<WrapPanel Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Check for updates at startup</Label>
+							<ToggleSwitch IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start."></ToggleSwitch>
+						</WrapPanel>
+						<WrapPanel Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Auto Update KnosssosNET</Label>
+							<ToggleSwitch IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input."></ToggleSwitch>
+						</WrapPanel>
+						<WrapPanel Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Auto Update FSO Builds</Label>
+							<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateStable}" ToolTip.Tip="KnossosNET will check for newer Stable FSO builds at the start and automatically download them if one is available">Stable</CheckBox>
+							<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateRC}" ToolTip.Tip="KnossosNET will check for newer RCs (Release Candidate) FSO builds at the start and automatically download them if one is available. Note: RC are only downloaded if they are newer than the newest available Stable.">RC</CheckBox>
+							<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateNightly}" ToolTip.Tip="KnossosNET will check for newer Nightly FSO builds at the start and automatically download them if one is available">Nightly</CheckBox>
+							<CheckBox Margin="5,0,0,0" IsChecked="{Binding DeleteOlder}" ToolTip.Tip="If this option is enabled, after an autoupdate KnossosNET will delete older versions of installed FSO builds if they are not needed by any mod">Delete older versions</CheckBox>
+						</WrapPanel>
+						<WrapPanel Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Delete Uploaded Mod Files</Label>
+							<ToggleSwitch Margin="5,0,0,0" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successful upload. You con choose to disable this option if you need to take a closer look or debug a problem."></ToggleSwitch>
+						</WrapPanel>
+						<!-- Image Cache -->
+						<WrapPanel Margin="5,10,0,0">
+							<Label VerticalAlignment="Center" Width="200" Content="Resource Cache"/>
+							<Label Margin="10,0,0,0" VerticalAlignment="Center" Content="{Binding ImgCacheSize}"/>
+							<Button Command="{Binding ClearImageCache}" Margin="5,0,0,0" Classes="Quaternary">Clear</Button>
+						</WrapPanel>
+						<!-- SubTasks -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Concurrent Subtasks</TextBlock>
+							<ComboBox SelectedIndex="{Binding MaxConcurrentSubtasks}" ToolTip.Tip="All tasks are done in order, but some tasks like install tasks creates multiple subtasks to download files, etc. This setting controls how many of them can run simultaneously." Grid.Column="1" Width="150" Margin="10,0,0,0">
+								<ComboBoxItem Tag="1">1</ComboBoxItem>
+								<ComboBoxItem Tag="2">2</ComboBoxItem>
+								<ComboBoxItem Tag="3">3</ComboBoxItem>
+								<ComboBoxItem Tag="4">4</ComboBoxItem>
+							</ComboBox>
+						</Grid>
+						<!-- Bandwidth limit -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Bandwidth Limit</TextBlock>
+							<ComboBox SelectedIndex="{Binding MaxDownloadSpeedIndex}" ToolTip.Tip="Bandwidth limiter (Per Individual Download)" Grid.Column="1" Width="150" Margin="10,0,0,0">
+								<ComboBoxItem Tag="0">Unlimited</ComboBoxItem>
+								<ComboBoxItem Tag="1">0.5 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="2">1 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="3">2 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="4">3 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="5">4 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="6">5 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="7">6 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="8">7 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="9">8 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="10">9 MB/s</ComboBoxItem>
+								<ComboBoxItem Tag="11">10 MB/s</ComboBoxItem>
+							</ComboBox>
+						</Grid>
+						<!-- Mirror Blacklist -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mirrors</TextBlock>
+							<WrapPanel Grid.Column="1" Margin="8,0,0,0">
+								<CheckBox Margin="0,0,0,0" IsChecked="{Binding !BlDlNebula}">dl.fsnebula.org</CheckBox>
+								<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlCfNebula}">cf.fsnebula.org</CheckBox>
+								<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlTalos}">talos.feralhosting.com</CheckBox>
 							</WrapPanel>
-							<!-- AutoUpdates -->
-							<WrapPanel Margin="5,10,0,0">
-								<Label Margin="0,5,0,0" Width="205">Check for updates at startup</Label>
-								<ToggleSwitch IsChecked="{Binding CheckUpdates}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will connect to the GitHub repo to check for available updates at the start."></ToggleSwitch>
-							</WrapPanel>
-							<WrapPanel Margin="5,10,0,0">
-								<Label Margin="0,5,0,0" Width="205">Auto Update KnosssosNET</Label>
-								<ToggleSwitch IsVisible="{Binding CheckUpdates}" Margin="5,0,0,0" IsChecked="{Binding AutoUpdate}" ToolTip.Tip="The update will be automatically downloaded and installed. KnossosNET will be restarted without any user input."></ToggleSwitch>
-							</WrapPanel>
-							<WrapPanel Margin="5,10,0,0">
-								<Label Margin="0,5,0,0" Width="205">Auto Update FSO Builds</Label>
-								<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateStable}" ToolTip.Tip="KnossosNET will check for newer Stable FSO builds at the start and automatically download them if one is available">Stable</CheckBox>
-								<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateRC}" ToolTip.Tip="KnossosNET will check for newer RCs (Release Candidate) FSO builds at the start and automatically download them if one is available. Note: RC are only downloaded if they are newer than the newest available Stable.">RC</CheckBox>
-								<CheckBox Margin="5,0,0,0" IsChecked="{Binding UpdateNightly}" ToolTip.Tip="KnossosNET will check for newer Nightly FSO builds at the start and automatically download them if one is available">Nightly</CheckBox>
-								<CheckBox Margin="5,0,0,0" IsChecked="{Binding DeleteOlder}" ToolTip.Tip="If this option is enabled, after an autoupdate KnossosNET will delete older versions of installed FSO builds if they are not needed by any mod">Delete older versions</CheckBox>
-							</WrapPanel>
-							<WrapPanel Margin="5,10,0,0">
-								<Label Margin="0,5,0,0" Width="205">Delete Uploaded Mod Files</Label>
-								<ToggleSwitch Margin="5,0,0,0" IsChecked="{Binding DeleteUploadedFiles}" ToolTip.Tip="During the upload of a mod version, generates files are saved on a '{modfolder}\kn_upload' folder, if this option is enabled these unnecessary files files will be deleted after a successful upload. You con choose to disable this option if you need to take a closer look or debug a problem."></ToggleSwitch>
-							</WrapPanel>
-							<!-- Image Cache -->
-							<WrapPanel Margin="5,10,0,0">
-								<Label VerticalAlignment="Center" Width="200" Content="Resource Cache"/>
-								<Label Margin="10,0,0,0" VerticalAlignment="Center" Content="{Binding ImgCacheSize}"/>
-								<Button Command="{Binding ClearImageCache}" Margin="5,0,0,0" Classes="Quaternary">Clear</Button>
-							</WrapPanel>
-							<!-- SubTasks -->
-							<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
-								<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Concurrent Subtasks</TextBlock>
-								<ComboBox SelectedIndex="{Binding MaxConcurrentSubtasks}" ToolTip.Tip="All tasks are done in order, but some tasks like install tasks creates multiple subtasks to download files, etc. This setting controls how many of them can run simultaneously." Grid.Column="1" Width="150" Margin="10,0,0,0">
-									<ComboBoxItem Tag="1">1</ComboBoxItem>
-									<ComboBoxItem Tag="2">2</ComboBoxItem>
-									<ComboBoxItem Tag="3">3</ComboBoxItem>
-									<ComboBoxItem Tag="4">4</ComboBoxItem>
-								</ComboBox>
-							</Grid>
-							<!-- Bandwidth limit -->
-							<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
-								<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Bandwidth Limit</TextBlock>
-								<ComboBox SelectedIndex="{Binding MaxDownloadSpeedIndex}" ToolTip.Tip="Bandwidth limiter (Per Individual Download)" Grid.Column="1" Width="150" Margin="10,0,0,0">
-									<ComboBoxItem Tag="0">Unlimited</ComboBoxItem>
-									<ComboBoxItem Tag="1">0.5 MB/s</ComboBoxItem>
-									<ComboBoxItem Tag="2">1 MB/s</ComboBoxItem>
-									<ComboBoxItem Tag="3">2 MB/s</ComboBoxItem>
-									<ComboBoxItem Tag="4">3 MB/s</ComboBoxItem>
-									<ComboBoxItem Tag="5">4 MB/s</ComboBoxItem>
-									<ComboBoxItem Tag="6">5 MB/s</ComboBoxItem>
-									<ComboBoxItem Tag="7">6 MB/s</ComboBoxItem>
-									<ComboBoxItem Tag="8">7 MB/s</ComboBoxItem>
-									<ComboBoxItem Tag="9">8 MB/s</ComboBoxItem>
-									<ComboBoxItem Tag="10">9 MB/s</ComboBoxItem>
-									<ComboBoxItem Tag="11">10 MB/s</ComboBoxItem>
-								</ComboBox>
-							</Grid>
-							<!-- Mirror Blacklist -->
-							<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
-								<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mirrors</TextBlock>
-								<WrapPanel Grid.Column="1" Margin="8,0,0,0">
-									<CheckBox Margin="0,0,0,0" IsChecked="{Binding !BlDlNebula}">dl.fsnebula.org</CheckBox>
-									<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlCfNebula}">cf.fsnebula.org</CheckBox>
-									<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlTalos}">talos.feralhosting.com</CheckBox>
-								</WrapPanel>
-							</Grid>
-							<!-- Log File -->
-							<WrapPanel Margin="5,10,0,0">
-								<Label Margin="0,5,0,0" Width="210">Enable Logging</Label>
-								<ToggleSwitch Margin="1,0,0,0" IsChecked="{Binding EnableLogFile}"></ToggleSwitch>
-							</WrapPanel>
-							<WrapPanel Margin="5,10,0,0">
-									<Label Margin="0,5,0,0" Width="200">Logging Level</Label> 
-									<ComboBox SelectedIndex="{Binding LogLevel}" IsEnabled="{Binding EnableLogFile}" Grid.Column="1" Width="150" Margin="11,0,0,0">
-									<ComboBoxItem Tag="0">Information</ComboBoxItem>
-									<ComboBoxItem Tag="1">Warning</ComboBoxItem>
-									<ComboBoxItem Tag="2">Error</ComboBoxItem>
-								</ComboBox>
-							</WrapPanel>
+						</Grid>
+						<!-- Log File -->
+						<WrapPanel Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="210">Enable Logging</Label>
+							<ToggleSwitch Margin="1,0,0,0" IsChecked="{Binding EnableLogFile}"></ToggleSwitch>
+						</WrapPanel>
+						<WrapPanel Margin="5,10,0,0">
+								<Label Margin="0,5,0,0" Width="200">Logging Level</Label> 
+								<ComboBox SelectedIndex="{Binding LogLevel}" IsEnabled="{Binding EnableLogFile}" Grid.Column="1" Width="150" Margin="11,0,0,0">
+								<ComboBoxItem Tag="0">Information</ComboBoxItem>
+								<ComboBoxItem Tag="1">Warning</ComboBoxItem>
+								<ComboBoxItem Tag="2">Error</ComboBoxItem>
+							</ComboBox>
+						</WrapPanel>
 					</StackPanel>
-        </Expander>
+				</Expander>
 
 				<!--VIDEO SETTINGS-->
-        <Expander VerticalAlignment="Top" Margin="5" MinWidth="400">
-          <Expander.Header>
-            <Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Video settings the FSO engine will use in-game.">
-              Video Settings
-            </Label>
-          </Expander.Header>
+				<Expander VerticalAlignment="Top" Margin="5" MinWidth="740">
+					<Expander.Header>
+						<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Video settings the FSO engine will use in-game.">
+							Video Settings
+						</Label>
+					</Expander.Header>
 					<StackPanel Margin="5">
-						<TextBox IsVisible="{Binding DisplaySettingsWarning}" BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,-5,5,5" Foreground="Yellow" MaxWidth="600" HorizontalAlignment="Left">
-              Note, video settings for most mods using FSO version 24.2.0 or higher will need to be changed in-game by default.
-              To change these new settings, play a modern mod and then go to the in-game "Options" menu.
+						<TextBox IsVisible="{Binding DisplaySettingsWarning}" BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,-5,5,5" Foreground="Yellow" MaxWidth="680" HorizontalAlignment="Left">
+						  Note, video settings for most mods using FSO version 24.2.0 or higher will need to be changed in-game by default.
+						  To change these new settings, play a modern mod and then go to the in-game "Options" menu.
 						</TextBox>
-            <!-- Performance Tips (keep on separate row to ensure resizing looks better) -->
+						<!-- Performance Tips (keep on separate row to ensure resizing looks better) -->
 						<Button Margin="5" Command="{Binding OpenPerformanceHelp}" Classes="Quaternary" Content="Tips to Optimize Game Performance" ToolTip.Tip="View help for optimizing performance" HorizontalAlignment="Left"></Button>
 						<!-- Resolution -->
 						<WrapPanel Margin="5">
@@ -160,7 +160,7 @@
 								<ComboBoxItem Tag="32">32 Bit</ComboBoxItem>
 								<ComboBoxItem Tag="16" IsEnabled="{Binding Enable16BitColor}">16 bit</ComboBoxItem>
 							</ComboBox>
-							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="470" Margin="10,0,0,0"></TextBlock>
 							<ComboBox ToolTip.Tip="Display resolution FSO will run at. Default is your system display resolution." SelectedIndex="{Binding ResolutionSelectedIndex}" ItemsSource="{Binding ResolutionItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="300" Margin="10,0,0,0"></ComboBox>
 						</WrapPanel>
 						<!-- Texture Filtering -->
@@ -245,31 +245,31 @@
 							<ToggleSwitch ToolTip.Tip="Displays a counter of the frames-per-second (FPS) in the upper left corner of the screen during missions. Disabled by default." Tag="-fps" IsChecked="{Binding ShowFps}"></ToggleSwitch>
 						</WrapPanel>
 					</StackPanel>
-        </Expander>
+				</Expander>
 
 				<!--Audio SETTINGS-->
-        <Expander VerticalAlignment="Top" Margin="5" MinWidth="400">
-          <Expander.Header>
-            <Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Audio settings the FSO engine will use in-game.">
-              Audio Settings
-            </Label>
-          </Expander.Header>
+				<Expander VerticalAlignment="Top" Margin="5" MinWidth="740">
+					<Expander.Header>
+						<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Audio settings the FSO engine will use in-game.">
+						  Audio Settings
+						</Label>
+					</Expander.Header>
 					<StackPanel Margin="5">
-				    <TextBox IsVisible="{Binding DisplaySettingsWarning}"  BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,-5,5,0" Foreground="Yellow" MaxWidth="600" HorizontalAlignment="Left">
-              Note, audio settings for most mods using FSO version 24.2.0 or higher will need to be changed in-game by default. 
-              To change these new settings, play a modern mod and then go to the in-game "Options" menu.
-            </TextBox>
+						<TextBox IsVisible="{Binding DisplaySettingsWarning}" BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,-5,5,0" MaxWidth="680" Foreground="Yellow" HorizontalAlignment="Left">
+							Note, audio settings for most mods using FSO version 24.2.0 or higher will need to be changed in-game by default. 
+							To change these new settings, play a modern mod and then go to the in-game "Options" menu.
+						</TextBox>
 						<!-- Playback -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Playback Devices</TextBlock>
-							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
-							<ComboBox SelectedIndex="{Binding PlaybackSelectedIndex}" ItemsSource="{Binding PlaybackItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="470" Margin="10,0,0,0"></TextBlock>
+							<ComboBox SelectedIndex="{Binding PlaybackSelectedIndex}" ItemsSource="{Binding PlaybackItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="470" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Capture -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Capture Devices</TextBlock>
-							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
-							<ComboBox SelectedIndex="{Binding CaptureSelectedIndex}" ItemsSource="{Binding CaptureItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="470" Margin="10,0,0,0"></TextBlock>
+							<ComboBox SelectedIndex="{Binding CaptureSelectedIndex}" ItemsSource="{Binding CaptureItems}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="470" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Sample Rate -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
@@ -282,32 +282,32 @@
 							</ComboBox>
 						</Grid>
 						<!-- Enable EFX -->
-            <WrapPanel>
-              <Label Margin="4,5,0,0" Width="200">Enable EFX</Label>
+						<WrapPanel>
+							<Label Margin="4,5,0,0" Width="200">Enable EFX</Label>
 							<ToggleSwitch Tag="efx" Margin="11,0,0,0" IsChecked="{Binding EnableEFX}" ToolTip.Tip="Enables in-mission sound effects to play with an extra sound environment filter set by the mission designer. By default, this filter adds a reverb effect."></ToggleSwitch>
 						</WrapPanel>
 						<!-- Disable Audio -->
-            <WrapPanel>
-              <Label Margin="4,5,0,0" Width="200">Disable Audio</Label>
+						<WrapPanel>
+							<Label Margin="4,5,0,0" Width="200">Disable Audio</Label>
 							<ToggleSwitch Tag="-nosound" Margin="11,0,0,0" IsChecked="{Binding DisableAudio}"></ToggleSwitch>
 						</WrapPanel>
 						<!-- Disable Music -->
-            <WrapPanel>
-              <Label Margin="4,5,0,0" Width="200">Disable Music</Label>
+						<WrapPanel>
+							<Label Margin="4,5,0,0" Width="200">Disable Music</Label>
 							<ToggleSwitch Tag="-nomusic" Margin="11,0,0,0" IsChecked="{Binding DisableMusic}"></ToggleSwitch>
 						</WrapPanel>
 						<!-- TTS -->
-            <WrapPanel>
-              <Label Margin="4,5,0,0" Width="200">Enable Text to Speech</Label>
+						<WrapPanel>
+							<Label Margin="4,5,0,0" Width="200">Enable Text to Speech</Label>
 							<ToggleSwitch IsChecked="{Binding EnableTTS}" Margin="11,0,0,0"></ToggleSwitch>
 						</WrapPanel>
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Voice</TextBlock>
-							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
-							<ComboBox SelectedIndex="{Binding VoiceSelectedIndex}" ItemsSource="{Binding VoiceItems}" IsEnabled="{Binding EnableTTS}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
-							<Grid Grid.Column="2" IsVisible="{Binding EnableTTS}">
-								<Button Command="{Binding TestVoiceCommand}" IsVisible="{Binding !PlayingTTS}" Margin="5,0,0,0" Classes="Quaternary">Test</Button>
-								<Button Command="{Binding StopTTS}" IsVisible="{Binding PlayingTTS}" Margin="5,0,0,0" Classes="Cancel">Stop</Button>
+						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Width="200">Voice</TextBlock>
+							<TextBlock Grid.Row="0" Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="470" Margin="10,0,0,0"></TextBlock>
+							<ComboBox Grid.Row="0" SelectedIndex="{Binding VoiceSelectedIndex}" ItemsSource="{Binding VoiceItems}" IsEnabled="{Binding EnableTTS}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="470" Margin="10,0,0,0"></ComboBox>
+							<Grid Grid.Row="1" Grid.Column="1" IsVisible="{Binding EnableTTS}">
+								<Button Command="{Binding TestVoiceCommand}" IsVisible="{Binding !PlayingTTS}" Margin="10,10,0,0" Classes="Quaternary">Test</Button>
+								<Button Command="{Binding StopTTS}" IsVisible="{Binding PlayingTTS}" Margin="10,10,0,0" Classes="Cancel">Stop</Button>
 							</Grid>
 						</Grid>
 						<Button Command="{Binding OpenGetVoices}" IsVisible="{Binding WindowsOS}" Margin="214,5,0,5" Classes="Tertiary" Grid.Column="2">Get Additional SAPI Voices</Button>
@@ -317,75 +317,60 @@
 							<CheckBox Grid.Column="2" IsChecked="{Binding TtsBriefings}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Briefings</CheckBox>
 							<CheckBox Grid.Column="3" IsChecked="{Binding TtsIngame}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Ingame</CheckBox>
 							<CheckBox Grid.Column="4" IsChecked="{Binding TtsMulti}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Multi</CheckBox>
-							<CheckBox Grid.Column="5" IsChecked="{Binding TtsDescription}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Mod Description</CheckBox>
+							<CheckBox Grid.Column="5" IsChecked="{Binding TtsDescription}" IsEnabled="{Binding EnableTTS}" Margin="10,0,0,0">Mod Details</CheckBox>
 						</Grid>
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Speech Volume</TextBlock>
-							<Slider Grid.Column="1" Width="500" Margin="10,0,0,0" Value="{Binding TtsVolume}" Maximum="100" Minimum="0"></Slider>
+							<Slider Grid.Column="1" Width="470" Margin="10,0,0,0" Value="{Binding TtsVolume}" Maximum="100" Minimum="0"></Slider>
 						</Grid>
 					</StackPanel>
-        </Expander>
+				</Expander>
 
 				<!--INPUT SETTINGS-->
-        <Expander VerticalAlignment="Top" Margin="5" MinWidth="400">
-          <Expander.Header>
-            <Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Input settings where you can specify which of your plugged-in devices FSO can use in-game.">
-              Input Settings
-            </Label>
-          </Expander.Header>
+				<Expander VerticalAlignment="Top" Margin="5" MinWidth="740">
+					<Expander.Header>
+						<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Input settings where you can specify which of your plugged-in devices FSO can use in-game.">
+							Input Settings
+						</Label>
+					</Expander.Header>
 					<StackPanel Margin="5">
-				    <TextBox IsVisible="{Binding DisplaySettingsWarning}" BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,0,5,0" Foreground="Yellow" MaxWidth="600" HorizontalAlignment="Left">
-              Note, input settings for most mods using FSO version 24.2.0 or higher will need to be changed in-game by default. To change these new settings, play a modern mod and then go to the in-game "Options" menu.
-            </TextBox>
-            <?ignore
-							<!--Mouse and Joystick settings are saved in the pilot file, these values only edit the new in-game options which are not used-->
-							<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-								<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Mouse Sensitivity</TextBlock>
-								<Slider Grid.Column="1" Width="500" Value="{Binding MouseSensitivity}" Maximum="9" Minimum="0"></Slider>
-							</Grid>
-							<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-								<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick Sensitivity</TextBlock>
-								<Slider Grid.Column="1" Width="500" Value="{Binding JoystickSensitivity}" Maximum="9" Minimum="0"></Slider>
-							</Grid>
-							<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-								<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick Deadzone</TextBlock>
-								<Slider Grid.Column="1" Width="500"  Value="{Binding JoystickDeadZone}" Maximum="10" Minimum="0"></Slider>
-							</Grid>
-            ?>
+						<TextBox IsVisible="{Binding DisplaySettingsWarning}" BorderBrush="Transparent" IsReadOnly="True" TextWrapping="Wrap" Margin="5,0,5,0" Foreground="Yellow" MaxWidth="680" HorizontalAlignment="Left">
+						  Note, input settings for most mods using FSO version 24.2.0 or higher will need to be changed in-game by default. To change these new settings, play a modern mod and then go to the in-game "Options" menu.
+						</TextBox>
 						<!-- Joy1 -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #0</TextBlock>
-							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
-							<ComboBox Height="50" Grid.Column="1" SelectedIndex="{Binding Joy1SelectedIndex}" ItemsSource="{Binding Joystick1Items}" IsVisible="{Binding FlagDataLoaded}" Width="500" Margin="10,0,0,0"></ComboBox>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="470" Margin="10,0,0,0"></TextBlock>
+							<ComboBox Height="50" Grid.Column="1" SelectedIndex="{Binding Joy1SelectedIndex}" ItemsSource="{Binding Joystick1Items}" IsVisible="{Binding FlagDataLoaded}" Width="470" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Joy2 -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #1</TextBlock>
-							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
-							<ComboBox Height="50" SelectedIndex="{Binding Joy2SelectedIndex}" ItemsSource="{Binding Joystick2Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="470" Margin="10,0,0,0"></TextBlock>
+							<ComboBox Height="50" SelectedIndex="{Binding Joy2SelectedIndex}" ItemsSource="{Binding Joystick2Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="470" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Joy3 -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #2</TextBlock>
-							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
-							<ComboBox Height="50" SelectedIndex="{Binding Joy3SelectedIndex}" ItemsSource="{Binding Joystick3Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="470" Margin="10,0,0,0"></TextBlock>
+							<ComboBox Height="50" SelectedIndex="{Binding Joy3SelectedIndex}" ItemsSource="{Binding Joystick3Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="470" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 						<!-- Joy4 -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Joystick #3</TextBlock>
-							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="500" Margin="10,0,0,0"></TextBlock>
-							<ComboBox Height="50" SelectedIndex="{Binding Joy4SelectedIndex}" ItemsSource="{Binding Joystick4Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="500" Margin="10,0,0,0"></ComboBox>
+							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="470" Margin="10,0,0,0"></TextBlock>
+							<ComboBox Height="50" SelectedIndex="{Binding Joy4SelectedIndex}" ItemsSource="{Binding Joystick4Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="470" Margin="10,0,0,0"></ComboBox>
 						</Grid>
 					</StackPanel>
 				</Expander>
 		
 				<!--FSO ENGINE SETTINGS-->
-        <Expander VerticalAlignment="Top" Margin="5" MinWidth="400">
-          <Expander.Header>
-            <Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Additional settings that affect how the FSO engine runs.">
-              Specialized Settings
-            </Label>
-          </Expander.Header>
+				<Expander VerticalAlignment="Top" Margin="5" MinWidth="740">
+					<Expander.Header>
+						<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Additional settings that affect how the FSO engine runs.">
+							Specialized Settings
+						</Label>
+					</Expander.Header>
 					<StackPanel Margin="5">
 						<!-- FS2 Lang -->
 						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
@@ -405,7 +390,7 @@
 						<!-- Sys Info -->
 						<WrapPanel Margin="9,0,0,0">
 							<TextBlock VerticalAlignment="Center" Width="201">Detected Build Settings </TextBlock>
-							<Label Margin="0,5,0,0" FontWeight="Bold">OS:</Label>
+							<Label Margin="4,5,0,0" FontWeight="Bold">OS:</Label>
 							<TextBlock Margin="5,8,0,0" Text="{Binding DetectedOS}"></TextBlock>
 							<Label Margin="30,5,0,0" FontWeight="Bold">CPU Arch:</Label>
 							<TextBlock Margin="5,8,0,0" Text="{Binding CpuArch}"></TextBlock>
@@ -417,10 +402,10 @@
 							<CheckBox Margin="12,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, KnossosNET will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
 						</WrapPanel>
 						<!-- GLOBAL CMDLINE -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
-							<Label ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Command Line</Label>
-							<TextBox Text="{Binding GlobalCmd}" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="1" Width="500"></TextBox>
-							<Button Command="{Binding GlobalCmdHelp}" Classes="Quaternary" Grid.Column="2" Margin="10,0,0,0">Command Line Wiki Page</Button>
+						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto" Margin="5">
+							<Label Grid.Row="0" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Command Line</Label>
+							<TextBox Grid.Row="0" Text="{Binding GlobalCmd}" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="1" Width="470"></TextBox>
+							<Button Grid.Row="1" Command="{Binding GlobalCmdHelp}" Classes="Quaternary" Grid.Column="1" Margin="0,10,0,0">Command Line Wiki Page</Button>
 						</Grid>
 						<!-- Multi Port -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
@@ -435,30 +420,34 @@
 				</Expander>
 
 				<!--Developer Settings-->
-				<Label IsVisible="{Binding ShowDevOptions}" Margin="5,15,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Advanced settings used by Hard-light devs.">Developer Options</Label>
-				<Border IsVisible="{Binding ShowDevOptions}" Margin="0,5,0,5" BorderBrush="Black" BorderThickness="5" CornerRadius="2">
-					<StackPanel IsVisible="{Binding ShowDevOptions}" Margin="5">
+				<Expander IsVisible="{Binding ShowDevOptions}" VerticalAlignment="Top" Margin="5" MinWidth="740">
+					<Expander.Header>
+						<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Advanced settings used by Hard-light devs.">
+							Developer Options
+						</Label>
+					</Expander.Header>
+					<StackPanel Margin="5">
 						<!-- Developer Options Shutoff-->
-						<WrapPanel IsVisible="{Binding ShowDevOptions}" Margin="5,10,0,0">
+						<WrapPanel Margin="5,10,0,0">
 							<Button Content="Turn Off Developer Options" ToolTip.Tip="Restore Dev Options to Default and Close Developer Section.  This should restore normal Knossos.NET operations." Command="{Binding ToggleDeveloperOptions}"></Button>
 						</WrapPanel>
 						<!-- NoSystemCMD -->
-						<WrapPanel IsVisible="{Binding ShowDevOptions}" IsEnabled="{Binding ShowDevOptions}" Margin="5,10,0,0">
+						<WrapPanel Margin="5,10,0,0">
 							<Label Margin="0,5,0,0" Width="205">Don't Apply Graphics Settings</Label>
 							<ToggleSwitch IsChecked="{Binding NoSystemCMD}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will not pass the graphics settings configured to FSO."></ToggleSwitch>
 						</WrapPanel>
 						<!-- PrefixCMD -->
-						<WrapPanel IsVisible="{Binding ShowDevOptions}" IsEnabled="{Binding ShowDevOptions}" Margin="5,10,0,0">
+						<WrapPanel Margin="5,10,0,0">
 							<Label Margin="0,5,0,0" Width="205">Pass FSO launch command as argument to other command</Label> 
-							<TextBox Text="{Binding PrefixCMD}" Margin="5,0,0,0" ToolTip.Tip="This will be prepended to the launch command for FSO and FRED." Width="500"></TextBox>
+							<TextBox Text="{Binding PrefixCMD}" Margin="5,0,0,0" ToolTip.Tip="This will be prepended to the launch command for FSO and FRED." Width="470"></TextBox>
 						</WrapPanel>
 						<!-- EnvVars -->
-						<WrapPanel IsVisible="{Binding ShowDevOptions}" IsEnabled="{Binding ShowDevOptions}" Margin="5,10,0,0">
+						<WrapPanel Margin="5,10,0,0">
 							<Label Margin="0,5,0,0" Width="205">Pass environment variables to FSO</Label> 
-							<TextBox Text="{Binding EnvVars}" Margin="5,0,0,0" ToolTip.Tip="Expects a comma-separated list." Width="500"></TextBox>
+							<TextBox Text="{Binding EnvVars}" Margin="5,0,0,0" ToolTip.Tip="Expects a comma-separated list." Width="450"></TextBox>
 						</WrapPanel>
 					</StackPanel>
-				</Border>
+				</Expander>
 			</StackPanel>
 		</ScrollViewer>
 	</Grid>

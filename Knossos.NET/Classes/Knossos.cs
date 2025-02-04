@@ -765,6 +765,7 @@ namespace Knossos.NET
                 TaskViewModel.Instance?.CancelAllRunningTasks();
                 Nebula.CancelOperations();
                 await Task.Delay(2000).ConfigureAwait(false);
+                KnUtils.ClearDownloadedRemoteResourceList();
                 LoadBasePath();
             });
         }
@@ -1368,7 +1369,7 @@ namespace Knossos.NET
 
             
 
-            if (MainWindow.instance != null && globalSettings.warnNewSettingsSystem)
+            if (MainWindow.instance != null && globalSettings.warnNewSettingsSystem && !CustomLauncher.IsCustomMode)
             {
                 try
                 {
