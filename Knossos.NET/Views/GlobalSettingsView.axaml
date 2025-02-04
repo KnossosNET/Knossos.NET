@@ -21,7 +21,7 @@
 		<ScrollViewer Grid.Row="1">
 			<StackPanel>
 				<!--KNOSSOS SETTINGS-->
-          <Expander VerticalAlignment="Top" Margin="5" MinWidth="400">
+          <Expander IsExpanded="{Binding ExpandKnossosSettings}" VerticalAlignment="Top" Margin="5" MinWidth="400">
             <Expander.Header>
 							<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Settings that are specific to KnossosNET only. These settings do not affect the FSO engine.">
                 KnossosNET Settings
