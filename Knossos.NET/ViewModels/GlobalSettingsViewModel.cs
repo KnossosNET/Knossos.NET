@@ -64,6 +64,7 @@ namespace Knossos.NET.ViewModels
         internal bool displaySettingsWarning = true;
         [ObservableProperty]
         internal bool quickStartButtonVisibility = true;
+        [ObservableProperty]
         internal bool expandKnossosSettings = false;
 
         /* Knossos Settings */
