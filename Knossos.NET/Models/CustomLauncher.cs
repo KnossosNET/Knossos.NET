@@ -162,6 +162,11 @@ namespace Knossos.NET.Models
         public static bool MenuDisplayGlobalSettingsEntry { get; private set; } = false;
 
         /// <summary>
+        /// Display the QuickStart button in the Knossos settings menu
+        /// </summary>
+        public static bool SettingsDisplayQuickStartButton { get; private set; } = true;
+
+        /// <summary>
         /// Add custom buttons to the menu
         /// </summary>
         public static CustomMenuButton[]? CustomMenuButtons { get; private set; }
@@ -321,11 +326,14 @@ namespace Knossos.NET.Models
                     if (customData.MenuDisplayNebulaLoginEntry.HasValue)
                         MenuDisplayNebulaLoginEntry = customData.MenuDisplayNebulaLoginEntry.Value;
 
+                    if (customData.MenuDisplayCommunityEntry.HasValue)
+                        MenuDisplayCommunityEntry = customData.MenuDisplayCommunityEntry.Value;
+
                     if (customData.MenuDisplayGlobalSettingsEntry.HasValue)
                         MenuDisplayGlobalSettingsEntry = customData.MenuDisplayGlobalSettingsEntry.Value;
 
-                    if (customData.MenuDisplayCommunityEntry.HasValue)
-                        MenuDisplayCommunityEntry = customData.MenuDisplayCommunityEntry.Value;
+                    if (customData.SettingsDisplayQuickStartButton.HasValue)
+                        SettingsDisplayQuickStartButton = customData.SettingsDisplayQuickStartButton.Value;
 
                     CustomMenuButtons = customData.CustomMenuButtons;
 
@@ -380,8 +388,9 @@ namespace Knossos.NET.Models
             public bool? MenuDisplayEngineEntry { get; set; }
             public bool? MenuDisplayDebugEntry { get; set; }
             public bool? MenuDisplayNebulaLoginEntry { get; set; }
-            public bool? MenuDisplayGlobalSettingsEntry { get; set; }
             public bool? MenuDisplayCommunityEntry { get; set; }
+            public bool? MenuDisplayGlobalSettingsEntry { get; set; }
+            public bool? SettingsDisplayQuickStartButton { get; set; }
             public string[]? CustomCmdlineArray { get; set; }
             public bool? UseNebulaServices { get; set; }
             public bool? WriteLogFile { get; set; }

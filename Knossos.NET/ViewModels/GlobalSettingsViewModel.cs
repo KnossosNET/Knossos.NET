@@ -63,6 +63,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool displaySettingsWarning = true;
         [ObservableProperty]
+        internal bool quickStartButtonVisibility = true;
+        [ObservableProperty]
         internal bool expandKnossosSettings = false;
 
         /* Knossos Settings */
@@ -582,6 +584,7 @@ namespace Knossos.NET.ViewModels
             LogLevel= Knossos.globalSettings.logLevel;
             Fs2RootPack = Knossos.retailFs2RootFound;
             NumberOfMods = Knossos.GetInstalledModList(null).Count.ToString();
+            QuickStartButtonVisibility = CustomLauncher.IsCustomMode ? CustomLauncher.SettingsDisplayQuickStartButton : true;
             NumberOfBuilds = Knossos.GetInstalledBuildsList(null).Count.ToString();
             if(KnUtils.IsWindows)
             {

@@ -14,7 +14,7 @@
 
 	<Grid RowDefinitions="Auto,*">
 		<WrapPanel Margin="5,5,0,5" Grid.Row="0" VerticalAlignment="Center">
-			<Button Margin="0,5,30,0" Command="{Binding QuickSetupCommand}" FontSize="20" ToolTip.Tip="Open the initial 'Getting Started' guide window" Classes="Quaternary">Quick Setup Guide</Button>
+			<Button Margin="0,5,30,0" IsVisible="{Binding QuickStartButtonVisibility}" Command="{Binding QuickSetupCommand}" FontSize="20" ToolTip.Tip="Open the initial 'Getting Started' guide window" Classes="Quaternary">Quick Setup Guide</Button>
 			<Button Margin="0,5,30,0" Command="{Binding ResetCommand}" FontWeight="Bold" FontSize="20" ToolTip.Tip="Reset all settings to defaults" Classes="Cancel">Reset to defaults</Button>
 			<Button Margin="0,5,30,0" Command="{Binding ReloadFlagData}" FontSize="20" ToolTip.Tip="Reload all settings from the configuration file and reload system data.">Reload Data</Button>
 		</WrapPanel>
