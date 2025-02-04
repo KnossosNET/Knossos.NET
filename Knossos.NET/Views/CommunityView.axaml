@@ -14,58 +14,54 @@
 
 	<TabControl>
 		<TabItem Header="Resources">
-            <ScrollViewer HorizontalScrollBarVisibility="Visible">
-                <StackPanel Margin="40,20,20,10">
-                    <Button Width="900" Command="{Binding JoinHLPDiscord}" ToolTip.Tip="Hard Light Productions Discord - Permanent Invitation: https://discord.gg/cyhMBhMHzK"  Classes="CommunityLink">                          
-                            <WrapPanel Margin="10,5,15,5">
+			<ScrollViewer>
+                <StackPanel HorizontalAlignment="Left" MinWidth="680" MaxWidth="900" Margin="40,20,20,10">
+                    <Button HorizontalAlignment="Stretch" ToolTip.Tip="Hard Light Productions Discord - Permanent Invitation: https://discord.gg/cyhMBhMHzK"  Classes="CommunityLink">                          
+                            <WrapPanel Margin="10,10,15,10">
                                 <Image Margin="0,3,0,0" Height="64" Width="64" Source="/Assets/general/discordicon.png"/>
                                 <TextBlock FontSize="18" Margin="30,5,0,0" TextWrapping="Wrap">Join our discord!  With more than two thousand members and the collective wisdom of the community's modders, mission designers and scripters, you'll have everything you need to bring your FSO vision to life!</TextBlock>
                             </WrapPanel> 
                     </Button>
-                    <Button Width="900" Command="{Binding VisitHLPWiki}" ToolTip.Tip="Hard-Light Productions wiki https://wiki.hard-light.net/index.php/Main_Page"  Margin="0,20,0,0" Classes="CommunityLink">
-                            <WrapPanel Margin="10,5,15,10">
+                    <Button HorizontalAlignment="Stretch"  Command="{Binding VisitHLPWiki}" ToolTip.Tip="Hard-Light Productions wiki https://wiki.hard-light.net/index.php/Main_Page"  Margin="0,15,0,0" Classes="CommunityLink">
+                            <WrapPanel Margin="10,10,15,10">
                                 <Image Height="64" Width="64" Source="/Assets/knossos-icon.ico"/>
                                 <TextBlock FontSize="18" Margin="30,15,0,0" TextWrapping="Wrap">Our wiki has documentation for modding the game, additional resources for creating your own missions, and details about the Freespace canon.</TextBlock> 
                             </WrapPanel>
                     </Button>
-                    <Button Width="900" Command="{Binding OpenFredTutorial}" ToolTip.Tip="Fred Tutorial Selection https://wiki.hard-light.net/index.php/FRED_tutorials"  Margin="0,15,0,0" Classes="CommunityLink">
+                    <Button HorizontalAlignment="Stretch"  Command="{Binding OpenFredTutorial}" ToolTip.Tip="Fred Tutorial Selection https://wiki.hard-light.net/index.php/FRED_tutorials"  Margin="0,15,0,0" Classes="CommunityLink">
                             <WrapPanel Margin="10,10,15,10">
                                 <Image Height="64" Width="64" Source="/Assets/general/fred.png"/>
                                 <TextBlock FontSize="18" Margin="30,15,0,0" TextWrapping="Wrap">Learn how to make your own custom missions for FSO with this tutorial for our mission editor, called FRED.</TextBlock>
                             </WrapPanel>
                     </Button>
-                    <Button Width="900" Command="{Binding VisitScriptingRepo}" ToolTip.Tip="Scripting Repository https://github.com/FSO-Scripters/fso-scripts"  Margin="0,15,0,0" Classes="CommunityLink">
+                    <Button HorizontalAlignment="Stretch"  Command="{Binding VisitScriptingRepo}" ToolTip.Tip="Scripting Repository https://github.com/FSO-Scripters/fso-scripts"  Margin="0,15,0,0" Classes="CommunityLink">
                             <WrapPanel Margin="10,10,15,10">
                                 <Image Height="64" Width="64" Source="/Assets/general/fsolua.png"/>
                                 <TextBlock FontSize="18" Margin="30,15,0,0" TextWrapping="Wrap">For advanced users, you can download custom scripts to use in your mods and missions that enable new features.</TextBlock> 
                             </WrapPanel>
                     </Button>
                 </StackPanel>
-            </ScrollViewer>
+			</ScrollViewer>
 		</TabItem>
 
 	    <TabItem Header="FAQ">
-            <ScrollViewer HorizontalScrollBarVisibility="Visible">
-                <StackPanel Margin="30,0,20,10">
-                    <ItemsControl ItemsSource="{Binding Categories}">
+			<ScrollViewer>
+                <StackPanel HorizontalAlignment="Left" MinWidth="680" Margin="30,0,20,10">
+                    <ItemsControl HorizontalAlignment="Stretch" ItemsSource="{Binding Categories}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel HorizontalAlignment="Stretch" Margin="10,10,0,0">
+                                <StackPanel Margin="10,10,0,0">
                                     <Expander Classes="FAQ" Margin="10,0,0,0">
                                         <Expander.Header>
-                                                <TextBlock Width="800" FontSize="24" Text="{Binding Name}"></TextBlock>
+                                            <TextBlock MinWidth="600" MaxWidth="800" FontSize="24" Text="{Binding Name}"></TextBlock>
                                         </Expander.Header>
                                         <TreeView ItemsSource="{Binding Questions}">
                                             <TreeView.ItemTemplate>
                                                 <TreeDataTemplate>
-                                                    <Button Margin="0,15,0,5" Classes="CommunityInfo">
+                                                    <Button HorizontalAlignment="Stretch" Margin="0,15,0,5" Classes="CommunityInfo">
                                                         <StackPanel Margin="10,10,10,10">
-                                                            <WrapPanel>
-                                                                <TextBlock Width="800" FontSize="18" Text="{Binding question}" TextWrapping="Wrap"></TextBlock>
-                                                            </WrapPanel>
-                                                            <WrapPanel>
-                                                                <TextBlock Width="800" Margin="0,10,0,5" FontSize="14" Text="{Binding Answer}" TextWrapping="Wrap"></TextBlock>
-                                                            </WrapPanel>
+                                                            <TextBlock Width="800" FontSize="18" Text="{Binding question}" TextWrapping="Wrap"></TextBlock>
+                                                            <TextBlock Width="800" Margin="0,10,0,5" FontSize="14" Text="{Binding Answer}" TextWrapping="Wrap"></TextBlock>
                                                         </StackPanel>
                                                     </Button>
                                                 </TreeDataTemplate>
@@ -77,7 +73,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
-		    </ScrollViewer>
+			</ScrollViewer>
         </TabItem>
 
 		<TabItem Header="Bug Reporting">
