@@ -261,6 +261,27 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
+        /// Click on a menu button by code, it needs the button name
+        /// </summary>
+        /// <param name="buttonName"></param>
+        public void ClickOnMenuButton(string buttonName)
+        {
+            Dispatcher.UIThread.Invoke(new Action(() => {
+                if (MenuItems != null)
+                {
+                    foreach (var item in MenuItems)
+                    {
+                        if (item.label.ToLower() == buttonName.ToLower())
+                        {
+                            SelectedMenuItem = item;
+                            break;
+                        }
+                    }
+                }
+            }));
+        }
+
+        /// <summary>
         /// When the user clicks a sidebar menu item this code is called
         /// </summary>
         /// <param name="value"></param>
