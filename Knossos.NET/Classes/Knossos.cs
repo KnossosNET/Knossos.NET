@@ -1368,7 +1368,7 @@ namespace Knossos.NET
 
             
 
-            if (MainWindow.instance != null && globalSettings.warnNewSettingsSystem)
+            if (MainWindow.instance != null && globalSettings.warnNewSettingsSystem && !CustomLauncher.IsCustomMode)
             {
                 try
                 {
