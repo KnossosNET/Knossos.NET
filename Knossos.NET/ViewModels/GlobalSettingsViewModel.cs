@@ -62,6 +62,10 @@ namespace Knossos.NET.ViewModels
         internal bool isAVX2 = false;
         [ObservableProperty]
         internal bool displaySettingsWarning = true;
+        [ObservableProperty]
+        internal bool quickStartButtonVisibility = true;
+        [ObservableProperty]
+        internal bool expandKnossosSettings = false;
 
         /* Knossos Settings */
         [ObservableProperty]
@@ -588,6 +592,7 @@ namespace Knossos.NET.ViewModels
             LogLevel= Knossos.globalSettings.logLevel;
             Fs2RootPack = Knossos.retailFs2RootFound;
             NumberOfMods = Knossos.GetInstalledModList(null).Count.ToString();
+            QuickStartButtonVisibility = CustomLauncher.IsCustomMode ? CustomLauncher.SettingsDisplayQuickStartButton : true;
             NumberOfBuilds = Knossos.GetInstalledBuildsList(null).Count.ToString();
             if(KnUtils.IsWindows)
             {
@@ -1579,6 +1584,14 @@ namespace Knossos.NET.ViewModels
             if (!ShowDevOptions){
                 NoSystemCMD = false;
             }
+        }
+
+        /// <summary>
+        /// Expand Knossos settings section
+        /// </summary>
+        public void ExpandKnossosSection()
+        {
+            ExpandKnossosSettings = true;
         }
 
     }

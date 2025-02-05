@@ -98,17 +98,27 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// Starting width size of the launcher window
-        /// This is also the min width
         /// null for auto
         /// </summary>
         public static int? WindowWidth { get; private set; } = 1024;
 
         /// <summary>
         /// Starting height size of the launcher window
-        /// This is also the min height
         /// null for auto
         /// </summary>
         public static int? WindowHeight { get; private set; } = 540;
+
+        /// <summary>
+        /// This is the min width for the launcher
+        /// null for auto
+        /// </summary>
+        public static int? MinWindowWidth { get; private set; } = 900;
+
+        /// <summary>
+        /// This is the min height for the launcher
+        /// null for auto
+        /// </summary>
+        public static int? MinWindowHeight { get; private set; } = 500;
 
         /// <summary>
         /// Configurable option to show the task buttom at the end of the menu buttom list
@@ -150,6 +160,11 @@ namespace Knossos.NET.Models
         /// If you do this you may want to add "-no_ingame_options" to the custom cmdline
         /// </summary>
         public static bool MenuDisplayGlobalSettingsEntry { get; private set; } = false;
+
+        /// <summary>
+        /// Display the QuickStart button in the Knossos settings menu
+        /// </summary>
+        public static bool SettingsDisplayQuickStartButton { get; private set; } = true;
 
         /// <summary>
         /// Add custom buttons to the menu
@@ -290,6 +305,12 @@ namespace Knossos.NET.Models
                     if (customData.WindowHeight != null)
                         WindowHeight = customData.WindowHeight;
 
+                    if (customData.MinWindowWidth != null)
+                        MinWindowWidth = customData.MinWindowWidth;
+
+                    if (customData.MinWindowHeight != null)
+                        MinWindowHeight = customData.MinWindowHeight;
+
                     if (customData.MenuTaskButtonAtTheEnd.HasValue)
                         MenuTaskButtonAtTheEnd = customData.MenuTaskButtonAtTheEnd.Value;
 
@@ -305,11 +326,14 @@ namespace Knossos.NET.Models
                     if (customData.MenuDisplayNebulaLoginEntry.HasValue)
                         MenuDisplayNebulaLoginEntry = customData.MenuDisplayNebulaLoginEntry.Value;
 
+                    if (customData.MenuDisplayCommunityEntry.HasValue)
+                        MenuDisplayCommunityEntry = customData.MenuDisplayCommunityEntry.Value;
+
                     if (customData.MenuDisplayGlobalSettingsEntry.HasValue)
                         MenuDisplayGlobalSettingsEntry = customData.MenuDisplayGlobalSettingsEntry.Value;
 
-                    if (customData.MenuDisplayCommunityEntry.HasValue)
-                        MenuDisplayCommunityEntry = customData.MenuDisplayCommunityEntry.Value;
+                    if (customData.SettingsDisplayQuickStartButton.HasValue)
+                        SettingsDisplayQuickStartButton = customData.SettingsDisplayQuickStartButton.Value;
 
                     CustomMenuButtons = customData.CustomMenuButtons;
 
@@ -357,13 +381,16 @@ namespace Knossos.NET.Models
             public string? NebulaTextToolTip { get; set; }
             public int? WindowWidth { get; set; }
             public int? WindowHeight { get; set; }
+            public int? MinWindowWidth { get; set; }
+            public int? MinWindowHeight { get; set; }
             public bool? MenuTaskButtonAtTheEnd { get; set; }
             public bool? MenuOpenFirstTime { get; set; }
             public bool? MenuDisplayEngineEntry { get; set; }
             public bool? MenuDisplayDebugEntry { get; set; }
             public bool? MenuDisplayNebulaLoginEntry { get; set; }
-            public bool? MenuDisplayGlobalSettingsEntry { get; set; }
             public bool? MenuDisplayCommunityEntry { get; set; }
+            public bool? MenuDisplayGlobalSettingsEntry { get; set; }
+            public bool? SettingsDisplayQuickStartButton { get; set; }
             public string[]? CustomCmdlineArray { get; set; }
             public bool? UseNebulaServices { get; set; }
             public bool? WriteLogFile { get; set; }

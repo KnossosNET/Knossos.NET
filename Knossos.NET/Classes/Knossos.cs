@@ -211,10 +211,16 @@ namespace Knossos.NET
             string modver = string.Empty;
             string modExecType = string.Empty;
             string toolName = string.Empty;
+            string buildid = string.Empty;
+            string buildver = string.Empty;
+            string? cmdline = null;
             bool saveID = false;
             bool saveVer = false;
             bool saveExecType = false;
             bool toolID = false;
+            bool saveBuildID = false;
+            bool saveBuildVer = false;
+            bool saveCmdline = false;
 
             foreach (var arg in args)
             {
@@ -239,6 +245,21 @@ namespace Knossos.NET
                     saveExecType = false;
                     modExecType = arg;
                 }
+                if (saveBuildID)
+                {
+                    saveBuildID = false;
+                    buildid = arg;
+                }
+                if (saveBuildVer)
+                {
+                    saveBuildVer = false;
+                    buildver = arg;
+                }
+                if (saveCmdline)
+                {
+                    saveCmdline = false;
+                    cmdline = arg;
+                }
                 if (arg.ToLower() == "-playmod")
                 {
                     saveID = true;
@@ -254,6 +275,18 @@ namespace Knossos.NET
                 if (arg.ToLower() == "-exec")
                 {
                     saveExecType = true;
+                }
+                if (arg.ToLower() == "-build")
+                {
+                    saveBuildID = true;
+                }
+                if (arg.ToLower() == "-build-version")
+                {
+                    saveBuildVer = true;
+                }
+                if (arg.ToLower() == "-cmdline")
+                {
+                    saveCmdline = true;
                 }
             }
 
@@ -276,6 +309,38 @@ namespace Knossos.NET
                     Log.Add(Log.LogSeverity.Error, "Knossos.QuickLaunch", ex);
                 }
             }
+            FsoBuild? fsoBuild = null;
+            if (buildver != string.Empty)
+            {
+                //we have a version
+                if (buildid == string.Empty)
+                    buildid = "fso";
+                switch (buildver.ToLower())
+                {
+                    case "newerstable":
+                        fsoBuild = GetInstalledBuildsList().Where(x => x.id.ToLower() == buildid.ToLower() && x.stability == FsoStability.Stable)?.MaxBy(x => new SemanticVersion(x.version));
+                        break;
+                    case "newerrc":
+                        fsoBuild = GetInstalledBuildsList().Where(x => x.id.ToLower() == buildid.ToLower() && x.stability == FsoStability.RC)?.MaxBy(x => new SemanticVersion(x.version));
+                        break;
+                    case "newernightly":
+                        fsoBuild = GetInstalledBuildsList().Where(x => x.id.ToLower() == buildid.ToLower() && x.stability == FsoStability.Nightly)?.MaxBy(x => new SemanticVersion(x.version));
+                        break;
+                    default:
+                        fsoBuild = GetInstalledBuildsList().FirstOrDefault(x => x.id.ToLower() == buildid.ToLower() && x.version == buildver);
+                        break;
+                }
+            }
+            else if(buildid != string.Empty)
+            {
+                //no version, pick whatever is newer for this id
+                fsoBuild = GetInstalledBuildsList().Where(x => x.id.ToLower() == buildid.ToLower())?.MaxBy(x => new SemanticVersion(x.version));
+            }
+
+            if (buildid != string.Empty && fsoBuild == null)
+            {
+                Log.Add(Log.LogSeverity.Error, "Knossos.QuickLaunch", "Quick launch was used but we could not find a FSO build with this ID: " + buildid + " and version: " + buildver == null ? "Any" : buildver );
+            }
 
             if(modid != string.Empty)
             {
@@ -295,7 +360,7 @@ namespace Knossos.NET
 
                     if(mod != null)
                     {
-                        PlayMod(mod, execType);
+                        PlayMod(mod, execType, false, 0, false, fsoBuild, cmdline);
                     }
                     else
                     {
@@ -325,7 +390,7 @@ namespace Knossos.NET
 
                         if(mod != null)
                         {
-                            PlayMod(mod, execType);
+                            PlayMod(mod, execType, false, 0, false, fsoBuild, cmdline);
                         }
                     }
                     else
@@ -424,12 +489,22 @@ namespace Knossos.NET
 
                             if (releaseAsset != null && releaseAsset.browser_download_url != null)
                             {
+                                if(globalSettings.ignoredLauncherUpdates.Contains(latest.tag_name))
+                                {
+                                    Log.Add(Log.LogSeverity.Information, "Knossos.CheckKnetUpdates()", "Launcher update: " + latest.tag_name + " is available, but it was skipped because it is on the ignore list.");
+                                    return;
+                                }
                                 if (!forceUpdateDownload && !globalSettings.autoUpdate)
                                 {
                                     MessageBox.MessageBoxResult result = MessageBox.MessageBoxResult.Cancel;
                                     await Dispatcher.UIThread.Invoke(async () => {
-                                        result = await MessageBox.Show(null, "Knossos.NET " + latest.tag_name + ":\n" + latest.body + "\n\n\nIf you continue Knossos.NET will be re-started after download.", "An update is available", MessageBox.MessageBoxButtons.ContinueCancel);
+                                        result = await MessageBox.Show(null, "Knossos.NET " + latest.tag_name + ":\n" + latest.body + "\n\n\nIf you continue Knossos.NET will be re-started after download.", "An update is available", MessageBox.MessageBoxButtons.ContinueCancelSkipVersion);
                                     }).ConfigureAwait(false);
+                                    if(result == MessageBox.MessageBoxResult.SkipVersion)
+                                    {
+                                        globalSettings.ignoredLauncherUpdates.Add(latest.tag_name);
+                                        globalSettings.Save();
+                                    }
                                     if (result != MessageBox.MessageBoxResult.Continue)
                                     {
                                         return;
@@ -691,6 +766,7 @@ namespace Knossos.NET
                 TaskViewModel.Instance?.CancelAllRunningTasks();
                 Nebula.CancelOperations();
                 await Task.Delay(2000).ConfigureAwait(false);
+                KnUtils.ClearDownloadedRemoteResourceList();
                 LoadBasePath();
             });
         }
@@ -708,6 +784,8 @@ namespace Knossos.NET
                 MainWindowViewModel.Instance?.tagFilter.Clear();
 
                 await FolderSearchRecursive(globalSettings.basePath, isQuickLaunch).ConfigureAwait(false);
+
+                Log.Add(Log.LogSeverity.Information, "Knossos.LoadBasePath()", "Loaded: " + installedMods.Count() +" installed mods or tcs and " + engineBuilds.Count() + " engine builds." );
 
                 if (!isQuickLaunch)
                 {
@@ -845,7 +923,7 @@ namespace Knossos.NET
         /// <param name="fsoExecType"></param>
         /// <param name="standaloneServer"></param>
         /// <param name="standalonePort"></param>
-        public static async void PlayMod(Mod mod, FsoExecType fsoExecType, bool standaloneServer = false, int standalonePort = 0, bool vrMode = false)
+        public static async void PlayMod(Mod mod, FsoExecType fsoExecType, bool standaloneServer = false, int standalonePort = 0, bool vrMode = false, FsoBuild? specifiedBuild = null, string? additionalCmd = null)
         {
             if (TaskViewModel.Instance?.IsSafeState() == false)
             {
@@ -906,7 +984,12 @@ namespace Knossos.NET
             var cmdline = "-parse_cmdline_only";
             var modFlag = string.Empty;
             var modList = new List<Mod>();
-            FsoBuild? fsoBuild = null;
+            FsoBuild? fsoBuild = specifiedBuild;
+
+            if(additionalCmd != null)
+            {
+                cmdline += " " + additionalCmd;
+            }
 
             /* VR Mode Stuff */
             if(vrMode)
@@ -1289,7 +1372,7 @@ namespace Knossos.NET
 
             
 
-            if (MainWindow.instance != null && globalSettings.warnNewSettingsSystem)
+            if (MainWindow.instance != null && globalSettings.warnNewSettingsSystem && !CustomLauncher.IsCustomMode)
             {
                 try
                 {

@@ -48,6 +48,10 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal int? windowHeight = null;
         [ObservableProperty]
+        internal int? minWindowWidth = null;
+        [ObservableProperty]
+        internal int? minWindowHeight = null;
+        [ObservableProperty]
         internal ModListViewModel? installedModsView;
         [ObservableProperty]
         internal NebulaModListViewModel? nebulaModsView;
@@ -103,6 +107,8 @@ namespace Knossos.NET.ViewModels
             }
             if (!CustomLauncher.IsCustomMode)
             {
+                MinWindowWidth = 900;
+                MinWindowHeight = 500;
                 placeholderTileImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
                 InstalledModsView = new ModListViewModel();
                 NebulaModsView = new NebulaModListViewModel();
@@ -121,6 +127,8 @@ namespace Knossos.NET.ViewModels
                 AppTitle = CustomLauncher.WindowTitle + " v" + Knossos.AppVersion;
                 WindowHeight = CustomLauncher.WindowHeight;
                 WindowWidth = CustomLauncher.WindowWidth;
+                MinWindowWidth = CustomLauncher.MinWindowWidth;
+                MinWindowHeight = CustomLauncher.MinWindowHeight;
                 CustomHomeVM = new CustomHomeViewModel();
                 if (CustomLauncher.MenuDisplayEngineEntry)
                     FsoBuildsView = new FsoBuildsViewModel();
@@ -251,6 +259,27 @@ namespace Knossos.NET.ViewModels
                 if (MenuItems != null && MenuItems.Count() - 1 > defaultSelectedIndex)
                 {
                     SelectedMenuItem = MenuItems[defaultSelectedIndex];
+                }
+            }));
+        }
+
+        /// <summary>
+        /// Click on a menu button by code, it needs the button name
+        /// </summary>
+        /// <param name="buttonName"></param>
+        public void ClickOnMenuButton(string buttonName)
+        {
+            Dispatcher.UIThread.Invoke(new Action(() => {
+                if (MenuItems != null)
+                {
+                    foreach (var item in MenuItems)
+                    {
+                        if (item.label.ToLower() == buttonName.ToLower())
+                        {
+                            SelectedMenuItem = item;
+                            break;
+                        }
+                    }
                 }
             }));
         }

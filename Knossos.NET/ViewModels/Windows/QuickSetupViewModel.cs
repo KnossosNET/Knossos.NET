@@ -2,6 +2,7 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
+using Knossos.NET.Views;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
@@ -215,6 +216,18 @@ namespace Knossos.NET.ViewModels
                     UpdateBuildInstallButton();
                 }
             }
-        }    
+        }
+        
+        public void ClickSettingsButton()
+        {
+            MainWindowViewModel.Instance?.ClickOnMenuButton("Settings");
+            MainWindowViewModel.Instance?.GlobalSettingsView?.ExpandKnossosSection();
+        }
+
+        public void ClickEngineButton()
+        {
+            MainWindowViewModel.Instance?.ClickOnMenuButton("Engine");
+        }
+
     }
 }

@@ -545,6 +545,7 @@ namespace Knossos.NET.Models
                     cancellationToken = null;
                 }
                 GC.Collect();
+                Log.Add(Log.LogSeverity.Information, "Nebula.InitialRepoLoad()", "Loaded: " + allModsInRepo.Count() + " repo entries. Engine builds: "+ builds.Count() + ", Mods: " + modsByID.Count() + ", TCs: " + modsTcs.Count() + "." );
                 return modUpdates;
             }
             catch (TaskCanceledException)
@@ -786,7 +787,7 @@ namespace Knossos.NET.Models
                                 if (jsonReply != null)
                                 {
                                     var reply = JsonSerializer.Deserialize<ApiReply>(jsonReply);
-                                    if (!reply.result)
+                                    if (!reply.result && resourceUrl != "mod/check_id")
                                         Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api POST call: " + response.StatusCode + "(" + (int)response.StatusCode + ")\n" + data);
 
                                     return reply;
@@ -794,6 +795,13 @@ namespace Knossos.NET.Models
                             }
                             else
                             {
+                                /* Nebula responds with a HTTP status code 401 for expired tokens, so lets try this again */
+                                if(needsLogIn && apiUserToken != null && response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                                {
+                                    Log.Add(Log.LogSeverity.Information, "Nebula.ApiCall()", "Nebula: User login token is expired.");
+                                    apiUserToken = null;
+                                    return await ApiCall(resourceUrl, data, needsLogIn, timeoutSeconds, method);
+                                }
                                 /* Upload/Update/delete Mod Timeout Hack */
                                 if(response.StatusCode.ToString() == "GatewayTimeout" && (resourceUrl == "mod/release" || resourceUrl == "mod/release/update" || resourceUrl == "mod/release/delete"))
                                 {
@@ -829,6 +837,16 @@ namespace Knossos.NET.Models
                                     }
 
                                     return reply;
+                                }
+                            }
+                            else
+                            {
+                                /* Nebula responds with a HTTP status code 401 for expired tokens, so lets try this again */
+                                if (needsLogIn && apiUserToken != null && response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                                {
+                                    Log.Add(Log.LogSeverity.Information, "Nebula.ApiCall()", "Nebula: User login token is expired.");
+                                    apiUserToken = null;
+                                    return await ApiCall(resourceUrl, data, needsLogIn, timeoutSeconds, method);
                                 }
                             }
                             Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api GET call: " + response.StatusCode + "(" + (int)response.StatusCode + ").");
@@ -1222,13 +1240,13 @@ namespace Knossos.NET.Models
                 if(editableIds != null)
                     return editableIds;
 
-                var reply = await ApiCall("mod/editable", null, true, 30, ApiMethod.GET);
+                var reply = await ApiCall("mod/editable", null, true, 45, ApiMethod.GET);
                 if (reply.HasValue)
                 { 
                     if (reply.Value.mods != null && reply.Value.mods.Any())
                     {
                         var ids = reply.Value.mods.Select(x => x.Deserialize<string>()!).ToArray()!;
-                        Log.Add(Log.LogSeverity.Information, "Nebula.GetEditableMods", "Editable mods in Nebula: " + string.Join(", ", ids));
+                        Log.Add(Log.LogSeverity.Information, "Nebula.GetEditableMods", "Editable mod ids in Nebula: " + string.Join(",", ids));
                         editableIds = ids;
                         return ids;
                     }
@@ -1260,13 +1278,13 @@ namespace Knossos.NET.Models
                 if (tryUseCache && privateMods != null)
                     return privateMods;
 
-                var reply = await ApiCall("mod/list_private", null, true, 30, ApiMethod.GET);
+                var reply = await ApiCall("mod/list_private", null, true, 45, ApiMethod.GET);
                 if (reply.Value.mods != null && reply.Value.mods.Any())
                 {
                     var mods = reply.Value.mods.Select(x => x.Deserialize<Mod>()!).ToArray()!;
                     foreach (var mod in mods)
                     {
-                        Log.Add(Log.LogSeverity.Information, "Nebula.GetPrivateMods", "Private mod in Nebula with access: " + mod);
+                        Log.Add(Log.LogSeverity.Information, "Nebula.GetPrivateMods", mod.ToString());
                     }
                     return mods;
                 }

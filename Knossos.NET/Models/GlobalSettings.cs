@@ -10,6 +10,7 @@ using IniParser;
 using Avalonia.Threading;
 using Knossos.NET.ViewModels;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Knossos.NET.Models
 {
@@ -142,6 +143,8 @@ namespace Knossos.NET.Models
                 }
             }
         }
+        [JsonPropertyName("ignored_launcher_updates")]
+        public List<string> ignoredLauncherUpdates { get; set; } = new List<string>();
 
         /* 
          * Settings that can wait to be saved at app close so we dont have to call save() all the time
@@ -693,6 +696,7 @@ namespace Knossos.NET.Models
                         sortType = tempSettings.sortType;
                         portableFsoPreferences = tempSettings.portableFsoPreferences;
                         minimizeToTray = tempSettings.minimizeToTray;
+                        ignoredLauncherUpdates = tempSettings.ignoredLauncherUpdates;
 
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings have been loaded");
