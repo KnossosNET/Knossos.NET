@@ -21,25 +21,53 @@ namespace Knossos.NET
     public partial class App : Application
     {
         TrayIcon? trayIcon = null;
+        bool minimizeToTray = false;
 
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
         }
 
+        public void DisableMinimizeToTrayRuntime()
+        {
+            minimizeToTray = false;
+        }
+
+        public void EnableMinimizeToTrayRuntime()
+        {
+            if (!minimizeToTray && ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                if (desktop.MainWindow != null)
+                {
+                    desktop.MainWindow.PropertyChanged += (v, __) =>
+                    {
+                        if (minimizeToTray && v is MainWindow view && view.WindowState == WindowState.Minimized)
+                        {
+                            desktop.MainWindow.Hide();
+                            desktop.MainWindow.WindowState = WindowState.Normal;
+                            StartTrayIcon();
+                            trayIcon!.IsVisible = true;
+                        }
+                    };
+                    desktop.MainWindow.Closing += (_, __) =>
+                    {
+                        if (trayIcon != null)
+                        {
+                            trayIcon.IsVisible = false;
+                            trayIcon = null;
+                        }
+                    };
+                    minimizeToTray = true;
+                }
+            }
+        }
+
         public override void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                bool trayMode = false;
-                foreach (var arg in Environment.GetCommandLineArgs())
-                {
-                    if (arg.ToLower() == "-traymode")
-                    {
-                        trayMode = true;
-                    }
-                }
-                if (trayMode)
+                minimizeToTray = Environment.GetCommandLineArgs().FirstOrDefault(x => x.ToLower() == "-traymode") != null;
+                if (minimizeToTray)
                 {
                     desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
                     Knossos.StartUp(false, false);
@@ -76,20 +104,37 @@ namespace Knossos.NET
             trayIcon.Menu = new NativeMenu();
 
             /*****************************OPEN***********************************/
-            var open = new NativeMenuItem("Open Launcher");
-            open.Click += (s, e) => {
+            var open = new NativeMenuItem("Open");
+            open.Click += (s, _) => {
                 if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 {
-                    desktop.MainWindow = new MainWindow
+                    if (desktop.MainWindow == null)
                     {
-                        DataContext = new MainWindowViewModel()
-                    };
-                    desktop.MainWindow.Closing += (s, e) =>
-                    {
-                        StartTrayIcon();
-                        trayIcon.IsVisible = true;
-                    };
-                    desktop.MainWindow.Show();
+                        desktop.MainWindow = new MainWindow
+                        {
+                            DataContext = new MainWindowViewModel()
+                        };
+                        desktop.MainWindow.PropertyChanged += (v, __) =>
+                        {
+                            if (v is MainWindow view && view.WindowState == WindowState.Minimized)
+                            {
+                                desktop.MainWindow.Hide();
+                                desktop.MainWindow.WindowState = WindowState.Normal;
+                                StartTrayIcon();
+                                trayIcon.IsVisible = true;
+                            }
+                        };
+                        desktop.MainWindow.Closing += (_, __) =>
+                        {
+                            if (trayIcon != null)
+                            {
+                                trayIcon.IsVisible = false;
+                                trayIcon = null;
+                            }
+                        };
+                        desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+                    }
+                    desktop.MainWindow?.Show();
                     trayIcon.IsVisible = false;
                     GC.Collect();
                 }
@@ -221,11 +266,16 @@ namespace Knossos.NET
 
             /*****************************CLOSE***********************************/
             trayIcon.Menu.Add(new NativeMenuItemSeparator());
-            var close = new NativeMenuItem("Exit");
+            var close = new NativeMenuItem("Exit Knossos.NET");
             close.Click += (s, e) => { 
                 if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 {
                     desktop.Shutdown();
+                }
+                if(trayIcon != null)
+                {
+                    trayIcon.IsVisible = false;
+                    trayIcon = null;
                 }
             };
             trayIcon.Menu.Add(close);

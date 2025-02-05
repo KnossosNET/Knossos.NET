@@ -143,10 +143,12 @@ namespace Knossos.NET.ViewModels
             }
             if (!Knossos.initIsComplete)
             {
+                //Normal Startup
                 Knossos.StartUp(false, forceUpdate);
             }
             else
             {
+                //Loading main view the first time from the tray icon
                 Knossos.LoadBasePath();
             }
             CustomHomeVM?.CheckBasePath();
