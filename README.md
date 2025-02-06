@@ -66,6 +66,7 @@ For versions older than 1.3.0 hardware rendering is used by default and can be s
 <br /><br />
 ## **Mod Filters and tags:**<br />
 ![tags](https://i.imgur.com/KKVyuxc.png)
+<br />
 A filter and tags feature offers QOL improvements to mod search and listening.<br />
 Filters are a physical button that will display all mods that contain it.<br />
 Tags are words that will be used in the search function to improve search results. Before this only the mod name was used for the search.<br />
