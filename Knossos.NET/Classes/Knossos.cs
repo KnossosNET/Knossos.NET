@@ -32,6 +32,7 @@ namespace Knossos.NET
         public static bool inPortableMode { get; private set; } = false;
         public static bool isKnDataFolderReadOnly { get; private set; } = false;
         public static bool inSingleTCMode { get; private set; } = false;
+        public static bool initIsComplete {  get; private set; } = false;
 
         /// <summary>
         /// Static constructor
@@ -162,8 +163,8 @@ namespace Knossos.NET
 
                 if (globalSettings.basePath == null && !isQuickLaunch && !inSingleTCMode)
                     OpenQuickSetup();
-
-            }catch(Exception ex)
+            }
+            catch(Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Knossos.StartUp", ex);
             }
@@ -822,6 +823,8 @@ namespace Knossos.NET
                     NebulaModListView.Instance?.GenerateFilterButtons();
                     ModListView.Instance?.GenerateFilterButtons();
                 });
+
+                initIsComplete = true;
             }
         }
 

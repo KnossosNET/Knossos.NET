@@ -60,6 +60,11 @@
 							</ComboBox>
 							<NumericUpDown IsEnabled="{Binding ModCompression}" Margin="10,0,0,0" Width="120" Grid.Column="2" Minimum="1" Maximum="8" Value="{Binding CompressionMaxParallelism}" ToolTip.Tip="Max number of parallel compression tasks"></NumericUpDown>
 						</WrapPanel>
+            <!-- MinimizeToTray -->
+							<WrapPanel Margin="5,10,0,0">
+								<Label Margin="0,5,0,0" Width="205">Minimize to tray</Label>
+								<ToggleSwitch IsChecked="{Binding MinimizeToTray}" Margin="5,0,0,0" ToolTip.Tip="As of Knossos.NET v1.3, this is a experimental feature."></ToggleSwitch>
+							</WrapPanel>
 						<!-- AutoUpdates -->
 						<WrapPanel Margin="5,10,0,0">
 							<Label Margin="0,5,0,0" Width="205">Check for updates at startup</Label>

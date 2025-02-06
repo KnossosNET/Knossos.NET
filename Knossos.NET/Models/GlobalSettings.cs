@@ -121,9 +121,30 @@ namespace Knossos.NET.Models
         public AutoUpdateFsoBuilds autoUpdateBuilds { get; set; } = new AutoUpdateFsoBuilds();
         [JsonPropertyName("warn_new_settings_system")]
         public bool warnNewSettingsSystem { get; set; } = true;
+        [JsonIgnore]
+        public bool _minimizeToTray { get; set; } = false;
+        [JsonPropertyName("minimize_to_tray")]
+        public bool minimizeToTray {
+            get { return _minimizeToTray; }
+            set { if (_minimizeToTray != value) { 
+                    _minimizeToTray = value;
+                    pendingChangesOnAppClose = true;
+                    if (Avalonia.Application.Current is App app)
+                    {
+                        if (_minimizeToTray)
+                        {
+                            app.EnableMinimizeToTrayRuntime();
+                        }
+                        else
+                        {
+                            app.DisableMinimizeToTrayRuntime();
+                        }
+                    }
+                }
+            }
+        }
         [JsonPropertyName("ignored_launcher_updates")]
         public List<string> ignoredLauncherUpdates { get; set; } = new List<string>();
-
 
         /* 
          * Settings that can wait to be saved at app close so we dont have to call save() all the time
@@ -674,6 +695,7 @@ namespace Knossos.NET.Models
                         mainMenuOpen = tempSettings.mainMenuOpen;
                         sortType = tempSettings.sortType;
                         portableFsoPreferences = tempSettings.portableFsoPreferences;
+                        minimizeToTray = tempSettings.minimizeToTray;
                         ignoredLauncherUpdates = tempSettings.ignoredLauncherUpdates;
 
                         ReadFS2IniValues();

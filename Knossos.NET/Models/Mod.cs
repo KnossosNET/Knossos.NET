@@ -831,6 +831,17 @@ namespace Knossos.NET.Models
         }
 
         /// <summary>
+        /// To use with the List .Sort()
+        /// Orders the two titles using a regular case-insensitive string comparison, but ignoring any leading 'A', 'An', or 'The' articles
+        /// </summary>
+        /// <param name="title1"></param>
+        /// <param name="title2"></param>
+        public static int CompareTitles(Mod mod1, Mod mod2)
+        {
+            return String.Compare(KnUtils.RemoveArticles(mod1.title), KnUtils.RemoveArticles(mod2.title), StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        /// <summary>
         /// Does mod sorting based on the global Knossos.globalSettings.sortType variable
         /// Returns:
         /// Less than zero if modA precedes modB
