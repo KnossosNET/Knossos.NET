@@ -1,5 +1,5 @@
 # Knossos.NET<br />
-![KnossosNET](https://i.imgur.com/HGmL9iI.png)
+![KnossosNET](https://i.imgur.com/xwWvwcn.png)
 <br />
 <br />
 Knossos.NET, also known as KNet, is a multi-platform launcher for Freespace 2 Open using .NET 6.0 and AvaloniaUI<br />
@@ -7,7 +7,7 @@ Knossos.NET, also known as KNet, is a multi-platform launcher for Freespace 2 Op
 
 <br /><br />
 ## **Current Status:**<br />
-Version 1.2.2 has been released!<br />
+Version 1.3.0 has been released!<br />
 Check out our download page: https://knossoslauncher.com/<br />
 
 <br /><br />
@@ -28,8 +28,10 @@ This greately minimizes hard drive usage, but comes with two things to keep in m
 KnossosNET supports direct mod launch by adding a Command Line argument, this will open the launcher, and will launch FSO to play a mod with all the current settings and configurations, and close the launcher.<br />
 Example:<br />
 <br />
-KnossosNET.exe -playmod mod-id -version mod-version (optional) -exec fso-exec-type (optional)<br />
+KnossosNET.exe -playmod {mod-id} -version {mod-version} (optional) -exec {fso-exec-type} (optional) -build {buildid} (optional) -build-version {version} -cmdline "{additional cmd arguments for fso}"<br />
 <br />
+If no -build is given it will default to "FSO" if -build-version is also used. If -build-version is not used either mod default will be used.<br />
+-build-version supports both a specific version and the special strings "NewerStable", "NewerNightly" and "NewerRc" to select the newest one of each condition that is installed.<br />
 If no version is given (KnossosNET.exe -playmod mod-id) the highest version of the mod will be launched.<br />
 If no fso-exec-type is given or "Default", or an invalid type is passed "Release" will be used instead. <br />
 Exec type options:<br />
@@ -43,10 +45,22 @@ Exec type options:<br />
 The "Settings" window on a mod displays the Command Line to play that mod directly via Quick Launch. You can copy that Quick Launch Command Line and use it to create a shortcut to easily launch that mod. <br />
 
 <br /><br />
-## **Software Rendering Mode:**<br />
-By default KnossosNET will render the UI in the GPU, can be set to run completely on software rendering what effectively avoids any use of the user GPU, this will come at the cost of increased CPU usage, what should not be a problem when in idle.
+## **Tool Quick Launch:**<br />
+Just like mods QuickLaunch, you can launch installed mod development tools with a cmdline argument. Windows users have the possibility to create a shortcut to desktop with a click. This may be extended to Linux and Mac later on.<br />
+KnossosNET.exe -tool {tool-id}
+
+<br /><br />
+## **Tray Icon Mode:**<br />
+On 1.3.0 a feature to minimize to tray has been implemented, this can be enabled on global settings.<br />
+Additionally, a cmdline argument (-tray) has been added to Knossos.NET. By starting in this mode the launcher will start to tray and will not load UI resources until the user opens the UI for the first time.<br />
+The tray icon allow to launch mods directly from there.<br />
+
+<br /><br />
+## **Rendering Mode:**<br />
+From 1.3.0 KnossosNET will render the UI in software mode by default to avoid use of the user GPU, but it can be set to run on hardware gpu rendering.
 <br />
-You can force the software rendering mode by using the "-software" Command Line argument or by setting an environment variable "KNET_RENDER_MODE" to "software".
+You can force the hardware rendering mode by using the "-hardware" Command Line argument or by setting an environment variable "KNET_RENDER_MODE" to "hardware".<br />
+For versions older than 1.3.0 hardware rendering is used by default and can be set to run on software mode by using "-software" or KNET_RENDER_MODE" to "software".
 
 <br /><br />
 ## **mod.ini Support:**<br />
@@ -69,7 +83,7 @@ On KnossosNET there are multiples sources of Command Line arguments that are eve
 <br /><br />
 ## **Dev Environment:**<br />
 - MSVC 2022<br />
-- .NET 6.0.406 SDK https://dotnet.microsoft.com/en-us/download/dotnet/6.0<br />
+- .NET 6.0.406(or newer) SDK https://dotnet.microsoft.com/en-us/download/dotnet/6.0<br />
 - Avalonia Extension for Visual Studio https://marketplace.visualstudio.com/items?itemName=AvaloniaTeam.AvaloniaVS<br />
 
 <br /><br />
@@ -79,18 +93,31 @@ On KnossosNET there are multiples sources of Command Line arguments that are eve
 
 <br /><br />
 ## **Current NuGet Packages:**<br />
-- Avalonia 11.0.5<br />
-- Avalonia.Desktop 11.0.5<br />
-- Avalonia.Diagnostics 11.0.5<br />
-- Avalonia.Themes.Fluent 11.0.5<br />
+- Avalonia 11.2.3<br />
+- Avalonia.Desktop 11.2.3<br />
+- Avalonia.Control.DataGrid 11.2.3<br />
+- Avalonia.Diagnostics 11.2.3<br />
+- Avalonia.Markup.Xaml.Loader 11.2.3<br />
+- Avalonia.Themes.Fluent 11.2.3<br />
 - Avalonia.HtmlRenderer 11.0.0<br />
-- CommunityToolkit.Mvvm 8.2.1<br />
+- CommunityToolkit.Mvvm 8.4.0<br />
+- Microsoft.Extensions.Http 8.0.1<br />
 - ini-parser-netstandard 2.5.2<br />
-- SharpCompress 0.33.0<br />
+- SharpCompress 0.39.0<br />
 - AnimatedImage.Avalonia 1.0.7<br />
+- ObservableCollections 3.3.3<br />
+- WindowsShortcutFactory 1.2.0<br />
 
 <br /><br />
 ## **Compiling for Linux and Mac:**<br />
 - Right click on the project -> Publish<br />
 - Export to folder<br />
-- From there you can pick the dest enviroment on the list<br />
+- From there you can pick the destiny environment on the list<br />
+
+
+# Custom TC Launcher Mode<br />
+![CustomLauncher](https://i.imgur.com/uCYnTvD.png)
+<br />
+<br />
+Starting from 1.3.0 Knossos.NET supports "Custom TC Mode" is can be used to provide a customized launcher for a specific Total Conversion mod. Supporting customization by an additional json file or by hard-coding the data in.<br />
+More information and examples here: https://github.com/KnossosNET/Knet-CustomTc-Mode-Example<br />
