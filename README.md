@@ -54,6 +54,7 @@ KnossosNET.exe -tool {tool-id}
 On 1.3.0 a feature to minimize to tray has been implemented, this can be enabled on global settings.<br />
 Additionally, a cmdline argument (-tray) has been added to Knossos.NET. By starting in this mode the launcher will start to tray and will not load UI resources until the user opens the UI for the first time.<br />
 The tray icon allow to launch mods directly from there.<br />
+![TrayIcon](https://i.imgur.com/cWF4WdT.png)
 
 <br /><br />
 ## **Rendering Mode:**<br />
@@ -61,6 +62,15 @@ From 1.3.0 KnossosNET will render the UI in software mode by default to avoid us
 <br />
 You can force the hardware rendering mode by using the "-hardware" Command Line argument or by setting an environment variable "KNET_RENDER_MODE" to "hardware".<br />
 For versions older than 1.3.0 hardware rendering is used by default and can be set to run on software mode by using "-software" or KNET_RENDER_MODE" to "software".
+
+<br /><br />
+## **Mod Filters and tags:**<br />
+![tags](https://i.imgur.com/KKVyuxc.png)
+A filter and tags feature offers QOL improvements to mod search and listening.<br />
+Filters are a physical button that will display all mods that contain it.<br />
+Tags are words that will be used in the search function to improve search results. Before this only the mod name was used for the search.<br />
+To add filters and tags to you mods please consult in the discord or create a PR or issue here: https://github.com/KnossosNET/KNet-General-Resources-Repo
+
 
 <br /><br />
 ## **mod.ini Support:**<br />
