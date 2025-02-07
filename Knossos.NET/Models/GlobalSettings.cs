@@ -122,24 +122,13 @@ namespace Knossos.NET.Models
         [JsonPropertyName("warn_new_settings_system")]
         public bool warnNewSettingsSystem { get; set; } = true;
         [JsonIgnore]
-        public bool _minimizeToTray { get; set; } = false;
+        private bool _minimizeToTray { get; set; } = false;
         [JsonPropertyName("minimize_to_tray")]
         public bool minimizeToTray {
             get { return _minimizeToTray; }
             set { if (_minimizeToTray != value) { 
                     _minimizeToTray = value;
                     pendingChangesOnAppClose = true;
-                    if (Avalonia.Application.Current is App app)
-                    {
-                        if (_minimizeToTray)
-                        {
-                            app.EnableMinimizeToTrayRuntime();
-                        }
-                        else
-                        {
-                            app.DisableMinimizeToTrayRuntime();
-                        }
-                    }
                 }
             }
         }

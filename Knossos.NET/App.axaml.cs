@@ -21,53 +21,19 @@ namespace Knossos.NET
     public partial class App : Application
     {
         TrayIcon? trayIcon = null;
-        bool minimizeToTray = false;
+        WindowState? lastWindowState = null;
 
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
         }
 
-        public void DisableMinimizeToTrayRuntime()
-        {
-            minimizeToTray = false;
-        }
-
-        public void EnableMinimizeToTrayRuntime()
-        {
-            if (!minimizeToTray && ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                if (desktop.MainWindow != null)
-                {
-                    desktop.MainWindow.PropertyChanged += (v, __) =>
-                    {
-                        if (minimizeToTray && v is MainWindow view && view.WindowState == WindowState.Minimized)
-                        {
-                            desktop.MainWindow.Hide();
-                            desktop.MainWindow.WindowState = WindowState.Normal;
-                            StartTrayIcon();
-                            trayIcon!.IsVisible = true;
-                        }
-                    };
-                    desktop.MainWindow.Closing += (_, __) =>
-                    {
-                        if (trayIcon != null)
-                        {
-                            trayIcon.IsVisible = false;
-                            trayIcon = null;
-                        }
-                    };
-                    minimizeToTray = true;
-                }
-            }
-        }
-
         public override void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                minimizeToTray = Environment.GetCommandLineArgs().FirstOrDefault(x => x.ToLower() == "-traymode") != null;
-                if (minimizeToTray)
+                bool trayMode = Environment.GetCommandLineArgs().FirstOrDefault(x => x.ToLower() == "-traymode") != null;
+                if (trayMode)
                 {
                     desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
                     Knossos.StartUp(false, false);
@@ -75,19 +41,60 @@ namespace Knossos.NET
                 }
                 else
                 {
-                    desktop.MainWindow = new MainWindow
-                    {
-                        DataContext = new MainWindowViewModel()
-                    };
+                    CreateMainWindow(desktop);
                 }
             }
 
             base.OnFrameworkInitializationCompleted();
         }
 
+        private void CreateMainWindow(IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.MainWindow = new MainWindow
+            {
+                DataContext = new MainWindowViewModel()
+            };
+
+            desktop.MainWindow.PropertyChanged += (v, p) =>
+            {
+                if (Knossos.globalSettings.minimizeToTray && p.Property.Name == nameof(WindowState) 
+                    && p.NewValue != null && ((WindowState)p.NewValue) == WindowState.Minimized)
+                {
+                    lastWindowState = p.OldValue != null ? (WindowState)p.OldValue : null;
+                    desktop.MainWindow.Hide();
+                    if(!KnUtils.IsWindows)
+                        desktop.MainWindow.ShowInTaskbar = false;
+                    StartTrayIcon();
+                    if (trayIcon != null)
+                    {
+                        trayIcon.IsVisible = true;
+                    }
+                }
+                if(!Knossos.globalSettings.minimizeToTray && !desktop.MainWindow.ShowInTaskbar)
+                {
+                    desktop.MainWindow.ShowInTaskbar = true;
+                }
+            };
+            desktop.MainWindow.Closing += (_, __) =>
+            {
+                if (trayIcon != null)
+                {
+                    trayIcon.IsVisible = false;
+                    trayIcon.Dispose();
+                }
+            };
+        }
+
 
         private async void StartTrayIcon()
         {
+            if(KnUtils.IsLinux && trayIcon != null)
+            {
+                //workaround for an avalonia bug
+                //where app crashes by changing tray icon visility to true after it was hidden once
+                trayIcon.Dispose();
+                trayIcon = null;
+            }
             if (trayIcon == null)
             {
                 trayIcon = new TrayIcon
@@ -101,7 +108,7 @@ namespace Knossos.NET
                 while (!Knossos.initIsComplete) { await Task.Delay(10); }
             }
 
-            trayIcon.Menu = new NativeMenu();
+            trayIcon.Menu?.Items.Clear();
 
             /*****************************OPEN***********************************/
             var open = new NativeMenuItem("Open");
@@ -110,37 +117,24 @@ namespace Knossos.NET
                 {
                     if (desktop.MainWindow == null)
                     {
-                        desktop.MainWindow = new MainWindow
-                        {
-                            DataContext = new MainWindowViewModel()
-                        };
-                        desktop.MainWindow.PropertyChanged += (v, __) =>
-                        {
-                            if (v is MainWindow view && view.WindowState == WindowState.Minimized)
-                            {
-                                desktop.MainWindow.Hide();
-                                desktop.MainWindow.WindowState = WindowState.Normal;
-                                StartTrayIcon();
-                                trayIcon.IsVisible = true;
-                            }
-                        };
-                        desktop.MainWindow.Closing += (_, __) =>
-                        {
-                            if (trayIcon != null)
-                            {
-                                trayIcon.IsVisible = false;
-                                trayIcon = null;
-                            }
-                        };
+                        CreateMainWindow(desktop);
                         desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
                     }
+                    else if (lastWindowState.HasValue)
+                    {
+                        desktop.MainWindow.WindowState = lastWindowState.Value;
+                    }
                     desktop.MainWindow?.Show();
+                    if (!KnUtils.IsWindows && desktop.MainWindow != null)
+                    { 
+                        desktop.MainWindow.ShowInTaskbar = true;
+                    }
                     trayIcon.IsVisible = false;
                     GC.Collect();
                 }
             };
-            trayIcon.Menu.Add(open);
-            trayIcon.Menu.Add(new NativeMenuItemSeparator());
+            trayIcon.Menu?.Add(open);
+            trayIcon.Menu?.Add(new NativeMenuItemSeparator());
 
             try
             {
@@ -165,23 +159,7 @@ namespace Knossos.NET
                                 var m = mods.Where(x => x.id == mod.id)?.MaxBy(x => new SemanticVersion(x.version));
                                 if (m != null)
                                 {
-                                    var modItem = new NativeMenuItem(m.ToString()) { Menu = new NativeMenu() };
-                                    /*************************************MOD SUB BUTTONS*************************************/
-                                    modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.Release));
-                                    modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.Debug));
-                                    modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.Fred2));
-                                    modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.Fred2Debug));
-                                    modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.QtFred));
-                                    modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.QtFredDebug));
-                                    var settings = new NativeMenuItem("Settings");
-                                    settings.Click += (s, e) => {
-                                        var dialog = new ModSettingsView();
-                                        dialog.DataContext = new ModSettingsViewModel(m);
-                                        dialog.Show();
-                                    };
-                                    modItem.Menu.Add(settings);
-                                    /*****************************************************************************************/
-                                    filterItem.Menu.Add(modItem);
+                                    filterItem.Menu.Add(CreateModMenuItem(m));
                                     addedIds.Add(mod.id);
                                 }
                             }
@@ -190,7 +168,7 @@ namespace Knossos.NET
                     }
                 }
                 if(play.Menu.Any())
-                    trayIcon.Menu.Add(play);
+                    trayIcon.Menu?.Add(play);
                 /*****************************DEVELOP***********************************/
                 var dev = new NativeMenuItem("Develop") { Menu = new NativeMenu(), Icon = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/menu_develop.png"))) };
                 var devMods = mods.Where(x => x.devMode);
@@ -204,30 +182,14 @@ namespace Knossos.NET
                             var m = mods.Where(x => x.id == devMod.id)?.MaxBy(x => new SemanticVersion(x.version));
                             if(m != null)
                             {
-                                var modItem = new NativeMenuItem(m.ToString()) { Menu = new NativeMenu() };
-                                /*************************************MOD SUB BUTTONS*************************************/
-                                modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.Release));
-                                modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.Debug));
-                                modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.Fred2));
-                                modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.Fred2Debug));
-                                modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.QtFred));
-                                modItem.Menu.Add(CreateLaunchFSOButton(m, FsoExecType.QtFredDebug));
-                                var settings = new NativeMenuItem("Settings");
-                                settings.Click += (s, e) => {
-                                    var dialog = new ModSettingsView();
-                                    dialog.DataContext = new ModSettingsViewModel(m);
-                                    dialog.Show();
-                                };
-                                modItem.Menu.Add(settings);
-                                /*****************************************************************************************/
-                                dev.Menu.Add(modItem);
+                                dev.Menu.Add(CreateModMenuItem(m));
                                 addedIds.Add(devMod.id);
                             }
                         }
                     }
                 }    
                 if(dev.Menu.Any())
-                    trayIcon.Menu.Add(dev);
+                    trayIcon.Menu?.Add(dev);
                 /*****************************TOOLS*************************************/
                 var toolsItem = new NativeMenuItem("Tools") { Menu = new NativeMenu(), Icon = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/custom-config-icon.png"))) };
                 var tools = Knossos.GetTools();
@@ -244,7 +206,7 @@ namespace Knossos.NET
                     }
                 }
                 if (toolsItem.Menu.Any())
-                    trayIcon.Menu.Add(toolsItem);
+                    trayIcon.Menu?.Add(toolsItem);
                 /*****************************DEBUG*************************************/
                 var debug = new NativeMenuItem("Debug") { Menu = new NativeMenu(), Icon = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/menu_debug.png"))) };
                 var openFs2Log = new NativeMenuItem("Open fs2_open.log");
@@ -257,7 +219,7 @@ namespace Knossos.NET
                     OpenLog();
                 };
                 debug.Menu.Add(openLog);
-                trayIcon.Menu.Add(debug);
+                trayIcon.Menu?.Add(debug);
             }
             catch (Exception ex)
             {
@@ -265,7 +227,7 @@ namespace Knossos.NET
             }
 
             /*****************************CLOSE***********************************/
-            trayIcon.Menu.Add(new NativeMenuItemSeparator());
+            trayIcon.Menu?.Add(new NativeMenuItemSeparator());
             var close = new NativeMenuItem("Exit Knossos.NET");
             close.Click += (s, e) => { 
                 if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -275,16 +237,50 @@ namespace Knossos.NET
                 if(trayIcon != null)
                 {
                     trayIcon.IsVisible = false;
-                    trayIcon = null;
                 }
             };
-            trayIcon.Menu.Add(close);
+            trayIcon.Menu?.Add(close);
             GC.Collect();
+        }
+
+        private NativeMenuItem CreateModMenuItem(Mod mod)
+        {
+            var modItem = new NativeMenuItem(mod.ToString()) { Menu = new NativeMenu() };
+            /*************************************MOD SUB BUTTONS*************************************/
+            modItem.Menu.Add(CreateLaunchFSOButton(mod, FsoExecType.Release));
+
+            var advItem = new NativeMenuItem("Advanced") { Menu = new NativeMenu() };
+            if (mod.devMode)
+            {
+                modItem.Menu.Add(CreateLaunchFSOButton(mod, FsoExecType.Fred2));
+            }
+            else
+            {
+                advItem.Menu.Add(CreateLaunchFSOButton(mod, FsoExecType.Fred2));
+            }
+
+            advItem.Menu.Add(CreateLaunchFSOButton(mod, FsoExecType.Debug));
+            advItem.Menu.Add(CreateLaunchFSOButton(mod, FsoExecType.Fred2Debug));
+            advItem.Menu.Add(CreateLaunchFSOButton(mod, FsoExecType.QtFred));
+            advItem.Menu.Add(CreateLaunchFSOButton(mod, FsoExecType.QtFredDebug));
+
+            modItem.Menu.Add(advItem);
+
+            var settings = new NativeMenuItem("Settings");
+            settings.Click += (s, e) => {
+                var dialog = new ModSettingsView();
+                dialog.DataContext = new ModSettingsViewModel(mod);
+                dialog.Show();
+            };
+            modItem.Menu.Add(settings);
+            /*****************************************************************************************/
+            return modItem;
         }
 
         private NativeMenuItem CreateLaunchFSOButton(Mod mod, FsoExecType fsoExecType)
         {
-            var item = new NativeMenuItem(fsoExecType.ToString());
+            var name = fsoExecType != FsoExecType.Release ? fsoExecType.ToString() : "Play";
+            var item = new NativeMenuItem(name);
             item.Click += (s, e) => {
                 Knossos.PlayMod(mod, fsoExecType);
             };
