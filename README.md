@@ -51,7 +51,7 @@ KnossosNET.exe -tool {tool-id}
 
 <br /><br />
 ## **Tray Icon Mode:**<br />
-On 1.3.0 a feature to minimize to tray has been implemented, this can be enabled on global settings.<br />
+On 1.3.0 a feature to "close to tray" has been implemented, this can be enabled on global settings.<br />
 Additionally, a cmdline argument (-traymode) has been added to Knossos.NET. By starting in this mode the launcher will start to tray and will not load UI resources until the user opens the UI for the first time.<br />
 The tray icon allow to launch mods directly from there.<br />
 ![TrayIcon](https://i.imgur.com/cWF4WdT.png)
