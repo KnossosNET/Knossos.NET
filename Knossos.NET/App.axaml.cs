@@ -21,6 +21,7 @@ namespace Knossos.NET
     public partial class App : Application
     {
         TrayIcon? trayIcon = null;
+        bool trayMode = false;
         WindowState? lastWindowState = null;
 
         public override void Initialize()
@@ -32,7 +33,7 @@ namespace Knossos.NET
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                bool trayMode = Environment.GetCommandLineArgs().FirstOrDefault(x => x.ToLower() == "-traymode") != null;
+                trayMode = Environment.GetCommandLineArgs().FirstOrDefault(x => x.ToLower() == "-traymode") != null;
                 if (trayMode)
                 {
                     desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
@@ -57,12 +58,21 @@ namespace Knossos.NET
 
             desktop.MainWindow.PropertyChanged += (v, p) =>
             {
-                if (Knossos.globalSettings.minimizeToTray && p.Property.Name == nameof(WindowState) 
+                if (KnUtils.IsMacOS && (Knossos.globalSettings.minimizeToTray || trayMode) && p.Property.Name == nameof(WindowState) && p.OldValue != null
+                    && p.NewValue != null && ((WindowState)p.NewValue) == lastWindowState && ((WindowState)p.OldValue) == WindowState.Minimized)
+                {
+                    desktop.MainWindow.Show();
+                    if (trayIcon != null)
+                    {
+                        trayIcon.IsVisible = false;
+                    }
+                }
+                if ((Knossos.globalSettings.minimizeToTray || trayMode ) && p.Property.Name == nameof(WindowState) 
                     && p.NewValue != null && ((WindowState)p.NewValue) == WindowState.Minimized)
                 {
                     lastWindowState = p.OldValue != null ? (WindowState)p.OldValue : null;
                     desktop.MainWindow.Hide();
-                    if(!KnUtils.IsWindows)
+                    if(KnUtils.IsLinux)
                         desktop.MainWindow.ShowInTaskbar = false;
                     StartTrayIcon();
                     if (trayIcon != null)
@@ -70,7 +80,7 @@ namespace Knossos.NET
                         trayIcon.IsVisible = true;
                     }
                 }
-                if(!Knossos.globalSettings.minimizeToTray && !desktop.MainWindow.ShowInTaskbar)
+                if(KnUtils.IsLinux && !(Knossos.globalSettings.minimizeToTray || trayMode) && !desktop.MainWindow.ShowInTaskbar)
                 {
                     desktop.MainWindow.ShowInTaskbar = true;
                 }
@@ -125,7 +135,7 @@ namespace Knossos.NET
                         desktop.MainWindow.WindowState = lastWindowState.Value;
                     }
                     desktop.MainWindow?.Show();
-                    if (!KnUtils.IsWindows && desktop.MainWindow != null)
+                    if (KnUtils.IsLinux && desktop.MainWindow != null)
                     { 
                         desktop.MainWindow.ShowInTaskbar = true;
                     }
