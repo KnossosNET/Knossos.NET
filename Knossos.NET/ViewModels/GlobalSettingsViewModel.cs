@@ -198,11 +198,11 @@ namespace Knossos.NET.ViewModels
         }
 
         /* This change is applied right away */
-        private bool minimizeToTray = false;
-        internal bool MinimizeToTray
+        private bool closeToTray = false;
+        internal bool CloseToTray
         {
-            get { return minimizeToTray; }
-            set { if (minimizeToTray != value) { this.SetProperty(ref minimizeToTray, value); Knossos.globalSettings.minimizeToTray = value ; UnCommitedChanges = true; } }
+            get { return closeToTray; }
+            set { if (closeToTray != value) { this.SetProperty(ref closeToTray, value); Knossos.globalSettings.closeToTray = value ; UnCommitedChanges = true; } }
         }
 
         /*VIDEO*/
@@ -668,7 +668,7 @@ namespace Knossos.NET.ViewModels
             PrefixCMD = Knossos.globalSettings.prefixCMD;
             EnvVars = Knossos.globalSettings.envVars;
             ShowDevOptions = Knossos.globalSettings.showDevOptions || NoSystemCMD;
-            MinimizeToTray = Knossos.globalSettings.minimizeToTray;
+            CloseToTray = Knossos.globalSettings.closeToTray;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -1248,7 +1248,7 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.prefixCMD = PrefixCMD;
             Knossos.globalSettings.envVars = EnvVars;
             Knossos.globalSettings.showDevOptions = ShowDevOptions;
-            Knossos.globalSettings.minimizeToTray = MinimizeToTray;
+            Knossos.globalSettings.closeToTray = CloseToTray;
 
             /* VIDEO */
             //Resolution
