@@ -51,12 +51,22 @@ namespace Knossos.NET
 
         private void CreateMainWindow(IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
+            if (mainVM == null)
             {
-                DataContext = new MainWindowViewModel()
-            };
+                desktop.MainWindow = new MainWindow
+                {
+                    DataContext = new MainWindowViewModel()
+                };
 
-            mainVM = desktop.MainWindow.DataContext as MainWindowViewModel;
+                mainVM = desktop.MainWindow.DataContext as MainWindowViewModel;
+            }
+            else
+            {
+                desktop.MainWindow = new MainWindow
+                {
+                    DataContext = mainVM
+                };
+            }
 
             desktop.MainWindow.Closing += (_, __) =>
             {
