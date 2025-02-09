@@ -51,15 +51,12 @@ namespace Knossos.NET
 
         private void CreateMainWindow(IClassicDesktopStyleApplicationLifetime desktop)
         {
-            if(mainVM == null)
-            {
-                mainVM = new MainWindowViewModel();
-            }
-
             desktop.MainWindow = new MainWindow
             {
-                DataContext = mainVM
+                DataContext = new MainWindowViewModel()
             };
+
+            mainVM = desktop.MainWindow.DataContext as MainWindowViewModel;
 
             desktop.MainWindow.Closing += (_, __) =>
             {
@@ -101,6 +98,7 @@ namespace Knossos.NET
                     {
                         MainWindow.instance?.FixMarginButtomTasks();
                     }
+                    MainWindow.instance?.SetSize(mainVM?.WindowWidth, mainVM?.WindowHeight);
                     trayIcon?.Dispose();
                     GC.Collect();
                 }
