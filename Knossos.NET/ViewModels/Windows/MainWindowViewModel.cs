@@ -44,13 +44,13 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string appTitle = "Knossos.NET v" + Knossos.AppVersion;
         [ObservableProperty]
-        internal int? windowWidth = null;
+        internal int windowWidth = 1200;
         [ObservableProperty]
-        internal int? windowHeight = null;
+        internal int windowHeight = 700;
         [ObservableProperty]
-        internal int? minWindowWidth = null;
+        internal int minWindowWidth = 900;
         [ObservableProperty]
-        internal int? minWindowHeight = null;
+        internal int minWindowHeight = 500;
         [ObservableProperty]
         internal ModListViewModel? installedModsView;
         [ObservableProperty]
@@ -107,8 +107,6 @@ namespace Knossos.NET.ViewModels
             }
             if (!CustomLauncher.IsCustomMode)
             {
-                MinWindowWidth = 900;
-                MinWindowHeight = 500;
                 placeholderTileImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
                 InstalledModsView = new ModListViewModel();
                 NebulaModsView = new NebulaModListViewModel();
@@ -125,10 +123,10 @@ namespace Knossos.NET.ViewModels
                 //Apply customization for Single TC Mode
                 Knossos.globalSettings.mainMenuOpen = CustomLauncher.MenuOpenFirstTime;
                 AppTitle = CustomLauncher.WindowTitle + " v" + Knossos.AppVersion;
-                WindowHeight = CustomLauncher.WindowHeight;
-                WindowWidth = CustomLauncher.WindowWidth;
-                MinWindowWidth = CustomLauncher.MinWindowWidth;
-                MinWindowHeight = CustomLauncher.MinWindowHeight;
+                WindowHeight = CustomLauncher.WindowHeight.HasValue ? CustomLauncher.WindowHeight.Value : 1200;
+                WindowWidth = CustomLauncher.WindowWidth.HasValue ? CustomLauncher.WindowWidth.Value : 700;
+                MinWindowWidth = CustomLauncher.MinWindowWidth.HasValue ? CustomLauncher.MinWindowWidth.Value : 900;
+                MinWindowHeight = CustomLauncher.MinWindowHeight.HasValue ? CustomLauncher.MinWindowHeight.Value : 500;
                 CustomHomeVM = new CustomHomeViewModel();
                 if (CustomLauncher.MenuDisplayEngineEntry)
                     FsoBuildsView = new FsoBuildsViewModel();
