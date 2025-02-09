@@ -43,10 +43,8 @@ namespace Knossos.NET.ViewModels
         /* UI Bindings, use the uppercase version, otherwise changes will not register */
         [ObservableProperty]
         internal string appTitle = "Knossos.NET v" + Knossos.AppVersion;
-        [ObservableProperty]
-        internal int windowWidth = 1200;
-        [ObservableProperty]
-        internal int windowHeight = 700;
+        public int? WindowWidth { get; private set; } = null;
+        public int? WindowHeight { get; private set; } = null;
         [ObservableProperty]
         internal int minWindowWidth = 900;
         [ObservableProperty]
@@ -123,8 +121,8 @@ namespace Knossos.NET.ViewModels
                 //Apply customization for Single TC Mode
                 Knossos.globalSettings.mainMenuOpen = CustomLauncher.MenuOpenFirstTime;
                 AppTitle = CustomLauncher.WindowTitle + " v" + Knossos.AppVersion;
-                WindowHeight = CustomLauncher.WindowHeight.HasValue ? CustomLauncher.WindowHeight.Value : 1200;
-                WindowWidth = CustomLauncher.WindowWidth.HasValue ? CustomLauncher.WindowWidth.Value : 700;
+                WindowHeight = CustomLauncher.WindowHeight;
+                WindowWidth = CustomLauncher.WindowWidth;
                 MinWindowWidth = CustomLauncher.MinWindowWidth.HasValue ? CustomLauncher.MinWindowWidth.Value : 900;
                 MinWindowHeight = CustomLauncher.MinWindowHeight.HasValue ? CustomLauncher.MinWindowHeight.Value : 500;
                 CustomHomeVM = new CustomHomeViewModel();
@@ -147,6 +145,7 @@ namespace Knossos.NET.ViewModels
                     MainWindow.instance?.FixMarginButtomTasks();
                 }
             }
+            MainWindow.instance?.SetSize(WindowWidth,WindowHeight);
             if (!Knossos.initIsComplete)
             {
                 //Normal Startup

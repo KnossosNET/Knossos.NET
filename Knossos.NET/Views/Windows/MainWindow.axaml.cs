@@ -34,6 +34,19 @@ namespace Knossos.NET.Views
             }
         }
 
+        /// <summary>
+        /// Change size of the main window
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public void SetSize(double? width, double? height)
+        {
+            if(width.HasValue)
+                this.Width = width.Value;
+            if(height.HasValue)
+                this.Height = height.Value;
+        }
+
         protected override async void OnClosing(WindowClosingEventArgs e)
         {
             //Intercept closing, do stuff, then re-call close
