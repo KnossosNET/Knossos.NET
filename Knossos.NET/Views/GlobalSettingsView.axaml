@@ -235,14 +235,14 @@
 							<ToggleSwitch ToolTip.Tip="Enable basic Post Processing, which helps ensure visuals are balanced. Enabled by default." Tag="-no_post_process" IsChecked="{Binding PostProcess}"></ToggleSwitch>
 						</WrapPanel>
 						<!-- VSYNC -->
-            <!-- More advanced option that power users can set via Command Line or in individual mod settings.
+						<!-- More advanced option that power users can set via Command Line or in individual mod settings.
 						<WrapPanel>
 							<Label Margin="5,5,0,0" Width="210">VSync</Label>
 							<ToggleSwitch ToolTip.Tip="Enable vertical sync, which ensures the game FPS matches the monitor FPS. Enabled by default." Tag="-no_vsync" IsChecked="{Binding Vsync}"></ToggleSwitch>
 						</WrapPanel>
 						-->
-            <!-- FPS Cap -->
-            <!-- More advanced option that power users can set via Command Line or in individual mod settings.
+						<!-- FPS Cap -->
+						<!-- More advanced option that power users can set via Command Line or in individual mod settings.
 						<WrapPanel>
 							<Label Margin="5,5,0,0" Width="210">Limit to 120 FPS</Label>
 							<ToggleSwitch ToolTip.Tip="Caps the frames-per-second (FPS) of FSO to 120. Enabled by default." Tag="-no_fps_capping" IsChecked="{Binding !NoFpsCapping}"></ToggleSwitch>
