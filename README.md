@@ -46,19 +46,19 @@ The "Settings" window on a mod displays the Command Line to play that mod direct
 
 <br /><br />
 ## **Tool Quick Launch:**<br />
-Just like mods QuickLaunch, you can launch installed mod development tools with a cmdline argument. Windows users have the possibility to create a shortcut to desktop with a click. This may be extended to Linux and Mac later on.<br />
+You can launch installed mod development tools with a Command Line argument (just like how you can launch mods with QuickLaunch).<br />
 KnossosNET.exe -tool {tool-id}
 
 <br /><br />
 ## **Tray Icon Mode:**<br />
 On 1.3.0 a feature to "close to tray" has been implemented, this can be enabled on global settings.<br />
-Additionally, a cmdline argument (-traymode) has been added to Knossos.NET. By starting in this mode the launcher will start to tray and will not load UI resources until the user opens the UI for the first time.<br />
+Additionally, a Command Line argument (-traymode) has been added to Knossos.NET. By starting in this mode the launcher will start to tray and will not load UI resources until the user opens the UI for the first time.<br />
 The tray icon allow to launch mods directly from there.<br />
 ![TrayIcon](https://i.imgur.com/cWF4WdT.png)
 
 <br /><br />
 ## **Rendering Mode:**<br />
-From 1.3.0 KnossosNET will render the UI in software mode by default to avoid use of the user GPU, but it can be set to run on hardware gpu rendering.
+From 1.3.0 KnossosNET will render the UI in software mode by default to avoid use of the user GPU, but it can be set to run on hardware GPU rendering.
 <br />
 You can force the hardware rendering mode by using the "-hardware" Command Line argument or by setting an environment variable "KNET_RENDER_MODE" to "hardware".<br />
 For versions older than 1.3.0 hardware rendering is used by default and can be set to run on software mode by using "-software" or KNET_RENDER_MODE" to "software".
@@ -68,9 +68,9 @@ For versions older than 1.3.0 hardware rendering is used by default and can be s
 ![tags](https://i.imgur.com/KKVyuxc.png)
 <br />
 A filter and tags feature offers QOL improvements to mod search and listening.<br />
-Filters are a physical button that will display all mods that contain it.<br />
+Filters are a physical button that will display all mods that contain that filter.<br />
 Tags are words that will be used in the search function to improve search results. Before this only the mod name was used for the search.<br />
-To add filters and tags to you mods please consult in the discord or create a PR or issue here: https://github.com/KnossosNET/KNet-General-Resources-Repo
+To add filters and tags to your mods please consult in the Discord channel or create a PR or issue at the GitHub link here: https://github.com/KnossosNET/KNet-General-Resources-Repo
 
 
 <br /><br />
@@ -123,12 +123,12 @@ On KnossosNET there are multiples sources of Command Line arguments that are eve
 ## **Compiling for Linux and Mac:**<br />
 - Right click on the project -> Publish<br />
 - Export to folder<br />
-- From there you can pick the destiny environment on the list<br />
+- From there you can pick the destination environment on the list<br />
 <br /><br />
 
 # Custom TC Launcher Mode<br />
 ![CustomLauncher](https://i.imgur.com/uCYnTvD.png)
 <br />
 <br />
-Starting from 1.3.0 Knossos.NET supports "Custom TC Mode" is can be used to provide a customized launcher for a specific Total Conversion mod. Supporting customization by an additional json file or by hard-coding the data in.<br />
+Starting from 1.3.0, Knossos.NET supports "Custom TC Mode" which can be used to provide a customized launcher for a specific Total Conversion mod. "Custom TC Mode" supports customization via an additional json file or by hard-coding the data in.<br />
 More information and examples here: https://github.com/KnossosNET/Knet-CustomTc-Mode-Example<br />
