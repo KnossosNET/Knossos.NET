@@ -13,9 +13,9 @@
 	</Design.DataContext>
 
 	<ScrollViewer HorizontalScrollBarVisibility="Visible">
-		<TabControl Margin="10" MinWidth="1000" SelectedIndex="{Binding TabIndex}">
+		<TabControl Margin="10" SelectedIndex="{Binding TabIndex}">
 		  <TabItem Header="Mods">
-					<SplitView Margin="0,0,0,5" IsPaneOpen="True" DisplayMode="Inline" OpenPaneLength="350">
+					<SplitView MinWidth="1000" Margin="0,0,0,5" IsPaneOpen="True" DisplayMode="Inline" OpenPaneLength="350">
 						<SplitView.Pane>
 							<Grid RowDefinitions="Auto,*,Auto,Auto,Auto">
 							
