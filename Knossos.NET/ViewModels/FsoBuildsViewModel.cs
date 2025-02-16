@@ -219,6 +219,9 @@ namespace Knossos.NET.ViewModels
                 switch (build.stability)
                 {
                     case FsoStability.Stable:
+                        //do not add this un-usable build in db
+                        if (build.id == "FSO" && build.version == "3.8.0-2")
+                             continue;
                         var previous = newStable.FirstOrDefault(b => string.Compare(b.Date, build.date) < 0);
                         if (previous != null)
                         {
