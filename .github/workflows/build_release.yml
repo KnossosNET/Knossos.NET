@@ -20,7 +20,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: '${{ github.ref }}'
@@ -32,7 +32,7 @@ jobs:
           echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
 
@@ -53,7 +53,7 @@ jobs:
           tar -czvf win-builds.tgz --exclude='*.pdb' *
 
       - name: Upload build archive
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: win-builds
           path: ${{ env.PUBLISH_DIR }}/win-builds.tgz
@@ -64,7 +64,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: '${{ github.ref }}'
@@ -76,7 +76,7 @@ jobs:
           echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
 
@@ -97,7 +97,7 @@ jobs:
           tar -czvf mac-builds.tgz --exclude='*.pdb' *
 
       - name: Upload build archive
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mac-builds
           path: ${{ env.PUBLISH_DIR }}/mac-builds.tgz
@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: '${{ github.ref }}'
@@ -132,7 +132,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install zip nsis
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
 
@@ -141,13 +141,13 @@ jobs:
         run: ./ci/publish_all_host.sh
 
       - name: Download Windows build artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: win-builds
           path: ${{ env.PUBLISH_DIR }}
 
       - name: Download macOS build artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: mac-builds
           path: ${{ env.PUBLISH_DIR }}
@@ -184,7 +184,7 @@ jobs:
           cat checksums.txt
 
       - name: Generate Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: true
           files: ${{ env.OUTPUT_DIR }}/*
