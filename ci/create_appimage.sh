@@ -40,7 +40,7 @@ case "$ARCH" in
         ;;
     "aarch64" | "arm64")
         DOTNET_ARCH="arm64"
-        DOCKER_ARCH="arm64v8"
+        DOCKER_ARCH="arm64/v8"
         ;;
     *)
         fail_msg "Unknown arch! Aborting!"
@@ -52,12 +52,12 @@ esac
 
 
 # now just run script in appropriate container to generate bundle
-docker run --rm \
+docker run --platform linux/$DOCKER_ARCH --rm \
     -e ARCH="$ARCH" \
     -e PUBLISH_DIR="/PublishDir" \
     -e OUTPUT_DIR="/OutputDir" \
     -v "$REPO_ROOT":/repo \
     -v "$PUBLISH_DIR":/PublishDir \
     -v "$OUTPUT_DIR":/OutputDir \
-    -t $DOCKER_ARCH/ubuntu:jammy \
+    -t ubuntu:jammy \
     /bin/bash -xc "/repo/ci/bundle_appimage.sh"
