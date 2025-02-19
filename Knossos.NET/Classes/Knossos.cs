@@ -986,6 +986,11 @@ namespace Knossos.NET
             var modList = new List<Mod>();
             FsoBuild? fsoBuild = specifiedBuild;
 
+            if(mod.modSettings.noIngameOptions)
+            {
+                cmdline += " -no_ingame_options";
+            }
+
             if(additionalCmd != null)
             {
                 cmdline += " " + additionalCmd;
