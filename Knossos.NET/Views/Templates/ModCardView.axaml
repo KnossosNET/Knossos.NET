@@ -62,7 +62,7 @@
 						<Button Command="{Binding ButtonCommand}" CommandParameter="delete" Content="Delete" Classes="Cancel Rounded" HorizontalAlignment="Center"  Margin="0,2,0,0" Width="100" ></Button>
 					</StackPanel>
 				</TabItem>
-				<TabItem Margin="-15, 0, 0, 0" >
+				<TabItem Margin="-18, 0, 0, 0" >
 					<TabItem.Header>
 						<Label FontWeight="Bold" FontSize="11" Foreground="White">Debug</Label>
 					</TabItem.Header>
