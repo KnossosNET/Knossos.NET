@@ -32,7 +32,7 @@
 				<Button Command="{Binding CreateDevEnv}" IsVisible="{Binding !ModHasDevEnvVersion}" Classes="Primary" Margin="20,0,0,0" Width="200">Create Developer Version</Button>
 			</WrapPanel>
 			<WrapPanel HorizontalAlignment="Center" Grid.Row="0" Margin="10,50,10,10">
-				<Button Command="{Binding LoadVersionsFromNebula}" Classes="Quaternary" Margin="10,0,0,0" Width="200">Install or Modify Locally</Button>
+				<Button Command="{Binding LoadVersionsFromNebula}" Classes="Quaternary" Margin="10,0,0,0" Width="200" ToolTip.Tip="Install a new version of a developed mod from Nebula. Local installation of development mods should not be modified. Package addition and removal for testing can be handled in the packages tab.">Install Locally</Button>
 				<Button Command="{Binding DeleteAll}" Classes="Cancel" Margin="20,0,0,0" Width="200">Delete All Local Versions</Button>
 			</WrapPanel>
 			<ListBox Background="{StaticResource BackgroundColorSecondary}" IsEnabled="{Binding ButtonsEnabled}" Margin="10,0,10,10" Grid.Row="1" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}" HorizontalAlignment="Stretch" MinHeight="180">
@@ -49,10 +49,10 @@
 			</ListBox>
 		</Grid>
 		<Label Grid.Row="1" Margin="0,0,0,0" HorizontalAlignment="Center">Actions to Apply to Active Version</Label>
-		<WrapPanel Grid.Row="2" Margin="0,4,0,0" HorizontalAlignment="Center" IsEnabled="{Binding ButtonsEnabled}">
-			<Button Width="150" Margin="0,0,0,0" IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding UploadMod}" Classes="Settings">Upload to Nebula</Button>
+		<WrapPanel Grid.Row="2" Margin="0,5,0,0" HorizontalAlignment="Center" IsEnabled="{Binding ButtonsEnabled}">
+			<Button Width="150" Margin="0,0,0,0" IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding UploadMod}" Classes="Primary">Upload to Nebula</Button>
 			<Button Width="150" Margin="20,0,0,0" IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding UploadModAdvanced}" Classes="Secondary">Advanced Upload</Button>
-			<Button IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding ChangeVisibility}" Content="{Binding VisibilityButtonText}" Classes="Settings" Width="150" Margin="24,0,0,0"/>
+			<Button IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding ChangeVisibility}" Content="{Binding VisibilityButtonText}" Classes="Primary" Width="150" Margin="20,0,0,0"/>
 		</WrapPanel>
 		<WrapPanel Grid.Row="3" Margin="0,10,0,0" HorizontalAlignment="Center" IsEnabled="{Binding ButtonsEnabled}">
 			<Button IsVisible="{Binding !IsDevEnvVersion}" Command="{Binding DeleteNebula}" Classes="Cancel" Width="150" Margin="0,0,0,0">Delete from Nebula</Button>

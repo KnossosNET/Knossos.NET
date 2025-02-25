@@ -54,7 +54,7 @@
 			<WrapPanel HorizontalAlignment="Left">
 				<StackPanel>
 					<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">Youtube Videos</Label>
-					<TextBlock HorizontalAlignment="Right" Margin="30,10,5,5" Foreground="Gray" FontSize="12" TextWrapping="Wrap">One link per line</TextBlock>
+					<TextBlock HorizontalAlignment="Right" Margin="30,10,5,5" Foreground="Gray" FontSize="12" TextWrapping="Wrap">One video link per line</TextBlock>
 				</StackPanel>
 				<StackPanel>
 					<TextBox Height="400" Width="400" Text="{Binding ModVideos}" Margin="5"></TextBox>
@@ -66,15 +66,15 @@
 					<Label HorizontalContentAlignment="Right" FontWeight="Bold" FontSize="18">Title Image</Label>
 					<TextBlock Margin="30,10,0,0" HorizontalAlignment="Right" Foreground="Gray" FontSize="12" TextWrapping="Wrap">This image should be 150×225 pixels large, 300KB max.</TextBlock>
 				</StackPanel>
-				<StackPanel MinWidth="225">
+				<StackPanel HorizontalAlignment="Center" MinWidth="225">
 					<Border Width="152" Height="227" BorderBrush="Gray" CornerRadius="2" BorderThickness="1">
 						<Image Width="150" Height="225" Source="{Binding TileImage}"></Image>
 					</Border>
+					<Button Command="{Binding ChangeTileImage}" Width="100" Classes="Quaternary" Margin="5">Browse</Button>
+					<Button Command="{Binding RemoveTileImage}" Width="100" Classes="Cancel" Margin="5">Remove</Button>
 				</StackPanel>
 			</WrapPanel>
 			<WrapPanel Margin="160,0,0,0">
-				<Button Command="{Binding ChangeTileImage}" Width="100" Classes="Quaternary" Margin="5">Browse</Button>
-				<Button Command="{Binding RemoveTileImage}" Width="100" Classes="Cancel" Margin="5">Remove</Button>
 			</WrapPanel>
 			<!--Banner Image-->
 			<WrapPanel HorizontalAlignment="Left">
