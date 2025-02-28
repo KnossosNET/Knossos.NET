@@ -10,18 +10,21 @@
 	<Grid RowDefinitions="Auto,*">
 		<StackPanel>
 			<WrapPanel Grid.Row="0" Margin="5">
-				<Button Margin="5" Classes="Primary" Command="{Binding OpenFS2Log}">View fs2__open.log</Button>
-				<Button Margin="5" Classes="Primary" Command="{Binding UploadFS2Log}">Upload fs2__open.log</Button>
-				<Button Margin="5" Classes="Settings" Command="{Binding OpenDebugFilterView}">Adjust Debug Filters</Button>
-				<Button Margin="5" Classes="Settings" Command="{Binding OpenFS2Ini}">View fs2__open.ini</Button>
+				<Button Margin="5" Width="175" Classes="Primary" Command="{Binding UploadFS2Log}">Upload fs2__open.log</Button>
+				<Button Margin="5" Width="175" Classes="Primary" Command="{Binding OpenFS2Log}" ToolTip.Tip="View the logfile output from Freespace Open's Debug Build">Open fs2__open.log</Button>
+				<Button Margin="5" Width="175" Classes="Settings" Command="{Binding OpenDebugFilterView}">Adjust Debug Filters</Button>
+				<Button Margin="5" Width="175" Classes="Settings" Command="{Binding OpenFS2Ini}">View fs2__open.ini</Button>
 			</WrapPanel>
 			<WrapPanel Grid.Row="0" Margin="5">
-				<Button Margin="5" Classes="Settings" Command="{Binding UploadKnossosConsole}">Upload KnossosNET Console</Button>
-				<Button Margin="5" Classes="Settings" Command="{Binding OpenLog}">View KnossosNET Logfile</Button>
-				<Button Margin="5" Classes="Settings" Command="{Binding OpenSettings}">View KnossosNET Settings File</Button>
+				<Button Margin="5" Width="175" Classes="Primary" Command="{Binding UploadKnossosConsole}">Upload Knossos Log</Button>
+				<Button Margin="5" Width="175" Classes="Settings" Command="{Binding OpenLog}">Knossos Extended Log</Button>
+				<Button Margin="5" Width="175" Classes="Settings" Command="{Binding OpenSettings}">Knossos Settings File</Button>
 			</WrapPanel>
+			<Label Margin="10,20,5,10">
+				Knossos Session Log
+			</Label>
 		</StackPanel>
-		<TextBox Grid.Row="1" Text="{Binding UiConsoleOutput}" IsReadOnly="True"></TextBox>
+		<TextBox Grid.Row="1" Margin="20,0,20,15" Text="{Binding UiConsoleOutput}" IsReadOnly="True" TextWrapping="Wrap"></TextBox>
 	</Grid>
 	
 </UserControl>
