@@ -174,13 +174,22 @@ namespace Knossos.NET.ViewModels
                     break;
                 // easiest case, this handles a filter list of one and the start of all other cases
                 } else if (count == 0){
-                    FilterString += myTI.ToTitleCase(filter.Replace("_", " "));
+                    if (Knossos.filterDisplayStrings.ContainsKey(filter.ToLower()))
+                        FilterString += Knossos.filterDisplayStrings[filter.ToLower()];
+                    else 
+                        FilterString += myTI.ToTitleCase(filter.Replace("_", " "));
                 // Last case except for 0 will always have an and
                 } else if (count == externalCount - 1){
-                    FilterString += " and " + myTI.ToTitleCase(filter.Replace("_", " "));; // No Oxford commas here!
+                    if (Knossos.filterDisplayStrings.ContainsKey(filter.ToLower()))
+                        FilterString += " and " + Knossos.filterDisplayStrings[filter.ToLower()];
+                    else 
+                        FilterString += " and " + myTI.ToTitleCase(filter.Replace("_", " "));; // No Oxford commas here!
                 // Other cases will always have a comma
                 } else {
-                    FilterString += ", " + myTI.ToTitleCase(filter.Replace("_", " "));;
+                    if (Knossos.filterDisplayStrings.ContainsKey(filter.ToLower()))
+                        FilterString += ", " + Knossos.filterDisplayStrings[filter.ToLower()];
+                    else 
+                        FilterString += ", " + myTI.ToTitleCase(filter.Replace("_", " "));
                 }
 
                 FiltersEnabled = true;
