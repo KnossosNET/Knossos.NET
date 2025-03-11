@@ -193,6 +193,14 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
+        /// Used to signal the mod list view to update its "have you installed FS2" button
+        /// </summary>
+        public void UpdateFS2InstallButton()
+        {
+            Fs2Present = Knossos.retailFs2RootFound;
+        }
+
+        /// <summary>
         /// Open the tab code
         /// </summary>
         public void OpenTab()
@@ -229,7 +237,10 @@ namespace Knossos.NET.ViewModels
                 });
             }
 
-            Fs2Present = Knossos.retailFs2RootFound;
+            if (Knossos.initIsComplete)
+            {
+                Fs2Present = Knossos.retailFs2RootFound;
+            }
         }
 
         /// <summary>
