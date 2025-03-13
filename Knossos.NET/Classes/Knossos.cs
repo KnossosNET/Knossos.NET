@@ -1661,7 +1661,16 @@ namespace Knossos.NET
                     foreach (var mod in delete)
                     {
                         Log.Add(Log.LogSeverity.Information, "Knossos.RemoveMod()", "Deleting mod: "+mod.title + " " +mod.version);
-                        FileSystem.DeleteDirectory(mod.fullPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        try
+                        {
+                            // this might only work on Windows
+                            FileSystem.DeleteDirectory(mod.fullPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        }
+                        catch (PlatformNotSupportedException pnse)
+                        {
+                            // this should work on all platforms but doesn't use the Recycle Bin / Trash
+                            Directory.Delete(mod.fullPath, true);
+                        }
                         installedMods.Remove(mod);
                     }
                 }
@@ -1683,7 +1692,16 @@ namespace Knossos.NET
             try
             {
                 Log.Add(Log.LogSeverity.Information, "Knossos.RemoveMod()", "Deleting mod: " + mod.title + " " + mod.version);
-                FileSystem.DeleteDirectory(mod.fullPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                try
+                {
+                    // this might only work on Windows
+                    FileSystem.DeleteDirectory(mod.fullPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                }
+                catch (PlatformNotSupportedException pnse)
+                {
+                    // this should work on all platforms but doesn't use the Recycle Bin / Trash
+                    Directory.Delete(mod.fullPath, true);
+                }
                 installedMods.Remove(mod);
             }
             catch (Exception ex)
