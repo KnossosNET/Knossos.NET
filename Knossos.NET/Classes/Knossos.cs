@@ -1666,7 +1666,7 @@ namespace Knossos.NET
                             // this might only work on Windows
                             FileSystem.DeleteDirectory(mod.fullPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         }
-                        catch (PlatformNotSupportedException pnse)
+                        catch (PlatformNotSupportedException)
                         {
                             // this should work on all platforms but doesn't use the Recycle Bin / Trash
                             Directory.Delete(mod.fullPath, true);
@@ -1697,7 +1697,7 @@ namespace Knossos.NET
                     // this might only work on Windows
                     FileSystem.DeleteDirectory(mod.fullPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                 }
-                catch (PlatformNotSupportedException pnse)
+                catch (PlatformNotSupportedException)
                 {
                     // this should work on all platforms but doesn't use the Recycle Bin / Trash
                     Directory.Delete(mod.fullPath, true);
