@@ -3,6 +3,7 @@ using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.ViewModels;
 using Knossos.NET.Views;
+using Microsoft.VisualBasic.FileIO;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -1660,7 +1661,16 @@ namespace Knossos.NET
                     foreach (var mod in delete)
                     {
                         Log.Add(Log.LogSeverity.Information, "Knossos.RemoveMod()", "Deleting mod: "+mod.title + " " +mod.version);
-                        Directory.Delete(mod.fullPath, true); 
+                        try
+                        {
+                            // this might only work on Windows
+                            FileSystem.DeleteDirectory(mod.fullPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        }
+                        catch (PlatformNotSupportedException)
+                        {
+                            // this should work on all platforms but doesn't use the Recycle Bin / Trash
+                            Directory.Delete(mod.fullPath, true);
+                        }
                         installedMods.Remove(mod);
                     }
                 }
@@ -1682,7 +1692,16 @@ namespace Knossos.NET
             try
             {
                 Log.Add(Log.LogSeverity.Information, "Knossos.RemoveMod()", "Deleting mod: " + mod.title + " " + mod.version);
-                Directory.Delete(mod.fullPath, true);
+                try
+                {
+                    // this might only work on Windows
+                    FileSystem.DeleteDirectory(mod.fullPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    // this should work on all platforms but doesn't use the Recycle Bin / Trash
+                    Directory.Delete(mod.fullPath, true);
+                }
                 installedMods.Remove(mod);
             }
             catch (Exception ex)
