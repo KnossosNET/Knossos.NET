@@ -55,6 +55,11 @@
 				</StackPanel>
 			</WrapPanel>
 			<WrapPanel Margin="10" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">
+				<Button Margin="0,0,5,0" Height="42" Width="100" HorizontalAlignment="Right" Classes="Primary" IsVisible="{Binding !Fs2Present}" Command="{Binding InstallFS2Command}" FontSize="11" ToolTip.Tip="Add Freespace 2 to your knossos.NET library by pointing at a current installation or by using the GOG.com installer.  Mods with a Freespace dependency will not appear without this in your library.">
+					<TextBlock HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="100" TextWrapping="Wrap">
+						Find/Install Freespace 2
+					</TextBlock>
+				</Button>
 				<Button Command="{Binding ReloadRepoCommand}" ToolTip.Tip="Refresh">
 					<Image Height="30" Width="30" Source="/Assets/general/refresh.png"></Image>
 				</Button>
