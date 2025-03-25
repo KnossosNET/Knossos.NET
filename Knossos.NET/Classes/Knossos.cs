@@ -1616,6 +1616,16 @@ namespace Knossos.NET
             {
                 /* Likely file/folder permission issues */
                 Log.Add(Log.LogSeverity.Error, "Knossos.ModSearchRecursive", ex);
+
+                if (folderLevel == 0 )
+                {
+                    if (MainWindow.instance != null)
+                    {
+                        Dispatcher.UIThread.Invoke(() => {
+                            MessageBox.Show(MainWindow.instance!, "KnossosNET either cannot find or does not have permission to read a previously selected library folder.\nEither select a new library folder in KnossosNET's settings, or check if the folder is now protected.", "Knossos.NET Library Folder Error" , MessageBox.MessageBoxButtons.OK);
+                        });
+                    }
+                }
             }
         }
 
