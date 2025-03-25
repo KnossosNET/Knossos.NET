@@ -34,6 +34,21 @@ namespace Knossos.NET
         public static bool isKnDataFolderReadOnly { get; private set; } = false;
         public static bool inSingleTCMode { get; private set; } = false;
         public static bool initIsComplete {  get; private set; } = false;
+        public static IDictionary<string, string> filterDisplayStrings { get; private set;} = new Dictionary<string, string>
+        {
+                ["total_conversion"] = "Standalone Game",
+                ["retail_fs2"] = "Retail Freespace 2",
+                ["fs2_mod"] = "Freespace 2 Mod",
+                ["fs1_mod"] = "Freespace 1 Mod",
+                ["tc_mod"] = "Standalone Game Mod",
+                ["utility"] = "Utilities and Misc",
+                ["dependency"] = "Dependency",
+                ["asset_pack"] = "Asset Pack",
+                ["demo"] = "Demo Mod",
+                ["multiplayer"] = "Multiplayer Enabled",
+                ["vr_mod"] = "VR",
+                ["test"] = "For Testing",
+        };
 
         /// <summary>
         /// Static constructor
