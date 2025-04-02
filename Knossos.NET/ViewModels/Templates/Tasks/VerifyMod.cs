@@ -158,6 +158,7 @@ namespace Knossos.NET.ViewModels
                     else
                     {
                         Info = "FAIL";
+                        mod.packages?.ForEach(p => p.isSelected = true); //mark all installed pkgs as selected so they are not deleted!
                         TaskViewModel.Instance?.InstallMod(mod, reinstall);
                     }
 

@@ -559,6 +559,7 @@ namespace Knossos.NET.ViewModels
                     MessageBox.Show(MainWindow.instance!, "This mod is compressed, mod verify is not available for compressed mods, uncompress it and try again.", "Verify error", MessageBox.MessageBoxButtons.OK);
                     return;
                 }
+                MessageBox.Show(MainWindow.instance!, "The verify process has started.", "Verify", MessageBox.MessageBoxButtons.OK);
                 TaskViewModel.Instance!.VerifyMod(SelectedMod);
             }
         }

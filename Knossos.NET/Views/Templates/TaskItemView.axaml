@@ -54,7 +54,7 @@
 						<StackPanel IsVisible="{Binding !IsFileDownloadTask}" IsEnabled="{Binding !IsFileDownloadTask}">
 							<TextBlock HorizontalAlignment="Left" Height="22" FontSize="16" Margin="5,0,0,0" TextWrapping="Wrap" Text="{Binding Name, Converter={StaticResource escapeUnderscoresConverter}}" Foreground="{Binding TextColor}"/>
 							<StackPanel IsVisible="{Binding !IsCompleted}">
-								<ProgressBar Width="350" IsVisible="{Binding ProgressBarMax}" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="{Binding ShowProgressText}"></ProgressBar>
+								<ProgressBar Width="350" HorizontalAlignment="Left" IsVisible="{Binding ProgressBarMax}" Maximum="{Binding ProgressBarMax}" Minimum="{Binding ProgressBarMin}" Value="{Binding ProgressCurrent}" Margin="5,0,0,0" Height="20" ShowProgressText="{Binding ShowProgressText}"></ProgressBar>
 								<Label Height="22" FontSize="12" Margin="5,0,0,0" VerticalAlignment="Center" Content="{Binding Info, Converter={StaticResource escapeUnderscoresConverter}}}"/>
 							</StackPanel>
 							<StackPanel IsVisible="{Binding !IsTextTask}">
