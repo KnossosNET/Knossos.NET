@@ -52,8 +52,6 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal String filterString = String.Empty;
 
-        [ObservableProperty]
-        internal bool filtersEnabled = false;
 
         //The actual collection were the mods are
         private ObservableList<ModCardViewModel> Mods = new ObservableList<ModCardViewModel>();
@@ -87,10 +85,6 @@ namespace Knossos.NET.ViewModels
                 if (tags.Count() > tagIndex)
                 {
                     MainWindowViewModel.Instance.tagFilter.Remove(tags[tagIndex]);
-                }
-
-                if (MainWindowViewModel.Instance.tagFilter.Count < 1) {
-                    FiltersEnabled = false;
                 }
 
                 ApplyFilters();
@@ -132,16 +126,14 @@ namespace Knossos.NET.ViewModels
 
         private void BuildFilterString(){
             if (MainWindowViewModel.Instance == null){
-                FilterString = "";
-                FiltersEnabled = false;
+                FilterString = "No Filters Applied";
                 return;
             }
             
             int externalCount = MainWindowViewModel.Instance.tagFilter.Count;
 
             if (externalCount == 0 ){
-                FilterString = "";
-                FiltersEnabled = false;
+                FilterString = "No Filters Applied";
                 return;
             }
 
@@ -173,7 +165,6 @@ namespace Knossos.NET.ViewModels
                         FilterString += ", " + myTI.ToTitleCase(filter.Replace("_", " "));
                 }
 
-                FiltersEnabled = true;
                 count++;
             }
         }

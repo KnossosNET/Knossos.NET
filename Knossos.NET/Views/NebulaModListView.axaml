@@ -50,7 +50,7 @@
 				<StackPanel Margin="10,0,0,0">
 					<Label Content="{Binding SortString}" FontSize="12">
 					</Label>
-					<Label Content="{Binding FilterString}" IsEnabled="{Binding FiltersEnabled}" FontSize="12">
+					<Label Content="{Binding FilterString}" FontSize="12">
 					</Label>
 				</StackPanel>
 			</WrapPanel>
