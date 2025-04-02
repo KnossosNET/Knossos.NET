@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
+using Knossos.NET.Views;
 using ObservableCollections;
 
 namespace Knossos.NET.ViewModels
@@ -27,6 +28,9 @@ namespace Knossos.NET.ViewModels
         /// Current Sort Mode
         /// </summary>
         internal ModSortType localSort = ModSortType.name;
+
+        [ObservableProperty]
+        internal bool fs2Present = true;
 
         internal string search = string.Empty;
         internal string Search
@@ -146,7 +150,7 @@ namespace Knossos.NET.ViewModels
             TextInfo myTI = new CultureInfo("en-US", false).TextInfo;
 
             foreach (var filter in MainWindowViewModel.Instance.tagFilter) {
-                if (count > 3){ 
+                if (count > 2){ 
                     FilterString += " and ...";
                     break;
                 // easiest case, this handles a filter list of one and the start of all other cases
@@ -175,6 +179,14 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
+        /// Used to signal the mod list view to update its "have you installed FS2" button
+        /// </summary>
+        public void UpdateFS2InstallButton()
+        {
+            Fs2Present = Knossos.retailFs2RootFound;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         public void OpenTab()
@@ -191,7 +203,12 @@ namespace Knossos.NET.ViewModels
                 }
             }
 
-            SortString = "Sorted by " + Search;
+            if (Knossos.initIsComplete)
+            {
+                Fs2Present = Knossos.retailFs2RootFound;
+            }
+
+            SortString = "Sorted by " + localSort;         
             BuildFilterString();
         }
 
@@ -325,6 +342,22 @@ namespace Knossos.NET.ViewModels
                 {
                     Mods.Remove(modCard);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Open the retails FS2 installer window
+        /// </summary>
+        internal async void InstallFS2Command()
+        {
+            if (MainWindow.instance != null)
+            {
+                var dialog = new Fs2InstallerView();
+                dialog.DataContext = new Fs2InstallerViewModel();
+
+                await dialog.ShowDialog<Fs2InstallerView?>(MainWindow.instance);
+
+                Fs2Present = Knossos.retailFs2RootFound;
             }
         }
     }

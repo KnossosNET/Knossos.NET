@@ -835,9 +835,12 @@ namespace Knossos.NET
 
                 //generate mod tag buttons
                 Dispatcher.UIThread.Invoke(() =>
-                {
+                {                                      
                     NebulaModListView.Instance?.GenerateFilterButtons();
                     ModListView.Instance?.GenerateFilterButtons();
+                    MainWindowViewModel.Instance?.NebulaModsView?.UpdateFS2InstallButton();
+                    MainWindowViewModel.Instance?.InstalledModsView?.UpdateFS2InstallButton();
+
                 });
 
                 initIsComplete = true;
