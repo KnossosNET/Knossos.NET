@@ -342,7 +342,7 @@ namespace Knossos.NET.ViewModels
             if (MainWindow.instance != null)
             {
                 var dialog = new AddUserBuildView();
-                dialog.DataContext = new AddUserBuildViewModel();
+                dialog.DataContext = new AddUserBuildViewModel(dialog);
 
                 await dialog.ShowDialog<AddUserBuildView?>(MainWindow.instance);
             }
