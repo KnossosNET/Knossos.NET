@@ -92,6 +92,7 @@ namespace Knossos.NET.ViewModels
 
         public FsoBuildPickerViewModel(Window window)
         {
+            this.window = window;
         }
 
         public FsoBuildPickerViewModel(FsoBuild? preSelected, Window? window)

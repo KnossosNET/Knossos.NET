@@ -117,7 +117,7 @@ namespace Knossos.NET.ViewModels
             {
                 if (modJson.modSettings.customBuildExec != null)
                 {
-                    fsoPicker = new FsoBuildPickerViewModel(new FsoBuild(modJson.modSettings.customBuildExec), null);
+                    fsoPicker = new FsoBuildPickerViewModel(new FsoBuild(modJson.modSettings.customBuildExec), window);
                 }
                 else
                 {
