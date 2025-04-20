@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Avalonia.Platform.Storage;
+using Avalonia.Controls;
 
 namespace Knossos.NET.ViewModels
 {
@@ -54,6 +55,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool innoExtractIsAvailable = false;
         private string? gogExe = null;
+        private Window? window;
 
         public Fs2InstallerViewModel() 
         { 
@@ -61,6 +63,15 @@ namespace Knossos.NET.ViewModels
             {
                 InnoExtractIsAvailable = true;
             }
+        }
+
+        public Fs2InstallerViewModel(Window window)
+        {
+            if (KnUtils.IsWindows || KnUtils.IsMacOS || KnUtils.IsLinux && (KnUtils.CpuArch == "X64" || KnUtils.CpuArch == "X86" || KnUtils.CpuArch == "Arm64" || KnUtils.CpuArch == "RiscV64"))
+            {
+                InnoExtractIsAvailable = true;
+            }
+            this.window = window;
         }
 
         /// <summary>
@@ -336,7 +347,8 @@ namespace Knossos.NET.ViewModels
             FilePickerOpenOptions options = new FilePickerOpenOptions();
             options.AllowMultiple = false;
             options.Title = "Select your Freespace 2 gog .exe installer file";
-            var result = await MainWindow.instance!.StorageProvider.OpenFilePickerAsync(options);
+            var topmostWindow = window == null ? MainWindow.instance! : window;
+            var result = await topmostWindow.StorageProvider.OpenFilePickerAsync(options);
 
             if (result != null && result.Count > 0)
             {
@@ -458,7 +470,8 @@ namespace Knossos.NET.ViewModels
             FolderPickerOpenOptions options = new FolderPickerOpenOptions();
             options.AllowMultiple = false;
             options.Title = "Select your Freespace 2 retail folder";
-            var result = await MainWindow.instance!.StorageProvider.OpenFolderPickerAsync(options);
+            var topmostWindow = window == null ? MainWindow.instance! : window;
+            var result = await topmostWindow.StorageProvider.OpenFolderPickerAsync(options);
 
             if (result != null && result.Count > 0)
             {

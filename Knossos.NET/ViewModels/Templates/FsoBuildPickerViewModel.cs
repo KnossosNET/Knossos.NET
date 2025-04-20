@@ -16,6 +16,7 @@ namespace Knossos.NET.ViewModels
     public partial class FsoBuildPickerViewModel : ViewModelBase
     {
         private bool directSeparatorAdded = false;
+        private Window? window = null;
         [ObservableProperty]
         internal ObservableCollection<ComboBoxItem> buildItems = new ObservableCollection<ComboBoxItem>();
 
@@ -89,9 +90,14 @@ namespace Knossos.NET.ViewModels
         {
         }
 
-        public FsoBuildPickerViewModel(FsoBuild? preSelected)
+        public FsoBuildPickerViewModel(Window window)
+        {
+        }
+
+        public FsoBuildPickerViewModel(FsoBuild? preSelected, Window? window)
         {
             FillBuildsItems(preSelected);
+            this.window = window;
         }
 
         /*
@@ -292,7 +298,8 @@ namespace Knossos.NET.ViewModels
                 FilePickerOpenOptions options = new FilePickerOpenOptions();
                 options.AllowMultiple = false;
                 options.Title = "Select the FSO executable file";
-                var result = await MainWindow.instance.StorageProvider.OpenFilePickerAsync(options);
+                var topmostWindow = window == null ? MainWindow.instance! : window;
+                var result = await topmostWindow.StorageProvider.OpenFilePickerAsync(options);
 
                 if (result != null && result.Count > 0)
                 {

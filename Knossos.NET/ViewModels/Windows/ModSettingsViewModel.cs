@@ -11,6 +11,7 @@ using System;
 using System.IO;
 using VP.NET;
 using System.Diagnostics;
+using Avalonia.Controls;
 
 namespace Knossos.NET.ViewModels
 {
@@ -21,6 +22,7 @@ namespace Knossos.NET.ViewModels
     {
         private Mod? modJson;
         private ModCardViewModel? modCardViewModel;
+        private Window? window = null;
 
         internal ObservableCollection<DependencyItemViewModel> DepItems { get; set; } = new ObservableCollection<DependencyItemViewModel>();
 
@@ -59,6 +61,12 @@ namespace Knossos.NET.ViewModels
         public ModSettingsViewModel()
         {
             fsoPicker = new FsoBuildPickerViewModel();
+        }
+
+        public ModSettingsViewModel(Window window)
+        {
+            fsoPicker = new FsoBuildPickerViewModel(window);
+            this.window = window;
         }
 
         /// <summary>
@@ -103,13 +111,13 @@ namespace Knossos.NET.ViewModels
             
             if(modJson.modSettings.customBuildId == null)
             {
-                fsoPicker = new FsoBuildPickerViewModel(null);
+                fsoPicker = new FsoBuildPickerViewModel(null, window);
             }
             else
             {
                 if (modJson.modSettings.customBuildExec != null)
                 {
-                    fsoPicker = new FsoBuildPickerViewModel(new FsoBuild(modJson.modSettings.customBuildExec));
+                    fsoPicker = new FsoBuildPickerViewModel(new FsoBuild(modJson.modSettings.customBuildExec), null);
                 }
                 else
                 {
@@ -119,20 +127,20 @@ namespace Knossos.NET.ViewModels
                         var theBuild = matchingBuilds.FirstOrDefault(build => build.version == modJson.modSettings.customBuildVersion);
                         if (theBuild != null)
                         {
-                            fsoPicker = new FsoBuildPickerViewModel(theBuild);
+                            fsoPicker = new FsoBuildPickerViewModel(theBuild, window);
                         }
                         else
                         {
                             Log.Add(Log.LogSeverity.Warning, "ModSettingsViewModel.Constructor()", "Missing user-saved build version for mod: " + modJson.title + " - " + modJson.version + " requested build id: " + modJson.modSettings.customBuildId + " and version: " + modJson.modSettings.customBuildVersion);
                             BuildMissingWarning = "Missing user-saved build version for mod: " + modJson.title + " - " + modJson.version + " requested build id: " + modJson.modSettings.customBuildId + " and version: " + modJson.modSettings.customBuildVersion;
-                            fsoPicker = new FsoBuildPickerViewModel(null);
+                            fsoPicker = new FsoBuildPickerViewModel(null, window);
                         }
                     }
                     else
                     {
                         Log.Add(Log.LogSeverity.Warning, "ModSettingsViewModel.Constructor()", "Missing user-saved build id for mod: " + modJson.title + " - " + modJson.version + " requested build id: " + modJson.modSettings.customBuildId);
                         BuildMissingWarning = "Missing user-saved build id for mod: " + modJson.title + " - " + modJson.version + " requested build id: " + modJson.modSettings.customBuildId;
-                        fsoPicker = new FsoBuildPickerViewModel(null);
+                        fsoPicker = new FsoBuildPickerViewModel(null, window);
                     }
                 }
             }
@@ -413,7 +421,7 @@ namespace Knossos.NET.ViewModels
         {
             CustomDependencies = false;
             BuildMissingWarning = string.Empty;
-            FsoPicker = new FsoBuildPickerViewModel(null);
+            FsoPicker = new FsoBuildPickerViewModel(null, window);
             FsoFlags = null;
             ConfigureBuild(true);
             DepItems.Clear();

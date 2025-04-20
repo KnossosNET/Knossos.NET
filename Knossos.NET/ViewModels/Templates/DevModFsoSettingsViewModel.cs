@@ -35,13 +35,13 @@ namespace Knossos.NET.ViewModels
             {
                 if (editor.ActiveVersion.modSettings.customBuildId == null)
                 {
-                    FsoPicker = new FsoBuildPickerViewModel(null);
+                    FsoPicker = new FsoBuildPickerViewModel(null,null);
                 }
                 else
                 {
                     if (editor.ActiveVersion.modSettings.customBuildExec != null)
                     {
-                        FsoPicker = new FsoBuildPickerViewModel(new FsoBuild(editor.ActiveVersion.modSettings.customBuildExec));
+                        FsoPicker = new FsoBuildPickerViewModel(new FsoBuild(editor.ActiveVersion.modSettings.customBuildExec), null);
                     }
                     else
                     {
@@ -51,18 +51,18 @@ namespace Knossos.NET.ViewModels
                             var theBuild = matchingBuilds.FirstOrDefault(build => build.version == editor.ActiveVersion.modSettings.customBuildVersion);
                             if (theBuild != null)
                             {
-                                FsoPicker = new FsoBuildPickerViewModel(theBuild);
+                                FsoPicker = new FsoBuildPickerViewModel(theBuild, null);
                             }
                             else
                             {
                                 Log.Add(Log.LogSeverity.Warning, "DevModFsoSettingsViewModel.Constructor()", "Missing user-saved build version for mod: " + editor.ActiveVersion.tile + " - " + editor.ActiveVersion.version + " requested build id: " + editor.ActiveVersion.modSettings.customBuildId + " and version: " + editor.ActiveVersion.modSettings.customBuildVersion);
-                                FsoPicker = new FsoBuildPickerViewModel(null);
+                                FsoPicker = new FsoBuildPickerViewModel(null, null);
                             }
                         }
                         else
                         {
                             Log.Add(Log.LogSeverity.Warning, "DevModFsoSettingsViewModel.Constructor()", "Missing user-saved build id for mod: " + editor.ActiveVersion.tile + " - " + editor.ActiveVersion.version + " requested build id: " + editor.ActiveVersion.modSettings.customBuildId);
-                            FsoPicker = new FsoBuildPickerViewModel(null);
+                            FsoPicker = new FsoBuildPickerViewModel(null, null);
                         }
                     }
                 }
