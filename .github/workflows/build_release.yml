@@ -164,9 +164,6 @@ jobs:
       - name: Create installers for Windows
         run: ${{ github.workspace }}/ci/create_win_installer.sh
 
-      - name: Set up QEMU integration for Docker
-        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-
       - name: Create AppImage (x86_64)
         env:
           ARCH: x86_64
