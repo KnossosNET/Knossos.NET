@@ -344,7 +344,7 @@ namespace Knossos.NET.ViewModels
             if (MainWindow.instance != null)
             {
                 var dialog = new Fs2InstallerView();
-                dialog.DataContext = new Fs2InstallerViewModel();
+                dialog.DataContext = new Fs2InstallerViewModel(dialog);
 
                 await dialog.ShowDialog<Fs2InstallerView?>(MainWindow.instance);
 
