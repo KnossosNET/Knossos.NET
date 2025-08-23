@@ -97,7 +97,10 @@ namespace Knossos.NET.ViewModels
 
         internal async void LogIn()
         {
-            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(UserPass) || string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(UserPass))
+            UserName = UserName?.Trim();
+            UserPass = UserPass?.Trim();
+
+            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(UserPass))
             {
                 await MessageBox.Show(MainWindow.instance!, "Username and password are required fields.", "Login error", MessageBox.MessageBoxButtons.OK);
                 return;
@@ -134,8 +137,11 @@ namespace Knossos.NET.ViewModels
 
         internal async void Register()
         {
-            if(string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(UserPass) || string.IsNullOrEmpty(UserEmail) ||
-               string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(UserPass) || string.IsNullOrWhiteSpace(UserEmail))
+            UserName = UserName?.Trim();
+            UserPass = UserPass?.Trim();
+            UserEmail = UserEmail.Trim();
+
+            if(string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(UserPass) || string.IsNullOrEmpty(UserEmail))
             {
                 await MessageBox.Show(MainWindow.instance!, "Username, password and email are all required fields.", "Register error", MessageBox.MessageBoxButtons.OK);
                 return;
@@ -165,7 +171,9 @@ namespace Knossos.NET.ViewModels
 
         internal async void Reset() 
         {
-            if (string.IsNullOrEmpty(UserName) || string.IsNullOrWhiteSpace(UserName))
+            UserName = UserName?.Trim();
+
+            if (string.IsNullOrEmpty(UserName))
             {
                 await MessageBox.Show(MainWindow.instance!, "Username is a required field.", "Reset password", MessageBox.MessageBoxButtons.OK);
                 return;

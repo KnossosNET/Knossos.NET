@@ -20,7 +20,13 @@ namespace Knossos.NET.Models
 
     public class ModMember
     {
+        private string _user = string.Empty;
+
         public ModMemberRole role { get; set; }
-        public string user { get; set; } = string.Empty;
+        public string user
+        {
+            get { return _user; }
+            set { _user = value.Trim(); }
+        }
     }
 }
