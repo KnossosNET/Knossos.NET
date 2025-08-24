@@ -1,4 +1,5 @@
-﻿using Avalonia.Platform.Storage;
+﻿using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Classes;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
@@ -55,8 +57,6 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool riscv64 = false;
         [ObservableProperty]
-        internal bool modCreated = false;
-        [ObservableProperty]
         internal int copyProgress = 0;
         [ObservableProperty]
         internal int maxFiles = 100;
@@ -64,12 +64,24 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string buildNewPath = string.Empty;
 
+        [ObservableProperty]
+        internal bool collapseData = false;
+        [ObservableProperty]
+        internal bool collapseArch = false;
+        [ObservableProperty]
+        internal bool collapseExecs = false;
+
         private string buildId = string.Empty;
         private string? folderPath = null;
-
+        private Window? window = null;
 
         public AddUserBuildViewModel() 
         {
+        }
+
+        public AddUserBuildViewModel(Window window)
+        {
+            this.window = window;
         }
 
         internal async void OpenFolderCommand()
@@ -83,15 +95,15 @@ namespace Knossos.NET.ViewModels
                     string[] execs;
                     if (KnUtils.IsWindows)
                     {
-                        execs=Directory.GetFiles(folderPath, "*.exe");
+                        execs=Directory.GetFiles(folderPath, "*.exe", SearchOption.AllDirectories);
                     }
                     else if (KnUtils.IsMacOS)
                     {
-                        execs=Directory.GetDirectories(folderPath, "*.app");
+                        execs=Directory.GetDirectories(folderPath, "*.app", SearchOption.AllDirectories);
                     }
                     else
                     {
-                        execs=Directory.GetFiles(folderPath, "*.AppImage");
+                        execs=Directory.GetFiles(folderPath, "*.AppImage", SearchOption.AllDirectories);
                     }
                     ScanResults += "\nDetected Executables: " + execs.Count();
                     foreach (string exe in execs)
@@ -103,7 +115,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 if (file.Name.ToLower().Contains("fs2_open"))
                                 {
-                                    DebugFile = file.Name;
+                                    DebugFile = Path.GetRelativePath(folderPath, exe);
                                     if (BuildVersion == string.Empty)
                                     {
                                         ParseVersion(file.Name);
@@ -114,7 +126,7 @@ namespace Knossos.NET.ViewModels
                                 {
                                     if (file.Name.ToLower().Contains("fred2_open"))
                                     {
-                                        Fred2Debug = file.Name;
+                                        Fred2Debug = Path.GetRelativePath(folderPath, exe);
                                         if (BuildVersion == string.Empty)
                                         {
                                             ParseVersion(file.Name);
@@ -125,7 +137,7 @@ namespace Knossos.NET.ViewModels
                                     {
                                         if (file.Name.ToLower().Contains("qtfred"))
                                         {
-                                            QtFredDebug = file.Name;
+                                            QtFredDebug = Path.GetRelativePath(folderPath, exe);
                                         }
                                     }
                                 }
@@ -134,7 +146,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 if (file.Name.ToLower().Contains("fs2_open"))
                                 {
-                                    Release = file.Name;
+                                    Release = Path.GetRelativePath(folderPath, exe);
                                     if (BuildVersion == string.Empty)
                                     {
                                         ParseVersion(file.Name);
@@ -145,7 +157,7 @@ namespace Knossos.NET.ViewModels
                                 {
                                     if (file.Name.ToLower().Contains("fred2_open"))
                                     {
-                                        Fred2 = file.Name;
+                                        Fred2 = Path.GetRelativePath(folderPath, exe);
                                         if (BuildVersion == string.Empty)
                                         {
                                             ParseVersion(file.Name);
@@ -156,7 +168,7 @@ namespace Knossos.NET.ViewModels
                                     {
                                         if (file.Name.ToLower().Contains("qtfred"))
                                         {
-                                            QtFred = file.Name;
+                                            QtFred = Path.GetRelativePath(folderPath, exe);
                                         }
                                     }
                                 }
@@ -224,7 +236,10 @@ namespace Knossos.NET.ViewModels
                 FolderPickerOpenOptions options = new FolderPickerOpenOptions();
                 options.AllowMultiple = false;
                 options.Title = "Select the folder containing the FSO execs files";
-                var result = await MainWindow.instance.StorageProvider.OpenFolderPickerAsync(options);
+
+                var topmostWindow = window == null ? MainWindow.instance : window; 
+
+                var result = await topmostWindow.StorageProvider.OpenFolderPickerAsync(options);
                 if (result != null && result.Count > 0)
                     return result[0].Path.LocalPath.ToString();
                 else
@@ -304,22 +319,20 @@ namespace Knossos.NET.ViewModels
 
         public async Task<string?> GetPath(string? folderRoot)
         {
-            if(MainWindow.instance != null && folderPath != null)
+            if(MainWindow.instance != null && folderRoot != null)
             {
                 FilePickerOpenOptions options = new FilePickerOpenOptions();
                 options.AllowMultiple = false;
                 options.Title = "Select the executable file";
-                if (folderRoot != null)
-                {
-                    options.SuggestedStartLocation = await MainWindow.instance.StorageProvider.TryGetFolderFromPathAsync(folderRoot);
-                }
+                options.SuggestedStartLocation = await MainWindow.instance.StorageProvider.TryGetFolderFromPathAsync(folderRoot);
 
-                var result = await MainWindow.instance.StorageProvider.OpenFilePickerAsync(options);
+                var topmostWindow = window == null ? MainWindow.instance : window;
+
+                var result = await topmostWindow.StorageProvider.OpenFilePickerAsync(options);
 
                 if (result != null && result.Count > 0)
                 {
-                    var file = new FileInfo(result[0].Path.LocalPath.ToString());
-                    return file.Name;
+                    return Path.GetRelativePath(folderRoot, result[0].Path.LocalPath.ToString());
                 }
             }
             return null;
@@ -331,10 +344,14 @@ namespace Knossos.NET.ViewModels
             {
                 return;
             }
-
+            
             if (folderPath != null)
             {
-                if(await CopyFilesRecursively(folderPath, BuildNewPath))
+                CollapseData = true;
+                CollapseExecs = true;
+                CollapseArch = true;
+                string[] ignoreList = { ".pdb", ".lib", ".exp", ".a", ".map" };
+                if(await KnUtils.CopyDirectoryAsync(folderPath, BuildNewPath, true, new CancellationTokenSource(), copyCallback, ignoreList))
                 {
                     Mod mod = new Mod();
                     mod.fullPath = BuildNewPath + Path.DirectorySeparatorChar;
@@ -485,7 +502,14 @@ namespace Knossos.NET.ViewModels
                     Knossos.AddBuild(userBuild);
                     FsoBuildsViewModel.Instance?.AddBuildToUi(userBuild);
 
-                    ModCreated = true;
+                    Dispatcher.UIThread.Invoke(() => { window?.Close(); });
+                }
+                else
+                {
+                    CollapseData = false;
+                    CollapseExecs = false;
+                    CollapseArch = false;
+                    await MessageBox.Show(window, "An error has ocurred while copying files", "Filecopy error", MessageBox.MessageBoxButtons.OK);
                 }
             }
         }
@@ -531,37 +555,10 @@ namespace Knossos.NET.ViewModels
             return true;
         }
 
-        private async Task<bool> CopyFilesRecursively(string sourcePath, string targetPath)
+        private async void copyCallback(string filename)
         {
-            return await Task<bool>.Factory.StartNew(() => { 
-                try
-                {
-                    Directory.CreateDirectory(targetPath);
-                    foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
-                    {
-                        Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
-                    }
-                    var allFiles = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories);
-                    Dispatcher.UIThread.Invoke(()=> MaxFiles = allFiles.Length );
-                    foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
-                    {
-                        if (!newPath.ToLower().Contains(".pdb") && !newPath.ToLower().Contains(".lib") && !newPath.ToLower().Contains(".exp") && !newPath.ToLower().EndsWith(".a"))
-                        {
-                            System.IO.File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
-                        }
-                        Dispatcher.UIThread.Invoke(() => CopyProgress++);
-                    }
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "AddUserBuildViewModel.CopyFilesRecursively()", ex);
-                    if (MainWindow.instance != null)
-                    {
-                        MessageBox.Show(MainWindow.instance, "Error while copying files:\n"+ex.Message.ToString(), "Filecopy error", MessageBox.MessageBoxButtons.OK);
-                    }
-                    return false;
-                }
+            await Dispatcher.UIThread.InvokeAsync(() => {
+                CopyProgress++;
             });
         }
     }

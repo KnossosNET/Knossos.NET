@@ -411,50 +411,62 @@ namespace Knossos.NET
         /// <returns></returns>
         /// <exception cref="DirectoryNotFoundException"></exception>
         /// <exception cref="TaskCanceledException"></exception>
-        public static async Task CopyDirectoryAsync(string sourceDir, string destinationDir, bool recursive, CancellationTokenSource cancelSource, Action<string>? progressCallback = null)
+        public static async Task<bool> CopyDirectoryAsync(string sourceDir, string destinationDir, bool recursive, CancellationTokenSource cancelSource,
+            Action<string>? progressCallback = null, string[]? ignoreExtensions = null)
         {
-            await Task.Run(async () =>
+            return await Task.Run(async () =>
             {
-                var dir = new DirectoryInfo(sourceDir);
-
-                if (!dir.Exists)
-                    throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
-
-                var dirs = dir.GetDirectories();
-
-                Directory.CreateDirectory(destinationDir);
-
-                foreach (var file in dir.GetFiles())
+                try
                 {
-                    if (cancelSource.IsCancellationRequested)
-                    {
-                        throw new TaskCanceledException();
-                    }
-                    var targetFilePath = Path.Combine(destinationDir, file.Name);
-                    if (progressCallback != null)
-                    {
-                        progressCallback(file.Name);
-                    }
-                    file.CopyTo(targetFilePath);
-                }
+                    var dir = new DirectoryInfo(sourceDir);
 
-                if (recursive)
-                {
-                    foreach (var subDir in dirs)
+                    if (!dir.Exists)
+                        throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+
+                    var dirs = dir.GetDirectories();
+
+                    Directory.CreateDirectory(destinationDir);
+
+                    foreach (var file in dir.GetFiles())
                     {
                         if (cancelSource.IsCancellationRequested)
                         {
                             throw new TaskCanceledException();
                         }
-
-                        var newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-                        await CopyDirectoryAsync(subDir.FullName, newDestinationDir, true, cancelSource, progressCallback);
+                        if (ignoreExtensions == null || !ignoreExtensions.Contains(file.Extension.ToLower()))
+                        {
+                            var targetFilePath = Path.Combine(destinationDir, file.Name);
+                            if (progressCallback != null)
+                            {
+                                progressCallback(file.Name);
+                            }
+                            file.CopyTo(targetFilePath);
+                        }
                     }
-                }
 
-                Directory.SetCreationTime(destinationDir, Directory.GetCreationTime(sourceDir));
-                Directory.SetLastAccessTime(destinationDir, Directory.GetLastAccessTime(sourceDir));
-                Directory.SetLastWriteTime(destinationDir, Directory.GetLastWriteTime(sourceDir));
+                    if (recursive)
+                    {
+                        foreach (var subDir in dirs)
+                        {
+                            if (cancelSource.IsCancellationRequested)
+                            {
+                                throw new TaskCanceledException();
+                            }
+
+                            var newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+                            await CopyDirectoryAsync(subDir.FullName, newDestinationDir, true, cancelSource, progressCallback);
+                        }
+                    }
+
+                    Directory.SetCreationTime(destinationDir, Directory.GetCreationTime(sourceDir));
+                    Directory.SetLastAccessTime(destinationDir, Directory.GetLastAccessTime(sourceDir));
+                    Directory.SetLastWriteTime(destinationDir, Directory.GetLastWriteTime(sourceDir));
+                }catch(Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "KnUtils.CopyDirectoryAsync()", ex);
+                    return false;
+                }
+                return true;
             });
         }
 
