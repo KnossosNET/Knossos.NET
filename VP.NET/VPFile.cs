@@ -1,4 +1,6 @@
-﻿namespace VP.NET
+﻿using System.IO;
+
+namespace VP.NET
 {    
     public enum VPFileType
     {
@@ -12,6 +14,7 @@
         private VPContainer? vp;
         internal string? fullpath; //only used for adding new files
         internal bool delete = false;
+        internal bool newFile = false;
         public VPFileType type; 
         public VPIndexEntry info;
         public CompressionInfo compressionInfo;
@@ -80,7 +83,7 @@
         /// Adds a file into this directory
         /// </summary>
         /// <param name="file"></param>
-        public void AddFile(FileInfo file)
+        public VPFile? AddFile(FileInfo file)
         {
             if (type != VPFileType.Directory)
                 throw new Exception("This is not a directory!");
@@ -95,6 +98,7 @@
 
             var nf = new VPFile(VPFileType.File, vp!, this, file.Name, 0, 0, VPTime.GetTimestampFromFile(file.FullName), file.FullName);
             VPFile.InsertInOrder(files, nf);
+            return nf;
         }
 
         /// <summary>
@@ -154,6 +158,54 @@
         }
 
         /// <summary>
+        /// Retuns true if file or folder is marked for deletion, false if not.
+        /// </summary>
+        public bool DeleteStatus()
+        {
+            return delete;
+        }
+
+        /// <summary>
+        /// Marks or unmarks this file or folder as a new file or folder that is not yet saved.
+        /// This is only used for display purposes on the frontend, its not used internally
+        /// </summary>
+        /// <param name="value"></param>
+        public void SetNewFile(bool value = true)
+        {
+            newFile = value;
+        }
+
+        /// <summary>
+        /// Retuns true if file or folder is marked as a new file, false if not.
+        /// </summary>
+        public bool NewFileStatus()
+        {
+            return newFile;
+        }
+
+        /// <summary>
+        /// Returns the number of files on this VPFile
+        /// If this VPFile is a folder it returns the number of files on that folder and subfolders
+        /// otherwise it returns 1
+        /// </summary>
+        /// <returns>int</returns>
+        public int GetNumberOfFiles()
+        {
+            if(type == VPFileType.File)
+            { 
+                return 1; 
+            }
+            if(type == VPFileType.Directory && files != null && files.Count() > 0)
+            {
+                int count = 0;
+                foreach (var f in files)
+                    count += f.GetNumberOfFiles();
+                return count;
+            }
+            return 0;
+        }
+
+        /// <summary>
         /// Extracts this file or folder to path
         /// </summary>
         /// <param name="path"></param>
@@ -168,6 +220,8 @@
                         Directory.CreateDirectory(path + Path.DirectorySeparatorChar + info.name);
                         foreach (var file in files)
                         {
+                            if (progressCallback != null)
+                                progressCallback(file.info.name, 1, vp!.numberFiles);
                             await file.ExtractRecursiveAsync(path + Path.DirectorySeparatorChar + info.name);
                         }
                     }
@@ -184,6 +238,56 @@
                 case VPFileType.BackDir:
                     break;
             }
+        }
+
+        public async Task ReadToStream(Stream destination)
+        {
+            int bufferSize = 8192;
+            if (info.size == 0)
+            {
+                throw new Exception("Files can not be of size 0, you are trying to extract a file that have not been saved to the vp yet?");
+            }
+            if (info.offset < 16)
+            {
+                throw new Exception("Invalid file offset.");
+            }
+            if (!File.Exists(vp?.vpFilePath))
+            {
+                throw new Exception("Unable to open vp file in path : " + vp?.vpFilePath);
+            }
+
+            var source = new FileStream(vp.vpFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize);
+
+            if (!source.CanRead)
+            {
+                throw new Exception("Unable to read vp file : " + vp.vpFilePath);
+            }
+            if (!destination.CanWrite)
+            {
+                throw new Exception("Unable to open file for writting : " + fullpath);
+            }
+
+            source.Seek(info.offset, SeekOrigin.Begin);
+
+            if (compressionInfo.header.HasValue)
+            {
+                VPCompression.DecompressStream(source, destination, compressionInfo.header.Value, info.size);
+            }
+            else
+            {
+                int leftToCopy = (int)info.size;
+                while (leftToCopy > 0)
+                {
+                    byte[] buffer = new byte[bufferSize];
+                    int bytesToRead = leftToCopy > bufferSize ? bufferSize : leftToCopy;
+                    leftToCopy -= await source.ReadAsync(buffer, 0, bytesToRead);
+                    await destination.WriteAsync(buffer, 0, bytesToRead);
+                }
+            }
+
+            source.Close();
+            await source.DisposeAsync();
+            destination.Position = 0;
         }
 
         private async Task ExtractFile(string fullpath)
