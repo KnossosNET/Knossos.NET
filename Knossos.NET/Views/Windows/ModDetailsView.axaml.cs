@@ -19,8 +19,20 @@ namespace Knossos.NET.Views
             _carousel = this.Get<Carousel>("carousel");
             _left = this.Get<Button>("left");
             _right = this.Get<Button>("right");
-            _left.Click += (s, e) => _carousel.Previous();
-            _right.Click += (s, e) => _carousel.Next();
+            _left.Click += (s, e) =>
+            {
+                if (_carousel.ItemCount > 0 && _carousel.SelectedIndex == 0)
+                    _carousel.SelectedIndex = _carousel.ItemCount - 1;
+                else
+                    _carousel.Previous();
+            };
+            _right.Click += (s, e) =>
+            {
+                if (_carousel.ItemCount > 0 && _carousel.SelectedIndex == _carousel.ItemCount - 1)
+                    _carousel.SelectedIndex = 0;
+                else
+                    _carousel.Next();
+            };
         }
 
         private void ModDetailsView_StopTTS(object? sender, CancelEventArgs e)
