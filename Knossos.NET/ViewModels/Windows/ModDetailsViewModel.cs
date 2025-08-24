@@ -4,6 +4,7 @@ using Avalonia.Platform;
 using Avalonia.Threading;
 using BBcodes;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
@@ -11,7 +12,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -85,6 +85,8 @@ namespace Knossos.NET.ViewModels
         internal string? description = string.Empty;
         [ObservableProperty]
         internal string? banner = null;
+        [ObservableProperty]
+        internal string? apngBanner = null;
         [ObservableProperty]
         internal bool forumAvailable = false;
         [ObservableProperty]
@@ -281,9 +283,30 @@ namespace Knossos.NET.ViewModels
                 if (!string.IsNullOrEmpty(modVersions[selectedIndex].banner))
                 {
                     HasBanner = true;
-                    if (System.IO.File.Exists(modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner))
+                    var bannerLocalPath = modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner;
+                    if (System.IO.File.Exists(bannerLocalPath))
                     {
-                        Banner = modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner;
+                        var isApng = false;
+                        using (var stream = new FileStream(bannerLocalPath, FileMode.Open, FileAccess.Read))
+                        {
+                            try
+                            {
+                                isApng = APNGHelper.IsApng(stream);
+
+                            }
+                            catch { /* Not a valid png*/ }
+                        }
+                        Dispatcher.UIThread.Invoke(() =>
+                        {
+                            if (isApng)
+                            {
+                                ApngBanner = bannerLocalPath;
+                            }
+                            else
+                            {
+                                Banner = bannerLocalPath;
+                            }
+                        });
                     }
                     else
                     {
@@ -293,9 +316,30 @@ namespace Knossos.NET.ViewModels
                             Task.Run(async () =>
                             {
                                 var fs = await KnUtils.GetRemoteResource(url).ConfigureAwait(false);
-                                Dispatcher.UIThread.Invoke(() => { 
-                                        Banner = fs;
-                                });
+                                if (fs != null)
+                                {
+                                    var isApng = false;
+                                    using (var stream = new FileStream(fs, FileMode.Open, FileAccess.Read))
+                                    {
+                                        try
+                                        {
+                                            isApng = APNGHelper.IsApng(stream);
+
+                                        }
+                                        catch { /* Not a valid png*/ }
+                                    }
+                                    Dispatcher.UIThread.Invoke(() =>
+                                    {
+                                        if (isApng)
+                                        {
+                                            ApngBanner = fs;
+                                        }
+                                        else
+                                        {
+                                            Banner = fs;
+                                        }
+                                    });
+                                }
                             }).ConfigureAwait(false);
                         }
                     }
