@@ -174,12 +174,6 @@ jobs:
           ARCH: aarch64
         run: ${{ github.workspace }}/ci/create_appimage.sh
 
-      - name: Generate checksums
-        run: |
-          cd $OUTPUT_DIR
-          sha256sum *.* >checksums.txt
-          cat checksums.txt
-
       - name: Generate Release
         uses: softprops/action-gh-release@v2
         with:
