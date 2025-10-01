@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<GenerateApplicationManifest>true</GenerateApplicationManifest>
+	
+	<ApplicationId>com.KnossosNET.Knossos.NET</ApplicationId>
+	<ApplicationVersion>1</ApplicationVersion>
+	<AndroidVersionCode>1</AndroidVersionCode>
+    <ApplicationDisplayVersion>1.3.1</ApplicationDisplayVersion>
+	
+	<RunAOTCompilation>false</RunAOTCompilation>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <AndroidResource Include="Icon.png">
+      <Link>Resources\drawable\Icon.png</Link>
+    </AndroidResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Android" />
+    <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Knossos.NET\Knossos.NET.csproj" />
+  </ItemGroup>
+</Project>

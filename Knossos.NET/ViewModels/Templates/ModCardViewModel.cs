@@ -65,7 +65,7 @@ namespace Knossos.NET.ViewModels
                     }
                     else
                     {
-                        Image = MainWindowViewModel.Instance?.placeholderTileImage;
+                        Image = MainViewModel.Instance?.placeholderTileImage;
                     }
                 }
             }
@@ -130,7 +130,7 @@ namespace Knossos.NET.ViewModels
         private async Task LazyReLoadTileImageAsync()
         {
             await Task.Delay(new Random().Next(200, 700));
-            Image = tileModBitmap != null ? tileModBitmap : MainWindowViewModel.Instance?.placeholderTileImage;
+            Image = tileModBitmap != null ? tileModBitmap : MainViewModel.Instance?.placeholderTileImage;
         }
 
         public void AddModVersion(Mod modJson)
@@ -345,7 +345,7 @@ namespace Knossos.NET.ViewModels
                         modVersions[modVersions.Count - 1].installed = false;
                         if (!IsLocalMod)
                         {
-                            MainWindowViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
+                            MainViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
                         }
                         Knossos.RemoveMod(modVersions[activeVersionIndex].id);
                         MainWindowViewModel.Instance?.RunModStatusChecks();
@@ -392,7 +392,7 @@ namespace Knossos.NET.ViewModels
 
         private void LoadImage()
         {
-            Image = MainWindowViewModel.Instance?.placeholderTileImage;
+            Image = MainViewModel.Instance?.placeholderTileImage;
 
             try
             {

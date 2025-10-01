@@ -325,7 +325,7 @@ namespace Knossos.NET.ViewModels
                 DeveloperModsViewModel.Instance?.UpdateListedFsoBuildVersionsInEditor();
                 if (runModstatusChecks)
                 {
-                    MainWindowViewModel.Instance?.RunModStatusChecks();
+                    MainViewModel.Instance?.RunModStatusChecks();
                 }
             }
             catch(Exception ex)
@@ -403,7 +403,7 @@ namespace Knossos.NET.ViewModels
                             }
                         }
                     }
-                    MainWindowViewModel.Instance?.RunModStatusChecks();
+                    MainViewModel.Instance?.RunModStatusChecks();
                 });
             }
             else

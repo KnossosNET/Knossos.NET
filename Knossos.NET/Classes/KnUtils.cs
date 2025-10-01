@@ -56,19 +56,19 @@ namespace Knossos.NET
             httpClientFactory = serviceCollention.BuildServiceProvider().GetRequiredService<IHttpClientFactory>();
         }
 
-        private static readonly bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        private static readonly bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-        private static readonly bool isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-        private static readonly bool isAppImage = isLinux && !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPIMAGE"));
+        private static readonly bool isAppImage = IsLinux && !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPIMAGE"));
         private static readonly string cpuArch = RuntimeInformation.OSArchitecture.ToString();
         private static readonly bool cpuAVX = Avx.IsSupported;
         private static readonly bool cpuAVX2 = Avx2.IsSupported;
         private static string fsoPrefPath = string.Empty;
         private static IHttpClientFactory httpClientFactory;
 
-        public static bool IsWindows => isWindows;
-        public static bool IsLinux => isLinux;
-        public static bool IsMacOS => isMacOS;
+        public static bool IsAndroid => OperatingSystem.IsAndroid();
+        public static bool IsBrowser => OperatingSystem.IsBrowser();
+        public static bool IsWindows => OperatingSystem.IsWindows();
+        public static bool IsLinux => OperatingSystem.IsLinux();
+        public static bool IsMacOS => OperatingSystem.IsMacOS();
+
         /// <summary>
         /// <para>Possible Values:</para>
         /// <para>Arm	  //A 32-bit ARM processor architecture.</para>
@@ -125,6 +125,10 @@ namespace Knossos.NET
                 }
                 else
                 {
+                    if(IsAndroid)
+                    {
+                        return AndroidHelper.GetDefaultKnetDir();
+                    }
                     return AppDomain.CurrentDomain.BaseDirectory;
                 }
             }
@@ -145,6 +149,10 @@ namespace Knossos.NET
                 }
                 else
                 {
+                    if(IsAndroid)
+                    {
+                        return AndroidHelper.GetDefaultKnetDataDir();
+                    }
                     return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "KnossosNET");
                 }
             }
@@ -187,7 +195,11 @@ namespace Knossos.NET
                 }
                 else
                 {
-                    if (KnUtils.isMacOS)
+                    if(KnUtils.IsAndroid)
+                    {
+                        return AndroidHelper.GetDefaultFSODataDir();
+                    }
+                    if (KnUtils.IsMacOS)
                     {
                         return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "HardLightProductions", fsoID);
                     }
@@ -541,7 +553,6 @@ namespace Knossos.NET
         /// (sha256, lowercase)
         /// </summary>
         /// <param name="fullPath"></param>
-        /// <param name="method"></param>
         /// <returns>hash string or null if failed</returns>
         public static async Task<string?> GetFileHash(string fullPath)
         {
@@ -685,7 +696,7 @@ namespace Knossos.NET
         /// If the file is already in cache, a check is done to make sure it has no changed.
         /// If it has changed it is updated
         /// </summary>
-        /// <param name="imageURL"></param>
+        /// <param name="resourceURL"></param>
         /// <param name="attempt"></param>
         /// <returns>string path or null</returns>
         public static async Task<string?> GetRemoteResource(string resourceURL, int attempt = 1)
@@ -1165,7 +1176,7 @@ namespace Knossos.NET
         /// <summary>
         /// Gets rid of 'A', 'An', and 'The' at the beginning of a string, case-insensitively
         /// </summary>
-        /// <param name="text">A string</param>
+        /// <param name="title">A string</param>
         /// <returns>The string with any articles removed from the beginning</returns>
         public static string RemoveArticles(string title)
         {
@@ -1179,7 +1190,7 @@ namespace Knossos.NET
         /// <summary>
         /// Checks if a file is currently in use
         /// </summary>
-        /// <param name="file"></param>
+        /// <param name="filePath"></param>
         /// <returns>true or false</returns>
         public static bool IsFileInUse(string filePath)
         {

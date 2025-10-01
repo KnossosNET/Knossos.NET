@@ -303,9 +303,9 @@ namespace Knossos.NET.ViewModels
                 else
                 {
                     Knossos.AddMod(mod);
-                    MainWindowViewModel.Instance!.AddInstalledMod(mod);
+                    MainViewModel.Instance!.AddInstalledMod(mod);
                 }
-                MainWindowViewModel.Instance!.AddDevMod(mod);
+                MainViewModel.Instance!.AddDevMod(mod);
                 if (dialog != null)
                     dialog.Close();
             }
