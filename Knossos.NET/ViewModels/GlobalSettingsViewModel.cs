@@ -611,6 +611,11 @@ namespace Knossos.NET.ViewModels
                     {
                         DetectedOS = "OSX";
                     }
+                    else
+                    {
+                        if (KnUtils.IsAndroid)
+                            DetectedOS = "Android";
+                    }
                 }
             }
 
