@@ -62,7 +62,7 @@ namespace Knossos.NET.ViewModels
             this.dialog = dialog;
             isPortableMode = Knossos.inPortableMode;
             Instance = this;
-            UpdateBuildName(MainWindowViewModel.Instance!.LatestStable);
+            UpdateBuildName(MainViewModel.Instance!.LatestStable);
             TrackRepoStatus();
         }
 
@@ -208,7 +208,7 @@ namespace Knossos.NET.ViewModels
                 stable.type = ModType.engine;
                 stable.stability = "stable";
 
-                MainWindowViewModel.Instance!.FsoBuildsView!.RelayInstallBuild(stable);
+                MainViewModel.Instance!.FsoBuildsView!.RelayInstallBuild(stable);
 
                 var installed = Knossos.GetInstalledBuild("FSO", LatestBuild);
                 if (installed != null){
@@ -220,13 +220,13 @@ namespace Knossos.NET.ViewModels
         
         public void ClickSettingsButton()
         {
-            MainWindowViewModel.Instance?.ClickOnMenuButton("Settings");
-            MainWindowViewModel.Instance?.GlobalSettingsView?.ExpandKnossosSection();
+            MainViewModel.Instance?.ClickOnMenuButton("Settings");
+            MainViewModel.Instance?.GlobalSettingsView?.ExpandKnossosSection();
         }
 
         public void ClickEngineButton()
         {
-            MainWindowViewModel.Instance?.ClickOnMenuButton("Engine");
+            MainViewModel.Instance?.ClickOnMenuButton("Engine");
         }
 
     }

@@ -139,8 +139,10 @@ namespace Knossos.NET
         /// Compress a file into a .7z file with max LZMA2 compression
         /// destFile must be pass with the ".7z" extension.
         /// </summary>
-        /// <param name="sourceFolder"></param>
+        /// <param name="filepath"></param>
+        /// <param name="workingFolder"></param>
         /// <param name="destFile"></param>
+        /// <param name="doNotStoreTimestamp"></param>
         /// <returns>true if successfull, false otherwise</returns>
         /// <exception cref="ObjectDisposedException"></exception>
         public async Task<bool> CompressFile(string filepath, string workingFolder, string destFile, bool doNotStoreTimestamp = false)
@@ -156,8 +158,7 @@ namespace Knossos.NET
         /// <summary>
         /// Test a compressed file integrity
         /// </summary>
-        /// <param name="sourceFolder"></param>
-        /// <param name="destFile"></param>
+        /// <param name="file"></param>
         /// <returns>true if successfull, false otherwise</returns>
         /// <exception cref="ObjectDisposedException"></exception>
         public async Task<bool> VerifyFile(string file)

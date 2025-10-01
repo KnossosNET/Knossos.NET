@@ -44,7 +44,7 @@ namespace Knossos.NET.ViewModels
                     }
                     else
                     {
-                        TileImage = MainWindowViewModel.Instance?.placeholderTileImage;
+                        TileImage = MainViewModel.Instance?.placeholderTileImage;
                     }
                 }
             }
@@ -92,7 +92,7 @@ namespace Knossos.NET.ViewModels
         private async Task LazyReLoadTileImageAsync()
         {
             await Task.Delay(new Random().Next(200,700));
-            TileImage = tileModBitmap != null? tileModBitmap : MainWindowViewModel.Instance?.placeholderTileImage;
+            TileImage = tileModBitmap != null? tileModBitmap : MainViewModel.Instance?.placeholderTileImage;
         }
 
         /* Button Commands */
@@ -158,7 +158,7 @@ namespace Knossos.NET.ViewModels
 
         private async Task LoadImage(string modFullPath, string? tileString)
         {
-            TileImage = MainWindowViewModel.Instance?.placeholderTileImage;
+            TileImage = MainViewModel.Instance?.placeholderTileImage;
 
             try
             {

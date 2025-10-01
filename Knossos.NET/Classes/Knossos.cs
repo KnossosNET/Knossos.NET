@@ -113,20 +113,6 @@ namespace Knossos.NET
                     }
                 }
 
-                //Rename the old cache folder
-                try
-                {
-                    var oldCachePath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "image_cache");
-                    if (!Directory.Exists(KnUtils.GetCachePath()) && Directory.Exists(oldCachePath))
-                    {
-                        Directory.Move(oldCachePath, KnUtils.GetCachePath());
-                    }
-                }
-                catch(Exception ex) 
-                {
-                    Log.Add(Log.LogSeverity.Error, "Knossos.Startup()", ex);
-                }
-
                 Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "=== KnossosNET v" + AppVersion + " Start ===");
 
                 if (inPortableMode)
@@ -148,14 +134,14 @@ namespace Knossos.NET
 
                 //Load knossos config
                 globalSettings.Load();
-                MainWindowViewModel.Instance?.ApplySettings();
+                MainViewModel.Instance?.ApplySettings();
 
 
                 //Print Decompressor Type
                 Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "The selected decompressor type is set to " + globalSettings.decompressor.ToString());
 
                 //Check for updates
-                if (globalSettings.checkUpdate && !isQuickLaunch)
+                if (globalSettings.checkUpdate && !isQuickLaunch && !KnUtils.IsAndroid && !KnUtils.IsBrowser)
                 {
                     await CheckKnetUpdates().ConfigureAwait(false);
                     //Check for .old files and delete them
@@ -170,6 +156,10 @@ namespace Knossos.NET
                 }
 
                 //Load base path from knossos legacy
+                if (globalSettings.basePath == null && KnUtils.IsAndroid)
+                {
+                    globalSettings.basePath = AndroidHelper.GetDefaultLibraryDir();
+                } 
                 if (globalSettings.basePath == null && !inSingleTCMode)
                 {
                     globalSettings.basePath = KnUtils.GetBasePathFromKnossosLegacy();
@@ -775,7 +765,7 @@ namespace Knossos.NET
         {
             Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                MainWindowViewModel.Instance?.ClearViews();
+                MainViewModel.Instance?.ClearViews();
                 installedMods.Clear();
                 engineBuilds.Clear();
                 retailFs2RootFound = false;
@@ -797,7 +787,7 @@ namespace Knossos.NET
             {
                 //Clear Mod Tags
                 ModTags.Clear();
-                MainWindowViewModel.Instance?.tagFilter.Clear();
+                MainViewModel.Instance?.tagFilter.Clear();
 
                 await FolderSearchRecursive(globalSettings.basePath, isQuickLaunch).ConfigureAwait(false);
 
@@ -806,18 +796,18 @@ namespace Knossos.NET
                 if (!isQuickLaunch)
                 {
                     //Sort/Re-sort installed mods
-                    MainWindowViewModel.Instance?.InstalledModsView?.ChangeSort(globalSettings.sortType);
+                    MainViewModel.Instance?.InstalledModsView?.ChangeSort(globalSettings.sortType);
 
                     //Red border for mod with missing deps
                     Dispatcher.UIThread.Invoke(() =>
                     {
-                        MainWindowViewModel.Instance?.RunModStatusChecks();
+                        MainViewModel.Instance?.RunModStatusChecks();
                     });
 
                     //Load config options to view, must be done after loading the fso builds due to flag data
                     Dispatcher.UIThread.Invoke(() =>
                     {
-                        MainWindowViewModel.Instance?.GlobalSettingsLoadData();
+                        MainViewModel.Instance?.GlobalSettingsLoadData();
                     });
 
                     //Enter the nebula
@@ -838,8 +828,8 @@ namespace Knossos.NET
                 {                                      
                     NebulaModListView.Instance?.GenerateFilterButtons();
                     ModListView.Instance?.GenerateFilterButtons();
-                    MainWindowViewModel.Instance?.NebulaModsView?.UpdateFS2InstallButton();
-                    MainWindowViewModel.Instance?.InstalledModsView?.UpdateFS2InstallButton();
+                    MainViewModel.Instance?.NebulaModsView?.UpdateFS2InstallButton();
+                    MainViewModel.Instance?.InstalledModsView?.UpdateFS2InstallButton();
 
                 });
 
@@ -1528,10 +1518,6 @@ namespace Knossos.NET
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param>
         public static FsoBuild? GetInstalledBuild (string id, string version)
         {
             return engineBuilds.FirstOrDefault(build => build.id == id && build.version == version);
@@ -1588,7 +1574,7 @@ namespace Knossos.NET
                                     }
                                 }
                                 if(!isQuickLaunch)
-                                    await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(modJson), DispatcherPriority.Background);
+                                    await Dispatcher.UIThread.InvokeAsync(() => MainViewModel.Instance?.AddInstalledMod(modJson), DispatcherPriority.Background);
                                 break;
 
                             case ModType.engine:
@@ -1600,7 +1586,7 @@ namespace Knossos.NET
                         }
                         if(modJson.devMode && !isQuickLaunch)
                         {
-                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddDevMod(modJson), DispatcherPriority.Background);
+                            await Dispatcher.UIThread.InvokeAsync(() => MainViewModel.Instance?.AddDevMod(modJson), DispatcherPriority.Background);
                         }
                     }
                     catch (Exception ex)
@@ -1613,7 +1599,7 @@ namespace Knossos.NET
                 {
                     var modLegacy = new Mod(path, di.Name, ModType.modlegacy);
                     installedMods.Add(modLegacy);
-                    await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance?.AddInstalledMod(modLegacy), DispatcherPriority.Background);
+                    await Dispatcher.UIThread.InvokeAsync(() => MainViewModel.Instance?.AddInstalledMod(modLegacy), DispatcherPriority.Background);
                 }
             }catch (Exception ex)
             {
@@ -1639,7 +1625,7 @@ namespace Knossos.NET
         /// <param name="message"></param>
         public static void WriteToUIConsole(string message)
         {
-            MainWindowViewModel.Instance?.WriteToUIConsole(message);
+            MainViewModel.Instance?.WriteToUIConsole(message);
         }
 
         /// <summary>
@@ -1685,7 +1671,7 @@ namespace Knossos.NET
                 var delete = installedMods.Where(m => m.id == modId).ToList();
                 if (delete.Any())
                 {
-                    MainWindowViewModel.Instance?.RemoveInstalledMod(modId);
+                    MainViewModel.Instance?.RemoveInstalledMod(modId);
                     foreach (var mod in delete)
                     {
                         Log.Add(Log.LogSeverity.Information, "Knossos.RemoveMod()", "Deleting mod: "+mod.title + " " +mod.version);

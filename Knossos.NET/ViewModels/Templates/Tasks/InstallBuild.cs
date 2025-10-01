@@ -429,7 +429,7 @@ namespace Knossos.NET.ViewModels
                         }
                         if (modJson.devMode)
                         {
-                            await Dispatcher.UIThread.InvokeAsync(() => MainWindowViewModel.Instance!.AddDevMod(modJson), DispatcherPriority.Background);
+                            await Dispatcher.UIThread.InvokeAsync(() => MainViewModel.Instance!.AddDevMod(modJson), DispatcherPriority.Background);
                             //Update version editor if needed
                             DeveloperModsViewModel.Instance?.UpdateVersionManager(modJson.id);
                         }
@@ -437,7 +437,7 @@ namespace Knossos.NET.ViewModels
                         CancelButtonVisible = false;
 
                         //Re-run Dependencies checks 
-                        MainWindowViewModel.Instance?.RunModStatusChecks();
+                        MainViewModel.Instance?.RunModStatusChecks();
 
                         // Clean old versions
                         if (cleanupOldVersions)
@@ -514,7 +514,7 @@ namespace Knossos.NET.ViewModels
                                                 Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.InstallBuild()", "Cleanup: " + version + " is newer than " + build + ". Skipping.");
                                             }
                                         }
-                                        MainWindowViewModel.Instance?.RunModStatusChecks();
+                                        MainViewModel.Instance?.RunModStatusChecks();
                                     }
                                     else
                                     {
@@ -546,7 +546,7 @@ namespace Knossos.NET.ViewModels
                         */
                         if (!Knossos.flagDataLoaded)
                         {
-                            MainWindowViewModel.Instance?.GlobalSettingsLoadData();
+                            MainViewModel.Instance?.GlobalSettingsLoadData();
                         }
                         return newBuild;
                     }

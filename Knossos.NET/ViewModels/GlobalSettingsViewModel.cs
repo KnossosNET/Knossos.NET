@@ -550,7 +550,7 @@ namespace Knossos.NET.ViewModels
                     DisplaySettingsWarning = false;
                     return;
                 }
-                var res = MainWindowViewModel.Instance?.CustomHomeVM?.ActiveVersionHasCmdline("no_ingame_options");
+                var res = MainViewModel.Instance?.CustomHomeVM?.ActiveVersionHasCmdline("no_ingame_options");
                 if (res.HasValue) 
                 {
                     DisplaySettingsWarning = !res.Value;
