@@ -9,6 +9,7 @@
 	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 	<ApplicationIcon>..\Knossos.NET\Assets\knossos-icon.ico</ApplicationIcon>
 	<TrimMode>copyused</TrimMode>
+	<PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
 
   <PropertyGroup>
