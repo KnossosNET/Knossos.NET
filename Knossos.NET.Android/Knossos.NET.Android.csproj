@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0-android</TargetFramework>
@@ -9,15 +9,26 @@
 	<ImplicitUsings>enable</ImplicitUsings>
 	<GenerateApplicationManifest>true</GenerateApplicationManifest>
 	
-	<ApplicationId>com.KnossosNET.Knossos.NET</ApplicationId>
+	<ApplicationId>com.knossosnet.knossosnet</ApplicationId>
 	<ApplicationVersion>1</ApplicationVersion>
 	<AndroidVersionCode>1</AndroidVersionCode>
     <ApplicationDisplayVersion>1.3.1</ApplicationDisplayVersion>
-	
+	<AndroidUseAapt2>true</AndroidUseAapt2>
 	<RunAOTCompilation>false</RunAOTCompilation>
   </PropertyGroup>
-	
+
   <ItemGroup>
+	<AndroidNativeLibrary Include="natives\arm64-v8a\*.so" Abi="arm64-v8a" />
+	<AndroidNativeLibrary Include="natives\armeabi-v7a\*.so" Abi="armeabi-v7a"/>
+	<AndroidNativeLibrary Include="natives\x86\*.so" Abi="x86" />
+	<AndroidNativeLibrary Include="natives\x86_64\*.so" Abi="x86_64"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AndroidJavaSource Include="java\**\*.java" />
+  </ItemGroup>
+	
+  <ItemGroup Condition="'$(Configuration)' != 'Release'">
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 	
@@ -34,5 +45,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Knossos.NET\Knossos.NET.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="natives\arm64-v8a\" />
   </ItemGroup>
 </Project>

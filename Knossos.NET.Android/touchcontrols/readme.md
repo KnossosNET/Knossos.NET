@@ -1,0 +1,2 @@
+This is the code to compile libtouchcontrols.so.
+It has not been integrated into the build process, to compile it im dropping in the cpp folder of the fsowrapper folder and copy back the .so files to the natives folder.
