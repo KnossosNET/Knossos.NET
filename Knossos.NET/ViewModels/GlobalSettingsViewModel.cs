@@ -1131,42 +1131,38 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void BrowseFolderCommand()
         {
-            if (MainWindow.instance != null)
-            {
+            FolderPickerOpenOptions options = new FolderPickerOpenOptions(); 
+            if (BasePath != string.Empty)
+            { 
+                options.SuggestedStartLocation = await KnUtils.GetTopLevel().StorageProvider.TryGetFolderFromPathAsync(BasePath);
+            }
+            options.AllowMultiple = false;
 
-                FolderPickerOpenOptions options = new FolderPickerOpenOptions(); 
-                if (BasePath != string.Empty)
-                { 
-                    options.SuggestedStartLocation = await MainWindow.instance.StorageProvider.TryGetFolderFromPathAsync(BasePath);
-                }
-                options.AllowMultiple = false;
+            var result = await KnUtils.GetTopLevel().StorageProvider.OpenFolderPickerAsync(options);
 
-                var result = await MainWindow.instance.StorageProvider.OpenFolderPickerAsync(options);
-
-                try {
-                    if (result != null && result.Count > 0)
-                    {
-                        
-                        // Test if we can write to the new library directory
-                        using (StreamWriter writer = new StreamWriter(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"))
-                        {
-                            writer.WriteLine("test");
-                        }
-                        File.Delete(Path.Combine(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"));
-                    
-                        Knossos.globalSettings.basePath = result[0].Path.LocalPath.ToString();
-                        Knossos.globalSettings.Save();
-                        Knossos.ResetBasePath();
-                        LoadData();
-                    }
-                } 
-                catch (Exception ex) 
+            try {
+                if (result != null && result.Count > 0)
                 {
-                    Log.Add(Log.LogSeverity.Error, "GlobalSettings.BrowseFolderCommand() - test read/write was not successful: ", ex);
-                    await Dispatcher.UIThread.Invoke(async () => {
-                        await MessageBox.Show(null, "KnossosNET was not able to write to this folder.  Please select another library folder.", "Cannot Select Folder", MessageBox.MessageBoxButtons.OK);
-                    }).ConfigureAwait(false);
+                        
+                    // Test if we can write to the new library directory
+                    using (StreamWriter writer = new StreamWriter(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"))
+                    {
+                        writer.WriteLine("test");
+                    }
+                    File.Delete(Path.Combine(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"));
+                    
+                    Knossos.globalSettings.basePath = result[0].Path.LocalPath.ToString();
+                    Knossos.globalSettings.Save();
+                    Knossos.ResetBasePath();
+                    LoadData();
                 }
+            } 
+            catch (Exception ex) 
+            {
+                Log.Add(Log.LogSeverity.Error, "GlobalSettings.BrowseFolderCommand() - test read/write was not successful: ", ex);
+                await Dispatcher.UIThread.Invoke(async () => {
+                    await MessageBox.Show(null, "KnossosNET was not able to write to this folder.  Please select another library folder.", "Cannot Select Folder", MessageBox.MessageBoxButtons.OK);
+                }).ConfigureAwait(false);
             }
         }
 
@@ -1463,12 +1459,8 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void OpenPerformanceHelp()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new PerformanceHelpView();
-
-                await dialog.ShowDialog<PerformanceHelpView?>(MainWindow.instance);
-            }
+            var dialog = new PerformanceHelpView();
+            await dialog.ShowDialog<PerformanceHelpView?>(MainWindow.instance);
         }
 
         /// <summary>
@@ -1490,13 +1482,9 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void InstallFS2Command()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new Fs2InstallerView();
-                dialog.DataContext = new Fs2InstallerViewModel(dialog);
-
-                await dialog.ShowDialog<Fs2InstallerView?>(MainWindow.instance);
-            }
+            var dialog = new Fs2InstallerView();
+            dialog.DataContext = new Fs2InstallerViewModel(dialog);
+            await dialog.ShowDialog<Fs2InstallerView?>(MainWindow.instance);
         }
 
         /// <summary>
@@ -1512,13 +1500,10 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void CleanupLibraryCommand()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new CleanupKnossosLibraryView();
-                dialog.DataContext = new CleanupKnossosLibraryViewModel();
+            var dialog = new CleanupKnossosLibraryView();
+            dialog.DataContext = new CleanupKnossosLibraryViewModel();
 
-                await dialog.ShowDialog<CleanupKnossosLibraryView?>(MainWindow.instance);
-            }
+            await dialog.ShowDialog<CleanupKnossosLibraryView?>(MainWindow.instance);
         }
 
         /// <summary>

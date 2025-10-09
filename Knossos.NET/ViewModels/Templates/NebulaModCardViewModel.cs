@@ -108,14 +108,11 @@ namespace Knossos.NET.ViewModels
 
         internal async void ButtonCommandInstall()
         {
-            if (MainWindow.instance != null && ModVersion != null)
+            if (modJson != null)
             {
-                if (modJson != null)
-                {
-                    var dialog = new ModInstallView();
-                    dialog.DataContext = new ModInstallViewModel(modJson, dialog);
-                    await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
-                }
+                var dialog = new ModInstallView();
+                dialog.DataContext = new ModInstallViewModel(modJson, dialog);
+                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
             }
         }
 
@@ -145,7 +142,7 @@ namespace Knossos.NET.ViewModels
 
         internal async void ButtonCommandDetails()
         {
-            if (MainWindow.instance != null && ModVersion != null)
+            if (ModVersion != null)
             {
                 if(modJson != null)
                 {

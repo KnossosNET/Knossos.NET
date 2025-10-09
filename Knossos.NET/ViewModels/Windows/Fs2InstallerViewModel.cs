@@ -55,7 +55,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool innoExtractIsAvailable = false;
         private string? gogExe = null;
-        private Window? window;
+        private KnossosWindow? window;
 
         public Fs2InstallerViewModel() 
         { 
@@ -65,7 +65,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public Fs2InstallerViewModel(Window window)
+        public Fs2InstallerViewModel(KnossosWindow window)
         {
             if (KnUtils.IsWindows || KnUtils.IsMacOS || KnUtils.IsLinux && (KnUtils.CpuArch == "X64" || KnUtils.CpuArch == "X86" || KnUtils.CpuArch == "Arm64" || KnUtils.CpuArch == "RiscV64"))
             {
@@ -347,7 +347,8 @@ namespace Knossos.NET.ViewModels
             FilePickerOpenOptions options = new FilePickerOpenOptions();
             options.AllowMultiple = false;
             options.Title = "Select your Freespace 2 gog .exe installer file";
-            var topmostWindow = window == null ? MainWindow.instance! : window;
+
+            var topmostWindow = KnUtils.GetTopLevel();
             var result = await topmostWindow.StorageProvider.OpenFilePickerAsync(options);
 
             if (result != null && result.Count > 0)
@@ -470,7 +471,7 @@ namespace Knossos.NET.ViewModels
             FolderPickerOpenOptions options = new FolderPickerOpenOptions();
             options.AllowMultiple = false;
             options.Title = "Select your Freespace 2 retail folder";
-            var topmostWindow = window == null ? MainWindow.instance! : window;
+            var topmostWindow = KnUtils.GetTopLevel();
             var result = await topmostWindow.StorageProvider.OpenFolderPickerAsync(options);
 
             if (result != null && result.Count > 0)

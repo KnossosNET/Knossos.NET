@@ -48,7 +48,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool page6 = false;
 
-        private Window? dialog;
+        private KnossosWindow? dialog;
 
         public static QuickSetupViewModel? Instance;
 
@@ -57,7 +57,7 @@ namespace Knossos.NET.ViewModels
             isPortableMode = Knossos.inPortableMode;
         }
 
-        public QuickSetupViewModel(Window dialog) 
+        public QuickSetupViewModel(KnossosWindow dialog) 
         {
             this.dialog = dialog;
             isPortableMode = Knossos.inPortableMode;

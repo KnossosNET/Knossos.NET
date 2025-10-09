@@ -107,10 +107,7 @@ namespace Knossos.NET
                 {
                     isKnDataFolderReadOnly = true;
                     Log.Add(Log.LogSeverity.Error, "Knossos.StartUp()", ex);
-                    if (MainWindow.instance != null)
-                    {
-                        await MessageBox.Show(MainWindow.instance, "Unable to write to KnossosNET data folder:\n'"+ KnUtils.GetKnossosDataFolderPath()+"'\nSome functions may not work correctly.", "KnossosNET Error", MessageBox.MessageBoxButtons.OK);
-                    }
+                    await MessageBox.Show(MainWindow.instance, "Unable to write to KnossosNET data folder:\n'"+ KnUtils.GetKnossosDataFolderPath()+"'\nSome functions may not work correctly.", "KnossosNET Error", MessageBox.MessageBoxButtons.OK);
                 }
 
                 Log.Add(Log.LogSeverity.Information, "Knossos.StartUp()", "=== KnossosNET v" + AppVersion + " Start ===");

@@ -127,14 +127,14 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private Window? dialog;
+        private KnossosWindow? dialog;
 
         /* Only used in preview */
         public ModDetailsViewModel()
         {
         }
 
-        public ModDetailsViewModel(Mod modJson, Window dialog)
+        public ModDetailsViewModel(Mod modJson, KnossosWindow dialog)
         {
             this.modVersions = new List<Mod>() { modJson };
             this.modCard = null;
@@ -154,7 +154,7 @@ namespace Knossos.NET.ViewModels
             this.dialog = dialog;
         }
 
-        public ModDetailsViewModel(List<Mod> modVersions, int selectedIndex, ModCardViewModel modCard, Window dialog)
+        public ModDetailsViewModel(List<Mod> modVersions, int selectedIndex, ModCardViewModel modCard, KnossosWindow dialog)
         {
             this.dialog = dialog;
             this.modVersions = modVersions;
@@ -520,13 +520,10 @@ namespace Knossos.NET.ViewModels
 
         internal async void ButtonCommandSettings()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new ModSettingsView();
-                dialog.DataContext = new ModSettingsViewModel(modVersions[ItemSelectedIndex]);
+            var dialog = new ModSettingsView();
+            dialog.DataContext = new ModSettingsViewModel(modVersions[ItemSelectedIndex]);
 
-                await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
-            }
+            await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
         }
 
         internal async void ButtonCommandDelete()
