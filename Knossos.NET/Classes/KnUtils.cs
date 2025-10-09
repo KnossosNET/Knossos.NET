@@ -1,28 +1,30 @@
-﻿using System;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Media;
+using Avalonia.Threading;
+using Knossos.NET.Classes;
+using Knossos.NET.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
+using SharpCompress.Archives;
+using SharpCompress.Common;
+using SharpCompress.Readers;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using System.Net;
-using System.Net.Http;
-using SharpCompress.Archives;
-using SharpCompress.Common;
-using SharpCompress.Readers;
-using Knossos.NET.Classes;
-using Knossos.NET.Models;
-using Avalonia;
-using Avalonia.Media;
-using Avalonia.Threading;
-using Microsoft.Win32;
 using WindowsShortcutFactory;
 
 namespace Knossos.NET
@@ -1262,6 +1264,21 @@ namespace Knossos.NET
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtils.CreateDesktopShortcut()", ex);
             }
+        }
+
+        /// <summary>
+        /// Resolves TopLevel Window or View, usually to load a filepicker
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static TopLevel GetTopLevel()
+        {
+            var app = Application.Current?.ApplicationLifetime;
+            if (app is IClassicDesktopStyleApplicationLifetime d && d.MainWindow is not null)
+                return d.MainWindow;
+            if (app is ISingleViewApplicationLifetime sv && sv.MainView is not null)
+                return TopLevel.GetTopLevel(sv.MainView)!;
+            throw new InvalidOperationException("Unable to resolve TopLevel/owner.");
         }
     }
 }

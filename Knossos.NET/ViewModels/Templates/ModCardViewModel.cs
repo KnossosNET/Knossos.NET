@@ -314,8 +314,7 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                if (MainWindow.instance != null)
-                    MessageBox.Show(MainWindow.instance, "Log File " + Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log") + " not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+                MessageBox.Show(MainWindow.instance, "Log File " + Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log") + " not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
 
@@ -364,25 +363,19 @@ namespace Knossos.NET.ViewModels
 
         internal async void ButtonCommandDetails()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new ModDetailsView();
-                dialog.DataContext = new ModDetailsViewModel(modVersions, activeVersionIndex, this, dialog);
-                detailsView = dialog;
-                await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
-                detailsView = null;
-            }
+            var dialog = new ModDetailsView();
+            dialog.DataContext = new ModDetailsViewModel(modVersions, activeVersionIndex, this, dialog);
+            detailsView = dialog;
+            await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
+            detailsView = null;
         }
 
         internal async void ButtonCommandSettings()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new ModSettingsView();
-                dialog.DataContext = new ModSettingsViewModel(modVersions[activeVersionIndex],this);
-                settingsView = dialog;
-                await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
-            }
+            var dialog = new ModSettingsView();
+            dialog.DataContext = new ModSettingsViewModel(modVersions[activeVersionIndex],this);
+            settingsView = dialog;
+            await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
         }
 
         private void LoadImage()

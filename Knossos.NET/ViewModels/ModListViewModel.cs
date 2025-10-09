@@ -341,15 +341,12 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void InstallFS2Command()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new Fs2InstallerView();
-                dialog.DataContext = new Fs2InstallerViewModel(dialog);
+            var dialog = new Fs2InstallerView();
+            dialog.DataContext = new Fs2InstallerViewModel(dialog);
 
-                await dialog.ShowDialog<Fs2InstallerView?>(MainWindow.instance);
+            await dialog.ShowDialog<Fs2InstallerView?>(MainWindow.instance);
 
-                Fs2Present = Knossos.retailFs2RootFound;
-            }
+            Fs2Present = Knossos.retailFs2RootFound;
         }
     }
 }

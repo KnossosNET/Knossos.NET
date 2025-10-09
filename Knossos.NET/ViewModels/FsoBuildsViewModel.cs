@@ -339,13 +339,10 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void CommandAddUserBuild()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new AddUserBuildView();
-                dialog.DataContext = new AddUserBuildViewModel(dialog);
+            var dialog = new AddUserBuildView();
+            dialog.DataContext = new AddUserBuildViewModel(dialog);
 
-                await dialog.ShowDialog<AddUserBuildView?>(MainWindow.instance);
-            }
+            await dialog.ShowDialog<AddUserBuildView?>(MainWindow.instance);
         }
 
         /// <summary>
