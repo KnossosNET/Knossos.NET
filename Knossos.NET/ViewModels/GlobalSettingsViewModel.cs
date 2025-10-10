@@ -21,6 +21,18 @@ namespace Knossos.NET.ViewModels
     {
         private bool UnCommitedChanges = false;
 
+        [ObservableProperty]
+        internal ObservableCollection<string> androidFolderPaths = new ObservableCollection<string>();
+
+        internal int androidFolderPathsSelectedIndex = 0;
+        internal int AndroidFolderPathsSelectedIndex
+        {
+            get { return androidFolderPathsSelectedIndex; }
+            set { if (androidFolderPathsSelectedIndex != value) { this.SetProperty(ref androidFolderPathsSelectedIndex, value); UpdateBasePathAndroid(); } }
+        }
+
+        internal bool IsAndroid { get; } = KnUtils.IsAndroid;
+
         /* Limiters definition */
         private const long speedUnlimited = 0;
         private const long speedHalfMB = 850000;
@@ -570,6 +582,35 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        internal void UpdateBasePathAndroid()
+        {
+            try
+            {
+                if (AndroidFolderPathsSelectedIndex == -1 || AndroidFolderPaths.Count() - 1 < AndroidFolderPathsSelectedIndex)
+                    return;
+                var path = AndroidFolderPaths[AndroidFolderPathsSelectedIndex];
+                if (path == BasePath)
+                    return;
+                // Test if we can write to the new library directory
+                Directory.CreateDirectory(path);
+                using (StreamWriter writer = new StreamWriter(path + Path.DirectorySeparatorChar + "test.txt"))
+                {
+                    writer.WriteLine("test");
+                }
+                File.Delete(Path.Combine(path + Path.DirectorySeparatorChar + "test.txt"));
+
+                Knossos.globalSettings.basePath = path;
+                Knossos.globalSettings.Save();
+                Knossos.ResetBasePath();
+                LoadData();
+            }
+            catch (Exception ex) 
+            {
+                Log.Add(Log.LogSeverity.Error, "GlobalSettingsViewModel.UpdateBasePathAndroid()", "Index " + AndroidFolderPathsSelectedIndex + " Collection "+AndroidFolderPaths.Count());
+                Log.Add(Log.LogSeverity.Error, "GlobalSettingsViewModel.UpdateBasePathAndroid()", ex);
+            }
+        }
+
         /// <summary>
         /// Loads data from the GlobalSettings.cs class into this one to display it in the UI
         /// Also loads flag data from a FSO build, if one is installed
@@ -588,6 +629,20 @@ namespace Knossos.NET.ViewModels
             {
                 BasePath = Knossos.globalSettings.basePath;
             }
+            /* Android Folder Paths */
+            if (KnUtils.IsAndroid)
+            {
+                AndroidFolderPaths.Clear();
+                AndroidFolderPaths.Add(BasePath);
+                AndroidFolderPathsSelectedIndex = 0;
+                foreach (var path in AndroidHelper.GetAllExternalAppFilesDirs())
+                {
+                    if (!AndroidFolderPaths.Contains(path))
+                    { AndroidFolderPaths.Add(path); }
+                }
+                AndroidFolderPathsSelectedIndex = 0;
+            }
+
             EnableLogFile = Knossos.globalSettings.enableLogFile;
             LogLevel= Knossos.globalSettings.logLevel;
             Fs2RootPack = Knossos.retailFs2RootFound;
@@ -1133,8 +1188,12 @@ namespace Knossos.NET.ViewModels
         {
             FolderPickerOpenOptions options = new FolderPickerOpenOptions(); 
             if (BasePath != string.Empty)
-            { 
-                options.SuggestedStartLocation = await KnUtils.GetTopLevel().StorageProvider.TryGetFolderFromPathAsync(BasePath);
+            {
+                try
+                {
+                    options.SuggestedStartLocation = await KnUtils.GetTopLevel().StorageProvider.TryGetFolderFromPathAsync(BasePath);
+                }
+                catch { }
             }
             options.AllowMultiple = false;
 
