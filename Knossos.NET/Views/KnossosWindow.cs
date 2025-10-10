@@ -134,12 +134,13 @@ namespace Knossos.NET.Views
 
             var layout = new Grid
             {
-                RowDefinitions = new RowDefinitions("60, *")
+                RowDefinitions = new RowDefinitions("35, *")
             };
 
             var titleBar = new Grid
             {
-                Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromRgb(240, 240, 240))
+                Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromRgb(240, 240, 240)),
+                Height = 35
             };
             titleBar.ColumnDefinitions = new ColumnDefinitions("*, Auto");
 
@@ -159,7 +160,7 @@ namespace Knossos.NET.Views
                 Width = 60,
                 Height = 30,
                 Background = SolidColorBrush.Parse("Red"),
-                Margin = new Thickness(0, -18, 6, 6)
+                Margin = new Thickness(0, 3, 6, 6)
             };
             closeBtn.Click += (_, __) => Close();
 
@@ -173,8 +174,11 @@ namespace Knossos.NET.Views
 
             // view
             Grid.SetRow(body, 1);
-            body.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
-            body.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
+            if (MainView.instance != null)
+            {
+                body.MaxHeight = MainView.instance.Bounds.Height - 80;
+                body.MaxWidth = MainView.instance.Bounds.Width - 40;
+            }
             layout.Children.Add(body);
 
             card.Child = layout;
@@ -185,7 +189,7 @@ namespace Knossos.NET.Views
         // or display it on the mainview via dialoghost
         private async Task ShowInternalAsync(TopLevel? owner, bool isDialog)
         {
-            if (KnUtils.IsAndroid || KnUtils.IsBrowser)
+            if (!KnUtils.IsAndroid || KnUtils.IsBrowser)
             {
                 _tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
                 var chrome = BuildOverlayChrome(this);
