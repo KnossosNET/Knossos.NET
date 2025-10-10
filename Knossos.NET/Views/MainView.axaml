@@ -20,7 +20,7 @@
 
 	<!-- Main View -->
 	<Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-		<ContentPresenter ZIndex="999" x:Name="DialogOverlay"/>
+		<ContentPresenter ZIndex="999" x:Name="DialogOverlay"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 		<SplitView x:Name="AppContent" IsPaneOpen="{Binding IsMenuOpen}" CompactPaneLength="60" DisplayMode="CompactInline" OpenPaneLength="150" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 			<SplitView.Pane>
 				<ScrollViewer  Background="{StaticResource BackgroundColorTertiary}">
