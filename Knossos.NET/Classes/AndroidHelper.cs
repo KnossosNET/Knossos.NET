@@ -76,10 +76,8 @@ public static class AndroidHelper
     /// <summary>
     /// Copy build .so files to internal app folder for execution
     /// </summary>
-    private static void StageAllToInternal(string srcAbiDir)
+    private static void StageAllToInternal(string srcAbiDir, string dstAbiDir)
     {
-        var ctx = Application.Context;
-        string dstAbiDir = System.IO.Path.Combine(ctx.FilesDir!.AbsolutePath, "natives");
         Directory.CreateDirectory(dstAbiDir);
 
         if (!Directory.Exists(srcAbiDir))
@@ -116,17 +114,18 @@ public static class AndroidHelper
     {
         try
         {
+            var ctx = Application.Context;
+            string dstAbiDir = System.IO.Path.Combine(ctx.FilesDir!.AbsolutePath, "natives");
             var fi = new FileInfo(engineLibPath);
             var folderPath = fi.Directory!.FullName;
             if (!folderPath.EndsWith("/"))
                 folderPath += "/";
-            StageAllToInternal(folderPath);
+            StageAllToInternal(folderPath, dstAbiDir);
             var libName = fi.Name;
-            var ctx = Application.Context;
             var intent = new Intent();
             intent.SetClassName(ctx, "com.knossosnet.knossosnet.GameActivity");
             intent.AddFlags(ActivityFlags.NewTask);
-            intent.PutExtra("engineLibName", libName);
+            intent.PutExtra("engineLibName", Path.Combine(dstAbiDir, libName));
 
             if (workingFolder != null)
             {
