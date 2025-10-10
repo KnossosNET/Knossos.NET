@@ -29,7 +29,7 @@ public static class AndroidHelper
     public static string[] GetAllExternalAppFilesDirs()
         => (Application.Context.GetExternalFilesDirs(null) ?? System.Array.Empty<Java.IO.File>())
             .Where(f => f is not null)
-            .Select(f => f!.AbsolutePath)
+            .Select(f => Path.Combine(f!.AbsolutePath, "library") )
             .ToArray();
 
     /// <summary>
