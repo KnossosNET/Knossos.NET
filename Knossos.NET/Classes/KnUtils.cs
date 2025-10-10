@@ -5,6 +5,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
+using Knossos.NET.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using SharpCompress.Archives;
@@ -1273,11 +1274,10 @@ namespace Knossos.NET
         /// <exception cref="InvalidOperationException"></exception>
         public static TopLevel GetTopLevel()
         {
-            var app = Application.Current?.ApplicationLifetime;
-            if (app is IClassicDesktopStyleApplicationLifetime d && d.MainWindow is not null)
-                return d.MainWindow;
-            if (app is ISingleViewApplicationLifetime sv && sv.MainView is not null)
-                return TopLevel.GetTopLevel(sv.MainView)!;
+            if(MainWindow.instance != null)
+                return MainWindow.instance;
+            if (MainView.instance != null)
+                return TopLevel.GetTopLevel(MainView.instance)!;
             throw new InvalidOperationException("Unable to resolve TopLevel/owner.");
         }
     }

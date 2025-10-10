@@ -189,7 +189,7 @@ namespace Knossos.NET.Views
         // or display it on the mainview via dialoghost
         private async Task ShowInternalAsync(TopLevel? owner, bool isDialog)
         {
-            if (!KnUtils.IsAndroid || KnUtils.IsBrowser)
+            if (KnUtils.IsAndroid || KnUtils.IsBrowser)
             {
                 _tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
                 var chrome = BuildOverlayChrome(this);
