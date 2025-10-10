@@ -233,7 +233,7 @@ namespace Knossos.NET.Models
         [JsonIgnore]
         public bool enableEfx { get; set; } = false;
         [JsonPropertyName("enable_tts")]
-        public bool enableTts { get; set; } = false;
+        public bool enableTts { get; set; } = true;
         [JsonIgnore]
         public int? ttsVoice { get; set; } = null;
         public string? ttsVoiceName { get; set; } = null;

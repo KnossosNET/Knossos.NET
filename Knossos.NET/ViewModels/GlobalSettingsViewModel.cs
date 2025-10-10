@@ -1137,6 +1137,8 @@ namespace Knossos.NET.ViewModels
         private FlagsJsonV1? GetFlagData()
         {
             FlagDataLoaded = false;
+            if (KnUtils.IsAndroid)
+                return null;
             var builds = Knossos.GetInstalledBuildsList();
             if (builds.Any())
             {
