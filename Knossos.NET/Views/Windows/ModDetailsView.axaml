@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui"
+<KnossosWindow xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 x:Name="DetailsWindow"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -20,9 +20,9 @@
 		<vm:ModDetailsViewModel/>
 	</Design.DataContext>
 
-	<Window.Resources>
+	<KnossosWindow.Resources>
 		<cvt:BitmapAssetValueConverter x:Key="imageConverter"/>
-	</Window.Resources>
+	</KnossosWindow.Resources>
 
 	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}">
 	<Grid RowDefinitions="Auto,Auto,*,Auto">
@@ -111,5 +111,5 @@
 		</Grid>
 	</Grid>
 	</ScrollViewer>
-</Window>
+</KnossosWindow>
  

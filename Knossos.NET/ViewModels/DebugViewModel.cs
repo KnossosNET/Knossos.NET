@@ -40,8 +40,7 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                if (MainWindow.instance != null)
-                    MessageBox.Show(MainWindow.instance, "Log File " + KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+                MessageBox.Show(MainWindow.instance, "Log File " + KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
 
@@ -64,8 +63,7 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                if (MainWindow.instance != null)
-                    MessageBox.Show(MainWindow.instance, "Log File " + KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+                MessageBox.Show(MainWindow.instance, "Log File " + KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
 
@@ -88,8 +86,7 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                if (MainWindow.instance != null)
-                    MessageBox.Show(MainWindow.instance, "Log File " + KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+                MessageBox.Show(MainWindow.instance, "Log File " + KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
 
@@ -112,8 +109,7 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                if (MainWindow.instance != null)
-                    MessageBox.Show(MainWindow.instance, "Log File " + KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+                MessageBox.Show(MainWindow.instance, "Log File " + KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
 
@@ -129,14 +125,12 @@ namespace Knossos.NET.ViewModels
                         var status = await Nebula.UploadLog(logString);
                         if (!status)
                         {
-                            if (MainWindow.instance != null)
-                                await MessageBox.Show(MainWindow.instance, "An error has ocurred while uploading the log file, check the log below.", "Upload log error", MessageBox.MessageBoxButtons.OK);
+                            await MessageBox.Show(MainWindow.instance, "An error has ocurred while uploading the log file, check the log below.", "Upload log error", MessageBox.MessageBoxButtons.OK);
                         }
                     }
                     else
                     {
-                        if (MainWindow.instance != null)
-                            await MessageBox.Show(MainWindow.instance, "The log file is empty.", "Error", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(MainWindow.instance, "The log file is empty.", "Error", MessageBox.MessageBoxButtons.OK);
                     }
                 }
                 catch (Exception ex)
@@ -146,8 +140,7 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                if (MainWindow.instance != null)
-                    await MessageBox.Show(MainWindow.instance, "Log File " + KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Log File " + KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
         internal async void UploadKnossosConsole()
@@ -157,8 +150,7 @@ namespace Knossos.NET.ViewModels
                 var status = await Nebula.UploadLog(UiConsoleOutput);
                 if (!status)
                 {
-                    if (MainWindow.instance != null)
-                        await MessageBox.Show(MainWindow.instance, "An error has ocurred while uploading the console output, check the log below.", "Upload error", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance, "An error has ocurred while uploading the console output, check the log below.", "Upload error", MessageBox.MessageBoxButtons.OK);
                 }
             }
             catch (Exception ex)

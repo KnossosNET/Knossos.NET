@@ -21,6 +21,18 @@ namespace Knossos.NET.ViewModels
     {
         private bool UnCommitedChanges = false;
 
+        [ObservableProperty]
+        internal ObservableCollection<string> androidFolderPaths = new ObservableCollection<string>();
+
+        internal int androidFolderPathsSelectedIndex = 0;
+        internal int AndroidFolderPathsSelectedIndex
+        {
+            get { return androidFolderPathsSelectedIndex; }
+            set { if (androidFolderPathsSelectedIndex != value) { this.SetProperty(ref androidFolderPathsSelectedIndex, value); UpdateBasePathAndroid(); } }
+        }
+
+        internal bool IsAndroid { get; } = KnUtils.IsAndroid;
+
         /* Limiters definition */
         private const long speedUnlimited = 0;
         private const long speedHalfMB = 850000;
@@ -550,7 +562,7 @@ namespace Knossos.NET.ViewModels
                     DisplaySettingsWarning = false;
                     return;
                 }
-                var res = MainWindowViewModel.Instance?.CustomHomeVM?.ActiveVersionHasCmdline("no_ingame_options");
+                var res = MainViewModel.Instance?.CustomHomeVM?.ActiveVersionHasCmdline("no_ingame_options");
                 if (res.HasValue) 
                 {
                     DisplaySettingsWarning = !res.Value;
@@ -567,6 +579,35 @@ namespace Knossos.NET.ViewModels
             if(UnCommitedChanges)
             {
                 SaveCommand();
+            }
+        }
+
+        internal void UpdateBasePathAndroid()
+        {
+            try
+            {
+                if (AndroidFolderPathsSelectedIndex == -1 || AndroidFolderPaths.Count() - 1 < AndroidFolderPathsSelectedIndex)
+                    return;
+                var path = AndroidFolderPaths[AndroidFolderPathsSelectedIndex];
+                if (path == BasePath)
+                    return;
+                // Test if we can write to the new library directory
+                Directory.CreateDirectory(path);
+                using (StreamWriter writer = new StreamWriter(path + Path.DirectorySeparatorChar + "test.txt"))
+                {
+                    writer.WriteLine("test");
+                }
+                File.Delete(Path.Combine(path + Path.DirectorySeparatorChar + "test.txt"));
+
+                Knossos.globalSettings.basePath = path;
+                Knossos.globalSettings.Save();
+                Knossos.ResetBasePath();
+                LoadData();
+            }
+            catch (Exception ex) 
+            {
+                Log.Add(Log.LogSeverity.Error, "GlobalSettingsViewModel.UpdateBasePathAndroid()", "Index " + AndroidFolderPathsSelectedIndex + " Collection "+AndroidFolderPaths.Count());
+                Log.Add(Log.LogSeverity.Error, "GlobalSettingsViewModel.UpdateBasePathAndroid()", ex);
             }
         }
 
@@ -588,6 +629,20 @@ namespace Knossos.NET.ViewModels
             {
                 BasePath = Knossos.globalSettings.basePath;
             }
+            /* Android Folder Paths */
+            if (KnUtils.IsAndroid)
+            {
+                AndroidFolderPaths.Clear();
+                AndroidFolderPaths.Add(BasePath);
+                AndroidFolderPathsSelectedIndex = 0;
+                foreach (var path in AndroidHelper.GetAllExternalAppFilesDirs())
+                {
+                    if (!AndroidFolderPaths.Contains(path))
+                    { AndroidFolderPaths.Add(path); }
+                }
+                AndroidFolderPathsSelectedIndex = 0;
+            }
+
             EnableLogFile = Knossos.globalSettings.enableLogFile;
             LogLevel= Knossos.globalSettings.logLevel;
             Fs2RootPack = Knossos.retailFs2RootFound;
@@ -610,6 +665,11 @@ namespace Knossos.NET.ViewModels
                     if(KnUtils.IsMacOS)
                     {
                         DetectedOS = "OSX";
+                    }
+                    else
+                    {
+                        if (KnUtils.IsAndroid)
+                            DetectedOS = "Android";
                     }
                 }
             }
@@ -1077,6 +1137,8 @@ namespace Knossos.NET.ViewModels
         private FlagsJsonV1? GetFlagData()
         {
             FlagDataLoaded = false;
+            if (KnUtils.IsAndroid)
+                return null;
             var builds = Knossos.GetInstalledBuildsList();
             if (builds.Any())
             {
@@ -1126,42 +1188,42 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void BrowseFolderCommand()
         {
-            if (MainWindow.instance != null)
+            FolderPickerOpenOptions options = new FolderPickerOpenOptions(); 
+            if (BasePath != string.Empty)
             {
-
-                FolderPickerOpenOptions options = new FolderPickerOpenOptions(); 
-                if (BasePath != string.Empty)
-                { 
-                    options.SuggestedStartLocation = await MainWindow.instance.StorageProvider.TryGetFolderFromPathAsync(BasePath);
-                }
-                options.AllowMultiple = false;
-
-                var result = await MainWindow.instance.StorageProvider.OpenFolderPickerAsync(options);
-
-                try {
-                    if (result != null && result.Count > 0)
-                    {
-                        
-                        // Test if we can write to the new library directory
-                        using (StreamWriter writer = new StreamWriter(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"))
-                        {
-                            writer.WriteLine("test");
-                        }
-                        File.Delete(Path.Combine(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"));
-                    
-                        Knossos.globalSettings.basePath = result[0].Path.LocalPath.ToString();
-                        Knossos.globalSettings.Save();
-                        Knossos.ResetBasePath();
-                        LoadData();
-                    }
-                } 
-                catch (Exception ex) 
+                try
                 {
-                    Log.Add(Log.LogSeverity.Error, "GlobalSettings.BrowseFolderCommand() - test read/write was not successful: ", ex);
-                    await Dispatcher.UIThread.Invoke(async () => {
-                        await MessageBox.Show(null, "KnossosNET was not able to write to this folder.  Please select another library folder.", "Cannot Select Folder", MessageBox.MessageBoxButtons.OK);
-                    }).ConfigureAwait(false);
+                    options.SuggestedStartLocation = await KnUtils.GetTopLevel().StorageProvider.TryGetFolderFromPathAsync(BasePath);
                 }
+                catch { }
+            }
+            options.AllowMultiple = false;
+
+            var result = await KnUtils.GetTopLevel().StorageProvider.OpenFolderPickerAsync(options);
+
+            try {
+                if (result != null && result.Count > 0)
+                {
+                        
+                    // Test if we can write to the new library directory
+                    using (StreamWriter writer = new StreamWriter(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"))
+                    {
+                        writer.WriteLine("test");
+                    }
+                    File.Delete(Path.Combine(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"));
+                    
+                    Knossos.globalSettings.basePath = result[0].Path.LocalPath.ToString();
+                    Knossos.globalSettings.Save();
+                    Knossos.ResetBasePath();
+                    LoadData();
+                }
+            } 
+            catch (Exception ex) 
+            {
+                Log.Add(Log.LogSeverity.Error, "GlobalSettings.BrowseFolderCommand() - test read/write was not successful: ", ex);
+                await Dispatcher.UIThread.Invoke(async () => {
+                    await MessageBox.Show(null, "KnossosNET was not able to write to this folder.  Please select another library folder.", "Cannot Select Folder", MessageBox.MessageBoxButtons.OK);
+                }).ConfigureAwait(false);
             }
         }
 
@@ -1458,12 +1520,8 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void OpenPerformanceHelp()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new PerformanceHelpView();
-
-                await dialog.ShowDialog<PerformanceHelpView?>(MainWindow.instance);
-            }
+            var dialog = new PerformanceHelpView();
+            await dialog.ShowDialog<PerformanceHelpView?>(MainWindow.instance);
         }
 
         /// <summary>
@@ -1485,13 +1543,9 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void InstallFS2Command()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new Fs2InstallerView();
-                dialog.DataContext = new Fs2InstallerViewModel(dialog);
-
-                await dialog.ShowDialog<Fs2InstallerView?>(MainWindow.instance);
-            }
+            var dialog = new Fs2InstallerView();
+            dialog.DataContext = new Fs2InstallerViewModel(dialog);
+            await dialog.ShowDialog<Fs2InstallerView?>(MainWindow.instance);
         }
 
         /// <summary>
@@ -1507,13 +1561,10 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void CleanupLibraryCommand()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new CleanupKnossosLibraryView();
-                dialog.DataContext = new CleanupKnossosLibraryViewModel();
+            var dialog = new CleanupKnossosLibraryView();
+            dialog.DataContext = new CleanupKnossosLibraryViewModel();
 
-                await dialog.ShowDialog<CleanupKnossosLibraryView?>(MainWindow.instance);
-            }
+            await dialog.ShowDialog<CleanupKnossosLibraryView?>(MainWindow.instance);
         }
 
         /// <summary>
