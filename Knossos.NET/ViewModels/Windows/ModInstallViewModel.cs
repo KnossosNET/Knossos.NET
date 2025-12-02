@@ -160,7 +160,9 @@ namespace Knossos.NET.ViewModels
             List <Mod> allMods;
             if(SelectedMod != null)
             {
-                await SelectedMod.LoadFulLNebulaData();
+                var successfull = await SelectedMod.LoadFulLNebulaData();
+                if (!successfull)
+                    _ = MessageBox.Show(MainWindow.instance, "An error has ocurred while fetching data from nebula for mod " + SelectedMod, "Error fetching data", MessageBox.MessageBoxButtons.OK);
             }
             //load all dependencies mods in singletc mode so they can be modified too at any time
             if(SelectedMod != null && !SelectedMod.GetMissingDependenciesList().Any() && !Knossos.inSingleTCMode)
@@ -353,7 +355,9 @@ namespace Knossos.NET.ViewModels
                         else
                         {
                             //Load Nebula data first to check the packages and add to cache
-                            await modDep.LoadFulLNebulaData();
+                            var successfull = await modDep.LoadFulLNebulaData();
+                            if (!successfull)
+                                _ = MessageBox.Show(MainWindow.instance, "An error has ocurred while fetching data from nebula for mod " + modDep, "Error fetching data", MessageBox.MessageBoxButtons.OK);
                             modCache.Add(modDep);
                         }
 
@@ -384,7 +388,9 @@ namespace Knossos.NET.ViewModels
                                         else
                                         {
                                             //Load Nebula data first to check the packages and add to cache
-                                            await alternativeVersion.LoadFulLNebulaData();
+                                            var successfull = await alternativeVersion.LoadFulLNebulaData();
+                                            if (!successfull)
+                                                _ = MessageBox.Show(MainWindow.instance, "An error has ocurred while fetching data from nebula for mod " + alternativeVersion, "Error fetching data", MessageBox.MessageBoxButtons.OK);
                                             modCache.Add(alternativeVersion);
                                         }
                                     }

@@ -760,8 +760,9 @@ namespace Knossos.NET.Models
         /// Uses the new API call introduced along with repo_minimal.json to load the missing data from Nebula using the api
         /// Can be called multiple times, the data is only loaded once unless ClearUnusedData() is called on this mod object
         /// Does nothing for installed mods
+        /// Returns true if the operation was successfull, false otherwise.
         /// </summary>
-        public async Task LoadFulLNebulaData()
+        public async Task<bool> LoadFulLNebulaData()
         {
             if(!installed && !fullDataLoaded)
             {
@@ -788,12 +789,15 @@ namespace Knossos.NET.Models
                         modFlag = newData.modFlag;
                         customBuild = newData.customBuild;
                         owners = newData.owners;
+                        return true;
                     }
                 }catch(Exception ex)
                 {
                     Log.Add(Log.LogSeverity.Error, "Mod.LoadFulLNebulaData", ex);
                 }
+                return false;
             }
+            return true;
         }
 
         /// <summary>
