@@ -27,7 +27,7 @@
 	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}">
 	<Grid RowDefinitions="Auto,Auto,*,Auto">
 		<StackPanel Grid.Row="0" Margin="25">
-			<Image Source="{Binding Banner, Converter={StaticResource imageConverter}}" anim:ImageBehavior.AnimatedSource="{Binding Banner}" HorizontalAlignment="Stretch" Height="300" IsVisible="{Binding HasBanner}"></Image>
+			<Image Source="{Binding Banner, Converter={StaticResource imageConverter}}" anim:ImageBehavior.AnimatedSource="{Binding ApngBanner}" HorizontalAlignment="Stretch" Height="300" IsVisible="{Binding HasBanner}"></Image>
 			<Label Content="{Binding Name, Converter={StaticResource escapeUnderscoresConverter}}" FontWeight="Bold" FontSize="24" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" Foreground="White"/>
 			
 			<!--Buttons and Mod info-->
