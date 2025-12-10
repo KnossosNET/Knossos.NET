@@ -44,7 +44,7 @@ namespace Knossos.NET.ViewModels
                     }
                     else
                     {
-                        TileImage = MainWindowViewModel.Instance?.placeholderTileImage;
+                        TileImage = MainViewModel.Instance?.placeholderTileImage;
                     }
                 }
             }
@@ -92,7 +92,7 @@ namespace Knossos.NET.ViewModels
         private async Task LazyReLoadTileImageAsync()
         {
             await Task.Delay(new Random().Next(200,700));
-            TileImage = tileModBitmap != null? tileModBitmap : MainWindowViewModel.Instance?.placeholderTileImage;
+            TileImage = tileModBitmap != null? tileModBitmap : MainViewModel.Instance?.placeholderTileImage;
         }
 
         /* Button Commands */
@@ -108,14 +108,11 @@ namespace Knossos.NET.ViewModels
 
         internal async void ButtonCommandInstall()
         {
-            if (MainWindow.instance != null && ModVersion != null)
+            if (modJson != null)
             {
-                if (modJson != null)
-                {
-                    var dialog = new ModInstallView();
-                    dialog.DataContext = new ModInstallViewModel(modJson, dialog);
-                    await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
-                }
+                var dialog = new ModInstallView();
+                dialog.DataContext = new ModInstallViewModel(modJson, dialog);
+                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
             }
         }
 
@@ -145,7 +142,7 @@ namespace Knossos.NET.ViewModels
 
         internal async void ButtonCommandDetails()
         {
-            if (MainWindow.instance != null && ModVersion != null)
+            if (ModVersion != null)
             {
                 if(modJson != null)
                 {
@@ -158,7 +155,7 @@ namespace Knossos.NET.ViewModels
 
         private async Task LoadImage(string modFullPath, string? tileString)
         {
-            TileImage = MainWindowViewModel.Instance?.placeholderTileImage;
+            TileImage = MainViewModel.Instance?.placeholderTileImage;
 
             try
             {

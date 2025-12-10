@@ -29,10 +29,14 @@
 					</Expander.Header>
 					<StackPanel Margin="5">
 						<!-- Base Path -->
-						<WrapPanel Margin="7,10,0,0">
+						<WrapPanel Margin="7,10,0,0" IsVisible="{Binding !IsAndroid}">
 							<TextBlock VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
 							<TextBox HorizontalAlignment="Left" Width="400" Text="{Binding BasePath}" Margin="10,0,0,0" IsReadOnly="True" ></TextBox>
 							<Button IsVisible="{Binding !IsPortableMode}" Margin="5,0,0,0" Classes="Quaternary" Command="{Binding BrowseFolderCommand}">Browse</Button>
+						</WrapPanel>
+						<WrapPanel Margin="7,10,0,0" IsVisible="{Binding IsAndroid}">
+							<TextBlock VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
+							<ComboBox HorizontalAlignment="Left" Width="400" SelectedIndex="{Binding AndroidFolderPathsSelectedIndex}" ItemsSource="{Binding AndroidFolderPaths}" Margin="10,0,0,0" ></ComboBox>
 						</WrapPanel>
 						<!-- Lib Info -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="6,10,0,0">

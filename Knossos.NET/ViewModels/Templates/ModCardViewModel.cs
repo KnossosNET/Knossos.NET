@@ -65,7 +65,7 @@ namespace Knossos.NET.ViewModels
                     }
                     else
                     {
-                        Image = MainWindowViewModel.Instance?.placeholderTileImage;
+                        Image = MainViewModel.Instance?.placeholderTileImage;
                     }
                 }
             }
@@ -130,7 +130,7 @@ namespace Knossos.NET.ViewModels
         private async Task LazyReLoadTileImageAsync()
         {
             await Task.Delay(new Random().Next(200, 700));
-            Image = tileModBitmap != null ? tileModBitmap : MainWindowViewModel.Instance?.placeholderTileImage;
+            Image = tileModBitmap != null ? tileModBitmap : MainViewModel.Instance?.placeholderTileImage;
         }
 
         public void AddModVersion(Mod modJson)
@@ -314,8 +314,7 @@ namespace Knossos.NET.ViewModels
             }
             else
             {
-                if (MainWindow.instance != null)
-                    MessageBox.Show(MainWindow.instance, "Log File " + Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log") + " not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+                MessageBox.Show(MainWindow.instance, "Log File " + Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log") + " not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
 
@@ -345,10 +344,10 @@ namespace Knossos.NET.ViewModels
                         modVersions[modVersions.Count - 1].installed = false;
                         if (!IsLocalMod)
                         {
-                            MainWindowViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
+                            MainViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
                         }
                         Knossos.RemoveMod(modVersions[activeVersionIndex].id);
-                        MainWindowViewModel.Instance?.RunModStatusChecks();
+                        MainViewModel.Instance?.RunModStatusChecks();
                     }
                 }
                 else
@@ -364,30 +363,24 @@ namespace Knossos.NET.ViewModels
 
         internal async void ButtonCommandDetails()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new ModDetailsView();
-                dialog.DataContext = new ModDetailsViewModel(modVersions, activeVersionIndex, this, dialog);
-                detailsView = dialog;
-                await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
-                detailsView = null;
-            }
+            var dialog = new ModDetailsView();
+            dialog.DataContext = new ModDetailsViewModel(modVersions, activeVersionIndex, this, dialog);
+            detailsView = dialog;
+            await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
+            detailsView = null;
         }
 
         internal async void ButtonCommandSettings()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new ModSettingsView();
-                dialog.DataContext = new ModSettingsViewModel(modVersions[activeVersionIndex],this);
-                settingsView = dialog;
-                await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
-            }
+            var dialog = new ModSettingsView();
+            dialog.DataContext = new ModSettingsViewModel(modVersions[activeVersionIndex],this);
+            settingsView = dialog;
+            await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
         }
 
         private void LoadImage()
         {
-            Image = MainWindowViewModel.Instance?.placeholderTileImage;
+            Image = MainViewModel.Instance?.placeholderTileImage;
 
             try
             {

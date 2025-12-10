@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>28</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<GenerateApplicationManifest>true</GenerateApplicationManifest>
+	
+	<ApplicationId>com.knossosnet.knossosnet</ApplicationId>
+	<ApplicationVersion>1</ApplicationVersion>
+	<AndroidVersionCode>1</AndroidVersionCode>
+    <ApplicationDisplayVersion>1.3.1</ApplicationDisplayVersion>
+	<AndroidUseAapt2>true</AndroidUseAapt2>
+	<RunAOTCompilation>false</RunAOTCompilation>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<AndroidNativeLibrary Include="natives\arm64-v8a\*.so" Abi="arm64-v8a" />
+	<AndroidNativeLibrary Include="natives\armeabi-v7a\*.so" Abi="armeabi-v7a"/>
+	<AndroidNativeLibrary Include="natives\x86\*.so" Abi="x86" />
+	<AndroidNativeLibrary Include="natives\x86_64\*.so" Abi="x86_64"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AndroidJavaSource Include="java\**\*.java" />
+  </ItemGroup>
+	
+  <ItemGroup Condition="'$(Configuration)' != 'Release'">
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <AndroidResource Include="Icon.png">
+      <Link>Resources\drawable\Icon.png</Link>
+    </AndroidResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Android" />
+    <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Knossos.NET\Knossos.NET.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="natives\arm64-v8a\" />
+  </ItemGroup>
+</Project>

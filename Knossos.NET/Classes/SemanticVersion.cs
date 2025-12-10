@@ -88,7 +88,7 @@ namespace Knossos.NET.Classes
         /// </summary>
         /// <param name="versionA"></param>
         /// <param name="versionB"></param>
-        /// <returns>Retuns >=1 if A is superior, 0 if equal or <=-1 if A is inferior.</returns>    
+        /// <returns>Retuns &gt;=1 if A is superior, 0 if equal or &lt;=-1 if A is inferior.</returns>    
         public static int Compare(string versionA, string versionB)
         {
             return Compare(new SemanticVersion(versionA), new SemanticVersion(versionB));
@@ -99,7 +99,7 @@ namespace Knossos.NET.Classes
         /// </summary>
         /// <param name="versionA"></param>
         /// <param name="versionB"></param>
-        /// <returns>Retuns >=1 if A is superior, 0 if equal or <=-1 if A is inferior.</returns>        
+        /// <returns>Retuns >=1 if A is superior, 0 if equal or &lt;=-1 if A is inferior.</returns>        
         public static int Compare(SemanticVersion versionA, SemanticVersion versionB)
         {
             if(versionA.major != versionB.major)
@@ -258,7 +258,7 @@ namespace Knossos.NET.Classes
 
         /// <summary>
         /// Compares a semantic version string to the version string in the mod dependency to see if it sastifies the requirement.
-        /// Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 < 4.7.0, Version: ">=4.6.1"->equal or better
+        /// Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 &lt; 4.7.0, Version: ">=4.6.1"->equal or better
         /// </summary>
         /// <param name="dependencyVersion"></param>
         /// <param name="version"></param>
@@ -276,7 +276,7 @@ namespace Knossos.NET.Classes
         */
         /// <summary>
         /// Compares a semantic version to the version string in the mod dependency to see if it sastifies the requirement.
-        /// Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 < 4.7.0, Version: ">=4.6.1"->equal or better
+        /// Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 &lt; 4.7.0, Version: ">=4.6.1"->equal or better
         /// </summary>
         /// <param name="dependencyVersion"></param>
         /// <param name="version"></param>
