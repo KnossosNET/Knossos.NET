@@ -108,15 +108,32 @@ namespace Knossos.NET.ViewModels
                     }
                 }
                 //Filters
-                if (visibility && MainWindowViewModel.Instance != null && MainWindowViewModel.Instance.tagFilter.Any())
+                if (ModTags.IsFilterPresentInModID(card.ID, "Hidden"))
                 {
                     visibility = false;
-                    foreach (var filter in MainWindowViewModel.Instance.tagFilter)
+                    if (MainWindowViewModel.Instance != null && MainWindowViewModel.Instance.tagFilter.FirstOrDefault(f => f == "Hidden") != null)
                     {
-                        if (card.ID != null && ModTags.IsFilterPresentInModID(card.ID, filter))
+                        visibility = true;
+                    }
+                }
+                else
+                { 
+                    if (MainWindowViewModel.Instance != null && MainWindowViewModel.Instance.tagFilter.Any())
+                    {
+                        visibility = false;
+                        foreach (var filter in MainWindowViewModel.Instance.tagFilter)
                         {
-                            visibility = true;
-                            break;
+                            if(filter == "Hidden")
+                            {
+                                if(MainWindowViewModel.Instance.tagFilter.Count == 1)
+                                    visibility = true;
+                                continue;
+                            }
+                            if (card.ID != null && ModTags.IsFilterPresentInModID(card.ID, filter))
+                            {
+                                visibility = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -201,6 +218,16 @@ namespace Knossos.NET.ViewModels
 
             SortString = "Sorted by " + localSort;         
             BuildFilterString();
+        }
+
+        /// <summary>
+        /// Reset currently selected filters
+        /// </summary>
+        public void ResetFilters()
+        {
+            ModListView.Instance?.GenerateFilterButtons();
+            MainWindowViewModel.Instance?.tagFilter.Clear();
+            ApplyFilters();
         }
 
         public void CloseTab()
