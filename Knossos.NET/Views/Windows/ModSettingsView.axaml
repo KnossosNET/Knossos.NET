@@ -34,6 +34,11 @@
 						<Label Foreground="White">Available exec type options: </Label>
 						<Label Foreground="Orange">Default, Release, Debug, Fred2, Fred2Debug, QtFred, QtFredDebug</Label>
 					</WrapPanel>
+					<!--Visibility Settings-->
+					<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">VISIBILITY SETTINGS</Label>
+					<CheckBox IsChecked="{Binding UserHidden}" Margin="5" ToolTip.Tip="Hide mod from your play menu. Can be displayed again by using the filter option to show hidden mods.">
+						Hidden by default
+					</CheckBox>
 					<!--Mod Engine Settings-->
 					<Label Margin="0,20,0,0" FontWeight="Black" FontSize="20">ENGINE SETTINGS</Label>
 					<CheckBox IsChecked="{Binding NoIngameOptions}" Margin="5" ToolTip.Tip="By disabling in-game options, launcher engine settings will be used instead. Only valid if the mod uses a FSO engine build equal or higher than version 24.2.0">

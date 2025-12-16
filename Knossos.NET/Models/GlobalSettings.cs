@@ -11,6 +11,8 @@ using Avalonia.Threading;
 using Knossos.NET.ViewModels;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
+using Knossos.NET.Views;
 
 namespace Knossos.NET.Models
 {
@@ -121,6 +123,8 @@ namespace Knossos.NET.Models
         public AutoUpdateFsoBuilds autoUpdateBuilds { get; set; } = new AutoUpdateFsoBuilds();
         [JsonPropertyName("warn_new_settings_system")]
         public bool warnNewSettingsSystem { get; set; } = true;
+        [JsonPropertyName("hidden_mod_ids")]
+        public List<string> hiddenModIds { get; set; } = new List<string>();
         [JsonIgnore]
         private bool _closeToTray { get; set; } = false;
         [JsonPropertyName("close_to_tray")]
@@ -686,7 +690,15 @@ namespace Knossos.NET.Models
                         portableFsoPreferences = tempSettings.portableFsoPreferences;
                         closeToTray = tempSettings.closeToTray;
                         ignoredLauncherUpdates = tempSettings.ignoredLauncherUpdates;
-
+                        hiddenModIds = tempSettings.hiddenModIds;
+                        if (hiddenModIds.Any())
+                        {
+                            foreach (var hiddenMod in hiddenModIds)
+                            {
+                                ModTags.AddModFilter(hiddenMod, "Hidden");
+                            }
+                            MainWindowViewModel.Instance?.InstalledModsView?.ResetFilters();
+                        }
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings have been loaded");
 

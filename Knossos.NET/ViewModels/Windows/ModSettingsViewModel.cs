@@ -57,6 +57,8 @@ namespace Knossos.NET.ViewModels
         internal bool noIngameOptions = false;
         [ObservableProperty]
         internal bool ingameOptionsFileExist = false;
+        [ObservableProperty]
+        internal bool userHidden = false;
 
         public ModSettingsViewModel()
         {
@@ -95,6 +97,8 @@ namespace Knossos.NET.ViewModels
             compressed = modJson.modSettings.isCompressed;
             ignoreGlobalCmd = modJson.modSettings.ignoreGlobalCmd;
             noIngameOptions = modJson.modSettings.noIngameOptions;
+            if (ModTags.IsFilterPresentInModID(modJson.id, "Hidden"))
+                UserHidden = true;
             if (Knossos.globalSettings.modCompression != CompressionSettings.Disabled && !modJson.modSettings.isCompressed)
             {
                 compressionAvailable = true;
@@ -346,7 +350,24 @@ namespace Knossos.NET.ViewModels
 
                 modJson.modSettings.ignoreGlobalCmd = IgnoreGlobalCmd;
                 modJson.modSettings.noIngameOptions = NoIngameOptions;
+                var oldUserHidden = ModTags.IsFilterPresentInModID(modJson.id, "Hidden");
 
+                if (UserHidden)
+                {
+                    ModTags.AddModFilter(modJson.id, "Hidden");
+                    if(!Knossos.globalSettings.hiddenModIds.Contains(modJson.id))
+                        Knossos.globalSettings.hiddenModIds.Add(modJson.id);
+                }
+                else
+                {
+                    ModTags.RemoveModFilter(modJson.id, "Hidden");
+                    Knossos.globalSettings.hiddenModIds.Remove(modJson.id);
+                }
+                if (oldUserHidden != UserHidden)
+                {
+                    MainWindowViewModel.Instance?.InstalledModsView?.ResetFilters();
+                    Knossos.globalSettings.Save();
+                }
                 modJson.modSettings.Save();
                 if(modCardViewModel != null)
                 {

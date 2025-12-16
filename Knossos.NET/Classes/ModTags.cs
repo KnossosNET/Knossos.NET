@@ -27,6 +27,11 @@ namespace Knossos.NET.Classes
             Filters.Add(filter);
         }
 
+        public void RemoveFilter(string filter)
+        {
+            Filters.Remove(filter);
+        }
+
         /// <summary>
         /// Check if a filter exist in this modid filterlist
         /// Case insensitive
@@ -95,6 +100,7 @@ namespace Knossos.NET.Classes
         /// </summary>
         public enum Filters
         {
+            Hidden,
             Total_Conversion,
             Retail_FS2,
             FS2_MOD,
@@ -196,6 +202,26 @@ namespace Knossos.NET.Classes
             if(!found)
             {
                 modTags.Add(new ModTag(id, filter));
+            }
+        }
+
+        /// <summary>
+        /// Removes a mod filter
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="filter"></param>
+        public static void RemoveModFilter(string id, string filter)
+        {
+            for (int i = 0; i < modTags.Count(); i++)
+            {
+                if (modTags[i].ModID == id)
+                {
+                    if (modTags[i].FilterExist(filter))
+                    {
+                        modTags[i].RemoveFilter(filter);
+                        break;
+                    }
+                }
             }
         }
 
