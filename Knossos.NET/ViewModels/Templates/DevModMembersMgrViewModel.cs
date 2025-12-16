@@ -107,7 +107,7 @@ namespace Knossos.NET.ViewModels
                     //verify if the modid is already uploaded to nebula
                     if(await Nebula.IsModIdInNebula(editor.ActiveVersion.id) == false)
                     {
-                        _ = MessageBox.Show(MainWindow.instance!, "The mod id: " + editor.ActiveVersion.id + ", was not found in the nebula database. This likely mean you mod was never uploaded to nebula.\nYou need to upload at least one version to nebula (public or private) in order to manage mod members.\nIt can also be caused by a network error." , "Mod ID not in Nebula", MessageBox.MessageBoxButtons.OK);
+                        _ = MessageBox.Show(MainWindow.instance!, "The mod id: " + editor.ActiveVersion.id + ", was not found in Nebula's database. This likely means your mod was never uploaded to Nebula.\nYou need to upload at least one version to Nebula (public or private) in order to manage mod members.\nIt can also be caused by a network error.", "Mod ID not in Nebula", MessageBox.MessageBoxButtons.OK);
                         ButtonsEnabled = false;
                         return;
                     }
