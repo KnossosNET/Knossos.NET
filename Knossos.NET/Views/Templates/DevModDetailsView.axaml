@@ -41,7 +41,7 @@
 			<WrapPanel HorizontalAlignment="Left">
 				<Label Width="150" HorizontalContentAlignment="Right" Margin="5" FontWeight="Bold" FontSize="18">Description</Label>
 				<StackPanel MinWidth="280" MaxWidth="600">
-					<TextBox TextWrapping="Wrap" Width="480" Height="200" Text="{Binding ModDescription}" Margin="5"></TextBox>
+					<TextBox AcceptsReturn="True" TextWrapping="Wrap" Width="480" Height="200" Text="{Binding ModDescription}" Margin="5"></TextBox>
 				</StackPanel>
 			</WrapPanel>
 			<Button HorizontalAlignment="Center" Command="{Binding OpenDescriptionEditor}" Classes="Quaternary" Margin="5,5,5,20">Open Editor</Button>
@@ -57,7 +57,7 @@
 					<TextBlock HorizontalAlignment="Right" Margin="20,10,0,5" Foreground="Gray" FontSize="12" TextWrapping="Wrap">One video link per line</TextBlock>
 				</StackPanel>
 				<StackPanel>
-					<TextBox Height="400" Width="480" Text="{Binding ModVideos}" Margin="5"></TextBox>
+					<TextBox AcceptsReturn="True" Height="400" Width="480" Text="{Binding ModVideos}" Margin="5"></TextBox>
 				</StackPanel>
 			</WrapPanel>
 			<!--Tile Image-->
