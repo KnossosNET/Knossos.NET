@@ -15,21 +15,21 @@
 	<ScrollViewer HorizontalScrollBarVisibility="Auto" AllowAutoHide="False">
 		<TabControl Margin="5" SelectedIndex="{Binding TabIndex}">
 		  <TabItem Header="Mods">
-					<SplitView MinWidth="1000" Margin="0,0,0,5" IsPaneOpen="True" DisplayMode="CompactInline" CompactPaneLength="100" OpenPaneLength="300">
+					<SplitView Margin="0,0,0,5" IsPaneOpen="True" DisplayMode="CompactInline" CompactPaneLength="100" OpenPaneLength="280">
 						<SplitView.Pane>
 							<Grid RowDefinitions="Auto,*,Auto,Auto,Auto">
 							
 								<Button Command="{Binding CreateMod}" Grid.Row="0" Margin="5,5,0,5" HorizontalAlignment="Left">Create New Mod</Button>
-								<ComboBox SelectedIndex="{Binding SortSelectedIndex}" ItemsSource="{Binding SortBoxItems}" Grid.Row="0" Margin="0,5,5,5" Width="150" HorizontalAlignment="Right" ToolTip.Tip="Sort Type"></ComboBox>
+								<ComboBox SelectedIndex="{Binding SortSelectedIndex}" ItemsSource="{Binding SortBoxItems}" Grid.Row="0" Margin="0,5,5,5" Width="130" HorizontalAlignment="Right" ToolTip.Tip="Sort Type"></ComboBox>
 							
 								<ListBox Grid.Row="1" ItemsSource="{Binding Mods}" SelectedIndex="{Binding SelectedIndex}">
 									<ListBox.ItemTemplate>
 										<DataTemplate>
 											<WrapPanel>
-												<Label FontWeight="Bold" Content="["/>
-												<Label FontWeight="Bold" Content="{Binding type}"/>
-												<Label FontWeight="Bold" Content="]"/>
-												<Label Content="{Binding title, Converter={StaticResource escapeUnderscoresConverter}}"/>
+												<Label FontSize="13" FontWeight="Bold" Content="["/>
+												<Label FontSize="13" FontWeight="Bold" Content="{Binding type}"/>
+												<Label FontSize="13" FontWeight="Bold" Content="]"/>
+												<Label FontSize="13" Content="{Binding title, Converter={StaticResource escapeUnderscoresConverter}}"/>
 											</WrapPanel>
 										</DataTemplate>
 									</ListBox.ItemTemplate>
