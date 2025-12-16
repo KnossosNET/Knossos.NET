@@ -18,7 +18,7 @@
 			<Button Margin="0,5,30,0" Command="{Binding ResetCommand}" FontWeight="Bold" FontSize="20" ToolTip.Tip="Reset all settings to defaults" Classes="Cancel">Reset to defaults</Button>
 			<Button Margin="0,5,30,0" Command="{Binding ReloadFlagData}" FontSize="20" ToolTip.Tip="Reload all settings from the configuration file and reload system data.">Reload Data</Button>
 		</WrapPanel>
-		<ScrollViewer Grid.Row="1">
+		<ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" AllowAutoHide="False">
 			<StackPanel>
 				<!--KNOSSOS SETTINGS-->
 				<Expander IsExpanded="{Binding ExpandKnossosSettings}" VerticalAlignment="Top" Margin="5" MinWidth="740">

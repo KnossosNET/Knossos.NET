@@ -16,7 +16,7 @@
 		<vm:ServerCreatorViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}">
+	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}" HorizontalScrollBarVisibility="Auto" AllowAutoHide="False"> 
 		<StackPanel>
 			<Label HorizontalAlignment="Center" FontWeight="Bold" FontSize="22">Select a mod</Label>
 			<ComboBox MinWidth="400" HorizontalAlignment="Center" SelectedIndex="{Binding ModIndex}" ItemsSource="{Binding ListOfMods}"></ComboBox>

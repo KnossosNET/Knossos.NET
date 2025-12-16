@@ -80,7 +80,7 @@
 				</Button>
 			</WrapPanel>
 		</Grid>
-		<ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+		<ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AllowAutoHide="False">
 			<StackPanel>
 				<StackPanel IsVisible="{Binding Sorting}">
 					<v:LoadingIconView Width="80" Height="80" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="50,50,0,0" Content="{Binding LoadingAnimation}"/>

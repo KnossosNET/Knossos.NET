@@ -24,7 +24,7 @@
 		<cvt:BitmapAssetValueConverter x:Key="imageConverter"/>
 	</Window.Resources>
 
-	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}">
+	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}" AllowAutoHide="False">
 	<Grid RowDefinitions="Auto,Auto,*,Auto">
 		<StackPanel Grid.Row="0" Margin="25">
 			<Image Source="{Binding Banner, Converter={StaticResource imageConverter}}" anim:ImageBehavior.AnimatedSource="{Binding ApngBanner}" HorizontalAlignment="Stretch" Height="300" IsVisible="{Binding HasBanner}"></Image>
