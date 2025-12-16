@@ -92,18 +92,22 @@ namespace Knossos.NET.ViewModels
                 if (folderPath != null)
                 {
                     ScanResults = "Folder:\n" + folderPath;
-                    string[] execs;
+                    List<string> execs;
                     if (KnUtils.IsWindows)
                     {
-                        execs=Directory.GetFiles(folderPath, "*.exe", SearchOption.AllDirectories);
+                        execs=Directory.GetFiles(folderPath, "*.exe", SearchOption.AllDirectories).ToList();
                     }
                     else if (KnUtils.IsMacOS)
                     {
-                        execs=Directory.GetDirectories(folderPath, "*.app", SearchOption.AllDirectories);
+                        execs=Directory.GetDirectories(folderPath, "*.app", SearchOption.AllDirectories).ToList();
                     }
                     else
                     {
-                        execs=Directory.GetFiles(folderPath, "*.AppImage", SearchOption.AllDirectories);
+                        execs = Directory.GetDirectories(folderPath, "*.AppImage", SearchOption.AllDirectories).ToList();
+                        var fileList = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+                        var filesNoExt = fileList.Where(path => Path.GetExtension(path).Length == 0 )?.ToList();
+                        if(filesNoExt != null && filesNoExt.Any())
+                            execs.AddRange(filesNoExt);
                     }
                     ScanResults += "\nDetected Executables: " + execs.Count();
                     foreach (string exe in execs)
