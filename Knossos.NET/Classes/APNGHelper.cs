@@ -15,8 +15,8 @@ namespace Knossos.NET.Classes
         /// <summary>
         ///  Reads a stream to verify if it is a valid APNG file
         ///  Checks for acTL chuck presence.
-        ///  Dosent close or disposes the stream.
-        ///  Throws a exception if the stream dosent contains a png file data
+        ///  Doesn't close or disposes the stream.
+        ///  Throws a exception if the stream doesn't contains a png file data
         /// </summary>
         /// <param name="pngStream"></param>
         /// <returns>true if file is apng</returns>
