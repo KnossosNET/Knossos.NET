@@ -446,6 +446,22 @@ namespace Knossos.NET.Models
         }
 
         /// <summary>
+        /// Gets a all valid executables for the OS/Cpu arch
+        /// </summary>
+        /// <returns>List<FsoFile> or null</returns>
+        public List<FsoFile>? GetExecutables()
+        {
+            if (directExec != null)
+            {
+                return null;
+            }
+
+            var validExecs = executables.Where(b => b.isValid);
+
+            return validExecs?.ToList();
+        }
+
+        /// <summary>
         /// Return the fsofile executable fullpath
         /// </summary>
         /// <param name="fsoFile"></param>
