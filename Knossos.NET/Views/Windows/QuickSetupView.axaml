@@ -21,7 +21,7 @@
 		<vm:QuickSetupViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer>
+	<ScrollViewer AllowAutoHide="False">
 	<Grid Background="{StaticResource BackgroundColorPrimary}" HorizontalAlignment="Stretch" RowDefinitions="*,Auto">
 		
 		<!--Page1-->

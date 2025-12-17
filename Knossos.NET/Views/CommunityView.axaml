@@ -14,7 +14,7 @@
 
 	<TabControl>
 		<TabItem Header="Resources">
-			<ScrollViewer>
+			<ScrollViewer AllowAutoHide="False">
                 <StackPanel HorizontalAlignment="Left" MinWidth="680" MaxWidth="900" Margin="40,20,20,10">
                     <Button HorizontalAlignment="Stretch" ToolTip.Tip="Hard Light Productions Discord - Permanent Invitation: https://discord.gg/cyhMBhMHzK"  Classes="CommunityLink">                          
                             <WrapPanel Margin="10,10,15,10">

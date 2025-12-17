@@ -14,7 +14,7 @@
 	</Design.DataContext>
 
 	<Grid Margin="5">
-		<ScrollViewer VerticalAlignment="Stretch" HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Auto">
+		<ScrollViewer VerticalAlignment="Stretch" HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Auto"  AllowAutoHide="False">
 			<Grid RowDefinitions="Auto,*" HorizontalAlignment="Stretch">
 				<Button IsVisible="{Binding ButtonsVisible}" HorizontalAlignment="Left" Grid.Row="0" Margin="5" Command="{Binding CleanCommand}" ToolTip.Tip="Clean completed or cancelled tasks">
 					<Image Width="30" Height="30" Source="avares://Knossos.NET/Assets/general/clean.png"/>
