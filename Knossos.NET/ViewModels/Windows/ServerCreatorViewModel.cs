@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
@@ -66,6 +67,22 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         public int buildType = 0;
 
+        public ServerCreatorViewModel()
+        {
+            //load last selected mod
+            if (Knossos.globalSettings.standaloneServerSettings != null)
+            {
+                var selectedMod = listOfMods.FirstOrDefault(x => x.id == Knossos.globalSettings.standaloneServerSettings.Value.modId 
+                                                                    && x.version == Knossos.globalSettings.standaloneServerSettings.Value.modVersion);
+                if (selectedMod != null)
+                {
+                    var index = listOfMods.IndexOf(selectedMod);
+                    if(index >= 0)
+                        ModIndex = index;
+                }
+            }
+        }
+
         /// <summary>
         /// Load multi.cfg file for the currently selected mod in the list
         /// </summary>
@@ -78,9 +95,19 @@ namespace Knossos.NET.ViewModels
             PxoChannel = "#Eleh";
             try
             {
-                if (ModIndex >= 0)
+                if (Knossos.globalSettings.standaloneServerSettings != null)
                 {
-                    Cfg.LoadData(ListOfMods[ModIndex]);
+                    BanList = string.Join(Environment.NewLine, Knossos.globalSettings.standaloneServerSettings.Value.banList);
+                    ExtraOptions = string.Join(Environment.NewLine, Knossos.globalSettings.standaloneServerSettings.Value.extraOptions);
+                    Name = Knossos.globalSettings.standaloneServerSettings.Value.name;
+                    Password = Knossos.globalSettings.standaloneServerSettings.Value.password;
+                    UsePxo = Knossos.globalSettings.standaloneServerSettings.Value.usePxo;
+                    NoVoice = Knossos.globalSettings.standaloneServerSettings.Value.noVoice;
+                    Port = Knossos.globalSettings.standaloneServerSettings.Value.port;
+                    PxoChannel = Knossos.globalSettings.standaloneServerSettings.Value.pxoChannel ?? "#Eleh";
+                }
+                if (ModIndex >= 0 && Cfg.LoadData(ListOfMods[ModIndex]))
+                {
                     UsePxo = Cfg.UsePXO;
                     Name = Cfg.Name;
                     Password = Cfg.Password;
@@ -134,6 +161,8 @@ namespace Knossos.NET.ViewModels
                         Cfg.Others = ExtraOptions.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToList();
                     }
                     Cfg.SaveData(ListOfMods[ModIndex]);
+                    Knossos.globalSettings.standaloneServerSettings = new GlobalSettings.StandaloneServerSettings(Cfg, ListOfMods[ModIndex].id, ListOfMods[ModIndex].version, BuildType);
+                    Knossos.globalSettings.Save();
                 }
             }
             catch (Exception ex)

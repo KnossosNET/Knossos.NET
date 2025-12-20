@@ -24,7 +24,8 @@ namespace Knossos.NET.Models
         /// Data is saved in {modfolder}\data\multi.cfg
         /// </summary>
         /// <param name="mod"></param>
-        public void LoadData(Mod mod)
+        /// Returns true/false if successfull
+        public bool LoadData(Mod mod)
         {
             UsePXO = false;
             NoVoice = false;
@@ -91,6 +92,7 @@ namespace Knossos.NET.Models
                             Others.Add(line.ToLower());
                         }
                     }
+                    return true;
                 }
                 else
                 {
@@ -101,6 +103,7 @@ namespace Knossos.NET.Models
             {
                 Log.Add(Log.LogSeverity.Error, "MultiCfg.LoadData()", ex);
             }
+            return false;
         }
 
         /// <summary>
