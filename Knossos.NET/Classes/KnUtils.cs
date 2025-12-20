@@ -1252,5 +1252,51 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "KnUtils.CreateDesktopShortcut()", ex);
             }
         }
+
+        /// <summary>
+        /// Add windows firewall exception for a executable
+        /// </summary>
+        /// <param name="programPath"></param>
+        /// <param name="ruleName"></param>
+        /// <returns>true/false</returns>
+        public static bool AddFirewallException(string programPath, string ruleName)
+        {
+            if (!isWindows)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.AddFirewallExceptions()", "This function is only supported on Windows.");
+                return false;
+            }
+            try
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "netsh",
+                    Arguments = $"advfirewall firewall add rule name=\"{ruleName}\" dir=in action=allow program=\"{programPath.Replace("/", "\\")}\" enable=yes",
+                    UseShellExecute = true,
+                    Verb = "runas",
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+                using (var process = Process.Start(startInfo))
+                {
+                    process?.WaitForExit();
+                    if (process?.ExitCode == 0)
+                    {
+                        Log.Add(Log.LogSeverity.Information, "KnUtils.AddFirewallExceptions()", "Added new Firewall Rules for : " + ruleName);
+                        return true;
+                    }
+                    else
+                    {
+                        Log.Add(Log.LogSeverity.Error, "KnUtils.AddFirewallExceptions()", "Failed to add Firewall Rules for : " + ruleName + ". Error code was: " + process?.ExitCode);
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "KnUtils.AddFirewallExceptions()", ex);
+                return false;
+            }
+        }
     }
 }

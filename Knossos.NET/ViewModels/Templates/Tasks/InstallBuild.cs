@@ -436,6 +436,21 @@ namespace Knossos.NET.ViewModels
                         IsCompleted = true;
                         CancelButtonVisible = false;
 
+                        //Add firewall rules (windows)
+                        if (KnUtils.IsWindows)
+                        {
+                            var executables = newBuild.GetExecutables();
+                            if (executables != null && executables.Any())
+                            {
+                                foreach (var executable in executables)
+                                {
+                                    var fp = newBuild.GetExecutablePath(executable);
+                                    if (fp != null)
+                                        _ = Task.Factory.StartNew(() => KnUtils.AddFirewallException(fp, "Knossos " + newBuild.ToString()));
+                                }
+                            }
+                        }
+
                         //Re-run Dependencies checks 
                         MainWindowViewModel.Instance?.RunModStatusChecks();
 
