@@ -139,6 +139,10 @@ namespace Knossos.NET.ViewModels
                 {
                     editor.ActiveVersion.videos = ModVideos.Split(Environment.NewLine,StringSplitOptions.RemoveEmptyEntries);
                 }
+                else
+                {
+                    editor.ActiveVersion.videos = new string[0];
+                }
                 editor.ActiveVersion.tile = TileImagePath;
                 editor.ActiveVersion.banner = BannerImagePath;
                 if (Screenshots.Any())
