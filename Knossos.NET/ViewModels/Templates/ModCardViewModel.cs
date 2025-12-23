@@ -349,6 +349,11 @@ namespace Knossos.NET.ViewModels
                         }
                         Knossos.RemoveMod(modVersions[activeVersionIndex].id);
                         MainWindowViewModel.Instance?.RunModStatusChecks();
+                        if (Knossos.globalSettings.hiddenModIds.Contains(modVersions[activeVersionIndex].id))
+                        {
+                            Knossos.globalSettings.hiddenModIds.Remove(modVersions[activeVersionIndex].id);
+                            Knossos.globalSettings.Save();
+                        }
                     }
                 }
                 else
