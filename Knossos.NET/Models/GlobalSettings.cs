@@ -1,18 +1,17 @@
 ﻿
-using System.Text.Json;
+using Avalonia.Threading;
+using IniParser;
+using Knossos.NET.Classes;
+using Knossos.NET.ViewModels;
 using System;
-using System.Text.Json.Serialization;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
-using Knossos.NET.Classes;
-using IniParser;
-using Avalonia.Threading;
-using Knossos.NET.ViewModels;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using Knossos.NET.Views;
 
 namespace Knossos.NET.Models
 {
@@ -88,6 +87,37 @@ namespace Knossos.NET.Models
             }
         }
 
+        public struct StandaloneServerSettings
+        {
+
+            public StandaloneServerSettings(MultiCfg multiCfg, string id, string version, int buildType) : this()
+            {
+                this.extraOptions = multiCfg.Others;
+                this.banList = multiCfg.Ban;
+                this.pxoChannel = multiCfg.PXOChannel;
+                this.usePxo = multiCfg.UsePXO;
+                this.noVoice = multiCfg.NoVoice;
+                this.port = multiCfg.Port;
+                this.name = multiCfg.Name;
+                this.password = multiCfg.Password;
+                this.buildType = buildType;
+                this.modId = id;
+                this.modVersion = version;
+            }
+
+            public List<string> extraOptions { get; set; }
+            public List<string> banList { get; set; }
+            public string? pxoChannel { get; set; }
+            public bool usePxo { get; set; }
+            public bool noVoice { get; set; }
+            public int port { get; set; }
+            public string? name { get; set; }
+            public string? password { get; set; }
+            public int buildType { get; set; }
+            public string modId { get; set; }
+            public string modVersion { get; set; }
+        }
+
         /* Knossos Settings */
         [JsonPropertyName("base_path")]
         public string? basePath { get; set; } = null;
@@ -138,6 +168,9 @@ namespace Knossos.NET.Models
         }
         [JsonPropertyName("ignored_launcher_updates")]
         public List<string> ignoredLauncherUpdates { get; set; } = new List<string>();
+
+        [JsonPropertyName("standalone_server_settings")]
+        public StandaloneServerSettings? standaloneServerSettings { get; set;} = null;
 
         /* 
          * Settings that can wait to be saved at app close so we dont have to call save() all the time
@@ -699,6 +732,7 @@ namespace Knossos.NET.Models
                             }
                             MainWindowViewModel.Instance?.InstalledModsView?.ResetFilters();
                         }
+                        standaloneServerSettings = tempSettings.standaloneServerSettings;
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings have been loaded");
 
