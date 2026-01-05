@@ -52,4 +52,5 @@ public class NativeBridge {
 
     public static native void runMacro(int id);
     public static native void cancelMacros();
+	public static native void setTextInputEnabled(boolean enabled);
 }

@@ -196,6 +196,24 @@ public class GameActivity extends org.libsdl.app.SDLActivity {
             }
         } catch (Throwable ignored) {}
     }
+	
+	private void toggleSdlKeyboard(View overlayRoot) {
+        boolean imeVisible = false;
+
+        if (Build.VERSION.SDK_INT >= 30) {
+            WindowInsets insets = overlayRoot.getRootWindowInsets();
+            if (insets != null) {
+                imeVisible = insets.isVisible(WindowInsets.Type.ime());
+            }
+        }
+
+        if (!imeVisible) {
+            NativeBridge.setTextInputEnabled(true);
+        } else {
+            NativeBridge.setTextInputEnabled(false);
+        }
+    }
+
 
     @SuppressLint("ClickableViewAccessibility")
     private void setupOverlayFromXml()
@@ -208,6 +226,8 @@ public class GameActivity extends org.libsdl.app.SDLActivity {
 
         
         // Button listeners
+		Button btnKyb = overlay.findViewById(getResources().getIdentifier("btnKyb", "id", getPackageName()));
+        btnKyb.setOnClickListener(v -> toggleSdlKeyboard(overlay));
         // ESC
         Button btnEsc = overlay.findViewById(getResources().getIdentifier("btnEsc", "id", getPackageName()));
         btnEsc.setOnTouchListener(makeTouchHandler(NativeBridge.CODE_ESC));
@@ -350,7 +370,7 @@ public class GameActivity extends org.libsdl.app.SDLActivity {
 
         // Buttons that visibility are controlled by the toggle
         View[] topBar = new View[] {
-                btnEsc, btnF3, btnALTJ, btnALTM, btnALTH, btnAltA, btnC31, btnC35, btnC39, btnC5 };
+                btnEsc, btnF3, btnALTJ, btnALTM, btnALTH, btnAltA, btnC31, btnC35, btnC39, btnC5, btnKyb };
 
         View[] joystick = new View[] {
                 dpad, btnSpace, btnLCtrl, btnCycleP, btnCycleS, btnTab, btnS, btnA, btnZ, btnRet,
