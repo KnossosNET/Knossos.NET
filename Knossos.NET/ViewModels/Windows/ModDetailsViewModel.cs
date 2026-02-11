@@ -564,7 +564,7 @@ namespace Knossos.NET.ViewModels
                                 Knossos.globalSettings.Save();
                             }
 
-                            MainWindowViewModel.Instance?.RunModStatusChecks();
+                            MainViewModel.Instance?.RunModStatusChecks();
                             if (dialog != null)
                             {
                                 dialog.Close();

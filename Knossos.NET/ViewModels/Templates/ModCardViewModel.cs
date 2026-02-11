@@ -347,7 +347,7 @@ namespace Knossos.NET.ViewModels
                             MainViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
                         }
                         Knossos.RemoveMod(modVersions[activeVersionIndex].id);
-                        MainWindowViewModel.Instance?.RunModStatusChecks();
+                        MainViewModel.Instance?.RunModStatusChecks();
                         if (Knossos.globalSettings.hiddenModIds.Contains(modVersions[activeVersionIndex].id))
                         {
                             Knossos.globalSettings.hiddenModIds.Remove(modVersions[activeVersionIndex].id);

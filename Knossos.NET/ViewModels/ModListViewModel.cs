@@ -111,21 +111,21 @@ namespace Knossos.NET.ViewModels
                 if (ModTags.IsFilterPresentInModID(card.ID, "Hidden"))
                 {
                     visibility = false;
-                    if (MainWindowViewModel.Instance != null && MainWindowViewModel.Instance.tagFilter.FirstOrDefault(f => f == "Hidden") != null)
+                    if (MainViewModel.Instance != null && MainViewModel.Instance.tagFilter.FirstOrDefault(f => f == "Hidden") != null)
                     {
                         visibility = true;
                     }
                 }
                 else
                 { 
-                    if (MainWindowViewModel.Instance != null && MainWindowViewModel.Instance.tagFilter.Any())
+                    if (MainViewModel.Instance != null && MainViewModel.Instance.tagFilter.Any())
                     {
                         visibility = false;
-                        foreach (var filter in MainWindowViewModel.Instance.tagFilter)
+                        foreach (var filter in MainViewModel.Instance.tagFilter)
                         {
                             if(filter == "Hidden")
                             {
-                                if(MainWindowViewModel.Instance.tagFilter.Count == 1)
+                                if(MainViewModel.Instance.tagFilter.Count == 1)
                                     visibility = true;
                                 continue;
                             }
@@ -226,7 +226,7 @@ namespace Knossos.NET.ViewModels
         public void ResetFilters()
         {
             ModListView.Instance?.GenerateFilterButtons();
-            MainWindowViewModel.Instance?.tagFilter.Clear();
+            MainViewModel.Instance?.tagFilter.Clear();
             ApplyFilters();
         }
 

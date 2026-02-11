@@ -1275,7 +1275,7 @@ namespace Knossos.NET
         /// <returns>true/false</returns>
         public static bool AddFirewallException(string programPath, string ruleName)
         {
-            if (!isWindows)
+            if (!IsWindows)
             {
                 Log.Add(Log.LogSeverity.Error, "KnUtils.AddFirewallExceptions()", "This function is only supported on Windows.");
                 return false;

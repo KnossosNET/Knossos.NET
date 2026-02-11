@@ -365,7 +365,7 @@ namespace Knossos.NET.ViewModels
                 }
                 if (oldUserHidden != UserHidden)
                 {
-                    MainWindowViewModel.Instance?.InstalledModsView?.ResetFilters();
+                    MainViewModel.Instance?.InstalledModsView?.ResetFilters();
                     Knossos.globalSettings.Save();
                 }
                 modJson.modSettings.Save();

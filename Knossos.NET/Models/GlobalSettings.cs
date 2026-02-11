@@ -730,7 +730,7 @@ namespace Knossos.NET.Models
                             {
                                 ModTags.AddModFilter(hiddenMod, "Hidden");
                             }
-                            MainWindowViewModel.Instance?.InstalledModsView?.ResetFilters();
+                            MainViewModel.Instance?.InstalledModsView?.ResetFilters();
                         }
                         standaloneServerSettings = tempSettings.standaloneServerSettings;
                         ReadFS2IniValues();
