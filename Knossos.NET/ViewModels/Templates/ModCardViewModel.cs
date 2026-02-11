@@ -86,6 +86,8 @@ namespace Knossos.NET.ViewModels
         internal bool isQtFredDebugAvailable = false;
         private Bitmap? tileModBitmap;
 
+        public bool androidButtonsEnabled = false;
+
         /* Should only be used by the editor preview */
         public ModCardViewModel()
         {
@@ -277,7 +279,11 @@ namespace Knossos.NET.ViewModels
         /* Button Commands */
         internal void ButtonCommand(object command)
         {
-            switch((string)command)
+            if (KnUtils.IsAndroid && !androidButtonsEnabled)
+            {
+                return;
+            }
+            switch ((string)command)
             {
                 case "play" : Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release); break;
                 case "playvr": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release, false, 0, true); break;

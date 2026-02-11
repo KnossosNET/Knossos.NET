@@ -22,6 +22,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal Bitmap? tileImage;
 
+        public bool androidButtonsEnabled = false;
+
         private Bitmap? tileModBitmap;
 
         private bool visible = true;
@@ -98,7 +100,11 @@ namespace Knossos.NET.ViewModels
         /* Button Commands */
         internal void ButtonCommand(object command)
         {
-            switch((string)command)
+            if (KnUtils.IsAndroid && !androidButtonsEnabled)
+            {
+                return;
+            }
+            switch ((string)command)
             {
                 case "details": ButtonCommandDetails(); break;
                 case "install": ButtonCommandInstall(); break;
