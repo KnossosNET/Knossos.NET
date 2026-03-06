@@ -75,7 +75,7 @@ namespace Knossos.NET.Models
         //https://dl.fsnebula.org/storage/repo.json
         //https://fsnebula.org/storage/repo.json"
 
-        public static string[] nebulaMirrors = { "cf.fsnebula.org", "dl.fsnebula.org", "fsnebula.org", "talos.feralhosting.com", "fsnebula.global.ssl.fastly.net" }; //lowercase, last one is the image host
+        public static string[] nebulaMirrors = { "cf.fsnebula.org", "dl.fsnebula.org", "fsnebula.org", "hestia.feralhosting.com", "fsnebula.global.ssl.fastly.net" }; //lowercase, last one is the image host
         private static readonly string repoUrl = @"https://fsnebula.org/storage/repo_minimal.json";
         private static readonly string apiURL = @"https://api.fsnebula.org/api/1/";
         private static readonly string nebulaURL = @"https://fsnebula.org/";
