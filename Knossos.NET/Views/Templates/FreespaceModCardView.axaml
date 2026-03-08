@@ -26,10 +26,19 @@
                 <Label FontSize="32" FontWeight="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Content="LOADING..."/>
             </Grid>
             <!-- Retail Non-Installed Overlay-->
-            <Grid IsVisible="{Binding RetailOverlay}" RowDefinitions="*,*" ToolTip.Tip="KnossosNET needs to copy your Freespace 2 retail game files to your library in order to install and use this mod" ZIndex="98" Background="Black" VerticalAlignment="Stretch" Opacity="0.8" HorizontalAlignment="Stretch">
+            <Grid IsVisible="{Binding RetailOverlay}" RowDefinitions="*,*,*,*" ToolTip.Tip="KnossosNET needs to copy your Freespace 2 retail game files to your library in order to install and use this mod" ZIndex="98" Background="Black" VerticalAlignment="Stretch" Opacity="0.8" HorizontalAlignment="Stretch">
                 <Label Grid.Row="0" FontSize="22" FontWeight="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Content="Freespace 2 retail game files needed"/>
-                <Button Command="{Binding CommandRetail}" Grid.Row="1" Classes="Primary" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2">
-                    Copy Fresspace 2 game files to KnossosNET
+                <WrapPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+				    <Button Command="{Binding CommandGetGOG}" Grid.Row="3" Classes="Quaternary" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2">
+                        Get it from GoG
+                    </Button>
+                    <Button Command="{Binding CommandGetSteam}" Grid.Row="3" Classes="Quaternary" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2">
+                        Get it from Steam
+                    </Button>
+                </WrapPanel>
+                <Label Grid.Row="2" FontSize="18" FontWeight="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Content="Already have it?"/>
+                <Button Command="{Binding CommandRetail}" Grid.Row="3" Classes="Primary" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2">
+                    Copy Freespace 2 game files to KnossosNET
                 </Button>
             </Grid>
             <!-- Banner -->

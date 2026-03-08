@@ -137,6 +137,16 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        internal void CommandGetGOG()
+        {
+            KnUtils.OpenBrowserURL("https://www.gog.com/en/game/freespace_2");
+        }
+
+        internal void CommandGetSteam()
+        {
+            KnUtils.OpenBrowserURL("https://store.steampowered.com/app/273620/Freespace_2/");
+        }
+
         private ModCardViewModel? FindModCard()
         {
             if (MainWindowViewModel.Instance != null && MainWindowViewModel.Instance.InstalledModsView != null)
