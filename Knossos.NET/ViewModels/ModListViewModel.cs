@@ -378,5 +378,15 @@ namespace Knossos.NET.ViewModels
                 Fs2Present = Knossos.retailFs2RootFound;
             }
         }
+
+        /// <summary>
+        /// Find if a modcard is added to this view by mod id, and return a reference to it
+        /// </summary>
+        /// <param name="modId"></param>
+        /// <returns>ModcardViewModel or null</returns>
+        public ModCardViewModel? GetModCardByID (string modId)
+        {
+            return Mods.FirstOrDefault (m => m.ID == modId);
+        }
     }
 }

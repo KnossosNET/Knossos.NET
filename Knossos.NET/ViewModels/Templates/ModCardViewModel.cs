@@ -121,6 +121,7 @@ namespace Knossos.NET.ViewModels
                 BorderColor = KnUtils.GetResourceColor("ModCardBorderDevMode");
             }
             LoadImage();
+            FreespaceViewModel.Instance?.SetInstalled(ID, true);
         }
 
         /// <summary>
@@ -348,6 +349,7 @@ namespace Knossos.NET.ViewModels
                             MainWindowViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
                         }
                         Knossos.RemoveMod(modVersions[activeVersionIndex].id);
+                        FreespaceViewModel.Instance?.SetInstalled(ID, false);
                         MainWindowViewModel.Instance?.RunModStatusChecks();
                         if (Knossos.globalSettings.hiddenModIds.Contains(modVersions[activeVersionIndex].id))
                         {
