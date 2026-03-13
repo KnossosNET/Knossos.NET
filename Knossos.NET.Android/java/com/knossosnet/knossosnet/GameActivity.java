@@ -95,6 +95,7 @@ public class GameActivity extends org.libsdl.app.SDLActivity {
 
     private static final String[] PREFERRED_ORDER = new String[] {
         "libSDL2.so",
+        "libshaderc.so",
         "libopenal.so",
         "libavutil.so",
         "libswresample.so",
