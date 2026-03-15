@@ -402,12 +402,15 @@ namespace Knossos.NET
         /// <summary>
         /// Async directory copy helper method
         /// Support optional recursive copy and progressCallback that informs the name of the current file that is being copied
+        /// Supports passing an optional array of extensions to ignore during file copy. 
+        /// This also applies to folders starting with a "." (Unix hidden folder convention) 
         /// </summary>
         /// <param name="sourceDir"></param>
         /// <param name="destinationDir"></param>
         /// <param name="recursive"></param>
         /// <param name="cancelSource"></param>
         /// <param name="progressCallback"></param>
+        /// <param name="ignoreExtensions"></param>
         /// <returns></returns>
         /// <exception cref="DirectoryNotFoundException"></exception>
         /// <exception cref="TaskCanceledException"></exception>
@@ -452,9 +455,11 @@ namespace Knossos.NET
                             {
                                 throw new TaskCanceledException();
                             }
-
+                            //Skip Unix convention hidden folder too if they match the skip extension list
+                            if (subDir.Name.StartsWith(".") && ignoreExtensions != null && ignoreExtensions.Contains(subDir.Name.ToLower()))
+                                continue;
                             var newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-                            await CopyDirectoryAsync(subDir.FullName, newDestinationDir, true, cancelSource, progressCallback);
+                            await CopyDirectoryAsync(subDir.FullName, newDestinationDir, true, cancelSource, progressCallback, ignoreExtensions);
                         }
                     }
 
