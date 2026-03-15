@@ -7,7 +7,6 @@ using Android.Content;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace Knossos.NET.Classes;
 
@@ -130,13 +129,12 @@ public static class AndroidHelper
 
             if (workingFolder != null)
             {
-                //cmdline += " -working_folder " + workingFolder;
-                System.Environment.SetEnvironmentVariable("FSO_WORKFOLDER_OVERRIDE_PATH", workingFolder);
+                cmdline += " -working_folder " + workingFolder;
             }
 
             if (cmdline.Length > 0)
                 intent.PutStringArrayListExtra("fsoArgs", cmdline.Split(" "));
-            System.Environment.SetEnvironmentVariable("FSO_LIB_DIR_FALLBACK_PATH", dstAbiDir);
+
             ctx.StartActivity(intent);
         }
         catch (Exception ex)
