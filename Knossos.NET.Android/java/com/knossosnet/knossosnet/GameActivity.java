@@ -44,6 +44,25 @@ public class GameActivity extends org.libsdl.app.SDLActivity {
         return "android_main";
     }
 
+    private void hideSystemUI() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            hideSystemUI();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //Load .so files from internal private storage in order (fso last)
@@ -76,6 +95,8 @@ public class GameActivity extends org.libsdl.app.SDLActivity {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         } catch (Throwable ignored) {
         }
+
+        hideSystemUI();
 
         //Init TTS
         TTSManager.init(this);
@@ -181,6 +202,7 @@ public class GameActivity extends org.libsdl.app.SDLActivity {
     @Override protected void onResume() 
     {
         super.onResume();
+        hideSystemUI();
     }
 
     @Override protected void onDestroy()
