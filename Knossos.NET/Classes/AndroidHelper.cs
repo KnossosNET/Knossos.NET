@@ -1,18 +1,49 @@
 ﻿#if ANDROID
 using Android.App;
-using Android.OS;
 using System.Linq;
 using Android.Content;
 #endif
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using Avalonia.Threading;
 
 namespace Knossos.NET.Classes;
 
 public static class AndroidHelper
 {
 #if ANDROID
+
+    /// <summary>
+    /// Open a file on a 3rd party app
+    /// </summary>
+    /// <param name="path"></param>
+    public static async void ShareTextFile(string path)
+    {
+        if (!File.Exists(path)) return;
+        var text = await File.ReadAllTextAsync(path);
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            var intent = new Intent(Intent.ActionSend);
+            intent.SetType("text/plain");
+            intent.PutExtra(Intent.ExtraText, text);
+            intent.AddFlags(ActivityFlags.NewTask);
+
+            var context = Android.App.Application.Context;
+
+            try
+            {
+                var chooser = Intent.CreateChooser(intent, "Open text with...");
+                context.StartActivity(chooser);
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "AndroidHelper.ShareTextFile", ex);
+            }
+        });
+    }
+
     /// <summary>
     /// App main storage inside the internal phone memory
     /// </summary>
@@ -142,8 +173,10 @@ public static class AndroidHelper
             Log.Add(Log.LogSeverity.Error, "AndroidHelper.LaunchFSO", ex);
         }
     }
+
 #else
     //Stubs
+    public static void ShareTextFile(string path, Activity activity) { }
     public static string? GetExternalAppFilesDir() => "";
     public static string GetInternalAppFilesDir() => "";
     public static string[] GetAllExternalAppFilesDirs() => new string[] { };

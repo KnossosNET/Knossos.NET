@@ -4,6 +4,8 @@ using Knossos.NET.Views;
 using System;
 using System.Diagnostics;
 using System.IO;
+using Knossos.NET.Classes;
+
 namespace Knossos.NET.ViewModels
 {
     public partial class DebugViewModel : ViewModelBase
@@ -27,11 +29,15 @@ namespace Knossos.NET.ViewModels
             {
                 try
                 {
+#if ANDROID
+                    AndroidHelper.ShareTextFile(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log");
+#else
                     var cmd = new Process();
                     cmd.StartInfo.FileName = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log";
                     cmd.StartInfo.UseShellExecute = true;
                     cmd.Start();
                     cmd.Dispose();
+#endif
                 }
                 catch (Exception ex)
                 {
