@@ -776,6 +776,9 @@ namespace Knossos.NET
             Dispatcher.UIThread.InvokeAsync(async () =>
             {
                 MainWindowViewModel.Instance?.ClearViews();
+                FreespaceViewModel.Instance?.SetLoading(true);
+                FreespaceViewModel.Instance?.SetFS2RootFound(false);
+                FreespaceViewModel.Instance?.SetInstalling(null, false);
                 installedMods.Clear();
                 engineBuilds.Clear();
                 retailFs2RootFound = false;
@@ -840,7 +843,8 @@ namespace Knossos.NET
                     ModListView.Instance?.GenerateFilterButtons();
                     MainWindowViewModel.Instance?.NebulaModsView?.UpdateFS2InstallButton();
                     MainWindowViewModel.Instance?.InstalledModsView?.UpdateFS2InstallButton();
-
+                    FreespaceViewModel.Instance?.SetLoading(false);
+                    FreespaceViewModel.Instance?.SetFS2RootFound(retailFs2RootFound);
                 });
 
                 initIsComplete = true;

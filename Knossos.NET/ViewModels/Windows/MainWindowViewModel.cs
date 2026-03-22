@@ -50,6 +50,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal int minWindowHeight = 500;
         [ObservableProperty]
+        internal FreespaceViewModel? freespaceView;
+        [ObservableProperty]
         internal ModListViewModel? installedModsView;
         [ObservableProperty]
         internal NebulaModListViewModel? nebulaModsView;
@@ -106,6 +108,7 @@ namespace Knossos.NET.ViewModels
             if (!CustomLauncher.IsCustomMode)
             {
                 placeholderTileImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
+                FreespaceView = new FreespaceViewModel();
                 InstalledModsView = new ModListViewModel();
                 NebulaModsView = new NebulaModListViewModel();
                 FsoBuildsView = new FsoBuildsViewModel();
@@ -245,6 +248,7 @@ namespace Knossos.NET.ViewModels
                 MenuItems = new ObservableCollection<MainViewMenuItem>{
                     new MainViewMenuItem(TaskView, null, "Tasks", "Overview of current running tasks"),
                     new MainViewMenuItem(InstalledModsView!, "avares://Knossos.NET/Assets/general/menu_play.png", "Play", "View and run installed Freepsace Open games and modifications"),
+                    new MainViewMenuItem(FreespaceView!, "avares://Knossos.NET/Assets/general/menu_fs.png", "Freespace", "Quick and simple access to Freespace 2 content and improved graphics mods. Also list story relevant and Freespace multiplayer mods."),
                     new MainViewMenuItem(NebulaModsView!, "avares://Knossos.NET/Assets/general/menu_explore.png", "Explore", "Search and install Freespace Open games and modifications"),
                     new MainViewMenuItem(FsoBuildsView!, "avares://Knossos.NET/Assets/general/menu_engine.png", "Engine", "Download new Freespace Open engine builds"),
                     new MainViewMenuItem(DeveloperModView!, "avares://Knossos.NET/Assets/general/menu_develop.png", "Develop", "Develop new games and modifications for the Freespace Open Engine"),

@@ -123,12 +123,14 @@ namespace Knossos.NET.ViewModels
         {
             IsInstalling = true;
             cancellationTokenSource = cancelToken;
+            FreespaceViewModel.Instance?.SetInstalling(ID!, true);
         }
 
         public void CancelInstall()
         {
             IsInstalling = false;
             cancellationTokenSource = null;
+            FreespaceViewModel.Instance?.SetInstalling(ID!, false);
         }
 
         public void CancelInstallCommand()
@@ -141,6 +143,7 @@ namespace Knossos.NET.ViewModels
             catch { }
             cancellationTokenSource = null;
             TaskViewModel.Instance?.CancelAllInstallTaskWithID(ID!, ModVersion);
+            FreespaceViewModel.Instance?.SetInstalling(ID!,false);
         }
 
         internal async void ButtonCommandDetails()

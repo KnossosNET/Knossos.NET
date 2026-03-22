@@ -1,0 +1,70 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="200"
+             xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+             VerticalAlignment="Stretch" 
+             HorizontalAlignment="Stretch"
+             Background="Transparent"
+             x:DataType="vm:FreespaceModCardViewModel"
+             x:Class="Knossos.NET.Views.FreespaceModCardView">
+
+    <Design.DataContext>
+		<vm:FreespaceModCardViewModel/>
+	</Design.DataContext>
+  
+    <Border BorderBrush="Gray" CornerRadius="5" Height="200" MinWidth="400" MaxWidth="800" BorderThickness="8" ToolTip.Tip="{Binding Tooltip}">
+		<Grid>
+            <!-- Installing Overlay-->
+            <Grid IsVisible="{Binding InstallingOverlay}" ToolTip.Tip="KnossosNET is installing this mod, please wait..." ZIndex="99" Background="Black" VerticalAlignment="Stretch" Opacity="0.8" HorizontalAlignment="Stretch">
+                <Label FontSize="32" FontWeight="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Content="Installing..."/>
+            </Grid>
+            <!-- Loading Overlay-->
+            <Grid IsVisible="{Binding LoadingOverlay}" ToolTip.Tip="KnossosNET is loading your library, please wait..." ZIndex="99" Background="Black" VerticalAlignment="Stretch" Opacity="0.8" HorizontalAlignment="Stretch">
+                <Label FontSize="32" FontWeight="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Content="LOADING..."/>
+            </Grid>
+            <!-- Retail Non-Installed Overlay-->
+            <Grid IsVisible="{Binding RetailOverlay}" RowDefinitions="*,*,*,*" ToolTip.Tip="KnossosNET needs to copy your Freespace 2 retail game files to your library in order to install and use this mod" ZIndex="98" Background="Black" VerticalAlignment="Stretch" Opacity="0.8" HorizontalAlignment="Stretch">
+                <Label Grid.Row="0" FontSize="22" FontWeight="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Content="Freespace 2 retail game files needed"/>
+                <WrapPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+				    <Button Command="{Binding CommandGetGOG}" Grid.Row="3" Classes="Quaternary" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2">
+                        Get it from GoG
+                    </Button>
+                    <Button Command="{Binding CommandGetSteam}" Grid.Row="3" Classes="Quaternary" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2">
+                        Get it from Steam
+                    </Button>
+                </WrapPanel>
+                <Label Grid.Row="2" FontSize="18" FontWeight="Black" VerticalAlignment="Center" HorizontalAlignment="Center" Content="Already have it?"/>
+                <Button Command="{Binding CommandRetail}" Grid.Row="3" Classes="Primary" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2">
+                    Copy Freespace 2 game files to KnossosNET
+                </Button>
+            </Grid>
+            <!-- Banner -->
+			<Image Stretch="Fill" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Source="{Binding BannerImage}"/>
+            <!--Installed Menu Buttons-->
+            <WrapPanel IsVisible="{Binding Installed}" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="3" Opacity="0.9">
+                <Button Command="{Binding CommandPlay}" Classes="Primary" Margin="2" ToolTip.Tip="Play !">
+                    <Image Width="30" Height="30" Source="/Assets/general/resume.png"></Image>
+                </Button>
+                <Button Command="{Binding CommandSettings}" Classes="Option" Margin="2" ToolTip.Tip="Change mod settings">
+                    <Image Width="30" Height="30" Source="/Assets/general/menu_settings.png"></Image>
+                </Button>
+                <Button Command="{Binding CommandModify}" Classes="Quaternary" Margin="2" ToolTip.Tip="Modify or update mod">
+                    <Image Width="30" Height="30" Source="/Assets/general/custom-config-icon.png"></Image>
+                </Button>
+                <Button Command="{Binding CommandDetails}" Margin="2" ToolTip.Tip="Mod details">
+                    <Image Width="30" Height="30" Source="/Assets/general/menu_explore.png"></Image>
+                </Button>
+            </WrapPanel>
+            <!--Non-Installed Menu Buttons-->
+            <WrapPanel IsVisible="{Binding !Installed}" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="3" Opacity="0.9">
+                <Button Command="{Binding CommandInstall}" Classes="Primary" FontSize="24" Margin="2" ToolTip.Tip="Install this mod">
+                   Install
+                </Button>
+            </WrapPanel>
+        </Grid>
+    </Border>
+
+</UserControl>
