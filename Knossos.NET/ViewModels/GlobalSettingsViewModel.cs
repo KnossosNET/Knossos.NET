@@ -71,6 +71,13 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string basePath = string.Empty; //When this is changed settings are saved immediately.
 
+        private bool antiStuck = true;
+        internal bool AntiStuck
+        {
+            get { return antiStuck; }
+            set { if (antiStuck != value) { this.SetProperty(ref antiStuck, value); UnCommitedChanges = true; } }
+        }
+
         private bool blCfNebula = false;
         internal bool BlCfNebula
         {
@@ -669,6 +676,7 @@ namespace Knossos.NET.ViewModels
             EnvVars = Knossos.globalSettings.envVars;
             ShowDevOptions = Knossos.globalSettings.showDevOptions || NoSystemCMD;
             CloseToTray = Knossos.globalSettings.closeToTray;
+            AntiStuck = Knossos.globalSettings.antiStuck;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -1249,6 +1257,7 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.envVars = EnvVars;
             Knossos.globalSettings.showDevOptions = ShowDevOptions;
             Knossos.globalSettings.closeToTray = CloseToTray;
+            Knossos.globalSettings.antiStuck = AntiStuck;
 
             /* VIDEO */
             //Resolution
