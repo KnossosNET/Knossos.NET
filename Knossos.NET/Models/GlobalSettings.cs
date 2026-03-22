@@ -127,6 +127,8 @@ namespace Knossos.NET.Models
         public int logLevel { get; set; } = 1;
         [JsonPropertyName("global_cmdline")]
         public string? globalCmdLine { get; set; } = null;
+        [JsonPropertyName("anti-stuck")]
+        public bool antiStuck { get; set; } = true;
         [JsonPropertyName("force_sse2")]
         public bool forceSSE2 { get; set; } = false;
         [JsonPropertyName("max_concurrent_subtasks")]
@@ -724,6 +726,7 @@ namespace Knossos.NET.Models
                         closeToTray = tempSettings.closeToTray;
                         ignoredLauncherUpdates = tempSettings.ignoredLauncherUpdates;
                         hiddenModIds = tempSettings.hiddenModIds;
+                        antiStuck = tempSettings.antiStuck;
                         if (hiddenModIds.Any())
                         {
                             foreach (var hiddenMod in hiddenModIds)

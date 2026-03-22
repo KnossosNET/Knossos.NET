@@ -128,6 +128,11 @@
 								<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlHestia}">hestia.feralhosting.com</CheckBox>
 							</WrapPanel>
 						</Grid>
+						<!-- Anti Stuck -->
+						<WrapPanel Margin="5,10,0,0" ToolTip.Tip="During file downloads, if less than 100KB are downloaded every 30 seconds, the download will be restarted on a different mirror.">
+							<Label Margin="0,5,0,0" Width="210">Download anti-stuck</Label>
+							<ToggleSwitch Margin="1,0,0,0" IsChecked="{Binding AntiStuck}"></ToggleSwitch>
+						</WrapPanel>
 						<!-- Log File -->
 						<WrapPanel Margin="5,10,0,0">
 							<Label Margin="0,5,0,0" Width="210">Enable Logging</Label>
