@@ -160,7 +160,7 @@ namespace Knossos.NET.Models
         [JsonPropertyName("close_to_tray")]
         public bool closeToTray {
             get { return _closeToTray; }
-            set { if (_closeToTray != value) { 
+            set { if (_closeToTray != value) {
                     _closeToTray = value;
                     pendingChangesOnAppClose = true;
                 }
@@ -170,7 +170,10 @@ namespace Knossos.NET.Models
         public List<string> ignoredLauncherUpdates { get; set; } = new List<string>();
 
         [JsonPropertyName("standalone_server_settings")]
-        public StandaloneServerSettings? standaloneServerSettings { get; set;} = null;
+        public StandaloneServerSettings? standaloneServerSettings { get; set; } = null;
+
+        [JsonPropertyName("mod_filecopy_extension_skip")]
+        public List<string>? skipExtensionsModFilecopy { get; set; } = new List<string>() { ".svn", ".github", ".git", ".gitattributes", ".gitignore", ".md" };
 
         /* 
          * Settings that can wait to be saved at app close so we dont have to call save() all the time
@@ -733,6 +736,7 @@ namespace Knossos.NET.Models
                             MainWindowViewModel.Instance?.InstalledModsView?.ResetFilters();
                         }
                         standaloneServerSettings = tempSettings.standaloneServerSettings;
+                        skipExtensionsModFilecopy = tempSettings.skipExtensionsModFilecopy;
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings have been loaded");
 
