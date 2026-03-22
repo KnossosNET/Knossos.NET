@@ -305,18 +305,7 @@ namespace Knossos.NET.ViewModels
         {
             if (File.Exists(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log"))
             {
-                try
-                {
-                    var cmd = new Process();
-                    cmd.StartInfo.FileName = Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log");
-                    cmd.StartInfo.UseShellExecute = true;
-                    cmd.Start();
-                    cmd.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "ModCardViewModel.OpenFS2Log", ex);
-                }
+                KnUtils.OpenFileInOS(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log");
             }
             else
             {

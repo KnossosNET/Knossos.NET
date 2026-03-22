@@ -3,47 +3,57 @@ using Android.App;
 using System.Linq;
 using Android.Content;
 #endif
+using Avalonia.Threading;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Avalonia.Threading;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.Classes;
 
 public static class AndroidHelper
 {
-#if ANDROID
+    public static Func<string, Task>? ShareTextAsyncFunc { get; set; }
+    public static Func<string, string, Task>? ShareFileAsyncFunc { get; set; }
+    public static Func<string, Task>? OpenUrlAsyncFunc { get; set; }
 
     /// <summary>
-    /// Open a file on a 3rd party app
+    /// Open URL on external android web browser
     /// </summary>
-    /// <param name="path"></param>
-    public static async void ShareTextFile(string path)
+    /// <param name="url"></param>
+    /// <returns>task</returns>
+    public static Task OpenUrlAsync(string url)
     {
-        if (!File.Exists(path)) return;
-        var text = await File.ReadAllTextAsync(path);
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            var intent = new Intent(Intent.ActionSend);
-            intent.SetType("text/plain");
-            intent.PutExtra(Intent.ExtraText, text);
-            intent.AddFlags(ActivityFlags.NewTask);
-
-            var context = Android.App.Application.Context;
-
-            try
-            {
-                var chooser = Intent.CreateChooser(intent, "Open text with...");
-                context.StartActivity(chooser);
-            }
-            catch (Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error, "AndroidHelper.ShareTextFile", ex);
-            }
-        });
+        return OpenUrlAsyncFunc?.Invoke(url) ?? Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Open text with a external android app
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns>task</returns>
+    public static Task ShareTextAsync(string text)
+    {
+        if (text.Length == 0 || ShareTextAsyncFunc == null)
+            return Task.CompletedTask;
+        return ShareTextAsyncFunc.Invoke(text);
+    }
+
+    /// <summary>
+    /// Open a file with a external android app
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="mimeType"></param>
+    /// <returns>task</returns>
+    public static Task ShareFileAsync(string text, string mimeType = "text/plain")
+    {
+        if (text.Length == 0 || ShareFileAsyncFunc == null)
+            return Task.CompletedTask;
+        return ShareFileAsyncFunc.Invoke(text, mimeType);
+    }
+
+#if ANDROID
     /// <summary>
     /// App main storage inside the internal phone memory
     /// </summary>
@@ -176,7 +186,6 @@ public static class AndroidHelper
 
 #else
     //Stubs
-    public static void ShareTextFile(string path, Activity activity) { }
     public static string? GetExternalAppFilesDir() => "";
     public static string GetInternalAppFilesDir() => "";
     public static string[] GetAllExternalAppFilesDirs() => new string[] { };

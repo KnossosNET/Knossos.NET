@@ -27,22 +27,7 @@ namespace Knossos.NET.ViewModels
         {
             if (File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log"))
             {
-                try
-                {
-#if ANDROID
-                    AndroidHelper.ShareTextFile(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log");
-#else
-                    var cmd = new Process();
-                    cmd.StartInfo.FileName = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log";
-                    cmd.StartInfo.UseShellExecute = true;
-                    cmd.Start();
-                    cmd.Dispose();
-#endif
-                }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.ReloadLog", ex);
-                }
+                KnUtils.OpenFileInOS(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log");
             }
             else
             {
@@ -54,18 +39,7 @@ namespace Knossos.NET.ViewModels
         {
             if (File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json"))
             {
-                try
-                {
-                    var cmd = new Process();
-                    cmd.StartInfo.FileName = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json";
-                    cmd.StartInfo.UseShellExecute = true;
-                    cmd.Start();
-                    cmd.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.ReloadLog", ex);
-                }
+                KnUtils.OpenFileInOS(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json");
             }
             else
             {
@@ -77,18 +51,7 @@ namespace Knossos.NET.ViewModels
         {
             if (File.Exists(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log"))
             {
-                try
-                {
-                    var cmd = new Process();
-                    cmd.StartInfo.FileName = KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log";
-                    cmd.StartInfo.UseShellExecute = true;
-                    cmd.Start();
-                    cmd.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.ReloadFS2Log", ex);
-                }
+                KnUtils.OpenFileInOS(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log");
             }
             else
             {
@@ -100,18 +63,7 @@ namespace Knossos.NET.ViewModels
         {
             if (File.Exists(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini"))
             {
-                try
-                {
-                    var cmd = new Process();
-                    cmd.StartInfo.FileName = KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini";
-                    cmd.StartInfo.UseShellExecute = true;
-                    cmd.Start();
-                    cmd.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.ReloadFS2ini", ex);
-                }
+                KnUtils.OpenFileInOS(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini");
             }
             else
             {

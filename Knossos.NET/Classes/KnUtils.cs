@@ -366,6 +366,9 @@ namespace Knossos.NET
         {
             try
             {
+#if ANDROID
+                _ = AndroidHelper.OpenUrlAsync(url);
+#else
                 using (var process = new Process())
                 {
                     if (IsWindows)
@@ -386,6 +389,7 @@ namespace Knossos.NET
                     process.StartInfo.CreateNoWindow = true;
                     process.Start();
                 }
+#endif
             }
             catch (Exception ex)
             {
@@ -1324,6 +1328,47 @@ namespace Knossos.NET
             if (MainView.instance != null)
                 return TopLevel.GetTopLevel(MainView.instance)!;
             throw new InvalidOperationException("Unable to resolve TopLevel/owner.");
+        }
+
+        /// <summary>
+        /// Opens any file on the right application in the operative system
+        /// mimetype is only used on Android
+        /// </summary>
+        /// <param name="fullpath"></param>
+        /// <param name="mimetype"></param>
+        public static void OpenFileInOS(string fullpath, string mimetype = "text/plain")
+        {
+            if (File.Exists(fullpath))
+            {
+                try
+                {
+#if ANDROID
+                    if(mimetype.ToLower() == "text/plain")
+                    {
+                        var text = File.ReadAllText(fullpath);
+                        _ = AndroidHelper.ShareTextAsync(text);
+                    }
+                    else
+                    {
+                        _ = AndroidHelper.ShareFileAsync(fullpath, mimetype);
+                    }
+#else
+                    var cmd = new Process();
+                    cmd.StartInfo.FileName = fullpath;
+                    cmd.StartInfo.UseShellExecute = true;
+                    cmd.Start();
+                    cmd.Dispose();
+#endif
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "KnUtils.OpenFileInOS", ex);
+                }
+            }
+            else
+            {
+                Log.Add(Log.LogSeverity.Warning, "KnUtils.OpenFileInOS", "File does not exist:  " + fullpath);
+            }
         }
     }
 }
