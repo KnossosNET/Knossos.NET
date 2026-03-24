@@ -365,5 +365,23 @@ namespace Knossos.NET.ViewModels
                 }
             }
         }
+
+        internal async void OpenAddToolGuide()
+        {
+            try
+            {
+                var text = "If you want to add or update your tool to Knossos.NET tool section, you will need to make a PR in the tool repo: https://github.com/KnossosNET/Knet-Tool-Repo." +
+                    "\nEditing the 'knet_tools.json' to add or modify your tool. The download must be in a direct-download storage (like a Github release), no google drive support." +
+                    "\nIf you dont know how to do this, please create an 'issue' instead in that same repo, providing the tool data and download link." +
+                    "\nIf you press continue you will be taken to the repo.";
+                var resp = await MessageBox.Show(MainWindow.instance, text, "Adding tools to Knossos.NET", MessageBox.MessageBoxButtons.ContinueCancel);
+                if (resp == MessageBox.MessageBoxResult.Continue)
+                    KnUtils.OpenBrowserURL("https://github.com/KnossosNET/Knet-Tool-Repo");
+            }
+            catch(Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "DeveloperModsViewModel.OpenAddToolGuide", ex);
+            }
+        }
     }
 }
