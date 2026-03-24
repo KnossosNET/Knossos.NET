@@ -127,6 +127,13 @@ namespace Knossos.NET.ViewModels
             set { if (maxConcurrentSubtasks != value) { this.SetProperty(ref maxConcurrentSubtasks, value); UnCommitedChanges = true; } }
         }
 
+        private int maxUploadsRetries = 4;
+        internal int MaxUploadsRetries
+        {
+            get { return maxUploadsRetries; }
+            set { if (maxUploadsRetries != value) { this.SetProperty(ref maxUploadsRetries, value); UnCommitedChanges = true; } }
+        }
+
         private long maxDownloadSpeedIndex = 0;
         internal long MaxDownloadSpeedIndex
         {
@@ -677,6 +684,7 @@ namespace Knossos.NET.ViewModels
             ShowDevOptions = Knossos.globalSettings.showDevOptions || NoSystemCMD;
             CloseToTray = Knossos.globalSettings.closeToTray;
             AntiStuck = Knossos.globalSettings.antiStuck;
+            MaxUploadsRetries = Knossos.globalSettings.maxUploadRetries;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -1258,6 +1266,7 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.showDevOptions = ShowDevOptions;
             Knossos.globalSettings.closeToTray = CloseToTray;
             Knossos.globalSettings.antiStuck = AntiStuck;
+            Knossos.globalSettings.maxUploadRetries = MaxUploadsRetries;
 
             /* VIDEO */
             //Resolution
