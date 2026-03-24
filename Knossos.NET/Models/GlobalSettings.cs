@@ -133,6 +133,8 @@ namespace Knossos.NET.Models
         public bool forceSSE2 { get; set; } = false;
         [JsonPropertyName("max_concurrent_subtasks")]
         public int maxConcurrentSubtasks { get; set; } = 3;
+        [JsonPropertyName("max_upload_retries")]
+        public int maxUploadRetries { get; set; } = 4;
         [JsonPropertyName("max_download_speed")]
         public long maxDownloadSpeed { get; set; } = 0;
         [JsonPropertyName("mirror_blacklist")]
@@ -730,6 +732,7 @@ namespace Knossos.NET.Models
                         ignoredLauncherUpdates = tempSettings.ignoredLauncherUpdates;
                         hiddenModIds = tempSettings.hiddenModIds;
                         antiStuck = tempSettings.antiStuck;
+                        maxUploadRetries = tempSettings.maxUploadRetries;
                         if (hiddenModIds.Any())
                         {
                             foreach (var hiddenMod in hiddenModIds)
