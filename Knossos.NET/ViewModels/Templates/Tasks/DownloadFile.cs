@@ -171,6 +171,15 @@ namespace Knossos.NET.ViewModels
                 Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.Download()", "Downloading file: " + downloadUrl);
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
 
+                // ANTI-STUCK CONFIG
+                // If less ANTI_STUCK_MIN_BYTES are downloaded in ANTI_STUCK_CHECK_SECONDS
+                // The download is restarted with a mirror swap
+                const int ANTI_STUCK_CHECK_SECONDS = 30;
+                const long ANTI_STUCK_MIN_BYTES = 102400; // 100 KB (3.33 KB/s)
+                DateTime lastStallCheck = DateTime.UtcNow;
+                long bytesAtLastCheck = 0;
+                // =================================
+
                 var httpClient = KnUtils.GetHttpClient();
                 if (downloadUrl.ToString().ToLower().Contains(".json"))
                 {
@@ -219,6 +228,9 @@ namespace Knossos.NET.ViewModels
                         {
                             throw new TaskCanceledException();
                         }
+                        // Reset anti-stuck counter on paused downloads
+                        lastStallCheck = DateTime.UtcNow;
+                        bytesAtLastCheck = totalBytesRead;
                     }
 
                     if (cancellationTokenSource!.IsCancellationRequested)
@@ -253,6 +265,27 @@ namespace Knossos.NET.ViewModels
                         stopwatch.Restart();
                     }
 
+                    // Anti-Stuck check
+                    if (Knossos.globalSettings.antiStuck && (DateTime.UtcNow - lastStallCheck).TotalSeconds >= ANTI_STUCK_CHECK_SECONDS)
+                    {
+                        long bytesInWindow = totalBytesRead - bytesAtLastCheck;
+
+                        if (bytesInWindow < ANTI_STUCK_MIN_BYTES)
+                        {
+                            string speedStr = KnUtils.FormatBytes(bytesInWindow / ANTI_STUCK_CHECK_SECONDS) + "/s";
+                            Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.Download",
+                                $"[ANTI-STUCK] Mirror {CurrentMirror ?? downloadUrl.Host} is stuck (too slow). " +
+                                $"Only {KnUtils.FormatBytes(bytesInWindow)} in {ANTI_STUCK_CHECK_SECONDS}s ({speedStr}). " +
+                                "Changing to a diferent mirror...");
+
+                            return false;
+                        }
+
+                        // reset counter
+                        lastStallCheck = DateTime.UtcNow;
+                        bytesAtLastCheck = totalBytesRead;
+                    }
+                    // =================================
 
                     if (readCount % 100 == 0)
                     {

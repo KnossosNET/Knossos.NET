@@ -563,8 +563,8 @@ namespace Knossos.NET.ViewModels
                                 Knossos.globalSettings.hiddenModIds.Remove(modVersions[0].id);
                                 Knossos.globalSettings.Save();
                             }
-
                             MainViewModel.Instance?.RunModStatusChecks();
+                            FreespaceViewModel.Instance?.SetInstalled(modVersions[0].id, false);
                             if (dialog != null)
                             {
                                 dialog.Close();

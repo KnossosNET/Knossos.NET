@@ -83,6 +83,13 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string basePath = string.Empty; //When this is changed settings are saved immediately.
 
+        private bool antiStuck = true;
+        internal bool AntiStuck
+        {
+            get { return antiStuck; }
+            set { if (antiStuck != value) { this.SetProperty(ref antiStuck, value); UnCommitedChanges = true; } }
+        }
+
         private bool blCfNebula = false;
         internal bool BlCfNebula
         {
@@ -97,11 +104,11 @@ namespace Knossos.NET.ViewModels
             set { if (blDlNebula != value) { this.SetProperty(ref blDlNebula, value); UnCommitedChanges = true; } }
         }
 
-        private bool blTalos = false;
-        internal bool BlTalos
+        private bool blHestia = false;
+        internal bool BlHestia
         {
-            get { return blTalos; }
-            set { if (blTalos != value) { this.SetProperty(ref blTalos, value); UnCommitedChanges = true; } }
+            get { return blHestia; }
+            set { if (blHestia != value) { this.SetProperty(ref blHestia, value); UnCommitedChanges = true; } }
         }
 
         private bool enableLogFile = true;
@@ -130,6 +137,13 @@ namespace Knossos.NET.ViewModels
         {
             get { return maxConcurrentSubtasks; }
             set { if (maxConcurrentSubtasks != value) { this.SetProperty(ref maxConcurrentSubtasks, value); UnCommitedChanges = true; } }
+        }
+
+        private int maxUploadsRetries = 4;
+        internal int MaxUploadsRetries
+        {
+            get { return maxUploadsRetries; }
+            set { if (maxUploadsRetries != value) { this.SetProperty(ref maxUploadsRetries, value); UnCommitedChanges = true; } }
         }
 
         private long maxDownloadSpeedIndex = 0;
@@ -698,7 +712,7 @@ namespace Knossos.NET.ViewModels
 
             BlDlNebula = false;
             BlCfNebula = false;
-            BlTalos = false;
+            BlHestia = false;
             if (Knossos.globalSettings.mirrorBlacklist != null)
             {
                 if (Knossos.globalSettings.mirrorBlacklist.Contains("dl.fsnebula.org"))
@@ -709,9 +723,9 @@ namespace Knossos.NET.ViewModels
                 {
                     BlCfNebula = true;
                 }
-                if (Knossos.globalSettings.mirrorBlacklist.Contains("talos.feralhosting.com"))
+                if (Knossos.globalSettings.mirrorBlacklist.Contains("hestia.feralhosting.com"))
                 {
-                    BlTalos = true;
+                    BlHestia = true;
                 }
             }
 
@@ -729,6 +743,8 @@ namespace Knossos.NET.ViewModels
             EnvVars = Knossos.globalSettings.envVars;
             ShowDevOptions = Knossos.globalSettings.showDevOptions || NoSystemCMD;
             CloseToTray = Knossos.globalSettings.closeToTray;
+            AntiStuck = Knossos.globalSettings.antiStuck;
+            MaxUploadsRetries = Knossos.globalSettings.maxUploadRetries;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -1280,9 +1296,9 @@ namespace Knossos.NET.ViewModels
             {
                 blMirrors.Add("cf.fsnebula.org");
             }
-            if (BlTalos)
+            if (BlHestia)
             {
-                blMirrors.Add("talos.feralhosting.com");
+                blMirrors.Add("hestia.feralhosting.com");
             }
             if (blMirrors.Any() && blMirrors.Count() != 3 /*Invalid!*/)
             {
@@ -1293,7 +1309,7 @@ namespace Knossos.NET.ViewModels
                 Knossos.globalSettings.mirrorBlacklist = null;
                 BlDlNebula = false;
                 BlCfNebula = false;
-                BlTalos = false;
+                BlHestia = false;
             }
 
             Knossos.globalSettings.modCompression = ModCompression;
@@ -1311,6 +1327,8 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.envVars = EnvVars;
             Knossos.globalSettings.showDevOptions = ShowDevOptions;
             Knossos.globalSettings.closeToTray = CloseToTray;
+            Knossos.globalSettings.antiStuck = AntiStuck;
+            Knossos.globalSettings.maxUploadRetries = MaxUploadsRetries;
 
             /* VIDEO */
             //Resolution

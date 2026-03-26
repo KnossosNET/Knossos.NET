@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:v="using:Knossos.NET.Views"
+			 xmlns:vm="using:Knossos.NET.ViewModels"
+             VerticalAlignment="Stretch"
+             Background="Transparent"
+             HorizontalAlignment="Stretch"
+             x:DataType="vm:FreespaceViewModel"
+             x:Class="Knossos.NET.Views.FreespaceView">
+    <Design.DataContext>
+		<vm:FreespaceViewModel/>
+	</Design.DataContext>
+
+  <ScrollViewer VerticalAlignment="Stretch" HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
+       <ItemsControl Margin="10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding CardList}">
+			<ItemsControl.ItemTemplate>
+				<DataTemplate>
+					<v:FreespaceModCardView Margin="5" Content="{Binding}"/>
+				</DataTemplate>
+			</ItemsControl.ItemTemplate>
+			<ItemsControl.ItemsPanel>
+				<ItemsPanelTemplate>
+					<StackPanel />
+				</ItemsPanelTemplate>
+			</ItemsControl.ItemsPanel>
+		</ItemsControl>
+  </ScrollViewer>
+</UserControl>

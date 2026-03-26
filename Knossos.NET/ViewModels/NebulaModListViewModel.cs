@@ -396,9 +396,18 @@ namespace Knossos.NET.ViewModels
         {
             var dialog = new Fs2InstallerView();
             dialog.DataContext = new Fs2InstallerViewModel(dialog);
-
             await dialog.ShowDialog<Fs2InstallerView?>(MainWindow.instance);
             Fs2Present = Knossos.retailFs2RootFound;
         }        
+
+        /// <summary>
+        /// Find if a modcard is added to this view by mod id, and return a reference to it
+        /// </summary>
+        /// <param name="modId"></param>
+        /// <returns>NebulaModcardViewModel or null</returns>
+        public NebulaModCardViewModel? GetModCardByID(string modId)
+        {
+            return Mods.FirstOrDefault(m => m.ID == modId);
+        }
     }
 }

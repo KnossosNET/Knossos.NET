@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Linq;
 
 namespace Knossos.NET.ViewModels
 {
@@ -59,7 +60,13 @@ namespace Knossos.NET.ViewModels
                         writer.WriteLine("Warning: This token indicates an incomplete folder copy. If this token is present on the next KnossosNET startup this folder WILL BE DELETED.");
                     }
 
-                    await KnUtils.CopyDirectoryAsync(currentDir.FullName, newDir, true, cancellationTokenSource, copyCallback);
+                    await KnUtils.CopyDirectoryAsync(
+                        currentDir.FullName, 
+                        newDir, 
+                        true, 
+                        cancellationTokenSource, 
+                        copyCallback,
+                        Knossos.globalSettings.skipExtensionsModFilecopy != null && Knossos.globalSettings.skipExtensionsModFilecopy.Any() ? Knossos.globalSettings.skipExtensionsModFilecopy.ToArray() : null);
 
                     File.Delete(newDir + Path.DirectorySeparatorChar + "knossos_net_download.token");
 

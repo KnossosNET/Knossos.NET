@@ -105,6 +105,11 @@
 								<ComboBoxItem Tag="4">4</ComboBoxItem>
 							</ComboBox>
 						</Grid>
+						<!-- Upload Retries -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0" ToolTip.Tip="During mod uploads, files and uploaded and verified in smaller parts, this sets the number of retry attempts in case of a upload or verify fails.">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Max Upload Retries</TextBlock>
+							<NumericUpDown Margin="10,0,0,0" Grid.Column="1" Width="120" Minimum="1" Maximum="20" Value="{Binding MaxUploadsRetries}"/>
+						</Grid>
 						<!-- Bandwidth limit -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="7,10,0,0">
 							<TextBlock Grid.Column="0" VerticalAlignment="Center" Width="200">Bandwidth Limit</TextBlock>
@@ -129,9 +134,14 @@
 							<WrapPanel Grid.Column="1" Margin="8,0,0,0">
 								<CheckBox Margin="0,0,0,0" IsChecked="{Binding !BlDlNebula}">dl.fsnebula.org</CheckBox>
 								<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlCfNebula}">cf.fsnebula.org</CheckBox>
-								<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlTalos}">talos.feralhosting.com</CheckBox>
+								<CheckBox Margin="25,0,0,0" IsChecked="{Binding !BlHestia}">hestia.feralhosting.com</CheckBox>
 							</WrapPanel>
 						</Grid>
+						<!-- Anti Stuck -->
+						<WrapPanel Margin="5,10,0,0" ToolTip.Tip="During file downloads, if less than 100KB are downloaded every 30 seconds, the download will be restarted on a different mirror.">
+							<Label Margin="0,5,0,0" Width="210">Download anti-stuck</Label>
+							<ToggleSwitch Margin="1,0,0,0" IsChecked="{Binding AntiStuck}"></ToggleSwitch>
+						</WrapPanel>
 						<!-- Log File -->
 						<WrapPanel Margin="5,10,0,0">
 							<Label Margin="0,5,0,0" Width="210">Enable Logging</Label>

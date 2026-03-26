@@ -127,10 +127,14 @@ namespace Knossos.NET.Models
         public int logLevel { get; set; } = 1;
         [JsonPropertyName("global_cmdline")]
         public string? globalCmdLine { get; set; } = null;
+        [JsonPropertyName("anti-stuck")]
+        public bool antiStuck { get; set; } = true;
         [JsonPropertyName("force_sse2")]
         public bool forceSSE2 { get; set; } = false;
         [JsonPropertyName("max_concurrent_subtasks")]
         public int maxConcurrentSubtasks { get; set; } = 3;
+        [JsonPropertyName("max_upload_retries")]
+        public int maxUploadRetries { get; set; } = 4;
         [JsonPropertyName("max_download_speed")]
         public long maxDownloadSpeed { get; set; } = 0;
         [JsonPropertyName("mirror_blacklist")]
@@ -160,7 +164,7 @@ namespace Knossos.NET.Models
         [JsonPropertyName("close_to_tray")]
         public bool closeToTray {
             get { return _closeToTray; }
-            set { if (_closeToTray != value) { 
+            set { if (_closeToTray != value) {
                     _closeToTray = value;
                     pendingChangesOnAppClose = true;
                 }
@@ -170,7 +174,10 @@ namespace Knossos.NET.Models
         public List<string> ignoredLauncherUpdates { get; set; } = new List<string>();
 
         [JsonPropertyName("standalone_server_settings")]
-        public StandaloneServerSettings? standaloneServerSettings { get; set;} = null;
+        public StandaloneServerSettings? standaloneServerSettings { get; set; } = null;
+
+        [JsonPropertyName("mod_filecopy_extension_skip")]
+        public List<string>? skipExtensionsModFilecopy { get; set; } = new List<string>() { ".svn", ".github", ".git", ".gitattributes", ".gitignore", ".md" };
 
         /* 
          * Settings that can wait to be saved at app close so we dont have to call save() all the time
@@ -724,6 +731,8 @@ namespace Knossos.NET.Models
                         closeToTray = tempSettings.closeToTray;
                         ignoredLauncherUpdates = tempSettings.ignoredLauncherUpdates;
                         hiddenModIds = tempSettings.hiddenModIds;
+                        antiStuck = tempSettings.antiStuck;
+                        maxUploadRetries = tempSettings.maxUploadRetries;
                         if (hiddenModIds.Any())
                         {
                             foreach (var hiddenMod in hiddenModIds)
@@ -733,6 +742,7 @@ namespace Knossos.NET.Models
                             MainViewModel.Instance?.InstalledModsView?.ResetFilters();
                         }
                         standaloneServerSettings = tempSettings.standaloneServerSettings;
+                        skipExtensionsModFilecopy = tempSettings.skipExtensionsModFilecopy;
                         ReadFS2IniValues();
                         Log.Add(Log.LogSeverity.Information, "GlobalSettings.Load()", "Global settings have been loaded");
 

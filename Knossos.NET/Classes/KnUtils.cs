@@ -421,12 +421,15 @@ namespace Knossos.NET
         /// <summary>
         /// Async directory copy helper method
         /// Support optional recursive copy and progressCallback that informs the name of the current file that is being copied
+        /// Supports passing an optional array of extensions to ignore during file copy. 
+        /// Files and folders starting with a "." (Unix hidden folder convention) are skipped.
         /// </summary>
         /// <param name="sourceDir"></param>
         /// <param name="destinationDir"></param>
         /// <param name="recursive"></param>
         /// <param name="cancelSource"></param>
         /// <param name="progressCallback"></param>
+        /// <param name="ignoreExtensions"></param>
         /// <returns></returns>
         /// <exception cref="DirectoryNotFoundException"></exception>
         /// <exception cref="TaskCanceledException"></exception>
@@ -452,6 +455,9 @@ namespace Knossos.NET
                         {
                             throw new TaskCanceledException();
                         }
+                        //Skip Unix convention hidden files
+                        if (file.Name.StartsWith("."))
+                            continue;
                         if (ignoreExtensions == null || !ignoreExtensions.Contains(file.Extension.ToLower()))
                         {
                             var targetFilePath = Path.Combine(destinationDir, file.Name);
@@ -471,9 +477,11 @@ namespace Knossos.NET
                             {
                                 throw new TaskCanceledException();
                             }
-
+                            //Skip Unix convention hidden folder too
+                            if (subDir.Name.StartsWith("."))
+                                continue;
                             var newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-                            await CopyDirectoryAsync(subDir.FullName, newDestinationDir, true, cancelSource, progressCallback);
+                            await CopyDirectoryAsync(subDir.FullName, newDestinationDir, true, cancelSource, progressCallback, ignoreExtensions);
                         }
                     }
 
@@ -1270,52 +1278,6 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "KnUtils.CreateDesktopShortcut()", ex);
             }
         }
-
-        /// <summary>
-        /// Add windows firewall exception for a executable
-        /// </summary>
-        /// <param name="programPath"></param>
-        /// <param name="ruleName"></param>
-        /// <returns>true/false</returns>
-        public static bool AddFirewallException(string programPath, string ruleName)
-        {
-            if (!IsWindows)
-            {
-                Log.Add(Log.LogSeverity.Error, "KnUtils.AddFirewallExceptions()", "This function is only supported on Windows.");
-                return false;
-            }
-            try
-            {
-                var startInfo = new ProcessStartInfo
-                {
-                    FileName = "netsh",
-                    Arguments = $"advfirewall firewall add rule name=\"{ruleName}\" dir=in action=allow program=\"{programPath.Replace("/", "\\")}\" enable=yes",
-                    UseShellExecute = true,
-                    Verb = "runas",
-                    WindowStyle = ProcessWindowStyle.Hidden
-                };
-
-                using (var process = Process.Start(startInfo))
-                {
-                    process?.WaitForExit();
-                    if (process?.ExitCode == 0)
-                    {
-                        Log.Add(Log.LogSeverity.Information, "KnUtils.AddFirewallExceptions()", "Added new Firewall Rules for : " + ruleName);
-                        return true;
-                    }
-                    else
-                    {
-                        Log.Add(Log.LogSeverity.Error, "KnUtils.AddFirewallExceptions()", "Failed to add Firewall Rules for : " + ruleName + ". Error code was: " + process?.ExitCode);
-                        return false;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error, "KnUtils.AddFirewallExceptions()", ex);
-                return false;
-            }
-		}
 		
 		/// Resolves TopLevel Window or View, usually to load a filepicker
         /// </summary>

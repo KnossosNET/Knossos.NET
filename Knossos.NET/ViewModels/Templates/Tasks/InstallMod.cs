@@ -603,6 +603,7 @@ namespace Knossos.NET.ViewModels
                     if (installed == null)
                     {
                         MainViewModel.Instance?.NebulaModsView?.RemoveMod(mod.id);
+                        FreespaceViewModel.Instance?.SetInstalling(mod.id, false);
                         Knossos.AddMod(mod);
                         await Dispatcher.UIThread.InvokeAsync(() => MainViewModel.Instance?.AddInstalledMod(mod), DispatcherPriority.Background);
                         //We cant determine if the version we are installing is the newer one at this point, but this will determine if it is newer than anything was was installed previously, what is good enoght

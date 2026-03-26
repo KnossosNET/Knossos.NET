@@ -17,7 +17,7 @@ namespace Knossos.NET
 {
     public static class Knossos
     {
-        public static readonly string AppVersion = "1.3.2";
+        public static readonly string AppVersion = "1.3.3";
         public readonly static string ToolRepoURL = "https://raw.githubusercontent.com/KnossosNET/Knet-Tool-Repo/main/knet_tools.json";
         public readonly static string GitHubUpdateRepoURL = "https://api.github.com/repos/KnossosNET/Knossos.NET";
         public readonly static string FAQURL = "https://raw.githubusercontent.com/KnossosNET/KNet-General-Resources-Repo/main/communityfaq.json";
@@ -763,6 +763,9 @@ namespace Knossos.NET
             Dispatcher.UIThread.InvokeAsync(async () =>
             {
                 MainViewModel.Instance?.ClearViews();
+                FreespaceViewModel.Instance?.SetLoading(true);
+                FreespaceViewModel.Instance?.SetFS2RootFound(false);
+                FreespaceViewModel.Instance?.SetInstalling(null, false);
                 installedMods.Clear();
                 engineBuilds.Clear();
                 retailFs2RootFound = false;
@@ -827,7 +830,8 @@ namespace Knossos.NET
                     ModListView.Instance?.GenerateFilterButtons();
                     MainViewModel.Instance?.NebulaModsView?.UpdateFS2InstallButton();
                     MainViewModel.Instance?.InstalledModsView?.UpdateFS2InstallButton();
-
+                    FreespaceViewModel.Instance?.SetLoading(false);
+                    FreespaceViewModel.Instance?.SetFS2RootFound(retailFs2RootFound);
                 });
 
                 initIsComplete = true;

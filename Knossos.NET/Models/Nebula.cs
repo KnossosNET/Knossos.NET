@@ -75,7 +75,7 @@ namespace Knossos.NET.Models
         //https://dl.fsnebula.org/storage/repo.json
         //https://fsnebula.org/storage/repo.json"
 
-        public static string[] nebulaMirrors = { "cf.fsnebula.org", "dl.fsnebula.org", "fsnebula.org", "talos.feralhosting.com", "fsnebula.global.ssl.fastly.net" }; //lowercase, last one is the image host
+        public static string[] nebulaMirrors = { "cf.fsnebula.org", "dl.fsnebula.org", "fsnebula.org", "hestia.feralhosting.com", "fsnebula.global.ssl.fastly.net" }; //lowercase, last one is the image host
         private static readonly string repoUrl = @"https://fsnebula.org/storage/repo_minimal.json";
         private static readonly string apiURL = @"https://api.fsnebula.org/api/1/";
         private static readonly string nebulaURL = @"https://fsnebula.org/";
@@ -1743,7 +1743,7 @@ namespace Knossos.NET.Models
         public class MultipartUploader
         {
             private static readonly int maxUploadParallelism = 3;
-            private static readonly int maxUploadRetries = 4;
+            private static readonly int maxUploadRetries = Knossos.globalSettings.maxUploadRetries;
             private static readonly long partMaxSize = 10485760; //10MB
             private List<FilePart> fileParts = new List<FilePart>();
             private CancellationTokenSource cancellationTokenSource;
@@ -1852,10 +1852,22 @@ namespace Knossos.NET.Models
                 if (cancellationTokenSource.IsCancellationRequested)
                     throw new TaskCanceledException();
 
-                verified = await Finish();
+                int attempt = 1;
+                do
+                {
+                    verified = await Finish();
 
-                if (verified && progressCallback != null)
-                    progressCallback.Invoke("Verify: " + verified, maxProgress, maxProgress);
+                    if (verified && progressCallback != null)
+                        progressCallback.Invoke("Verify: " + verified, maxProgress, maxProgress);
+
+                    if (!verified && progressCallback != null && attempt <= maxUploadRetries)
+                    {
+                        Log.Add(Log.LogSeverity.Warning, "Nebula.Upload", "File failed nebula upload verify, retrying: " + fileFullPath);
+                        progressCallback.Invoke("Verify: Failed, Retrying... Retry #" + attempt, maxProgress, maxProgress);
+                        await Task.Delay(2000);
+                    }
+
+                } while (!verified && attempt++ <= maxUploadRetries);
 
                 return verified;
             }
