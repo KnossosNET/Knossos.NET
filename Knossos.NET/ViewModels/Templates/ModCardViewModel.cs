@@ -284,9 +284,14 @@ namespace Knossos.NET.ViewModels
             {
                 return;
             }
+            ButtonCommandRelay(command);
+        }
+
+        internal void ButtonCommandRelay(object command)
+        {
             switch ((string)command)
             {
-                case "play" : Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release); break;
+                case "play": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release); break;
                 case "playvr": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release, false, 0, true); break;
                 case "fred2": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2); break;
                 case "fred2debug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2Debug); break;

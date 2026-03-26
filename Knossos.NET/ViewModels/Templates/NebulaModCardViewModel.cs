@@ -104,6 +104,11 @@ namespace Knossos.NET.ViewModels
             {
                 return;
             }
+            ButtonCommandRelay(command);
+        }
+
+        internal void ButtonCommandRelay(object command)
+        {
             switch ((string)command)
             {
                 case "details": ButtonCommandDetails(); break;

@@ -12,7 +12,7 @@
 	<ApplicationId>com.knossosnet.knossosnet</ApplicationId>
 	<ApplicationVersion>2</ApplicationVersion>
 	<AndroidVersionCode>2</AndroidVersionCode>
-    <ApplicationDisplayVersion>1.3.2</ApplicationDisplayVersion>
+    <ApplicationDisplayVersion>1.3.3</ApplicationDisplayVersion>
 	<AndroidUseAapt2>true</AndroidUseAapt2>
 	<RunAOTCompilation>false</RunAOTCompilation>
   </PropertyGroup>
@@ -45,9 +45,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Knossos.NET\Knossos.NET.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="natives\arm64-v8a\" />
   </ItemGroup>
 </Project>

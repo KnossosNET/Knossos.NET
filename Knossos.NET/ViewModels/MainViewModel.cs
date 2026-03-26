@@ -37,6 +37,8 @@ namespace Knossos.NET.ViewModels
 
         /* UI Bindings, use the uppercase version, otherwise changes will not register */
         [ObservableProperty]
+        internal FreespaceViewModel? freespaceView;
+        [ObservableProperty]
         internal ModListViewModel? installedModsView;
         [ObservableProperty]
         internal NebulaModListViewModel? nebulaModsView;
@@ -94,6 +96,7 @@ namespace Knossos.NET.ViewModels
             {
                 placeholderTileImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
                 InstalledModsView = new ModListViewModel();
+                FreespaceView = new FreespaceViewModel();
                 NebulaModsView = new NebulaModListViewModel();
                 FsoBuildsView = new FsoBuildsViewModel();
                 DeveloperModView = new DeveloperModsViewModel();
@@ -226,6 +229,7 @@ namespace Knossos.NET.ViewModels
                 MenuItems = new ObservableCollection<MainViewMenuItem>{
                     new MainViewMenuItem(TaskView, null, "Tasks", "Overview of current running tasks"),
                     new MainViewMenuItem(InstalledModsView!, "avares://Knossos.NET/Assets/general/menu_play.png", "Play", "View and run installed Freepsace Open games and modifications"),
+                    new MainViewMenuItem(FreespaceView!, "avares://Knossos.NET/Assets/general/menu_fs.png", "Freespace", "Quick and simple access to Freespace 2 content and improved graphics mods. Also list story relevant and Freespace multiplayer mods."),
                     new MainViewMenuItem(NebulaModsView!, "avares://Knossos.NET/Assets/general/menu_explore.png", "Explore", "Search and install Freespace Open games and modifications"),
                     new MainViewMenuItem(FsoBuildsView!, "avares://Knossos.NET/Assets/general/menu_engine.png", "Engine", "Download new Freespace Open engine builds"),
                     new MainViewMenuItem(DeveloperModView!, "avares://Knossos.NET/Assets/general/menu_develop.png", "Develop", "Develop new games and modifications for the Freespace Open Engine"),
