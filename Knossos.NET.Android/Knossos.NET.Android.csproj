@@ -1,18 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">	
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+	<ApplicationVersion>2</ApplicationVersion>
+	<AndroidVersionCode>2</AndroidVersionCode>
+    <ApplicationDisplayVersion>1.3.3</ApplicationDisplayVersion>
+	<ApplicationId>com.knossosnet.knossosnet</ApplicationId>
+	
     <TargetFramework>net10.0-android</TargetFramework>
     <SupportedOSPlatformVersion>28</SupportedOSPlatformVersion>
+	<OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<GenerateApplicationManifest>true</GenerateApplicationManifest>
-	
-	<ApplicationId>com.knossosnet.knossosnet</ApplicationId>
-	<ApplicationVersion>2</ApplicationVersion>
-	<AndroidVersionCode>2</AndroidVersionCode>
-    <ApplicationDisplayVersion>1.3.3</ApplicationDisplayVersion>
 	<AndroidUseAapt2>true</AndroidUseAapt2>
 	<RunAOTCompilation>false</RunAOTCompilation>
   </PropertyGroup>
