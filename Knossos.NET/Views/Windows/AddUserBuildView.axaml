@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui"
+<KnossosWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -93,4 +93,4 @@
 		<ProgressBar Grid.Row="1" IsVisible="{Binding CopyProgress}" Value="{Binding CopyProgress}" Maximum="{Binding MaxFiles}" Height="50" Minimum="0" Width="200" HorizontalAlignment="Center"></ProgressBar>
 	</Grid>
 	</ScrollViewer>
-</Window>
+</KnossosWindow>
