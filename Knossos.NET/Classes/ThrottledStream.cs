@@ -1,6 +1,7 @@
-﻿using System.Threading;
+﻿using System;
 using System.IO;
-using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 
 namespace Knossos.NET.Classes
@@ -149,6 +150,12 @@ namespace Knossos.NET.Classes
         public override long Seek(long offset, SeekOrigin origin)
         {
             return stream.Seek(offset, origin);
+        }
+
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            Limit(buffer.Length);
+            return stream.ReadAsync(buffer, cancellationToken);
         }
     }
 }
