@@ -261,7 +261,7 @@ namespace Knossos.NET.ViewModels
                     }
                     else
                     {
-                        bytesRead = await contentStream.ReadAsync(buffer.AsMemory());
+                        bytesRead = await contentStream.ReadAsync(buffer.AsMemory(), cancellationTokenSource!.Token);
                     }
 
                     if (bytesRead == 0)
@@ -324,11 +324,6 @@ namespace Knossos.NET.ViewModels
                 while (isMoreToRead);
                 stopwatch.Reset();
                 return true;
-            }
-            catch (OperationCanceledException)
-            {
-                //cancel requested, do not log
-                return false;
             }
             catch (Exception ex)
             {
