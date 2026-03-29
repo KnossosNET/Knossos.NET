@@ -238,7 +238,32 @@ namespace Knossos.NET.ViewModels
                         throw new TaskCanceledException();
                     }
 
-                    var bytesRead = await contentStream.ReadAsync(buffer);
+                    int bytesRead = 0;
+                    if (Knossos.globalSettings.antiStuck)
+                    {
+                        //If there is zero progress, cancel (throws exception)
+                        using var readTimeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(ANTI_STUCK_CHECK_SECONDS));
+                        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource!.Token, readTimeoutCts.Token);
+                        try
+                        {
+                            bytesRead = await contentStream.ReadAsync(buffer.AsMemory(), linkedCts.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            if (readTimeoutCts.IsCancellationRequested)
+                            {
+                                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.Download",
+                                $"[ANTI-STUCK] Mirror {CurrentMirror ?? downloadUrl.Host} is stuck. " +
+                                "Changing to a diferent mirror...");
+                            }
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        bytesRead = await contentStream.ReadAsync(buffer.AsMemory());
+                    }
+
                     if (bytesRead == 0)
                     {
                         isMoreToRead = false;
@@ -299,6 +324,11 @@ namespace Knossos.NET.ViewModels
                 while (isMoreToRead);
                 stopwatch.Reset();
                 return true;
+            }
+            catch (OperationCanceledException)
+            {
+                //cancel requested, do not log
+                return false;
             }
             catch (Exception ex)
             {
