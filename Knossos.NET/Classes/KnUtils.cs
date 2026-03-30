@@ -1278,8 +1278,9 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "KnUtils.CreateDesktopShortcut()", ex);
             }
         }
-		
-		/// Resolves TopLevel Window or View, usually to load a filepicker
+
+        /// <summary>
+        /// Resolves TopLevel Window or View, usually to load a filepicker
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
