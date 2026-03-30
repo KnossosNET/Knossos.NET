@@ -103,6 +103,57 @@ jobs:
           path: ${{ env.PUBLISH_DIR }}/mac-builds.tgz
           retention-days: 5
 
+  build-android:
+    name: Android build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: '${{ github.ref }}'
+
+      - name: Set environment
+        shell: bash
+        run: |
+          echo "VERSION=$(echo ${{ github.ref_name }} | cut -c 2-)" >> $GITHUB_ENV
+          echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android workload
+        shell: bash
+        run: |
+          dotnet workload install android
+          dotnet workload list
+
+      - name: Build Android
+        shell: bash
+        run: |
+          dotnet build Knossos.NET.Android/Knossos.NET.Android.csproj -c Release -p:BuildAndroid=true
+
+      - name: Collect Android artifacts
+        shell: bash
+        run: |
+          mkdir -p "$OUTPUT_DIR/android"
+          find . -type f \( -name "*.apk" -o -name "*.aab" \) -exec cp {} "$OUTPUT_DIR/android/" \;
+
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-builds
+          path: ${{ env.OUTPUT_DIR }}/android/*
+          retention-days: 5
+
   package_release:
     name: Linux builds, package and release
     needs: [build-win, build-mac, build-android]
