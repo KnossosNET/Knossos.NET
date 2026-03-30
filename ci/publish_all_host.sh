@@ -61,7 +61,7 @@ for rid in $RIDS; do
     echo "Publishing $rid ..."
     echo
 
-    dotnet publish "${PROJECT_FILE:="$NAME/$NAME.csproj"}" -r "$rid" -c Release --self-contained -p:PublishSingleFile=true -o "$PUBLISH_DIR/$rid"
+    dotnet publish "${PROJECT_FILE:="$NAME/$NAME.csproj"}" -r "$rid" -c Release -f net6.0 --self-contained -p:PublishSingleFile=true -o "$PUBLISH_DIR/$rid"
 	
 	# Rename final executable to remove *.Desktop* from it
 	if [ "${OUTPUT_BINARY_NAME:-$NAME}" != "${PROJECT_NAME:-$NAME}" ]; then
