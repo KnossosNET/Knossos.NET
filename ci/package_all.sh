@@ -43,13 +43,14 @@ for rid in $RIDS; do
 
     pushd "$PUBLISH_DIR/$rid" > /dev/null
 
-    if [ ${rid:0:3} = "win" ]; then
-        zip "$OUTPUT_DIR/$fname.zip" * -x \*.pdb
-    else
-        chmod +x "$NAME"  # make sure binary is executable
-        tar -czvf "$OUTPUT_DIR/$fname.tar.gz" --exclude='*.pdb' *
-    fi
+	BIN_NAME="${OUTPUT_BINARY_NAME:-$NAME}"
 
+	if [ ${rid:0:3} = "win" ]; then
+		zip "$OUTPUT_DIR/$fname.zip" * -x \*.pdb
+	else
+		chmod +x "$BIN_NAME"
+		tar -czvf "$OUTPUT_DIR/$fname.tar.gz" --exclude='*.pdb' *
+	fi
     popd > /dev/null
 done
 

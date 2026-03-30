@@ -105,7 +105,7 @@ jobs:
 
   package_release:
     name: Linux builds, package and release
-    needs: [build-win, build-mac]
+    needs: [build-win, build-mac, build-android]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -151,6 +151,12 @@ jobs:
         with:
           name: mac-builds
           path: ${{ env.PUBLISH_DIR }}
+
+      - name: Download Android build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-builds
+          path: ${{ env.OUTPUT_DIR }}/android
 
       - name: Extract build archives
         run: |

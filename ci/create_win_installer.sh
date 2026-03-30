@@ -46,10 +46,12 @@ for arch in $ARCHS; do
         continue
     fi
 
-    if [ ! -f "$PUBLISH_DIR/win-$arch/$NAME.exe" ]; then
-        echo "  $NAME binary for $arch not found! Skipping..."
-        continue
-    fi
+	BIN_NAME="${OUTPUT_BINARY_NAME:-$NAME}"
+
+	if [ ! -f "$PUBLISH_DIR/win-$arch/$BIN_NAME.exe" ]; then
+		echo "  $BIN_NAME binary for $arch not found! Skipping..."
+		continue
+	fi
 
     if [ -n "$VERSION" ]; then
         makensis -DARCH=$arch -DVERSION="$VERSION" -DPUBLISH_DIR="$PUBLISH_DIR" -DOUTPUT_DIR="$OUTPUT_DIR" "packaging/windows/knossos.nsi"

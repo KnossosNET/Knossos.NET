@@ -30,7 +30,17 @@ for rid in $RIDS; do
     echo "Publishing $rid ..."
     echo
 
-    dotnet publish "$NAME/$NAME.csproj" -r $rid -c Release --self-contained -p:PublishSingleFile=true -o "$PUBLISH_DIR/$rid"
+    dotnet publish "${PROJECT_FILE:="$NAME/$NAME.csproj"}" -r "$rid" -c Release --self-contained -p:PublishSingleFile=true -o "$PUBLISH_DIR/$rid"
+	
+	# Rename final executable to remove *.Desktop* from it
+	if [ "${OUTPUT_BINARY_NAME:-$NAME}" != "${PROJECT_NAME:-$NAME}" ]; then
+		if [[ "$rid" == win-* ]]; then
+			[ -f "$PUBLISH_DIR/$rid/${PROJECT_NAME}.exe" ] && mv "$PUBLISH_DIR/$rid/${PROJECT_NAME}.exe" "$PUBLISH_DIR/$rid/${OUTPUT_BINARY_NAME}.exe"
+		else
+			[ -f "$PUBLISH_DIR/$rid/${PROJECT_NAME}" ] && mv "$PUBLISH_DIR/$rid/${PROJECT_NAME}" "$PUBLISH_DIR/$rid/${OUTPUT_BINARY_NAME}"
+			chmod +x "$PUBLISH_DIR/$rid/${OUTPUT_BINARY_NAME}"
+		fi
+	fi
 done
 
 echo
