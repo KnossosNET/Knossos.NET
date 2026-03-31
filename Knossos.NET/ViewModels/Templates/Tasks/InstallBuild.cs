@@ -1,14 +1,18 @@
 ﻿using Avalonia.Threading;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using System.Threading;
-using Knossos.NET.Classes;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
@@ -433,9 +437,63 @@ namespace Knossos.NET.ViewModels
                             //Update version editor if needed
                             DeveloperModsViewModel.Instance?.UpdateVersionManager(modJson.id);
                         }
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        {
+                            bool Vruninstalled = false;
+                            string keyPath = @"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64";
+                            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(keyPath))
+                            {
+                                if (key != null)
+                                {
+                                    // 'Bld' is a DWORD representing the build version
+                                    object bldValue = key.GetValue("Bld");
+                                    if (bldValue != null && int.TryParse(bldValue.ToString(), out int bld))
+                                    {
+                                        // Example: 2022 runtimes typically have build numbers > 30000
+                                        Vruninstalled = true;
+                                    }
+                                }
+                            }
+                            if (!Vruninstalled)
+                            {
+                                string resourceName = "Knossos.NET.Assets.utils.win.VC_redist.x64.exe";
+                                string tempFilePath = Path.Combine(Path.GetTempPath(), "vc_redist.x64.exe");
+                                Assembly assembly = Assembly.GetExecutingAssembly();
+                                using Stream resourceStream = assembly.GetManifestResourceStream(resourceName)??throw new Exception("Resource not found!");
+                                using (FileStream fileStream = new(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                                {
+                                    resourceStream.CopyTo(fileStream);
+                                    fileStream.Flush();
+                                }
+                                //Retry a couple of times incase we get locked out by av temporealy
+                                int retries = 5;
+                                while (retries > 0)
+                                {
+                                    try
+                                    {
+                                        Process.Start(new ProcessStartInfo
+                                        {
+                                            FileName = tempFilePath,
+                                            Arguments = "/install /quiet /norestart",
+                                            Verb = "runas",
+                                            UseShellExecute = true
+                                        }).WaitForExit();
+                                        break; // Success!
+                                    }
+                                    catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 32) // Error code for "File in use"
+                                    {
+                                        retries--;
+                                        if (retries == 0) throw;
+                                        System.Threading.Thread.Sleep(500); // Wait 500ms for AV to finish scanning
+                                    }
+                                }
+
+                                if (File.Exists(tempFilePath)) File.Delete(tempFilePath);
+                            }
+                        }
+                    
                         IsCompleted = true;
                         CancelButtonVisible = false;
-
                         //Re-run Dependencies checks 
                         MainWindowViewModel.Instance?.RunModStatusChecks();
 
