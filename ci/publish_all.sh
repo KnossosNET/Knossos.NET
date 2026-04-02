@@ -30,17 +30,20 @@ for rid in $RIDS; do
     echo "Publishing $rid ..."
     echo
 
-    dotnet publish "${PROJECT_FILE:="$NAME/$NAME.csproj"}" -r "$rid" -c Release -f net6.0 --self-contained -p:PublishSingleFile=true -o "$PUBLISH_DIR/$rid"
-	
-	# Rename final executable to remove *.Desktop* from it
-	if [ "${OUTPUT_BINARY_NAME:-$NAME}" != "${PROJECT_NAME:-$NAME}" ]; then
-		if [[ "$rid" == win-* ]]; then
-			[ -f "$PUBLISH_DIR/$rid/${PROJECT_NAME}.exe" ] && mv "$PUBLISH_DIR/$rid/${PROJECT_NAME}.exe" "$PUBLISH_DIR/$rid/${OUTPUT_BINARY_NAME}.exe"
-		else
-			[ -f "$PUBLISH_DIR/$rid/${PROJECT_NAME}" ] && mv "$PUBLISH_DIR/$rid/${PROJECT_NAME}" "$PUBLISH_DIR/$rid/${OUTPUT_BINARY_NAME}"
-			chmod +x "$PUBLISH_DIR/$rid/${OUTPUT_BINARY_NAME}"
-		fi
-	fi
+    if [ $rid = "android" ]; then
+        PLATFORM=".Android"
+        PLATFORM_FLAGS="-p:BuildAndroid=true"
+    else
+        PLATFORM=".Desktop"
+        PLATFORM_FLAGS="-r \"$rid\" -f net6.0 --self-contained -p:PublishSingleFile=true -p:CheckEolTargetFramework=false"
+    fi
+
+    dotnet publish "$NAME$PLATFORM/$NAME$PLATFORM.csproj" -c Release $PLATFORM_FLAGS -o "$PUBLISH_DIR/$rid"
+
+    # Rename final executable to remove platform descriptor from it
+    find "$PUBLISH_DIR/$rid" -name "$NAME*" -not -iname \*.pdb | while read file; do
+        mv -n "$file" "${file/$PLATFORM/}"
+    done
 done
 
 echo

@@ -20,7 +20,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: '${{ github.ref }}'
@@ -32,7 +32,7 @@ jobs:
           echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '6.0.x'
 
@@ -53,7 +53,7 @@ jobs:
           tar -czvf win-builds.tgz --exclude='*.pdb' *
 
       - name: Upload build archive
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: win-builds
           path: ${{ env.PUBLISH_DIR }}/win-builds.tgz
@@ -64,7 +64,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: '${{ github.ref }}'
@@ -76,7 +76,7 @@ jobs:
           echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '6.0.x'
 
@@ -97,72 +97,19 @@ jobs:
           tar -czvf mac-builds.tgz --exclude='*.pdb' *
 
       - name: Upload build archive
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: mac-builds
           path: ${{ env.PUBLISH_DIR }}/mac-builds.tgz
           retention-days: 5
 
-  build-android:
-    name: Android build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: '${{ github.ref }}'
-
-      - name: Set environment
-        shell: bash
-        run: |
-          echo "VERSION=$(echo ${{ github.ref_name }} | cut -c 2-)" >> $GITHUB_ENV
-          echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
-
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Install Android workload
-        shell: bash
-        run: |
-          dotnet workload install android
-          dotnet workload list
-
-      - name: Build Android
-        shell: bash
-        run: |
-          dotnet build Knossos.NET.Android/Knossos.NET.Android.csproj -c Release -p:BuildAndroid=true
-
-      - name: Collect Android artifacts
-        shell: bash
-        run: |
-          mkdir -p "$OUTPUT_DIR/android"
-          find . -type f \( -name "*-Signed.apk" -o -name "*.aab" \) -exec cp {} "$OUTPUT_DIR/android/" \;
-          echo "Android artifacts collected:"
-          ls -la "$OUTPUT_DIR/android"
-
-      - name: Upload Android artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-builds
-          path: ${{ env.OUTPUT_DIR }}/android/*
-          retention-days: 5
-
   package_release:
-    name: Linux builds, package and release
-    needs: [build-win, build-mac, build-android]
+    name: Linux/Android builds, package and release
+    needs: [build-win, build-mac]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: '${{ github.ref }}'
@@ -184,32 +131,38 @@ jobs:
         # nsis for windows installer
         run: sudo apt-get update && sudo apt-get install zip nsis
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '10.0.x'
 
-      - name: Publish Linux RIDs
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android workload
+        shell: bash
+        run: |
+          dotnet workload install android
+          dotnet workload list
+
+      - name: Publish Linux/Android RIDs
         shell: bash
         run: ./ci/publish_all_host.sh
 
       - name: Download Windows build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: win-builds
           path: ${{ env.PUBLISH_DIR }}
 
       - name: Download macOS build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: mac-builds
           path: ${{ env.PUBLISH_DIR }}
-
-      - name: Download Android build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: android-builds
-          path: ${{ env.OUTPUT_DIR }}/android
 
       - name: Extract build archives
         run: |
@@ -234,9 +187,10 @@ jobs:
         run: ${{ github.workspace }}/ci/create_appimage.sh
 
       - name: Generate Release
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true
-          files: |
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ github.ref_name }} \
+            --title "${{ github.ref_name }}" \
+            --draft \
             ${{ env.OUTPUT_DIR }}/*
-            ${{ env.OUTPUT_DIR }}/android/*

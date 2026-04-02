@@ -98,8 +98,7 @@ install -m 755 "$FILE_ROOT/$APPRUN_FILE" "$APPDIR"
 
 install -d "$APPDIR/usr/bin"
 tar -xzvf "$OUTPUT_DIR/Linux_$DOTNET_ARCH.tar.gz" -C "$APPDIR/usr/bin"
-BIN_NAME="${OUTPUT_BINARY_NAME:-$NAME}"
-chmod +x "$APPDIR/usr/bin/$BIN_NAME"
+chmod +x "$APPDIR/usr/bin/$NAME"
 
 install -d "$APPDIR/usr/share/applications"
 install -m 644 "$BUILD_DIR/$ID.desktop" "$APPDIR/usr/share/applications"
