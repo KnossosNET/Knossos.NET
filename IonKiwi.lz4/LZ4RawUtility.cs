@@ -327,7 +327,9 @@ namespace IonKiwi.lz4 {
                 /* The difference in offsets is the size of the block */
                 int cmpBytes = offsets[currentBlock + 1] - offsets[currentBlock];
                 byte[] cmpBuf = new byte[lz4.LZ4_compressBound(blockSize)];
-                inputStream.Read(cmpBuf,0, cmpBytes);
+                var readBytes = inputStream.Read(cmpBuf,0, cmpBytes);
+                if (readBytes != cmpBytes)
+                    throw new Exception("Incomplete read from stream");
                 fixed (byte* cmpPtr = cmpBuf)
                 {
                     fixed (byte* decBuf = new byte[blockSize])
