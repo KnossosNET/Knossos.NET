@@ -10,6 +10,7 @@
 	<ApplicationIcon>..\Knossos.NET\Assets\knossos-icon.ico</ApplicationIcon>
 	<TrimMode>copyused</TrimMode>
 	<PublishSingleFile>true</PublishSingleFile>
+	<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <PropertyGroup>

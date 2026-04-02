@@ -8,6 +8,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
+  	<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <Nullable>enable</Nullable>
     <TrimMode>copyused</TrimMode>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>

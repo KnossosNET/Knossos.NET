@@ -8,6 +8,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
+	<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
