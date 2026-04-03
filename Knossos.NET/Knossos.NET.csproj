@@ -64,12 +64,6 @@
     <AvaloniaResource Include="Assets\utils\osx\**" />
   </ItemGroup>
   <ItemGroup>
-    <AvaloniaResource Remove="Assets\utils\win\VC_redist.x64.exe" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\utils\win\VC_redist.x64.exe" />
-  </ItemGroup>
-  <ItemGroup>
     <!--This helps with theme dll-s trimming.
 	If you will publish your application in self-contained mode with p:PublishTrimmed=true and it will use Fluent theme Default theme will be trimmed from the output and vice versa.
 	https://github.com/AvaloniaUI/Avalonia/issues/5593 -->
