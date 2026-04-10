@@ -387,7 +387,8 @@ namespace Knossos.NET.Classes
         {
             if (other == null)
                 return 1;
-            return this > (SemanticVersion)other ? 1 : 0;
+
+            return Compare(this, (SemanticVersion)other);
         }
     }
 }
