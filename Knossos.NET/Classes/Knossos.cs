@@ -1484,7 +1484,7 @@ namespace Knossos.NET
             }
             else
             {
-                return installedMods;
+                return installedMods.ToList();
             }
         }
 
@@ -1527,7 +1527,7 @@ namespace Knossos.NET
                 }
                 else
                 {
-                    return engineBuilds;
+                    return engineBuilds.ToList();
                 }
             }
         }
@@ -1903,7 +1903,7 @@ namespace Knossos.NET
         /// <returns>List of tools or empty list</returns>
         public static List<Tool> GetTools()
         {
-            return modTools;
+            return modTools.ToList();
         }
     }
 }
