@@ -87,12 +87,11 @@ namespace Knossos.NET.ViewModels
                     {
                         if (result != null)
                         {
-                            Info = "Release Mod failed. Reason: " + result;
+                            throw new TaskCanceledException("Release Mod failed. Reason: " + result);
                         }
                         else
                         {
-                            Info = "Release Mod failed for unknown reasons.";
-                            throw new TaskCanceledException();
+                            throw new TaskCanceledException("Release Mod failed for unknown reasons.");
                         }
                     }
                     Info = result;
@@ -106,13 +105,13 @@ namespace Knossos.NET.ViewModels
                     throw new Exception("The task is already set, it cant be changed or re-assigned.");
                 }
             }
-            catch (TaskCanceledException)
+            catch (TaskCanceledException tc)
             {
                 //Task cancel requested by user
                 IsCompleted = false;
                 IsCancelled = true;
                 CancelButtonVisible = false;
-                Info = "Task Cancelled";
+                Info = tc.InnerException?.Message != null ? tc.InnerException.Message : "Task cancelled";
                 //Only dispose the token if it was created locally
                 if (cancelSource == null)
                 {

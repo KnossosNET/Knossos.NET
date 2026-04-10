@@ -789,7 +789,7 @@ namespace Knossos.NET.Models
                                 {
                                     var reply = JsonSerializer.Deserialize<ApiReply>(jsonReply);
                                     if (!reply.result && resourceUrl != "mod/check_id")
-                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api POST call: " + response.StatusCode + "(" + (int)response.StatusCode + ")\n" + data);
+                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api POST call. Status: " + response.StatusCode + "(" + (int)response.StatusCode + "). Reply: \n" + jsonReply + "\n");
 
                                     return reply;
                                 }
@@ -924,7 +924,10 @@ namespace Knossos.NET.Models
                     }
                     else
                     {
-                        Log.Add(Log.LogSeverity.Error, "Nebula.GetModJson", "Unable to get mod json data. ID: " + modid + " Version: " + version + " Reason: " + reply.Value.reason);
+                        if(reply.Value.reason == "not_found")
+                            Log.Add(Log.LogSeverity.Warning, "Nebula.GetModJson", "Mod ID + Version not found on Nebula. ID: " + modid + " Version: " + version + " Reason: " + reply.Value.reason);
+                        else
+                            Log.Add(Log.LogSeverity.Error, "Nebula.GetModJson", "Unable to get mod json data. ID: " + modid + " Version: " + version + " Reason: " + reply.Value.reason);
                     }
                 }
             }
