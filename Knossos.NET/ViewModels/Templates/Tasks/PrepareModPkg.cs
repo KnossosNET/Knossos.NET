@@ -112,7 +112,7 @@ namespace Knossos.NET.ViewModels
                                         Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
                                         //Disable failing and instead delete the file if it exists
                                         //throw new TaskCanceledException();
-                                        KnUtils.DeleteFileSafe(zipPath);
+                                        await KnUtils.DeleteFileSafe(zipPath, cancellationTokenSource);
                                     }
                                     else
                                     {
@@ -132,7 +132,7 @@ namespace Knossos.NET.ViewModels
                                             ProgressBarMax = 100;
                                             ProgressCurrent = 0;
                                             Info = "Retry: Compressing (7z)";
-                                            KnUtils.DeleteFileSafe(zipPath);
+                                            await KnUtils.DeleteFileSafe(zipPath, cancellationTokenSource);
                                             crcAttempt++;
                                         }
                                     }
@@ -193,7 +193,7 @@ namespace Knossos.NET.ViewModels
                                         Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
                                         //Disable failing and instead delete the file if it exists
                                         //throw new TaskCanceledException();
-                                        KnUtils.DeleteFileSafe(zipPath + ".tar.gz");
+                                        await KnUtils.DeleteFileSafe(zipPath + ".tar.gz", cancellationTokenSource);
                                     }
                                     else
                                     {
@@ -213,7 +213,7 @@ namespace Knossos.NET.ViewModels
                                             ProgressBarMax = 100;
                                             ProgressCurrent = 0;
                                             Info = "Retry: Compressing (.tar.gz)";
-                                            KnUtils.DeleteFileSafe(zipPath + ".tar.gz");
+                                            await KnUtils.DeleteFileSafe(zipPath + ".tar.gz", cancellationTokenSource);
                                             crcAttempt++;
                                         }
                                     }
@@ -232,7 +232,7 @@ namespace Knossos.NET.ViewModels
                                         Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "Error while compressing the package");
                                         //Disable failing and instead delete the file if it exists
                                         //throw new TaskCanceledException();
-                                        KnUtils.DeleteFileSafe(zipPath);
+                                        await KnUtils.DeleteFileSafe(zipPath, cancellationTokenSource);
                                     }
                                     else
                                     {
@@ -252,7 +252,7 @@ namespace Knossos.NET.ViewModels
                                             ProgressBarMax = 100;
                                             ProgressCurrent = 0;
                                             Info = "Retry: Compressing (7z)";
-                                            KnUtils.DeleteFileSafe(zipPath);
+                                            await KnUtils.DeleteFileSafe(zipPath, cancellationTokenSource);
                                             crcAttempt++;
                                         }
                                     }
@@ -267,6 +267,9 @@ namespace Knossos.NET.ViewModels
                     {
                         Info = "Waiting for file to be closed";
                         Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.PrepareModPkg()", "Waiting for file to be closed: " + zipPath);
+                        await Task.Delay(100);
+                        if (cancellationTokenSource.IsCancellationRequested)
+                            throw new TaskCanceledException();
                     }
 
                     Info = "Getting Hash";

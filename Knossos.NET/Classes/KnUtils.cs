@@ -1212,7 +1212,7 @@ namespace Knossos.NET
         /// <summary>
         /// Deletes a file checking if it exists first and then waits for the file to be closed. 
         /// </summary>
-        public static void DeleteFileSafe(string filePath)
+        public static async Task DeleteFileSafe(string filePath, CancellationTokenSource? cancellationToken = null)
         {
             try
             {
@@ -1221,6 +1221,9 @@ namespace Knossos.NET
                     while (IsFileInUse(filePath))
                     {
                         Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.PrepareModPkg()", "Waiting for file to be closed to delete it: " + filePath);
+                        await Task.Delay(100);
+                        if (cancellationToken != null && cancellationToken.IsCancellationRequested)
+                            throw new TaskCanceledException();
                     }
                     File.Delete(filePath);
                 }
