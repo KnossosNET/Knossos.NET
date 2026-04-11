@@ -9,57 +9,57 @@ namespace Knossos.NET.Classes
     /// </summary>
     public class ProgressStream : Stream
     {
-        private Stream stream;
-        private Action<int>? progressCallback;
-
+        private readonly Stream _stream;
+        private readonly Action<int>? _progressCallback;
 
         public ProgressStream(Stream stream, Action<int>? progressCallback)
         {
-            this.stream = stream;
-            this.progressCallback = progressCallback;
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            _progressCallback = progressCallback;
         }
 
-        public override bool CanRead => stream.CanRead;
-
-        public override bool CanSeek => stream.CanSeek;
-
-        public override bool CanWrite => stream.CanWrite;
-
-        public override long Length => stream.Length;
-
-        public override long Position { get => stream.Position; set => stream.Position = value; }
-
-        public override void Flush()
+        public override bool CanRead => _stream.CanRead;
+        public override bool CanSeek => _stream.CanSeek;
+        public override bool CanWrite => _stream.CanWrite;
+        public override long Length => _stream.Length;
+        public override long Position
         {
-            stream.Flush();
+            get => _stream.Position;
+            set => _stream.Position = value;
         }
+
+        public override void Flush() => _stream.Flush();
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            int n = stream.Read(buffer, offset, count);
-            progressCallback?.Invoke((int)((100 * stream.Position) / stream.Length));
+            int n = _stream.Read(buffer, offset, count);
+            _progressCallback?.Invoke((int)((100 * _stream.Position) / _stream.Length));
             return n;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            stream.Seek(offset, origin);
+            _stream.Seek(offset, origin);
             return Position;
         }
 
-        public override void SetLength(long value)
-        {
-            stream.SetLength(value);
-        }
+        public override void SetLength(long value) => _stream.SetLength(value);
 
         public override void Write(byte[] buffer, int offset, int count)
+            => _stream.Write(buffer, offset, count);
+
+        protected override void Dispose(bool disposing)
         {
-            stream.Write(buffer, offset, count);
+            if (disposing)
+            {
+                _stream.Dispose();
+            }
+            base.Dispose(disposing);
         }
 
         public override void Close()
         {
-            stream.Close();
+            _stream.Close();
             base.Close();
         }
     }
