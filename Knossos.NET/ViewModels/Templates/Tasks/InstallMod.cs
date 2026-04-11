@@ -308,7 +308,7 @@ namespace Knossos.NET.ViewModels
                          File starts to download, File finishes downloading, Decompression starts, Decompression ends, Image download completed
                     */
                     mod.fullPath = modPath + Path.DirectorySeparatorChar;
-                    await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks }, async (file, token) =>
+                    await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks, CancellationToken = cancellationTokenSource.Token }, async (file, token) =>
                     {
                         if (cancellationTokenSource.IsCancellationRequested)
                         {
