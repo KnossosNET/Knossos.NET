@@ -749,6 +749,7 @@ namespace Knossos.NET.Models
                 Log.Add(Log.LogSeverity.Warning, "Nebula.Trinity()", "Nebula services has been disabled.");
                 return null;
             }
+            using var request = new HttpRequestMessage();
             try
             {
                 var client = KnUtils.GetHttpClient();
@@ -763,9 +764,11 @@ namespace Knossos.NET.Models
                             return null;
                         }
                     }
-                    client.DefaultRequestHeaders.Add("X-KN-TOKEN", apiUserToken);
+                    request.Headers.Add("X-KN-TOKEN", apiUserToken);
                 }
                 client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
+                request.RequestUri = new Uri(apiURL + resourceUrl);
+                request.Content = data;
                 switch (method)
                 {
                     case ApiMethod.POST:
@@ -774,7 +777,8 @@ namespace Knossos.NET.Models
                             {
                                 throw new ArgumentNullException(nameof(data));
                             }
-                            var response = await client.PostAsync(apiURL + resourceUrl, data);
+                            request.Method = HttpMethod.Post;
+                            var response = await client.SendAsync(request);
                             data.Dispose();
                             if (response.IsSuccessStatusCode)
                             {
@@ -822,7 +826,8 @@ namespace Knossos.NET.Models
                         }
                     case ApiMethod.GET:
                         {
-                            var response = await client.GetAsync(apiURL + resourceUrl);
+                            request.Method = HttpMethod.Get;
+                            var response = await client.SendAsync(request);
                             if (response.IsSuccessStatusCode)
                             {
                                 var json = await response.Content.ReadAsStringAsync();
