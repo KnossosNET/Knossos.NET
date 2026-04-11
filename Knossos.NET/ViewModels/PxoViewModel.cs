@@ -143,7 +143,7 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync("https://pxo.nottheeye.com/api/v1/games/active").ConfigureAwait(false);
+                using var response = await KnUtils.GetHttpClient().GetAsync("https://pxo.nottheeye.com/api/v1/games/active").ConfigureAwait(false);
                 var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 Dispatcher.UIThread.Invoke(() =>
                 {

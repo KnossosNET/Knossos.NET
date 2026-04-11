@@ -808,7 +808,7 @@ namespace Knossos.NET
                 string? newEtag = null;
                 Log.Add(Log.LogSeverity.Information, "KnUtils.GetUrlFileEtag()", "Getting " + url + " etag.");
 
-                var result = await KnUtils.GetHttpClient().GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                using var result = await KnUtils.GetHttpClient().GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                 newEtag = result.Headers?.ETag?.ToString().Replace("\"", "");
                 try
                 {
