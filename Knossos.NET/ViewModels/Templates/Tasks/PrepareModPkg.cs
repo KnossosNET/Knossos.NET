@@ -25,7 +25,7 @@ namespace Knossos.NET.ViewModels
                     IsTextTask = false;
                     IsFileDownloadTask = false;
                     Name = "Prepare Pkg: " + pkg.name;
-                    //var maxCrcAttempts = 5; //How many times try to compress a pkg with 7z in case of CRC error (LIMIT DISABLED)
+                    var maxCrcAttempts = 25; //How many times try to compress a pkg with 7z in case of CRC error
 
                     if (cancelSource != null)
                         cancellationTokenSource = cancelSource;
@@ -121,21 +121,22 @@ namespace Knossos.NET.ViewModels
                                         crcResult = await compressor.VerifyFile(zipPath);
                                         if (!crcResult)
                                         {
-                                            /*
                                             if(crcAttempt >= maxCrcAttempts)
                                             {
                                                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Max attempts reached, cancelling upload...");
                                                 throw new TaskCanceledException();
                                             }
-                                            */
                                             Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.PrepareModPkg()", "CRC error on file: " + zipPath + ". Retrying...");
                                             ProgressBarMax = 100;
                                             ProgressCurrent = 0;
                                             Info = "Retry: Compressing (7z)";
                                             KnUtils.DeleteFileSafe(zipPath);
                                             crcAttempt++;
+                                            await Task.Delay(1000);
                                         }
                                     }
+                                    if (cancellationTokenSource.IsCancellationRequested)
+                                        throw new TaskCanceledException();
                                 } while (!crcResult);
                                 Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.PrepareModPkg()", "CRC Verify OK on File: " + zipPath);
                             }
