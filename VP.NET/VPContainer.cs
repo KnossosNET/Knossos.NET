@@ -310,8 +310,13 @@ namespace VP.NET
                                         {
                                             byte[] buffer = new byte[bufferSize];
                                             int bytesToRead = leftToCopy > bufferSize ? bufferSize : leftToCopy;
-                                            leftToCopy -= await sourceVP.ReadAsync(buffer, 0, bytesToRead);
-                                            await vp.WriteAsync(buffer, 0, bytesToRead);
+                                            var bytesRead = await sourceVP.ReadAsync(buffer, 0, bytesToRead);
+                                            if(bytesRead != bytesToRead)
+                                            {
+                                                throw new IOException("Unable to read from file");
+                                            }
+                                            leftToCopy -= bytesRead;
+                                            await vp.WriteAsync(buffer, 0, bytesRead);
                                         }
                                     }
                                     else
@@ -343,8 +348,13 @@ namespace VP.NET
                                 {
                                     byte[] buffer = new byte[bufferSize];
                                     int bytesToRead = leftToCopy > bufferSize ? bufferSize : leftToCopy;
-                                    leftToCopy -= await sourceVP.ReadAsync(buffer, 0, bytesToRead);
-                                    await vp.WriteAsync(buffer, 0, bytesToRead);
+                                    var bytesRead = await sourceVP.ReadAsync(buffer, 0, bytesToRead);
+                                    if (bytesRead != bytesToRead)
+                                    {
+                                        throw new IOException("Unable to read from file");
+                                    }
+                                    leftToCopy -= bytesRead;
+                                    await vp.WriteAsync(buffer, 0, bytesRead);
                                 }
                             }
                             sourceVP.Dispose();
