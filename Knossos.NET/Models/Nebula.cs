@@ -651,7 +651,7 @@ namespace Knossos.NET.Models
             }
             catch (IOException)
             {
-                Log.WriteToConsole("repo_minimal.json is in use. Waiting for file access...");
+                _ = Log.WriteToConsole("repo_minimal.json is in use. Waiting for file access...");
                 await Task.Delay(500);
                 if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
                 {

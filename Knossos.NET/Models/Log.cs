@@ -1,9 +1,8 @@
 ﻿using Avalonia.Threading;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,62 +22,78 @@ namespace Knossos.NET
 
         private class LogEntry
         {
-            string logString = string.Empty;
-            bool writeToFile = false;
+            public string LogString { get; }
+            public bool WriteToFile { get; }
 
             public LogEntry(LogSeverity logSeverity, string from, string data)
             {
-                logString = DateTime.Now.ToString() + " - *" + logSeverity.ToString() + "* : (" + from + ") " + data;
-                if (Knossos.globalSettings.enableLogFile && (int)logSeverity >= Knossos.globalSettings.logLevel)
+                LogString = $"{DateTime.Now} - *{logSeverity}* : ({from}) {data}";
+
+                WriteToFile = Knossos.globalSettings.enableLogFile && (int)logSeverity >= Knossos.globalSettings.logLevel;
+            }
+        }
+
+        public static readonly string LogFilePath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "Knossos.log");
+        private static readonly ConcurrentQueue<LogEntry> queuedLogs = new();
+        private static readonly Task _consumerTask;
+        private static readonly int maxFileWriteAttempts = 5;
+
+        static Log()
+        {
+            _consumerTask = Task.Run(ConsumeQueueAsync);
+            if(Knossos.globalSettings.enableLogFile)
+            {
+                _ = WriteToFileAsync($"{DateTime.Now.ToString()} Init logger...");
+            }
+        }
+
+        private static async Task ConsumeQueueAsync()
+        {
+            while (true)
+            {
+                if (queuedLogs.TryDequeue(out var entry))
                 {
-                    writeToFile = true;
+                    await ProcessEntryAsync(entry);
                 }
-                Task.Factory.StartNew(() => { 
-                    ProcessLogEntry(); 
-                });
-            }
-
-            private async void ProcessLogEntry()
-            {
-                while (!queuedLogs.Any() || queuedLogs.Peek() != this)
+                else
+                {
                     await Task.Delay(10);
-                WriteToConsole();
-                if (writeToFile)
-                    WriteToFile();
-                queuedLogs.Dequeue();
-            }
-
-            private void WriteToConsole()
-            {
-                Log.WriteToConsole(logString);
-            }
-
-            private void WriteToFile(int attempt = 1)
-            {
-                try
-                {
-                    using (var writer = new StreamWriter(LogFilePath, true))
-                    {
-                        writer.WriteLine(logString, Encoding.UTF8);
-                    }
-                }catch(Exception ex)
-                {
-                    if(attempt < maxFileWriteAttempts)
-                    {
-                        attempt++;
-                        WriteToFile(attempt);
-                    }
-                    else
-                    {
-                        Log.WriteToConsole("Failed to write to the logfile, reason: " + ex.ToString() + " \nFilePath:"+ LogFilePath);
-                    }
                 }
             }
         }
 
-        public static readonly string LogFilePath = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "Knossos.log";
-        private static readonly int maxFileWriteAttempts = 5;
-        private static Queue<LogEntry> queuedLogs = new Queue<LogEntry>();
+        private static async Task ProcessEntryAsync(LogEntry entry)
+        {
+            // Siempre se escribe en consola (UI thread)
+            await WriteToConsole(entry.LogString);
+
+            // Si corresponde, escribir en archivo
+            if (entry.WriteToFile)
+            {
+                await WriteToFileAsync(entry.LogString);
+            }
+        }
+
+        private static async Task WriteToFileAsync(string data, int attempt = 1)
+        {
+            try
+            {
+                await using var writer = new StreamWriter(LogFilePath, true, Encoding.UTF8);
+                await writer.WriteLineAsync(data);
+            }
+            catch (Exception ex)
+            {
+                if (attempt < maxFileWriteAttempts)
+                {
+                    await Task.Delay(50 * attempt);
+                    await WriteToFileAsync(data, attempt + 1);
+                }
+                else
+                {
+                    await WriteToConsole($"Failed to write to logfile: {ex.Message}\nFilePath: {LogFilePath}");
+                }
+            }
+        }
 
         /// <summary>
         /// Write a log entry to console and file
@@ -114,7 +129,7 @@ namespace Knossos.NET
         /// Write a string to VS console and the UI console on the Debug tab
         /// </summary>
         /// <param name="data"></param>
-        public async static void WriteToConsole(string data)
+        public static async Task WriteToConsole(string data)
         {
             try
             {
