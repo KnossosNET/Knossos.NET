@@ -331,9 +331,6 @@ namespace Knossos.NET.Models
         public string envVars { get; set; } = string.Empty;
         [JsonPropertyName("show_dev_options")]
         public bool showDevOptions { get; set; } = false;
-        
-        [JsonIgnore]
-        private FileSystemWatcher? iniWatcher = null;
 
         /// <summary>
         /// Call this when the app is closing to save settings if we have pending changes
@@ -345,57 +342,6 @@ namespace Knossos.NET.Models
             {
                 Save(false);
             }
-        }
-
-        /// <summary>
-        /// When the User is on the settings tab we must watch the fs2_open.ini for external changes
-        /// This is the initial call that must be called once, then we start or stop raising of events
-        /// </summary>
-        private void StartWatchingDirectory()
-        {
-            iniWatcher = new FileSystemWatcher(KnUtils.GetFSODataFolderPath());
-            iniWatcher.NotifyFilter = NotifyFilters.LastWrite;
-            iniWatcher.Changed += OnIniChanged;
-            iniWatcher.Filter = "fs2_open.ini";
-        }
-
-        /// <summary>
-        /// If the fs2_open.ini is changed externally, reload the data
-        /// </summary>
-        private void OnIniChanged(object sender, FileSystemEventArgs e)
-        {
-            iniWatcher!.EnableRaisingEvents = false;
-            Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                Log.Add(Log.LogSeverity.Information, "GlobalSettings.OnIniChanged()", "fs2_open.ini was changed externally, loading data.");
-                Load();
-                MainWindowViewModel.Instance?.GlobalSettingsLoadData();
-            });
-            Task.Delay(1000);
-            iniWatcher!.EnableRaisingEvents = true;
-        }
-
-        /// <summary>
-        /// Start watching for changes on the ini file
-        /// </summary>
-        public void EnableIniWatch()
-        {
-            if (iniWatcher != null)
-                iniWatcher.EnableRaisingEvents = true;
-            else
-            {
-                StartWatchingDirectory();
-                EnableIniWatch();
-            }
-        }
-
-        /// <summary>
-        /// Stop watching for changes on the ini file
-        /// </summary>
-        public void DisableIniWatch()
-        {
-            if(iniWatcher != null)
-                iniWatcher.EnableRaisingEvents = false;
         }
 
         /// <summary>
@@ -944,12 +890,6 @@ namespace Knossos.NET.Models
                 data["PXO"]["Login"] = pxoLogin;
                 data["PXO"]["Password"] = pxoPassword;
 
-                bool wasWatchingIni = false;
-                if (iniWatcher != null)
-                {
-                    wasWatchingIni = iniWatcher.EnableRaisingEvents;
-                    iniWatcher.EnableRaisingEvents = false;
-                }
                 if (customFullPath == null)
                 {
                     parser.WriteFile(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini", data, new UTF8Encoding(false));
@@ -961,9 +901,6 @@ namespace Knossos.NET.Models
                     parser.WriteFile(customFullPath, data, new UTF8Encoding(false));
                     Log.Add(Log.LogSeverity.Information, "GlobalSettings.WriteFS2IniValues", "Writen ini: " + customFullPath);
                 }
-
-                if (iniWatcher!= null && wasWatchingIni)
-                    iniWatcher.EnableRaisingEvents = true;
             }
             catch (Exception ex)
             {
