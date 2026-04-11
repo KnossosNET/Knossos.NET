@@ -154,6 +154,95 @@
 					</StackPanel>
 				</Expander>
 
+								<!--FSO ENGINE SETTINGS-->
+				<Expander VerticalAlignment="Top" Margin="5" MinWidth="740">
+					<Expander.Header>
+						<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Additional settings that affect how the FSO engine runs.">
+							Specialized Settings
+						</Label>
+					</Expander.Header>
+					<StackPanel Margin="5">
+						<!-- FS2 Lang -->
+						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
+							<TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="3,0,0,0" Width="200">In-game Language</TextBlock>
+							<ComboBox SelectedIndex="{Binding Fs2LangSelectedIndex}" Grid.Column="1" Width="200" Margin="8,0,0,0">
+								<ComboBoxItem>English</ComboBoxItem>
+								<ComboBoxItem>German</ComboBoxItem>
+								<ComboBoxItem>French</ComboBoxItem>
+								<ComboBoxItem>Polish</ComboBoxItem>
+							</ComboBox>
+						</Grid>
+						<!-- Portable FSO Preferences -->
+						<WrapPanel IsVisible="{Binding IsPortableMode}">
+							<Label Margin="4,5,0,0" Width="200" ToolTip.Tip="Store FSO pilots and settings in a portable location. Only if the launcher is in portable mode">Portable FSO Data</Label>
+							<ToggleSwitch Margin="11,0,0,0" IsChecked="{Binding PortableFsoPreferences}"></ToggleSwitch>
+						</WrapPanel>
+						<!-- Sys Info -->
+						<WrapPanel Margin="9,0,0,0">
+							<TextBlock VerticalAlignment="Center" Width="201">Detected Build Settings </TextBlock>
+							<Label Margin="4,5,0,0" FontWeight="Bold">OS:</Label>
+							<TextBlock Margin="5,8,0,0" Text="{Binding DetectedOS}"></TextBlock>
+							<Label Margin="30,5,0,0" FontWeight="Bold">CPU Arch:</Label>
+							<TextBlock Margin="5,8,0,0" Text="{Binding CpuArch}"></TextBlock>
+							<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX}">AVX</CheckBox>
+							<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX2}">AVX2</CheckBox>
+						</WrapPanel>	
+						<WrapPanel Margin="0,5,0,0">	
+							<Label Margin="5,5,0,0" IsVisible="{Binding IsAVX}" Width="200">Force SSE2</Label> 
+							<CheckBox Margin="12,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, KnossosNET will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
+						</WrapPanel>
+						<!-- GLOBAL CMDLINE -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto" Margin="5">
+							<Label Grid.Row="0" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Command Line</Label>
+							<TextBox Grid.Row="0" Text="{Binding GlobalCmd}" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="1" Width="470"></TextBox>
+							<Button Grid.Row="1" Command="{Binding GlobalCmdHelp}" Classes="Quaternary" Grid.Column="1" Margin="0,10,0,0">Command Line Wiki Page</Button>
+						</Grid>
+						<!-- Multi Port -->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+							<Label ToolTip.Tip="Network port used by multiplayer. Default is 7808." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Multiplayer Port</Label>
+							<NumericUpDown Value="{Binding MultiPort}" Grid.Column="1" Width="150"></NumericUpDown>
+						</Grid>
+						<!-- Debug Filter-->
+						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
+							<Button Content="Adjust Debug Filters" Command="{Binding OpenDebugFilterView}"></Button>
+						</Grid>
+					</StackPanel>
+				</Expander>
+
+				<!--Developer Settings-->
+				<Expander IsVisible="{Binding ShowDevOptions}" VerticalAlignment="Top" Margin="5" MinWidth="740">
+					<Expander.Header>
+						<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Advanced settings used by Hard-light devs.">
+							Developer Options
+						</Label>
+					</Expander.Header>
+					<StackPanel Margin="5">
+						<!-- Developer Options Shutoff-->
+						<WrapPanel Margin="5,10,0,0">
+							<Button Content="Turn Off Developer Options" ToolTip.Tip="Restore Dev Options to Default and Close Developer Section.  This should restore normal Knossos.NET operations." Command="{Binding ToggleDeveloperOptions}"></Button>
+						</WrapPanel>
+						<!-- NoSystemCMD -->
+						<WrapPanel Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Don't Apply Graphics Settings</Label>
+							<ToggleSwitch IsChecked="{Binding NoSystemCMD}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will not pass the graphics settings configured to FSO."></ToggleSwitch>
+						</WrapPanel>
+						<!-- PrefixCMD -->
+						<WrapPanel Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Pass FSO launch command as argument to other command</Label> 
+							<TextBox Text="{Binding PrefixCMD}" Margin="5,0,0,0" ToolTip.Tip="This will be prepended to the launch command for FSO and FRED." Width="470"></TextBox>
+						</WrapPanel>
+						<!-- EnvVars -->
+						<WrapPanel Margin="5,10,0,0">
+							<Label Margin="0,5,0,0" Width="205">Pass environment variables to FSO</Label> 
+							<TextBox Text="{Binding EnvVars}" Margin="5,0,0,0" ToolTip.Tip="Expects a comma-separated list." Width="450"></TextBox>
+						</WrapPanel>
+					</StackPanel>
+				</Expander>
+
+				<!--LEGACY SETTINGS-->
+				<TextBlock Margin="12,20,0,0" Text="Legacy Settings" />
+				<Separator  />
+
 				<!--VIDEO SETTINGS-->
 				<Expander VerticalAlignment="Top" Margin="5" MinWidth="740">
 					<Expander.Header>
@@ -380,91 +469,6 @@
 							<TextBlock Text="First download a FSO build to enable this setting." IsVisible="{Binding !FlagDataLoaded}" VerticalAlignment="Center" Foreground="Red" FontWeight="Bold" Grid.Column="1" Width="470" Margin="10,0,0,0"></TextBlock>
 							<ComboBox Height="50" SelectedIndex="{Binding Joy4SelectedIndex}" ItemsSource="{Binding Joystick4Items}" IsVisible="{Binding FlagDataLoaded}" Grid.Column="1" Width="470" Margin="10,0,0,0"></ComboBox>
 						</Grid>
-					</StackPanel>
-				</Expander>
-		
-				<!--FSO ENGINE SETTINGS-->
-				<Expander VerticalAlignment="Top" Margin="5" MinWidth="740">
-					<Expander.Header>
-						<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Additional settings that affect how the FSO engine runs.">
-							Specialized Settings
-						</Label>
-					</Expander.Header>
-					<StackPanel Margin="5">
-						<!-- FS2 Lang -->
-						<Grid ColumnDefinitions="Auto,Auto" Margin="5">
-							<TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="3,0,0,0" Width="200">In-game Language</TextBlock>
-							<ComboBox SelectedIndex="{Binding Fs2LangSelectedIndex}" Grid.Column="1" Width="200" Margin="8,0,0,0">
-								<ComboBoxItem>English</ComboBoxItem>
-								<ComboBoxItem>German</ComboBoxItem>
-								<ComboBoxItem>French</ComboBoxItem>
-								<ComboBoxItem>Polish</ComboBoxItem>
-							</ComboBox>
-						</Grid>
-						<!-- Portable FSO Preferences -->
-						<WrapPanel IsVisible="{Binding IsPortableMode}">
-							<Label Margin="4,5,0,0" Width="200" ToolTip.Tip="Store FSO pilots and settings in a portable location. Only if the launcher is in portable mode">Portable FSO Data</Label>
-							<ToggleSwitch Margin="11,0,0,0" IsChecked="{Binding PortableFsoPreferences}"></ToggleSwitch>
-						</WrapPanel>
-						<!-- Sys Info -->
-						<WrapPanel Margin="9,0,0,0">
-							<TextBlock VerticalAlignment="Center" Width="201">Detected Build Settings </TextBlock>
-							<Label Margin="4,5,0,0" FontWeight="Bold">OS:</Label>
-							<TextBlock Margin="5,8,0,0" Text="{Binding DetectedOS}"></TextBlock>
-							<Label Margin="30,5,0,0" FontWeight="Bold">CPU Arch:</Label>
-							<TextBlock Margin="5,8,0,0" Text="{Binding CpuArch}"></TextBlock>
-							<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX}">AVX</CheckBox>
-							<CheckBox Margin="50,0,0,0" IsEnabled="False" IsChecked="{Binding IsAVX2}">AVX2</CheckBox>
-						</WrapPanel>	
-						<WrapPanel Margin="0,5,0,0">	
-							<Label Margin="5,5,0,0" IsVisible="{Binding IsAVX}" Width="200">Force SSE2</Label> 
-							<CheckBox Margin="12,0,0,0" IsVisible="{Binding IsAVX}" ToolTip.Tip="When enabled, KnossosNET will force to run SSE2 FSO builds instead of AVX ones, if SSE2 builds are available." IsChecked="{Binding ForceSSE2}"></CheckBox>
-						</WrapPanel>
-						<!-- GLOBAL CMDLINE -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto" Margin="5">
-							<Label Grid.Row="0" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Global Command Line</Label>
-							<TextBox Grid.Row="0" Text="{Binding GlobalCmd}" ToolTip.Tip="This cmdline will be added to all mods and will override any mod settings using the same flags." Grid.Column="1" Width="470"></TextBox>
-							<Button Grid.Row="1" Command="{Binding GlobalCmdHelp}" Classes="Quaternary" Grid.Column="1" Margin="0,10,0,0">Command Line Wiki Page</Button>
-						</Grid>
-						<!-- Multi Port -->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
-							<Label ToolTip.Tip="Network port used by multiplayer. Default is 7808." Grid.Column="0" VerticalContentAlignment="Center" Width="210">Multiplayer Port</Label>
-							<NumericUpDown Value="{Binding MultiPort}" Grid.Column="1" Width="150"></NumericUpDown>
-						</Grid>
-						<!-- Debug Filter-->
-						<Grid ColumnDefinitions="Auto,Auto,Auto" Margin="5">
-							<Button Content="Adjust Debug Filters" Command="{Binding OpenDebugFilterView}"></Button>
-						</Grid>
-					</StackPanel>
-				</Expander>
-
-				<!--Developer Settings-->
-				<Expander IsVisible="{Binding ShowDevOptions}" VerticalAlignment="Top" Margin="5" MinWidth="740">
-					<Expander.Header>
-						<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18" ToolTip.Tip="Advanced settings used by Hard-light devs.">
-							Developer Options
-						</Label>
-					</Expander.Header>
-					<StackPanel Margin="5">
-						<!-- Developer Options Shutoff-->
-						<WrapPanel Margin="5,10,0,0">
-							<Button Content="Turn Off Developer Options" ToolTip.Tip="Restore Dev Options to Default and Close Developer Section.  This should restore normal Knossos.NET operations." Command="{Binding ToggleDeveloperOptions}"></Button>
-						</WrapPanel>
-						<!-- NoSystemCMD -->
-						<WrapPanel Margin="5,10,0,0">
-							<Label Margin="0,5,0,0" Width="205">Don't Apply Graphics Settings</Label>
-							<ToggleSwitch IsChecked="{Binding NoSystemCMD}" Margin="5,0,0,0" ToolTip.Tip="Knossos.NET will not pass the graphics settings configured to FSO."></ToggleSwitch>
-						</WrapPanel>
-						<!-- PrefixCMD -->
-						<WrapPanel Margin="5,10,0,0">
-							<Label Margin="0,5,0,0" Width="205">Pass FSO launch command as argument to other command</Label> 
-							<TextBox Text="{Binding PrefixCMD}" Margin="5,0,0,0" ToolTip.Tip="This will be prepended to the launch command for FSO and FRED." Width="470"></TextBox>
-						</WrapPanel>
-						<!-- EnvVars -->
-						<WrapPanel Margin="5,10,0,0">
-							<Label Margin="0,5,0,0" Width="205">Pass environment variables to FSO</Label> 
-							<TextBox Text="{Binding EnvVars}" Margin="5,0,0,0" ToolTip.Tip="Expects a comma-separated list." Width="450"></TextBox>
-						</WrapPanel>
 					</StackPanel>
 				</Expander>
 			</StackPanel>
