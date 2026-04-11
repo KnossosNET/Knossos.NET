@@ -196,7 +196,7 @@ namespace Knossos.NET
                 await Task.Delay(2000);
                 if(KnUtils.IsAppImage && File.Exists(KnUtils.AppImagePath + ".old"))
                 {
-                    File.Delete(KnUtils.AppImagePath + "old");
+                    File.Delete(KnUtils.AppImagePath + ".old");
                 }
 
                 /*No cleanup is needed for the other versions
