@@ -196,7 +196,7 @@ namespace Knossos.NET.Models
                     {
                         try
                         {
-                            HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(ModTagsURL).ConfigureAwait(false);
+                            using var response = await KnUtils.GetHttpClient().GetAsync(ModTagsURL).ConfigureAwait(false);
                             var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                             var tagsRepo = JsonSerializer.Deserialize<NebulaModTagJson[]>(json)!;
                             if (tagsRepo != null)

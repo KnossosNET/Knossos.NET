@@ -197,7 +197,7 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(Knossos.ToolRepoURL).ConfigureAwait(false);
+                using var response = await KnUtils.GetHttpClient().GetAsync(Knossos.ToolRepoURL).ConfigureAwait(false);
                 var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var toolsRepo = JsonSerializer.Deserialize<Tool[]>(json)!;
                 if(toolsRepo != null && toolsRepo.Any())
