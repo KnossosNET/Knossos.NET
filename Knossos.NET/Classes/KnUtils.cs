@@ -349,24 +349,31 @@ namespace Knossos.NET
         /// <param name="url"></param>
         public static void OpenBrowserURL(string url)
         {
+            // Check URL
+            if (string.IsNullOrWhiteSpace(url) || !Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                Log.Add(Log.LogSeverity.Warning, "KnUtils.OpenBrowserURL", $"Not opening web browser link due to invalid or unsafe URL: {url}");
+                return;
+            }
+
             try
             {
                 using (var process = new Process())
                 {
                     if (IsWindows)
                     {
-                        process.StartInfo.FileName = "cmd";
-                        process.StartInfo.Arguments = $"/c start {url}";
+                        process.StartInfo.FileName = uri.ToString();
+                        process.StartInfo.UseShellExecute = true;
                     }
                     else if (IsLinux)
                     {
                         process.StartInfo.FileName = "xdg-open";
-                        process.StartInfo.Arguments = url;
+                        process.StartInfo.Arguments = uri.ToString();
                     }
                     else if (IsMacOS)
                     {
                         process.StartInfo.FileName = "open";
-                        process.StartInfo.Arguments = url;
+                        process.StartInfo.Arguments = uri.ToString();
                     }
                     process.StartInfo.CreateNoWindow = true;
                     process.Start();
