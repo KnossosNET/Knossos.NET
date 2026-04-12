@@ -37,36 +37,67 @@ namespace Knossos.NET.ViewModels
                     if (mod.screenshots != null && mod.screenshots.Any())
                     {
                         ProgressBarMax += mod.screenshots.Length;
-                        var list = new List<string>();
+
+                        var uploadedScreenshots = new List<string>(mod.screenshots.Length);
                         var i = 1;
+
                         foreach (var sc in mod.screenshots)
                         {
-                            Info = "Screenshot Image " + i + " / " + mod.screenshots.Length;
-                            var cks = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + sc);
-                            if (cks != null)
-                            {
-                                list.Add(cks);
-                            }
+                            Info = $"Screenshot Image {i} / {mod.screenshots.Length}";
                             ProgressCurrent++;
+                            var checksum = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + sc);
+
+                            if (checksum != null)
+                            {
+                                uploadedScreenshots.Add(checksum);
+                            }
+                            else
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.UploadModImages", $"Failed to upload screenshot: {sc}. Upload will be cancelled.");
+                                Info = $"Failed to upload screenshot: {sc}";
+                                throw new Exception($"Could not upload screenshot '{sc}'.");
+                            }
+                            i++;
                         }
-                        mod.screenshots = list.ToArray();
+
+                        mod.screenshots = uploadedScreenshots.ToArray();
                     }
+
                     //Tile
                     if (!string.IsNullOrEmpty(mod.tile))
                     {
                         Info = "Tile Image";
-                        mod.tile = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + mod.tile);
+                        var checksum = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + mod.tile);
+
+                        if (checksum != null)
+                        {
+                            mod.tile = checksum;
+                        }
+                        else
+                        {
+                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.UploadModImages", "Failed to upload tile image.");
+                            throw new Exception("Could not upload tile image.");
+                        }
                     }
                     ProgressCurrent++;
                     //Banner
                     if (!string.IsNullOrEmpty(mod.banner))
                     {
                         Info = "Banner Image";
-                        mod.banner = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + mod.banner);
+                        var checksum = await Nebula.UploadImage(mod.fullPath + Path.DirectorySeparatorChar + mod.banner);
+
+                        if (checksum != null)
+                        {
+                            mod.banner = checksum;
+                        }
+                        else
+                        {
+                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.UploadModImages", "Failed to upload banner image.");
+                            throw new Exception("Could not upload banner image.");
+                        }
                     }
                     ProgressCurrent++;
-
-                    Info = "OK";
+                    Info = "All images uploaded successfully";
                     IsCompleted = true;
                     CancelButtonVisible = false;
                     ProgressCurrent = ProgressBarMax;
