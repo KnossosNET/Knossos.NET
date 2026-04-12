@@ -257,7 +257,7 @@ namespace Knossos.NET.ViewModels
             {
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
-                    await MessageBox.Show(MainWindow.instance!, "KnossosNET library path is not set! Before installing mods go to settings and select a library folder.", "Error", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance!, "KnossosNET Library Folder path is not set! Before installing mods go to settings and select a Library Folder.", "Error", MessageBox.MessageBoxButtons.OK);
                 });
                 return null;
             }
@@ -296,7 +296,7 @@ namespace Knossos.NET.ViewModels
             {
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
-                    await MessageBox.Show(MainWindow.instance!, "KnossosNET library path is not set! Before installing mods go to settings and select a library folder.", "Error", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance!, "KnossosNET Library Folder path is not set! Before installing mods go to settings and select a Library Folder.", "Error", MessageBox.MessageBoxButtons.OK);
                 });
                 return;
             }
