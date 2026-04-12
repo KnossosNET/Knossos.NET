@@ -107,6 +107,7 @@ namespace Knossos.NET.Models
                         customBuildExec = tempSettings.customBuildExec;
                         isCompressed = tempSettings.isCompressed;
                         ignoreGlobalCmd = tempSettings.ignoreGlobalCmd;
+                        noIngameOptions = tempSettings.noIngameOptions;
                         Log.Add(Log.LogSeverity.Information, "ModSettings.Load()", "Mod settings have been loaded from " + filePath);
                     }
                     

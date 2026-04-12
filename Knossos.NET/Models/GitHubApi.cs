@@ -19,7 +19,7 @@ namespace Knossos.NET.Models
             {
                 var client = KnUtils.GetHttpClient();
                 client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("product", "1"));
-                HttpResponseMessage response = await client.GetAsync(Knossos.GitHubUpdateRepoURL + "/releases/latest");
+                using var response = await client.GetAsync(Knossos.GitHubUpdateRepoURL + "/releases/latest");
                 var json = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<GitHubRelease>(json)!;
             }

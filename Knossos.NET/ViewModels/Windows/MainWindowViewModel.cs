@@ -355,12 +355,7 @@ namespace Knossos.NET.ViewModels
                     }
                     Knossos.globalSettings.Load();
                     GlobalSettingsView?.LoadData();
-                    //Knossos.globalSettings.EnableIniWatch();
                     GlobalSettingsView?.UpdateImgCacheSize();
-                }
-                else
-                {
-                    //Knossos.globalSettings.DisableIniWatch();
                 }
 
                 //Custom Views

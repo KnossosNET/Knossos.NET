@@ -25,20 +25,28 @@ namespace Knossos.NET
         private Process? process;
         private bool completedSuccessfully = false;
         private CancellationTokenSource? cancelSource;
+        private static readonly object _unpackLock = new object();
 
         public SevenZipConsoleWrapper(Action<int>? progressCallback = null, CancellationTokenSource? cancelSource = null) 
         {
-            if(pathToConsoleExecutable == null)
+            if (pathToConsoleExecutable == null)
             {
-                pathToConsoleExecutable = UnpackExec();
-                if (File.Exists(pathToConsoleExecutable))
+                lock (_unpackLock)
                 {
-                    _ = Run();
-                }
-                else
-                {
-                    pathToConsoleExecutable = null;
-                    Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.Constructor", "File does not exist: " + pathToConsoleExecutable);
+                    if (pathToConsoleExecutable == null)
+                    {
+                        pathToConsoleExecutable = UnpackExec();
+
+                        if (File.Exists(pathToConsoleExecutable))
+                        {
+                            _ = Run(); // get version
+                        }
+                        else
+                        {
+                            pathToConsoleExecutable = null;
+                            Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.Constructor", "File does not exist: " + pathToConsoleExecutable);
+                        }
+                    }
                 }
             }
             this.progressCallback = progressCallback;
@@ -174,7 +182,10 @@ namespace Knossos.NET
             {
                 if (process != null && process.ExitCode != 0)
                 {
-                    process.Kill();
+                    if (!process.HasExited)
+                    {
+                        process.Kill();
+                    }
                 }
             }
             catch (Exception ex)
@@ -383,7 +394,7 @@ namespace Knossos.NET
             {
                 try
                 {
-                    if (process.ExitCode != 0)
+                    if (!process.HasExited)
                     {
                         process.Kill();
                     }

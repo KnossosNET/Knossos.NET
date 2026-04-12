@@ -30,7 +30,7 @@ namespace Knossos.NET.ViewModels
             
             try
             {
-                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(Knossos.FAQURL).ConfigureAwait(false);
+                using var response = await KnUtils.GetHttpClient().GetAsync(Knossos.FAQURL).ConfigureAwait(false);
                 var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var faqRepo = JsonSerializer.Deserialize<QuestionCategory[]>(json)!;
                 if(faqRepo != null)

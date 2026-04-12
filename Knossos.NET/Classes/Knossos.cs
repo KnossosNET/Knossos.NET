@@ -70,7 +70,7 @@ namespace Knossos.NET
             catch (Exception ex)
             {
                 //At this stage we can only log to console
-                Log.WriteToConsole("Knossos() - " + ex.Message);
+                _ = Log.WriteToConsole("Knossos() - " + ex.Message);
             }
             //Important!!! The first time it needs to be ran after checking if we are in portable mode or not
             //Due to the Knossos data folder path changing
@@ -196,7 +196,7 @@ namespace Knossos.NET
                 await Task.Delay(2000);
                 if(KnUtils.IsAppImage && File.Exists(KnUtils.AppImagePath + ".old"))
                 {
-                    File.Delete(KnUtils.AppImagePath + "old");
+                    File.Delete(KnUtils.AppImagePath + ".old");
                 }
 
                 /*No cleanup is needed for the other versions
@@ -1484,7 +1484,7 @@ namespace Knossos.NET
             }
             else
             {
-                return installedMods;
+                return installedMods.ToList();
             }
         }
 
@@ -1527,7 +1527,7 @@ namespace Knossos.NET
                 }
                 else
                 {
-                    return engineBuilds;
+                    return engineBuilds.ToList();
                 }
             }
         }
@@ -1903,7 +1903,7 @@ namespace Knossos.NET
         /// <returns>List of tools or empty list</returns>
         public static List<Tool> GetTools()
         {
-            return modTools;
+            return modTools.ToList();
         }
     }
 }

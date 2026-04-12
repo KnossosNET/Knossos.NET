@@ -45,19 +45,19 @@ namespace Knossos.NET.Models
                         while ((line = reader.ReadLine()) != null)
                         {
                             var option = "+name";
-                            if (line.ToLower().Contains(option+" "))
+                            if (line.Contains(option+" ", StringComparison.CurrentCultureIgnoreCase))
                             {
-                                Name = line.ToLower().Replace(option + " ", "");
+                                Name = line.Replace(option + " ", "", StringComparison.CurrentCultureIgnoreCase);
                                 continue;
                             }
                             option = "+passwd";
-                            if (line.ToLower().Contains(option + " "))
+                            if (line.Contains(option + " ", StringComparison.CurrentCultureIgnoreCase))
                             {
-                                Password = line.ToLower().Replace(option + " ", "");
+                                Password = line.Replace(option + " ", "", StringComparison.CurrentCultureIgnoreCase);
                                 continue;
                             }
                             option = "+pxo";
-                            if (line.ToLower().Contains(option + " "))
+                            if (line.Contains(option + " ", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 UsePXO = true;
                                 try
@@ -68,28 +68,28 @@ namespace Knossos.NET.Models
                                 continue;
                             }
                             option = "+ban";
-                            if (line.ToLower().Contains(option + " "))
+                            if (line.Contains(option + " ", StringComparison.CurrentCultureIgnoreCase))
                             {
-                                Ban.Add(line.ToLower().Replace(option + " ", ""));
+                                Ban.Add(line.Replace(option + " ", "", StringComparison.CurrentCultureIgnoreCase));
                                 continue;
                             }
                             option = "+no_voice";
-                            if (line.ToLower().Contains(option + " "))
+                            if (line.Contains(option + " ", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 NoVoice = true;
                                 continue;
                             }
                             option = "+port";
-                            if (line.ToLower().Contains(option + " "))
+                            if (line.Contains(option + " ", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 try
                                 {
-                                    Port = int.Parse(line.ToLower().Replace(option + " ", ""));
+                                    Port = int.Parse(line.Replace(option + " ", "", StringComparison.CurrentCultureIgnoreCase));
                                 }
                                 catch { }
                                 continue;
                             }
-                            Others.Add(line.ToLower());
+                            Others.Add(line);
                         }
                     }
                     return true;

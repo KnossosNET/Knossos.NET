@@ -349,24 +349,31 @@ namespace Knossos.NET
         /// <param name="url"></param>
         public static void OpenBrowserURL(string url)
         {
+            // Check URL
+            if (string.IsNullOrWhiteSpace(url) || !Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                Log.Add(Log.LogSeverity.Warning, "KnUtils.OpenBrowserURL", $"Not opening web browser link due to invalid or unsafe URL: {url}");
+                return;
+            }
+
             try
             {
                 using (var process = new Process())
                 {
                     if (IsWindows)
                     {
-                        process.StartInfo.FileName = "cmd";
-                        process.StartInfo.Arguments = $"/c start {url}";
+                        process.StartInfo.FileName = uri.ToString();
+                        process.StartInfo.UseShellExecute = true;
                     }
                     else if (IsLinux)
                     {
                         process.StartInfo.FileName = "xdg-open";
-                        process.StartInfo.Arguments = url;
+                        process.StartInfo.Arguments = uri.ToString();
                     }
                     else if (IsMacOS)
                     {
                         process.StartInfo.FileName = "open";
-                        process.StartInfo.Arguments = url;
+                        process.StartInfo.Arguments = uri.ToString();
                     }
                     process.StartInfo.CreateNoWindow = true;
                     process.Start();
@@ -676,8 +683,11 @@ namespace Knossos.NET
                 if (localFile != null)
                 {
                     var fileStream = new FileStream(localFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    if(fileStream.Length == 0)
+                    if (fileStream.Length == 0)
+                    { 
+                        fileStream.Dispose();
                         return null;
+                    }
                     return fileStream;
                 }
             }
@@ -808,7 +818,7 @@ namespace Knossos.NET
                 string? newEtag = null;
                 Log.Add(Log.LogSeverity.Information, "KnUtils.GetUrlFileEtag()", "Getting " + url + " etag.");
 
-                var result = await KnUtils.GetHttpClient().GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                using var result = await KnUtils.GetHttpClient().GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                 newEtag = result.Headers?.ETag?.ToString().Replace("\"", "");
                 try
                 {
@@ -1212,7 +1222,7 @@ namespace Knossos.NET
         /// <summary>
         /// Deletes a file checking if it exists first and then waits for the file to be closed. 
         /// </summary>
-        public static void DeleteFileSafe(string filePath)
+        public static async Task DeleteFileSafe(string filePath, CancellationTokenSource? cancellationToken = null)
         {
             try
             {
@@ -1221,6 +1231,9 @@ namespace Knossos.NET
                     while (IsFileInUse(filePath))
                     {
                         Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.PrepareModPkg()", "Waiting for file to be closed to delete it: " + filePath);
+                        await Task.Delay(100);
+                        if (cancellationToken != null && cancellationToken.IsCancellationRequested)
+                            throw new TaskCanceledException();
                     }
                     File.Delete(filePath);
                 }
