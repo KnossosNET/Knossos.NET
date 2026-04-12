@@ -70,7 +70,7 @@ namespace Knossos.NET
             catch (Exception ex)
             {
                 //At this stage we can only log to console
-                Log.WriteToConsole("Knossos() - " + ex.Message);
+                _ = Log.WriteToConsole("Knossos() - " + ex.Message);
             }
             //Important!!! The first time it needs to be ran after checking if we are in portable mode or not
             //Due to the Knossos data folder path changing
