@@ -260,7 +260,7 @@ namespace Knossos.NET.ViewModels
                             -Increase main progress when: 
                              File starts to download, File finishes downloading, Decompression starts, Decompression ends, Image download completed
                         */
-                        await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks }, async (file, token) =>
+                        await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks, CancellationToken = cancellationTokenSource.Token }, async (file, token) =>
                         {
                             if (cancellationTokenSource.IsCancellationRequested)
                             {
