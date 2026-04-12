@@ -77,6 +77,7 @@ namespace Knossos.NET.ViewModels
         public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false)
         {
             string? modPath = null;
+            bool installed = false;
             try
             {
                 if (!TaskIsSet)
@@ -142,6 +143,7 @@ namespace Knossos.NET.ViewModels
                         if (modifyPkgs != null)
                         {
                             //Modify Build
+                            installed = true;
                             foreach (var pkg in modifyPkgs)
                             {
                                 var installedPkg = modJson.packages.FirstOrDefault(p => p.name == pkg.name && p.folder == pkg.folder);
@@ -699,7 +701,7 @@ namespace Knossos.NET.ViewModels
                 Info = "Task Cancelled";
                 try
                 {
-                    if (modPath != null)
+                    if (modPath != null && !installed)
                     {
                         Directory.Delete(modPath, true);
                     }
@@ -740,7 +742,7 @@ namespace Knossos.NET.ViewModels
                 Info = "Task Failed";
                 try
                 {
-                    if (modPath != null)
+                    if (modPath != null && !installed)
                     {
                         Directory.Delete(modPath, true);
                     }
