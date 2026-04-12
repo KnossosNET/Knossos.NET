@@ -1,19 +1,79 @@
 ﻿using Avalonia.Threading;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using System.Threading;
-using Knossos.NET.Classes;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
     public partial class TaskItemViewModel : ViewModelBase
     {
+        private async Task<bool> InstallVCRedist(bool is86 = false) {
+            var fileTask = new TaskItemViewModel(); // Crete new task
+            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, fileTask)); //insert task into this job TaskList
+            Info = "Tasks: " + ProgressCurrent + "/" + (++ProgressBarMax); //Update progress  
+            var path = "";
+            if (is86) { path = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "vc_redist.x86.exe"); }
+            else { path = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "vc_redist.x64.exe"); }
+            var fileUrl = "";
+            if (is86)
+            {
+                fileUrl = "https://aka.ms/vc14/vc_redist.x86.exe";
+            } //installs both x64 and arm versons
+            else { fileUrl = "https://aka.ms/vc14/vc_redist.x64.exe"; }
+            var result = await fileTask.DownloadFile(fileUrl, path, "Downloading VCRedist", false, null, cancellationTokenSource); // Start and await to finish
+                                                                                                                                       //Always check for cancel before executing the file
+            if (cancellationTokenSource.IsCancellationRequested)
+            {
+                throw new TaskCanceledException();
+            }
+
+            if (result.HasValue && result.Value)
+            {
+                //Assembly assembly = Assembly.GetExecutingAssembly();
+                //using Stream resourceStream = assembly.GetManifestResourceStream(resourceName)??throw new Exception("Resource not found!");
+                //Execute the installer
+                Info = "Tasks: " + (++ProgressCurrent) + "/" + ProgressBarMax;
+                //Retry a couple of times incase we get locked out by av temporealy
+                int retries = 5;
+                while (retries > 0)
+                {
+                    try
+                    {     
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = path,
+                            Arguments = "/install /quiet /norestart",
+                            Verb = "runas",
+                            UseShellExecute = true
+                        }).WaitForExit();
+                        break; // Success!
+                    }
+                    catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 32) // Error code for "File in use"
+                    {
+                        retries--;
+                        if (retries == 0) throw;
+                        System.Threading.Thread.Sleep(500); // Wait 500ms for AV to finish scanning
+                    }
+                }
+
+                if (File.Exists(path)) File.Delete(path);
+                return true;
+            }
+            else
+            {
+                throw new Exception("Error while downloading file: " + fileUrl);
+            }     
+        }
         public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false)
         {
             string? modPath = null;
@@ -433,9 +493,65 @@ namespace Knossos.NET.ViewModels
                             //Update version editor if needed
                             DeveloperModsViewModel.Instance?.UpdateVersionManager(modJson.id);
                         }
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        {
+                            bool installx86 = false;
+                        bool install64 = false;
+                        //Determine the cpu arch for vcredist that we need to download, if we need to download, from the FSO build arch NOT the host cpu arch.
+                        foreach (var ex in newBuild.executables)
+                        {
+                            if (ex.arch == FsoExecArch.x86 || ex.arch == FsoExecArch.x86_avx || ex.arch == FsoExecArch.x86_avx2)
+                            {
+                                installx86 = true;
+                            }
+                            if (ex.arch == FsoExecArch.arm64 || ex.arch == FsoExecArch.x64 || ex.arch == FsoExecArch.x64_avx || ex.arch == FsoExecArch.x64_avx2)
+                            {
+                                install64 = true;
+                            }
+                        }
+                            if (installx86)
+                            {
+                                string keyPath = @"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86";
+                                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(keyPath))
+                                {
+                                    if (key != null)
+                                    {
+                                        // 'Bld' is a DWORD representing the build version
+                                        object bldValue = key.GetValue("Bld");
+                                        if (bldValue != null && int.TryParse(bldValue.ToString(), out int bld))
+                                        {
+                                            // Example: 2022 runtimes typically have build numbers > 30000
+                                            installx86 = false;
+                                        }
+                                    }
+                                }
+                            }
+                            if (install64)
+                            {
+                                string keyPath = @"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64";
+                                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(keyPath))
+                                {
+                                    if (key != null)
+                                    {
+                                        // 'Bld' is a DWORD representing the build version
+                                        object bldValue = key.GetValue("Bld");
+                                        if (bldValue != null && int.TryParse(bldValue.ToString(), out int bld))
+                                        {
+                                            // Example: 2022 runtimes typically have build numbers > 30000
+                                            install64 = false;
+                                        }
+                                    }
+                                }
+                            }
+                            if (installx86)
+                            {
+                                await InstallVCRedist(true);
+                            }
+                            if (install64) { await InstallVCRedist(false); }                         
+                        }
+                    
                         IsCompleted = true;
                         CancelButtonVisible = false;
-
                         //Re-run Dependencies checks 
                         MainWindowViewModel.Instance?.RunModStatusChecks();
 
