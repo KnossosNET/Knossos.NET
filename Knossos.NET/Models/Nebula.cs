@@ -736,12 +736,14 @@ namespace Knossos.NET.Models
         /// <param name="needsLogIn"></param>
         /// <param name="timeoutSeconds"></param>
         /// <param name="method"></param>
+        /// <param name="attempt"></param>
         /// <returns>
         /// apireply or null if the call failed completely
         /// It is difficult to point out exactly what the reply is because it changed from call to call
         /// Most api calls return a ApiReply.result true or false if successfull or not but this is not to case for every call
+        /// If the nebula token is expired, the api call will attempt up to 3 times to renew it.
         /// </returns>
-        private static async Task<ApiReply?> ApiCall(string resourceUrl, HttpContent? data, bool needsLogIn = false, int timeoutSeconds = 45, ApiMethod method = ApiMethod.POST)
+        private static async Task<ApiReply?> ApiCall(string resourceUrl, HttpContent? data, bool needsLogIn = false, int timeoutSeconds = 45, ApiMethod method = ApiMethod.POST, int attempt = 0)
         {
             //Custom mode with no nebula services
             if (Knossos.inSingleTCMode && !CustomLauncher.UseNebulaServices)
@@ -775,9 +777,9 @@ namespace Knossos.NET.Models
                                 throw new ArgumentNullException(nameof(data));
                             }
                             var response = await client.PostAsync(apiURL + resourceUrl, data);
-                            data.Dispose();
                             if (response.IsSuccessStatusCode)
                             {
+                                data.Dispose();
                                 var jsonReply = await response.Content.ReadAsStringAsync();
                                 if (jsonReply == "OK") // multiupload/part hack
                                 {
@@ -799,10 +801,16 @@ namespace Knossos.NET.Models
                                 /* Nebula responds with a HTTP status code 401 for expired tokens, so lets try this again */
                                 if(needsLogIn && apiUserToken != null && response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                                 {
-                                    Log.Add(Log.LogSeverity.Information, "Nebula.ApiCall()", "Nebula: User login token is expired.");
-                                    apiUserToken = null;
-                                    return await ApiCall(resourceUrl, data, needsLogIn, timeoutSeconds, method);
+                                    if (attempt <= 3)
+                                    {
+                                        attempt++;
+                                        await Task.Delay(2000);
+                                        Log.Add(Log.LogSeverity.Information, "Nebula.ApiCall()", $"Nebula: User login token is expired. Trying to renew #{attempt}");
+                                        apiUserToken = null;
+                                        return await ApiCall(resourceUrl, data, needsLogIn, timeoutSeconds, method, attempt);
+                                    }
                                 }
+                                data.Dispose();
                                 /* Upload/Update/delete Mod Timeout Hack */
                                 if(response.StatusCode.ToString() == "GatewayTimeout" && (resourceUrl == "mod/release" || resourceUrl == "mod/release/update" || resourceUrl == "mod/release/delete" || resourceUrl == "multiupload/finish"))
                                 {
