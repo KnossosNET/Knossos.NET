@@ -683,8 +683,11 @@ namespace Knossos.NET
                 if (localFile != null)
                 {
                     var fileStream = new FileStream(localFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    if(fileStream.Length == 0)
+                    if (fileStream.Length == 0)
+                    { 
+                        fileStream.Dispose();
                         return null;
+                    }
                     return fileStream;
                 }
             }
