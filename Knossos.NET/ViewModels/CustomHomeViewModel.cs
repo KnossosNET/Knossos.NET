@@ -512,7 +512,7 @@ namespace Knossos.NET.ViewModels
                 {
                     Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.BrowseFolderCommand() - test read/write was not successful: ", ex);
                     await Dispatcher.UIThread.Invoke(async () => {
-                        await MessageBox.Show(null, "We were not able to write to this folder.  Please select another library folder.", "Cannot Select Folder", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(null, "We were not able to write to this folder.  Please select another Library Folder.", "Cannot Select Folder", MessageBox.MessageBoxButtons.OK);
                     }).ConfigureAwait(false);
                 }
             }

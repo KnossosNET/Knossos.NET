@@ -32,13 +32,13 @@
 						<WrapPanel Margin="7,10,0,0">
 							<TextBlock VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
 							<TextBox HorizontalAlignment="Left" Width="400" Text="{Binding BasePath}" Margin="10,0,0,0" IsReadOnly="True" ></TextBox>
-							<Button IsVisible="{Binding !IsPortableMode}" Margin="5,0,0,0" Classes="Quaternary" Command="{Binding BrowseFolderCommand}">Browse</Button>
+							<Button IsVisible="{Binding !IsPortableMode}" Margin="5,0,0,0" Classes="Quaternary" Command="{Binding BrowseFolderCommand}" ToolTip.Tip="It is highly recommended to set this as an empty folder in a location with a large amount of available storage. Do not set it to a shared or cloud drive (such as OneDrive or Google Drive) because syncing issues will prevent Knossos from downloading mod files correctly.">Browse</Button>
 						</WrapPanel>
 						<!-- Lib Info -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="6,10,0,0">
 							<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Width="200">Stats</TextBlock>
 							<WrapPanel Grid.Column="1" Grid.Row="0"  Margin="8,2,0,0">
-								<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications (collectively known as mods) are installed in your KnossosNET library.">Mods:</Label>
+								<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications (collectively known as mods) are installed in your KnossosNET Library Folder.">Mods:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
 								<Label Margin="40,5,0,0" FontWeight="Bold">Builds:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfBuilds}"></TextBlock>
