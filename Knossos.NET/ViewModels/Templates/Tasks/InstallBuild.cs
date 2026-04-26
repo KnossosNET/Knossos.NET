@@ -32,7 +32,7 @@ namespace Knossos.NET.ViewModels
             else { fileUrl = "https://aka.ms/vc14/vc_redist.x64.exe"; }
             var result = await fileTask.DownloadFile(fileUrl, path, "Downloading VCRedist", false, null, cancellationTokenSource); // Start and await to finish
                                                                                                                                        //Always check for cancel before executing the file
-            if (cancellationTokenSource.IsCancellationRequested)
+            if (cancellationTokenSource != null && cancellationTokenSource.IsCancellationRequested)
             {
                 throw new TaskCanceledException();
             }
@@ -55,7 +55,7 @@ namespace Knossos.NET.ViewModels
                             Arguments = "/install /quiet /norestart",
                             Verb = "runas",
                             UseShellExecute = true
-                        }).WaitForExit();
+                        })?.WaitForExit();
                         break; // Success!
                     }
                     catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 32) // Error code for "File in use"
@@ -74,6 +74,7 @@ namespace Knossos.NET.ViewModels
                 throw new Exception("Error while downloading file: " + fileUrl);
             }     
         }
+
         public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false)
         {
             string? modPath = null;
@@ -498,28 +499,28 @@ namespace Knossos.NET.ViewModels
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
                             bool installx86 = false;
-                        bool install64 = false;
-                        //Determine the cpu arch for vcredist that we need to download, if we need to download, from the FSO build arch NOT the host cpu arch.
-                        foreach (var ex in newBuild.executables)
-                        {
-                            if (ex.arch == FsoExecArch.x86 || ex.arch == FsoExecArch.x86_avx || ex.arch == FsoExecArch.x86_avx2)
+                            bool install64 = false;
+                            //Determine the cpu arch for vcredist that we need to download, if we need to download, from the FSO build arch NOT the host cpu arch.
+                            foreach (var ex in newBuild.executables)
                             {
-                                installx86 = true;
+                                if (ex.arch == FsoExecArch.x86 || ex.arch == FsoExecArch.x86_avx || ex.arch == FsoExecArch.x86_avx2)
+                                {
+                                    installx86 = true;
+                                }
+                                if (ex.arch == FsoExecArch.arm64 || ex.arch == FsoExecArch.x64 || ex.arch == FsoExecArch.x64_avx || ex.arch == FsoExecArch.x64_avx2)
+                                {
+                                    install64 = true;
+                                }
                             }
-                            if (ex.arch == FsoExecArch.arm64 || ex.arch == FsoExecArch.x64 || ex.arch == FsoExecArch.x64_avx || ex.arch == FsoExecArch.x64_avx2)
-                            {
-                                install64 = true;
-                            }
-                        }
                             if (installx86)
                             {
                                 string keyPath = @"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86";
-                                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(keyPath))
+                                using (RegistryKey? key = Registry.LocalMachine.OpenSubKey(keyPath))
                                 {
                                     if (key != null)
                                     {
                                         // 'Bld' is a DWORD representing the build version
-                                        object bldValue = key.GetValue("Bld");
+                                        object? bldValue = key.GetValue("Bld");
                                         if (bldValue != null && int.TryParse(bldValue.ToString(), out int bld))
                                         {
                                             // Example: 2022 runtimes typically have build numbers > 30000
@@ -531,12 +532,12 @@ namespace Knossos.NET.ViewModels
                             if (install64)
                             {
                                 string keyPath = @"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64";
-                                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(keyPath))
+                                using (RegistryKey? key = Registry.LocalMachine.OpenSubKey(keyPath))
                                 {
                                     if (key != null)
                                     {
                                         // 'Bld' is a DWORD representing the build version
-                                        object bldValue = key.GetValue("Bld");
+                                        object? bldValue = key.GetValue("Bld");
                                         if (bldValue != null && int.TryParse(bldValue.ToString(), out int bld))
                                         {
                                             // Example: 2022 runtimes typically have build numbers > 30000
