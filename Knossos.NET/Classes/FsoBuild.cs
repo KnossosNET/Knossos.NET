@@ -1,4 +1,6 @@
-﻿using Knossos.NET.Classes;
+﻿using Avalonia.Threading;
+using Knossos.NET.Classes;
+using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -91,6 +93,7 @@ namespace Knossos.NET.Models
         public bool isInstalled = true;
         public bool devMode = false;
         public Mod? modData; 
+        private static bool _flagErrorOneWarn = false;
       
         /// <summary>
         /// This is a "DirectExec" FsoBuild
@@ -275,6 +278,7 @@ namespace Knossos.NET.Models
                         }
 
                         fso.StartInfo.UseShellExecute = false;
+                        fso.StartInfo.RedirectStandardError = true;
                         if (workingFolder != null)
                             fso.StartInfo.WorkingDirectory = workingFolder;
                         if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences ||
@@ -301,6 +305,31 @@ namespace Knossos.NET.Models
                         fso.Start();
                         if (waitForExit)
                             await fso.WaitForExitAsync();
+
+                        var stderr = fso.StandardError.ReadToEnd();
+                        if (!string.IsNullOrEmpty(stderr))
+                        {
+                            var errorMsg = $"FSO exited with code {fso.ExitCode}\n\n\nStderr:\n{stderr}";
+                            Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", errorMsg);
+
+                            if (KnUtils.IsLinux && stderr.Contains("fuse", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var libfuseError = $"libfuse is missing! FSO AppImages needs fuse to run. Install with:\n" +
+                                    "Ubuntu/Debian: sudo apt install libfuse2\n" +
+                                    "Fedora: sudo dnf install fuse\n" +
+                                    "Arch: sudo pacman -S fuse2";
+                                Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", libfuseError);
+                                Dispatcher.UIThread.Invoke(new Action(() => { MessageBox.Show(MainWindow.instance, libfuseError, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); }));
+                            }
+                            else
+                            {
+                                Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", stderr);
+                                Dispatcher.UIThread.Invoke(new Action(() => { MessageBox.Show(MainWindow.instance, stderr, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); }));
+                            }
+
+                            return new FsoResult(false);
+                        }
+
                         return new FsoResult(true);
                     }
                 }
@@ -344,6 +373,7 @@ namespace Knossos.NET.Models
             }
 
             string output = string.Empty;
+            string stderr = string.Empty;
             try
             {
                 using (var cmd = new Process())
@@ -354,6 +384,7 @@ namespace Knossos.NET.Models
                     cmd.StartInfo.CreateNoWindow = true;
                     cmd.StartInfo.RedirectStandardOutput = true;
                     cmd.StartInfo.RedirectStandardInput = true;
+                    cmd.StartInfo.RedirectStandardError = true;
                     cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
                     cmd.StartInfo.WorkingDirectory = folderPath;
                     if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences ||
@@ -369,8 +400,41 @@ namespace Knossos.NET.Models
 
                     cmd.Start();
                     string result = cmd.StandardOutput.ReadToEnd();
+                    stderr = cmd.StandardError.ReadToEnd();
                     output = result;
                     cmd.WaitForExit();
+
+                    if (!string.IsNullOrEmpty(stderr) )
+                    {
+                        var errorMsg = $"FSO exited with code {cmd.ExitCode}\n\nStdout:\n{output}\n\nStderr:\n{stderr}";
+                        Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", errorMsg);
+
+                        if (KnUtils.IsLinux && (stderr.Contains("fuse", StringComparison.OrdinalIgnoreCase) || output.Contains("fuse", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            var libfuseError = $"libfuse is missing! FSO AppImages needs fuse to run. Install with:\n" +
+                                "Ubuntu/Debian: sudo apt install libfuse2\n" +
+                                "Fedora: sudo dnf install fuse\n" +
+                                "Arch: sudo pacman -S fuse2";
+                            Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", libfuseError);
+                            if (!_flagErrorOneWarn)
+                            {
+                                _flagErrorOneWarn = true;
+                                Dispatcher.UIThread.Invoke(new Action(() => { MessageBox.Show(MainWindow.instance, libfuseError, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); }));
+                            }
+                        }
+                        else
+                        {
+                            Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", stderr);
+                            if (!_flagErrorOneWarn)
+                            {
+                                _flagErrorOneWarn = true;
+                                Dispatcher.UIThread.Invoke(new Action(() => { MessageBox.Show(MainWindow.instance, stderr, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); }));
+                            }
+                        }
+
+                        return null;
+                    }
+
                     cmd.Dispose();
                     //avoiding the "fso is running in legacy config mode..."
                     if (result.Contains("{"))
