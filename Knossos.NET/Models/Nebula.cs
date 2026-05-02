@@ -913,7 +913,7 @@ namespace Knossos.NET.Models
                     }
                 }
 
-                var reply = await ApiCall("mod/json/"+modid+"/"+version, null, false, 30, ApiMethod.GET);
+                var reply = await ApiCall("mod/json/"+modid+"/"+version, null, false, 60, ApiMethod.GET);
 
                 if (reply.HasValue)
                 {
