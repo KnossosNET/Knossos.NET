@@ -278,7 +278,6 @@ namespace Knossos.NET.Models
                         }
 
                         fso.StartInfo.UseShellExecute = false;
-                        fso.StartInfo.RedirectStandardError = true;
                         if (workingFolder != null)
                             fso.StartInfo.WorkingDirectory = workingFolder;
                         if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences ||
@@ -305,30 +304,6 @@ namespace Knossos.NET.Models
                         fso.Start();
                         if (waitForExit)
                             await fso.WaitForExitAsync();
-
-                        var stderr = fso.StandardError.ReadToEnd();
-                        if (!string.IsNullOrEmpty(stderr))
-                        {
-                            var errorMsg = $"FSO exited with code {fso.ExitCode}\n\n\nStderr:\n{stderr}";
-                            Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", errorMsg);
-
-                            if (KnUtils.IsLinux && stderr.Contains("fuse", StringComparison.OrdinalIgnoreCase))
-                            {
-                                var libfuseError = $"libfuse is missing! FSO AppImages needs fuse to run. Install with:\n" +
-                                    "Ubuntu/Debian: sudo apt install libfuse2\n" +
-                                    "Fedora: sudo dnf install fuse\n" +
-                                    "Arch: sudo pacman -S fuse2";
-                                Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", libfuseError);
-                                Dispatcher.UIThread.Invoke(new Action(() => { MessageBox.Show(MainWindow.instance, libfuseError, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); }));
-                            }
-                            else
-                            {
-                                Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", stderr);
-                                Dispatcher.UIThread.Invoke(new Action(() => { MessageBox.Show(MainWindow.instance, stderr, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); }));
-                            }
-
-                            return new FsoResult(false);
-                        }
 
                         return new FsoResult(true);
                     }
@@ -404,12 +379,13 @@ namespace Knossos.NET.Models
                     output = result;
                     cmd.WaitForExit();
 
-                    if (!string.IsNullOrEmpty(stderr) )
+                    if (KnUtils.IsLinux && !string.IsNullOrEmpty(stderr))
                     {
+                        //Possible missing dependency libs on linux like libfuse for appimage
                         var errorMsg = $"FSO exited with code {cmd.ExitCode}\n\nStdout:\n{output}\n\nStderr:\n{stderr}";
                         Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", errorMsg);
 
-                        if (KnUtils.IsLinux && (stderr.Contains("fuse", StringComparison.OrdinalIgnoreCase) || output.Contains("fuse", StringComparison.OrdinalIgnoreCase)))
+                        if (stderr.Contains("fuse", StringComparison.OrdinalIgnoreCase) || output.Contains("fuse", StringComparison.OrdinalIgnoreCase))
                         {
                             var libfuseError = $"libfuse is missing! FSO AppImages needs fuse to run. Install with:\n" +
                                 "Ubuntu/Debian: sudo apt install libfuse2\n" +
@@ -419,7 +395,7 @@ namespace Knossos.NET.Models
                             if (!_flagErrorOneWarn)
                             {
                                 _flagErrorOneWarn = true;
-                                Dispatcher.UIThread.Invoke(new Action(() => { MessageBox.Show(MainWindow.instance, libfuseError, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); }));
+                                Dispatcher.UIThread.Invoke(async () => { await MessageBox.Show(MainWindow.instance, libfuseError, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); });
                             }
                         }
                         else
@@ -428,10 +404,9 @@ namespace Knossos.NET.Models
                             if (!_flagErrorOneWarn)
                             {
                                 _flagErrorOneWarn = true;
-                                Dispatcher.UIThread.Invoke(new Action(() => { MessageBox.Show(MainWindow.instance, stderr, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); }));
+                                Dispatcher.UIThread.Invoke(async ()=> { await MessageBox.Show(MainWindow.instance, stderr, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); });
                             }
                         }
-
                         return null;
                     }
 
