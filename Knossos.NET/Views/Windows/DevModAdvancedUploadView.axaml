@@ -8,9 +8,10 @@
 		Icon="/Assets/knossos-icon.ico"
 		xmlns:vm="using:Knossos.NET.ViewModels"
 		x:DataType="vm:DevModAdvancedUploadViewModel"
-		Width="1100"
-		Height="700"
 		WindowStartupLocation="CenterOwner"
+		SizeToContent="Width"
+		MinHeight="400"
+		MinWidth="400"
 		Title="{Binding Title}"
 		CanResize="True">
 

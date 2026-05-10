@@ -10,7 +10,7 @@
 		x:DataType="vm:QuickSetupViewModel"
 		Icon="/Assets/knossos-icon.ico"
 		Topmost="True"
-		WindowStartupLocation="CenterScreen"
+		WindowStartupLocation="CenterOwner"
 		Title="Quick Setup Guide" 
 		SizeToContent="WidthAndHeight"
 		MaxWidth="800"

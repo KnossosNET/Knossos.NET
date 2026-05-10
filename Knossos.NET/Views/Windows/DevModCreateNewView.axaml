@@ -9,9 +9,12 @@
 		x:DataType="vm:DevModCreateNewViewModel"
         Title="Create New Mod"
 		x:Name="CreateModView"
-		SizeToContent="WidthAndHeight"
-		Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterOwner"
+		SizeToContent="Width"
+		MinHeight="400"
+		MinWidth="400"
+		Icon="/Assets/knossos-icon.ico"
+
 		CanResize="False">
 	<Design.DataContext>
 		<vm:DevModCreateNewViewModel/>

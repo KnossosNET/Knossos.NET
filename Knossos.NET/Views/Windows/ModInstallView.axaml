@@ -5,14 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Knossos.NET.Views.ModInstallView"
-		WindowStartupLocation="CenterScreen"
 		xmlns:v="using:Knossos.NET.Views"
 		xmlns:vm="using:Knossos.NET.ViewModels"
 		x:DataType="vm:ModInstallViewModel"
 		xmlns:models="using:Knossos.NET.Models"
 		Icon="/Assets/knossos-icon.ico"
+		WindowStartupLocation="CenterOwner"
 		SizeToContent="Width"
-		Height="600"
+		MinHeight="400"
+	    MinWidth="400"
 		Title="{Binding Title}"
 		CanResize="True">
 	

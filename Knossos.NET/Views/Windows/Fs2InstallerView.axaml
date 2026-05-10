@@ -8,9 +8,11 @@
 		xmlns:vm="using:Knossos.NET.ViewModels"
 		x:DataType="vm:Fs2InstallerViewModel"
 		Icon="/Assets/knossos-icon.ico"
-		WindowStartupLocation="CenterScreen"
 		Title="Freespace 2 Retail Installer" 
-		SizeToContent="WidthAndHeight"
+		WindowStartupLocation="CenterOwner"
+		SizeToContent="Width"
+		MinHeight="400"
+		MinWidth="400"
 		CanResize="False">
 
 	<Design.DataContext>

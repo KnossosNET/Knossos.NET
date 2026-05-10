@@ -11,8 +11,10 @@ namespace Knossos.NET.Views
         {
             //InitializeComponent();
             AvaloniaXamlLoader.Load(this);
-            ((CleanupKnossosLibraryViewModel)DataContext!).OnRequestClose += (s, ev) => Close();
-            ((CleanupKnossosLibraryViewModel)DataContext!).LoadRemovableMods();
+            DataContext = new CleanupKnossosLibraryViewModel();
+
+            ((CleanupKnossosLibraryViewModel)DataContext).OnRequestClose += (s, ev) => Close();
+            ((CleanupKnossosLibraryViewModel)DataContext).LoadRemovableMods();
         }
     }
 }

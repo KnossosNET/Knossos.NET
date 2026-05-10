@@ -9,7 +9,9 @@
 		x:DataType="vm:ServerCreatorViewModel"
 		Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterOwner"
-		SizeToContent="WidthAndHeight"
+		SizeToContent="Width"
+		MinHeight="400"
+	    MinWidth="400"
         Title="PXO Standalone Server Creator">
 	
 	<Design.DataContext>

@@ -8,9 +8,11 @@
 		xmlns:vm="using:Knossos.NET.ViewModels"
 		x:DataType="vm:CleanupKnossosLibraryViewModel"
 		Icon="/Assets/knossos-icon.ico"
-		WindowStartupLocation="CenterScreen"
         Title="KnossosNET Library Cleanup" 
-		SizeToContent="WidthAndHeight" 
+		WindowStartupLocation="CenterOwner"
+		SizeToContent="Width"
+		MinHeight="400"
+	    MinWidth="400"
 		CanResize="False">
 	
 	<Design.DataContext>

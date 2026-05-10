@@ -8,7 +8,10 @@
 		xmlns:vm="using:Knossos.NET.ViewModels"
 		x:DataType="vm:DebugFiltersViewModel"
 		Icon="/Assets/knossos-icon.ico"
-		WindowStartupLocation="CenterScreen"
+		WindowStartupLocation="CenterOwner"
+		SizeToContent="Width"
+		MinHeight="400"
+		MinWidth="400"
         Title="Debug Filter Selection" 
 		CanResize="True">
 	

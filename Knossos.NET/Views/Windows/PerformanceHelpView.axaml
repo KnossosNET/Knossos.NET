@@ -6,9 +6,11 @@
         x:Class="Knossos.NET.Views.PerformanceHelpView"
 		xmlns:vm="clr-namespace:Knossos.NET.ViewModels;assembly=Knossos.NET"
 		Icon="/Assets/knossos-icon.ico"
-		WindowStartupLocation="CenterScreen"
         Title="How to increase in-game performance" 
-		SizeToContent="WidthAndHeight" 
+		WindowStartupLocation="CenterOwner"
+		SizeToContent="Width"
+		MinHeight="400"
+	    MinWidth="400"
 		CanResize="False">
 	
 	<StackPanel MaxWidth="500" Background="{StaticResource BackgroundColorPrimary}">

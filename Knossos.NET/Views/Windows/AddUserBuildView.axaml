@@ -8,10 +8,11 @@
 		xmlns:vm="using:Knossos.NET.ViewModels"
 		x:DataType="vm:AddUserBuildViewModel"
 		Icon="/Assets/knossos-icon.ico"
-		WindowStartupLocation="CenterScreen"
         Title="Add Custom FSO Build"
-		Width="550"
-		Height="600"
+		WindowStartupLocation="CenterOwner"
+		SizeToContent="Width"
+		MinHeight="400"
+		MinWidth="400"
 		CanResize="True">
 	
 	<Design.DataContext>

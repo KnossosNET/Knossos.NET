@@ -1580,7 +1580,6 @@ namespace Knossos.NET.ViewModels
         internal async void CleanupLibraryCommand()
         {
             var dialog = new CleanupKnossosLibraryView();
-            dialog.DataContext = new CleanupKnossosLibraryViewModel();
 
             await dialog.ShowDialog<CleanupKnossosLibraryView?>(MainWindow.instance);
         }
