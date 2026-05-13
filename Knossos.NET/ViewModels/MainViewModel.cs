@@ -335,13 +335,8 @@ namespace Knossos.NET.ViewModels
                         GlobalSettingsView?.CheckDisplaySettingsWarning();
                     }
                     Knossos.globalSettings.Load();
-                    GlobalSettingsView?.LoadData();
-                    //Knossos.globalSettings.EnableIniWatch();
+                    GlobalSettingsView?.LoadDataAsync();
                     GlobalSettingsView?.UpdateImgCacheSize();
-                }
-                else
-                {
-                    //Knossos.globalSettings.DisableIniWatch();
                 }
 
                 //Custom Views
@@ -487,7 +482,7 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public void GlobalSettingsLoadData()
         {
-            GlobalSettingsView?.LoadData();
+            GlobalSettingsView?.LoadDataAsync();
         }
 
         internal void ApplySettings()

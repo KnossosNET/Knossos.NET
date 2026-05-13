@@ -596,7 +596,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal void UpdateBasePathAndroid()
+        internal async void UpdateBasePathAndroid()
         {
             try
             {
@@ -616,7 +616,7 @@ namespace Knossos.NET.ViewModels
                 Knossos.globalSettings.basePath = path;
                 Knossos.globalSettings.Save();
                 Knossos.ResetBasePath();
-                LoadData();
+                await LoadDataAsync();
             }
             catch (Exception ex) 
             {
@@ -1236,13 +1236,6 @@ namespace Knossos.NET.ViewModels
                       Knossos.ResetBasePath();
                       await LoadDataAsync();
                 } 
-                catch (Exception ex) 
-                {
-                    Log.Add(Log.LogSeverity.Error, "GlobalSettings.BrowseFolderCommand() - test read/write was not successful: ", ex);
-                    await Dispatcher.UIThread.Invoke(async () => {
-                        await MessageBox.Show(null, "KnossosNET was not able to write to this folder.  Please select another Library Folder.", "Cannot Select Folder", MessageBox.MessageBoxButtons.OK);
-                    }).ConfigureAwait(false);
-                }
             } 
             catch (Exception ex) 
             {

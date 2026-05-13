@@ -103,11 +103,5 @@ namespace Knossos.NET.Classes
             }
             base.Dispose(disposing);
         }
-
-        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
-        {
-            Limit(buffer.Length);
-            return stream.ReadAsync(buffer, cancellationToken);
-        }
     }
 }
