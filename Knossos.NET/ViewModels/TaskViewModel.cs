@@ -257,7 +257,7 @@ namespace Knossos.NET.ViewModels
             {
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
-                    await MessageBox.Show(MainWindow.instance!, "KnossosNET library path is not set! Before installing mods go to settings and select a library folder.", "Error", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance!, "KnossosNET Library Folder path is not set! Before installing mods go to settings and select a Library Folder.", "Error", MessageBox.MessageBoxButtons.OK);
                 });
                 return null;
             }
@@ -292,44 +292,51 @@ namespace Knossos.NET.ViewModels
         /// <param name="manualCompress"></param>
         public async void InstallMod(Mod mod, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true)
         {
-            if (Knossos.GetKnossosLibraryPath() == null)
+            try
             {
-                await Dispatcher.UIThread.InvokeAsync(async () =>
+                if (Knossos.GetKnossosLibraryPath() == null)
                 {
-                    await MessageBox.Show(MainWindow.instance!, "KnossosNET library path is not set! Before installing mods go to settings and select a library folder.", "Error", MessageBox.MessageBoxButtons.OK);
-                });
-                return;
-            }
-
-            if (mod.type == ModType.engine)
-            {
-                //If this is an engine build then call the UI element to do the build install process instead
-                FsoBuildsViewModel.Instance?.RelayInstallBuild(mod);
-            }
-            else
-            {
-                using (var cancelSource = new CancellationTokenSource())
-                {
-                    var newTask = new TaskItemViewModel();
-                    Dispatcher.UIThread.Invoke(() =>
+                    await Dispatcher.UIThread.InvokeAsync(async () =>
                     {
-                        TaskList.Add(newTask);
-                        taskQueue.Enqueue(newTask);
+                        await MessageBox.Show(MainWindow.instance!, "KnossosNET Library Folder path is not set! Before installing mods go to settings and select a Library Folder.", "Error", MessageBox.MessageBoxButtons.OK);
                     });
-                    var res = await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress, cleanupOldVersions, cleanInstall, allowHardlinks).ConfigureAwait(false);
-                    if(res && Knossos.inSingleTCMode)
+                    return;
+                }
+
+                if (mod.type == ModType.engine)
+                {
+                    //If this is an engine build then call the UI element to do the build install process instead
+                    FsoBuildsViewModel.Instance?.RelayInstallBuild(mod);
+                }
+                else
+                {
+                    using (var cancelSource = new CancellationTokenSource())
                     {
-                        try
+                        var newTask = new TaskItemViewModel();
+                        Dispatcher.UIThread.Invoke(() =>
                         {
-                            TaskList.Remove(newTask);
-                        }
-                        catch (Exception ex)
+                            TaskList.Add(newTask);
+                            taskQueue.Enqueue(newTask);
+                        });
+                        var res = await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress, cleanupOldVersions, cleanInstall, allowHardlinks).ConfigureAwait(false);
+                        if(res && Knossos.inSingleTCMode)
                         {
-                            Log.Add(Log.LogSeverity.Error, "TaskViewModel.InstallMod()", ex);
+                            try
+                            {
+                                TaskList.Remove(newTask);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskViewModel.InstallMod()", ex);
+                            }
+                            Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask("Completed: " + newTask.Name), DispatcherPriority.Background);
                         }
-                        Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask("Completed: " + newTask.Name), DispatcherPriority.Background);
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "TaskViewModel.InstallMod()", ex);
             }
         }
 
@@ -418,15 +425,22 @@ namespace Knossos.NET.ViewModels
         /// <param name="mod"></param>
         public async void VerifyMod(Mod mod)
         {
-            using (var cancelSource = new CancellationTokenSource())
+            try
             {
-                var newTask = new TaskItemViewModel();
-                Dispatcher.UIThread.Invoke(() =>
+                using (var cancelSource = new CancellationTokenSource())
                 {
-                    TaskList.Add(newTask);
-                    taskQueue.Enqueue(newTask);
-                });
-                await newTask.VerifyMod(mod, cancelSource).ConfigureAwait(false);
+                    var newTask = new TaskItemViewModel();
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        TaskList.Add(newTask);
+                        taskQueue.Enqueue(newTask);
+                    });
+                    await newTask.VerifyMod(mod, cancelSource).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "TaskViewModel.VerifyMod()", ex);
             }
         }
 
@@ -439,20 +453,27 @@ namespace Knossos.NET.ViewModels
         /// <param name="hackCallback"></param>
         public async void CreateModVersion(Mod oldMod, string newVersion, Action hackCallback)
         {
-            using (var cancelSource = new CancellationTokenSource())
+            try
             {
-                var newTask = new TaskItemViewModel();
-                Dispatcher.UIThread.Invoke(() =>
+                using (var cancelSource = new CancellationTokenSource())
                 {
-                    TaskList.Add(newTask);
-                    taskQueue.Enqueue(newTask);
-                });
-                await newTask.CreateModVersion(oldMod, newVersion, cancelSource).ConfigureAwait(false);
-                await Task.Delay(1000).ConfigureAwait(false);
-                Dispatcher.UIThread.Invoke(() =>
-                {
-                    hackCallback?.Invoke();
-                });
+                    var newTask = new TaskItemViewModel();
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        TaskList.Add(newTask);
+                        taskQueue.Enqueue(newTask);
+                    });
+                    await newTask.CreateModVersion(oldMod, newVersion, cancelSource).ConfigureAwait(false);
+                    await Task.Delay(1000).ConfigureAwait(false);
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        hackCallback?.Invoke();
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "TaskViewModel.CreateModVersion()", ex);
             }
         }
 
@@ -468,15 +489,22 @@ namespace Knossos.NET.ViewModels
         /// <param name="parallelUploads"></param>
         public async void UploadModVersion(Mod mod, bool isNewMod, bool metadataonly = false, int parallelCompression = 1, int parallelUploads = 1, List<DevModAdvancedUploadData>? advData = null )
         {
-            using (var cancelSource = new CancellationTokenSource())
+            try
             {
-                var newTask = new TaskItemViewModel();
-                Dispatcher.UIThread.Invoke(() =>
+                using (var cancelSource = new CancellationTokenSource())
                 {
-                    TaskList.Add(newTask);
-                    taskQueue.Enqueue(newTask);
-                });
-                await newTask.UploadModVersion(mod, isNewMod, metadataonly, cancelSource, parallelCompression, parallelUploads, advData).ConfigureAwait(false);
+                    var newTask = new TaskItemViewModel();
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        TaskList.Add(newTask);
+                        taskQueue.Enqueue(newTask);
+                    });
+                    await newTask.UploadModVersion(mod, isNewMod, metadataonly, cancelSource, parallelCompression, parallelUploads, advData).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "TaskViewModel.UploadModVersion()", ex);
             }
         }
 

@@ -40,7 +40,7 @@ namespace Knossos.NET.ViewModels
                         else
                         {
                             Task.Run(async () => {
-                                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(path).ConfigureAwait(false);
+                                using var response = await KnUtils.GetHttpClient().GetAsync(path).ConfigureAwait(false);
                                 byte[] content = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                                 using (Stream stream = new MemoryStream(content))
                                 {
@@ -322,7 +322,7 @@ namespace Knossos.NET.ViewModels
                     {
                         Task.Run(async () => {
                             
-                            HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(TileImagePath).ConfigureAwait(false);
+                            using var response = await KnUtils.GetHttpClient().GetAsync(TileImagePath).ConfigureAwait(false);
                             byte[] content = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                             using (Stream stream = new MemoryStream(content))
                             {
@@ -354,7 +354,7 @@ namespace Knossos.NET.ViewModels
                     else
                     {
                         Task.Run( async () => { 
-                            HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(TileImagePath).ConfigureAwait(false);
+                            using var response = await KnUtils.GetHttpClient().GetAsync(TileImagePath).ConfigureAwait(false);
                             byte[] content =  await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                             using (Stream stream = new MemoryStream(content))
                             {

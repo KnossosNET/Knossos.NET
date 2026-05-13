@@ -110,6 +110,7 @@ namespace Knossos.NET.ViewModels
                     {
                         Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallTool()", "Error while decompressing the file " + fileFullPath);
                         CancelTaskCommand();
+                        throw new TaskCanceledException();
                     }
 
                     if (cancellationTokenSource.IsCancellationRequested)

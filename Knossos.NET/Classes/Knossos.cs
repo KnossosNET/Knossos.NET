@@ -17,7 +17,7 @@ namespace Knossos.NET
 {
     public static class Knossos
     {
-        public static readonly string AppVersion = "1.3.4";
+        public static readonly string AppVersion = "1.3.6";
         public readonly static string ToolRepoURL = "https://raw.githubusercontent.com/KnossosNET/Knet-Tool-Repo/main/knet_tools.json";
         public readonly static string GitHubUpdateRepoURL = "https://api.github.com/repos/KnossosNET/Knossos.NET";
         public readonly static string FAQURL = "https://raw.githubusercontent.com/KnossosNET/KNet-General-Resources-Repo/main/communityfaq.json";
@@ -70,7 +70,7 @@ namespace Knossos.NET
             catch (Exception ex)
             {
                 //At this stage we can only log to console
-                Log.WriteToConsole("Knossos() - " + ex.Message);
+                _ = Log.WriteToConsole("Knossos() - " + ex.Message);
             }
             //Important!!! The first time it needs to be ran after checking if we are in portable mode or not
             //Due to the Knossos data folder path changing
@@ -183,7 +183,7 @@ namespace Knossos.NET
                 await Task.Delay(2000);
                 if(KnUtils.IsAppImage && File.Exists(KnUtils.AppImagePath + ".old"))
                 {
-                    File.Delete(KnUtils.AppImagePath + "old");
+                    File.Delete(KnUtils.AppImagePath + ".old");
                 }
 
                 /*No cleanup is needed for the other versions
@@ -1345,9 +1345,9 @@ namespace Knossos.NET
             }
 
             /* Build the cmdline, take in consideration systemcmd, globalcmd, modcmd(with user changes if any) */
-            var modCmd = mod.GetModCmdLine()?.Split('-').ToList();
-            var systemCmd = Knossos.globalSettings.GetSystemCMD(fsoBuild)?.Split('-');
-            var globalCmd = Knossos.globalSettings.globalCmdLine?.Split('-');
+            var modCmd = KnUtils.SplitCmdLineFlags(mod.GetModCmdLine())?.ToList();
+            var systemCmd = KnUtils.SplitCmdLineFlags(Knossos.globalSettings.GetSystemCMD(fsoBuild));
+            var globalCmd = KnUtils.SplitCmdLineFlags(Knossos.globalSettings.globalCmdLine);
 
             if(!standaloneServer)
             {
@@ -1471,7 +1471,7 @@ namespace Knossos.NET
             }
             else
             {
-                return installedMods;
+                return installedMods.ToList();
             }
         }
 
@@ -1514,7 +1514,7 @@ namespace Knossos.NET
                 }
                 else
                 {
-                    return engineBuilds;
+                    return engineBuilds.ToList();
                 }
             }
         }
@@ -1612,7 +1612,7 @@ namespace Knossos.NET
                     if (MainWindow.instance != null)
                     {
                         Dispatcher.UIThread.Invoke(() => {
-                            MessageBox.Show(MainWindow.instance!, "KnossosNET either cannot find or does not have permission to read a previously selected library folder.\nEither select a new library folder in KnossosNET's settings, or check if the folder is now protected.", "Knossos.NET Library Folder Error" , MessageBox.MessageBoxButtons.OK);
+                            MessageBox.Show(MainWindow.instance!, "KnossosNET either cannot find or does not have permission to read a previously selected Library Folder.\nEither select a new Library Folder in KnossosNET's settings, or check if the folder is now protected.", "Knossos.NET Library Folder Error" , MessageBox.MessageBoxButtons.OK);
                         });
                     }
                 }
@@ -1886,7 +1886,7 @@ namespace Knossos.NET
         /// <returns>List of tools or empty list</returns>
         public static List<Tool> GetTools()
         {
-            return modTools;
+            return modTools.ToList();
         }
     }
 }

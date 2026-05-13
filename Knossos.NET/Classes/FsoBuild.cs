@@ -1,4 +1,6 @@
-﻿using Knossos.NET.Classes;
+﻿using Avalonia.Threading;
+using Knossos.NET.Classes;
+using Knossos.NET.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -92,6 +94,7 @@ namespace Knossos.NET.Models
         public bool isInstalled = true;
         public bool devMode = false;
         public Mod? modData; 
+        private static bool _flagErrorOneWarn = false;
       
         /// <summary>
         /// This is a "DirectExec" FsoBuild
@@ -306,6 +309,7 @@ namespace Knossos.NET.Models
                         fso.Start();
                         if (waitForExit)
                             await fso.WaitForExitAsync();
+
                         return new FsoResult(true);
                     }
                 }
@@ -322,7 +326,7 @@ namespace Knossos.NET.Models
         /// Get FSO flags structure of this build using the JSON format V1
         /// </summary>
         /// <returns>A FlagsJsonV1 structure or null if failed</returns>
-        public FlagsJsonV1? GetFlagsV1()
+        public async Task<FlagsJsonV1?> GetFlagsV1Async()
         {
 #if ANDROID
                 // no flags on android
@@ -354,6 +358,7 @@ namespace Knossos.NET.Models
             }
 
             string output = string.Empty;
+            string stderr = string.Empty;
             try
             {
                 using (var cmd = new Process())
@@ -364,6 +369,7 @@ namespace Knossos.NET.Models
                     cmd.StartInfo.CreateNoWindow = true;
                     cmd.StartInfo.RedirectStandardOutput = true;
                     cmd.StartInfo.RedirectStandardInput = true;
+                    cmd.StartInfo.RedirectStandardError = true;
                     cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
                     cmd.StartInfo.WorkingDirectory = folderPath;
                     if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences ||
@@ -378,9 +384,47 @@ namespace Knossos.NET.Models
                     }
 
                     cmd.Start();
-                    string result = cmd.StandardOutput.ReadToEnd();
+                    // Read stdout and stderr concurrently to prevent pipe deadlock.
+                    // Sequential reads deadlock if stderr output exceeds the pipe buffer (~4 KB).
+                    var stdoutTask = cmd.StandardOutput.ReadToEndAsync();
+                    var stderrTask = cmd.StandardError.ReadToEndAsync();
+                    await Task.WhenAll(stdoutTask, stderrTask).ConfigureAwait(false);
+                    string result = stdoutTask.Result;
+                    stderr = stderrTask.Result;
                     output = result;
-                    cmd.WaitForExit();
+                    await cmd.WaitForExitAsync().ConfigureAwait(false);
+
+                    if (KnUtils.IsLinux && !string.IsNullOrEmpty(stderr))
+                    {
+                        //Possible missing dependency libs on linux like libfuse for appimage
+                        var errorMsg = $"FSO exited with code {cmd.ExitCode}\n\nStdout:\n{output}\n\nStderr:\n{stderr}";
+                        Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", errorMsg);
+
+                        if (stderr.Contains("fuse", StringComparison.OrdinalIgnoreCase) || output.Contains("fuse", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var libfuseError = $"libfuse is missing! FSO AppImages needs fuse to run. Install with:\n" +
+                                "Ubuntu/Debian: sudo apt install libfuse2\n" +
+                                "Fedora: sudo dnf install fuse\n" +
+                                "Arch: sudo pacman -S fuse2";
+                            Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", libfuseError);
+                            if (!_flagErrorOneWarn)
+                            {
+                                _flagErrorOneWarn = true;
+                                await Dispatcher.UIThread.InvokeAsync(async () => { await MessageBox.Show(MainWindow.instance, libfuseError, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); });
+                            }
+                        }
+                        else
+                        {
+                            Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", stderr);
+                            if (!_flagErrorOneWarn)
+                            {
+                                _flagErrorOneWarn = true;
+                                await Dispatcher.UIThread.InvokeAsync(async () => { await MessageBox.Show(MainWindow.instance, stderr, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); });
+                            }
+                        }
+                        return null;
+                    }
+
                     cmd.Dispose();
                     //avoiding the "fso is running in legacy config mode..."
                     if (result.Contains("{"))

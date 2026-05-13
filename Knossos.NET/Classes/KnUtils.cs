@@ -364,6 +364,13 @@ namespace Knossos.NET
         /// <param name="url"></param>
         public static void OpenBrowserURL(string url)
         {
+            // Check URL
+            if (string.IsNullOrWhiteSpace(url) || !Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                Log.Add(Log.LogSeverity.Warning, "KnUtils.OpenBrowserURL", $"Not opening web browser link due to invalid or unsafe URL: {url}");
+                return;
+            }
+
             try
             {
 #if ANDROID
@@ -373,18 +380,18 @@ namespace Knossos.NET
                 {
                     if (IsWindows)
                     {
-                        process.StartInfo.FileName = "cmd";
-                        process.StartInfo.Arguments = $"/c start {url}";
+                        process.StartInfo.FileName = uri.ToString();
+                        process.StartInfo.UseShellExecute = true;
                     }
                     else if (IsLinux)
                     {
                         process.StartInfo.FileName = "xdg-open";
-                        process.StartInfo.Arguments = url;
+                        process.StartInfo.Arguments = uri.ToString();
                     }
                     else if (IsMacOS)
                     {
                         process.StartInfo.FileName = "open";
-                        process.StartInfo.Arguments = url;
+                        process.StartInfo.Arguments = uri.ToString();
                     }
                     process.StartInfo.CreateNoWindow = true;
                     process.Start();
@@ -604,6 +611,19 @@ namespace Knossos.NET
         }
 
         /// <summary>
+        /// Splits a cmdline string into individual flag arguments. Splits on a '-' that is
+        /// preceded by start-of-string or whitespace, so hyphens inside flag values (e.g. paths)
+        /// are preserved.
+        /// </summary>
+        /// <param name="cmdline"></param>
+        /// <returns>array of flag arguments (without the leading '-'), or null if input is null</returns>
+        public static string[]? SplitCmdLineFlags(string? cmdline)
+        {
+            if (cmdline == null) return null;
+            return Regex.Split(cmdline, @"(?<=^|\s)-");
+        }
+
+        /// <summary>
         /// Adds arguments to a cmdline string, only if they arent already present
         /// </summary>
         /// <param name="cmdline"></param>
@@ -616,7 +636,7 @@ namespace Knossos.NET
                 if (args != null && args.Any())
                 {
                     var addedArgs = new List<string>();
-                    foreach (var arg in cmdline.ToLower().Split('-'))
+                    foreach (var arg in SplitCmdLineFlags(cmdline.ToLower()) ?? Array.Empty<string>())
                     {
                         addedArgs.Add(arg.Split(' ')[0].Trim());
                     }
@@ -638,6 +658,58 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "KnUtils.CmdLineBuilder()", ex);
             }
             return cmdline;
+        }
+
+        /// <summary>
+        /// Returns true if candidatePath resolves to a location within basePath.
+        /// Rejects absolute paths, null bytes, and path traversal sequences such as "..".
+        /// </summary>
+        public static bool IsSubPath(string basePath, string candidatePath)
+        {
+            if (string.IsNullOrEmpty(candidatePath))
+                return true;
+            if (Path.IsPathRooted(candidatePath))
+                return false;
+            try
+            {
+                var fullBase = Path.GetFullPath(basePath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                var fullTarget = Path.GetFullPath(Path.Combine(basePath, candidatePath));
+                //Windows is uniformly case-insensitive; Linux/macOS filesystems CAN be case-sensitive
+                //(always on Linux, optional on APFS), so use Ordinal there to avoid false-positives on
+                //traversal attempts that exploit case-only differences with sibling directories.
+                var comparison = IsWindows ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+                return fullTarget.StartsWith(fullBase, comparison);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// True if a string is safe to use as a single filesystem path component (no separators,
+        /// no traversal sequences, no null bytes, no drive letters, no NTFS-stripped trailing
+        /// whitespace or dots, not "." or ".."). Used to validate JSON-supplied fields like
+        /// mod.id / mod.version that get concatenated into install paths.
+        /// </summary>
+        public static bool IsSafePathComponent(string? component)
+        {
+            if (string.IsNullOrEmpty(component))
+                return false;
+            if (component == "." || component == "..")
+                return false;
+            if (component.Contains('\0'))
+                return false;
+            if (component.Contains('/') || component.Contains('\\'))
+                return false;
+            if (component.Length >= 2 && component[1] == ':')
+                return false;
+            //NTFS silently strips trailing dots/spaces — reject so "..  " or ".." don't round-trip.
+            if (component.Trim() != component)
+                return false;
+            if (component.EndsWith('.'))
+                return false;
+            return true;
         }
 
         /// <summary>
@@ -694,8 +766,11 @@ namespace Knossos.NET
                 if (localFile != null)
                 {
                     var fileStream = new FileStream(localFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    if(fileStream.Length == 0)
+                    if (fileStream.Length == 0)
+                    { 
+                        fileStream.Dispose();
                         return null;
+                    }
                     return fileStream;
                 }
             }
@@ -826,7 +901,7 @@ namespace Knossos.NET
                 string? newEtag = null;
                 Log.Add(Log.LogSeverity.Information, "KnUtils.GetUrlFileEtag()", "Getting " + url + " etag.");
 
-                var result = await KnUtils.GetHttpClient().GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                using var result = await KnUtils.GetHttpClient().GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                 newEtag = result.Headers?.ETag?.ToString().Replace("\"", "");
                 try
                 {
@@ -1011,13 +1086,60 @@ namespace Knossos.NET
                     //tar.gz
                     if (compressedFilePath!.ToLower().Contains(".tar") || compressedFilePath.ToLower().Contains(".gz"))
                     {
-                        using (var reader = ReaderFactory.Open(fileStream))
+                        using (var reader = ReaderFactory.OpenReader(fileStream))
                         {
                             while (reader.MoveToNextEntry())
                             {
                                 if (!reader.Entry.IsDirectory)
                                 {
-                                    reader.WriteEntryToDirectory(destFolderPath, new ExtractionOptions() { ExtractFullPath = extractFullPath, Overwrite = true, WriteSymbolicLink = (source, target) => { File.CreateSymbolicLink(source, target); } });
+                                    var entryKey = reader.Entry.Key?.Replace('\\', '/').Replace('/', Path.DirectorySeparatorChar);
+                                    if (entryKey != null && extractFullPath && !IsSubPath(destFolderPath, entryKey))
+                                    {
+                                        Log.Add(Log.LogSeverity.Warning, "KnUtils.DecompressFileSharpCompress()", $"Skipping potentially dangerous archive entry: {reader.Entry.Key}");
+                                        continue;
+                                    }
+
+                                    if (reader.Entry.Key == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    var destinationPath = Path.Combine(destFolderPath, reader.Entry.Key);
+
+                                    // Detect SymbLink
+                                    if (reader.Entry.LinkTarget != null)
+                                    {
+                                        try
+                                        {
+                                            var resolvedTarget = Path.IsPathRooted(reader.Entry.LinkTarget)
+                                                ? reader.Entry.LinkTarget
+                                                : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(destinationPath)!, reader.Entry.LinkTarget));
+                                            if (!IsSubPath(destFolderPath, Path.GetRelativePath(destFolderPath, resolvedTarget)))
+                                            {
+                                                Log.Add(Log.LogSeverity.Warning, "KnUtils.DecompressFileSharpCompress()", $"Skipping symlink escaping destination: {destinationPath} -> {reader.Entry.LinkTarget}");
+                                                continue;
+                                            }
+
+                                            // Make sure destination parent dir exist
+                                            var symlinkParentDir = Path.GetDirectoryName(destinationPath);
+                                            if (symlinkParentDir != null && !Directory.Exists(symlinkParentDir))
+                                                Directory.CreateDirectory(symlinkParentDir);
+
+                                            File.CreateSymbolicLink(destinationPath, reader.Entry.LinkTarget);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Log.Add(Log.LogSeverity.Error, "KnUtils.DecompressFileSharpCompress()", ex);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        reader.WriteEntryToFile(destinationPath, new ExtractionOptions
+                                        {
+                                            ExtractFullPath = extractFullPath,
+                                            Overwrite = true
+                                        });
+                                    }
                                 }
                                 if (cancellationTokenSource!.IsCancellationRequested)
                                 {
@@ -1029,13 +1151,19 @@ namespace Knossos.NET
                     else
                     {
                         //zip, 7z
-                        using (var archive = ArchiveFactory.Open(fileStream))
+                        using (var archive = ArchiveFactory.OpenArchive(fileStream))
                         {
                             var reader = archive.ExtractAllEntries();
                             while (reader.MoveToNextEntry())
                             {
                                 if (!reader.Entry.IsDirectory)
                                 {
+                                    var entryKey = reader.Entry.Key?.Replace('\\', '/').Replace('/', Path.DirectorySeparatorChar);
+                                    if (entryKey != null && extractFullPath && !IsSubPath(destFolderPath, entryKey))
+                                    {
+                                        Log.Add(Log.LogSeverity.Warning, "KnUtils.DecompressFileSharpCompress()", $"Skipping potentially dangerous archive entry: {reader.Entry.Key}");
+                                        continue;
+                                    }
                                     reader.WriteEntryToDirectory(destFolderPath, new ExtractionOptions() { ExtractFullPath = extractFullPath, Overwrite = true });
                                 }
                                 if (cancellationTokenSource!.IsCancellationRequested)
@@ -1230,7 +1358,7 @@ namespace Knossos.NET
         /// <summary>
         /// Deletes a file checking if it exists first and then waits for the file to be closed. 
         /// </summary>
-        public static void DeleteFileSafe(string filePath)
+        public static async Task DeleteFileSafe(string filePath, CancellationTokenSource? cancellationToken = null)
         {
             try
             {
@@ -1239,6 +1367,9 @@ namespace Knossos.NET
                     while (IsFileInUse(filePath))
                     {
                         Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.PrepareModPkg()", "Waiting for file to be closed to delete it: " + filePath);
+                        await Task.Delay(100);
+                        if (cancellationToken != null && cancellationToken.IsCancellationRequested)
+                            throw new TaskCanceledException();
                     }
                     File.Delete(filePath);
                 }

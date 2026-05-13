@@ -1,22 +1,84 @@
 ﻿using Avalonia.Threading;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using System.Threading;
-using Knossos.NET.Classes;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
     public partial class TaskItemViewModel : ViewModelBase
     {
+        private async Task<bool> InstallVCRedist(bool is86 = false) {
+            var fileTask = new TaskItemViewModel(); // Crete new task
+            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, fileTask)); //insert task into this job TaskList
+            Info = "Tasks: " + ProgressCurrent + "/" + (++ProgressBarMax); //Update progress  
+            var path = "";
+            if (is86) { path = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "vc_redist.x86.exe"); }
+            else { path = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "vc_redist.x64.exe"); }
+            var fileUrl = "";
+            if (is86)
+            {
+                fileUrl = "https://aka.ms/vc14/vc_redist.x86.exe";
+            } //installs both x64 and arm versons
+            else { fileUrl = "https://aka.ms/vc14/vc_redist.x64.exe"; }
+            var result = await fileTask.DownloadFile(fileUrl, path, "Downloading VCRedist", false, null, cancellationTokenSource); // Start and await to finish
+                                                                                                                                       //Always check for cancel before executing the file
+            if (cancellationTokenSource != null && cancellationTokenSource.IsCancellationRequested)
+            {
+                throw new TaskCanceledException();
+            }
+
+            if (result.HasValue && result.Value)
+            {
+                //Assembly assembly = Assembly.GetExecutingAssembly();
+                //using Stream resourceStream = assembly.GetManifestResourceStream(resourceName)??throw new Exception("Resource not found!");
+                //Execute the installer
+                Info = "Tasks: " + (++ProgressCurrent) + "/" + ProgressBarMax;
+                //Retry a couple of times incase we get locked out by av temporealy
+                int retries = 5;
+                while (retries > 0)
+                {
+                    try
+                    {     
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = path,
+                            Arguments = "/install /quiet /norestart",
+                            Verb = "runas",
+                            UseShellExecute = true
+                        })?.WaitForExit();
+                        break; // Success!
+                    }
+                    catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 32) // Error code for "File in use"
+                    {
+                        retries--;
+                        if (retries == 0) throw;
+                        System.Threading.Thread.Sleep(500); // Wait 500ms for AV to finish scanning
+                    }
+                }
+
+                if (File.Exists(path)) File.Delete(path);
+                return true;
+            }
+            else
+            {
+                throw new Exception("Error while downloading file: " + fileUrl);
+            }     
+        }
+
         public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false)
         {
             string? modPath = null;
+            bool installed = false;
             try
             {
                 if (!TaskIsSet)
@@ -76,12 +138,33 @@ namespace Knossos.NET.ViewModels
                             -Main progress max value is calculated as follows: ( Number of files to download * 2 ) + 1
                              (Download, Decompression, Download banner/tile images)
                         */
+                        //Reject build metadata with traversal sequences in path-component fields. Without this guard a
+                        //malicious Nebula response (id="..\\..\\..", version="../etc"...) would poison modPath itself,
+                        //causing the IsSubPath checks on file.dest / file.filename below to validate against the poisoned base.
+                        if (!KnUtils.IsSafePathComponent(modJson.id) ||
+                            !KnUtils.IsSafePathComponent(modJson.version))
+                        {
+                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", "Refusing to install: build has unsafe id/version: id=" + modJson.id + " version=" + modJson.version);
+                            CancelTaskCommand();
+                            throw new TaskCanceledException();
+                        }
+                        foreach (var pkg in modJson.packages)
+                        {
+                            if (pkg.folder != null && !KnUtils.IsSafePathComponent(pkg.folder))
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", "Refusing to install: build " + modJson.id + " has unsafe package folder: " + pkg.folder);
+                                CancelTaskCommand();
+                                throw new TaskCanceledException();
+                            }
+                        }
+
                         List<ModFile> files = new List<ModFile>();
                         string modFolder = modJson.id + "-" + modJson.version;
                         modPath = Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + modFolder;
                         if (modifyPkgs != null)
                         {
                             //Modify Build
+                            installed = true;
                             foreach (var pkg in modifyPkgs)
                             {
                                 var installedPkg = modJson.packages.FirstOrDefault(p => p.name == pkg.name && p.folder == pkg.folder);
@@ -168,8 +251,13 @@ namespace Knossos.NET.ViewModels
                         {
                             if (file.dest != null && file.dest.Trim() != string.Empty)
                             {
-                                var path = file.dest;
-                                Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + path);
+                                if (!KnUtils.IsSubPath(modPath, file.dest))
+                                {
+                                    Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", $"Unsafe dest path in build '{build.id}': {file.dest}");
+                                    CancelTaskCommand();
+                                    return null;
+                                }
+                                Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + file.dest);
                             }
                         }
 
@@ -198,7 +286,7 @@ namespace Knossos.NET.ViewModels
                             -Increase main progress when: 
                              File starts to download, File finishes downloading, Decompression starts, Decompression ends, Image download completed
                         */
-                        await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks }, async (file, token) =>
+                        await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks, CancellationToken = cancellationTokenSource.Token }, async (file, token) =>
                         {
                             if (cancellationTokenSource.IsCancellationRequested)
                             {
@@ -214,6 +302,12 @@ namespace Knossos.NET.ViewModels
                             }
 
                             Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
+                            if (string.IsNullOrEmpty(file.filename) || !KnUtils.IsSubPath(modPath, file.filename))
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", $"Unsafe filename in build '{build.id}': {file.filename}");
+                                CancelTaskCommand();
+                                throw new TaskCanceledException();
+                            }
                             var fileFullPath = modPath + Path.DirectorySeparatorChar + file.filename;
                             var result = await fileTask.DownloadFile(file.urls!, fileFullPath, "Downloading " + file.filename, false, null, cancellationTokenSource);
 
@@ -286,6 +380,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", "Error while decompressing the file " + fileFullPath);
                                 CancelTaskCommand();
+                                throw new TaskCanceledException();
                             }
                             //sender.ProgressBarCurrent = ++ProgressCurrent;
                             ++ProgressCurrent;
@@ -433,9 +528,65 @@ namespace Knossos.NET.ViewModels
                             //Update version editor if needed
                             DeveloperModsViewModel.Instance?.UpdateVersionManager(modJson.id);
                         }
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        {
+                            bool installx86 = false;
+                            bool install64 = false;
+                            //Determine the cpu arch for vcredist that we need to download, if we need to download, from the FSO build arch NOT the host cpu arch.
+                            foreach (var ex in newBuild.executables)
+                            {
+                                if (ex.arch == FsoExecArch.x86 || ex.arch == FsoExecArch.x86_avx || ex.arch == FsoExecArch.x86_avx2)
+                                {
+                                    installx86 = true;
+                                }
+                                if (ex.arch == FsoExecArch.arm64 || ex.arch == FsoExecArch.x64 || ex.arch == FsoExecArch.x64_avx || ex.arch == FsoExecArch.x64_avx2)
+                                {
+                                    install64 = true;
+                                }
+                            }
+                            if (installx86)
+                            {
+                                string keyPath = @"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86";
+                                using (RegistryKey? key = Registry.LocalMachine.OpenSubKey(keyPath))
+                                {
+                                    if (key != null)
+                                    {
+                                        // 'Bld' is a DWORD representing the build version
+                                        object? bldValue = key.GetValue("Bld");
+                                        if (bldValue != null && int.TryParse(bldValue.ToString(), out int bld))
+                                        {
+                                            // Example: 2022 runtimes typically have build numbers > 30000
+                                            installx86 = false;
+                                        }
+                                    }
+                                }
+                            }
+                            if (install64)
+                            {
+                                string keyPath = @"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64";
+                                using (RegistryKey? key = Registry.LocalMachine.OpenSubKey(keyPath))
+                                {
+                                    if (key != null)
+                                    {
+                                        // 'Bld' is a DWORD representing the build version
+                                        object? bldValue = key.GetValue("Bld");
+                                        if (bldValue != null && int.TryParse(bldValue.ToString(), out int bld))
+                                        {
+                                            // Example: 2022 runtimes typically have build numbers > 30000
+                                            install64 = false;
+                                        }
+                                    }
+                                }
+                            }
+                            if (installx86)
+                            {
+                                await InstallVCRedist(true);
+                            }
+                            if (install64) { await InstallVCRedist(false); }                         
+                        }
+                    
                         IsCompleted = true;
                         CancelButtonVisible = false;
-
                         //Re-run Dependencies checks 
                         MainViewModel.Instance?.RunModStatusChecks();
 
@@ -583,7 +734,7 @@ namespace Knossos.NET.ViewModels
                 Info = "Task Cancelled";
                 try
                 {
-                    if (modPath != null)
+                    if (modPath != null && !installed)
                     {
                         Directory.Delete(modPath, true);
                     }
@@ -624,7 +775,7 @@ namespace Knossos.NET.ViewModels
                 Info = "Task Failed";
                 try
                 {
-                    if (modPath != null)
+                    if (modPath != null && !installed)
                     {
                         Directory.Delete(modPath, true);
                     }

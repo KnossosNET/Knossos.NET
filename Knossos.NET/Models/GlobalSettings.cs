@@ -331,9 +331,6 @@ namespace Knossos.NET.Models
         public string envVars { get; set; } = string.Empty;
         [JsonPropertyName("show_dev_options")]
         public bool showDevOptions { get; set; } = false;
-        
-        [JsonIgnore]
-        private FileSystemWatcher? iniWatcher = null;
 
         /// <summary>
         /// Call this when the app is closing to save settings if we have pending changes
@@ -347,58 +344,6 @@ namespace Knossos.NET.Models
             }
         }
 
-        /// <summary>
-        /// When the User is on the settings tab we must watch the fs2_open.ini for external changes
-        /// This is the initial call that must be called once, then we start or stop raising of events
-        /// </summary>
-        private void StartWatchingDirectory()
-        {
-            iniWatcher = new FileSystemWatcher(KnUtils.GetFSODataFolderPath());
-            iniWatcher.NotifyFilter = NotifyFilters.LastWrite;
-            iniWatcher.Changed += OnIniChanged;
-            iniWatcher.Filter = "fs2_open.ini";
-        }
-
-        /// <summary>
-        /// If the fs2_open.ini is changed externally, reload the data
-        /// </summary>
-        private void OnIniChanged(object sender, FileSystemEventArgs e)
-        {
-            iniWatcher!.EnableRaisingEvents = false;
-            Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                Log.Add(Log.LogSeverity.Information, "GlobalSettings.OnIniChanged()", "fs2_open.ini was changed externally, loading data.");
-                Load();
-                MainViewModel.Instance?.GlobalSettingsLoadData();
-            });
-            Task.Delay(1000);
-            iniWatcher!.EnableRaisingEvents = true;
-        }
-
-        /// <summary>
-        /// Start watching for changes on the ini file
-        /// </summary>
-        public void EnableIniWatch()
-        {
-            if (iniWatcher != null)
-                iniWatcher.EnableRaisingEvents = true;
-            else
-            {
-                StartWatchingDirectory();
-                EnableIniWatch();
-            }
-        }
-
-        /// <summary>
-        /// Stop watching for changes on the ini file
-        /// </summary>
-        public void DisableIniWatch()
-        {
-            if(iniWatcher != null)
-                iniWatcher.EnableRaisingEvents = false;
-        }
-
-        /// <summary>
         /// Load setting data that saves on the fs2_open.ini
         /// On the ini we save all data that is used by both FSO and KNET
         /// </summary>
@@ -944,12 +889,6 @@ namespace Knossos.NET.Models
                 data["PXO"]["Login"] = pxoLogin;
                 data["PXO"]["Password"] = pxoPassword;
 
-                bool wasWatchingIni = false;
-                if (iniWatcher != null)
-                {
-                    wasWatchingIni = iniWatcher.EnableRaisingEvents;
-                    iniWatcher.EnableRaisingEvents = false;
-                }
                 if (customFullPath == null)
                 {
                     parser.WriteFile(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "fs2_open.ini", data, new UTF8Encoding(false));
@@ -961,9 +900,6 @@ namespace Knossos.NET.Models
                     parser.WriteFile(customFullPath, data, new UTF8Encoding(false));
                     Log.Add(Log.LogSeverity.Information, "GlobalSettings.WriteFS2IniValues", "Writen ini: " + customFullPath);
                 }
-
-                if (iniWatcher!= null && wasWatchingIni)
-                    iniWatcher.EnableRaisingEvents = true;
             }
             catch (Exception ex)
             {
@@ -1017,8 +953,8 @@ namespace Knossos.NET.Models
             var cmd = string.Empty;
             if(shadowQuality > 0)
             {
-                cmd += "-enable_shadows";
-                cmd += "-shadow_quality " + shadowQuality;
+                cmd += " -enable_shadows";
+                cmd += " -shadow_quality " + shadowQuality;
             }
             if(aaPreset > 0)
             {
@@ -1027,8 +963,8 @@ namespace Knossos.NET.Models
                 var flag_aaPreset = aaPreset - 1;
                 if (build == null || SemanticVersion.Compare(build.version, "21.0.0") >= 0)
                 {
-                    cmd += "-aa";
-                    cmd += "-aa_preset " + flag_aaPreset;
+                    cmd += " -aa";
+                    cmd += " -aa_preset " + flag_aaPreset;
                 }
                 else
                 {
@@ -1036,23 +972,23 @@ namespace Knossos.NET.Models
                     {
                         if (flag_aaPreset <= 2)
                         {
-                            cmd += "-fxaa";
+                            cmd += " -fxaa";
                             switch (flag_aaPreset)
                             {
-                                case 0: cmd += "-fxaa_preset 1"; break;
-                                case 1: cmd += "-fxaa_preset 5"; break;
-                                case 2: cmd += "-fxaa_preset 7"; break;
+                                case 0: cmd += " -fxaa_preset 1"; break;
+                                case 1: cmd += " -fxaa_preset 5"; break;
+                                case 2: cmd += " -fxaa_preset 7"; break;
                             }
                         }
                         else
                         {
-                            cmd += "-smaa";
+                            cmd += " -smaa";
                             switch (flag_aaPreset)
                             {
-                                case 3: cmd += "-smaa_preset 0"; break;
-                                case 4: cmd += "-smaa_preset 1"; break;
-                                case 5: cmd += "-smaa_preset 2"; break;
-                                case 6: cmd += "-smaa_preset 3"; break;
+                                case 3: cmd += " -smaa_preset 0"; break;
+                                case 4: cmd += " -smaa_preset 1"; break;
+                                case 5: cmd += " -smaa_preset 2"; break;
+                                case 6: cmd += " -smaa_preset 3"; break;
                             }
                         }
                     }
@@ -1062,47 +998,47 @@ namespace Knossos.NET.Models
             {
                 switch (msaaPreset)
                 {
-                    case 1: cmd += "-msaa 4"; break;
-                    case 2: cmd += "-msaa 8"; break;
+                    case 1: cmd += " -msaa 4"; break;
+                    case 2: cmd += " -msaa 8"; break;
                 }
             }
             if (enableSoftParticles)
             {
-                cmd += "-soft_particles";
+                cmd += " -soft_particles";
             }
             if (!enableDeferredLighting)
             {
-                cmd += "-no_deferred";
+                cmd += " -no_deferred";
             }
             switch (windowMode)
             {
-                case 0: cmd += "-window"; break;
-                case 1: cmd += "-fullscreen_window"; break;
+                case 0: cmd += " -window"; break;
+                case 1: cmd += " -fullscreen_window"; break;
                 case 2: break; //fullscreen
             }
             if (!vsync)
             {
-                cmd += "-no_vsync";
+                cmd += " -no_vsync";
             }
             if(!postProcess)
             {
-                cmd += "-no_post_process";
+                cmd += " -no_post_process";
             }
             if (noFpsCapping)
             {
-                cmd += "-no_fps_capping";
+                cmd += " -no_fps_capping";
             }
             if(showFps)
             {
-                cmd += "-fps";
+                cmd += " -fps";
             }
             if(disableAudio)
             {
-                cmd += "-nosound";
+                cmd += " -nosound";
             }
             if(disableMusic)
             {
-                cmd += "-nomusic";
+                cmd += " -nomusic";
             }
             return cmd;
         }

@@ -101,13 +101,25 @@ namespace VP.NET
             switch (header)
             {
                 case CompressionHeader.LZ41:
+                    //The 1 MB stack on the worker thread is needed for LZ4's recursive native decode; Task.Run
+                    //can't guarantee it across all platforms. Marshal exceptions across the thread boundary via
+                    //ExceptionDispatchInfo so a corrupted footer doesn't silently leave uncompressedSize = 0.
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo? edi = null;
                     var cpThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        uncompressedSize = LZ4RawUtility.LZ41_Stream_Decompress(input, output, compressedFileSize);
+                        try
+                        {
+                            uncompressedSize = LZ4RawUtility.LZ41_Stream_Decompress(input, output, compressedFileSize);
+                        }
+                        catch (Exception ex)
+                        {
+                            edi = System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex);
+                        }
                     }, 1048576);
                     cpThread.Start();
                     cpThread.Join();
+                    edi?.Throw();
                     break;
             }
 

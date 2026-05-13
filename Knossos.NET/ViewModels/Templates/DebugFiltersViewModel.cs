@@ -36,7 +36,7 @@ namespace Knossos.NET.ViewModels
 
             try
             {
-                HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(Knossos.debugFilterURL).ConfigureAwait(false);
+                using var response = await KnUtils.GetHttpClient().GetAsync(Knossos.debugFilterURL).ConfigureAwait(false);
                 var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var debugRepo = JsonSerializer.Deserialize<DebugFilterCategory[]>(json)!;
                 if(debugRepo != null)

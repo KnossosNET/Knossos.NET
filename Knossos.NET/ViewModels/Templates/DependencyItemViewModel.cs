@@ -236,6 +236,42 @@ namespace Knossos.NET.ViewModels
                         itemVer.Content = "~" + mod.version;
                         VersionItems.Add(itemVer);
                     }
+
+                    separator = new ComboBoxItem();
+                    separator.Content = "--- <= ---";
+                    separator.IsEnabled = false;
+                    VersionItems.Add(separator);
+
+                    foreach (var mod in mods)
+                    {
+                        var itemVer = new ComboBoxItem();
+                        itemVer.Content = "<=" + mod.version;
+                        VersionItems.Add(itemVer);
+                    }
+
+                    separator = new ComboBoxItem();
+                    separator.Content = "--- > ---";
+                    separator.IsEnabled = false;
+                    VersionItems.Add(separator);
+
+                    foreach (var mod in mods)
+                    {
+                        var itemVer = new ComboBoxItem();
+                        itemVer.Content = ">" + mod.version;
+                        VersionItems.Add(itemVer);
+                    }
+
+                    separator = new ComboBoxItem();
+                    separator.Content = "--- < ---";
+                    separator.IsEnabled = false;
+                    VersionItems.Add(separator);
+
+                    foreach (var mod in mods)
+                    {
+                        var itemVer = new ComboBoxItem();
+                        itemVer.Content = "<" + mod.version;
+                        VersionItems.Add(itemVer);
+                    }
                 }
                 else
                 {
@@ -264,6 +300,42 @@ namespace Knossos.NET.ViewModels
                         {
                             var itemVer = new ComboBoxItem();
                             itemVer.Content = ">=" + build.version;
+                            VersionItems.Add(itemVer);
+                        }
+
+                        separator = new ComboBoxItem();
+                        separator.Content = "--- <= ---";
+                        separator.IsEnabled = false;
+                        VersionItems.Add(separator);
+
+                        foreach (var build in builds)
+                        {
+                            var itemVer = new ComboBoxItem();
+                            itemVer.Content = "<=" + build.version;
+                            VersionItems.Add(itemVer);
+                        }
+
+                        separator = new ComboBoxItem();
+                        separator.Content = "--- > ---";
+                        separator.IsEnabled = false;
+                        VersionItems.Add(separator);
+
+                        foreach (var build in builds)
+                        {
+                            var itemVer = new ComboBoxItem();
+                            itemVer.Content = ">" + build.version;
+                            VersionItems.Add(itemVer);
+                        }
+
+                        separator = new ComboBoxItem();
+                        separator.Content = "--- < ---";
+                        separator.IsEnabled = false;
+                        VersionItems.Add(separator);
+
+                        foreach (var build in builds)
+                        {
+                            var itemVer = new ComboBoxItem();
+                            itemVer.Content = "<" + build.version;
                             VersionItems.Add(itemVer);
                         }
                     }

@@ -377,9 +377,9 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal void ConfigureBuildCommand()
+        internal async void ConfigureBuildCommand()
         {
-            ConfigureBuild(false);
+            await ConfigureBuild(false);
         }
 
         /// <summary>
@@ -387,7 +387,7 @@ namespace Knossos.NET.ViewModels
         /// Also allows to edit the mod cmdline
         /// </summary>
         /// <param name="ignoreUserSettings"></param>
-        private void ConfigureBuild(bool ignoreUserSettings)
+        private async Task ConfigureBuild(bool ignoreUserSettings)
         {
             if (modJson == null)
                 return;
@@ -411,24 +411,24 @@ namespace Knossos.NET.ViewModels
 
             if(fsoBuild != null)
             {
-                var flagsV1=fsoBuild.GetFlagsV1();
+                var flagsV1 = await Task.Run(fsoBuild.GetFlagsV1Async);
                 if(flagsV1 != null)
                 {
                     FsoFlags = new FsoFlagsViewModel(flagsV1,modJson.GetModCmdLine(ignoreUserSettings));
                 }
                 else
                 {
-                    Dispatcher.UIThread.InvokeAsync(async () =>
+                    await Dispatcher.UIThread.InvokeAsync(async () =>
                     {
                         await MessageBox.Show(MainWindow.instance!, "Unable to get flag data from build " + fsoBuild + " It might be below the minimal version supported (3.8.1) or some other error ocurred.", "Invalid flag data", MessageBox.MessageBoxButtons.OK);
                     });
-                    
+
                 }
             }
             else
             {
                 /* No valid build found, send message */
-                Dispatcher.UIThread.InvokeAsync(async () =>
+                await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
                     await MessageBox.Show(MainWindow.instance!, "Unable to resolve FSO build dependency, download the correct one or manually select a FSO version. ", "Not engine build found", MessageBox.MessageBoxButtons.OK);
                 });
@@ -438,13 +438,13 @@ namespace Knossos.NET.ViewModels
         /// <summary>
         /// Reset settings to DEFAULT on UI
         /// </summary>
-        internal void ResetSettingsCommand()
+        internal async void ResetSettingsCommand()
         {
             CustomDependencies = false;
             BuildMissingWarning = string.Empty;
             FsoPicker = new FsoBuildPickerViewModel(null, window);
             FsoFlags = null;
-            ConfigureBuild(true);
+            await ConfigureBuild(true);
             DepItems.Clear();
             CreateDependencyItems(true);
             IgnoreGlobalCmd = false;

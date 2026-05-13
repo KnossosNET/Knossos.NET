@@ -280,8 +280,13 @@ namespace VP.NET
                 {
                     byte[] buffer = new byte[bufferSize];
                     int bytesToRead = leftToCopy > bufferSize ? bufferSize : leftToCopy;
-                    leftToCopy -= await source.ReadAsync(buffer, 0, bytesToRead);
-                    await destination.WriteAsync(buffer, 0, bytesToRead);
+                    var bytesRead = await source.ReadAsync(buffer, 0, bytesToRead);
+                    if (bytesRead != bytesToRead)
+                    {
+                        throw new IOException("Unable to read from file");
+                    }
+                    leftToCopy -= bytesRead;
+                    await destination.WriteAsync(buffer, 0, bytesRead);
                 }
             }
 
@@ -333,8 +338,13 @@ namespace VP.NET
                     {
                         byte[] buffer = new byte[bufferSize];
                         int bytesToRead = leftToCopy > bufferSize ? bufferSize : leftToCopy;
-                        leftToCopy -= await source.ReadAsync(buffer, 0, bytesToRead);
-                        await destination.WriteAsync(buffer, 0, bytesToRead);
+                        var bytesRead = await source.ReadAsync(buffer, 0, bytesToRead);
+                        if (bytesRead != bytesToRead)
+                        {
+                            throw new IOException("Unable to read from file");
+                        }
+                        leftToCopy -= bytesRead;
+                        await destination.WriteAsync(buffer, 0, bytesRead);
                     }
                 } 
 

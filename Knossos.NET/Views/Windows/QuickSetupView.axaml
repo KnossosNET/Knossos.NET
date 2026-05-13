@@ -36,17 +36,17 @@
 		<!--Page2-->
 		<StackPanel IsVisible="{Binding Page2}" Grid.Row="0" >
 			<StackPanel IsVisible="{Binding !IsPortableMode}">
-				<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >Setting up the library folder</TextBlock>
-				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">First, you must set a library folder. Go to the "Settings" tab and under the "KnossosNET" section click on the "Browse" button and choose or create a folder for KnossosNET to use. It is highly recommended to set this as an empty folder in a location with a large amount of available storage. </TextBlock>
-				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">The KnossosNET library folder is where all game and mod data will be saved to. Make sure you always have space available on this drive before installing a new mod or update.</TextBlock>
+				<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >Setting up the Library Folder</TextBlock>
+				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">First, you must set a Library Folder. Go to the "Settings" tab and under the "KnossosNET" section click on the "Browse" button and choose or create a folder for KnossosNET to use. It is highly recommended to set this as an empty folder in a location with a large amount of available storage. Do not set your Library Folder to a shared or cloud drive (such as OneDrive or Google Drive) because syncing issues will prevent Knossos from downloading mod files correctly.</TextBlock>
+				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">The KnossosNET Library Folder is where all game and mod data will be saved to. Make sure you always have space available on this drive before installing a new mod or update.</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">Current Library Folder</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" Text="{Binding LibraryPath}"></TextBlock>
-				<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Go to the "Settings" tab and set the library folder to continue.</TextBlock>
+				<TextBlock IsVisible="{Binding !CanContinue}" Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">Go to the "Settings" tab and set the Library Folder to continue.</TextBlock>
 				<Button IsVisible="{Binding !CanContinue}" Command="{Binding ClickSettingsButton}" Margin="20,0,0,0" Classes="Quaternary">Show me where</Button>
 			</StackPanel>
 			<StackPanel IsVisible="{Binding IsPortableMode}">
 				<TextBlock Margin="10" TextWrapping="Wrap" FontWeight="Bold" FontSize="36" HorizontalAlignment="Left" >KnossosNET is running in portable mode</TextBlock>
-				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">This means KnossosNET settings and FSO pilots, settings and data are saved inside the 'kn_portable' folder, you cannot set a library folder in this mode. </TextBlock>
+				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">This means KnossosNET settings and FSO pilots, settings and data are saved inside the 'kn_portable' folder, you cannot set a Library Folder in this mode. </TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">If you ever need to stop using the portable mode move, rename or delete the 'kn_portable' folder.</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" FontWeight="Bold" HorizontalAlignment="Left">Current Library Folder</TextBlock>
 				<TextBlock Margin="20" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left" Text="{Binding LibraryPath}"></TextBlock>

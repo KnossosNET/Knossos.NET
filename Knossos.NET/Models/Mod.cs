@@ -427,6 +427,10 @@ namespace Knossos.NET.Models
                                         {
                                             revisions.Add(d);
                                         }
+                                        else if (d.version.Contains("<=") || d.version.Contains(">") || d.version.Contains("<"))
+                                        {
+                                            //<=, >, < are not yet handled by the dedup logic below; leave them in temp as-is
+                                        }
                                         else
                                         {
                                             equal.Add(d);

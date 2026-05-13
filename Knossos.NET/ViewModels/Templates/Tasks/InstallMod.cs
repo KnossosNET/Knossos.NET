@@ -70,7 +70,7 @@ namespace Knossos.NET.ViewModels
                             try
                             {
                                 var fso = mod.GetDependency("FSO");
-                                if (fso != null && (fso.version == null || SemanticVersion.Compare(fso.version.Replace(">=", "").Replace("<", "").Replace(">", "").Trim(), VPCompression.MinimumFSOVersion) > 0))
+                                if (fso != null && (fso.version == null || SemanticVersion.Compare(fso.version.Replace(">=", "").Replace("<=", "").Replace(">", "").Replace("<", "").Replace("~", "").Trim(), VPCompression.MinimumFSOVersion) > 0))
                                     compressMod = true;
                             }
                             catch (Exception ex)
@@ -106,6 +106,27 @@ namespace Knossos.NET.ViewModels
                         -If the mod is installeds there is no need to download the baners and title image again so -2 to max tasks
                         -If devmode and file is a vp it needs to be decompressed +1 to max tasks
                     */
+
+                    //Reject mod metadata with traversal sequences in path-component fields. Without this guard a
+                    //malicious Nebula response (id="..\\..\\..", version="../etc"...) would poison modPath itself,
+                    //causing the IsSubPath checks on file.dest / file.filename below to validate against the poisoned base.
+                    if (!KnUtils.IsSafePathComponent(mod.id) ||
+                        !KnUtils.IsSafePathComponent(mod.version) ||
+                        (mod.parent != null && !KnUtils.IsSafePathComponent(mod.parent)))
+                    {
+                        Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Refusing to install: mod has unsafe id/version/parent: id=" + mod.id + " version=" + mod.version + " parent=" + mod.parent);
+                        CancelTaskCommand();
+                        throw new TaskCanceledException();
+                    }
+                    foreach (var pkg in mod.packages)
+                    {
+                        if (pkg.folder != null && !KnUtils.IsSafePathComponent(pkg.folder))
+                        {
+                            Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Refusing to install: mod " + mod.id + " has unsafe package folder: " + pkg.folder);
+                            CancelTaskCommand();
+                            throw new TaskCanceledException();
+                        }
+                    }
 
                     List<ModFile> files = new List<ModFile>();
                     string modFolder = mod.id + "-" + mod.version;
@@ -263,8 +284,13 @@ namespace Knossos.NET.ViewModels
                     {
                         if (file.dest != null && file.dest.Trim() != string.Empty)
                         {
-                            var path = file.dest;
-                            Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + path);
+                            if (!KnUtils.IsSubPath(modPath, file.dest))
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", $"Unsafe dest path in mod '{mod.id}': {file.dest}");
+                                CancelTaskCommand();
+                                return false;
+                            }
+                            Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + file.dest);
                         }
                     }
 
@@ -308,7 +334,7 @@ namespace Knossos.NET.ViewModels
                          File starts to download, File finishes downloading, Decompression starts, Decompression ends, Image download completed
                     */
                     mod.fullPath = modPath + Path.DirectorySeparatorChar;
-                    await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks }, async (file, token) =>
+                    await Parallel.ForEachAsync(files, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.maxConcurrentSubtasks, CancellationToken = cancellationTokenSource.Token }, async (file, token) =>
                     {
                         if (cancellationTokenSource.IsCancellationRequested)
                         {
@@ -345,6 +371,12 @@ namespace Knossos.NET.ViewModels
                             if (file.dest == null)
                             {
                                 file.dest = string.Empty;
+                            }
+                            if (string.IsNullOrEmpty(file.filename) || !KnUtils.IsSubPath(modPath, file.filename))
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", $"Unsafe filename in mod '{mod.id}': {file.filename}");
+                                CancelTaskCommand();
+                                throw new TaskCanceledException();
                             }
                             var fileFullPath = modPath + Path.DirectorySeparatorChar + file.filename;
                             var result = await fileTask.DownloadFile(file.urls!, fileFullPath, "Downloading " + file.filename, false, null, cancellationTokenSource);
@@ -404,6 +436,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Error while decompressing the file " + fileFullPath);
                                 CancelTaskCommand();
+                                throw new TaskCanceledException();
                             }
                             File.Delete(fileFullPath);
                             ++ProgressCurrent;

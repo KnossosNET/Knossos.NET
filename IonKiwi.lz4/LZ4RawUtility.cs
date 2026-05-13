@@ -293,27 +293,52 @@ namespace IonKiwi.lz4 {
             /* Num Offsets */
             inputStream.Position = initialPosition + compressedFileSize.Value - 12;
             int numOffsets = br.ReadInt32();
+            if (numOffsets <= 0 || numOffsets > (compressedFileSize.Value - 12) / 4)
+                throw new Exception($"Invalid numOffsets in LZ41 footer: {numOffsets}");
 
             /* File Size */
-            if(!length.HasValue) 
+            if(!length.HasValue)
+            {
                 length = br.ReadInt32();
+                if (length <= 0)
+                    throw new Exception($"Invalid uncompressed size in LZ41 footer: {length}");
+            }
             else
                 inputStream.Position += 4;
 
             /* Block Size */
+            //Compressor's enum maxes out at Max4MB (see _blockSize values above). Cap at the same value to
+            //prevent a hostile footer from triggering a multi-GB allocation per block.
+            const int MaxBlockSize = 4 * 1024 * 1024;
             int blockSize = br.ReadInt32();
+            if (blockSize <= 0 || blockSize > MaxBlockSize)
+                throw new Exception($"Invalid block size in LZ41 footer: {blockSize}");
 
             /* Read the offsets tail */
             inputStream.Position = initialPosition + (compressedFileSize.Value - 12 - (numOffsets * 4));
 
+            //Validate each offset as it's read. Compressor emits strictly-monotonic offsets starting at 4
+            //(post-header), so out-of-range or non-increasing entries are tampering and would otherwise drive
+            //arbitrary inputStream.Position seeks (sibling-file disclosure inside a VP archive).
+            int maxValidOffset = compressedFileSize.Value - 12 - (numOffsets * 4);
+            int prevOffset = -1;
             for(var i=0; i<numOffsets;i++)
             {
-                offsets.Add(br.ReadInt32());
+                var off = br.ReadInt32();
+                if (off < 0 || off > maxValidOffset)
+                    throw new Exception($"LZ41: offset table entry out of range at index {i}: {off}");
+                if (off <= prevOffset)
+                    throw new Exception($"LZ41: offset table not strictly monotonic at index {i}: {off} <= {prevOffset}");
+                offsets.Add(off);
+                prevOffset = off;
             }
 
             /* The blocks [currentBlock to endBlock] contain the data we want */
             int currentBlock = offset.Value / blockSize;
             int endBlock = ((offset.Value + length.Value - 1) / blockSize) + 1;
+
+            if (currentBlock < 0 || endBlock >= numOffsets)
+                throw new Exception($"Requested range exceeds block table (blocks {currentBlock}–{endBlock}, numOffsets={numOffsets})");
 
             /* Seek to the first block to read */
             inputStream.Position = initialPosition + offsets[currentBlock];
@@ -326,6 +351,9 @@ namespace IonKiwi.lz4 {
             {
                 /* The difference in offsets is the size of the block */
                 int cmpBytes = offsets[currentBlock + 1] - offsets[currentBlock];
+                //Even with strictly-monotonic in-range offsets, the gap can still exceed cmpBuf's allocation.
+                if (cmpBytes < 0 || cmpBytes > lz4.LZ4_compressBound(blockSize))
+                    throw new Exception($"LZ41: block {currentBlock} compressed size out of range: {cmpBytes}");
                 byte[] cmpBuf = new byte[lz4.LZ4_compressBound(blockSize)];
                 var readBytes = inputStream.Read(cmpBuf,0, cmpBytes);
                 if (readBytes != cmpBytes)

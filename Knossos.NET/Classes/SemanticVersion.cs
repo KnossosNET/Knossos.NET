@@ -258,7 +258,7 @@ namespace Knossos.NET.Classes
 
         /// <summary>
         /// Compares a semantic version string to the version string in the mod dependency to see if it sastifies the requirement.
-        /// Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 &lt; 4.7.0, Version: ">=4.6.1"->equal or better
+        /// Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 < 4.7.0, Version: ">=4.6.1" -> equal or newer, Version: "<=4.6.1" -> equal or older, Version: ">4.6.1" -> newer, Version: "<4.6.1" -> older
         /// </summary>
         /// <param name="dependencyVersion"></param>
         /// <param name="version"></param>
@@ -276,7 +276,7 @@ namespace Knossos.NET.Classes
         */
         /// <summary>
         /// Compares a semantic version to the version string in the mod dependency to see if it sastifies the requirement.
-        /// Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 &lt; 4.7.0, Version: ">=4.6.1"->equal or better
+        /// Version : null -> Any, Version: "4.6.1" -> Only that version, Version: "~4.6.1" -> >=4.6.1 < 4.7.0, Version: ">=4.6.1" -> equal or newer, Version: "<=4.6.1" -> equal or older, Version: ">4.6.1" -> newer, Version: "<4.6.1" -> older
         /// </summary>
         /// <param name="dependencyVersion"></param>
         /// <param name="version"></param>
@@ -335,6 +335,18 @@ namespace Knossos.NET.Classes
                     return false;
                 }
 
+                if (dependencyVersion.Contains(">"))
+                {
+                    var versionDep = new SemanticVersion(dependencyVersion.Replace(">", ""));
+                    return Compare(version, versionDep) > 0;
+                }
+
+                if (dependencyVersion.Contains("<"))
+                {
+                    var versionDep = new SemanticVersion(dependencyVersion.Replace("<", ""));
+                    return Compare(version, versionDep) < 0;
+                }
+
                 if (Compare(version, new SemanticVersion(dependencyVersion)) == 0)
                 {
                     return true;
@@ -387,7 +399,8 @@ namespace Knossos.NET.Classes
         {
             if (other == null)
                 return 1;
-            return this > (SemanticVersion)other ? 1 : 0;
+
+            return Compare(this, (SemanticVersion)other);
         }
     }
 }

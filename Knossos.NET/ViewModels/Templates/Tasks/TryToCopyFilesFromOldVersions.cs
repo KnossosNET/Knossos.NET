@@ -113,6 +113,19 @@ namespace Knossos.NET.ViewModels
                                 {
                                     if (f.filename != null && (!oldVer.devMode || (oldVer.devMode && oldPkg.folder != null)))
                                     {
+                                        //Validate the old-side relative path before reading. A malicious mod.json on disk
+                                        //could have a traversal in f.filename that leaks file existence via File.Exists and
+                                        //timing via GetFileHash even before we attempt to copy.
+                                        var oldRelative = oldVer.devMode
+                                            ? Path.Combine(oldPkg.folder ?? string.Empty, f.filename)
+                                            : f.filename;
+                                        if (string.IsNullOrEmpty(oldRelative) || !KnUtils.IsSubPath(oldVer.fullPath, oldRelative))
+                                        {
+                                            Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "Old version " + oldVer + " has unsafe file path, cannot use as source: " + oldRelative);
+                                            copySrcList.Clear();
+                                            copyDstList.Clear();
+                                            break;
+                                        }
                                         var oldPath = oldVer.devMode ? Path.Combine(oldVer.fullPath, oldPkg.folder!, f.filename) : Path.Combine(oldVer.fullPath, f.filename);
                                         if (File.Exists(oldPath))
                                         {
@@ -141,6 +154,18 @@ namespace Knossos.NET.ViewModels
                                                 }
                                             }
 
+                                            //Paired check on the write side: the new mod's package.folder is API-derived
+                                            //and would not have been validated yet if mod was loaded from a poisoned source.
+                                            var newRelative = mod.devMode
+                                                ? Path.Combine(package.folder ?? string.Empty, f.filename)
+                                                : f.filename;
+                                            if (!KnUtils.IsSubPath(mod.fullPath, newRelative))
+                                            {
+                                                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.TryToCopyFilesFromOldVersions()", "New mod has unsafe destination path, cannot copy from old version: " + newRelative);
+                                                copySrcList.Clear();
+                                                copyDstList.Clear();
+                                                break;
+                                            }
                                             copySrcList.Add(oldPath);
                                             var newPath = mod.devMode ? Path.Combine(mod.fullPath, package.folder!, f.filename) : Path.Combine(mod.fullPath, f.filename);
                                             copyDstList.Add(newPath);

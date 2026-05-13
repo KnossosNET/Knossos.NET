@@ -196,7 +196,7 @@ namespace Knossos.NET.Models
                     {
                         try
                         {
-                            HttpResponseMessage response = await KnUtils.GetHttpClient().GetAsync(ModTagsURL).ConfigureAwait(false);
+                            using var response = await KnUtils.GetHttpClient().GetAsync(ModTagsURL).ConfigureAwait(false);
                             var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                             var tagsRepo = JsonSerializer.Deserialize<NebulaModTagJson[]>(json)!;
                             if (tagsRepo != null)
@@ -651,7 +651,7 @@ namespace Knossos.NET.Models
             }
             catch (IOException)
             {
-                Log.WriteToConsole("repo_minimal.json is in use. Waiting for file access...");
+                _ = Log.WriteToConsole("repo_minimal.json is in use. Waiting for file access...");
                 await Task.Delay(500);
                 if (cancellationToken != null && cancellationToken!.IsCancellationRequested)
                 {
@@ -715,7 +715,10 @@ namespace Knossos.NET.Models
 
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public bool done { get; set; }
-          
+
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+            public bool gatewayTimeout { get; set; }
+
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public Mod mod { get; set; }
         }
@@ -736,12 +739,14 @@ namespace Knossos.NET.Models
         /// <param name="needsLogIn"></param>
         /// <param name="timeoutSeconds"></param>
         /// <param name="method"></param>
+        /// <param name="attempt"></param>
         /// <returns>
         /// apireply or null if the call failed completely
         /// It is difficult to point out exactly what the reply is because it changed from call to call
         /// Most api calls return a ApiReply.result true or false if successfull or not but this is not to case for every call
+        /// If the nebula token is expired, the api call will attempt up to 3 times to renew it.
         /// </returns>
-        private static async Task<ApiReply?> ApiCall(string resourceUrl, HttpContent? data, bool needsLogIn = false, int timeoutSeconds = 45, ApiMethod method = ApiMethod.POST)
+        private static async Task<ApiReply?> ApiCall(string resourceUrl, HttpContent? data, bool needsLogIn = false, int timeoutSeconds = 45, ApiMethod method = ApiMethod.POST, int attempt = 0)
         {
             //Custom mode with no nebula services
             if (Knossos.inSingleTCMode && !CustomLauncher.UseNebulaServices)
@@ -749,6 +754,7 @@ namespace Knossos.NET.Models
                 Log.Add(Log.LogSeverity.Warning, "Nebula.Trinity()", "Nebula services has been disabled.");
                 return null;
             }
+            using var request = new HttpRequestMessage();
             try
             {
                 var client = KnUtils.GetHttpClient();
@@ -763,9 +769,11 @@ namespace Knossos.NET.Models
                             return null;
                         }
                     }
-                    client.DefaultRequestHeaders.Add("X-KN-TOKEN", apiUserToken);
+                    request.Headers.Add("X-KN-TOKEN", apiUserToken);
                 }
                 client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
+                request.RequestUri = new Uri(apiURL + resourceUrl);
+                request.Content = data;
                 switch (method)
                 {
                     case ApiMethod.POST:
@@ -774,10 +782,11 @@ namespace Knossos.NET.Models
                             {
                                 throw new ArgumentNullException(nameof(data));
                             }
-                            var response = await client.PostAsync(apiURL + resourceUrl, data);
-                            data.Dispose();
+                            request.Method = HttpMethod.Post;
+                            var response = await client.SendAsync(request);
                             if (response.IsSuccessStatusCode)
                             {
+                                data.Dispose();
                                 var jsonReply = await response.Content.ReadAsStringAsync();
                                 if (jsonReply == "OK") // multiupload/part hack
                                 {
@@ -789,7 +798,7 @@ namespace Knossos.NET.Models
                                 {
                                     var reply = JsonSerializer.Deserialize<ApiReply>(jsonReply);
                                     if (!reply.result && resourceUrl != "mod/check_id")
-                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api POST call: " + response.StatusCode + "(" + (int)response.StatusCode + ")\n" + data);
+                                        Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api POST call. Status: " + response.StatusCode + "(" + (int)response.StatusCode + "). Reply: \n" + jsonReply + "\n");
 
                                     return reply;
                                 }
@@ -799,18 +808,31 @@ namespace Knossos.NET.Models
                                 /* Nebula responds with a HTTP status code 401 for expired tokens, so lets try this again */
                                 if(needsLogIn && apiUserToken != null && response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                                 {
-                                    Log.Add(Log.LogSeverity.Information, "Nebula.ApiCall()", "Nebula: User login token is expired.");
-                                    apiUserToken = null;
-                                    return await ApiCall(resourceUrl, data, needsLogIn, timeoutSeconds, method);
+                                    if (attempt <= 3)
+                                    {
+                                        attempt++;
+                                        await Task.Delay(2000);
+                                        Log.Add(Log.LogSeverity.Information, "Nebula.ApiCall()", $"Nebula: User login token is expired. Trying to renew #{attempt}");
+                                        apiUserToken = null;
+                                        return await ApiCall(resourceUrl, data, needsLogIn, timeoutSeconds, method, attempt);
+                                    }
                                 }
-                                /* Upload/Update/delete Mod Timeout Hack */
-                                if(response.StatusCode.ToString() == "GatewayTimeout" && (resourceUrl == "mod/release" || resourceUrl == "mod/release/update" || resourceUrl == "mod/release/delete"))
+                                data.Dispose();
+                                if (response.StatusCode == System.Net.HttpStatusCode.GatewayTimeout)
                                 {
-                                    Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall(" + resourceUrl + ")", "During mod/release request a GatewayTimeout was recieved. This is a known issue with Nebula and while Knet handles this" +
-                                        " as a success there is not an actual way to know if the api call was really successfull.");
-                                    var reply = new ApiReply();
-                                    reply.result = true;
-                                    return reply;
+                                    if (resourceUrl == "multiupload/finish")
+                                    {
+                                        /* Finish() has retry + CheckUploadDone() verification for null replies — let it handle this */
+                                        Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall(" + resourceUrl + ")", "A GatewayTimeout was received. Returning null so Finish() can verify server state.");
+                                        return null;
+                                    }
+                                    if (resourceUrl == "mod/release" || resourceUrl == "mod/release/update" || resourceUrl == "mod/release/delete")
+                                    {
+                                        Log.Add(Log.LogSeverity.Warning, "Nebula.ApiCall(" + resourceUrl + ")", "A GatewayTimeout was received. Operation status is unknown — the server may have processed the request after the proxy timed out.");
+                                        var reply = new ApiReply();
+                                        reply.gatewayTimeout = true;
+                                        return reply;
+                                    }
                                 }
                             }
                             Log.Add(Log.LogSeverity.Error, "Nebula.ApiCall(" + resourceUrl + ")", "An error has ocurred during nebula api POST call: " + response.StatusCode + "(" + (int)response.StatusCode + ")");
@@ -822,7 +844,8 @@ namespace Knossos.NET.Models
                         }
                     case ApiMethod.GET:
                         {
-                            var response = await client.GetAsync(apiURL + resourceUrl);
+                            request.Method = HttpMethod.Get;
+                            var response = await client.SendAsync(request);
                             if (response.IsSuccessStatusCode)
                             {
                                 var json = await response.Content.ReadAsStringAsync();
@@ -900,7 +923,7 @@ namespace Knossos.NET.Models
                     }
                 }
 
-                var reply = await ApiCall("mod/json/"+modid+"/"+version, null, false, 30, ApiMethod.GET);
+                var reply = await ApiCall("mod/json/"+modid+"/"+version, null, false, 60, ApiMethod.GET);
 
                 if (reply.HasValue)
                 {
@@ -924,7 +947,10 @@ namespace Knossos.NET.Models
                     }
                     else
                     {
-                        Log.Add(Log.LogSeverity.Error, "Nebula.GetModJson", "Unable to get mod json data. ID: " + modid + " Version: " + version + " Reason: " + reply.Value.reason);
+                        if(reply.Value.reason == "not_found")
+                            Log.Add(Log.LogSeverity.Warning, "Nebula.GetModJson", "Mod ID + Version not found on Nebula. ID: " + modid + " Version: " + version + " Reason: " + reply.Value.reason);
+                        else
+                            Log.Add(Log.LogSeverity.Error, "Nebula.GetModJson", "Unable to get mod json data. ID: " + modid + " Version: " + version + " Reason: " + reply.Value.reason);
                     }
                 }
             }
@@ -1417,6 +1443,11 @@ namespace Knossos.NET.Models
                         Log.Add(Log.LogSeverity.Information, "Nebula.DeleteModVersion", "Deleted mod/version : " + mod + " from Nebula.");
                         return "ok";
                     }
+                    else if (reply.Value.gatewayTimeout)
+                    {
+                        Log.Add(Log.LogSeverity.Warning, "Nebula.DeleteModVersion", "Server timed out. The deletion may or may not have succeeded. Please verify on the Nebula website.");
+                        return "Server timed out — please verify the deletion on the Nebula website.";
+                    }
                     else
                     {
                         Log.Add(Log.LogSeverity.Error, "Nebula.DeleteModVersion", "Error while deleting mod/version: " + mod + " Reason: " + reply.Value.reason);
@@ -1678,6 +1709,11 @@ namespace Knossos.NET.Models
                         Log.Add(Log.LogSeverity.Information, "Nebula.ReleaseMod", "ReleaseMod: " + mod + " OK!");
                         return "ok";
                     }
+                    else if (reply.Value.gatewayTimeout)
+                    {
+                        Log.Add(Log.LogSeverity.Warning, "Nebula.ReleaseMod", "Server timed out. The release may or may not have succeeded. Please verify on the Nebula website.");
+                        return "Server timed out — please verify the release on the Nebula website.";
+                    }
                     else
                     {
                         Log.Add(Log.LogSeverity.Error, "Nebula.ReleaseMod", "ReleaseMod: " + mod + " error. Reason: " + reply.Value.reason);
@@ -1713,6 +1749,11 @@ namespace Knossos.NET.Models
                     {
                         Log.Add(Log.LogSeverity.Information, "Nebula.UpdateMetaData", "UpdateMetaData: " + mod + " OK!");
                         return "ok";
+                    }
+                    else if (reply.Value.gatewayTimeout)
+                    {
+                        Log.Add(Log.LogSeverity.Warning, "Nebula.UpdateMetaData", "Server timed out. The metadata update may or may not have succeeded. Please verify on the Nebula website.");
+                        return "Server timed out — please verify the metadata update on the Nebula website.";
                     }
                     else
                     {
@@ -1844,13 +1885,11 @@ namespace Knossos.NET.Models
                     }
                 });
 
-                completed = true;
+                if (cancellationTokenSource.IsCancellationRequested)
+                    throw new TaskCanceledException();
 
                 if (progressCallback != null)
                     progressCallback.Invoke("Verifying Upload...", maxProgress, maxProgress);
-
-                if (cancellationTokenSource.IsCancellationRequested)
-                    throw new TaskCanceledException();
 
                 int attempt = 1;
                 do
@@ -1860,10 +1899,11 @@ namespace Knossos.NET.Models
                     if (verified && progressCallback != null)
                         progressCallback.Invoke("Verify: " + verified, maxProgress, maxProgress);
 
-                    if (!verified && progressCallback != null && attempt <= maxUploadRetries)
+                    if (!verified && attempt <= maxUploadRetries)
                     {
                         Log.Add(Log.LogSeverity.Warning, "Nebula.Upload", "File failed nebula upload verify, retrying: " + fileFullPath);
-                        progressCallback.Invoke("Verify: Failed, Retrying... Retry #" + attempt, maxProgress, maxProgress);
+                        if (progressCallback != null)
+                            progressCallback.Invoke("Verify: Failed, Retrying... Retry #" + attempt, maxProgress, maxProgress);
                         await Task.Delay(2000);
                     }
 
@@ -1875,35 +1915,85 @@ namespace Knossos.NET.Models
             /// <summary>
             /// Call to complete the upload process
             /// Nebula will check the complete file checksum here
+            /// Retries with exponential backoff, checking server state between attempts
             /// </summary>
             /// <returns>true if everything is fine, false otherwise</returns>
             private async Task<bool> Finish()
             {
+                const int maxFinishRetries = 3;
+
+                for (int attempt = 1; attempt <= maxFinishRetries; attempt++)
+                {
+                    var data = new MultipartFormDataContent()
+                    {
+                        { new StringContent(fileChecksum!), "id" },
+                        { new StringContent(fileChecksum!), "checksum" },
+                        { new StringContent("None"), "content_checksum" },
+                        { new StringContent("None"), "vp_checksum" }
+                    };
+
+                    var reply = await ApiCall("multiupload/finish", data, true, 160);
+                    if (reply.HasValue)
+                    {
+                        if (reply.Value.result)
+                        {
+                            Log.Add(Log.LogSeverity.Information, "MultipartUploader.Finish", "Multiupload: File uploaded to Nebula! " + fileFullPath);
+                            completed = true;
+                            return true;
+                        }
+                        else
+                        {
+                            Log.Add(Log.LogSeverity.Error, "MultipartUploader.Finish", "Unable to complete multipart upload to Nebula. Reason: " + reply.Value.reason);
+                            if (progressCallback != null)
+                                progressCallback.Invoke("Verify: " + reply.Value.reason, 0, 1);
+                            completed = false;
+                            return false;  // Definitive failure (e.g. checksum mismatch) — don't retry
+                        }
+                    }
+
+                    // reply is null — network error, client timeout, or similar
+                    Log.Add(Log.LogSeverity.Warning, "MultipartUploader.Finish",
+                        "Finish attempt " + attempt + " of " + maxFinishRetries + " got no valid reply. Checking server state...");
+
+                    await Task.Delay(2000 * attempt);  // Exponential backoff
+
+                    // Check if the server actually completed the upload
+                    if (await CheckUploadDone())
+                    {
+                        Log.Add(Log.LogSeverity.Information, "MultipartUploader.Finish",
+                            "Server confirmed upload is complete after finish attempt " + attempt);
+                        completed = true;
+                        return true;
+                    }
+
+                    if (attempt < maxFinishRetries)
+                    {
+                        Log.Add(Log.LogSeverity.Warning, "MultipartUploader.Finish",
+                            "Server says upload not done. Retrying finish (attempt " + (attempt + 1) + ")...");
+                    }
+                }
+
+                Log.Add(Log.LogSeverity.Error, "MultipartUploader.Finish",
+                    "All finish attempts exhausted for " + fileFullPath);
+                completed = false;
+                return false;
+            }
+
+            /// <summary>
+            /// Calls multiupload/start to check if the server has already marked this upload as done.
+            /// Used to verify whether a timed-out finish call actually succeeded server-side.
+            /// </summary>
+            private async Task<bool> CheckUploadDone()
+            {
                 var data = new MultipartFormDataContent()
                 {
                     { new StringContent(fileChecksum!), "id" },
-                    { new StringContent(fileChecksum!), "checksum" },
-                    { new StringContent("None"), "content_checksum" },
-                    { new StringContent("None"), "vp_checksum" }
+                    { new StringContent(fileLenght.ToString()), "size" },
+                    { new StringContent(fileParts.Count().ToString()), "parts" }
                 };
 
-                var reply = await ApiCall("multiupload/finish", data, true, 160);
-                if (reply.HasValue)
-                {
-                    if (!reply.Value.result)
-                    {
-                        Log.Add(Log.LogSeverity.Error, "MultipartUploader.Finish", "Unable to multi part upload process to Nebula. Reason: " + reply.Value.reason);
-                        if (progressCallback != null)
-                            progressCallback.Invoke("Verify: " + reply.Value.reason, 0, 1);
-                    }
-                    else
-                    {
-                        Log.Add(Log.LogSeverity.Information, "MultipartUploader.Finish", "Multiupload: File uploaded to Nebula! " + fileFullPath);
-                    }
-                    completed = reply.Value.result;
-                    return reply.Value.result;
-                }
-                return false;
+                var reply = await ApiCall("multiupload/start", data, true);
+                return reply.HasValue && reply.Value.done;
             }
 
             /// <summary>
@@ -2076,7 +2166,7 @@ namespace Knossos.NET.Models
                         { new StringContent(partChecksum), "checksum" },
                     };
 
-                    var reply = await ApiCall("multiupload/verify_part", data, true);
+                    var reply = await ApiCall("multiupload/verify_part", data, true, 120);
                     if (reply.HasValue)
                     {
                         if (!reply.Value.result)

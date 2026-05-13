@@ -1,7 +1,9 @@
 ﻿using Avalonia.Platform;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,20 +27,28 @@ namespace Knossos.NET
         private Process? process;
         private bool completedSuccessfully = false;
         private CancellationTokenSource? cancelSource;
+        private static readonly object _unpackLock = new object();
 
         public SevenZipConsoleWrapper(Action<int>? progressCallback = null, CancellationTokenSource? cancelSource = null) 
         {
-            if(pathToConsoleExecutable == null)
+            if (pathToConsoleExecutable == null)
             {
-                pathToConsoleExecutable = UnpackExec();
-                if (File.Exists(pathToConsoleExecutable))
+                lock (_unpackLock)
                 {
-                    _ = Run();
-                }
-                else
-                {
-                    pathToConsoleExecutable = null;
-                    Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.Constructor", "File does not exist: " + pathToConsoleExecutable);
+                    if (pathToConsoleExecutable == null)
+                    {
+                        pathToConsoleExecutable = UnpackExec();
+
+                        if (File.Exists(pathToConsoleExecutable))
+                        {
+                            _ = Run(); // get version
+                        }
+                        else
+                        {
+                            pathToConsoleExecutable = null;
+                            Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.Constructor", "File does not exist: " + pathToConsoleExecutable);
+                        }
+                    }
                 }
             }
             this.progressCallback = progressCallback;
@@ -46,7 +56,9 @@ namespace Knossos.NET
         }
 
         /// <summary>
-        /// Decompress a .zip, .7z or .tar.gz file to a folder using the 7zip cmdline tool
+        /// Decompress a .zip, .7z or .tar.gz file to a folder using the 7zip cmdline tool.
+        /// Each archive (and the intermediate .tar for .tar.gz inputs) is enumerated first via
+        /// ListArchiveEntries and any entry that escapes destFolder aborts extraction with no files written.
         /// </summary>
         /// <param name="sourceFile"></param>
         /// <param name="destFolder"></param>
@@ -57,6 +69,9 @@ namespace Knossos.NET
         {
             if (disposed)
                 throw new ObjectDisposedException("This object was already disposed.");
+
+            if (!await ValidateArchiveEntries(sourceFile, destFolder))
+                return false;
 
             bool isTarGz = false;
 
@@ -75,6 +90,11 @@ namespace Knossos.NET
             if (isTarGz && result)
             {
                 sourceFile = Path.Combine(destFolder, Path.GetFileName(sourceFile).Replace(".tar.gz", ".tar"));
+                if (!await ValidateArchiveEntries(sourceFile, destFolder))
+                {
+                    try { File.Delete(sourceFile); } catch { }
+                    return false;
+                }
                 if (extractFullPath)
                     cmdline = "x ";
                 else
@@ -89,6 +109,128 @@ namespace Knossos.NET
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Verifies every entry in the archive (plus any symlink/hardlink targets) resolves inside destFolder.
+        /// Returns false if any entry escapes, if the archive can't be enumerated, or on subprocess failure.
+        /// </summary>
+        private async Task<bool> ValidateArchiveEntries(string archivePath, string destFolder)
+        {
+            var entries = await ListArchiveEntries(archivePath);
+            if (entries == null)
+            {
+                Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.ValidateArchiveEntries", "Refusing to extract: could not enumerate entries of " + archivePath);
+                return false;
+            }
+            foreach (var entry in entries)
+            {
+                //Mirror the SharpCompress normalization in KnUtils.DecompressFileSharpCompress so backslashes
+                //in archive entries are treated as separators on POSIX (where Path.GetFullPath would otherwise
+                //treat them as literal filename characters).
+                var normalized = entry.Replace('\\', '/').Replace('/', Path.DirectorySeparatorChar);
+                if (string.IsNullOrEmpty(normalized) || !KnUtils.IsSubPath(destFolder, normalized))
+                {
+                    Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.ValidateArchiveEntries", "Refusing to extract: archive entry escapes destination: " + entry);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Enumerates entry paths in an archive without extracting, by running "7za l -slt -sccUTF-8".
+        /// Returns the list of entry paths plus any Symbolic Link / Hard Link targets. Returns null on
+        /// subprocess failure (caller should treat as "cannot validate, refuse to extract").
+        /// </summary>
+        public async Task<List<string>?> ListArchiveEntries(string archivePath)
+        {
+            if (disposed)
+                throw new ObjectDisposedException("This object was already disposed.");
+
+            if (pathToConsoleExecutable == null)
+            {
+                Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.ListArchiveEntries", "7z executable not available");
+                return null;
+            }
+
+            var stdoutLines = new List<string>();
+            int exitCode = -1;
+
+            try
+            {
+                using (var listProcess = new Process())
+                {
+                    listProcess.StartInfo.FileName = pathToConsoleExecutable;
+                    listProcess.StartInfo.Arguments = "l -slt -sccUTF-8 \"" + archivePath + "\"";
+                    listProcess.StartInfo.UseShellExecute = false;
+                    listProcess.StartInfo.RedirectStandardOutput = true;
+                    listProcess.StartInfo.RedirectStandardError = true;
+                    listProcess.StartInfo.CreateNoWindow = true;
+                    //Pin UTF-8 — without this, Windows OEM codepage decoding can mismatch the bytes 7za writes
+                    //during extraction, allowing a crafted entry to bypass the post-list validation.
+                    listProcess.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+                    listProcess.StartInfo.StandardErrorEncoding = Encoding.UTF8;
+                    listProcess.OutputDataReceived += (s, e) => { if (e.Data != null) stdoutLines.Add(e.Data); };
+                    listProcess.ErrorDataReceived += (s, e) => { if (e.Data != null) Log.Add(Log.LogSeverity.Warning, "SevenZipConsoleWrapper.ListArchiveEntries", e.Data); };
+                    listProcess.Start();
+                    listProcess.BeginOutputReadLine();
+                    listProcess.BeginErrorReadLine();
+                    await listProcess.WaitForExitAsync();
+                    exitCode = listProcess.ExitCode;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.ListArchiveEntries", ex);
+                return null;
+            }
+
+            if (exitCode != 0)
+            {
+                Log.Add(Log.LogSeverity.Error, "SevenZipConsoleWrapper.ListArchiveEntries", "7z list returned exit code " + exitCode + " for " + archivePath);
+                return null;
+            }
+
+            //Output format: blocks of "Key = Value" lines separated by blank lines. The first block is the
+            //archive's own info (Path = <archivePath>, no Size field). Each subsequent block is one entry.
+            var entries = new List<string>();
+            var currentBlock = new Dictionary<string, string>();
+
+            void FlushBlock()
+            {
+                if (currentBlock.Count > 0)
+                {
+                    //Skip the archive-info block (no Size field) and any header blocks without a Path.
+                    if (currentBlock.ContainsKey("Size") && currentBlock.TryGetValue("Path", out var path) && !string.IsNullOrEmpty(path))
+                    {
+                        entries.Add(path);
+                        if (currentBlock.TryGetValue("Symbolic Link", out var symlink) && !string.IsNullOrEmpty(symlink))
+                            entries.Add(symlink);
+                        if (currentBlock.TryGetValue("Hard Link", out var hardlink) && !string.IsNullOrEmpty(hardlink))
+                            entries.Add(hardlink);
+                    }
+                    currentBlock.Clear();
+                }
+            }
+
+            foreach (var line in stdoutLines)
+            {
+                if (string.IsNullOrEmpty(line))
+                {
+                    FlushBlock();
+                    continue;
+                }
+                var idx = line.IndexOf(" = ", StringComparison.Ordinal);
+                if (idx <= 0)
+                    continue;
+                var key = line.Substring(0, idx);
+                var value = line.Substring(idx + 3);
+                currentBlock[key] = value;
+            }
+            FlushBlock();
+
+            return entries;
         }
 
         /// <summary>
@@ -175,7 +317,10 @@ namespace Knossos.NET
             {
                 if (process != null && process.ExitCode != 0)
                 {
-                    process.Kill();
+                    if (!process.HasExited)
+                    {
+                        process.Kill();
+                    }
                 }
             }
             catch (Exception ex)
@@ -384,7 +529,7 @@ namespace Knossos.NET
             {
                 try
                 {
-                    if (process.ExitCode != 0)
+                    if (!process.HasExited)
                     {
                         process.Kill();
                     }

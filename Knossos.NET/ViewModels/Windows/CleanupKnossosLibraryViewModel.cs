@@ -29,6 +29,13 @@ namespace Knossos.NET.ViewModels
                     var newestMod = new Dictionary<string, string>();
                     foreach (var mod in Knossos.GetInstalledModList(null))
                     {
+                        //Always skip retail
+                        if(mod.id == "FS2")
+                        {
+                            modsToKeep.Add(mod);
+                            continue;
+                        }
+
                         //Always keep mods in dev mode
                         if (mod.devMode)
                         {
