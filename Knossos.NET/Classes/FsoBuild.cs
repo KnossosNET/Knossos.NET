@@ -419,7 +419,6 @@ namespace Knossos.NET.Models
                             if (!_flagErrorOneWarn)
                             {
                                 _flagErrorOneWarn = true;
-                                await Dispatcher.UIThread.InvokeAsync(async () => { await MessageBox.Show(MainWindow.instance, stderr, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); });
                             }
                         }
                         return null;
