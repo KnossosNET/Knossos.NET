@@ -17,7 +17,8 @@ namespace Knossos.NET.Views
     /// On Android/Browser: wraps this UserControl in a chrome overlay displayed via DialogHost.
     ///
     /// Sizing on desktop:
-    ///   Set Width/Height/MinWidth/MinHeight on the KnossosWindow in AXAML as usual.
+    ///   Set MaxWidth/MaxHeight/MinWidth/MinHeight on the KnossosWindow in AXAML as usual.
+    ///   Use WindowWidth/WindowHeight instead of Width/Height on the KnossosWindow AXAML.
     ///   The host Window picks them up automatically. SizeToContent works too.
     ///
     /// Sizing on Android overlay:
@@ -27,6 +28,7 @@ namespace Knossos.NET.Views
     ///   
     /// Note: For dialogs that are only intended to be used on desktop OS it is 
     /// recommended to just use a Window
+    /// Note2: Avoid using Width/Height to set a fixed size.
     /// </summary>
     public partial class KnossosWindow : UserControl
     {
@@ -75,6 +77,22 @@ namespace Knossos.NET.Views
         {
             get => GetValue(WindowStartupLocationProperty);
             set => SetValue(WindowStartupLocationProperty, value);
+        }
+
+        public static readonly StyledProperty<int> WindowWidthProperty =
+            AvaloniaProperty.Register<KnossosWindow, int>(nameof(WindowWidth), 0);
+        public int WindowWidth
+        {
+            get => GetValue(WindowWidthProperty);
+            set => SetValue(WindowWidthProperty, value);
+        }
+
+        public static readonly StyledProperty<int> WindowHeightProperty =
+            AvaloniaProperty.Register<KnossosWindow, int>(nameof(WindowHeight), 0);
+        public int WindowHeight
+        {
+            get => GetValue(WindowHeightProperty);
+            set => SetValue(WindowHeightProperty, value);
         }
 
         public static readonly StyledProperty<SizeToContent> SizeToContentProperty =
@@ -279,8 +297,8 @@ namespace Knossos.NET.Views
 
             // Transfer sizing constraints from the KnossosWindow AXAML to the host Window.
             // Use explicit checks so we only override defaults that were intentionally set.
-            if (!double.IsNaN(Width)   && Width   > 0) w.Width   = Width;
-            if (!double.IsNaN(Height)  && Height  > 0) w.Height  = Height;
+            if (!double.IsNaN(WindowHeight) && WindowHeight > 0) w.Height = WindowHeight;
+            if (!double.IsNaN(WindowWidth) && WindowWidth > 0) w.Width = WindowWidth;
             if (MinWidth  > 0) w.MinWidth  = MinWidth;
             if (MinHeight > 0) w.MinHeight = MinHeight;
             if (!double.IsPositiveInfinity(MaxWidth)  && MaxWidth  > 0) w.MaxWidth  = MaxWidth;

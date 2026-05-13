@@ -12,6 +12,7 @@
 			 WindowStartupLocation="CenterOwner"
 			 MinHeight="400"
 			 MinWidth="400"
+			 WindowWidth="1070"
 			 Title="{Binding Name}"
 			 CanResize="True"
 			 xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"

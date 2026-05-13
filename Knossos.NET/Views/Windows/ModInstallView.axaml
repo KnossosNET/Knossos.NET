@@ -14,6 +14,7 @@
 		SizeToContent="Width"
 		MinHeight="400"
 	    MinWidth="400"
+		WindowHeight="600"
 		Title="{Binding Title}"
 		CanResize="True">
 	

@@ -13,6 +13,8 @@
 		SizeToContent="Width"
 		MinHeight="400"
 		MinWidth="400"
+		WindowWidth="550"
+		WindowHeight="600"
 		CanResize="True">
 	
 	<Design.DataContext>
