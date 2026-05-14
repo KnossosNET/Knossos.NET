@@ -5,8 +5,10 @@
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="200"
 		Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterOwner"
+		SizeToContent="WidthAndHeight"
+		MinHeight="100"
+		MinWidth="200"
         x:Class="Knossos.NET.Views.MessageBox" 
-		SizeToContent="WidthAndHeight" 
 		CanResize="True">
 
 		<Grid Background="{StaticResource BackgroundColorPrimary}" HorizontalAlignment="Center" RowDefinitions="*,Auto">

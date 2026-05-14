@@ -88,7 +88,7 @@ namespace Knossos.NET.Classes
         /// </summary>
         /// <param name="versionA"></param>
         /// <param name="versionB"></param>
-        /// <returns>Retuns >=1 if A is superior, 0 if equal or <=-1 if A is inferior.</returns>    
+        /// <returns>Retuns &gt;=1 if A is superior, 0 if equal or &lt;=-1 if A is inferior.</returns>    
         public static int Compare(string versionA, string versionB)
         {
             return Compare(new SemanticVersion(versionA), new SemanticVersion(versionB));
@@ -99,7 +99,7 @@ namespace Knossos.NET.Classes
         /// </summary>
         /// <param name="versionA"></param>
         /// <param name="versionB"></param>
-        /// <returns>Retuns >=1 if A is superior, 0 if equal or <=-1 if A is inferior.</returns>        
+        /// <returns>Retuns >=1 if A is superior, 0 if equal or &lt;=-1 if A is inferior.</returns>        
         public static int Compare(SemanticVersion versionA, SemanticVersion versionB)
         {
             if(versionA.major != versionB.major)
