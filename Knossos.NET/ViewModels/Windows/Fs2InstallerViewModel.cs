@@ -1,17 +1,19 @@
-﻿using Avalonia.Platform;
+﻿using Avalonia.Controls;
+using Avalonia.Platform;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Knossos.NET.Classes.Inno;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
+using SharpCompress.Archives;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
-using Avalonia.Platform.Storage;
-using Avalonia.Controls;
 
 namespace Knossos.NET.ViewModels
 {
@@ -52,26 +54,21 @@ namespace Knossos.NET.ViewModels
         internal int progressCurrent = 0;
         [ObservableProperty]
         internal string installText = string.Empty;
-        [ObservableProperty]
-        internal bool innoExtractIsAvailable = false;
         private string? gogExe = null;
         private KnossosWindow? window;
         private int reqFilesFound = 0;
+        // GOG installer sources. Desktop: a real path. Sandboxed (Android/iOS): storage
+        // handles for the .exe and its .bin slice(s), accessed as streams (no file paths).
+        private IStorageFile? gogExeFile = null;
+        private readonly Dictionary<string, IStorageFile> gogBins =
+            new Dictionary<string, IStorageFile>(StringComparer.OrdinalIgnoreCase);
 
         public Fs2InstallerViewModel() 
         { 
-            if(KnUtils.IsWindows || KnUtils.IsMacOS || KnUtils.IsLinux && ( KnUtils.CpuArch == "X64" || KnUtils.CpuArch == "X86" || KnUtils.CpuArch == "Arm64" || KnUtils.CpuArch == "RiscV64"))
-            {
-                InnoExtractIsAvailable = true;
-            }
         }
 
         public Fs2InstallerViewModel(KnossosWindow window)
         {
-            if (KnUtils.IsWindows || KnUtils.IsMacOS || KnUtils.IsLinux && (KnUtils.CpuArch == "X64" || KnUtils.CpuArch == "X86" || KnUtils.CpuArch == "Arm64" || KnUtils.CpuArch == "RiscV64"))
-            {
-                InnoExtractIsAvailable = true;
-            }
             this.window = window;
         }
 
@@ -82,138 +79,79 @@ namespace Knossos.NET.ViewModels
         {
             if(Knossos.GetKnossosLibraryPath() == null)
             {
-                await MessageBox.Show(MainWindow.instance!, "The KnossosNET library path is not set, first set the library path in the settings tab before installing FS2 Retail.", "Library path is null", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "The KnossosNET library path is not set, first set the library path in the settings tab before installing FS2 Retail.", "Library path is null", MessageBox.MessageBoxButtons.OK);
                 return;
             }
             
-            //If gog exe first extract to a temp folder and process it first
-            if(gogExe != null)
-            {
-                InstallText = "Running innoextract";
-                IsInstalling = true;
-                try
-                {
-                    string innoPath = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar;
-                    if (KnUtils.IsWindows)
-                    {
-                        innoPath += "innoextract.exe";
-                    }
-                    else
-                    {
-                        if(KnUtils.IsLinux)
-                        {
-                            if(KnUtils.CpuArch == "X64")
-                            {
-                                innoPath += "innoextract.x64";
-                            }
-                            if (KnUtils.CpuArch == "X86")
-                            {
-                                innoPath += "innoextract.x86";
-                            }
-                            if (KnUtils.CpuArch == "Arm64")
-                            {
-                                innoPath += "innoextract.arm64";
-                            }
-                            if (KnUtils.CpuArch == "RiscV64")
-                            {
-                                innoPath += "innoextract.riscv64";
-                            }
-                        }
-                        else
-                        {
-                            if(KnUtils.IsMacOS)
-                            {
-                                innoPath += "innoextract.mac64";
-                            }
-                        }
-                    }
-
-                    await Task.Run(() =>
-                    {
-                        var cmd = new Process();
-                        Directory.CreateDirectory(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog");
-                        cmd.StartInfo.FileName = innoPath;
-                        cmd.StartInfo.Arguments = gogExe + " -L -g -d \"" + KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog\"";
-                        cmd.StartInfo.UseShellExecute = false;
-                        cmd.StartInfo.CreateNoWindow = true;
-                        cmd.StartInfo.RedirectStandardOutput = true;
-                        cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
-                        cmd.Start();
-                        string? output;
-                        while ((output = cmd.StandardOutput.ReadLine()) != null)
-                        {
-                            Dispatcher.UIThread.InvokeAsync(() =>
-                            {
-                                InstallText = "Running innoextract" + output;
-                                ProgressCurrent++;
-                            });
-                        }
-                        cmd.WaitForExit();
-                        cmd.Dispose();
-                    });
-                    /*
-                        there is an older gog installer that had all the data inside an /app folder, current version it just on the root
-                        ProccessFolder need to be pointed to the folder with all the vps and the datas folder
-                    */
-                    var sp = KnUtils.GetTopLevel().StorageProvider;
-                    if (File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog" + Path.DirectorySeparatorChar + "root_fs2.vp"))
-                    {
-                        ProcessFolder( await sp.TryGetFolderFromPathAsync(Path.Combine(KnUtils.GetKnossosDataFolderPath(),"gog")) );
-                    }
-                    else
-                    {
-                        ProcessFolder(await sp.TryGetFolderFromPathAsync(Path.Combine(KnUtils.GetKnossosDataFolderPath(), "gog", "app")));
-                    }
-                }
-                catch(Exception ex) 
-                {
-                    Log.Add(Log.LogSeverity.Error, "Fs2InstallerViewModel.InstallFS2Command()", ex);
-                    return;
-                }
-            }
-
-            if (!filePaths.Any())
-            {
-                await MessageBox.Show(MainWindow.instance!, "Filepaths list is empty, something happened, if you are reading a gog exe it may be because its internal folder structure is different than the expected.", "Error", MessageBox.MessageBoxButtons.OK);
-                if (gogExe != null)
-                {
-                    try
-                    {
-                        Directory.Delete(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog", true);
-                    }
-                    catch { }
-                }
-                return;
-            }
-
             await Task.Run(async () => { 
                 try
                 {
                     IsInstalling = true;
-                    ProgressMax += filePaths.Count();
-                    ProgressCurrent = ProgressMax - filePaths.Count();
-                    Directory.CreateDirectory(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "movies");
-                    Directory.CreateDirectory(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "players");
-                    foreach (var file in filePaths)
+                    Dispatcher.UIThread.Invoke(new Action(() => { ProgressCurrent = 0; }));
+                    var fs2Path = Path.Combine(Knossos.GetKnossosLibraryPath()!, "FS2");
+                    var moviesPath = Path.Combine(fs2Path, "data", "movies");
+                    var playersPath = Path.Combine(fs2Path, "data", "players");
+                    Directory.CreateDirectory(fs2Path);
+                    Directory.CreateDirectory(moviesPath);
+                    Directory.CreateDirectory(playersPath);
+
+                    //GoG (single .exe or .exe + .bin, GOG Galaxy multi-part)
+                    if (gogExe != null || gogExeFile != null)
                     {
-                        InstallText = "Copying " + file.Name;
-                        if (file.Name.ToLower().Contains(".vp"))
+                        var archive = OpenGogArchive(out var cleanup);
+                        try
                         {
-                            using (var streamOrg = await file.OpenReadAsync())
+                            // Gather the files we want (required + any present optional) and
+                            // their destination paths, using the same routing as before.
+                            var wanted = new List<InnoFile>();
+                            var destPath = new Dictionary<InnoFile, string>();
+                            foreach (var name in required.Concat(optional))
                             {
-                                using (var streamDst = new FileStream(Path.Combine(Knossos.GetKnossosLibraryPath()!, "FS2", file.Name), FileMode.Create, FileAccess.Write))
-                                {
-                                    await streamOrg.CopyToAsync(streamDst);
-                                }
+                                var f = archive.FindFile(name);
+                                if (f == null)
+                                    continue;
+                                var dir = RouteDir(name, fs2Path, playersPath, moviesPath);
+                                if (dir == "")
+                                    continue;
+                                wanted.Add(f);
+                                destPath[f] = Path.Combine(dir, name);
                             }
+
+                            Dispatcher.UIThread.Invoke(new Action(() => { InstallText = "Extracting FreeSpace 2 data..."; }));
+
+                            // Single forward pass over the .bin (works on Android forward-only
+                            // streams). ExtractFiles verifies each file's checksum internally.
+                            archive.ExtractFiles(
+                                wanted,
+                                file => File.Create(destPath[file]),
+                                file =>
+                                {
+                                    Dispatcher.UIThread.Invoke(new Action(() =>
+                                    {
+                                        InstallText = $"Extracted: {file.Name}";
+                                        ProgressCurrent++;
+                                    }));
+                                });
                         }
-                        else
+                        finally
                         {
-                            if (file.Name.ToLower().Contains(".hcf"))
+                            cleanup();
+                            archive.Dispose();
+                        }
+                    }
+
+                    //Folder Copy
+                    if (filePaths.Any())
+                    {
+                        foreach (var file in filePaths)
+                        {
+                            Dispatcher.UIThread.Invoke(new Action(() => { InstallText = $"Copying: {file.Name}"; }));
+                            /* VPs */
+                            if (file.Name.ToLower().Contains(".vp"))
                             {
                                 using (var streamOrg = await file.OpenReadAsync())
                                 {
-                                    using (var streamDst = new FileStream(Path.Combine(Knossos.GetKnossosLibraryPath()!, "FS2", "data", "players", file.Name), FileMode.Create, FileAccess.Write))
+                                    using (var streamDst = new FileStream(Path.Combine(fs2Path, file.Name), FileMode.Create, FileAccess.Write))
                                     {
                                         await streamOrg.CopyToAsync(streamDst);
                                     }
@@ -221,20 +159,37 @@ namespace Knossos.NET.ViewModels
                             }
                             else
                             {
-                                using (var streamOrg = await file.OpenReadAsync())
+                                /* Player Profiles */
+                                if (file.Name.ToLower().Contains(".hcf"))
                                 {
-                                    using (var streamDst = new FileStream(Path.Combine(Knossos.GetKnossosLibraryPath()!, "FS2", "data", "movies", file.Name), FileMode.Create, FileAccess.Write))
+                                    using (var streamOrg = await file.OpenReadAsync())
                                     {
-                                        await streamOrg.CopyToAsync(streamDst);
+                                        using (var streamDst = new FileStream(Path.Combine(playersPath, file.Name), FileMode.Create, FileAccess.Write))
+                                        {
+                                            await streamOrg.CopyToAsync(streamDst);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    /* Movies */
+                                    using (var streamOrg = await file.OpenReadAsync())
+                                    {
+                                        using (var streamDst = new FileStream(Path.Combine(moviesPath, file.Name), FileMode.Create, FileAccess.Write))
+                                        {
+                                            await streamOrg.CopyToAsync(streamDst);
+                                        }
                                     }
                                 }
                             }
+                            Dispatcher.UIThread.Invoke(new Action(() => { ProgressCurrent++; }));
                         }
-                        ProgressCurrent++;
                     }
-                    InstallText = "Finishing tasks...";
+
+                    /* FINISH */
+                    Dispatcher.UIThread.Invoke(new Action(() => { ProgressCurrent = ProgressMax;  InstallText = "Finishing tasks..."; }));
                     var fs2Mod = new Mod();
-                    fs2Mod.fullPath = Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2";
+                    fs2Mod.fullPath = fs2Path;
                     fs2Mod.folderName = "FS2";
                     fs2Mod.installed = true;
                     fs2Mod.id = "FS2";
@@ -339,145 +294,180 @@ namespace Knossos.NET.ViewModels
                         }
                     }
                     catch { }
-                    InstallText = "Install Complete!, KnossosNET is reloading the library...";
+                    Dispatcher.UIThread.Invoke(new Action(() => { InstallText = "Install Complete!, KnossosNET is reloading the library..."; }));
                     Knossos.ResetBasePath();
-                    if(gogExe != null)
-                    {
-                        try
-                        {
-                            Directory.Delete(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "gog",true);
-                        }
-                        catch { }
-                    }
+                    await Task.Delay(3000);
+                    Dispatcher.UIThread.Invoke(new Action(() => { window?.Close(); }));
                 }
                 catch(Exception ex)
                 {
                     Log.Add(Log.LogSeverity.Error, "Fs2InstallerViewModel.InstallFS2Command()",ex);
+                    Dispatcher.UIThread.Invoke(new Action(() => { MessageBox.Show(MainWindow.instance, $"An error has ocurred during file copy: {ex.Message}.", "An error has ocurred", MessageBox.MessageBoxButtons.OK); }));
                 }
             });
         }
 
         /// <summary>
         /// Open file dialog to select a gog exe file, it checks that this is a valid FS2 install file
+        /// by counting the number of requiered and optional files present in it.
         /// </summary>
         internal async void LoadGoGExeCommand()
         {
-            FilePickerOpenOptions options = new FilePickerOpenOptions();
-            options.AllowMultiple = false;
-            options.Title = "Select your Freespace 2 gog .exe installer file";
-
-            var topmostWindow = KnUtils.GetTopLevel();
-            var result = await topmostWindow.StorageProvider.OpenFilePickerAsync(options);
-
-            if (result != null && result.Count > 0)
+            var top = KnUtils.GetTopLevel();
+            // Sandboxed platforms (Android/Browser) have no usable file paths, so we
+            // pick the FOLDER (which grants access to both the .exe and its .bin siblings).
+            // Desktop keeps the familiar .exe file picker (path-based).
+            bool sandboxed = KnUtils.IsAndroid || KnUtils.IsBrowser;
+            try
             {
                 CanInstall = false;
                 gogExe = null;
-                try
+                gogExeFile = null;
+                gogBins.Clear();
+
+                if (!sandboxed)
                 {
-                    string innoPath = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar;
-
-                    /*Copy Innoextract License file*/
-                    using (var fileStream = File.Create(innoPath + Path.DirectorySeparatorChar + "innoextract.license"))
-                    {
-                        AssetLoader.Open(new Uri("avares://Knossos.NET.Desktop/Assets/utils/innoextract.license")).CopyTo(fileStream);
-                        fileStream.Close();
-                    }
-
-                    if (KnUtils.IsWindows)
-                    {
-                        innoPath += "innoextract.exe";
-                        using (var fileStream = File.Create(innoPath))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET.Desktop/Assets/utils/win/innoextract.exe")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                    }
+                    var options = new FilePickerOpenOptions();
+                    options.AllowMultiple = false;
+                    options.Title = "Select your Freespace 2 gog .exe installer file";
+                    var result = await top.StorageProvider.OpenFilePickerAsync(options);
+                    if (result == null || result.Count == 0)
+                        return;
+                    // If the platform gives us a real path, use it; otherwise fall back to folder mode.
+                    var localPath = result[0].TryGetLocalPath();
+                    if (localPath != null)
+                        gogExe = localPath;
                     else
-                    {
-                        if (KnUtils.IsLinux)
-                        {
-                            if (KnUtils.CpuArch == "X64")
-                            {
-                                innoPath += "innoextract.x64";
-                                using (var fileStream = File.Create(innoPath))
-                                {
-                                    AssetLoader.Open(new Uri("avares://Knossos.NET.Desktop/Assets/utils/linux-x64/innoextract.x64")).CopyTo(fileStream);
-                                    fileStream.Close();
-                                    KnUtils.Chmod(innoPath,"+x");
-                                }
-                            }
-                            if (KnUtils.CpuArch == "Arm64")
-                            {
-                                innoPath += "innoextract.arm64";
-                                using (var fileStream = File.Create(innoPath))
-                                {
-                                    AssetLoader.Open(new Uri("avares://Knossos.NET.Desktop/Assets/utils/linux-arm64/innoextract.arm64")).CopyTo(fileStream);
-                                    fileStream.Close();
-                                    KnUtils.Chmod(innoPath, "+x");
-                                }
-                            }
-                            if (KnUtils.CpuArch == "RiscV64")
-                            {
-                                innoPath += "innoextract.riscv64";
-                                using (var fileStream = File.Create(innoPath))
-                                {
-                                    AssetLoader.Open(new Uri("avares://Knossos.NET.Desktop/Assets/utils/linux-riscv64/innoextract.riscv64")).CopyTo(fileStream);
-                                    fileStream.Close();
-                                    KnUtils.Chmod(innoPath, "+x");
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if(KnUtils.IsMacOS)
-                            {
-                                innoPath += "innoextract.mac64";
-                                using (var fileStream = File.Create(innoPath))
-                                {
-                                    AssetLoader.Open(new Uri("avares://Knossos.NET.Desktop/Assets/utils/osx/innoextract.mac64")).CopyTo(fileStream);
-                                    fileStream.Close();
-                                    KnUtils.Chmod(innoPath, "+x");
-                                }
-                            }
-                        }
-                    }
+                        sandboxed = true;
+                }
 
-                    var cmd = new Process();
-                    var file = new FileInfo(result[0].Path.LocalPath.ToString());
-                    gogExe = "\"" + file.FullName + "\"";
-                    cmd.StartInfo.FileName = innoPath;
-                    cmd.StartInfo.Arguments = gogExe + " -l -g";
-                    cmd.StartInfo.UseShellExecute = false;
-                    cmd.StartInfo.CreateNoWindow = true;
-                    cmd.StartInfo.RedirectStandardOutput = true;
-                    cmd.StartInfo.RedirectStandardInput = true;
-                    cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
-                    cmd.Start();
-                    var innoOutput = cmd.StandardOutput.ReadToEnd().ToLower();
-                    cmd.WaitForExit();
-                    cmd.Dispose();
-                    int count = 0;
-                    foreach (var reqFileName in required)
+                if (sandboxed && gogExe == null)
+                {
+                    var fopts = new FolderPickerOpenOptions();
+                    fopts.AllowMultiple = false;
+                    fopts.Title = "Select the folder with your Freespace 2 gog installer (.exe + .bin)";
+                    var folders = await top.StorageProvider.OpenFolderPickerAsync(fopts);
+                    if (folders == null || folders.Count == 0)
+                        return;
+                    await FindGogFilesInFolder(folders[0]);
+                    if (gogExeFile == null)
                     {
-                        if (innoOutput.Contains(reqFileName))
-                            count++;
-                    }
-
-                    if (count != required.Count())
-                    {
-                        //Missing files
-                        gogExe = null;
-                        await MessageBox.Show(MainWindow.instance!, "Unable to find all the required Freespace 2 files in gog exe.", "Files not found", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(MainWindow.instance, "No .exe installer was found in that folder.", "Installer not found", MessageBox.MessageBoxButtons.OK);
                         return;
                     }
-                    ProgressMax = innoOutput.Split('\n').Length-2;
-                    ProgressMax += required.Count() + optional.Count();
-                    CanInstall = true;
-                }catch(Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "Fs2InstallerViewModel.LoadGoGExeCommand()", ex);
                 }
+
+                // Validate on a background thread: opening storage streams blocks, and doing
+                // that on the UI thread can deadlock on Android.
+                int total = 0;
+                bool allRequired = false;
+                await Task.Run(() =>
+                {
+                    var archive = OpenGogArchive(out var cleanup);
+                    try
+                    {
+                        int req = required.Count(r => archive.FindFile(r) != null);
+                        allRequired = req == required.Length;
+                        total = req + optional.Count(o => archive.FindFile(o) != null);
+                    }
+                    finally
+                    {
+                        cleanup();
+                        archive.Dispose();
+                    }
+                });
+
+                if (!allRequired)
+                {
+                    gogExe = null;
+                    gogExeFile = null;
+                    gogBins.Clear();
+                    await MessageBox.Show(MainWindow.instance, "Unable to find all the required Freespace 2 files in gog installer.", "Files not found", MessageBox.MessageBoxButtons.OK);
+                    return;
+                }
+                ProgressMax = total;
+                CanInstall = true;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "Fs2InstallerViewModel.LoadGoGExeCommand()", ex);
+                gogExe = null;
+                gogExeFile = null;
+                gogBins.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Finds the GOG installer .exe and its .bin slice(s) inside a picked folder,
+        /// storing them as storage handles (streams are opened later, at install time).
+        /// </summary>
+        private async Task FindGogFilesInFolder(IStorageFolder folder)
+        {
+            IStorageFile? anyExe = null;
+            await foreach (var item in folder.GetItemsAsync())
+            {
+                if (item is not IStorageFile f)
+                    continue;
+                var lname = f.Name.ToLowerInvariant();
+                if (lname.EndsWith(".exe"))
+                {
+                    anyExe ??= f;
+                    if (lname.Contains("setup"))
+                        gogExeFile ??= f;   // prefer a setup*.exe
+                }
+                else if (lname.EndsWith(".bin"))
+                {
+                    gogBins[f.Name] = f;
+                }
+            }
+            gogExeFile ??= anyExe;
+        }
+
+        /// <summary>
+        /// Opens the selected GOG installer as an InnoArchive, from a path (desktop) or from
+        /// storage streams (sandboxed). The returned cleanup action releases opened streams.
+        /// </summary>
+        private InnoArchive OpenGogArchive(out Action cleanup)
+        {
+            if (gogExe != null)
+            {
+                cleanup = () => { };
+                return new InnoArchive(gogExe);
+            }
+            if (gogExeFile != null)
+            {
+                var opened = new List<Stream>();
+                InnoArchive.SliceOpener opener = (idx, expectedName) =>
+                {
+                    if (gogBins.TryGetValue(expectedName, out var bf))
+                    {
+                        var bs = bf.OpenReadAsync().GetAwaiter().GetResult();
+                        opened.Add(bs);
+                        return bs;
+                    }
+                    return null;
+                };
+                var exeStream = gogExeFile.OpenReadAsync().GetAwaiter().GetResult();
+                var archive = new InnoArchive(exeStream, gogExeFile.Name, opener, leaveOpen: false);
+                cleanup = () => { foreach (var st in opened) { try { st.Dispose(); } catch { } } };
+                return archive;
+            }
+            throw new InvalidOperationException("No GOG installer selected.");
+        }
+
+        /// <summary>
+        /// Destination directory for a file name (same routing as the folder-copy path).
+        /// </summary>
+        private static string RouteDir(string name, string fs2Path, string playersPath, string moviesPath)
+        {
+            switch (Path.GetExtension(name).ToLowerInvariant())
+            {
+                case ".vp":
+                case ".vpc": return fs2Path;
+                case ".hcf": return playersPath;
+                case ".ogg":
+                case ".mve": return moviesPath;
+                default: return "";
             }
         }
 
@@ -544,12 +534,14 @@ namespace Knossos.NET.ViewModels
                     if (reqFilesFound < 9)
                     {
                         //Missing files
-                        await MessageBox.Show(MainWindow.instance!, "Unable to find all the required Freespace 2 files in this directory.", "Files not found", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(MainWindow.instance, "Unable to find all the required Freespace 2 files in this directory.", "Files not found", MessageBox.MessageBoxButtons.OK);
                         return;
                     }
                     CanInstall = true;
+                    ProgressMax = filePaths.Count();
                 }
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "Fs2InstallerViewModel.ProcessFolder()", ex);
             }
