@@ -86,8 +86,6 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string? banner = null;
         [ObservableProperty]
-        internal string? apngBanner = null;
-        [ObservableProperty]
         internal bool forumAvailable = false;
         [ObservableProperty]
         internal bool isInstalled = false;
@@ -242,26 +240,9 @@ namespace Knossos.NET.ViewModels
                     var bannerLocalPath = modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner;
                     if (System.IO.File.Exists(bannerLocalPath))
                     {
-                        var isApng = false;
-                        using (var stream = new FileStream(bannerLocalPath, FileMode.Open, FileAccess.Read))
-                        {
-                            try
-                            {
-                                isApng = APNGHelper.IsApng(stream);
-
-                            }
-                            catch { /* Not a valid png*/ }
-                        }
                         Dispatcher.UIThread.Invoke(() =>
                         {
-                            if (isApng)
-                            {
-                                ApngBanner = bannerLocalPath;
-                            }
-                            else
-                            {
-                                Banner = bannerLocalPath;
-                            }
+                            Banner = bannerLocalPath;
                         });
                     }
                     else
@@ -274,26 +255,9 @@ namespace Knossos.NET.ViewModels
                                 var fs = await KnUtils.GetRemoteResource(url).ConfigureAwait(false);
                                 if (fs != null)
                                 {
-                                    var isApng = false;
-                                    using (var stream = new FileStream(fs, FileMode.Open, FileAccess.Read))
-                                    {
-                                        try
-                                        {
-                                            isApng = APNGHelper.IsApng(stream);
-
-                                        }
-                                        catch { /* Not a valid png*/ }
-                                    }
                                     Dispatcher.UIThread.Invoke(() =>
                                     {
-                                        if (isApng)
-                                        {
-                                            ApngBanner = fs;
-                                        }
-                                        else
-                                        {
-                                            Banner = fs;
-                                        }
+                                        Banner = fs;
                                     });
                                 }
                             }).ConfigureAwait(false);
