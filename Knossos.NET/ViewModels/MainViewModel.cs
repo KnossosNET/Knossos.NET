@@ -367,6 +367,8 @@ namespace Knossos.NET.ViewModels
         public void RunModStatusChecks()
         {
             InstalledModsView?.RunModStatusChecks();
+            //QtFred availability depends on the installed engine builds
+            CustomHomeVM?.RefreshQtFredAvailability();
         }
 
         /// <summary>
