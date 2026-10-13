@@ -544,7 +544,8 @@ namespace Knossos.NET.Models
                                 string filename = exec.file;
                                 FsoExecType type = GetExecType(exec.label);
                                 FsoExecArch arch = GetExecArch(exec.properties);
-                                if(modJson.devMode)
+                                //Packages without a folder (like the FSO builds on Nebula) have exec.file relative to the build root
+                                if(modJson.devMode && !string.IsNullOrEmpty(package.folder))
                                     executables.Add(new FsoFile(package.folder+Path.DirectorySeparatorChar+exec.file.Replace(@"./",""), folderPath, type, arch, env));
                                 else
                                     executables.Add(new FsoFile(exec.file, folderPath, type, arch, env));
