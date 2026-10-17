@@ -209,48 +209,62 @@ namespace Knossos.NET.ViewModels
 
         internal async void DownloadBuildCommand()
         {
-            if (build != null)
+            if (build == null)
             {
-                var result = await MessageBox.Show(MainWindow.instance, "This will download and install the FSO Build: " + build?.ToString() + ". Do you want to continue?", "Install FSO engine build", MessageBox.MessageBoxButtons.YesNo);
-                if (result == MessageBox.MessageBoxResult.Yes)
+                return;
+            }
+
+            if (build.modData == null)
+            {
+                await MessageBox.Show(MainWindow.instance, "There was an error while getting build data, check the logs.", "Get modjson failed", MessageBox.MessageBoxButtons.OK);
+                return;
+            }
+
+            await UpdateBuildCompatibility(build.modData).ConfigureAwait(false);
+            await Dispatcher.UIThread.InvokeAsync(async () => {
+                bool installInDevMode = false;
+                if (HasWriteAccess)
                 {
-                    if (build != null)
+                    var result = await MessageBox.Show(MainWindow.instance,
+                        "You have developer access to the FSO Build: " + build.ToString() + ".\n\n" +
+                        "Choose normal mode to install a package for your computer, or developer mode to install all platform packages for editing and uploading.",
+                        "Install FSO engine build", MessageBox.MessageBoxButtons.InstallBuildModes);
+                    if (result != MessageBox.MessageBoxResult.InstallNormal && result != MessageBox.MessageBoxResult.InstallDeveloper)
                     {
-                        //Check compatibility
-                        if (build.modData != null)
-                        {
-                            await UpdateBuildCompatibility(build.modData).ConfigureAwait(false);
-                            await Dispatcher.UIThread.InvokeAsync(async() => {
-                                //Write access allows installing builds for editing on any OS or CPU.
-                                if (CanDownload)
-                                {
-                                    IsDownloading = true;
-                                    cancellationTokenSource = new CancellationTokenSource();
-                                    FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build!, this, build.modData)!;
-                                    if (newBuild != null)
-                                    {
-                                        //Install completed
-                                        IsInstalled = true;
-                                        build = newBuild;
-                                        UpdateDisplayData(newBuild);
-                                    }
-                                    IsDownloading = false;
-                                    cancellationTokenSource?.Dispose();
-                                    cancellationTokenSource = null;
-                                }
-                                else
-                                {
-                                    await MessageBox.Show(MainWindow.instance, "This build does not have any executables compatible with your operating system or CPU arch.", "Build is not valid for this computer", MessageBox.MessageBoxButtons.OK);
-                                }
-                            }).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            await MessageBox.Show(MainWindow.instance, "There was an error while getting build data, check the logs.", "Get modjson failed", MessageBox.MessageBoxButtons.OK);
-                        }
+                        return;
+                    }
+                    installInDevMode = result == MessageBox.MessageBoxResult.InstallDeveloper;
+                }
+                else
+                {
+                    var result = await MessageBox.Show(MainWindow.instance, "This will download and install the FSO Build: " + build.ToString() + ". Do you want to continue?", "Install FSO engine build", MessageBox.MessageBoxButtons.YesNo);
+                    if (result != MessageBox.MessageBoxResult.Yes)
+                    {
+                        return;
                     }
                 }
-            }
+
+                //Only an explicit developer-mode install may bypass OS/CPU compatibility.
+                if (!IsValid && !installInDevMode)
+                {
+                    await MessageBox.Show(MainWindow.instance, "This build does not have any executables compatible with your operating system or CPU arch.", "Build is not valid for this computer", MessageBox.MessageBoxButtons.OK);
+                    return;
+                }
+
+                IsDownloading = true;
+                cancellationTokenSource = new CancellationTokenSource();
+                FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build, this, build.modData, installInDevMode: installInDevMode)!;
+                if (newBuild != null)
+                {
+                    //Install completed
+                    IsInstalled = true;
+                    build = newBuild;
+                    UpdateDisplayData(newBuild);
+                }
+                IsDownloading = false;
+                cancellationTokenSource?.Dispose();
+                cancellationTokenSource = null;
+            }).ConfigureAwait(false);
         }
 
         internal async void LoadPkgData()

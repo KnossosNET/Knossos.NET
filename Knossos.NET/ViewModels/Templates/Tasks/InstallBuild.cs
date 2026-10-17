@@ -75,7 +75,7 @@ namespace Knossos.NET.ViewModels
             }     
         }
 
-        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false)
+        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false, bool installInDevMode = false)
         {
             string? modPath = null;
             bool installed = false;
@@ -160,8 +160,8 @@ namespace Knossos.NET.ViewModels
 
                         if (modifyPkgs == null)
                         {
-                            //Builds have no developer-mode checkbox: use the logged-in user's write access.
-                            modJson.devMode = Nebula.userIsLoggedIn &&
+                            //Automatic installs stay normal; developer mode requires an explicit choice and write access.
+                            modJson.devMode = installInDevMode && Nebula.userIsLoggedIn &&
                                 (await Nebula.GetEditableModIDs())?.Contains(modJson.id) == true;
                             if (cancellationTokenSource.IsCancellationRequested)
                             {
