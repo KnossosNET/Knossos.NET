@@ -560,6 +560,18 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        internal void OpenFS2Log()
+        {
+            if (File.Exists(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log"))
+            {
+                KnUtils.OpenFileInOS(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log");
+            }
+            else
+            {
+                MessageBox.Show(MainWindow.instance, "Log File " + Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log") + " not found.", "File not found", MessageBox.MessageBoxButtons.OK);
+            }
+        }
+
         internal void TriggerMenuCommand()
         {
             IsMenuOpen = !IsMenuOpen;
