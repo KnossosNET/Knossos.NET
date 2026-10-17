@@ -148,16 +148,6 @@ namespace Knossos.NET.ViewModels
                             CancelTaskCommand();
                             throw new TaskCanceledException();
                         }
-                        foreach (var pkg in modJson.packages)
-                        {
-                            if (pkg.folder != null && !KnUtils.IsSafePathComponent(pkg.folder))
-                            {
-                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", "Refusing to install: build " + modJson.id + " has unsafe package folder: " + pkg.folder);
-                                CancelTaskCommand();
-                                throw new TaskCanceledException();
-                            }
-                        }
-
                         if (modifyPkgs == null)
                         {
                             //Automatic installs stay normal; developer mode requires an explicit choice and write access.
@@ -165,6 +155,21 @@ namespace Knossos.NET.ViewModels
                                 (await Nebula.GetEditableModIDs())?.Contains(modJson.id) == true;
                             if (cancellationTokenSource.IsCancellationRequested)
                             {
+                                throw new TaskCanceledException();
+                            }
+                        }
+
+                        foreach (var pkg in modJson.packages)
+                        {
+                            //Official builds may omit folder; dev installs need a separate directory per package.
+                            if (modifyPkgs == null && modJson.devMode && string.IsNullOrEmpty(pkg.folder))
+                            {
+                                pkg.folder = pkg.name;
+                            }
+                            if (pkg.folder != null && !KnUtils.IsSafePathComponent(pkg.folder))
+                            {
+                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", "Refusing to install: build " + modJson.id + " has unsafe package folder: " + pkg.folder);
+                                CancelTaskCommand();
                                 throw new TaskCanceledException();
                             }
                         }
