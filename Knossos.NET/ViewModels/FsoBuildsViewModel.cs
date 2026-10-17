@@ -308,6 +308,8 @@ namespace Knossos.NET.ViewModels
             try
             {
                 Directory.Delete(build.folderPath,true);
+                item ??= StableItems.Concat(RcItems).Concat(NightlyItems).Concat(CustomItems)
+                    .FirstOrDefault(i => i.build != null && i.build.id == build.id && i.build.version == build.version);
                 if(item != null) 
                 { 
                     if(!StableItems.Remove(item))

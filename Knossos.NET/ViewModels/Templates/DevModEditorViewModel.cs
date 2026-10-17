@@ -102,7 +102,16 @@ namespace Knossos.NET.ViewModels
         {
             int currentIndex = index;
             string id = ActiveVersion.id;
-            Knossos.RemoveMod(ActiveVersion);
+            if (ActiveVersion.type == ModType.engine)
+            {
+                var build = Knossos.GetInstalledBuild(id, ActiveVersion.version);
+                if (build != null)
+                    FsoBuildsViewModel.Instance!.DeleteBuild(build, null);
+            }
+            else
+            {
+                Knossos.RemoveMod(ActiveVersion);
+            }
             mods.Remove(ActiveVersion);
             if (mods.Any())
             {
@@ -127,7 +136,18 @@ namespace Knossos.NET.ViewModels
         public void DeleteAllVersions()
         {
             //Delete mod from view and close editor
-            Knossos.RemoveMod(ActiveVersion.id);
+            if (ActiveVersion.type == ModType.engine)
+            {
+                foreach (var build in Knossos.GetInstalledBuildsList(ActiveVersion.id))
+                {
+                    FsoBuildsViewModel.Instance!.DeleteBuild(build, null, false);
+                }
+                MainViewModel.Instance?.RunModStatusChecks();
+            }
+            else
+            {
+                Knossos.RemoveMod(ActiveVersion.id);
+            }
             DeveloperModsViewModel.Instance!.DeleteMod(ActiveVersion.id);
             DeveloperModsViewModel.Instance!.CloseEditor();
         }
