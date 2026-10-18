@@ -157,14 +157,7 @@ namespace Knossos.NET.ViewModels
                 if(resp == MessageBox.MessageBoxResult.OK)
                 {
                     Log.Add(Log.LogSeverity.Information, "FsoBuildItemViewModel.DeleteBuildCommand()", "Deleting FSO build " + build.ToString());
-                    FsoBuildsViewModel.Instance!.DeleteBuild(build,this);
-                    var result = await Nebula.GetModData(build.id, build.version).ConfigureAwait(false);
-                    Dispatcher.UIThread.Invoke(() => {
-                        if (result != null)
-                        {
-                            FsoBuildsViewModel.Instance!.AddBuildToUi(new FsoBuild(result));
-                        }
-                    });
+                    await FsoBuildsViewModel.Instance!.DeleteBuild(build,this);
                 }
             }
         }
