@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 
 namespace Knossos.NET.ViewModels
@@ -298,34 +299,55 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Completely deletes an FSO Build, from UI, from Knossos internal list and also clears physical files
-        /// It optionally runs mod status checks, default on
+        /// Deletes an installed FSO build and restores its downloadable Nebula entry, if available.
+        /// It optionally runs mod status checks, default on.
         /// </summary>
         /// <param name="build"></param>
         /// <param name="item"></param>
-        public void DeleteBuild(FsoBuild build, FsoBuildItemViewModel? item, bool runModstatusChecks = true)
+        public async Task DeleteBuild(FsoBuild build, FsoBuildItemViewModel? item, bool runModstatusChecks = true)
         {
             try
             {
                 Directory.Delete(build.folderPath,true);
-                if(item != null) 
-                { 
-                    if(!StableItems.Remove(item))
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    item ??= StableItems.Concat(RcItems).Concat(NightlyItems).Concat(CustomItems)
+                        .FirstOrDefault(i => i.build != null && i.build.id == build.id && i.build.version == build.version);
+                    if (item != null)
                     {
-                        if (!RcItems.Remove(item))
+                        if (!StableItems.Remove(item))
                         {
-                            if (!NightlyItems.Remove(item))
+                            if (!RcItems.Remove(item))
                             {
-                                CustomItems.Remove(item);
+                                if (!NightlyItems.Remove(item))
+                                {
+                                    CustomItems.Remove(item);
+                                }
                             }
                         }
                     }
-                }
-                Knossos.RemoveBuild(build);
-                DeveloperModsViewModel.Instance?.UpdateListedFsoBuildVersionsInEditor();
-                if (runModstatusChecks)
+                    Knossos.RemoveBuild(build);
+                    DeveloperModsViewModel.Instance?.UpdateListedFsoBuildVersionsInEditor();
+                    if (runModstatusChecks)
+                    {
+                        MainViewModel.Instance?.RunModStatusChecks();
+                    }
+                });
+
+                //Fetch pristine metadata rather than reusing the installed build's folders and destinations.
+                var result = await Nebula.GetModData(build.id, build.version).ConfigureAwait(false);
+                if (result != null)
                 {
-                    MainViewModel.Instance?.RunModStatusChecks();
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        //A refresh or a new install may have already restored this version while the request was pending.
+                        if (Knossos.GetInstalledBuild(build.id, build.version) == null &&
+                            !StableItems.Concat(RcItems).Concat(NightlyItems).Concat(CustomItems)
+                                .Any(i => i.build != null && i.build.id == build.id && i.build.version == build.version))
+                        {
+                            AddBuildToUi(new FsoBuild(result));
+                        }
+                    });
                 }
             }
             catch(Exception ex)
@@ -385,19 +407,7 @@ namespace Knossos.NET.ViewModels
                             var uiItem = NightlyItems.FirstOrDefault(i => i.build == build);
                             TaskViewModel.Instance!.AddMessageTask("Deleting:" + build);
                             //Delete build
-                            DeleteBuild(build, uiItem, false);
-                            if (uiItem != null)
-                            {
-                                //Re add the item to the UI
-                                var result = await Nebula.GetModData(build.id, build.version).ConfigureAwait(false);
-                                if(result != null)
-                                {
-                                    Dispatcher.UIThread.Invoke(() =>
-                                    {
-                                        AddBuildToUi(new FsoBuild(result));
-                                    });
-                                }
-                            }
+                            await DeleteBuild(build, uiItem, false);
                         }
                     }
                     MainViewModel.Instance?.RunModStatusChecks();
