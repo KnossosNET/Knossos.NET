@@ -142,7 +142,7 @@ namespace Knossos.NET.ViewModels
                 {
                     await FsoBuildsViewModel.Instance!.DeleteBuild(build, null, false);
                 }
-                MainViewModel.Instance?.RunModStatusChecks();
+                MainWindowViewModel.Instance?.RunModStatusChecks();
             }
             else
             {

@@ -296,30 +296,6 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        private void OpenFS2Log()
-        {
-            if (File.Exists(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log"))
-            {
-                try
-                {
-                    var cmd = new Process();
-                    cmd.StartInfo.FileName = Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log");
-                    cmd.StartInfo.UseShellExecute = true;
-                    cmd.Start();
-                    cmd.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Log.Add(Log.LogSeverity.Error, "ModCardViewModel.OpenFS2Log", ex);
-                }
-            }
-            else
-            {
-                if (MainWindow.instance != null)
-                    MessageBox.Show(MainWindow.instance, "Log File " + Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log") + " not found.", "File not found", MessageBox.MessageBoxButtons.OK);
-            }
-        }
-
         internal async void ButtonCommandUpdate()
         {
             var dialog = new ModInstallView();

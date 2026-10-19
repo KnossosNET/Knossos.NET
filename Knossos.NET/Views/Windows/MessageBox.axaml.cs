@@ -20,6 +20,7 @@ namespace Knossos.NET.Views
             DetailsContinueCancel,
             DontWarnAgainOK,
             ContinueCancelSkipVersion,
+            InstallBuildModes
         }
 
         public enum MessageBoxResult
@@ -31,7 +32,9 @@ namespace Knossos.NET.Views
             Continue,
             Details,
             DontWarnAgain,
-            SkipVersion
+            SkipVersion,
+            InstallNormal,
+            InstallDeveloper
         }
 
         public MessageBox()
@@ -110,6 +113,13 @@ namespace Knossos.NET.Views
             if (buttons == MessageBoxButtons.ContinueCancelSkipVersion)
             {
                 AddButton("Skip this version", MessageBoxResult.SkipVersion, false, "Option", 150);
+            }
+
+            if (buttons == MessageBoxButtons.InstallBuildModes)
+            {
+                AddButton("Normal mode", MessageBoxResult.InstallNormal, true, "Accept", 120);
+                AddButton("Developer mode", MessageBoxResult.InstallDeveloper, false, "Option", 150);
+                AddButton("Cancel", MessageBoxResult.Cancel, false, "Cancel");
             }
 
             var tcs = new TaskCompletionSource<MessageBoxResult>();

@@ -330,7 +330,7 @@ namespace Knossos.NET.ViewModels
                     DeveloperModsViewModel.Instance?.UpdateListedFsoBuildVersionsInEditor();
                     if (runModstatusChecks)
                     {
-                        MainViewModel.Instance?.RunModStatusChecks();
+                        MainWindowViewModel.Instance?.RunModStatusChecks();
                     }
                 });
 

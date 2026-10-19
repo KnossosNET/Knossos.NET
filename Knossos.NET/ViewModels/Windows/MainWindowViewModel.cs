@@ -1,16 +1,17 @@
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
 using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Collections.ObjectModel;
-using Avalonia.Threading;
 using System.Threading;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
@@ -571,6 +572,30 @@ namespace Knossos.NET.ViewModels
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "MainWindowViewModel.OpenScreenshotsFolder", ex);
+            }
+        }
+
+        internal void OpenFS2Log()
+        {
+            if (File.Exists(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log"))
+            {
+                try
+                {
+                    var cmd = new Process();
+                    cmd.StartInfo.FileName = Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log");
+                    cmd.StartInfo.UseShellExecute = true;
+                    cmd.Start();
+                    cmd.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "ModCardViewModel.OpenFS2Log", ex);
+                }
+            }
+            else
+            {
+                if (MainWindow.instance != null)
+                    MessageBox.Show(MainWindow.instance, "Log File " + Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log") + " not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
 
