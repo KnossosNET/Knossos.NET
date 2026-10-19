@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
@@ -97,11 +98,20 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public void DeleteActiveVersion()
+        public async Task DeleteActiveVersion()
         {
             int currentIndex = index;
             string id = ActiveVersion.id;
-            Knossos.RemoveMod(ActiveVersion);
+            if (ActiveVersion.type == ModType.engine)
+            {
+                var build = Knossos.GetInstalledBuild(id, ActiveVersion.version);
+                if (build != null)
+                    await FsoBuildsViewModel.Instance!.DeleteBuild(build, null);
+            }
+            else
+            {
+                Knossos.RemoveMod(ActiveVersion);
+            }
             mods.Remove(ActiveVersion);
             if (mods.Any())
             {
@@ -123,10 +133,21 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public void DeleteAllVersions()
+        public async Task DeleteAllVersions()
         {
             //Delete mod from view and close editor
-            Knossos.RemoveMod(ActiveVersion.id);
+            if (ActiveVersion.type == ModType.engine)
+            {
+                foreach (var build in Knossos.GetInstalledBuildsList(ActiveVersion.id))
+                {
+                    await FsoBuildsViewModel.Instance!.DeleteBuild(build, null, false);
+                }
+                MainWindowViewModel.Instance?.RunModStatusChecks();
+            }
+            else
+            {
+                Knossos.RemoveMod(ActiveVersion.id);
+            }
             DeveloperModsViewModel.Instance!.DeleteMod(ActiveVersion.id);
             DeveloperModsViewModel.Instance!.CloseEditor();
         }

@@ -33,9 +33,14 @@
 							<Button Grid.Column="0" HorizontalAlignment="Left" Width="40" Height="40" Margin="10 10" Command="{Binding TriggerMenuCommand}" ToolTip.Tip="Expand or collapse the menu">
 								<PathIcon Height="15" Data="{StaticResource 3LinesRegular}" />
 							</Button>
-							<Button Grid.Column="1" Margin="15,0,0,0" Width="40" Height="40" HorizontalAlignment="Right" Command="{Binding OpenScreenshotsFolder}" ToolTip.Tip="Open screenshots folder">
-								<Image Height="30" Width="30" Source="/Assets/general/screenshot.png"></Image>
-							</Button>
+							<WrapPanel Margin="3,10,0,0" Grid.Column="1" >
+								<Button Margin="5,0,0,0" Width="40" Height="40" HorizontalAlignment="Right" Command="{Binding OpenScreenshotsFolder}" ToolTip.Tip="Open screenshots folder">
+									<Image Height="35" Width="35" Source="/Assets/general/screenshot.png"></Image>
+								</Button>
+								<Button Margin="2,0,0,0" Width="40" Height="40" HorizontalAlignment="Right" Command="{Binding OpenFS2Log}" ToolTip.Tip="Open FSO debug log file">
+									<Image Height="35" Width="35" Source="/Assets/general/logfile.png"></Image>
+								</Button>
+							</WrapPanel>
 						</Grid>
 						<Grid RowDefinitions="Auto, Auto">
 							<v:TaskInfoButtonView Name="TaskButtom" ZIndex="0" Margin="9,0,0,0" Grid.Row="{Binding TaskButtomRow}" Width="40" Height="45" HorizontalAlignment="Left" Content="{Binding TaskInfoButton}"/>
