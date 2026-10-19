@@ -31,7 +31,7 @@
 				</Button>
 				<Button Command="{Binding CreateDevEnv}" IsVisible="{Binding !ModHasDevEnvVersion}" Classes="Primary" Margin="20,0,0,0" Width="200">Create Developer Version</Button>
 			</WrapPanel>
-			<WrapPanel HorizontalAlignment="Center" Grid.Row="0" Margin="10,50,10,10">
+			<WrapPanel HorizontalAlignment="Center" Grid.Row="0" Margin="10,50,10,10" IsEnabled="{Binding ButtonsEnabled}">
 				<Button Command="{Binding LoadVersionsFromNebula}" Classes="Quaternary" Margin="10,0,0,0" Width="200" ToolTip.Tip="Install a new version of a developed mod from Nebula. Local installation of development mods should not be modified. Package addition and removal for testing can be handled in the packages tab.">Install Locally</Button>
 				<Button Command="{Binding DeleteAll}" Classes="Cancel" Margin="20,0,0,0" Width="200">Delete All Local Versions</Button>
 			</WrapPanel>

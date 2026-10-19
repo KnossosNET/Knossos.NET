@@ -552,13 +552,21 @@ namespace Knossos.NET.ViewModels
 
         internal async void DeleteAll()
         {
-            if (editor != null)
+            if (editor != null && ButtonsEnabled)
             {
                 var response = await MessageBox.Show(MainWindow.instance!, "This is going to complete delete the mod " + editor.ActiveVersion.title + " from your library." +
                     " All versions will be deleted. This is not going to affect any version already uploaded to Nebula.", "Delete ALL mod versions", MessageBox.MessageBoxButtons.OKCancel);
                 if (response == MessageBox.MessageBoxResult.OK)
                 {
-                    editor.DeleteAllVersions();
+                    ButtonsEnabled = false;
+                    try
+                    {
+                        await editor.DeleteAllVersions();
+                    }
+                    finally
+                    {
+                        ButtonsEnabled = true;
+                    }
                 }
             }
         }
@@ -601,13 +609,21 @@ namespace Knossos.NET.ViewModels
 
         internal async void DeleteLocally()
         {
-            if (editor != null)
+            if (editor != null && ButtonsEnabled)
             {
                 var response = await MessageBox.Show(MainWindow.instance!, "This is going to delete the mod/version " + editor.ActiveVersion + " from your library." +
                     " This is not going to affect anything uploaded to Nebula.", "Delete mod version", MessageBox.MessageBoxButtons.OKCancel);
                 if (response == MessageBox.MessageBoxResult.OK)
                 {
-                    editor.DeleteActiveVersion();
+                    ButtonsEnabled = false;
+                    try
+                    {
+                        await editor.DeleteActiveVersion();
+                    }
+                    finally
+                    {
+                        ButtonsEnabled = true;
+                    }
                 }
                 
             }
