@@ -282,6 +282,7 @@ namespace Knossos.NET.ViewModels
             {
                 case "play" : Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release); break;
                 case "playvr": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release, false, 0, true); break;
+                case "playvrdebug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Debug, false, 0, true); break;
                 case "fred2": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2); break;
                 case "fred2debug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2Debug); break;
                 case "debug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Debug); break;
@@ -292,7 +293,6 @@ namespace Knossos.NET.ViewModels
                 case "delete": ButtonCommandDelete(); break;
                 case "details": ButtonCommandDetails(); break;
                 case "settings": ButtonCommandSettings(); break;
-                case "logfile": OpenFS2Log(); break;
             }
         }
 
