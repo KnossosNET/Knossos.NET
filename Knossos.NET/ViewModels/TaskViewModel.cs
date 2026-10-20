@@ -250,14 +250,15 @@ namespace Knossos.NET.ViewModels
         /// <param name="build"></param>
         /// <param name="sender"></param>
         /// <param name="modJson"></param>
+        /// <param name="installInDevMode">Opt in to developer mode for a new install; requires write access.</param>
         /// <returns>FsoBuild class of the installed build or null if failed or cancelled</returns>
-        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, Mod? modJson=null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false)
+        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, Mod? modJson=null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false, bool installInDevMode = false)
         {
             if(Knossos.GetKnossosLibraryPath() == null)
             {
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
-                    await MessageBox.Show(MainWindow.instance!, "KnossosNET Library Folder path is not set! Before installing mods go to settings and select a Library Folder.", "Error", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance, "KnossosNET Library Folder path is not set! Before installing mods go to settings and select a Library Folder.", "Error", MessageBox.MessageBoxButtons.OK);
                 });
                 return null;
             }
@@ -267,7 +268,7 @@ namespace Knossos.NET.ViewModels
                 TaskList.Add(newTask);
                 taskQueue.Enqueue(newTask);
             });
-            var res = await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson, modifyPkgs, cleanupOldVersions).ConfigureAwait(false);
+            var res = await newTask.InstallBuild(build, sender,sender.cancellationTokenSource,modJson, modifyPkgs, cleanupOldVersions, installInDevMode).ConfigureAwait(false);
             if (res != null && Knossos.inSingleTCMode)
             {
                 try
@@ -298,7 +299,7 @@ namespace Knossos.NET.ViewModels
                 {
                     await Dispatcher.UIThread.InvokeAsync(async () =>
                     {
-                        await MessageBox.Show(MainWindow.instance!, "KnossosNET Library Folder path is not set! Before installing mods go to settings and select a Library Folder.", "Error", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(MainWindow.instance, "KnossosNET Library Folder path is not set! Before installing mods go to settings and select a Library Folder.", "Error", MessageBox.MessageBoxButtons.OK);
                     });
                     return;
                 }

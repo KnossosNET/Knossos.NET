@@ -1081,6 +1081,9 @@ namespace Knossos.NET
         {
             try
             {
+                if (cancellationTokenSource.IsCancellationRequested)
+                    throw new TaskCanceledException();
+
                 using (var fileStream = new ProgressStream(File.Open(compressedFilePath, FileMode.Open, FileAccess.Read, FileShare.Read), progressCallback))
                 {
                     //tar.gz
@@ -1134,6 +1137,9 @@ namespace Knossos.NET
                                     }
                                     else
                                     {
+                                        var parentDir = Path.GetDirectoryName(destinationPath);
+                                        if (parentDir != null)
+                                            Directory.CreateDirectory(parentDir);
                                         reader.WriteEntryToFile(destinationPath, new ExtractionOptions
                                         {
                                             ExtractFullPath = extractFullPath,
@@ -1150,25 +1156,48 @@ namespace Knossos.NET
                     }
                     else
                     {
-                        //zip, 7z
+                        //Solid archives and 7z need sequential extraction; ZIP entries can be extracted individually.
                         using (var archive = ArchiveFactory.OpenArchive(fileStream))
                         {
-                            var reader = archive.ExtractAllEntries();
-                            while (reader.MoveToNextEntry())
+                            if (archive.IsSolid || archive.Type == ArchiveType.SevenZip)
                             {
-                                if (!reader.Entry.IsDirectory)
+                                using var reader = archive.ExtractAllEntries();
+                                while (reader.MoveToNextEntry())
                                 {
-                                    var entryKey = reader.Entry.Key?.Replace('\\', '/').Replace('/', Path.DirectorySeparatorChar);
-                                    if (entryKey != null && extractFullPath && !IsSubPath(destFolderPath, entryKey))
+                                    if (!reader.Entry.IsDirectory)
                                     {
-                                        Log.Add(Log.LogSeverity.Warning, "KnUtils.DecompressFileSharpCompress()", $"Skipping potentially dangerous archive entry: {reader.Entry.Key}");
-                                        continue;
+                                        var entryKey = reader.Entry.Key?.Replace('\\', '/').Replace('/', Path.DirectorySeparatorChar);
+                                        if (entryKey != null && extractFullPath && !IsSubPath(destFolderPath, entryKey))
+                                        {
+                                            Log.Add(Log.LogSeverity.Warning, "KnUtils.DecompressFileSharpCompress()", $"Skipping potentially dangerous archive entry: {reader.Entry.Key}");
+                                            continue;
+                                        }
+                                        reader.WriteEntryToDirectory(destFolderPath, new ExtractionOptions() { ExtractFullPath = extractFullPath, Overwrite = true });
                                     }
-                                    reader.WriteEntryToDirectory(destFolderPath, new ExtractionOptions() { ExtractFullPath = extractFullPath, Overwrite = true });
+                                    if (cancellationTokenSource!.IsCancellationRequested)
+                                    {
+                                        throw new TaskCanceledException();
+                                    }
                                 }
-                                if (cancellationTokenSource!.IsCancellationRequested)
+                            }
+                            else
+                            {
+                                foreach (var entry in archive.Entries)
                                 {
-                                    throw new TaskCanceledException();
+                                    if (!entry.IsDirectory)
+                                    {
+                                        var entryKey = entry.Key?.Replace('\\', '/').Replace('/', Path.DirectorySeparatorChar);
+                                        if (entryKey != null && extractFullPath && !IsSubPath(destFolderPath, entryKey))
+                                        {
+                                            Log.Add(Log.LogSeverity.Warning, "KnUtils.DecompressFileSharpCompress()", $"Skipping potentially dangerous archive entry: {entry.Key}");
+                                            continue;
+                                        }
+                                        entry.WriteToDirectory(destFolderPath, new ExtractionOptions() { ExtractFullPath = extractFullPath, Overwrite = true });
+                                    }
+                                    if (cancellationTokenSource!.IsCancellationRequested)
+                                    {
+                                        throw new TaskCanceledException();
+                                    }
                                 }
                             }
                         }
@@ -1456,7 +1485,8 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Warning, "KnUtils.OpenFileInOS", "File does not exist:  " + fullpath);
             }
         }
-      
+		
+        /// <summary>
         /// Determines if the current OS meets the requirements for .NET 10 / "latest" channel updates.
         /// Windows 10+ or macOS 12.0+ qualify.
         /// </summary>

@@ -80,6 +80,7 @@ namespace Knossos.NET.ViewModels
         internal NebulaLoginViewModel nebulaLoginVM = new NebulaLoginViewModel();
         [ObservableProperty]
         internal DevToolManagerViewModel devToolManager = new DevToolManagerViewModel();
+        internal bool ToolsAvailable { get; } = !KnUtils.IsAndroid;
         [ObservableProperty]
         public string latestStable = string.Empty;
         [ObservableProperty]
@@ -104,7 +105,8 @@ namespace Knossos.NET.ViewModels
                     }
                     if (tabIndex == 1) //Tools
                     {
-                        DevToolManager.LoadTools();
+                        if (ToolsAvailable)
+                            DevToolManager.LoadTools();
                     }
                     if (tabIndex == 2) //Nebula Login
                     {
@@ -293,7 +295,7 @@ namespace Knossos.NET.ViewModels
         {
             var dialog = new DevModCreateNewView();
             dialog.DataContext = new DevModCreateNewViewModel(dialog);
-            await dialog.ShowDialog<DevModCreateNewView?>(MainWindow.instance!);
+            await dialog.ShowDialog<DevModCreateNewView?>(MainWindow.instance);
         }
 
         public void UpdateBuildNames(string stableIn, string nightlyIn)

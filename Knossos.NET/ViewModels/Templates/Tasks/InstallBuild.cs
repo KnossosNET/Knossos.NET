@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,6 +18,21 @@ namespace Knossos.NET.ViewModels
 {
     public partial class TaskItemViewModel : ViewModelBase
     {
+        private static (bool x86, bool x64) GetRequiredVCRedistArchitectures(FsoBuild build)
+        {
+            bool installx86 = false;
+            bool install64 = false;
+            //Developer builds can contain Android, Linux and macOS packages; only Windows binaries use VCRedist.
+            foreach (var ex in build.executables.Where(ex => ex.env == FsoExecEnvironment.Windows))
+            {
+                if (ex.arch == FsoExecArch.x86 || ex.arch == FsoExecArch.x86_avx || ex.arch == FsoExecArch.x86_avx2)
+                    installx86 = true;
+                if (ex.arch == FsoExecArch.arm64 || ex.arch == FsoExecArch.x64 || ex.arch == FsoExecArch.x64_avx || ex.arch == FsoExecArch.x64_avx2)
+                    install64 = true;
+            }
+            return (installx86, install64);
+        }
+
         private async Task<bool> InstallVCRedist(bool is86 = false) {
             var fileTask = new TaskItemViewModel(); // Crete new task
             await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, fileTask)); //insert task into this job TaskList
@@ -75,7 +91,7 @@ namespace Knossos.NET.ViewModels
             }     
         }
 
-        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false)
+        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false, bool installInDevMode = false)
         {
             string? modPath = null;
             bool installed = false;
@@ -127,6 +143,12 @@ namespace Knossos.NET.ViewModels
 
                     if (modJson != null)
                     {
+                        if (modifyPkgs == null)
+                        {
+                            //Keep the build entry's metadata unchanged so cancelled/failed installs can be retried in either mode.
+                            modJson = JsonSerializer.Deserialize<Mod>(JsonSerializer.Serialize(modJson))!;
+                        }
+
                         /*
                             -Parse all files we need to download
                             -Delete all incompatible packages with system/cpu
@@ -148,8 +170,24 @@ namespace Knossos.NET.ViewModels
                             CancelTaskCommand();
                             throw new TaskCanceledException();
                         }
+                        if (modifyPkgs == null)
+                        {
+                            //Automatic installs stay normal; developer mode requires an explicit choice and write access.
+                            modJson.devMode = installInDevMode && Nebula.userIsLoggedIn &&
+                                (await Nebula.GetEditableModIDs())?.Contains(modJson.id) == true;
+                            if (cancellationTokenSource.IsCancellationRequested)
+                            {
+                                throw new TaskCanceledException();
+                            }
+                        }
+
                         foreach (var pkg in modJson.packages)
                         {
+                            //Official builds may omit folder; dev installs need a separate directory per package.
+                            if (modifyPkgs == null && modJson.devMode && string.IsNullOrEmpty(pkg.folder))
+                            {
+                                pkg.folder = pkg.name;
+                            }
                             if (pkg.folder != null && !KnUtils.IsSafePathComponent(pkg.folder))
                             {
                                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallBuild()", "Refusing to install: build " + modJson.id + " has unsafe package folder: " + pkg.folder);
@@ -206,6 +244,22 @@ namespace Knossos.NET.ViewModels
                                         exec.properties = FsoBuild.FillProperties(pkg.environment!);
                                     }
                                     modJson.packages.Add(pkg);
+                                }
+                            }
+                        }
+                        else if (modJson.devMode)
+                        {
+                            //Keep every platform/architecture package in its own folder for editing and uploading.
+                            foreach (var pkg in modJson.packages)
+                            {
+                                foreach (var file in pkg.files ?? Array.Empty<ModFile>())
+                                {
+                                    file.dest = Path.Combine(pkg.folder ?? string.Empty, file.dest ?? string.Empty);
+                                    files.Add(file);
+                                }
+                                foreach (var exec in pkg.executables ?? new List<ModExecutable>())
+                                {
+                                    exec.properties = FsoBuild.FillProperties(pkg.environment ?? string.Empty);
                                 }
                             }
                         }
@@ -530,20 +584,8 @@ namespace Knossos.NET.ViewModels
                         }
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
-                            bool installx86 = false;
-                            bool install64 = false;
-                            //Determine the cpu arch for vcredist that we need to download, if we need to download, from the FSO build arch NOT the host cpu arch.
-                            foreach (var ex in newBuild.executables)
-                            {
-                                if (ex.arch == FsoExecArch.x86 || ex.arch == FsoExecArch.x86_avx || ex.arch == FsoExecArch.x86_avx2)
-                                {
-                                    installx86 = true;
-                                }
-                                if (ex.arch == FsoExecArch.arm64 || ex.arch == FsoExecArch.x64 || ex.arch == FsoExecArch.x64_avx || ex.arch == FsoExecArch.x64_avx2)
-                                {
-                                    install64 = true;
-                                }
-                            }
+                            //Use the architectures of Windows binaries in the build, not the host CPU architecture.
+                            var (installx86, install64) = GetRequiredVCRedistArchitectures(newBuild);
                             if (installx86)
                             {
                                 string keyPath = @"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86";
@@ -649,7 +691,7 @@ namespace Knossos.NET.ViewModels
                                                         var msgtask = new TaskItemViewModel();
                                                         msgtask.ShowMsg("Cleanup: Deleting " + version.version, null);
                                                         await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, msgtask));
-                                                        FsoBuildsViewModel.Instance!.DeleteBuild(version, uiItem, false);
+                                                        await FsoBuildsViewModel.Instance!.DeleteBuild(version, uiItem, false);
                                                         //If the build is custom and the dev editor is open and loaded this build id, reset it
                                                         if (version.stability == FsoStability.Custom)
                                                             await Dispatcher.UIThread.InvokeAsync(() => DeveloperModsViewModel.Instance!.ResetModEditor(version.id));
@@ -760,7 +802,7 @@ namespace Knossos.NET.ViewModels
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
                     //Messagebox is not thread safe!
-                    await MessageBox.Show(MainWindow.instance!, "An error was ocurred during the download of the mod: " + build.ToString() + ". Error: " + ex.Message, "Error", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance, "An error was ocurred during the download of the mod: " + build.ToString() + ". Error: " + ex.Message, "Error", MessageBox.MessageBoxButtons.OK);
                 });
                 while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
                 {

@@ -184,7 +184,7 @@ namespace Knossos.NET.ViewModels
             {
                 var dialog = new ModInstallView();
                 dialog.DataContext = new ModInstallViewModel(nebulaModVersions.First(), dialog);
-                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
+                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
             }
             else
             {
@@ -201,7 +201,7 @@ namespace Knossos.NET.ViewModels
             {
                 var dialog = new ModInstallView();
                 dialog.DataContext = new ModInstallViewModel(GetActiveInstalledModVersion, dialog, GetActiveInstalledModVersion.version);
-                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
+                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
             }
             else
             {
@@ -218,7 +218,7 @@ namespace Knossos.NET.ViewModels
             {
                 var dialog = new ModInstallView();
                 dialog.DataContext = new ModInstallViewModel(GetActiveInstalledModVersion, dialog);
-                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
+                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
             }
             else
             {
@@ -303,7 +303,7 @@ namespace Knossos.NET.ViewModels
                         {
                             if (modVersions.Count > 1)
                             {
-                                var resp = await MessageBox.Show(MainWindow.instance!, "You are about to delete version " + GetActiveInstalledModVersion.version + ", this will remove this version only. Do you want to continue?", "Delete version", MessageBox.MessageBoxButtons.YesNo);
+                                var resp = await MessageBox.Show(MainWindow.instance, "You are about to delete version " + GetActiveInstalledModVersion.version + ", this will remove this version only. Do you want to continue?", "Delete version", MessageBox.MessageBoxButtons.YesNo);
                                 if (resp == MessageBox.MessageBoxResult.Yes)
                                 {
                                     var delete = modVersions[ActiveVersionIndex];
@@ -312,11 +312,13 @@ namespace Knossos.NET.ViewModels
                                     Knossos.RemoveMod(delete);
                                     VersionItems.Remove(verDel);
                                     ActiveVersionIndex = 0;
+                                    //The index does not change if the first version was removed
+                                    RefreshQtFredAvailability();
                                 }
                             }
                             else
                             {
-                                var resp = await MessageBox.Show(MainWindow.instance!, "You are about to delete the last installed version. Do you want to continue?", "Delete last version", MessageBox.MessageBoxButtons.YesNo);
+                                var resp = await MessageBox.Show(MainWindow.instance, "You are about to delete the last installed version. Do you want to continue?", "Delete last version", MessageBox.MessageBoxButtons.YesNo);
                                 if (resp == MessageBox.MessageBoxResult.Yes)
                                 {
                                     //Last version
@@ -334,7 +336,7 @@ namespace Knossos.NET.ViewModels
                     }
                     else
                     {
-                        await MessageBox.Show(MainWindow.instance!, "You can not delete a mod while other install tasks are running, wait until they finish and try again.", "Tasks are running", MessageBox.MessageBoxButtons.OK);
+                        await MessageBox.Show(MainWindow.instance, "You can not delete a mod while other install tasks are running, wait until they finish and try again.", "Tasks are running", MessageBox.MessageBoxButtons.OK);
                     }
                 }
             }catch(Exception ex)
@@ -517,18 +519,38 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        /// <summary>
+        /// Updates the QtFred buttons visibility for the active version
+        /// </summary>
         public void RefreshQtFredAvailability()
         {
-            var bools = modVersions[ActiveVersionIndex].IsQtFredAvailable();
+            try
+            {
+                bool[]? bools = null;
+                //ActiveVersionIndex is -1 for a moment while versions are added
+                if (ActiveVersionIndex >= 0 && ActiveVersionIndex < modVersions.Count())
+                {
+                    bools = modVersions[ActiveVersionIndex].IsQtFredAvailable();
+                }
 
-            if (bools == null || bools.Length < 2){
-                IsQtFredAvailable = false;
-                IsQtFredDebugAvailable = false;
-                return;
+                if (bools == null || bools.Length < 2){
+                    IsQtFredAvailable = false;
+                    IsQtFredDebugAvailable = false;
+                    return;
+                }
+
+                IsQtFredAvailable = bools[0];
+                IsQtFredDebugAvailable = bools[1];
             }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "CustomHomeViewModel.RefreshQtFredAvailability()", ex);
+            }
+        }
 
-            IsQtFredAvailable = bools[0];
-            IsQtFredDebugAvailable = bools[1];
+        partial void OnActiveVersionIndexChanged(int value)
+        {
+            RefreshQtFredAvailability();
         }
     }
 }
