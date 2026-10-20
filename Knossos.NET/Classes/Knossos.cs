@@ -26,6 +26,7 @@ namespace Knossos.NET
         private static List<Mod> installedMods = new List<Mod>();
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();
         private static List<Tool> modTools = new List<Tool>();
+        private static readonly TaskCompletionSource<bool> initialLibraryScanCompletion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         public static GlobalSettings globalSettings = new GlobalSettings();
         public static bool retailFs2RootFound = false;
         public static bool flagDataLoaded = false;
@@ -76,6 +77,138 @@ namespace Knossos.NET
             //Important!!! The first time it needs to be ran after checking if we are in portable mode or not
             //Due to the Knossos data folder path changing
             inSingleTCMode = CustomLauncher.IsCustomMode;
+        }
+
+        /// <summary>
+        /// Run only on first install, determines the default first library path by OS
+        /// Write checks are done to make sure we can write to this folder
+        /// 
+        /// Rutes:
+        /// -First try to look and use a library from Knossos Legacy
+        /// -Windows: C:\Games\KnossosNET\FreespaceOpen; If not writtable: %PUBLIC%\KnossosNET\FreespaceOpen
+        /// -MacOS: ~/Library/Application Support/io.github.KnossosNET.Knossos_NET/FreespaceOpen
+        /// -Linux: ~/KnossosNET/FreespaceOpen
+        /// -Android: {internal storage}/Android/data/com.knossosnet.knossosnet/files/library
+        /// Fallbacks: {user profile}\KnossosNET\FreespaceOpen, then {LocalApplicationData}\KnossosNET\FreespaceOpen
+        /// </summary>
+        private static void DetermineDefaultBasePath()
+        {
+            //Load base path from knossos legacy, if it exists
+            var legacyBasePath = KnUtils.GetBasePathFromKnossosLegacy();
+            if (Directory.Exists(legacyBasePath) && TrySetDefaultBasePath(legacyBasePath))
+            {
+                Log.Add(Log.LogSeverity.Information, "Knossos.DetermineDefaultBasePath()", $"Loading library path '{globalSettings.basePath}' from Knossos Legacy.");
+                globalSettings.Save(false);
+                return;
+            }
+
+            var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+            if (KnUtils.IsAndroid)
+            {
+                TrySetDefaultBasePath(AndroidHelper.GetDefaultLibraryDir());
+            }
+            else if (KnUtils.IsWindows)
+            {
+                var systemRoot = Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.System));
+                if (string.IsNullOrWhiteSpace(systemRoot))
+                    systemRoot = @"C:\";
+
+                TrySetDefaultBasePath(Path.Combine(systemRoot, "Games", "KnossosNET", "FreespaceOpen"));
+
+                if (globalSettings.basePath == null)
+                {
+                    var publicProfile = Environment.GetEnvironmentVariable("PUBLIC");
+                    if (string.IsNullOrWhiteSpace(publicProfile))
+                    {
+                        var commonDocuments = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments);
+                        if (!string.IsNullOrWhiteSpace(commonDocuments))
+                            publicProfile = Directory.GetParent(commonDocuments)?.FullName;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(publicProfile))
+                        TrySetDefaultBasePath(Path.Combine(publicProfile, "KnossosNET", "FreespaceOpen"));
+                }
+            }
+            else if (KnUtils.IsMacOS)
+            {
+                TrySetDefaultBasePath(Path.Combine(userProfile, "Library", "Application Support", "io.github.KnossosNET.Knossos_NET", "FreespaceOpen"));
+            }
+            else if (KnUtils.IsLinux)
+            {
+                TrySetDefaultBasePath(Path.Combine(userProfile, "KnossosNET", "FreespaceOpen"));
+            }
+
+            // General fallbacks for an unknown OS, or when the preferred OS path is not writable.
+            if (globalSettings.basePath == null && !string.IsNullOrWhiteSpace(userProfile))
+                TrySetDefaultBasePath(Path.Combine(userProfile, "KnossosNET", "FreespaceOpen"));
+
+            if (globalSettings.basePath == null)
+            {
+                var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (!string.IsNullOrWhiteSpace(localAppData))
+                    TrySetDefaultBasePath(Path.Combine(localAppData, "KnossosNET", "FreespaceOpen"));
+            }
+
+            if (globalSettings.basePath == null)
+                TrySetDefaultBasePath(Path.Combine(KnUtils.GetKnossosDataFolderPath(), "FreespaceOpen"));
+
+            if (globalSettings.basePath != null)
+            {
+                Log.Add(Log.LogSeverity.Information, "Knossos.DetermineDefaultBasePath()", $"Choosing '{globalSettings.basePath}' as default library path.");
+                globalSettings.Save(false);
+            }
+            else
+            {
+                Log.Add(Log.LogSeverity.Error, "Knossos.DetermineDefaultBasePath()", "Unable to find a writable default library path.");
+            }
+        }
+
+        /// <summary>
+        /// Creates and verifies a possible default library path before selecting it.
+        /// </summary>
+        private static bool TrySetDefaultBasePath(string? path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return false;
+
+            string? writeTestPath = null;
+            try
+            {
+                var fullPath = Path.GetFullPath(path);
+                Directory.CreateDirectory(fullPath);
+
+                writeTestPath = Path.Combine(fullPath, $".knossos_write_test_{Guid.NewGuid():N}.tmp");
+                using (var writeTest = new FileStream(writeTestPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                {
+                    writeTest.WriteByte(0);
+                    writeTest.Flush(true);
+                }
+
+                File.Delete(writeTestPath);
+                writeTestPath = null;
+                globalSettings.basePath = fullPath;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Warning, "Knossos.TrySetDefaultBasePath()", $"Cannot use '{path}' as the default library path: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                if (writeTestPath != null)
+                {
+                    try
+                    {
+                        File.Delete(writeTestPath);
+                    }
+                    catch
+                    {
+                        // Best-effort cleanup of the temporary write test.
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -153,20 +286,23 @@ namespace Knossos.NET
                     }
                 }
 
-                //Load base path from knossos legacy
-                if (globalSettings.basePath == null && KnUtils.IsAndroid)
+                if(globalSettings.basePath != null && !isQuickLaunch && !Directory.Exists(globalSettings.basePath))
                 {
-                    globalSettings.basePath = AndroidHelper.GetDefaultLibraryDir();
-                } 
+                    //Reset and warn
+                    Dispatcher.UIThread.Invoke(() => {
+                        MessageBox.Show(MainWindow.instance, $"The previusly selected library folder:\n\n'{globalSettings.basePath}'\n\nNot longer exists, the library folder will be reset back to default.", "Library folder not found" , MessageBox.MessageBoxButtons.OK);
+                    });
+                    globalSettings.basePath = null;
+                }
+
                 if (globalSettings.basePath == null && !inSingleTCMode)
                 {
-                    globalSettings.basePath = KnUtils.GetBasePathFromKnossosLegacy();
+                    DetermineDefaultBasePath();
+                    if (!isQuickLaunch)
+                        OpenQuickSetup();
                 }
 
                 LoadBasePath(isQuickLaunch);
-
-                if (globalSettings.basePath == null && !isQuickLaunch && !inSingleTCMode)
-                    OpenQuickSetup();
             }
             catch(Exception ex)
             {
@@ -408,13 +544,10 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "Knossos.QuickLaunch", "Quick launch was used but the modid was not detected.");
             }
             await Task.Delay(2000);
-            if (MainWindow.instance != null)
+            Dispatcher.UIThread.Invoke(() =>
             {
-                Dispatcher.UIThread.Invoke(() =>
-                {
-                    MainWindow.instance.Close();
-                });
-            }
+                MainWindow.instance?.Close();
+            });
         }
 
         /// <summary>
@@ -575,7 +708,7 @@ namespace Knossos.NET
                                                 //Close App
                                                 Dispatcher.UIThread.Invoke(() =>
                                                 {
-                                                    MainWindow.instance!.Close();
+                                                    MainWindow.instance?.Close();
                                                 });
                                             }
                                             catch (Exception ex)
@@ -700,7 +833,7 @@ namespace Knossos.NET
                                             //Close App
                                             Dispatcher.UIThread.Invoke(() =>
                                             {
-                                                MainWindow.instance!.Close();
+                                                MainWindow.instance?.Close();
                                             });
                                         }
                                     }
@@ -752,7 +885,10 @@ namespace Knossos.NET
             {
                 var dialog = new QuickSetupView();
                 dialog.DataContext = new QuickSetupViewModel(dialog);
-                dialog.Show(MainWindow.instance!);
+                if(MainWindow.instance != null)
+                    dialog.Show(MainWindow.instance);
+                else
+                    dialog.Show();
             });
         }
 
@@ -791,6 +927,7 @@ namespace Knossos.NET
                 MainViewModel.Instance?.tagFilter.Clear();
 
                 await FolderSearchRecursive(globalSettings.basePath, isQuickLaunch).ConfigureAwait(false);
+                initialLibraryScanCompletion.TrySetResult(true);
 
                 Log.Add(Log.LogSeverity.Information, "Knossos.LoadBasePath()", "Loaded: " + installedMods.Count() +" installed mods or tcs and " + engineBuilds.Count() + " engine builds." );
 
@@ -837,6 +974,18 @@ namespace Knossos.NET
 
                 initIsComplete = true;
             }
+            else
+            {
+                initialLibraryScanCompletion.TrySetResult(true);
+            }
+        }
+
+        /// <summary>
+        /// Wait until the initial library scan has discovered locally installed tools.
+        /// </summary>
+        public static Task WaitForInitialLibraryScanAsync()
+        {
+            return initialLibraryScanCompletion.Task;
         }
 
         /// <summary>
@@ -938,7 +1087,7 @@ namespace Knossos.NET
         {
             if (TaskViewModel.Instance?.IsSafeState() == false)
             {
-                var result = await MessageBox.Show(MainWindow.instance!, "Other important tasks are running, it is recommended that you wait until they finish before launching the game because it may cause them to fail.\nIf you are absolutely sure those tasks cannot interfere you can continue.", "Tasks are running", MessageBox.MessageBoxButtons.ContinueCancel);
+                var result = await MessageBox.Show(MainWindow.instance, "Other important tasks are running, it is recommended that you wait until they finish before launching the game because it may cause them to fail.\nIf you are absolutely sure those tasks cannot interfere you can continue.", "Tasks are running", MessageBox.MessageBoxButtons.ContinueCancel);
                 if(result != MessageBox.MessageBoxResult.Continue)
                     return;
             }
@@ -982,11 +1131,7 @@ namespace Knossos.NET
 
             if(missingDeps.Count > 0)
             {
-                if (MainWindow.instance != null)
-                {
-                    await MessageBox.Show(MainWindow.instance, errorMsg, "Unable to resolve dependencies", MessageBox.MessageBoxButtons.OK);
-                }
-
+                await MessageBox.Show(MainWindow.instance, errorMsg, "Unable to resolve dependencies", MessageBox.MessageBoxButtons.OK);
                 return;
             }
 
@@ -1053,12 +1198,9 @@ namespace Knossos.NET
                         }
                     }
                     Log.Add(Log.LogSeverity.Warning, "Knossos.PlayMod()", outputString);
-                    if (MainWindow.instance != null)
-                    {
-                        var result = await MessageBox.Show(MainWindow.instance, outputString, "Dependency Conflict!", MessageBox.MessageBoxButtons.ContinueCancel);
-                        if (result != MessageBox.MessageBoxResult.Continue)
-                            return;
-                    }
+                    var result = await MessageBox.Show(MainWindow.instance, outputString, "Dependency Conflict!", MessageBox.MessageBoxButtons.ContinueCancel);
+                    if (result != MessageBox.MessageBoxResult.Continue)
+                        return;
                 }
             }
 
@@ -1121,10 +1263,7 @@ namespace Knossos.NET
             if(rootPath == string.Empty)
             {
                 Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", "Unable to determine working folder for mod: " + mod.folderName);
-                if (MainWindow.instance != null)
-                {
-                    await MessageBox.Show(MainWindow.instance, "Unable to determine working folder for mod: " + mod.folderName, "Error launching mod", MessageBox.MessageBoxButtons.OK);
-                }
+                await MessageBox.Show(MainWindow.instance, "Unable to determine working folder for mod: " + mod.folderName, "Error launching mod", MessageBox.MessageBoxButtons.OK);
                 return;
             }
             else
@@ -1276,16 +1415,13 @@ namespace Knossos.NET
             if (fsoBuild == null)
             {
                 Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", "Unable to find a valid FSO build for this mod!");
-                if (MainWindow.instance != null)
+                if (hasBuildDependency)
                 {
-                    if (hasBuildDependency)
-                    {
-                        await MessageBox.Show(MainWindow.instance!, "Unable to find a valid FSO build for this mod!", "Error launching mod", MessageBox.MessageBoxButtons.OK);
-                    }
-                    else
-                    {
-                        await MessageBox.Show(MainWindow.instance!, "This mod does not specify an engine build to use, you should select one in the mod settings.", "Error launching mod", MessageBox.MessageBoxButtons.OK);
-                    }
+                    await MessageBox.Show(MainWindow.instance, "Unable to find a valid FSO build for this mod!", "Error launching mod", MessageBox.MessageBoxButtons.OK);
+                }
+                else
+                {
+                    await MessageBox.Show(MainWindow.instance, "This mod does not specify an engine build to use, you should select one in the mod settings.", "Error launching mod", MessageBox.MessageBoxButtons.OK);
                 }
                 return;
             }
@@ -1298,12 +1434,9 @@ namespace Knossos.NET
                     {
                         if (mod.modSettings.isCompressed)
                         {
-                            if (MainWindow.instance != null)
-                            {
-                                var result = await MessageBox.Show(MainWindow.instance!, "This mod currently resolves to FSO build: " + fsoBuild.version + " and it is compressed, the minimum to fully support all compression features is: " + VPCompression.MinimumFSOVersion + ".\n23.0.0 may work if the mod do not have loose files, older versions are not going to work. Use a newer FSO version or uncompress this mod.", "FSO Version below minimum for compression", MessageBox.MessageBoxButtons.ContinueCancel);
-                                if (result != MessageBox.MessageBoxResult.Continue)
-                                    return;
-                            }
+                            var result = await MessageBox.Show(MainWindow.instance, "This mod currently resolves to FSO build: " + fsoBuild.version + " and it is compressed, the minimum to fully support all compression features is: " + VPCompression.MinimumFSOVersion + ".\n23.0.0 may work if the mod do not have loose files, older versions are not going to work. Use a newer FSO version or uncompress this mod.", "FSO Version below minimum for compression", MessageBox.MessageBoxButtons.ContinueCancel);
+                            if (result != MessageBox.MessageBoxResult.Continue)
+                                return;
                         }
                         else
                         {
@@ -1330,12 +1463,9 @@ namespace Knossos.NET
                             }
                             if (compressedMods != string.Empty)
                             {
-                                if (MainWindow.instance != null)
-                                {
-                                    var result = await MessageBox.Show(MainWindow.instance!, "This mod currently resolves to FSO build: " + fsoBuild.version + " and depends on mods: " + compressedMods + " that are currently compressed, the minimum to fully support all compression features is: " + VPCompression.MinimumFSOVersion + ".\n23.0.0 may work if the mod do not have loose files, older versions are not going to work. Use a newer FSO version or uncompress those mods.", "FSO Version below minimum for compression", MessageBox.MessageBoxButtons.ContinueCancel);
-                                    if (result != MessageBox.MessageBoxResult.Continue)
-                                        return;
-                                }
+                                var result = await MessageBox.Show(MainWindow.instance, "This mod currently resolves to FSO build: " + fsoBuild.version + " and depends on mods: " + compressedMods + " that are currently compressed, the minimum to fully support all compression features is: " + VPCompression.MinimumFSOVersion + ".\n23.0.0 may work if the mod do not have loose files, older versions are not going to work. Use a newer FSO version or uncompress those mods.", "FSO Version below minimum for compression", MessageBox.MessageBoxButtons.ContinueCancel);
+                                if (result != MessageBox.MessageBoxResult.Continue)
+                                    return;
                             }
                         }
                     }
@@ -1388,7 +1518,7 @@ namespace Knossos.NET
 
             
 
-            if (MainWindow.instance != null && globalSettings.warnNewSettingsSystem && !CustomLauncher.IsCustomMode)
+            if (!KnUtils.IsAndroid && globalSettings.warnNewSettingsSystem && !CustomLauncher.IsCustomMode)
             {
                 try
                 {
@@ -1450,10 +1580,7 @@ namespace Knossos.NET
             if (!fsoResult.IsSuccess)
             {
                 Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", fsoResult.ErrorMessage);
-                if (MainWindow.instance != null)
-                {
-                    await MessageBox.Show(MainWindow.instance, fsoResult.ErrorMessage, "Error launching mod", MessageBox.MessageBoxButtons.OK);
-                }
+                await MessageBox.Show(MainWindow.instance, fsoResult.ErrorMessage, "Error launching mod", MessageBox.MessageBoxButtons.OK);
             }
         }
 
@@ -1552,7 +1679,7 @@ namespace Knossos.NET
                     Log.Add(Log.LogSeverity.Warning, "Knossos.FolderSearchRecursive()", "Deleting incomplete download found at "+path);
                     Directory.Delete(path, true);
                 }
-                else if (File.Exists(path + Path.DirectorySeparatorChar + "tool.json"))
+                else if (!KnUtils.IsAndroid && File.Exists(path + Path.DirectorySeparatorChar + "tool.json"))
                 {
                     Knossos.AddTool(new Tool(path));
                 }
@@ -1610,12 +1737,9 @@ namespace Knossos.NET
 
                 if (folderLevel == 0 )
                 {
-                    if (MainWindow.instance != null)
-                    {
-                        Dispatcher.UIThread.Invoke(() => {
-                            MessageBox.Show(MainWindow.instance!, "KnossosNET either cannot find or does not have permission to read a previously selected Library Folder.\nEither select a new Library Folder in KnossosNET's settings, or check if the folder is now protected.", "Knossos.NET Library Folder Error" , MessageBox.MessageBoxButtons.OK);
-                        });
-                    }
+                    Dispatcher.UIThread.Invoke(() => {
+                        MessageBox.Show(MainWindow.instance, "KnossosNET either cannot find or does not have permission to read a previously selected Library Folder.\nEither select a new Library Folder in KnossosNET's settings, or check if the folder is now protected.", "Knossos.NET Library Folder Error" , MessageBox.MessageBoxButtons.OK);
+                    });
                 }
             }
         }
@@ -1743,58 +1867,19 @@ namespace Knossos.NET
                 {
                     if (KnUtils.IsWindows)
                     {
-                        if (ttsObject != null)
+                        KSapi.Stop();
+
+                        if (!string.IsNullOrEmpty(text))
                         {
-                            var sp = (Process)ttsObject;
-                            sp.Kill();
-                            ttsObject = null;
-                        }
-                        if (text != string.Empty)
-                        {
-                            if (!File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
+                            var voice = voice_index ?? globalSettings.ttsVoice;
+                            var vol = volume ?? globalSettings.ttsVolume;
+
+                            await Task.Run(() =>
                             {
-                                if (KnUtils.CpuArch == "X86")
-                                {
-                                    using (var fileStream = File.Create(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
-                                    {
-                                        AssetLoader.Open(new Uri("avares://Knossos.NET.Desktop/Assets/utils/win/KSapi_x86.exe")).CopyTo(fileStream);
-                                        fileStream.Close();
-                                    }
-                                }
-                                else
-                                {
-                                    using (var fileStream = File.Create(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe"))
-                                    {
-                                        AssetLoader.Open(new Uri("avares://Knossos.NET.Desktop/Assets/utils/win/KSapi.exe")).CopyTo(fileStream);
-                                        fileStream.Close();
-                                    }
-                                }
-                            }
-                            await Task.Run(async () =>
-                            {
-                                //Max cmdline lenght is 8192, lets limit the text to 7500
-                                if(text.Length > 7500)
-                                {
-                                    text = text.Substring(0, 7500);
-                                }
-                                await Task.Delay(300);
-                                var voice = globalSettings.ttsVoice;
-                                var vol = globalSettings.ttsVolume;
-                                if (voice_index.HasValue)
-                                    voice = voice_index.Value;
-                                if (volume.HasValue)
-                                    vol = volume.Value;
-                                using var ttsProcess = new Process();
-                                ttsProcess.StartInfo.FileName = KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "KSapi.exe";
-                                ttsProcess.StartInfo.Arguments = "-text \"" + text + "\" -voice " + voice + " -vol " + vol;
-                                ttsProcess.StartInfo.UseShellExecute = false;
-                                ttsProcess.StartInfo.CreateNoWindow = true;
-                                ttsObject = ttsProcess;
-                                ttsProcess.Start();
-                                ttsProcess.WaitForExit();
-                                ttsObject = null;
+                                KSapi.Speak(text, voice!.Value, Math.Clamp(vol, 0, 100));
+
                                 if (callBack != null)
-                                    await Dispatcher.UIThread.InvokeAsync(() => callBack(), DispatcherPriority.Background);
+                                    Dispatcher.UIThread.InvokeAsync(() => callBack(), DispatcherPriority.Background);
                             });
                         }
                     }

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
@@ -33,6 +34,7 @@ namespace Knossos.NET.ViewModels
         internal ObservableCollection<ComboBoxItem> toolItems = new ObservableCollection<ComboBoxItem>();
         [ObservableProperty]
         internal int toolIndex = 0;
+        internal bool ToolsAvailable { get; } = !KnUtils.IsAndroid;
 
         internal int tabIndex = 0;
         internal int TabIndex
@@ -97,11 +99,20 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public void DeleteActiveVersion()
+        public async Task DeleteActiveVersion()
         {
             int currentIndex = index;
             string id = ActiveVersion.id;
-            Knossos.RemoveMod(ActiveVersion);
+            if (ActiveVersion.type == ModType.engine)
+            {
+                var build = Knossos.GetInstalledBuild(id, ActiveVersion.version);
+                if (build != null)
+                    await FsoBuildsViewModel.Instance!.DeleteBuild(build, null);
+            }
+            else
+            {
+                Knossos.RemoveMod(ActiveVersion);
+            }
             mods.Remove(ActiveVersion);
             if (mods.Any())
             {
@@ -123,10 +134,21 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        public void DeleteAllVersions()
+        public async Task DeleteAllVersions()
         {
             //Delete mod from view and close editor
-            Knossos.RemoveMod(ActiveVersion.id);
+            if (ActiveVersion.type == ModType.engine)
+            {
+                foreach (var build in Knossos.GetInstalledBuildsList(ActiveVersion.id))
+                {
+                    await FsoBuildsViewModel.Instance!.DeleteBuild(build, null, false);
+                }
+                MainViewModel.Instance?.RunModStatusChecks();
+            }
+            else
+            {
+                Knossos.RemoveMod(ActiveVersion.id);
+            }
             DeveloperModsViewModel.Instance!.DeleteMod(ActiveVersion.id);
             DeveloperModsViewModel.Instance!.CloseEditor();
         }
@@ -145,7 +167,8 @@ namespace Knossos.NET.ViewModels
                 DetailsView = null;
                 MembersView = null;
                 IsEngineBuild = false;
-                LoadTools();
+                if (ToolsAvailable)
+                    LoadTools();
                 ModImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
                 index = 0;
                 //Get all installed mods with this ID
@@ -239,6 +262,7 @@ namespace Knossos.NET.ViewModels
                     case "release": Knossos.PlayMod(ActiveVersion,FsoExecType.Release); break;
                     case "fred2": Knossos.PlayMod(ActiveVersion, FsoExecType.Fred2); break;
                     case "qtfred": Knossos.PlayMod(ActiveVersion, FsoExecType.QtFred); break;
+                    case "qtfreddebug": Knossos.PlayMod(ActiveVersion, FsoExecType.QtFredDebug); break;
                     case "debug": Knossos.PlayMod(ActiveVersion, FsoExecType.Debug); break;
                     case "fred2debug": Knossos.PlayMod(ActiveVersion, FsoExecType.Fred2Debug); break;
                 }

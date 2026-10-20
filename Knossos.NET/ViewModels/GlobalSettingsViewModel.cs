@@ -63,6 +63,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string imgCacheSize = "0 MB";
         [ObservableProperty]
+        internal string fsoCacheSize = "0 MB";
+        [ObservableProperty]
         internal bool fs2RootPack = false;
         [ObservableProperty]
         internal string numberOfMods = string.Empty;
@@ -164,6 +166,14 @@ namespace Knossos.NET.ViewModels
         {
             get { return modCompression; }
             set { if (modCompression != value) { this.SetProperty(ref modCompression, value); UnCommitedChanges = true; } }
+        }
+
+        internal void UpdateModCompressionFromQuickSetup(CompressionSettings value)
+        {
+            if (modCompression != value)
+            {
+                this.SetProperty(ref modCompression, value, nameof(ModCompression));
+            }
         }
 
         private int compressionMaxParallelism = 2;
@@ -1358,7 +1368,7 @@ namespace Knossos.NET.ViewModels
 
             /* VIDEO */
             //Resolution
-            if (ResolutionSelectedIndex + 1 <= ResolutionItems.Count)
+            if (ResolutionSelectedIndex >= 0 && ResolutionSelectedIndex < ResolutionItems.Count)
             {
                 Knossos.globalSettings.displayResolution = ResolutionItems[ResolutionSelectedIndex].Content?.ToString();
                 var displayIndex = ResolutionItems[ResolutionSelectedIndex].Tag;
@@ -1401,12 +1411,12 @@ namespace Knossos.NET.ViewModels
 
             /* AUDIO SETTINGS */
             //Playback
-            if (PlaybackSelectedIndex + 1 <= PlaybackItems.Count)
+            if (PlaybackSelectedIndex >= 0 && PlaybackSelectedIndex < PlaybackItems.Count)
             {
                 Knossos.globalSettings.playbackDevice = PlaybackItems[PlaybackSelectedIndex].Tag?.ToString();
             }
             //Capture
-            if (CaptureSelectedIndex + 1 <= CaptureItems.Count)
+            if (CaptureSelectedIndex >= 0 && CaptureSelectedIndex < CaptureItems.Count)
             {
                 Knossos.globalSettings.captureDevice = CaptureItems[CaptureSelectedIndex].Tag?.ToString();
             }
@@ -1573,13 +1583,9 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void OpenGetVoices()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new AddSapiVoicesView();
-                dialog.DataContext = new AddSapiVoicesViewModel();
-
-                await dialog.ShowDialog<AddSapiVoicesView?>(MainWindow.instance);
-            }
+            var dialog = new AddSapiVoicesView();
+            dialog.DataContext = new AddSapiVoicesViewModel();
+            await dialog.ShowDialog<AddSapiVoicesView?>(MainWindow.instance!);
         }
 
         /// <summary>
@@ -1661,13 +1667,64 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
+        /// Clears the knet image cache folder
+        /// </summary>
+        internal async void ClearFSOCache()
+        {
+            await Task.Run(() => {
+                try
+                {
+                    var path = Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "cache");
+                    if (Directory.Exists(path))
+                        Directory.Delete(path, true);
+                    UpdateFSOCacheSize();
+
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "GlobalSettingsViewModel.ClearFSOCache()", ex);
+                }
+            }).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Update the size of the Knet image cache folder into UI
+        /// </summary>
+        public void UpdateFSOCacheSize()
+        {
+            Task.Run(async () => {
+                try
+                {
+                    var path = Path.Combine(KnUtils.GetFSODataFolderPath(),"data", "cache");
+                    if (Directory.Exists(path))
+                    {
+                        var sizeInBytes = await KnUtils.GetSizeOfFolderInBytes(path).ConfigureAwait(false);
+                        Dispatcher.UIThread.Invoke(() => {
+                            FsoCacheSize = KnUtils.FormatBytes(sizeInBytes);
+                        });
+                    }
+                    else
+                    {
+                        Dispatcher.UIThread.Invoke(() => {
+                            FsoCacheSize = "0 MB";
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, "GlobalSettingsViewModel.UpdateFSOCacheSize()", ex);
+                }
+            }).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Open Debug Filter Dialog
         /// </summary>
         internal async void OpenDebugFilterView()
         {
             var dialog = new Views.DebugFiltersView();
             dialog.DataContext = new DebugFiltersViewModel();
-            await dialog.ShowDialog<DebugFiltersView?>(MainWindow.instance!);
+            await dialog.ShowDialog<DebugFiltersView?>(MainWindow.instance);
         }
 
         internal void ToggleDeveloperOptions()

@@ -28,6 +28,8 @@ namespace Knossos.NET.Models
         public string? DisplayText { get; set; } = null;
         public string? ToolTip { get; set; } = null;
         public int? FontSize { get; set; } = null;
+        public int? Width { get; set; } = null; //Use it if the default button width is not enough for the display text
+        public int? Height { get; set; } = null; //Use it if the default button height is not enough for the font size
         public string? BackgroundHexColor { get; set; } = null; //#CD3632 hex color value
         public string? ForegroundHexColor { get; set; } = null; //#CD3632 hex color value
         public string? BorderHexColor { get; set; } = null; //#CD3632 hex color value
@@ -131,6 +133,13 @@ namespace Knossos.NET.Models
         /// After that it will use the saved state
         /// </summary>
         public static bool MenuOpenFirstTime { get; private set; } = false;
+
+        /// <summary>
+        /// Add the Home view to the menu
+        /// Disable it if the TC provides its own main tab with CustomMenuButtons, the first menu entry will be selected at start instead
+        /// Home is still displayed when the library folder has not been selected yet, as the folder selector is part of the Home view
+        /// </summary>
+        public static bool MenuDisplayHomeEntry { get; private set; } = true;
 
         /// <summary>
         /// Add the regular FSO engine view to the menu
@@ -317,6 +326,9 @@ namespace Knossos.NET.Models
                     if (customData.MenuOpenFirstTime.HasValue)
                         MenuOpenFirstTime = customData.MenuOpenFirstTime.Value;
 
+                    if (customData.MenuDisplayHomeEntry.HasValue)
+                        MenuDisplayHomeEntry = customData.MenuDisplayHomeEntry.Value;
+
                     if (customData.MenuDisplayEngineEntry.HasValue)
                         MenuDisplayEngineEntry = customData.MenuDisplayEngineEntry.Value;
 
@@ -385,6 +397,7 @@ namespace Knossos.NET.Models
             public int? MinWindowHeight { get; set; }
             public bool? MenuTaskButtonAtTheEnd { get; set; }
             public bool? MenuOpenFirstTime { get; set; }
+            public bool? MenuDisplayHomeEntry { get; set; }
             public bool? MenuDisplayEngineEntry { get; set; }
             public bool? MenuDisplayDebugEntry { get; set; }
             public bool? MenuDisplayNebulaLoginEntry { get; set; }

@@ -330,10 +330,6 @@ namespace Knossos.NET.Models
         /// <returns>A FlagsJsonV1 structure or null if failed</returns>
         public async Task<FlagsJsonV1?> GetFlagsV1Async()
         {
-#if ANDROID
-                // no flags on android
-                return null;
-#else
             var executable = GetExecutable(FsoExecType.Flags);
             var fullpath = GetExecutablePath(executable);
             if (fullpath == null)
@@ -353,16 +349,21 @@ namespace Knossos.NET.Models
             }
 
             Log.Add(Log.LogSeverity.Information, "FsoBuild.GetFlags()", "Getting FSO Flags from file: " + fullpath);
-
-            if(KnUtils.IsLinux || KnUtils.IsMacOS)
-            {
-                KnUtils.Chmod(fullpath!,"+x");
-            }
-
             string output = string.Empty;
             string stderr = string.Empty;
             try
             {
+#if ANDROID
+                output = await AndroidHelper.GetFlagsStringFSOAsync(fullpath!);
+                if (output == "") return null;
+                return JsonSerializer.Deserialize<FlagsJsonV1>(output);
+#else
+
+                if (KnUtils.IsLinux || KnUtils.IsMacOS)
+                {
+                    KnUtils.Chmod(fullpath!,"+x");
+                }
+
                 using (var cmd = new Process())
                 {
                     cmd.StartInfo.FileName = fullpath;
@@ -433,6 +434,7 @@ namespace Knossos.NET.Models
                     }
                     return JsonSerializer.Deserialize<FlagsJsonV1>(result);
                 }
+#endif
             }
             catch (JsonException exJson)
             {
@@ -455,7 +457,6 @@ namespace Knossos.NET.Models
                 Log.Add(Log.LogSeverity.Error, "FSO EXE OUTPUT ", output);
                 return null;
             }
-#endif
         }
 
         /// <summary>
@@ -1405,7 +1406,7 @@ namespace Knossos.NET.Models
                 return 0;
             }
 
-            if ((env == FsoExecEnvironment.Windows && !KnUtils.IsWindows) || (env == FsoExecEnvironment.Linux && !KnUtils.IsLinux) || (env == FsoExecEnvironment.MacOSX && !KnUtils.IsMacOS))
+            if ((env == FsoExecEnvironment.Windows && !KnUtils.IsWindows) || (env == FsoExecEnvironment.Linux && !KnUtils.IsLinux) || (env == FsoExecEnvironment.MacOSX && !KnUtils.IsMacOS) || (env == FsoExecEnvironment.Android && !KnUtils.IsAndroid))
             {
                 //Fred2 on Linux over Wine exception
                 //Note: this will only be valid if the exec arch matches the host cpu arch, otherwise DetermineScoreFromArch() will return 0 anyway.

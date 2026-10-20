@@ -82,17 +82,29 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>innowrap.dll</Link>
     </None>
+	<None Update="precompiled\windows\x64\KSapi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>KSapi.dll</Link>
+    </None>
   </ItemGroup>
   <ItemGroup Condition="'$(_IsWin)' == 'true' And '$(_IsX86)' == 'true'">
 	<None Update="precompiled\windows\x86\innowrap.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>innowrap.dll</Link>
     </None>
+	<None Update="precompiled\windows\x86\KSapi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>KSapi.dll</Link>
+    </None>
   </ItemGroup>
   <ItemGroup Condition="'$(_IsWin)' == 'true' And '$(_IsArm64)' == 'true'">
 	<None Update="precompiled\windows\arm64\innowrap.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>innowrap.dll</Link>
+    </None>
+	<None Update="precompiled\windows\arm64\KSapi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>KSapi.dll</Link>
     </None>
   </ItemGroup>
 
@@ -125,12 +137,9 @@
 	<None Update="precompiled\osx\libinnowrap.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>libinnowrap.dylib</Link>
-    </None>
-  </ItemGroup>
-
+	</None>
   <ItemGroup>
     <ProjectReference Include="..\Knossos.NET\Knossos.NET.csproj" />
   </ItemGroup>
 
 </Project>
-

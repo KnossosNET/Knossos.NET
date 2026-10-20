@@ -71,6 +71,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal bool build = false;
         [ObservableProperty]
+        internal bool isQtFredAvailable = false;
+        [ObservableProperty]
         internal string buildVersion = string.Empty;
         [ObservableProperty]
         internal string owners = string.Empty;
@@ -86,15 +88,9 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal string? banner = null;
         [ObservableProperty]
-        internal string? apngBanner = null;
-        [ObservableProperty]
         internal bool forumAvailable = false;
         [ObservableProperty]
         internal bool isInstalled = false;
-        [ObservableProperty]
-        internal bool isPlayingTTS = false;
-        [ObservableProperty]
-        internal bool ttsAvailable = false;
         [ObservableProperty]
         internal bool hasBanner = false;
         [ObservableProperty]
@@ -182,41 +178,6 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Play description button binding, used due to the delay argument
-        /// </summary>
-        internal void PlayDescriptionCommand()
-        {
-            PlayDescription(0);
-        }
-
-        /// <summary>
-        /// Play mod description using Knossos TTS
-        /// (the same system and voice used by FSO)
-        /// </summary>
-        /// <param name="delay"></param>
-        private async void PlayDescription(int delay = 0)
-        {
-            if(delay > 0)
-            {
-                await Task.Delay(delay).ConfigureAwait(false);
-            }
-            IsPlayingTTS = true;
-            var cleanDescriptionString = Regex.Replace(modVersions[ItemSelectedIndex].description!, @" ?\[.*?\]", string.Empty);
-            cleanDescriptionString = Regex.Replace(cleanDescriptionString, @" ?\<.*?\>", string.Empty);
-            Knossos.Tts(cleanDescriptionString, null, null, null, CompletedCallback);
-        }
-
-        /// <summary>
-        /// When the TTS playback is over, change the button back to normal
-        /// </summary>
-        /// <returns></returns>
-        private bool CompletedCallback()
-        {
-            IsPlayingTTS = false;
-            return true;
-        }
-
-        /// <summary>
         /// Load Current version in the array to UI
         /// </summary>
         /// <param name="index"></param>
@@ -237,11 +198,6 @@ namespace Knossos.NET.ViewModels
                         var html = BBCode.ConvertToHtml(modVersions[index].description!, BBCode.BasicRules);
                         Description = "<body style='overflow: hidden;white-space: pre-line;color:white;text-align: left;'>" + html + "</body>";
                         //Log.WriteToConsole(html);
-
-                        if(Knossos.globalSettings.ttsDescription && Knossos.globalSettings.enableTts)
-                        {
-                            TtsAvailable = true;
-                        }
                     }
                     if (modVersions[index].owners != null && modVersions[index].owners!.Any()) 
                     {
@@ -253,6 +209,8 @@ namespace Knossos.NET.ViewModels
                     }
                     Released = modVersions[index].firstRelease;
                     IsInstalled = modVersions[index].installed;
+                    //QtFred depends on the engine build this version resolves to, the buttons are only displayed for installed mods
+                    IsQtFredAvailable = modVersions[index].installed && modVersions[index].type != ModType.engine && modVersions[index].IsQtFredAvailable()[0];
                     if (modVersions[index].releaseThread != null)
                     {
                         ForumAvailable = true;
@@ -286,26 +244,9 @@ namespace Knossos.NET.ViewModels
                     var bannerLocalPath = modVersions[selectedIndex].fullPath + Path.DirectorySeparatorChar + modVersions[selectedIndex].banner;
                     if (System.IO.File.Exists(bannerLocalPath))
                     {
-                        var isApng = false;
-                        using (var stream = new FileStream(bannerLocalPath, FileMode.Open, FileAccess.Read))
-                        {
-                            try
-                            {
-                                isApng = APNGHelper.IsApng(stream);
-
-                            }
-                            catch { /* Not a valid png*/ }
-                        }
                         Dispatcher.UIThread.Invoke(() =>
                         {
-                            if (isApng)
-                            {
-                                ApngBanner = bannerLocalPath;
-                            }
-                            else
-                            {
-                                Banner = bannerLocalPath;
-                            }
+                            Banner = bannerLocalPath;
                         });
                     }
                     else
@@ -318,26 +259,9 @@ namespace Knossos.NET.ViewModels
                                 var fs = await KnUtils.GetRemoteResource(url).ConfigureAwait(false);
                                 if (fs != null)
                                 {
-                                    var isApng = false;
-                                    using (var stream = new FileStream(fs, FileMode.Open, FileAccess.Read))
-                                    {
-                                        try
-                                        {
-                                            isApng = APNGHelper.IsApng(stream);
-
-                                        }
-                                        catch { /* Not a valid png*/ }
-                                    }
                                     Dispatcher.UIThread.Invoke(() =>
                                     {
-                                        if (isApng)
-                                        {
-                                            ApngBanner = fs;
-                                        }
-                                        else
-                                        {
-                                            Banner = fs;
-                                        }
+                                        Banner = fs;
                                     });
                                 }
                             }).ConfigureAwait(false);
@@ -492,11 +416,6 @@ namespace Knossos.NET.ViewModels
         }
 
         /* Button Commands */
-        internal void StopTts()
-        {
-            IsPlayingTTS = false;
-            Knossos.Tts(string.Empty);
-        }
 
         internal void ButtonCommandPlay()
         {
@@ -534,7 +453,7 @@ namespace Knossos.NET.ViewModels
                 {
                     if (modVersions.Count > 1)
                     {
-                        var resp = await MessageBox.Show(MainWindow.instance!, "You are about to delete version " + modVersions[ItemSelectedIndex].version + " of this mod, this will remove this version only. Do you want to continue?", "Delete mod version", MessageBox.MessageBoxButtons.YesNo);
+                        var resp = await MessageBox.Show(MainWindow.instance, "You are about to delete version " + modVersions[ItemSelectedIndex].version + " of this mod, this will remove this version only. Do you want to continue?", "Delete mod version", MessageBox.MessageBoxButtons.YesNo);
                         if (resp == MessageBox.MessageBoxResult.Yes)
                         {
                             var delete = modVersions[ItemSelectedIndex];
@@ -548,7 +467,7 @@ namespace Knossos.NET.ViewModels
                     }
                     else
                     {
-                        var resp = await MessageBox.Show(MainWindow.instance!, "You are about to delete the last installed version of this mod. Do you want to continue?", "Delete mod version", MessageBox.MessageBoxButtons.YesNo);
+                        var resp = await MessageBox.Show(MainWindow.instance, "You are about to delete the last installed version of this mod. Do you want to continue?", "Delete mod version", MessageBox.MessageBoxButtons.YesNo);
                         if (resp == MessageBox.MessageBoxResult.Yes)
                         {
                             //Last version
@@ -574,12 +493,12 @@ namespace Knossos.NET.ViewModels
                 }
                 else
                 {
-                    await MessageBox.Show(MainWindow.instance!, "You can not delete a mod while other install tasks are running, wait until they finish and try again.", "Tasks are running", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance, "You can not delete a mod while other install tasks are running, wait until they finish and try again.", "Tasks are running", MessageBox.MessageBoxButtons.OK);
                 }
             }
             else
             {
-                await MessageBox.Show(MainWindow.instance!, "Dev mode mods can not be delated from the main view, go to the Development section.", "Mod is dev mode", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Dev mode mods can not be delated from the main view, go to the Development section.", "Mod is dev mode", MessageBox.MessageBoxButtons.OK);
             }
         }
 
@@ -596,12 +515,12 @@ namespace Knossos.NET.ViewModels
         {
             if (!Nebula.userIsLoggedIn)
             {
-                await MessageBox.Show(MainWindow.instance!, "You need to be logged to Nebula (in the Develop tab) to upload a report.", "Nebula loggin needed", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "You need to be logged to Nebula (in the Develop tab) to upload a report.", "Nebula loggin needed", MessageBox.MessageBoxButtons.OK);
                 return;
             }
             var dialog = new ReportModView();
             dialog.DataContext = new ReportModViewModel(modVersions[ItemSelectedIndex], dialog);
-            await dialog.ShowDialog<ReportModView?>(MainWindow.instance!);
+            await dialog.ShowDialog<ReportModView?>(MainWindow.instance);
         }
     }
 }
