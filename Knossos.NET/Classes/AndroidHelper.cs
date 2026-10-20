@@ -129,13 +129,15 @@ public static class AndroidHelper
     }
 
     /// <summary>
-    /// APK update destination. The internal cache is already exposed through the
-    /// app FileProvider and can be cleared safely by Android after installation.
+    /// APK update destination inside the FileProvider's shared-files directory.
+    /// Android can clear the cached APK safely after installation.
     /// </summary>
     public static string GetUpdateApkPath()
     {
         var cacheDir = Application.Context.CacheDir?.AbsolutePath ?? GetInternalAppFilesDir();
-        return Path.Combine(cacheDir, "update.apk");
+        var sharedFilesDir = Path.Combine(cacheDir, "shared-files");
+        Directory.CreateDirectory(sharedFilesDir);
+        return Path.Combine(sharedFilesDir, "update.apk");
     }
 
     /// <summary>
