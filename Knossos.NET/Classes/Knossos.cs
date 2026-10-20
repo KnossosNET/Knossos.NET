@@ -274,7 +274,15 @@ namespace Knossos.NET
                 //Check for updates
                 if (globalSettings.checkUpdate && !isQuickLaunch && !KnUtils.IsBrowser)
                 {
-                    await CheckKnetUpdates().ConfigureAwait(false);
+                    if (KnUtils.IsAndroid)
+                    {
+                        // Let the library load while the APK downloads and the installer opens.
+                        _ = CheckKnetUpdates();
+                    }
+                    else
+                    {
+                        await CheckKnetUpdates().ConfigureAwait(false);
+                    }
                     //Check for .old files and delete them
                     if (KnUtils.IsAppImage)
                     {
