@@ -1368,7 +1368,7 @@ namespace Knossos.NET.ViewModels
 
             /* VIDEO */
             //Resolution
-            if (ResolutionSelectedIndex + 1 <= ResolutionItems.Count)
+            if (ResolutionSelectedIndex >= 0 && ResolutionSelectedIndex < ResolutionItems.Count)
             {
                 Knossos.globalSettings.displayResolution = ResolutionItems[ResolutionSelectedIndex].Content?.ToString();
                 var displayIndex = ResolutionItems[ResolutionSelectedIndex].Tag;
@@ -1411,12 +1411,12 @@ namespace Knossos.NET.ViewModels
 
             /* AUDIO SETTINGS */
             //Playback
-            if (PlaybackSelectedIndex + 1 <= PlaybackItems.Count)
+            if (PlaybackSelectedIndex >= 0 && PlaybackSelectedIndex < PlaybackItems.Count)
             {
                 Knossos.globalSettings.playbackDevice = PlaybackItems[PlaybackSelectedIndex].Tag?.ToString();
             }
             //Capture
-            if (CaptureSelectedIndex + 1 <= CaptureItems.Count)
+            if (CaptureSelectedIndex >= 0 && CaptureSelectedIndex < CaptureItems.Count)
             {
                 Knossos.globalSettings.captureDevice = CaptureItems[CaptureSelectedIndex].Tag?.ToString();
             }
@@ -1583,13 +1583,9 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void OpenGetVoices()
         {
-            if (MainWindow.instance != null)
-            {
-                var dialog = new AddSapiVoicesView();
-                dialog.DataContext = new AddSapiVoicesViewModel();
-
-                await dialog.ShowDialog<AddSapiVoicesView?>(MainWindow.instance);
-            }
+            var dialog = new AddSapiVoicesView();
+            dialog.DataContext = new AddSapiVoicesViewModel();
+            await dialog.ShowDialog<AddSapiVoicesView?>(MainWindow.instance!);
         }
 
         /// <summary>
@@ -1728,7 +1724,7 @@ namespace Knossos.NET.ViewModels
         {
             var dialog = new Views.DebugFiltersView();
             dialog.DataContext = new DebugFiltersViewModel();
-            await dialog.ShowDialog<DebugFiltersView?>(MainWindow.instance!);
+            await dialog.ShowDialog<DebugFiltersView?>(MainWindow.instance);
         }
 
         internal void ToggleDeveloperOptions()

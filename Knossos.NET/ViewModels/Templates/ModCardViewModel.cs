@@ -293,6 +293,7 @@ namespace Knossos.NET.ViewModels
             {
                 case "play": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release); break;
                 case "playvr": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release, false, 0, true); break;
+                case "playvrdebug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Debug, false, 0, true); break;
                 case "fred2": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2); break;
                 case "fred2debug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2Debug); break;
                 case "debug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Debug); break;
@@ -303,19 +304,6 @@ namespace Knossos.NET.ViewModels
                 case "delete": ButtonCommandDelete(); break;
                 case "details": ButtonCommandDetails(); break;
                 case "settings": ButtonCommandSettings(); break;
-                case "logfile": OpenFS2Log(); break;
-            }
-        }
-
-        private void OpenFS2Log()
-        {
-            if (File.Exists(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log"))
-            {
-                KnUtils.OpenFileInOS(KnUtils.GetFSODataFolderPath() + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "fs2_open.log");
-            }
-            else
-            {
-                MessageBox.Show(MainWindow.instance, "Log File " + Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log") + " not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
         }
 
@@ -323,14 +311,14 @@ namespace Knossos.NET.ViewModels
         {
             var dialog = new ModInstallView();
             dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex], dialog);
-            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
+            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
         }
 
         internal async void ButtonCommandModify()
         {
             var dialog = new ModInstallView();
             dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex], dialog, modVersions[activeVersionIndex].version);
-            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance!);
+            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
         }
 
         internal async void ButtonCommandDelete()
@@ -339,7 +327,7 @@ namespace Knossos.NET.ViewModels
             {
                 if (TaskViewModel.Instance!.IsSafeState())
                 {
-                    var result = await MessageBox.Show(MainWindow.instance!, "You are going to remove mod " + Name + " .This will delete ALL versions of the mod. If you only want to delete a specific version you can do it from mod details.\n Do you really want to delete the mod?", "Delete mod", MessageBox.MessageBoxButtons.OKCancel);
+                    var result = await MessageBox.Show(MainWindow.instance, "You are going to remove mod " + Name + " .This will delete ALL versions of the mod. If you only want to delete a specific version you can do it from mod details.\n Do you really want to delete the mod?", "Delete mod", MessageBox.MessageBoxButtons.OKCancel);
                     if (result == MessageBox.MessageBoxResult.OK)
                     {
                         modVersions[modVersions.Count - 1].installed = false;
@@ -359,12 +347,12 @@ namespace Knossos.NET.ViewModels
                 }
                 else
                 {
-                    await MessageBox.Show(MainWindow.instance!, "You can not delete a mod while other install tasks are running, wait until they finish and try again.", "Tasks are running", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance, "You can not delete a mod while other install tasks are running, wait until they finish and try again.", "Tasks are running", MessageBox.MessageBoxButtons.OK);
                 }
             }
             else
             {
-                await MessageBox.Show(MainWindow.instance!, "Dev mode mods can not be delated from the main view, go to the Development section.", "Mod is dev mode", MessageBox.MessageBoxButtons.OK);
+                await MessageBox.Show(MainWindow.instance, "Dev mode mods can not be delated from the main view, go to the Development section.", "Mod is dev mode", MessageBox.MessageBoxButtons.OK);
             }
         }
 
