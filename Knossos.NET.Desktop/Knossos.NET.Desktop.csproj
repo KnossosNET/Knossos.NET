@@ -78,24 +78,68 @@
 
   <!-- Windows -->
   <ItemGroup Condition="'$(_IsWin)' == 'true' And '$(_IsX64)' == 'true'">
+	<None Update="precompiled\windows\x64\innowrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>innowrap.dll</Link>
+    </None>
 	<None Update="precompiled\windows\x64\KSapi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>KSapi.dll</Link>
     </None>
   </ItemGroup>
   <ItemGroup Condition="'$(_IsWin)' == 'true' And '$(_IsX86)' == 'true'">
+	<None Update="precompiled\windows\x86\innowrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>innowrap.dll</Link>
+    </None>
 	<None Update="precompiled\windows\x86\KSapi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>KSapi.dll</Link>
     </None>
   </ItemGroup>
   <ItemGroup Condition="'$(_IsWin)' == 'true' And '$(_IsArm64)' == 'true'">
+	<None Update="precompiled\windows\arm64\innowrap.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>innowrap.dll</Link>
+    </None>
 	<None Update="precompiled\windows\arm64\KSapi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>KSapi.dll</Link>
     </None>
   </ItemGroup>
 
+  <!-- Linux x64 -->
+  <ItemGroup Condition="'$(_IsLinux)' == 'true' And '$(_IsX64)' == 'true'">
+	<None Update="precompiled\linux\x64\libinnowrap.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>libinnowrap.so</Link>
+    </None>
+  </ItemGroup>
+
+  <!-- Linux arm64 -->
+  <ItemGroup Condition="'$(_IsLinux)' == 'true' And '$(_IsArm64)' == 'true'">
+	<None Update="precompiled\linux\arm64\libinnowrap.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>libinnowrap.so</Link>
+    </None>
+  </ItemGroup>
+
+  <!-- Linux riscv64 -->
+  <ItemGroup Condition="'$(_IsLinux)' == 'true' And '$(_IsRiscV64)' == 'true'">
+	<None Update="precompiled\linux\riscv64\libinnowrap.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>libinnowrap.so</Link>
+    </None>
+  </ItemGroup>
+
+  <!-- macOS (x64 / arm64) -->
+  <ItemGroup Condition="'$(_IsOsx)' == 'true'">
+	<None Update="precompiled\osx\libinnowrap.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>libinnowrap.dylib</Link>
+	</None>
+  </ItemGroup> 
+  
   <ItemGroup>
     <ProjectReference Include="..\Knossos.NET\Knossos.NET.csproj" />
   </ItemGroup>
