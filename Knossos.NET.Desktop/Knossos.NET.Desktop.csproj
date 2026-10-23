@@ -138,6 +138,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>libinnowrap.dylib</Link>
 	</None>
+  </ItemGroup> 
+  
   <ItemGroup>
     <ProjectReference Include="..\Knossos.NET\Knossos.NET.csproj" />
   </ItemGroup>

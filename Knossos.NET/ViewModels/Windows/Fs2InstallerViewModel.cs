@@ -13,6 +13,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
@@ -84,6 +86,17 @@ namespace Knossos.NET.ViewModels
             }
             
             await Task.Run(async () => { 
+                var createdFiles = new List<string>();
+                bool installationComplete = false;
+                FileStream CreateInstallFile(string path)
+                {
+                    // This is a fresh installation. Only register files we create,
+                    // so a failed attempt can remove them without touching others.
+                    var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write);
+                    createdFiles.Add(path);
+                    return stream;
+                }
+
                 try
                 {
                     IsInstalling = true;
@@ -123,7 +136,7 @@ namespace Knossos.NET.ViewModels
                             // streams). ExtractFiles verifies each file's checksum internally.
                             archive.ExtractFiles(
                                 wanted,
-                                file => File.Create(destPath[file]),
+                                file => CreateInstallFile(destPath[file]),
                                 file =>
                                 {
                                     Dispatcher.UIThread.Invoke(new Action(() =>
@@ -151,7 +164,7 @@ namespace Knossos.NET.ViewModels
                             {
                                 using (var streamOrg = await file.OpenReadAsync())
                                 {
-                                    using (var streamDst = new FileStream(Path.Combine(fs2Path, file.Name), FileMode.Create, FileAccess.Write))
+                                    using (var streamDst = CreateInstallFile(Path.Combine(fs2Path, file.Name)))
                                     {
                                         await streamOrg.CopyToAsync(streamDst);
                                     }
@@ -164,7 +177,7 @@ namespace Knossos.NET.ViewModels
                                 {
                                     using (var streamOrg = await file.OpenReadAsync())
                                     {
-                                        using (var streamDst = new FileStream(Path.Combine(playersPath, file.Name), FileMode.Create, FileAccess.Write))
+                                        using (var streamDst = CreateInstallFile(Path.Combine(playersPath, file.Name)))
                                         {
                                             await streamOrg.CopyToAsync(streamDst);
                                         }
@@ -175,7 +188,7 @@ namespace Knossos.NET.ViewModels
                                     /* Movies */
                                     using (var streamOrg = await file.OpenReadAsync())
                                     {
-                                        using (var streamDst = new FileStream(Path.Combine(moviesPath, file.Name), FileMode.Create, FileAccess.Write))
+                                        using (var streamDst = CreateInstallFile(Path.Combine(moviesPath, file.Name)))
                                         {
                                             await streamOrg.CopyToAsync(streamDst);
                                         }
@@ -219,81 +232,25 @@ namespace Knossos.NET.ViewModels
                     fs2Pkg.dependencies = new ModDependency[] { fs2Dep };
                     fs2Mod.packages.Add(fs2Pkg);
                     fs2Mod.modSource = ModSource.local;
-                    fs2Mod.SaveJson();
-                    try
+                    foreach (var name in new[] { "kn_tile.png", "kn_banner.png" }.Concat(fs2Mod.screenshots))
                     {
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_tile.png"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_tile.png")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_banner.png"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_banner.png")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_0.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_0.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_1.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_1.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_2.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_2.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_3.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_3.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_4.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_4.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_5.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_5.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_6.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_6.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_7.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_7.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_8.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_8.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_9.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_9.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_10.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_10.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
-                        using (var fileStream = File.Create(Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "FS2" + Path.DirectorySeparatorChar + "kn_screen_11.jpg"))
-                        {
-                            AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/fs2_res/kn_screen_11.jpg")).CopyTo(fileStream);
-                            fileStream.Close();
-                        }
+                        using var source = AssetLoader.Open(new Uri($"avares://Knossos.NET/Assets/fs2_res/{name}"));
+                        using var destination = CreateInstallFile(Path.Combine(fs2Path, name));
+                        source.CopyTo(destination);
                     }
-                    catch { }
+
+                    // Metadata marks a completed installation. Write it only after
+                    // every data and asset stream has closed successfully. SaveJson()
+                    // swallows write errors, so serialize here and let them abort.
+                    using (var metadata = CreateInstallFile(Path.Combine(fs2Path, "mod.json")))
+                    {
+                        JsonSerializer.Serialize(metadata, fs2Mod, new JsonSerializerOptions
+                        {
+                            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                            WriteIndented = true
+                        });
+                    }
+                    installationComplete = true;
                     Dispatcher.UIThread.Invoke(new Action(() => { InstallText = "Install Complete!, KnossosNET is reloading the library..."; }));
                     Knossos.ResetBasePath();
                     await Task.Delay(3000);
@@ -302,7 +259,29 @@ namespace Knossos.NET.ViewModels
                 catch(Exception ex)
                 {
                     Log.Add(Log.LogSeverity.Error, "Fs2InstallerViewModel.InstallFS2Command()",ex);
-                    Dispatcher.UIThread.Invoke(new Action(() => { MessageBox.Show(MainWindow.instance, $"An error has ocurred during file copy: {ex.Message}.", "An error has ocurred", MessageBox.MessageBoxButtons.OK); }));
+                    bool cleanupFailed = false;
+                    if (!installationComplete)
+                    {
+                        foreach (var path in createdFiles)
+                        {
+                            try { File.Delete(path); }
+                            catch (Exception cleanupError)
+                            {
+                                cleanupFailed = true;
+                                Log.Add(Log.LogSeverity.Error, "Fs2InstallerViewModel.InstallFS2Command.Cleanup", cleanupError);
+                            }
+                        }
+                    }
+                    Dispatcher.UIThread.Invoke(new Action(() =>
+                    {
+                        InstallText = "Installation failed.";
+                        var cleanupMessage = cleanupFailed ? " Some incomplete files could not be removed. See the log for details." : "";
+                        MessageBox.Show(MainWindow.instance, $"Installation failed: {ex.Message}.{cleanupMessage}", "FS2 installation failed", MessageBox.MessageBoxButtons.OK);
+                    }));
+                }
+                finally
+                {
+                    Dispatcher.UIThread.Invoke(new Action(() => { IsInstalling = false; }));
                 }
             });
         }

@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using SharpCompress.Compressors;
@@ -492,15 +493,18 @@ namespace Knossos.NET.Classes.Inno
             var outStream = new Dictionary<InnoFile, Stream>();
             var hashers = new Dictionary<InnoFile, RunningChecksum>();
             var remaining = new Dictionary<InnoFile, int>();
-            foreach (var f in files)
-            {
-                outStream[f] = outputFor(f);
-                hashers[f] = new RunningChecksum(f.ChecksumType);
-                remaining[f] = f.Parts.Count;
-            }
-
+            Exception? extractionError = null;
             try
             {
+                // Opening a later output can fail too. Close the outputs already
+                // opened before returning control to the installer's cleanup.
+                foreach (var f in files)
+                {
+                    outStream[f] = outputFor(f);
+                    hashers[f] = new RunningChecksum(f.ChecksumType);
+                    remaining[f] = f.Parts.Count;
+                }
+
                 using var reader = new ForwardBinReader(_sliceOpener, _baseName, _baseFilename, _slicesPerDisk);
                 foreach (var (f, part) in work)
                 {
@@ -522,9 +526,23 @@ namespace Knossos.NET.Classes.Inno
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                extractionError = ex;
+                throw;
+            }
             finally
             {
-                foreach (var s in outStream.Values) { try { s.Dispose(); } catch { } }
+                Exception? closeError = null;
+                foreach (var s in outStream.Values)
+                {
+                    try { s.Dispose(); }
+                    catch (Exception ex) { closeError ??= ex; }
+                }
+                // A final buffered write may fail on close. It must fail the
+                // extraction, while preserving an earlier extraction error.
+                if (extractionError == null && closeError != null)
+                    ExceptionDispatchInfo.Capture(closeError).Throw();
             }
         }
 
