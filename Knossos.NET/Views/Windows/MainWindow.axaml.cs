@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
+using Knossos.NET.Models;
 using Knossos.NET.ViewModels;
+using System;
 
 namespace Knossos.NET.Views
 {
@@ -33,12 +35,26 @@ namespace Knossos.NET.Views
         }
 
         /// <summary>
-        /// Change size of the main window
+        /// Apply the starting size, fitting normal mode to the screen while preserving custom dimensions.
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
         public void SetSize(double? width, double? height)
         {
+            if (!CustomLauncher.IsCustomMode)
+            {
+                var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
+                if (screen != null)
+                {
+                    // WorkingArea is in physical pixels; Width and Height are in logical units.
+                    var availableSize = screen.WorkingArea.Size.ToSize(screen.Scaling);
+                    if (width.HasValue)
+                        width = Math.Min(width.Value, availableSize.Width * 0.9);
+                    if (height.HasValue)
+                        height = Math.Min(height.Value, availableSize.Height * 0.9);
+                }
+            }
+
             if(width.HasValue)
                 this.Width = width.Value;
             if(height.HasValue)
