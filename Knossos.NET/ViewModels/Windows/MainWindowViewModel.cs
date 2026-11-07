@@ -109,8 +109,8 @@ namespace Knossos.NET.ViewModels
             if (!CustomLauncher.IsCustomMode)
             {
                 // Explicit logical dimensions avoid X11 scaling the default window size twice (#470).
-                WindowWidth = 1024;
-                WindowHeight = 700;
+                WindowWidth = 1200;
+                WindowHeight = 800;
                 placeholderTileImage = new Bitmap(AssetLoader.Open(new Uri("avares://Knossos.NET/Assets/general/NebulaDefault.png")));
                 FreespaceView = new FreespaceViewModel();
                 InstalledModsView = new ModListViewModel();

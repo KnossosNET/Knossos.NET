@@ -10,6 +10,7 @@
 			 xmlns:HtmlRenderer="clr-namespace:TheArtOfDev.HtmlRenderer.Avalonia;assembly=Avalonia.HtmlRenderer"
 			 Icon="/Assets/knossos-icon.ico"
 			 Width="1070"
+			 Height="1070"
 			 WindowStartupLocation="CenterOwner"
 			 Title="{Binding Name}"
 			 CanResize="True"
