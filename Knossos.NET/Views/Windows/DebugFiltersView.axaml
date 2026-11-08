@@ -9,6 +9,9 @@
 		x:DataType="vm:DebugFiltersViewModel"
 		Icon="/Assets/knossos-icon.ico"
 		WindowStartupLocation="CenterScreen"
+		SizeToContent="Manual"
+		Width="800"
+		Height="1000"
         Title="Debug Filter Selection" 
 		CanResize="True">
 	

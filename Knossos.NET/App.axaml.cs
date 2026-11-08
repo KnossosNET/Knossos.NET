@@ -78,6 +78,8 @@ namespace Knossos.NET
                 }
             };
 
+            // Apply the initial size before showing, including when reusing the view model from the tray.
+            MainWindow.instance?.SetSize(mainVM?.WindowWidth, mainVM?.WindowHeight);
             desktop.MainWindow.Show();
         }
 
@@ -91,7 +93,6 @@ namespace Knossos.NET
                 {
                     MainWindow.instance?.FixMarginButtomTasks();
                 }
-                MainWindow.instance?.SetSize(mainVM?.WindowWidth, mainVM?.WindowHeight);
                 trayIcon.Dispose();
                 trayIcon = null;
                 GC.Collect();
