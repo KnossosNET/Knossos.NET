@@ -1,0 +1,139 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Knossos.NET.ViewModels" xmlns:views="using:Knossos.NET.Views"
+    x:Class="Knossos.NET.Views.ModLocalFilesView" x:DataType="vm:ModLocalFilesViewModel">
+  <UserControl.Resources>
+    <StreamGeometry x:Key="DriveIcon">M5,3H19L23,13V21H1V13Z M6.5,5L3.5,12H20.5L17.5,5Z M4,15V18H7V15Z M9,15V18H12V15Z</StreamGeometry>
+    <StreamGeometry x:Key="CompressionIcon">M12,2C18,2 22,4 22,7S18,12 12,12 2,10 2,7 6,2 12,2Z M2,10C6,15 18,15 22,10V13C22,16 18,18 12,18S2,16 2,13Z M2,16C6,21 18,21 22,16V19C22,22 18,24 12,24S2,22 2,19Z</StreamGeometry>
+    <StreamGeometry x:Key="VerifyIcon">M12,1A11,11 0 1 0 12,23A11,11 0 0 0 12,1Z M5,12L7,10L11,14L17,7L19,9L11,18Z</StreamGeometry>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style Selector="Border.metric">
+      <Setter Property="Padding" Value="15"/>
+      <Setter Property="Margin" Value="0,0,12,12"/>
+      <Setter Property="MinHeight" Value="122"/>
+    </Style>
+    <Style Selector="TextBlock.metricValue">
+      <Setter Property="FontSize" Value="22"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style Selector="Button.fileAction">
+      <Setter Property="Margin" Value="0,0,12,12"/>
+      <Setter Property="MinHeight" Value="90"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="VerticalAlignment" Value="Stretch"/>
+      <Setter Property="VerticalContentAlignment" Value="Top"/>
+      <Setter Property="Padding" Value="12"/>
+    </Style>
+  </UserControl.Styles>
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel x:Name="PageLayout" Margin="24,20,12,20" Spacing="8">
+      <TextBlock Classes="heading" Text="{Binding Name}"/>
+      <TextBlock Classes="muted" Text="{Binding Version}" Margin="0,0,0,5"/>
+      <TextBlock Text="Local Files" FontWeight="SemiBold" FontSize="22"/>
+      <TextBlock Text="Manage storage and check the files of your installed mod." Classes="muted" Margin="0,0,12,5"/>
+      <Grid x:Name="StorageCards">
+        <Border Classes="surface metric">
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <PathIcon Data="{StaticResource FuturisticFolderIcon}" Foreground="#7EBBFF" Width="28" Height="28" VerticalAlignment="Top"/>
+            <StackPanel Grid.Column="1" Spacing="6">
+              <TextBlock Classes="muted" Text="Library Location"/>
+              <TextBlock Text="{Binding LibraryLocation}" FontWeight="Medium" MaxLines="3" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding LibraryLocation}"/>
+              <Button x:Name="OpenLibraryButton" Content="Open Folder" Command="{Binding OpenLibraryCommand}" IsVisible="{Binding ShowFolderButtons}" HorizontalAlignment="Left"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+        <Border Classes="surface metric">
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <PathIcon Data="{StaticResource DriveIcon}" Foreground="#A9B8C8" Width="28" Height="28" VerticalAlignment="Top"/>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Classes="muted" Text="Library Free Space"/>
+              <TextBlock Classes="metricValue" Text="{Binding FreeSpace}"/>
+              <TextBlock Classes="muted" Text="{Binding Capacity}"/>
+              <ProgressBar Minimum="0" Maximum="100" Value="{Binding PercentFree}" Height="6" MinWidth="0" Foreground="#439FFB"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+        <Border Classes="surface metric">
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <PathIcon Data="{StaticResource FuturisticPackageIcon}" Foreground="#7EBBFF" Width="28" Height="28" VerticalAlignment="Top"/>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Classes="muted" Text="Mod Disk Space"/>
+              <TextBlock Classes="metricValue" Text="{Binding ActiveSize}"/>
+              <TextBlock Classes="muted" Text="Compressed" IsVisible="{Binding IsCompressed}"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+        <Border Classes="surface metric">
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <PathIcon Data="{StaticResource FuturisticPackageIcon}" Foreground="#7EBBFF" Width="28" Height="28" VerticalAlignment="Top"/>
+            <StackPanel Grid.Column="1" Spacing="6">
+              <TextBlock Classes="muted" Text="All Versions Disk Space"/>
+              <TextBlock Classes="metricValue" Text="{Binding AllVersionsSize}"/>
+              <Button Content="Calculate / Refresh" Command="{Binding MeasureAllCommand}" HorizontalAlignment="Left"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+      </Grid>
+      <TextBlock Classes="muted" Text="Sizes count hardlinked files once per path. The space saved by sharing files between versions is not included." FontSize="12" Margin="0,0,12,6"/>
+      <ProgressBar IsVisible="{Binding IsMeasuring}" IsIndeterminate="True" Height="4" Margin="0,0,12,4"/>
+      <TextBlock Text="{Binding MeasurementError}" IsVisible="{Binding HasMeasurementError}" Foreground="#FFB88A" Margin="0,0,12,0"/>
+      <Grid x:Name="FileActions">
+        <Button Classes="fileAction accent" IsEnabled="False">
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <PathIcon Data="{StaticResource FuturisticFolderIcon}" Foreground="#9DCDFF" Width="26" Height="26" VerticalAlignment="Top"/>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Text="Move to Different Library" FontWeight="SemiBold"/>
+              <TextBlock Text="Move this mod to another library." Classes="muted"/>
+            </StackPanel>
+          </Grid>
+        </Button>
+        <Button Classes="fileAction editor" Command="{Binding ChangeCompressionCommand}">
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <PathIcon Data="{StaticResource CompressionIcon}" Foreground="#FFDEAD" Width="26" Height="26" VerticalAlignment="Top"/>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Text="{Binding CompressionLabel}" FontWeight="SemiBold"/>
+              <TextBlock Text="{Binding CompressionHint}" Classes="muted"/>
+            </StackPanel>
+          </Grid>
+        </Button>
+        <Button Classes="fileAction play" Command="{Binding VerifyCommand}">
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <PathIcon Data="{StaticResource VerifyIcon}" Foreground="#A5E8B7" Width="26" Height="26" VerticalAlignment="Top"/>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Text="Verify Files" FontWeight="SemiBold"/>
+              <TextBlock Text="Check files and repair damaged packages when available." Classes="muted"/>
+            </StackPanel>
+          </Grid>
+        </Button>
+        <Button x:Name="OpenModButton" Classes="fileAction" Command="{Binding OpenModCommand}" IsVisible="{Binding ShowFolderButtons}">
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <PathIcon Data="{StaticResource FuturisticFolderIcon}" Width="26" Height="26" VerticalAlignment="Top"/>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Text="Open Mod Folder" FontWeight="SemiBold"/>
+              <TextBlock Text="Browse the installed mod files." Classes="muted"/>
+            </StackPanel>
+          </Grid>
+        </Button>
+        <Button Classes="fileAction danger" IsEnabled="False">
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <PathIcon Data="{StaticResource FuturisticPackageIcon}" Foreground="#FFB5B5" Width="26" Height="26" VerticalAlignment="Top"/>
+            <StackPanel Grid.Column="1" Spacing="4">
+              <TextBlock Text="Export Mod" FontWeight="SemiBold"/>
+              <TextBlock Text="Create an archive of this mod." Classes="muted"/>
+            </StackPanel>
+          </Grid>
+        </Button>
+      </Grid>
+      <Border Classes="surface" Padding="14" Margin="0,0,12,0" IsVisible="{Binding Operation.IsApplying}">
+        <StackPanel Spacing="6">
+          <TextBlock Text="{Binding Operation.Status}" FontWeight="SemiBold"/>
+          <views:ModOperationProgressView DataContext="{Binding Operation}"/>
+          <Button Classes="danger" Content="Cancel" Command="{Binding Operation.CancelOperationCommand}" HorizontalAlignment="Left"/>
+        </StackPanel>
+      </Border>
+      <TextBlock Classes="muted" Text="{Binding Operation.OperationSummary}"/>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

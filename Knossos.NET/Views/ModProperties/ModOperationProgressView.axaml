@@ -1,0 +1,10 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Knossos.NET.ViewModels"
+    x:Class="Knossos.NET.Views.ModOperationProgressView" x:DataType="vm:ModVersionsViewModel">
+  <StackPanel Spacing="4">
+    <TextBlock Text="You can close Properties and reopen it to follow this operation." Classes="muted" TextWrapping="Wrap" FontSize="12"/>
+    <TextBlock Text="{Binding ActiveTask.Name}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+    <TextBlock Text="{Binding ActiveTask.Info}" Classes="muted" TextWrapping="Wrap" FontSize="12"/>
+    <ProgressBar Minimum="0" Maximum="{Binding ActiveTask.ProgressBarMax}" Value="{Binding ActiveTask.ProgressCurrent}" Height="6"/>
+  </StackPanel>
+</UserControl>

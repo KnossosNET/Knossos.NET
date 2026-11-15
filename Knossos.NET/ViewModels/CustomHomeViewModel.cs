@@ -176,15 +176,15 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Opens mod install window for this mod id
+        /// Opens Versions & Packages to install this mod.
         /// </summary>
         private async void Install()
         {
             if (nebulaModVersions.Any() && CustomLauncher.UseNebulaServices)
             {
-                var dialog = new ModInstallView();
-                dialog.DataContext = new ModInstallViewModel(nebulaModVersions.First(), dialog);
-                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
+                var dialog = new ModPropertiesView();
+                dialog.DataContext = ModPropertiesViewModel.GetOrCreate(nebulaModVersions.First(), dialog, ModPropertiesViewModel.MenuPageEntry.Versions);
+                await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
             }
             else
             {
@@ -193,15 +193,15 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Opens mod install window for this mod id in modify active version mode
+        /// Opens Versions & Packages to modify the active version.
         /// </summary>
         private async void Modify()
         {
             if (GetActiveInstalledModVersion != null && CustomLauncher.UseNebulaServices)
             {
-                var dialog = new ModInstallView();
-                dialog.DataContext = new ModInstallViewModel(GetActiveInstalledModVersion, dialog, GetActiveInstalledModVersion.version);
-                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
+                var dialog = new ModPropertiesView();
+                dialog.DataContext = ModPropertiesViewModel.GetOrCreate(GetActiveInstalledModVersion, dialog, ModPropertiesViewModel.MenuPageEntry.Versions);
+                await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
             }
             else
             {
@@ -210,15 +210,15 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Opens mod install window for this mod id
+        /// Opens Versions & Packages to update this mod.
         /// </summary>
         private async void Update()
         {
             if (GetActiveInstalledModVersion != null && CustomLauncher.UseNebulaServices)
             {
-                var dialog = new ModInstallView();
-                dialog.DataContext = new ModInstallViewModel(GetActiveInstalledModVersion, dialog);
-                await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
+                var dialog = new ModPropertiesView();
+                dialog.DataContext = ModPropertiesViewModel.GetOrCreate(GetActiveInstalledModVersion, dialog, ModPropertiesViewModel.MenuPageEntry.Versions);
+                await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
             }
             else
             {
@@ -227,16 +227,16 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Opens this mod details dialog
+        /// Opens Information in Mod Properties.
         /// </summary>
         private async void Details()
         {
-            var dialog = new ModDetailsView();
+            var dialog = new ModPropertiesView();
             var mod = GetActiveInstalledModVersion != null ? GetActiveInstalledModVersion : nebulaModVersions.FirstOrDefault();
             if (mod != null)
             {
-                dialog.DataContext = new ModDetailsViewModel(mod, dialog);
-                await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
+                dialog.DataContext = ModPropertiesViewModel.GetOrCreate(mod, dialog);
+                await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
             }
             else
             {
@@ -245,15 +245,15 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Opens this mod settings dialog
+        /// Opens Launch Options in Mod Properties.
         /// </summary>
         internal async void Settings()
         {
             if (GetActiveInstalledModVersion != null)
             {
-                var dialog = new ModSettingsView();
-                dialog.DataContext = new ModSettingsViewModel(GetActiveInstalledModVersion);
-                await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
+                var dialog = new ModPropertiesView();
+                dialog.DataContext = ModPropertiesViewModel.GetOrCreate(GetActiveInstalledModVersion, dialog, ModPropertiesViewModel.MenuPageEntry.Options);
+                await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
             }
             else
             {
@@ -285,6 +285,20 @@ namespace Knossos.NET.ViewModels
             {
                 MessageBox.Show(MainWindow.instance, "Log File " + Path.Combine(KnUtils.GetFSODataFolderPath(), "data", "fs2_open.log") + " not found.", "File not found", MessageBox.MessageBoxButtons.OK);
             }
+        }
+
+        /// <summary>Refreshes the launcher after a version has already been removed from disk.</summary>
+        public void InstalledVersionRemoved(Mod mod)
+        {
+            if (CustomLauncher.ModID != mod.id) return;
+            var active = GetActiveInstalledModVersion?.version;
+            modVersions.RemoveAll(m => m.id == mod.id && m.version == mod.version);
+            VersionItems.Clear();
+            foreach (var remaining in modVersions) VersionItems.Add(remaining.version);
+            Installed = modVersions.Count > 0;
+            ActiveVersionIndex = -1;
+            ActiveVersionIndex = Math.Max(0, modVersions.FindIndex(m => m.version == active));
+            RefreshQtFredAvailability();
         }
 
         /// <summary>

@@ -209,13 +209,13 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Open mod settings
+        /// Opens Launch Options in Mod Properties.
         /// </summary>
         internal async void OpenModSettings()
         {
-            var dialog = new ModSettingsView();
-            dialog.DataContext = new ModSettingsViewModel(ListOfMods[ModIndex]);
-            await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
+            var dialog = new ModPropertiesView();
+            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(ListOfMods[ModIndex], dialog, ModPropertiesViewModel.MenuPageEntry.Options);
+            await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
         }
     }
 }

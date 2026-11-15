@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace IonKiwi.lz4 {
 	public static class LZ4RawUtility {
@@ -116,7 +117,7 @@ namespace IonKiwi.lz4 {
         /// <exception cref="IOException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         /// <exception cref="Exception"></exception>
-        public static unsafe int LZ41_Stream_Compress_HC(Stream inputStream, Stream outputStream, LZ4FrameBlockSize blockSize, int compressionLevel = 6, int? inputfileSize = null)
+        public static unsafe int LZ41_Stream_Compress_HC(Stream inputStream, Stream outputStream, LZ4FrameBlockSize blockSize, int compressionLevel = 6, int? inputfileSize = null, CancellationToken cancellationToken = default)
         {
             //Validation
             if (compressionLevel < 3 || compressionLevel > 12)
@@ -168,6 +169,7 @@ namespace IonKiwi.lz4 {
             //Proccess until end of input stream
             while (true)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 fixed (byte* cmpPtr = new byte[lz4.LZ4_compressBound(_blockSize)])
                 {
                     //Calulate how much data remains, each block contains "block size" of uncompressed data, except maybe the last
@@ -256,14 +258,15 @@ namespace IonKiwi.lz4 {
         /// <exception cref="IOException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         /// <exception cref="Exception"></exception>
-        public static unsafe int LZ41_Stream_Decompress(Stream inputStream, Stream outputStream, int? compressedFileSize = null, int? offset = null, int? length = null)
+        public static unsafe int LZ41_Stream_Decompress(Stream inputStream, Stream outputStream, int? compressedFileSize = null, int? offset = null, int? length = null, CancellationToken cancellationToken = default)
         {
             //Validation
+            cancellationToken.ThrowIfCancellationRequested();
             if (!inputStream.CanRead)
                 throw new IOException("Input stream can not be read.");
             if (inputStream.Length == 0)
                 throw new IOException("Input stream can not empty.");
-            if (compressedFileSize.HasValue && compressedFileSize > inputStream.Length)
+            if (compressedFileSize.HasValue && (compressedFileSize < 16 || compressedFileSize > inputStream.Length - inputStream.Position))
                 throw new ArgumentOutOfRangeException("The specified compressed file size is larger than the input stream length");
             if (!outputStream.CanWrite)
                 throw new IOException("Output stream can not be written.");
@@ -278,7 +281,9 @@ namespace IonKiwi.lz4 {
             List<int> offsets = new List<int>();
 
             if (!compressedFileSize.HasValue)
-                compressedFileSize = (int)inputStream.Length;
+                compressedFileSize = checked((int)(inputStream.Length - initialPosition));
+            if (compressedFileSize < 16)
+                throw new InvalidDataException("Incomplete LZ41 stream.");
 
             if (!offset.HasValue)
                 offset = 0;
@@ -324,6 +329,7 @@ namespace IonKiwi.lz4 {
             int prevOffset = -1;
             for(var i=0; i<numOffsets;i++)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var off = br.ReadInt32();
                 if (off < 0 || off > maxValidOffset)
                     throw new Exception($"LZ41: offset table entry out of range at index {i}: {off}");
@@ -349,6 +355,7 @@ namespace IonKiwi.lz4 {
 
             for (; currentBlock < endBlock; ++currentBlock)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 /* The difference in offsets is the size of the block */
                 int cmpBytes = offsets[currentBlock + 1] - offsets[currentBlock];
                 //Even with strictly-monotonic in-range offsets, the gap can still exceed cmpBuf's allocation.
@@ -364,7 +371,7 @@ namespace IonKiwi.lz4 {
                     {
                         int decBytes = lz4.LZ4_decompress_safe_continue(lz4Stream, cmpPtr, decBuf, cmpBytes, blockSize);
                         if (decBytes <= 0)
-                            throw new Exception("Error while compressing the block.");
+                            throw new InvalidDataException("Invalid LZ41 block.");
 
                         /* Write out the part of the data we care about */
                         int blockLength = ((length.Value) < ((decBytes - offset.Value)) ? (length.Value) : ((decBytes - offset.Value)));
@@ -378,6 +385,8 @@ namespace IonKiwi.lz4 {
                     }
                 }
             }
+            if (length != 0)
+                throw new InvalidDataException("Incomplete LZ41 output.");
             return writtenBytes;
         }
     }

@@ -40,19 +40,9 @@ namespace Knossos.NET.ViewModels
                         var vp = new VPContainer();
                         await vp.LoadVP(vpFile.FullName);
                         vp.DisableCompression();
-                        await vp.SaveAsAsync(vpFile.FullName.Replace(".vpc", ".vp", StringComparison.OrdinalIgnoreCase), compressionCallback, cancellationTokenSource);
+                        await vp.SaveAsAsync(vpFile.FullName[..^1], compressionCallback, cancellationTokenSource);
                     });
 
-                    if (cancellationTokenSource.IsCancellationRequested)
-                    {
-                        try
-                        {
-                            File.Delete(vpFile.FullName.Replace(".vpc", ".vp", StringComparison.OrdinalIgnoreCase));
-                            File.Delete(vpFile.FullName.Replace(".vpc", ".vp", StringComparison.OrdinalIgnoreCase) + ".tmp");
-                        }
-                        catch { }
-                        throw new TaskCanceledException();
-                    }
                     File.Delete(vpFile.FullName);
                     Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.DecompressVP()", "Decompress VP finished: " + vpFile.Name + " Processed Files: " + ProgressBarMax);
                     Info = "";
@@ -65,7 +55,7 @@ namespace Knossos.NET.ViewModels
                     throw new Exception("The task is already set, it cant be changed or re-assigned.");
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 /*
                     Task cancel requested by user

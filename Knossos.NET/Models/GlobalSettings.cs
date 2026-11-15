@@ -17,7 +17,7 @@ namespace Knossos.NET.Models
 {
     /// <summary>
     /// Disabled = No option to compress is ever show
-    /// Manual = Mods are not compressed during install; the user can compress them later in mod settings
+    /// Manual = Mods are not compressed during install and can be compressed later in Local Files
     /// Always = Always compress all mods during install, no matter what.
     /// ModSupport = Compress only if the mod depends on a FSO verson that is higher or equal than the minimal required (23.2.0)
     /// </summary>
@@ -180,6 +180,12 @@ namespace Knossos.NET.Models
 
         [JsonPropertyName("mod_filecopy_extension_skip")]
         public List<string>? skipExtensionsModFilecopy { get; set; } = new List<string>() { ".svn", ".github", ".git", ".gitattributes", ".gitignore", ".md" };
+
+        [JsonPropertyName("expanded_launch_sections")]
+        public HashSet<string> expandedLaunchSections { get; set; } = new();
+
+        [JsonPropertyName("expanded_launch_flag_categories")]
+        public HashSet<string> expandedLaunchFlagCategories { get; set; } = new();
 
         /* 
          * Settings that can wait to be saved at app close so we dont have to call save() all the time
@@ -655,6 +661,8 @@ namespace Knossos.NET.Models
                         hideBuildCustom = tempSettings.hideBuildCustom;
                         hideBuildNightly = tempSettings.hideBuildNightly;
                         hideBuildRC = tempSettings.hideBuildRC;
+                        expandedLaunchFlagCategories = tempSettings.expandedLaunchFlagCategories ?? new();
+                        expandedLaunchSections = tempSettings.expandedLaunchSections ?? new();
                         forceSSE2 = tempSettings.forceSSE2;
                         maxConcurrentSubtasks = tempSettings.maxConcurrentSubtasks;
                         maxDownloadSpeed = tempSettings.maxDownloadSpeed;

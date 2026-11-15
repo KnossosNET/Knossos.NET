@@ -18,14 +18,12 @@ namespace Knossos.NET.ViewModels
     public partial class ModCardViewModel : ViewModelBase, IComparable<ModCardViewModel>
     {
         /* General Mod variables */
-        private ModDetailsView? detailsView = null;
-        private ModSettingsView? settingsView = null;
         private List<Mod> modVersions = new List<Mod>();
         private int activeVersionIndex = 0;
         private bool devMode { get; set; } = false;
         public string ID { get; set; }
 
-        public Mod? ActiveVersion 
+        public Mod? ActiveVersion
         {
             get
             {
@@ -103,7 +101,7 @@ namespace Knossos.NET.ViewModels
             modVersions.Add(modJson);
             Name = modJson.title;
             ModVersion = modJson.version;
-            if(modJson.modSource == ModSource.local)
+            if (modJson.modSource == ModSource.local)
             {
                 isLocalMod = true;
             }
@@ -188,14 +186,14 @@ namespace Knossos.NET.ViewModels
             });
         }
 
-        public void SwitchModVersion(int newIndex)
+        public void SwitchModVersion(int newIndex, bool force = false)
         {
-            if (newIndex != activeVersionIndex)
+            if (force || newIndex != activeVersionIndex)
             {
                 Log.Add(Log.LogSeverity.Information, "ModCardViewModel.SwitchModVersion()", "Changing active version for mod id " + ID + " to " + modVersions[newIndex].version);
                 activeVersionIndex = newIndex;
                 Name = modVersions[newIndex].title;
-                if(modVersions.Count() > 1)
+                if (modVersions.Count() > 1)
                     ModVersion = modVersions[newIndex].version + " (+" + (modVersions.Count - 1) + ")";
                 else
                     ModVersion = modVersions[newIndex].version;
@@ -222,15 +220,11 @@ namespace Knossos.NET.ViewModels
         {
             try
             {
-                //if the details or settings view is open close it
-                Dispatcher.UIThread.Invoke(() => { 
-                    detailsView?.Close();
-                    settingsView?.Close();
-                });
                 modVersions.Remove(mod);
-                SwitchModVersion(modVersions.Count() - 1);
+                // Removing an entry can change the version at the same numeric index.
+                SwitchModVersion(modVersions.Count() - 1, true);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "ModCardViewModel.DeleteModVersion()", ex);
             }
@@ -248,7 +242,7 @@ namespace Knossos.NET.ViewModels
         public void UpdateIsAvailable(bool value)
         {
             UpdateAvailable = value;
-            if(value)
+            if (value)
             {
                 BorderColor = KnUtils.GetResourceColor("ModCardBorderUpdate");
             }
@@ -267,7 +261,8 @@ namespace Knossos.NET.ViewModels
         {
             var bools = modVersions[activeVersionIndex].IsQtFredAvailable();
 
-            if (bools == null || bools.Length < 2){
+            if (bools == null || bools.Length < 2)
+            {
                 IsQtFredAvailable = false;
                 IsQtFredDebugAvailable = false;
                 return;
@@ -307,18 +302,24 @@ namespace Knossos.NET.ViewModels
             }
         }
 
+        public void SelectVersion(string version)
+        {
+            var index = modVersions.FindIndex(m => m.version == version);
+            if (index >= 0) SwitchModVersion(index);
+        }
+
         internal async void ButtonCommandUpdate()
         {
-            var dialog = new ModInstallView();
-            dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex], dialog);
-            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
+            var dialog = new ModPropertiesView();
+            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, activeVersionIndex, this, dialog, ModPropertiesViewModel.MenuPageEntry.Versions);
+            await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
         }
 
         internal async void ButtonCommandModify()
         {
-            var dialog = new ModInstallView();
-            dialog.DataContext = new ModInstallViewModel(modVersions[activeVersionIndex], dialog, modVersions[activeVersionIndex].version);
-            await dialog.ShowDialog<ModInstallView?>(MainWindow.instance);
+            var dialog = new ModPropertiesView();
+            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, activeVersionIndex, this, dialog, ModPropertiesViewModel.MenuPageEntry.Versions);
+            await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
         }
 
         internal async void ButtonCommandDelete()
@@ -327,7 +328,7 @@ namespace Knossos.NET.ViewModels
             {
                 if (TaskViewModel.Instance!.IsSafeState())
                 {
-                    var result = await MessageBox.Show(MainWindow.instance, "You are going to remove mod " + Name + " .This will delete ALL versions of the mod. If you only want to delete a specific version you can do it from mod details.\n Do you really want to delete the mod?", "Delete mod", MessageBox.MessageBoxButtons.OKCancel);
+                    var result = await MessageBox.Show(MainWindow.instance, "Delete all installed versions of " + Name + "? To delete a specific version, open Versions & Packages in Mod Properties.", "Delete mod", MessageBox.MessageBoxButtons.OKCancel);
                     if (result == MessageBox.MessageBoxResult.OK)
                     {
                         modVersions[modVersions.Count - 1].installed = false;
@@ -358,19 +359,17 @@ namespace Knossos.NET.ViewModels
 
         internal async void ButtonCommandDetails()
         {
-            var dialog = new ModDetailsView();
-            dialog.DataContext = new ModDetailsViewModel(modVersions, activeVersionIndex, this, dialog);
-            detailsView = dialog;
-            await dialog.ShowDialog<ModDetailsView?>(MainWindow.instance);
-            detailsView = null;
+            var dialog = new ModPropertiesView();
+            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, activeVersionIndex, this, dialog);
+            await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
         }
 
         internal async void ButtonCommandSettings()
         {
-            var dialog = new ModSettingsView();
-            dialog.DataContext = new ModSettingsViewModel(modVersions[activeVersionIndex],this);
-            settingsView = dialog;
-            await dialog.ShowDialog<ModSettingsView?>(MainWindow.instance);
+            var dialog = new ModPropertiesView();
+            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, activeVersionIndex, this, dialog,
+                ModPropertiesViewModel.MenuPageEntry.Options);
+            await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
         }
 
         private void LoadImage()
@@ -392,10 +391,10 @@ namespace Knossos.NET.ViewModels
                         {
                             using (var fs = await KnUtils.GetRemoteResourceStream(tile))
                             {
-                                if(fs != null)
+                                if (fs != null)
                                     tileModBitmap = new Bitmap(fs);
                             }
-                        }); 
+                        });
                     }
                     if (tileModBitmap != null)
                     {
