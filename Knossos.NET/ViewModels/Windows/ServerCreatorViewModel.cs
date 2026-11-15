@@ -209,7 +209,7 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Open mod settings
+        /// Opens Launch Options in Mod Properties.
         /// </summary>
         internal async void OpenModSettings()
         {

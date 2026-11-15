@@ -65,7 +65,7 @@
 				<ComboBoxItem Tag="3">Automatic</ComboBoxItem>
 			</ComboBox>
 			<TextBlock Margin="30,5,20,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left"><Run FontWeight="Bold">Disabled:</Run> Mod compression is unavailable.</TextBlock>
-			<TextBlock Margin="30,5,20,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left"><Run FontWeight="Bold">Manual:</Run> Mods are not compressed during installation. To compress a mod, install it first, open its individual Mod Settings, and use the compression option there.</TextBlock>
+			<TextBlock Margin="30,5,20,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left"><Run FontWeight="Bold">Manual:</Run> Mods are not compressed during installation. To compress an installed mod, open Local Files in Mod Properties.</TextBlock>
 			<TextBlock Margin="30,5,20,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left"><Run FontWeight="Bold">Automatic:</Run> Mods are compressed during installation only when they meet the minimum FSO build requirements for mod compression.</TextBlock>
 			<TextBlock Margin="30,5,20,0" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left"><Run FontWeight="Bold">Forced On:</Run> All non-developer mods are compressed during installation.</TextBlock>
 			<TextBlock Margin="20,20,20,5" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Left">You can change this option at any time in "Settings" under the "KnossosNET Settings" section.</TextBlock>

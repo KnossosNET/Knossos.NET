@@ -176,7 +176,7 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Opens mod install window for this mod id
+        /// Opens Versions & Packages to install this mod.
         /// </summary>
         private async void Install()
         {
@@ -193,7 +193,7 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Opens mod install window for this mod id in modify active version mode
+        /// Opens Versions & Packages to modify the active version.
         /// </summary>
         private async void Modify()
         {
@@ -210,7 +210,7 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Opens mod install window for this mod id
+        /// Opens Versions & Packages to update this mod.
         /// </summary>
         private async void Update()
         {
@@ -227,7 +227,7 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Opens this mod details dialog
+        /// Opens Information in Mod Properties.
         /// </summary>
         private async void Details()
         {
@@ -245,7 +245,7 @@ namespace Knossos.NET.ViewModels
         }
 
         /// <summary>
-        /// Opens this mod settings dialog
+        /// Opens Launch Options in Mod Properties.
         /// </summary>
         internal async void Settings()
         {

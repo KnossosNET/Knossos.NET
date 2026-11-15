@@ -29,7 +29,7 @@ Override the named brush resources to theme the design. Keep component layout in
 
 ModPropertiesView owns navigation and internal overlays. Child pages are UserControls; their views and viewmodels live in the corresponding ModProperties folders. Explicit data templates support Android trimming without reflection for these pages.
 
-Pass MenuPageEntry.Information (default) or MenuPageEntry.Options / Settings to the viewmodel constructor to choose the initial page. The list constructor preserves the selected installed version and its library card. Launch Options reuses the existing settings behavior and saves on navigation, version changes, and closing. Versions, DLC, and Local Files are reserved, disabled entries until their pages are implemented; update/modify still use the existing installer.
+Use `ModPropertiesViewModel.GetOrCreate` and pass `MenuPageEntry.Information` (the default) for mod details, `MenuPageEntry.Versions` for installing, updating, or modifying a mod, `MenuPageEntry.Options` for Launch Options, or `MenuPageEntry.Files` for Local Files. The overload that accepts a version list preserves the selected installed version and its library card. Launch Options saves changes on navigation, version changes, and closing.
 
 Breakpoints use Avalonia logical pixels. Below 760px the sidebar narrows while retaining icons and labels. Below 940px of content width, description and media stack. Metadata and launch actions wrap; thumbnails adapt to one, two, or three columns. Each page scrolls independently of the sidebar.
 

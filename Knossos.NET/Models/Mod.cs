@@ -76,8 +76,8 @@ namespace Knossos.NET.Models
         public string? banner { get; set; } // "<path to image>", optional, default: null, Used in the mod detail view. 1070x300. Under some unknown condition this can be a https url.
         [JsonPropertyName("release_thread")]
         public string? releaseThread { get; set; } // optional url string, default: null, Will display a button in the details view which opens the given link
-        public string[]? videos { get; set; } = new string[0]; // optional, default: [], A list of video links (the links will be loaded in an iframe to display the videos in the mod details view)
-        public string[]? screenshots { get; set; } = new string[0];  // optional, default: [], A list of images to be displayed in the mod details view.
+        public string[]? videos { get; set; } = new string[0]; // optional, default: [], video links displayed in Mod Properties
+        public string[]? screenshots { get; set; } = new string[0];  // optional, default: [], screenshots displayed in Mod Properties
         public string[]? attachments { get; set; } = new string[0];
         [JsonPropertyName("first_release")]
         public string? firstRelease { get; set; } // "YYYY-MM-DD", optional, default: null, the first release formatted in ISO 8601

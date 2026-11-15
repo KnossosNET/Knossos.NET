@@ -328,7 +328,7 @@ namespace Knossos.NET.ViewModels
             {
                 if (TaskViewModel.Instance!.IsSafeState())
                 {
-                    var result = await MessageBox.Show(MainWindow.instance, "You are going to remove mod " + Name + " .This will delete ALL versions of the mod. If you only want to delete a specific version you can do it from mod details.\n Do you really want to delete the mod?", "Delete mod", MessageBox.MessageBoxButtons.OKCancel);
+                    var result = await MessageBox.Show(MainWindow.instance, "Delete all installed versions of " + Name + "? To delete a specific version, open Versions & Packages in Mod Properties.", "Delete mod", MessageBox.MessageBoxButtons.OKCancel);
                     if (result == MessageBox.MessageBoxResult.OK)
                     {
                         modVersions[modVersions.Count - 1].installed = false;

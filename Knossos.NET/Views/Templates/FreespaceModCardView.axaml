@@ -52,7 +52,7 @@
                 <Button Command="{Binding CommandPlay}" Classes="Primary" Margin="2" ToolTip.Tip="Play !">
                     <Image Width="30" Height="30" Source="/Assets/general/resume.png"></Image>
                 </Button>
-                <Button Command="{Binding CommandSettings}" Classes="Option" Margin="2" ToolTip.Tip="Change mod settings">
+                <Button Command="{Binding CommandSettings}" Classes="Option" Margin="2" ToolTip.Tip="Launch Options">
                     <Image Width="30" Height="30" Source="/Assets/general/menu_settings.png"></Image>
                 </Button>
                 <Button Command="{Binding CommandModify}" Classes="Quaternary" Margin="2" ToolTip.Tip="Modify or update mod">

@@ -101,7 +101,7 @@ namespace Knossos.NET.Models
 
         /// <summary>
         /// This is a "DirectExec" FsoBuild
-        /// This is intended to be used for when the user manually selects a FSO build executable file on mod settings
+        /// Used when the user manually selects an FSO executable in Launch Options or the Develop editor.
         /// Version will be attempted to be parsed from the file name, if this fails 99.99.99-CurrentTimestamp will be used
         /// Stability is set to "Custom"
         /// </summary>
