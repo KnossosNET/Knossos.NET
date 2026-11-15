@@ -1,5 +1,6 @@
 ﻿using Avalonia.Threading;
 using Knossos.NET.Models;
+using Knossos.NET.Classes;
 using System;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace Knossos.NET.ViewModels
 {
     public partial class TaskItemViewModel : ViewModelBase
     {
-        public async Task<bool> CompressMod(Mod mod, CancellationTokenSource? cancelSource = null, bool isSubTask = false)
+        public async Task<bool> CompressMod(Mod mod, CancellationTokenSource? cancelSource = null, bool isSubTask = false, bool onlyIfNeeded = false)
         {
             try
             {
@@ -45,29 +46,32 @@ namespace Knossos.NET.ViewModels
                         cancellationTokenSource = new CancellationTokenSource();
                     }
 
-                    //Wait in Queue
                     if (!isSubTask)
                     {
                         while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
+                            await Task.Delay(1000, cancellationTokenSource.Token);
+                        cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                        mod = Knossos.GetInstalledMod(mod.id, mod.version) ?? mod;
+                        mod.modSettings.Load(mod.fullPath);
+                        if (onlyIfNeeded && !await Task.Run(() => InstalledModFile.NeedsCompressionChange(mod, true, cancellationTokenSource.Token), cancellationTokenSource.Token))
                         {
-                            await Task.Delay(1000);
-                            if (cancellationTokenSource.IsCancellationRequested)
-                            {
-                                throw new TaskCanceledException();
-                            }
+                            Info = "Already compressed";
+                            IsCompleted = true;
+                            return true;
                         }
                     }
 
                     Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.CompressMod()", "Starting to compress Mod: " + mod.title);
 
-                    var vpFiles = Directory.GetFiles(mod.fullPath, "*.vp").ToList();
+                    cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                    var vpFiles = Directory.EnumerateFiles(mod.fullPath, "*.vp", new EnumerationOptions { AttributesToSkip = FileAttributes.ReparsePoint, MatchCasing = MatchCasing.CaseInsensitive }).ToList();
                     ProgressBarMax = vpFiles.Count() + 1;
 
                     //Loose Files Compression
                     if (Directory.Exists(mod.fullPath + Path.DirectorySeparatorChar + "data") || mod.devMode)
                     {
                         var searchDir = mod.devMode ? mod.fullPath : mod.fullPath + Path.DirectorySeparatorChar + "data";
-                        var allFilesInDataFolder = Directory.GetFiles(searchDir, "*.*", SearchOption.AllDirectories).ToList();
+                        var allFilesInDataFolder = Directory.EnumerateFiles(searchDir, "*", new EnumerationOptions { RecurseSubdirectories = true, AttributesToSkip = FileAttributes.ReparsePoint }).ToList();
                         int skipped = 0;
                         //Filter
                         foreach (var fileInData in allFilesInDataFolder.ToList())
@@ -76,7 +80,7 @@ namespace Knossos.NET.ViewModels
 
                             if (file.IsReadOnly || file.Length < VPCompression.MinimumSize || VPCompression.ExtensionIgnoreList.Contains(file.Extension.ToLower()) || file.Extension.ToLower() == ".lz41")
                             {
-                                if (file.Extension.ToLower() == ".vp")
+                                if (!file.IsReadOnly && file.Extension.Equals(".vp", StringComparison.OrdinalIgnoreCase))
                                 {
                                     vpFiles.Add(fileInData);
                                     ProgressBarMax++;
@@ -97,40 +101,26 @@ namespace Knossos.NET.ViewModels
                             Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
 
                             var result = await fileTask.CompressLosseFiles(allFilesInDataFolder, skipped, cancellationTokenSource);
-                            if (cancellationTokenSource.IsCancellationRequested)
-                            {
-                                throw new TaskCanceledException();
-                            }
+                            cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                            if (!result) throw new IOException("Could not convert all loose files.");
                         }, DispatcherPriority.Background);
                     }
                     ProgressCurrent++;
                     Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
 
-                    //VP Compression
-                    await Parallel.ForEachAsync(vpFiles, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism }, async (file, token) =>
+                    foreach (var file in vpFiles)
                     {
-                        await Dispatcher.UIThread.InvokeAsync(async () =>
-                        {
-                            var vpTask = new TaskItemViewModel();
-                            await Dispatcher.UIThread.InvokeAsync(() =>
-                            {
-                                TaskList.Insert(0, vpTask);
-                            });
-                            Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
-                            await vpTask.CompressVP(new FileInfo(file), cancellationTokenSource);
-                            ProgressCurrent++;
-                            Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
-                            if (cancellationTokenSource.IsCancellationRequested)
-                            {
-                                throw new TaskCanceledException();
-                            }
-                        }, DispatcherPriority.Background);
-                    });
-
-                    if (cancellationTokenSource.IsCancellationRequested)
-                    {
-                        throw new TaskCanceledException();
+                        cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                        var vpTask = new TaskItemViewModel();
+                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, vpTask));
+                        var result = await vpTask.CompressVP(new FileInfo(file), cancellationTokenSource);
+                        cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                        if (!result) throw new IOException("Could not convert " + Path.GetFileName(file));
+                        ProgressCurrent++;
+                        Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                     }
+
+                    cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
                     //Update settings json
                     mod.modSettings.Load(mod.fullPath);
@@ -142,11 +132,6 @@ namespace Knossos.NET.ViewModels
                     Info = string.Empty;
                     CancelButtonVisible = false;
 
-                    if (!isSubTask && TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
-                    {
-                        TaskViewModel.Instance!.taskQueue.Dequeue();
-                    }
-
                     return true;
                 }
                 else
@@ -154,52 +139,24 @@ namespace Knossos.NET.ViewModels
                     throw new Exception("The task is already set, it cant be changed or re-assigned.");
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 Info = "Task Cancelled";
-                IsCompleted = false;
-                CancelButtonVisible = false;
-                //Only dispose the token if it was created locally
-                if (cancelSource == null)
-                {
-                    cancellationTokenSource?.Dispose();
-                }
-                if (!isSubTask)
-                {
-                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
-                    {
-                        await Task.Delay(500);
-                    }
-                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
-                    {
-                        TaskViewModel.Instance!.taskQueue.Dequeue();
-                    }
-                }
+                IsCancelled = true;
                 return false;
             }
             catch (Exception ex)
             {
-                Info = "Task Failed";
-                IsCompleted = false;
-                CancelButtonVisible = false;
-                cancellationTokenSource?.Cancel();
-                if (cancelSource == null)
-                {
-                    cancellationTokenSource?.Dispose();
-                }
-                if (!isSubTask)
-                {
-                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
-                    {
-                        await Task.Delay(500);
-                    }
-                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
-                    {
-                        TaskViewModel.Instance!.taskQueue.Dequeue();
-                    }
-                }
+                Info = ex.Message;
+                IsCancelled = true;
                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.CompressMod()", ex);
                 return false;
+            }
+            finally
+            {
+                CancelButtonVisible = false;
+                if (cancelSource == null) cancellationTokenSource?.Dispose();
+                if (!isSubTask) TaskViewModel.Instance?.CompleteQueuedTask(this);
             }
         }
     }

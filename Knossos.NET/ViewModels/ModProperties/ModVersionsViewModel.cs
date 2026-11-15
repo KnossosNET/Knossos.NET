@@ -22,6 +22,7 @@ namespace Knossos.NET.ViewModels
         private bool disposed, initialized, changing, hasOtherVersions, operationCancelled;
         private ModInstallOperation? operation;
         [ObservableProperty] private TaskItemViewModel? activeTask;
+        [ObservableProperty] private string operationSummary = string.Empty;
         private List<ModPackagePlanNode> plan = new();
         private ModPackagePlanCache planningCache = new();
         private readonly Dictionary<string, ModPackagePlanNode> displayedNodes = new();
@@ -55,8 +56,8 @@ namespace Knossos.NET.ViewModels
         public string VisibilityColor => IsPrivate ? "#E9B66F" : "#89C8FF";
         public bool IsCompressed => Root?.Installed?.modSettings.isCompressed == true;
         public bool CanDelete => IsInstalled && Root?.Installed?.devMode != true && Root?.Mod.id != "FS2" && CanEdit && !IsUpdatingDependencies;
-        public bool CanVerify => !IsEngine && IsInstalled && !IsCompressed && CanEdit && !IsUpdatingDependencies;
-        public string VerifyHint => IsCompressed ? "Verification is unavailable because this installation is compressed." : "Verify checks installed files and automatically repairs damaged packages.";
+        public bool CanVerify => !IsEngine && IsInstalled && CanEdit && !IsUpdatingDependencies;
+        public string VerifyHint => "Verify checks installed files and repairs damaged packages when downloads are available.";
         public bool CanChooseDeveloper => !IsEngine && !IsInstalled && HasWriteAccess && !forceDeveloper && CanEdit;
         public bool ShowDeveloper => !IsEngine && (HasWriteAccess || Developer || forceDeveloper);
         public bool ShowCompression => !IsEngine && Knossos.globalSettings.modCompression == CompressionSettings.Manual;
@@ -163,7 +164,7 @@ namespace Knossos.NET.ViewModels
             Dependencies.Clear();
             ModPackageTreeItem.UpdateDependencies(Dependencies, root);
             Error = string.Join("\n", planner.Errors.Distinct());
-            Status = root.Installed == null ? "Ready to install this version" : Developer ? "Developer installation · package activation preserves files" : "This version is installed";
+            if (!IsApplying) Status = root.Installed == null ? "Ready to install this version" : Developer ? "Developer installation · package activation preserves files" : "This version is installed";
             UpdateSize(true);
         }
         private static string DependencySignature(ModPackagePlanNode node)
@@ -301,16 +302,18 @@ namespace Knossos.NET.ViewModels
             if (initialized) await ReloadAsync(true);
         }
 
-        private void BeginOperation()
+        private void BeginOperation(IEnumerable<Mod> versions)
         {
             operationCancelled = false;
+            OperationSummary = string.Empty;
             IsApplying = true;
             owner.OperationStarted();
-            operation = new ModInstallOperation(task => ActiveTask = task, plan.Select(n => n.Mod));
+            operation = new ModInstallOperation(task => ActiveTask = task, versions);
             NotifyState();
         }
         private void EndOperation()
         {
+            OperationSummary = Status;
             operation?.Dispose();
             operation = null;
             ActiveTask = null;
@@ -334,7 +337,7 @@ namespace Knossos.NET.ViewModels
             if (string.IsNullOrEmpty(Knossos.GetKnossosLibraryPath())) { owner.ShowMessage("Library not configured", "Select a library folder in Settings before installing mods."); return; }
             if (CleanReinstall && !await owner.ConfirmAsync("Reinstall this version?",
                 "The current version's files will be replaced. Your selected packages will be reinstalled; other versions can still supply verified files. A failed installation restores the current version.", "Reinstall version")) return;
-            BeginOperation();
+            BeginOperation(plan.Select(n => n.Mod));
             try
             {
                 if (Knossos.inSingleTCMode) TaskViewModel.Instance.CleanCommand();
@@ -396,24 +399,64 @@ namespace Knossos.NET.ViewModels
             finally { EndOperation(); }
         }
         [RelayCommand(CanExecute = nameof(CanVerify))]
-        private async Task VerifyAsync()
+        private Task VerifyAsync() => Root?.Installed is Mod installed
+            ? RunFileOperationAsync(installed, ModFileOperation.Verify)
+            : Task.CompletedTask;
+
+        internal Task RunFileOperationAsync(Mod selected, ModFileOperation action) =>
+            RunFileOperationsAsync(new[] { selected }, action);
+
+        internal async Task RunFileOperationsAsync(IReadOnlyList<Mod> selected, ModFileOperation action)
         {
-            if (!CanVerify || Root?.Installed == null || TaskViewModel.Instance == null) return;
-            BeginOperation();
+            if (disposed || IsApplying || owner.IsSubmitting || TaskViewModel.Instance is not TaskViewModel tasks) return;
+
+            var targets = selected.Where(mod => mod.installed && mod.type != ModType.engine)
+                .Select(mod => (Selected: mod, Installed: Knossos.GetInstalledMod(mod.id, mod.version)))
+                .Where(target => target.Installed != null)
+                .ToArray();
+            if (targets.Length == 0)
+            {
+                owner.ShowMessage("Installation unavailable", "The selected versions are no longer installed.");
+                return;
+            }
+
+            BeginOperation(targets.Select(target => target.Installed!));
+            var label = action == ModFileOperation.Verify ? "Verification" :
+                action == ModFileOperation.Compress ? "Compression" : "Decompression";
             try
             {
-                var installed = Knossos.GetInstalledMod(Root.Mod.id, Root.Mod.version);
-                if (installed == null) return;
-                installed.modSettings.Load(installed.fullPath);
-                if (installed.modSettings.isCompressed) { NotifyState(); return; }
-                Status = "Verifying and repairing files…";
-                var success = await TaskViewModel.Instance.VerifyModAsync(ModPackageCatalog.Copy(installed), message => owner.ShowMessage("Repair failed", message), operation);
-                await ReloadAsync(true);
-                Status = success ? "Verification and any required repairs completed" : "Verification stopped. Review Tasks for details.";
+                bool success = true;
+                for (int i = 0; i < targets.Length; i++)
+                {
+                    operation!.Token.ThrowIfCancellationRequested();
+                    ActiveTask = null;
+                    var (requested, installed) = targets[i];
+                    Status = label + " · version " + installed!.version;
+                    if (targets.Length > 1) Status += " (" + (i + 1) + "/" + targets.Length + ")";
+
+                    if (action == ModFileOperation.Verify)
+                        success = await tasks.VerifyModAsync(ModPackageCatalog.Copy(installed), message => owner.ShowMessage("Verification failed", message), operation);
+                    else
+                        success = await tasks.ChangeModCompressionAsync(installed, action == ModFileOperation.Compress, operation, onlyIfNeeded: true);
+
+                    requested.modSettings.isCompressed = installed.modSettings.isCompressed;
+                    if (owner.ActiveVersion.version == installed.version)
+                        owner.ActiveVersion.modSettings.isCompressed = installed.modSettings.isCompressed;
+                    if (!success || operationCancelled) break;
+                }
+                if (initialized) await ReloadAsync(true);
+                Status = success && !operationCancelled ? label + " completed" : label + " stopped. Review Tasks for details.";
+                if (ActiveTask is { Info.Length: > 0 } && !operationCancelled) Status += " " + ActiveTask.Info;
             }
-            catch (Exception ex) { owner.ShowMessage("Verification failed", ex.Message); }
+            catch (OperationCanceledException) { Status = label + " cancelled."; }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "ModProperties.FileOperation", ex);
+                owner.ShowMessage(label + " failed", ex.Message);
+            }
             finally { EndOperation(); }
         }
+
         public void Dispose() { disposed = true; loadSource?.Cancel(); loadSource?.Dispose(); operation?.Dispose(); }
     }
 }

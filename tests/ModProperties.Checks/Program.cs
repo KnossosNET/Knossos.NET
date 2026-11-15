@@ -687,7 +687,7 @@ static partial class Program
         explicitInstalled.modSettings.isCompressed = true; explicitInstalled.modSettings.Save();
         queue.Dequeue(); Pump(compressedVerify);
         Check(!compressedVerify.Result && tasks.IsSafeState() && queue.Count == 0,
-            "verification rechecks compression after waiting and leaves no unfinished task blocking the queue");
+            "verification without recorded hashes leaves no unfinished task blocking the queue");
 
     }
 
@@ -871,7 +871,7 @@ static partial class Program
         installed.modSettings.isCompressed = true;
         catalog.Installed.Add(installed);
         remote.Versions.SelectedVersion = remote.Versions.Versions.First(v => v.Mod.version == "1.0.0"); Pump(remote.Versions.CurrentLoad);
-        Check(!remote.Versions.CanVerify && remote.Versions.VerifyHint.Contains("compressed"), "compressed installation disables verification and explains why");
+        Check(remote.Versions.CanVerify, "compressed installation can be verified from Versions");
     }
     [STAThread]
     static void Main(string[] args)
@@ -880,7 +880,8 @@ static partial class Program
         var output = Path.GetFullPath(Path.Combine("artifacts", "mod-versions-checks", Guid.NewGuid().ToString("N")));
         Directory.CreateDirectory(output);
         if (args.Contains("--launch-options")) { LaunchOptionsChecks(output); LaunchViewChecks(output); }
-        else { PlannerChecks(); EnginePackageChecks(); IncrementalChecks(output); BackupChecks(output); TaskChecks(output); SessionChecks(output); DeletionChecks(output); QueueChecks(output); SharedBuildChecks(output); HiddenEngineChecks(output); ViewChecks(output); LaunchOptionsChecks(output); TextEditorChecks(output); LaunchViewChecks(output); }
+        else if (args.Contains("--local-files")) LocalFilesChecks(output);
+        else { LocalFilesChecks(output); PlannerChecks(); EnginePackageChecks(); IncrementalChecks(output); BackupChecks(output); TaskChecks(output); SessionChecks(output); DeletionChecks(output); QueueChecks(output); SharedBuildChecks(output); HiddenEngineChecks(output); ViewChecks(output); LaunchOptionsChecks(output); TextEditorChecks(output); LaunchViewChecks(output); }
         Console.WriteLine("All " + assertions + " checks passed. Preview images: " + output);
     }
 }

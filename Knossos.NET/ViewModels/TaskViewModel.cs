@@ -369,81 +369,38 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        /// <summary>
-        /// Compress a mod for FSO using LZ41
-        /// Reemplaces .vp for .vpc and compress losse files inside the data folder
-        /// Do not do this for Devmode mods
-        /// </summary>
-        /// <param name="mod"></param>
-        public async Task CompressMod(Mod mod)
-        {
-            if (mod.type == ModType.engine)
-            {
-                //If this is an engine build then do nothing
-            }
-            else
-            {
-                using (var cancelSource = new CancellationTokenSource())
-                {
-                    var newTask = new TaskItemViewModel();
-                    Dispatcher.UIThread.Invoke(() =>
-                    {
-                        TaskList.Add(newTask);
-                        taskQueue.Enqueue(newTask);
-                    });
-                    var res = await newTask.CompressMod(mod, cancelSource).ConfigureAwait(false);
-                    if (res && Knossos.inSingleTCMode)
-                    {
-                        try
-                        {
-                            TaskList.Remove(newTask);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Add(Log.LogSeverity.Error, "TaskViewModel.CompressMod()", ex);
-                        }
-                        Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask("Completed: " + newTask.Name), DispatcherPriority.Background);
-                    }
-                }
-            }
-        }
+        public Task CompressMod(Mod mod) => ChangeModCompressionAsync(mod, compress: true);
 
-        /// <summary>
-        /// Decompresses a mod from LZ41 into regular files
-        /// Reemplaces .vpc for .vp and decompress .lz41 files inside the data folder
-        /// </summary>
-        /// <param name="mod"></param>
-        public async Task DecompressMod(Mod mod)
+        public Task DecompressMod(Mod mod) => ChangeModCompressionAsync(mod, compress: false);
+
+        public async Task<bool> ChangeModCompressionAsync(Mod mod, bool compress, ModInstallOperation? operation = null, bool onlyIfNeeded = false)
         {
-            if (mod.type == ModType.engine)
+            if (mod.type == ModType.engine) return false;
+
+            using var cancelSource = CancellationTokenSource.CreateLinkedTokenSource(operation?.Token ?? CancellationToken.None);
+            var token = cancelSource.Token;
+            if (onlyIfNeeded && !await Task.Run(() => InstalledModFile.NeedsCompressionChange(mod, compress, token), token))
+                return true;
+            token.ThrowIfCancellationRequested();
+
+            var newTask = new TaskItemViewModel();
+            operation?.Track(newTask);
+            Dispatcher.UIThread.Invoke(() =>
             {
-                //If this is an engine build then do nothing
-            }
-            else
-            {
-                using (var cancelSource = new CancellationTokenSource())
+                TaskList.Add(newTask);
+                taskQueue.Enqueue(newTask);
+            });
+
+            var result = compress
+                ? await newTask.CompressMod(mod, cancelSource, onlyIfNeeded: onlyIfNeeded).ConfigureAwait(false)
+                : await newTask.DecompressMod(mod, cancelSource, onlyIfNeeded).ConfigureAwait(false);
+            if (result && Knossos.inSingleTCMode)
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    var newTask = new TaskItemViewModel();
-                    Dispatcher.UIThread.Invoke(() =>
-                    {
-                        TaskList.Add(newTask);
-                        taskQueue.Enqueue(newTask);
-                    });
-                    var res = await newTask.DecompressMod(mod, cancelSource).ConfigureAwait(false);
-                    if (res && Knossos.inSingleTCMode)
-                    {
-                        try
-                        {
-                            TaskList.Remove(newTask);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Add(Log.LogSeverity.Error, "TaskViewModel.DecompressMod()", ex);
-                        }
-                        Dispatcher.UIThread.Invoke(() => TaskViewModel.Instance?.AddMessageTask("Completed: " + newTask.Name), DispatcherPriority.Background);
-                    }
-                }
-            }
+                    TaskList.Remove(newTask);
+                    AddMessageTask("Completed: " + newTask.Name);
+                });
+            return result;
         }
 
         /// <summary>
@@ -456,6 +413,7 @@ namespace Knossos.NET.ViewModels
 
         public async Task<bool> VerifyModAsync(Mod mod, Action<string>? reportError = null, ModInstallOperation? operation = null)
         {
+            if (mod.type == ModType.engine) return false;
             try
             {
                 using (var cancelSource = CancellationTokenSource.CreateLinkedTokenSource(operation?.Token ?? CancellationToken.None))

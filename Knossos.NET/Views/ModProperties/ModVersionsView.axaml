@@ -96,12 +96,7 @@
         </Border>
       </Grid>
       <StackPanel Grid.Row="2" Spacing="8">
-        <StackPanel IsVisible="{Binding IsApplying}" Spacing="4">
-          <TextBlock Text="You can close Properties; the operation will continue. Reopen this mod to see its progress." Classes="muted" TextWrapping="Wrap" FontSize="12"/>
-          <TextBlock Text="{Binding ActiveTask.Name}" FontWeight="SemiBold"/>
-          <TextBlock Text="{Binding ActiveTask.Info}" Classes="muted" TextWrapping="Wrap" FontSize="12"/>
-          <ProgressBar Minimum="0" Maximum="{Binding ActiveTask.ProgressBarMax}" Value="{Binding ActiveTask.ProgressCurrent}" Height="6"/>
-        </StackPanel>
+        <views:ModOperationProgressView IsVisible="{Binding IsApplying}"/>
         <WrapPanel x:Name="OptionsPanel">
           <Button Classes="play" Content="{Binding ApplyLabel}" Command="{Binding ApplyCommand}" Margin="0,0,10,8"/>
           <Button Classes="danger" Content="Cancel" Command="{Binding CancelOperationCommand}" IsVisible="{Binding IsApplying}" Margin="0,0,10,8"/>

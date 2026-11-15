@@ -42,52 +42,30 @@ namespace Knossos.NET.ViewModels
 
                     Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.DecompressLosseFiles()", "Starting to decompress loose files");
 
-                    await Parallel.ForEachAsync(filePaths, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism }, async (file, token) =>
+                    await Parallel.ForEachAsync(filePaths, new ParallelOptions
                     {
-                        var input = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
-                        BinaryReader br = new BinaryReader(input);
-
-                        if (!input.CanRead)
+                        MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism,
+                        CancellationToken = cancellationTokenSource.Token
+                    }, (file, token) =>
+                    {
+                        Info = "Processing " + Path.GetFileName(file);
+                        var destination = file[..^".lz41".Length];
+                        var temporary = destination + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                        try
                         {
-                            input.Dispose();
-                            throw new TaskCanceledException();
-                        }
+                            using (var input = File.OpenRead(file))
+                            using (var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                                VPCompression.DecompressStream(input, output, CompressionHeader.LZ41, cancellationToken: token);
 
-                        //Verify if it is compressed
-                        if (Encoding.ASCII.GetString(br.ReadBytes(4)) == "LZ41")
-                        {
-                            FileInfo fi = new FileInfo(file);
-                            Info = ProgressCurrent + " / " + ProgressBarMax + " " + fi.Name;
-                            input.Seek(0, SeekOrigin.Begin);
-                            var output = new FileStream(fi.FullName.Replace(".lz41", string.Empty, StringComparison.OrdinalIgnoreCase), FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-                            if (!output.CanWrite)
-                            {
-                                input.Dispose();
-                                output.Dispose();
-                                throw new TaskCanceledException();
-                            }
-
-                            VPCompression.DecompressStream(input, output);
-
-                            //Delete original
-                            input.Dispose();
-                            output.Dispose();
+                            token.ThrowIfCancellationRequested();
+                            File.Move(temporary, destination, overwrite: true);
                             File.Delete(file);
-                            decompressedCount++;
+                            Interlocked.Increment(ref decompressedCount);
                         }
-                        else
-                        {
-                            skippedCount++;
-                        }
-                        await input.DisposeAsync();
+                        finally { File.Delete(temporary); }
                         ProgressCurrent++;
-
-                        if (cancellationTokenSource.IsCancellationRequested)
-                        {
-                            throw new TaskCanceledException();
-                        }
+                        return ValueTask.CompletedTask;
                     });
-
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
                         throw new TaskCanceledException();
@@ -104,7 +82,7 @@ namespace Knossos.NET.ViewModels
                     throw new Exception("The task is already set, it cant be changed or re-assigned.");
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 /*
                     Task cancel requested by user

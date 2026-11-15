@@ -1042,7 +1042,7 @@ namespace Knossos.NET.Models
         /// Returns the executable types present in the build selected by this mod's
         /// dependencies or custom build settings, using the same precedence as PlayMod.
         /// </summary>
-        public HashSet<FsoExecType> GetAvailableExecutables()
+        internal FsoBuild? ResolveInstalledBuild()
         {
             FsoBuild? fsoBuild = null;
             var dependencyList = GetModDependencyList(false, true);
@@ -1063,6 +1063,12 @@ namespace Knossos.NET.Models
                     : new FsoBuild(modSettings.customBuildExec);
             }
 
+            return fsoBuild;
+        }
+
+        public HashSet<FsoExecType> GetAvailableExecutables()
+        {
+            var fsoBuild = ResolveInstalledBuild();
             var available = new HashSet<FsoExecType>();
             if (fsoBuild == null) return available;
 

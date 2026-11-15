@@ -12,6 +12,7 @@
   <Design.DataContext><vm:ModPropertiesViewModel/></Design.DataContext>
   <views:KnossosWindow.DataTemplates>
     <DataTemplate DataType="vm:ModInformationViewModel"><views:ModInformationView/></DataTemplate>
+    <DataTemplate DataType="vm:ModLocalFilesViewModel"><views:ModLocalFilesView/></DataTemplate>
     <DataTemplate DataType="vm:ModVersionsViewModel"><views:ModVersionsView/></DataTemplate>
     <DataTemplate DataType="vm:ModLaunchOptionsViewModel"><views:ModLaunchOptionsView/></DataTemplate>
   </views:KnossosWindow.DataTemplates>
@@ -50,7 +51,7 @@
                 <TextBlock Grid.Column="1" Text="Launch Options" TextWrapping="Wrap" VerticalAlignment="Center"/>
               </Grid>
             </Button>
-            <Button Classes="navigation" IsEnabled="False" ToolTip.Tip="Local file management will be added to Mod Properties in a future update.">
+            <Button Classes="navigation" Classes.selected="{Binding IsFilesSelected}" IsEnabled="{Binding CanConfigure}" Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:ModPropertiesViewModel+MenuPageEntry.Files}">
               <Grid ColumnDefinitions="24,*">
                 <PathIcon Data="{StaticResource FuturisticFolderIcon}"/>
                 <TextBlock Grid.Column="1" Text="Local Files" TextWrapping="Wrap" VerticalAlignment="Center"/>
@@ -75,6 +76,15 @@
             <ScrollViewer IsVisible="{Binding !IsMediaModal}" HorizontalScrollBarVisibility="Disabled">
               <StackPanel Spacing="16">
                 <TextBlock Text="{Binding ModalText}" TextWrapping="Wrap" FontSize="16"/>
+                <WrapPanel IsVisible="{Binding IsCompressionScopeModal}">
+                  <Button Classes="accent" Margin="0,0,8,8" Command="{Binding SelectCompressionScopeCommand}" CommandParameter="{x:Static vm:CompressionScope.Active}">
+                    <TextBlock Text="{Binding ActiveCompressionVersionLabel}" TextWrapping="Wrap"/>
+                  </Button>
+                  <Button Classes="accent" Margin="0,0,8,8" Command="{Binding SelectCompressionScopeCommand}" CommandParameter="{x:Static vm:CompressionScope.All}">
+                    <TextBlock Text="All installed versions" TextWrapping="Wrap"/>
+                  </Button>
+                  <Button Content="Cancel" Command="{Binding CloseModalCommand}" Margin="0,0,0,8"/>
+                </WrapPanel>
                 <TextBox IsVisible="{Binding IsReportModal}" Text="{Binding ReportReason}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="160" MaxLength="4000" Watermark="Describe the problem…" IsEnabled="{Binding !IsSubmitting}"/>
               </StackPanel>
             </ScrollViewer>

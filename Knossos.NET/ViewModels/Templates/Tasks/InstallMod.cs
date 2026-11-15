@@ -26,6 +26,7 @@ namespace Knossos.NET.ViewModels
             // Capture removal authorization before waiting. Later installs may add other packages.
             var initial = Knossos.GetInstalledMod(mod.id, mod.version);
             var preserveExisting = addOnly || initial == null;
+            var stageRepairFiles = cleanInstall && reinstallPkgs != null && !reinstallCurrentVersion;
             var removals = new HashSet<string>(!preserveExisting && reinstallPkgs == null
                 ? initial!.packages.Where(p => removePackages?.Contains(p.name) ?? mod.packages.Any(m => m.name == p.name && !m.isSelected)).Select(p => p.name)
                 : Array.Empty<string>());
@@ -415,67 +416,79 @@ namespace Knossos.NET.ViewModels
                                 CancelTaskCommand();
                                 throw new TaskCanceledException();
                             }
-                            var fileFullPath = modPath + Path.DirectorySeparatorChar + file.filename;
-                            var result = await fileTask.DownloadFile(file.urls!, fileFullPath, "Downloading " + file.filename, false, null, cancellationTokenSource);
+                            var downloadRoot = stageRepairFiles ? Path.Combine(modPath, ".repair-" + Guid.NewGuid().ToString("N")) : modPath;
+                            Directory.CreateDirectory(downloadRoot);
+                            try
+                            {
+                                if (!KnUtils.IsSubPath(downloadRoot, file.dest)) throw new IOException("Invalid package destination.");
+                                Directory.CreateDirectory(Path.Combine(downloadRoot, file.dest));
+                                var fileFullPath = InstalledModFile.Resolve(downloadRoot, file.filename);
+                                var result = await fileTask.DownloadFile(file.urls!, fileFullPath, "Downloading " + file.filename, false, null, cancellationTokenSource);
 
-                            if (cancellationTokenSource.IsCancellationRequested)
-                            {
-                                throw new TaskCanceledException();
-                            }
-
-                            if (result.HasValue && result.Value)
-                            {
-                                ++ProgressCurrent;
-                                Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
-                            }
-                            else
-                            {
-                                throw new Exception("Error while downloading file: " + fileFullPath);
-                            }
-
-                            //Checksum
-                            if (file.checksum != null && file.checksum.Count() > 0)
-                            {
-                                if (file.checksum[0].ToLower() == "sha256")
+                                if (cancellationTokenSource.IsCancellationRequested)
                                 {
-                                    using (FileStream? filehash = new FileStream(fileFullPath, FileMode.Open, FileAccess.Read))
-                                    {
-                                        using (SHA256 checksum = SHA256.Create())
-                                        {
-                                            filehash.Position = 0;
-                                            var hashValue = BitConverter.ToString(await checksum.ComputeHashAsync(filehash)).Replace("-", String.Empty);
-                                            filehash.Close();
-                                            if (hashValue.ToLower() != file.checksum[1].ToLower())
-                                            {
-                                                throw new Exception("The downloaded file hash was incorrect, expected: " + file.checksum[1] + " Calculated Hash: " + hashValue);
-                                            }
-                                        }
-                                        fileTask.Info = " Checksum OK!";
-                                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Remove(fileTask));
-                                    }
+                                    throw new TaskCanceledException();
+                                }
+
+                                if (result.HasValue && result.Value)
+                                {
+                                    ++ProgressCurrent;
+                                    Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                                 }
                                 else
                                 {
-                                    Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.InstallMod()", "Cryptographic methods besides sha256 are not supported, skipping checksum check :" + file.checksum[0]);
+                                    throw new Exception("Error while downloading file: " + fileFullPath);
                                 }
-                            }
 
-                            if (cancellationTokenSource.IsCancellationRequested)
-                            {
-                                throw new TaskCanceledException();
-                            }
+                                //Checksum
+                                if (file.checksum != null && file.checksum.Count() > 0)
+                                {
+                                    if (file.checksum[0].ToLower() == "sha256")
+                                    {
+                                        using (FileStream? filehash = new FileStream(fileFullPath, FileMode.Open, FileAccess.Read))
+                                        {
+                                            using (SHA256 checksum = SHA256.Create())
+                                            {
+                                                filehash.Position = 0;
+                                                var hashValue = BitConverter.ToString(await checksum.ComputeHashAsync(filehash)).Replace("-", String.Empty);
+                                                filehash.Close();
+                                                if (hashValue.ToLower() != file.checksum[1].ToLower())
+                                                {
+                                                    throw new Exception("The downloaded file hash was incorrect, expected: " + file.checksum[1] + " Calculated Hash: " + hashValue);
+                                                }
+                                            }
+                                            fileTask.Info = " Checksum OK!";
+                                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Remove(fileTask));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.InstallMod()", "Cryptographic methods besides sha256 are not supported, skipping checksum check :" + file.checksum[0]);
+                                    }
+                                }
 
-                            //Decompress
-                            var decompressTask = new TaskItemViewModel();
-                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, decompressTask));
-                            var decompResult = await decompressTask.DecompressNebulaFile(fileFullPath, file.filename, modPath + Path.DirectorySeparatorChar + file.dest, cancellationTokenSource);
-                            if (!decompResult)
-                            {
-                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Error while decompressing the file " + fileFullPath);
-                                CancelTaskCommand();
-                                throw new TaskCanceledException();
+                                if (cancellationTokenSource.IsCancellationRequested)
+                                {
+                                    throw new TaskCanceledException();
+                                }
+
+                                //Decompress
+                                var decompressTask = new TaskItemViewModel();
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, decompressTask));
+                                var decompResult = await decompressTask.DecompressNebulaFile(fileFullPath, file.filename, Path.Combine(downloadRoot, file.dest), cancellationTokenSource);
+                                if (!decompResult)
+                                {
+                                    Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Error while decompressing the file " + fileFullPath);
+                                    CancelTaskCommand();
+                                    throw new TaskCanceledException();
+                                }
+                                File.Delete(fileFullPath);
+                                if (stageRepairFiles) InstalledModFile.PublishRepair(downloadRoot, modPath, token);
                             }
-                            File.Delete(fileFullPath);
+                            finally
+                            {
+                                if (stageRepairFiles) Directory.Delete(downloadRoot, recursive: true);
+                            }
                             ++ProgressCurrent;
                         }
 
@@ -646,7 +659,8 @@ namespace Knossos.NET.ViewModels
                             TaskList.Insert(0, cpTask);
                         });
                         var compressionSucceeded = await cpTask.CompressMod(mod, cancellationTokenSource, true);
-                        if (reinstallCurrentVersion && !compressionSucceeded) throw new InvalidOperationException("Compression did not complete; restoring the previous installation.");
+                        if (!compressionSucceeded && (reinstallCurrentVersion || stageRepairFiles))
+                            throw new InvalidOperationException("Compression did not complete.");
                         ProgressCurrent++;
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                     }

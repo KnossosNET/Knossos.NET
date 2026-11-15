@@ -29,6 +29,7 @@ namespace Knossos.NET.ViewModels
         private bool modalBusy;
         private string? modalAction;
         private TaskCompletionSource<bool>? pendingConfirmation;
+        private TaskCompletionSource<CompressionScope?>? pendingCompressionScope;
         private ModMediaItemViewModel? selectedMedia;
         private IReadOnlyList<ModMediaItemViewModel> mediaItems = Array.Empty<ModMediaItemViewModel>();
 
@@ -46,6 +47,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty] private bool isVideoModal;
         [ObservableProperty] private bool isReportModal;
         [ObservableProperty] private bool isConfirmationModal;
+        [ObservableProperty] private bool isCompressionScopeModal;
+        [ObservableProperty] private string activeCompressionVersionLabel = string.Empty;
         [ObservableProperty] private bool isSubmitting;
         [ObservableProperty] private string confirmLabel = "Confirm";
         private int selectedVersionIndex;
@@ -53,6 +56,8 @@ namespace Knossos.NET.ViewModels
         public ObservableCollection<string> VersionItems { get; } = new();
         public ModInformationViewModel Information { get; }
         public ModVersionsViewModel Versions { get; }
+        public ModLocalFilesViewModel Files { get; }
+        public bool IsFilesSelected => SelectedPage == MenuPageEntry.Files;
         public bool IsVersionsSelected => SelectedPage == MenuPageEntry.Versions;
         public bool CanDownload => !IsInstalled && CanManageVersions;
         public bool CanChangeInformationVersion => IsInstalled && !Versions.IsApplying;
@@ -103,6 +108,7 @@ namespace Knossos.NET.ViewModels
             Knossos.Tts(string.Empty);
             ResetModal();
             IsModalOpen = false;
+            Files.StopMeasuring();
             if (!Versions.IsApplying) Dispose();
         }
 
@@ -118,9 +124,14 @@ namespace Knossos.NET.ViewModels
                 runningSessions.Remove(ActiveVersion.id);
             OnPropertyChanged(nameof(CanChangeInformationVersion));
             if (!disposed && releaseWhenIdle && attachedViews.Count == 0) Dispose();
+            else if (!disposed) Files.OperationCompleted();
         }
 
-        partial void OnIsSubmittingChanged(bool value) => Versions.RefreshCommands();
+        partial void OnIsSubmittingChanged(bool value)
+        {
+            Versions.RefreshCommands();
+            Files.RefreshCommands();
+        }
 
         partial void OnPreviewPathChanged(string? value) => OnPropertyChanged(nameof(IsPreviewUnavailable));
         public int SelectedVersionIndex
@@ -157,6 +168,7 @@ namespace Knossos.NET.ViewModels
             foreach (var mod in versions) VersionItems.Add(mod.version);
             Information = new ModInformationViewModel(this);
             Versions = new ModVersionsViewModel(this, forceDeveloper, catalog);
+            Files = new ModLocalFilesViewModel(this);
             selectedPage = menuPageEntry;
             RefreshVersion();
         }
@@ -170,6 +182,7 @@ namespace Knossos.NET.ViewModels
             OnPropertyChanged(nameof(CanManageVersions));
             OnPropertyChanged(nameof(CanDownload));
             OnPropertyChanged(nameof(CanChangeInformationVersion));
+            Files.VersionChanged();
             Navigate(SelectedPage);
             _ = Information.LoadAsync(ActiveVersion);
         }
@@ -185,6 +198,12 @@ namespace Knossos.NET.ViewModels
                 SelectedPage = MenuPageEntry.Versions;
                 _ = Versions.EnsureLoadedAsync();
             }
+            else if (page == MenuPageEntry.Files && CanConfigure)
+            {
+                CurrentPage = Files;
+                SelectedPage = MenuPageEntry.Files;
+                Files.Open();
+            }
             else if (page == MenuPageEntry.Options && CanConfigure && !Versions.IsApplying)
             {
                 options ??= new ModLaunchOptionsViewModel(ActiveVersion, modCard, this);
@@ -199,6 +218,7 @@ namespace Knossos.NET.ViewModels
             }
             OnPropertyChanged(nameof(IsInformationSelected));
             OnPropertyChanged(nameof(IsOptionsSelected));
+            OnPropertyChanged(nameof(IsFilesSelected));
             OnPropertyChanged(nameof(IsVersionsSelected));
         }
 
@@ -260,6 +280,30 @@ namespace Knossos.NET.ViewModels
             return pendingConfirmation.Task;
         }
 
+        internal Task<CompressionScope?> ChooseCompressionScopeAsync(Mod active, bool compress)
+        {
+            var verb = compress ? "Compress" : "Decompress";
+            var state = compress ? "compressed" : "decompressed";
+            ShowMessage(verb + " installed versions?",
+                "Choose whether to " + verb.ToLowerInvariant() + " the active version (" + active.version +
+                ") or all installed versions. Versions already " + state + " will be skipped.");
+            var choice = new TaskCompletionSource<CompressionScope?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            pendingCompressionScope = choice;
+            ActiveCompressionVersionLabel = "Active version (" + active.version + ")";
+            IsCompressionScopeModal = true;
+            return choice.Task;
+        }
+
+        [RelayCommand]
+        private void SelectCompressionScope(CompressionScope scope)
+        {
+            if (!IsCompressionScopeModal || pendingCompressionScope == null) return;
+            var choice = pendingCompressionScope;
+            pendingCompressionScope = null;
+            CloseModal();
+            choice.TrySetResult(scope);
+        }
+
         [RelayCommand]
         private void Back() => view?.Close();
 
@@ -302,6 +346,9 @@ namespace Knossos.NET.ViewModels
         {
             pendingConfirmation?.TrySetResult(false);
             pendingConfirmation = null;
+            pendingCompressionScope?.TrySetResult(null);
+            pendingCompressionScope = null;
+            IsCompressionScopeModal = false;
             IsMediaModal = IsVideoModal = IsReportModal = IsConfirmationModal = false;
             PreviewPath = null;
             ModalText = ReportReason = string.Empty;
@@ -462,8 +509,9 @@ namespace Knossos.NET.ViewModels
             options?.Dispose();
             options = null;
             Information.Dispose();
+            Files.Dispose();
             Versions.Dispose();
-            pendingConfirmation?.TrySetResult(false);
+            ResetModal();
         }
     }
 }
