@@ -246,6 +246,13 @@ namespace Knossos.NET.ViewModels
             set { if (singleView != value) { this.SetProperty(ref singleView, value); UnCommitedChanges = true; } }
         }
 
+        private bool useNebulaDevelopmentServer;
+        internal bool UseNebulaDevelopmentServer
+        {
+            get { return useNebulaDevelopmentServer; }
+            set { if (SetProperty(ref useNebulaDevelopmentServer, value)) { UnCommitedChanges = true; } }
+        }
+
         /* This change is applied right away */
         private bool closeToTray = false;
         internal bool CloseToTray
@@ -780,6 +787,7 @@ namespace Knossos.NET.ViewModels
             AntiStuck = Knossos.globalSettings.antiStuck;
             MaxUploadsRetries = Knossos.globalSettings.maxUploadRetries;
             SingleView = Knossos.globalSettings.singleViewMode;
+            UseNebulaDevelopmentServer = Knossos.globalSettings.useNebulaDevelopmentServer;
 
             /* VIDEO SETTINGS */
             //RESOLUTION
@@ -1365,6 +1373,7 @@ namespace Knossos.NET.ViewModels
             Knossos.globalSettings.antiStuck = AntiStuck;
             Knossos.globalSettings.maxUploadRetries = MaxUploadsRetries;
             Knossos.globalSettings.singleViewMode = SingleView;
+            Knossos.globalSettings.useNebulaDevelopmentServer = UseNebulaDevelopmentServer;
 
             /* VIDEO */
             //Resolution
