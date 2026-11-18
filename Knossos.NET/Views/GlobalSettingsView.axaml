@@ -242,6 +242,10 @@
 							<Label Margin="0,5,0,0" Width="205">Single Window Mode</Label>
 							<ToggleSwitch IsChecked="{Binding SingleView}" Margin="5,0,0,0" ToolTip.Tip="Knossos will work in the same way as it would work on Android, were you can only have one Window."></ToggleSwitch>
 						</WrapPanel>
+						<CheckBox Margin="5,10,0,0" IsChecked="{Binding UseNebulaDevelopmentServer, Mode=TwoWay}"
+								  ToolTip.Tip="Uses the development API and catalog with a separate Nebula login. Apply the setting and restart Knossos.NET.">
+							Use Nebula development server (restart required)
+						</CheckBox>
 						<!-- NoSystemCMD -->
 						<WrapPanel Margin="5,10,0,0">
 							<Label Margin="0,5,0,0" Width="205">Don't Apply Graphics Settings</Label>

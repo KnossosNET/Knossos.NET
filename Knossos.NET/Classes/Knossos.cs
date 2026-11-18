@@ -265,6 +265,7 @@ namespace Knossos.NET
 
                 //Load knossos config
                 globalSettings.Load();
+                Nebula.ConfigureEnvironment(globalSettings.useNebulaDevelopmentServer);
                 MainViewModel.Instance?.ApplySettings();
 
 
