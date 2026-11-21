@@ -1449,7 +1449,7 @@ namespace Knossos.NET
                 }
                 else
                 {
-                    await MessageBox.Show(MainWindow.instance, "This mod does not specify an engine build to use, you should select one in the mod settings.", "Error launching mod", MessageBox.MessageBoxButtons.OK);
+                    await MessageBox.Show(MainWindow.instance, "This mod does not specify an engine build. Select one in Launch Options in Mod Properties.", "Error launching mod", MessageBox.MessageBoxButtons.OK);
                 }
                 return;
             }

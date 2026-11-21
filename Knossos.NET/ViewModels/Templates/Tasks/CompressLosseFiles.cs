@@ -43,63 +43,42 @@ namespace Knossos.NET.ViewModels
 
                     Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.CompressLosseFiles()", "Starting to compress loose files");
 
-                    await Parallel.ForEachAsync(filePaths, new ParallelOptions { MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism }, async (file, token) =>
+                    await Parallel.ForEachAsync(filePaths, new ParallelOptions
                     {
-                        var input = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
-                        BinaryReader br = new BinaryReader(input);
-
-                        if (!input.CanRead)
+                        MaxDegreeOfParallelism = Knossos.globalSettings.compressionMaxParallelism,
+                        CancellationToken = cancellationTokenSource.Token
+                    }, (file, token) =>
+                    {
+                        Info = "Processing " + Path.GetFileName(file);
+                        var destination = file + ".lz41";
+                        var temporary = destination + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                        try
                         {
-                            input.Dispose();
-                            throw new TaskCanceledException();
-                        }
-
-                        //Verify if it is compressed
-                        if (Encoding.ASCII.GetString(br.ReadBytes(4)) != "LZ41")
-                        {
-                            FileInfo fi = new FileInfo(file);
-                            await Dispatcher.UIThread.InvokeAsync(() => {
-                                Info = ProgressCurrent + " / " + ProgressBarMax + " " + fi.Name;
-                            });
-                            input.Seek(0, SeekOrigin.Begin);
-                            var output = new FileStream(fi.FullName + ".lz41", FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-                            if (!output.CanWrite)
+                            int size;
+                            long length;
+                            using (var input = File.OpenRead(file))
                             {
-                                input.Dispose();
-                                output.Dispose();
-                                throw new TaskCanceledException();
+                                length = input.Length;
+                                using var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+                                size = VPCompression.CompressStream(input, output, cancellationToken: token);
                             }
-
-                            var compressedSize = VPCompression.CompressStream(input, output);
-                            output.Dispose();
-                            if (compressedSize < input.Length)
+                            token.ThrowIfCancellationRequested();
+                            if (size < length)
                             {
-                                //Delete original
-                                input.Dispose();
-                                output.Dispose();
+                                File.Move(temporary, destination, overwrite: true);
                                 File.Delete(file);
-                                compressedCount++;
+                                Interlocked.Increment(ref compressedCount);
                             }
                             else
                             {
-                                //Roll back
-                                input.Dispose();
-                                output.Dispose();
-                                File.Delete(fi.FullName + ".lz41");
-                                skippedCount++;
+                                // A repaired file can coexist with the damaged compressed copy.
+                                File.Delete(destination);
+                                Interlocked.Increment(ref skippedCount);
                             }
                         }
-                        else
-                        {
-                            skippedCount++;
-                        }
-                        await input.DisposeAsync();
+                        finally { File.Delete(temporary); }
                         ProgressCurrent++;
-
-                        if (cancellationTokenSource.IsCancellationRequested)
-                        {
-                            throw new TaskCanceledException();
-                        }
+                        return ValueTask.CompletedTask;
                     });
                     if (cancellationTokenSource.IsCancellationRequested)
                     {
@@ -117,7 +96,7 @@ namespace Knossos.NET.ViewModels
                     throw new Exception("The task is already set, it cant be changed or re-assigned.");
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 /*
                     Task cancel requested by user

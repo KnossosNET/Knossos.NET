@@ -22,8 +22,6 @@
     <None Remove="Libs\**" />
     <None Remove=".gitignore" />
     <None Remove="ViewModels\ModCardViewModel.cs~RF423e49e6.TMP" />
-    <None Remove="ViewModels\Windows\ModInstallViewModel.cs~RF3e55a24c.TMP" />
-    <None Remove="Views\Windows\ModDetailsView.axaml~RF2bc1dec5.TMP" />
     <Compile Update="Views\MessageBox.axaml.cs">
       <DependentUpon>MessageBox.axaml</DependentUpon>
     </Compile>
@@ -76,9 +74,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Views\Templates\DependencyItemView.axaml.cs">
-      <DependentUpon>DependencyItemView.axaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\FsoBuildsView.axaml.cs">
       <DependentUpon>FsoBuildsView.axaml</DependentUpon>
     </Compile>

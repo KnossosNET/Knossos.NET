@@ -46,12 +46,11 @@ namespace VP.NET
             if (!File.Exists(vpFilePath))
                 throw new IOException("File "+vpFilePath+" does not exist!");
             this.vpFilePath = vpFilePath;
-            var file = new FileStream(vpFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 8192);
+            using var file = new FileStream(vpFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 8192);
             var header = ReadHeader(file);
+            compression = header.version >= 3;
             var index = ReadIndex(file, header);
             ParseIndex(index, file);
-            file.Close();
-            file.Dispose();
         }
 
         /// <summary>
@@ -69,12 +68,11 @@ namespace VP.NET
                 numberFiles = 0;
                 numberFolders = 0;
                 vpFilePath = path;
-                var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 8192);
+                using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 8192);
                 var header = ReadHeader(file);
+                compression = header.version >= 3;
                 var index = ReadIndex(file, header);
                 ParseIndex(index, file);
-                file.Close();
-                file.Dispose();
             }).ContinueWith((task) =>
             {
                 if (task.IsFaulted && task.Exception != null)
@@ -136,92 +134,129 @@ namespace VP.NET
 
             var index = new List<VPIndexEntry>();
 
-            var vp = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize);
-
-            if(!vp.CanWrite)
+            try
             {
-                throw new Exception("Unable to open file for writting : " + tempPath);
-            }
-
-            /* Write Files */
-
-            vp.Seek(headerSize, SeekOrigin.Begin);
-
-            foreach (var file in vpFiles)
-            {
-                if (cancelSource != null && cancelSource.IsCancellationRequested)
+                using (var vp = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize))
                 {
-                    break;
-                }
-                await SaveRecursive(file, vp, bufferSize, index, progressCallback, cancelSource);
-            }
-
-            if (cancelSource != null && cancelSource.IsCancellationRequested)
-            {
-                vp.Dispose();
-                return;
-            }
-
-            /* Write Index */
-
-            header.indexOffset = (int)vp.Position;
-            header.numberEntries = index.Count();
-
-            foreach (var entry in index)
-            {
-                var offBytes = BitConverter.GetBytes(entry.offset);
-                await vp.WriteAsync(offBytes, 0, 4);
-
-                var sizeBytes = BitConverter.GetBytes(entry.size);
-                await vp.WriteAsync(sizeBytes, 0, 4);
-
-                if (entry.nameBytes == null || Encoding.ASCII.GetString(entry.nameBytes).Split('\0')[0] != entry.name)
-                {
-                    var name = entry.name;
-                    if (name.Length > 31)
+                    vp.Position = headerSize;
+                    foreach (var file in vpFiles)
                     {
-                        name = entry.name.Substring(0, 31);
+                        cancelSource?.Token.ThrowIfCancellationRequested();
+                        await SaveRecursive(file, vp, bufferSize, index, progressCallback, cancelSource);
                     }
-                    name = name.PadRight(32, '\0');
-                    var nameBytes = Encoding.ASCII.GetBytes(name);
-                    await vp.WriteAsync(nameBytes, 0, 32);
-                }
-                else
-                {
-                    await vp.WriteAsync(entry.nameBytes, 0, 32);
-                }
 
-                var timeBytes = BitConverter.GetBytes(entry.timestamp);
-                await vp.WriteAsync(timeBytes, 0, 4);
+                    var token = cancelSource?.Token ?? CancellationToken.None;
+                    token.ThrowIfCancellationRequested();
+                    header.indexOffset = checked((int)vp.Position);
+                    header.numberEntries = index.Count;
+                    await WriteIndexAsync(vp, index, token);
+                    vp.Position = 0;
+                    await WriteHeaderAsync(vp, header, token);
+                }
+                cancelSource?.Token.ThrowIfCancellationRequested();
+                File.Move(tempPath, destPath, overwrite: true);
+                vpFilePath = destPath;
             }
-
-            /* Write Header */
-
-            vp.Seek(0, SeekOrigin.Begin);
-
-            var headerBytes = Encoding.ASCII.GetBytes(header.header);
-            await vp.WriteAsync(headerBytes, 0, 4);
-
-            var versionBytes = BitConverter.GetBytes(header.version);
-            await vp.WriteAsync(versionBytes, 0, 4);
-
-            var offsetBytes = BitConverter.GetBytes(header.indexOffset);
-            await vp.WriteAsync(offsetBytes, 0, 4);
-
-            var numberEntries = BitConverter.GetBytes(header.numberEntries);
-            await vp.WriteAsync(numberEntries, 0, 4);
-
-            /* Finish */
-
-            vp.Close();
-            vp.Dispose();
-            File.Delete(destPath);
-            File.Move(tempPath,destPath);
-            vpFilePath = destPath;
+            finally
+            {
+                File.Delete(tempPath);
+            }
 
             /* Remove deleted files from the tree */
 
             DeleteRecursive(vpFiles);
+        }
+
+        /// <summary>Writes the reconstructed VP in order, so the destination can be a hashing stream.</summary>
+        public static async Task WriteUncompressedAsync(string sourcePath, Stream destination, CancellationToken token = default)
+        {
+            using var source = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var header = ReadHeader(source);
+            if (header.version < 3 || header.indexOffset < 16 || header.numberEntries < 0 ||
+                source.Length - header.indexOffset != (long)header.numberEntries * 44)
+                throw new InvalidDataException("Invalid VPC header or index.");
+
+            var entries = ReadIndex(source, header);
+            var index = new List<VPIndexEntry>(entries.Count);
+            var compressed = new bool[entries.Count];
+            using var reader = new BinaryReader(source, Encoding.ASCII, leaveOpen: true);
+            int position = 16;
+            for (int i = 0; i < entries.Count; i++)
+            {
+                token.ThrowIfCancellationRequested();
+                var entry = entries[i];
+                if (entry.size < 0 || entry.size > 0 && (entry.offset < 16 || (long)entry.offset + entry.size > header.indexOffset))
+                    throw new InvalidDataException("A VPC entry falls outside its data region.");
+                if (entry.size > 0)
+                {
+                    source.Position = entry.offset;
+                    compressed[i] = entry.size >= 4 && reader.ReadUInt32() == 0x31345A4C; // LZ41
+                    if (compressed[i])
+                    {
+                        if (entry.size < 16) throw new InvalidDataException("Incomplete LZ41 entry.");
+                        source.Position = (long)entry.offset + entry.size - 8;
+                        entry.size = reader.ReadInt32();
+                        if (entry.size <= 0) throw new InvalidDataException("Invalid uncompressed entry size.");
+                    }
+                    entry.offset = position;
+                    position = checked(position + entry.size);
+                }
+                else if (entry.offset != 0) entry.offset = position;
+                index.Add(entry);
+            }
+
+            header.version = 2;
+            header.indexOffset = position;
+            await WriteHeaderAsync(destination, header, token);
+            var buffer = new byte[81920];
+            for (int i = 0; i < entries.Count; i++)
+            {
+                token.ThrowIfCancellationRequested();
+                var entry = entries[i];
+                if (entry.size == 0) continue;
+                source.Position = entry.offset;
+                if (compressed[i])
+                {
+                    if (VPCompression.DecompressStream(source, destination, CompressionHeader.LZ41, entry.size, token) != index[i].size)
+                        throw new InvalidDataException("Unexpected decompressed entry size.");
+                    continue;
+                }
+
+                int remaining = entry.size;
+                while (remaining > 0)
+                {
+                    int bytesRead = await source.ReadAsync(buffer.AsMemory(0, Math.Min(remaining, buffer.Length)), token);
+                    if (bytesRead == 0) throw new EndOfStreamException();
+                    await destination.WriteAsync(buffer.AsMemory(0, bytesRead), token);
+                    remaining -= bytesRead;
+                }
+            }
+            await WriteIndexAsync(destination, index, token);
+        }
+
+        private static async Task WriteHeaderAsync(Stream output, VPHeader header, CancellationToken token)
+        {
+            await output.WriteAsync(Encoding.ASCII.GetBytes(header.header), token);
+            await output.WriteAsync(BitConverter.GetBytes(header.version), token);
+            await output.WriteAsync(BitConverter.GetBytes(header.indexOffset), token);
+            await output.WriteAsync(BitConverter.GetBytes(header.numberEntries), token);
+        }
+
+        private static async Task WriteIndexAsync(Stream output, List<VPIndexEntry> index, CancellationToken token)
+        {
+            foreach (var entry in index)
+            {
+                await output.WriteAsync(BitConverter.GetBytes(entry.offset), token);
+                await output.WriteAsync(BitConverter.GetBytes(entry.size), token);
+                var nameBytes = entry.nameBytes;
+                if (nameBytes == null || Encoding.ASCII.GetString(nameBytes).Split('\0')[0] != entry.name)
+                {
+                    var name = entry.name.Length > 31 ? entry.name[..31] : entry.name;
+                    nameBytes = Encoding.ASCII.GetBytes(name.PadRight(32, '\0'));
+                }
+                await output.WriteAsync(nameBytes, token);
+                await output.WriteAsync(BitConverter.GetBytes(entry.timestamp), token);
+            }
         }
 
         private void DeleteRecursive(List<VPFile> files)
@@ -283,7 +318,7 @@ namespace VP.NET
                                 throw new Exception("Unable to open vp file in path : " + vpFilePath);
                             }
 
-                            var sourceVP = new FileStream(vpFilePath,FileMode.Open,FileAccess.Read,FileShare.Read,bufferSize);
+                            using var sourceVP = new FileStream(vpFilePath,FileMode.Open,FileAccess.Read,FileShare.Read,bufferSize);
                             
                             if (!sourceVP.CanRead)
                             {
@@ -298,8 +333,8 @@ namespace VP.NET
                                 if (file.CheckHaveToCompress())
                                 {
                                     long inputStartingPosition = sourceVP.Position;
-                                    MemoryStream compressedOutput = new MemoryStream();
-                                    int newSize = VPCompression.CompressStream(sourceVP, compressedOutput, file.info.size);
+                                    using var compressedOutput = new MemoryStream();
+                                    int newSize = VPCompression.CompressStream(sourceVP, compressedOutput, file.info.size, cancelSource?.Token ?? CancellationToken.None);
                                     if (newSize >= file.info.size)
                                     {
                                         sourceVP.Position = inputStartingPosition;
@@ -328,7 +363,6 @@ namespace VP.NET
                                         compressedOutput.Seek(0, SeekOrigin.Begin);
                                         await compressedOutput.CopyToAsync(vp);
                                     }
-                                    compressedOutput.Dispose();
                                 }
                                 else
                                 {
@@ -336,7 +370,7 @@ namespace VP.NET
                                     file.info.offset = (int)vp.Position;
                                     file.compressionInfo.header = null;
                                     file.compressionInfo.uncompressedFileSize = null;
-                                    file.info.size = VPCompression.DecompressStream(sourceVP, vp, CompressionHeader.LZ41, file.info.size);
+                                    file.info.size = VPCompression.DecompressStream(sourceVP, vp, CompressionHeader.LZ41, file.info.size, cancelSource?.Token ?? CancellationToken.None);
                                 }
                             }
                             else
@@ -367,7 +401,7 @@ namespace VP.NET
                                 throw new Exception("Unable to open file " + file.fullpath + " to add it to the vp.");
                             }
 
-                            var source = new FileStream(file.fullpath, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize);
+                            using var source = new FileStream(file.fullpath, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize);
 
                             if (!source.CanRead)
                             {
@@ -379,8 +413,8 @@ namespace VP.NET
 
                             if (file.CheckHaveToCompress())
                             {
-                                MemoryStream compressedOutput = new MemoryStream();
-                                int newSize = VPCompression.CompressStream(source, compressedOutput);
+                                using var compressedOutput = new MemoryStream();
+                                int newSize = VPCompression.CompressStream(source, compressedOutput, cancellationToken: cancelSource?.Token ?? CancellationToken.None);
                                 if (newSize >= source.Length)
                                 {
                                     source.Seek(0, SeekOrigin.Begin);
@@ -397,7 +431,6 @@ namespace VP.NET
                                     file.compressionInfo.header = CompressionHeader.LZ41;
                                     file.compressionInfo.uncompressedFileSize = (int)source.Position;
                                 }
-                                compressedOutput.Dispose();
                             }
                             else
                             {
@@ -479,7 +512,7 @@ namespace VP.NET
             compression = false;
         }
 
-        private VPHeader ReadHeader(Stream file)
+        private static VPHeader ReadHeader(Stream file)
         {
             VPHeader header;
             try
@@ -492,14 +525,6 @@ namespace VP.NET
                     throw new Exception("This is not a valid VP file: Header mismatch!");
                 }
                 header.version = br.ReadInt32();
-                if(header.version >= 3)
-                {
-                    compression = true;
-                }
-                else
-                {
-                    compression = false;
-                }
                 header.indexOffset = br.ReadInt32();
                 header.numberEntries = br.ReadInt32();
             }catch (Exception ex)
@@ -509,7 +534,7 @@ namespace VP.NET
             return header;
         }
 
-        private List<VPIndexEntry> ReadIndex(Stream file, VPHeader vpHeader)
+        private static List<VPIndexEntry> ReadIndex(Stream file, VPHeader vpHeader)
         {
             var vpIndex = new List<VPIndexEntry>();
             if (vpHeader.indexOffset < 16)

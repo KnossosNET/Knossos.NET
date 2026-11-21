@@ -1,240 +1,164 @@
-﻿using Avalonia.Threading;
+using Avalonia.Threading;
+using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Knossos.NET.ViewModels
 {
     public partial class TaskItemViewModel : ViewModelBase
     {
-        public async Task<bool> VerifyMod(Mod mod, CancellationTokenSource cancelSource)
+        public async Task<bool> VerifyMod(Mod mod, CancellationTokenSource cancelSource, bool awaitRepairs = false,
+            Action<string>? reportError = null, ModInstallOperation? operation = null)
         {
+            if (TaskIsSet) throw new InvalidOperationException("This task has already been assigned.");
+            TaskIsSet = true;
+            cancellationTokenSource = cancelSource;
+            var token = cancelSource.Token;
+            var tasks = TaskViewModel.Instance!;
+            installID = mod.id;
+            installVersion = mod.version;
+            Name = "Verifying " + mod;
+            ShowProgressText = false;
+            CancelButtonVisible = true;
+            Info = "In Queue";
+
             try
             {
-                if (!TaskIsSet)
+                await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
+                while (tasks.taskQueue.Count > 0 && tasks.taskQueue.Peek() != this)
+                    await Task.Delay(1000, token);
+
+                token.ThrowIfCancellationRequested();
+                var (damaged, checkedFiles, unknownFiles) = await Task.Run(() => CheckFilesAsync(mod, token), token);
+                token.ThrowIfCancellationRequested();
+                if (checkedFiles == 0)
                 {
-                    TaskIsSet = true;
-                    installVersion = mod.version;
-                    installID = mod.id;
-                    if (cancelSource != null)
-                    {
-                        cancellationTokenSource = cancelSource;
-                    }
-                    else
-                    {
-                        cancellationTokenSource = new CancellationTokenSource();
-                    }
-                    CancelButtonVisible = true;
-                    Name = "Verifying " + mod.ToString();
-                    ShowProgressText = false;
-                    await Dispatcher.UIThread.InvokeAsync(() => TaskRoot.Add(this));
-                    Info = "In Queue";
-
-                    //Wait in Queue
-                    while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
-                    {
-                        await Task.Delay(1000);
-                        if (cancellationTokenSource.IsCancellationRequested)
-                        {
-                            throw new TaskCanceledException();
-                        }
-                    }
-
-                    Info = "Starting";
-
-                    ProgressCurrent = 0;
-                    ProgressBarMax = 0;
-                    foreach (var pkg in mod.packages)
-                    {
-                        if (pkg.filelist != null)
-                        {
-                            ProgressBarMax += pkg.filelist.Count();
-                        }
-                    }
-
-                    Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.VerifyMod()", "Start verify for :" + mod);
-                    mod.ReLoadJson();
-                    List<ModPackage> reinstall = new List<ModPackage>();
-                    List<string> fileArray = Directory.GetFiles(mod.fullPath, "*.*", SearchOption.AllDirectories).ToList();
-                    for (int i = fileArray.Count() - 1; i >= 0; i--)
-                    {
-                        if (fileArray[i].ToLower().Contains(".json") || fileArray[i].ToLower().Contains(".ini") || mod.tile != null && fileArray[i].ToLower().Contains(mod.tile) || mod.banner != null && fileArray[i].ToLower().Contains(mod.banner) || fileArray[i].ToLower().Contains("kn_screen"))
-                            fileArray.RemoveAt(i);
-                    }
-                    foreach (var pkg in mod.packages)
-                    {
-                        bool pkgPassed = true;
-                        if (pkg.filelist != null)
-                        {
-                            foreach (var file in pkg.filelist)
-                            {
-                                if (cancellationTokenSource!.IsCancellationRequested)
-                                {
-                                    throw new TaskCanceledException();
-                                }
-                                for (int i = fileArray.Count() - 1; i >= 0; i--)
-                                {
-                                    if (fileArray[i].ToLower().Replace(Path.DirectorySeparatorChar.ToString(), "").Contains(file.filename!.ToLower().Replace(@"./", "").Replace(@"\", "").Replace(@"/", "")))
-                                        fileArray.RemoveAt(i);
-                                }
-                                ProgressCurrent++;
-                                Info = "Files: " + ProgressCurrent + "/" + ProgressBarMax + " Current File: " + file.filename;
-                                //Checksum
-                                if (file.checksum != null && file.checksum.Count() > 0)
-                                {
-                                    if (file.checksum[0].ToLower() == "sha256")
-                                    {
-                                        try
-                                        {
-                                            using (FileStream? filehash = new FileStream(mod.fullPath + Path.DirectorySeparatorChar + file.filename, FileMode.Open, FileAccess.Read))
-                                            {
-                                                using (SHA256 checksum = SHA256.Create())
-                                                {
-                                                    filehash.Position = 0;
-                                                    var hashValue = BitConverter.ToString(await checksum.ComputeHashAsync(filehash)).Replace("-", String.Empty);
-                                                    filehash.Close();
-                                                    if (hashValue.ToLower() != file.checksum[1].ToLower())
-                                                    {
-                                                        pkgPassed = false;
-                                                        Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.VerifyMod()", file.filename + " failed checksum check! Mod: " + mod);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            //Filenotfound most likely
-                                            pkgPassed = false;
-                                            Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.VerifyMod()", ex);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.VerifyMod()", "Unsupported checksum crypto: " + file.checksum[0]);
-                                    }
-                                }
-                                if (!pkgPassed)
-                                {
-                                    continue;
-                                }
-                            }
-                        }
-                        if (pkgPassed)
-                        {
-                            Log.Add(Log.LogSeverity.Information, "TaskItemViewModel.VerifyMod()", "Pkg Verify OK: " + pkg.name + "Mod: " + mod);
-                        }
-                        else
-                        {
-                            pkg.isSelected = true;
-                            reinstall.Add(pkg);
-                            Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.VerifyMod()", "Pkg Verify FAIL: " + pkg.name + "Mod: " + mod);
-                        }
-                    }
-
-                    if (cancellationTokenSource!.IsCancellationRequested)
-                    {
-                        throw new TaskCanceledException();
-                    }
-
-                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
-                    {
-                        TaskViewModel.Instance!.taskQueue.Dequeue();
-                    }
-
+                    Info = "No SHA-256 checksums are available for this installation.";
                     IsCompleted = true;
-                    CancelButtonVisible = false;
-                    ProgressCurrent = ProgressBarMax;
+                    return false;
+                }
 
-                    if (!reinstall.Any())
-                    {
-                        Info = "PASSED";
-                        mod.ClearUnusedData();
-                    }
-                    else
-                    {
-                        Info = "FAIL";
-                        mod.packages?.ForEach(p => p.isSelected = true); //mark all installed pkgs as selected so they are not deleted!
-                        TaskViewModel.Instance?.InstallMod(mod, reinstall);
-                    }
-
-                    if (fileArray.Any())
-                    {
-                        foreach (var file in fileArray)
-                        {
-                            Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.VerifyMod()", "Unknown file detected during verify: " + file);
-                        }
-                        Info += " - " + fileArray.Count() + " Unknown files detected, check log or debug console";
-                    }
-
+                if (damaged.Count == 0)
+                {
+                    Info = "Passed · " + checkedFiles + " files checked" + UnknownFilesHint(unknownFiles);
+                    IsCompleted = true;
                     return true;
                 }
-                else
+
+                var repairable = damaged.All(pkg => pkg.files is { Length: > 0 } files && files.All(file => file.urls?.Length > 0));
+                if (!repairable || mod.devMode || mod.modSource == ModSource.local)
                 {
-                    throw new Exception("The task is already set, it cant be changed or re-assigned.");
+                    Info = damaged.Count + " packages failed verification. Automatic repair is unavailable.";
+                    IsCancelled = true;
+                    if (reportError != null)
+                        await Dispatcher.UIThread.InvokeAsync(() => reportError(Info));
+                    return false;
                 }
-            }
-            catch (TaskCanceledException)
-            {
-                /*
-                    Task cancel requested by user
-                */
-                IsCompleted = false;
-                IsCancelled = true;
+
+                // The queued repair cannot start until verification releases its own slot.
+                tasks.CompleteQueuedTask(this);
+                IsCompleted = true;
                 CancelButtonVisible = false;
-                Info = "Cancel Requested";
-                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
-                {
-                    await Task.Delay(500);
-                }
-                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
-                {
-                    TaskViewModel.Instance!.taskQueue.Dequeue();
-                }
-                await Task.Delay(2000); //give time for child tasks to cancel first
+                Info = damaged.Count + " packages failed verification. Repair queued." + UnknownFilesHint(unknownFiles);
+                var replacement = ModPackageCatalog.Copy(mod);
+                replacement.packages.ForEach(package => package.isSelected = true);
+                var repair = tasks.InstallModAsync(replacement, damaged, cleanInstall: true,
+                    reportError: reportError, addOnly: true, operation: operation);
+                if (!awaitRepairs) return true;
+
+                var repaired = await repair;
+                Info = repaired ? "Damaged packages repaired" + UnknownFilesHint(unknownFiles) : "Repair stopped. See the repair task for details.";
+                return repaired;
+            }
+            catch (OperationCanceledException)
+            {
                 Info = "Task Cancelled";
-                mod.ClearUnusedData();
-                //Only dispose the token if it was created locally
-                if (cancelSource == null)
-                {
-                    cancellationTokenSource?.Dispose();
-                }
+                IsCancelled = true;
                 return false;
             }
             catch (Exception ex)
             {
-                /*
-                    Task cancel forced due to a error
-                */
-                IsCompleted = false;
+                Info = "Verification failed";
                 IsCancelled = true;
-                CancelButtonVisible = false;
-                cancellationTokenSource?.Cancel();
-                Info = "Cancel Requested";
-                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
-                {
-                    await Task.Delay(500);
-                }
-                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
-                {
-                    TaskViewModel.Instance!.taskQueue.Dequeue();
-                }
-
-                await Task.Delay(2000); //give time for child tasks to cancel first
-                Info = "Task Failed";
-                mod.ClearUnusedData();
-                //Only dispose the token if it was created locally
-                if (cancelSource == null)
-                {
-                    cancellationTokenSource?.Dispose();
-                }
                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.VerifyMod()", ex);
+                if (reportError != null)
+                    await Dispatcher.UIThread.InvokeAsync(() => reportError(ex.Message));
                 return false;
             }
+            finally
+            {
+                CancelButtonVisible = false;
+                tasks.CompleteQueuedTask(this);
+            }
         }
+
+        private async Task<(List<ModPackage> Damaged, int CheckedFiles, int UnknownFiles)> CheckFilesAsync(Mod mod, CancellationToken token)
+        {
+            mod.ReLoadJson();
+            var unknown = Directory.EnumerateFiles(mod.fullPath, "*", new EnumerationOptions
+            {
+                RecurseSubdirectories = mod.id != "FS2",
+                AttributesToSkip = FileAttributes.ReparsePoint
+            }).Select(Path.GetFullPath).ToHashSet(KnUtils.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+            unknown.RemoveWhere(file =>
+                Path.GetExtension(file).Equals(".json", StringComparison.OrdinalIgnoreCase) ||
+                Path.GetExtension(file).Equals(".ini", StringComparison.OrdinalIgnoreCase) ||
+                Path.GetRelativePath(mod.fullPath, file).StartsWith("kn_images" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
+                Path.GetFileName(file).Equals(mod.tile, StringComparison.OrdinalIgnoreCase) ||
+                Path.GetFileName(file).Equals(mod.banner, StringComparison.OrdinalIgnoreCase));
+
+            var damaged = new List<ModPackage>();
+            var checkedFiles = 0;
+            ProgressCurrent = 0;
+            ProgressBarMax = mod.packages.Sum(pkg => pkg.filelist?.Length ?? 0);
+            foreach (var pkg in mod.packages)
+            {
+                var passed = true;
+                foreach (var file in pkg.filelist ?? Array.Empty<ModFilelist>())
+                {
+                    token.ThrowIfCancellationRequested();
+                    bool hasHash = file.checksum is { Length: >= 2 } && string.Equals(file.checksum[0], "sha256", StringComparison.OrdinalIgnoreCase);
+                    Info = file.filename ?? "Checking file list";
+                    ProgressCurrent++;
+                    try
+                    {
+                        var root = mod.devMode && !string.IsNullOrEmpty(pkg.folder) ? InstalledModFile.Resolve(mod.fullPath, pkg.folder) : mod.fullPath;
+                        var expected = InstalledModFile.Resolve(root, file.filename);
+                        var actual = InstalledModFile.Find(expected);
+                        unknown.Remove(actual);
+
+                        if (!hasHash)
+                            continue;
+
+                        // Developer VP packages are extracted on installation and have no whole-archive file to check.
+                        if (mod.devMode && pkg.isVp && expected.EndsWith(".vp", StringComparison.OrdinalIgnoreCase) && !File.Exists(actual))
+                            continue;
+
+                        checkedFiles++;
+                        var hash = await InstalledModFile.GetHashAsync(actual, expected, token);
+                        if (hash.Equals(file.checksum![1], StringComparison.OrdinalIgnoreCase)) continue;
+                        passed = false;
+                        Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.VerifyMod()", file.filename + " failed its checksum check.");
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        passed = false;
+                        Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.VerifyMod()", ex);
+                    }
+                }
+                if (!passed) damaged.Add(pkg);
+            }
+
+            foreach (var file in unknown)
+                Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.VerifyMod()", "Unknown file: " + file);
+            return (damaged, checkedFiles, unknown.Count);
+        }
+
+        private static string UnknownFilesHint(int count) => count == 0 ? string.Empty : " · " + count + " unlisted files";
     }
 }

@@ -53,7 +53,7 @@
 			<WrapPanel HorizontalAlignment="Center">
 				<Button Command="{Binding SaveCFG}" Margin="5" Classes="Secondary" >Save Data</Button>
 				<Button Command="{Binding OpenCFG}" Margin="5" Classes="Secondary" >Manually Edit CFG</Button>
-				<Button Command="{Binding OpenModSettings}" Margin="5" Classes="Secondary">Mod Settings</Button>
+				<Button Command="{Binding OpenModSettings}" Margin="5" Classes="Secondary">Launch Options</Button>
 			</WrapPanel>
 			<Button Command="{Binding LaunchServer}" Classes="Accept" HorizontalAlignment="Center">Create Server</Button>
 			<Label Margin="5" HorizontalAlignment="Center">Build type</Label>

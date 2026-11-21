@@ -17,10 +17,30 @@ namespace Knossos.NET.ViewModels
 {
     public partial class TaskItemViewModel : ViewModelBase
     {
-        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true)
+        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true, bool reinstallCurrentVersion = false, Action<string>? reportError = null, bool addOnly = false, IReadOnlyDictionary<string, bool>? packageActivation = null, IReadOnlyCollection<string>? removePackages = null)
         {
             string? modPath = null;
             Mod? installed = null;
+            Dictionary<string, bool>? developerActivation = null;
+            ModReinstallBackup? reinstallBackup = null;
+            // Capture removal authorization before waiting. Later installs may add other packages.
+            var initial = Knossos.GetInstalledMod(mod.id, mod.version);
+            var preserveExisting = addOnly || initial == null;
+            var stageRepairFiles = cleanInstall && reinstallPkgs != null && !reinstallCurrentVersion;
+            var removals = new HashSet<string>(!preserveExisting && reinstallPkgs == null
+                ? initial!.packages.Where(p => removePackages?.Contains(p.name) ?? mod.packages.Any(m => m.name == p.name && !m.isSelected)).Select(p => p.name)
+                : Array.Empty<string>());
+            var requestedPackages = mod.packages.Where(p => p.isSelected).Select(p => p.name).ToHashSet();
+            void ApplyActivation(Mod target)
+            {
+                if (!target.devMode) return;
+                foreach (var pkg in target.packages)
+                {
+                    if (preserveExisting && requestedPackages.Contains(pkg.name)) pkg.isEnabled = true;
+                    else if (!preserveExisting && packageActivation?.TryGetValue(pkg.name, out var enabled) == true) pkg.isEnabled = enabled;
+                }
+                target.SaveJson();
+            }
 
             try
             {
@@ -57,6 +77,8 @@ namespace Knossos.NET.ViewModels
                         }
                     }
 
+                    cancellationTokenSource.Token.ThrowIfCancellationRequested();
+
                     if (!mod.devMode) //Do not compress dev mode mods
                     {
                         compressMod = manualCompress;
@@ -84,9 +106,14 @@ namespace Knossos.NET.ViewModels
                         Check if its installed, even on install task it could have been installed by another task that was in the queue
                     */
                     installed = Knossos.GetInstalledMod(mod.id, mod.version);
+                    if (preserveExisting) mod.packages.RemoveAll(p => !p.isSelected);
                     if (installed != null)
                     {
                         installed.ReLoadJson();
+                        installed.modSettings.Load(installed.fullPath);
+                        mod.modSettings = installed.modSettings;
+                        mod.devMode = installed.devMode;
+                        if (installed.devMode) developerActivation = installed.packages.ToDictionary(p => p.name, p => p.isEnabled);
                         Name = "Modify " + mod.ToString();
                         compressMod = installed.modSettings.isCompressed;
                     }
@@ -150,9 +177,23 @@ namespace Knossos.NET.ViewModels
 
                     modPath = Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + rootPack + Path.DirectorySeparatorChar + modFolder;
 
+                    if (reinstallCurrentVersion)
+                    {
+                        if (installed == null || installed.devMode || mod.devMode) throw new InvalidOperationException("Clean reinstall is only available for installed normal mods.");
+                        // Preserve packages added after the user's plan was prepared, including during a queued wait.
+                        foreach (var pkg in installed.packages.Where(p => !removals.Contains(p.name)))
+                        {
+                            var requested = mod.packages.FirstOrDefault(p => p.name == pkg.name);
+                            if (requested != null) requested.isSelected = true;
+                            else { pkg.isSelected = true; mod.packages.Add(pkg); }
+                        }
+                        reinstallBackup = new ModReinstallBackup(Knossos.GetKnossosLibraryPath()!, modPath, installed.fullPath);
+                        reinstallPkgs = mod.packages.Where(p => p.isSelected).ToList();
+                    }
+
                     /* Metadata update */
                     bool metaUpdate = false;
-                    if (installed != null && Mod.IsMetaUpdate(mod, installed))
+                    if (installed != null && !preserveExisting && Mod.IsMetaUpdate(mod, installed))
                     {
                         metaUpdate = true;
                         installed.lastUpdate = mod.lastUpdate;
@@ -179,13 +220,13 @@ namespace Knossos.NET.ViewModels
                     }
 
                     /* Delete pkgs */
-                    if (installed != null)
+                    if (installed != null && !installed.devMode && !reinstallCurrentVersion)
                     {
                         bool save = false;
                         foreach (var modpkg in mod.packages.ToList())
                         {
                             var installedPkg = installed.packages.FirstOrDefault(p => p.name == modpkg.name);
-                            if (modpkg.filelist != null && !modpkg.isSelected && installedPkg != null)
+                            if (removals.Contains(modpkg.name) && installedPkg != null)
                             {
                                 int delCount = 0;
                                 var newTask = new TaskItemViewModel();
@@ -195,11 +236,11 @@ namespace Knossos.NET.ViewModels
                                     newTask.ShowMsg("Deleting pkg: " + modpkg.name, null, Brushes.Red);
                                     TaskList.Add(newTask);
                                 });
-                                foreach (var file in modpkg.filelist)
+                                foreach (var file in installedPkg.filelist ?? Array.Empty<ModFilelist>())
                                 {
                                     try
                                     {
-                                        if (File.Exists(installed.fullPath + Path.DirectorySeparatorChar + file.filename))
+                                        if (file.filename != null && KnUtils.IsSubPath(installed.fullPath, file.filename) && File.Exists(Path.Combine(installed.fullPath, file.filename)))
                                         {
                                             File.Delete(installed.fullPath + Path.DirectorySeparatorChar + file.filename);
                                             delCount++;
@@ -266,15 +307,12 @@ namespace Knossos.NET.ViewModels
 
 
                     /* Is there is nothing new to install just end the task */
-                    if (files.Count == 0 && !metaUpdate)
+                    if (installed != null && mod.packages.Count == 0 && files.Count == 0 && !metaUpdate && !reinstallCurrentVersion)
                     {
+                        if (installed != null) ApplyActivation(installed);
                         Info = string.Empty;
                         IsCompleted = true;
                         CancelButtonVisible = false;
-                        if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
-                        {
-                            TaskViewModel.Instance!.taskQueue.Dequeue();
-                        }
                         return true;
                     }
 
@@ -287,8 +325,7 @@ namespace Knossos.NET.ViewModels
                             if (!KnUtils.IsSubPath(modPath, file.dest))
                             {
                                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", $"Unsafe dest path in mod '{mod.id}': {file.dest}");
-                                CancelTaskCommand();
-                                return false;
+                                throw new InvalidOperationException("Unsafe installation destination: " + file.dest);
                             }
                             Directory.CreateDirectory(modPath + Path.DirectorySeparatorChar + file.dest);
                         }
@@ -321,6 +358,7 @@ namespace Knossos.NET.ViewModels
 
                     //Do not load old versions if it is a clean install
                     var oldVersions = cleanInstall ? new List<Mod>() : Knossos.GetInstalledModList(mod.id);
+                    if (reinstallCurrentVersion) oldVersions.RemoveAll(m => m.version == mod.version);
                     //Reload checksum data, because by default it is unloaded after parsing
                     foreach (var oldVer in oldVersions)
                     {
@@ -378,67 +416,79 @@ namespace Knossos.NET.ViewModels
                                 CancelTaskCommand();
                                 throw new TaskCanceledException();
                             }
-                            var fileFullPath = modPath + Path.DirectorySeparatorChar + file.filename;
-                            var result = await fileTask.DownloadFile(file.urls!, fileFullPath, "Downloading " + file.filename, false, null, cancellationTokenSource);
+                            var downloadRoot = stageRepairFiles ? Path.Combine(modPath, ".repair-" + Guid.NewGuid().ToString("N")) : modPath;
+                            Directory.CreateDirectory(downloadRoot);
+                            try
+                            {
+                                if (!KnUtils.IsSubPath(downloadRoot, file.dest)) throw new IOException("Invalid package destination.");
+                                Directory.CreateDirectory(Path.Combine(downloadRoot, file.dest));
+                                var fileFullPath = InstalledModFile.Resolve(downloadRoot, file.filename);
+                                var result = await fileTask.DownloadFile(file.urls!, fileFullPath, "Downloading " + file.filename, false, null, cancellationTokenSource);
 
-                            if (cancellationTokenSource.IsCancellationRequested)
-                            {
-                                throw new TaskCanceledException();
-                            }
-
-                            if (result.HasValue && result.Value)
-                            {
-                                ++ProgressCurrent;
-                                Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
-                            }
-                            else
-                            {
-                                throw new Exception("Error while downloading file: " + fileFullPath);
-                            }
-
-                            //Checksum
-                            if (file.checksum != null && file.checksum.Count() > 0)
-                            {
-                                if (file.checksum[0].ToLower() == "sha256")
+                                if (cancellationTokenSource.IsCancellationRequested)
                                 {
-                                    using (FileStream? filehash = new FileStream(fileFullPath, FileMode.Open, FileAccess.Read))
-                                    {
-                                        using (SHA256 checksum = SHA256.Create())
-                                        {
-                                            filehash.Position = 0;
-                                            var hashValue = BitConverter.ToString(await checksum.ComputeHashAsync(filehash)).Replace("-", String.Empty);
-                                            filehash.Close();
-                                            if (hashValue.ToLower() != file.checksum[1].ToLower())
-                                            {
-                                                throw new Exception("The downloaded file hash was incorrect, expected: " + file.checksum[1] + " Calculated Hash: " + hashValue);
-                                            }
-                                        }
-                                        fileTask.Info = " Checksum OK!";
-                                        await Dispatcher.UIThread.InvokeAsync(() => TaskList.Remove(fileTask));
-                                    }
+                                    throw new TaskCanceledException();
+                                }
+
+                                if (result.HasValue && result.Value)
+                                {
+                                    ++ProgressCurrent;
+                                    Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                                 }
                                 else
                                 {
-                                    Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.InstallMod()", "Cryptographic methods besides sha256 are not supported, skipping checksum check :" + file.checksum[0]);
+                                    throw new Exception("Error while downloading file: " + fileFullPath);
                                 }
-                            }
 
-                            if (cancellationTokenSource.IsCancellationRequested)
-                            {
-                                throw new TaskCanceledException();
-                            }
+                                //Checksum
+                                if (file.checksum != null && file.checksum.Count() > 0)
+                                {
+                                    if (file.checksum[0].ToLower() == "sha256")
+                                    {
+                                        using (FileStream? filehash = new FileStream(fileFullPath, FileMode.Open, FileAccess.Read))
+                                        {
+                                            using (SHA256 checksum = SHA256.Create())
+                                            {
+                                                filehash.Position = 0;
+                                                var hashValue = BitConverter.ToString(await checksum.ComputeHashAsync(filehash)).Replace("-", String.Empty);
+                                                filehash.Close();
+                                                if (hashValue.ToLower() != file.checksum[1].ToLower())
+                                                {
+                                                    throw new Exception("The downloaded file hash was incorrect, expected: " + file.checksum[1] + " Calculated Hash: " + hashValue);
+                                                }
+                                            }
+                                            fileTask.Info = " Checksum OK!";
+                                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Remove(fileTask));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Log.Add(Log.LogSeverity.Warning, "TaskItemViewModel.InstallMod()", "Cryptographic methods besides sha256 are not supported, skipping checksum check :" + file.checksum[0]);
+                                    }
+                                }
 
-                            //Decompress
-                            var decompressTask = new TaskItemViewModel();
-                            await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, decompressTask));
-                            var decompResult = await decompressTask.DecompressNebulaFile(fileFullPath, file.filename, modPath + Path.DirectorySeparatorChar + file.dest, cancellationTokenSource);
-                            if (!decompResult)
-                            {
-                                Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Error while decompressing the file " + fileFullPath);
-                                CancelTaskCommand();
-                                throw new TaskCanceledException();
+                                if (cancellationTokenSource.IsCancellationRequested)
+                                {
+                                    throw new TaskCanceledException();
+                                }
+
+                                //Decompress
+                                var decompressTask = new TaskItemViewModel();
+                                await Dispatcher.UIThread.InvokeAsync(() => TaskList.Insert(0, decompressTask));
+                                var decompResult = await decompressTask.DecompressNebulaFile(fileFullPath, file.filename, Path.Combine(downloadRoot, file.dest), cancellationTokenSource);
+                                if (!decompResult)
+                                {
+                                    Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", "Error while decompressing the file " + fileFullPath);
+                                    CancelTaskCommand();
+                                    throw new TaskCanceledException();
+                                }
+                                File.Delete(fileFullPath);
+                                if (stageRepairFiles) InstalledModFile.PublishRepair(downloadRoot, modPath, token);
                             }
-                            File.Delete(fileFullPath);
+                            finally
+                            {
+                                if (stageRepairFiles) Directory.Delete(downloadRoot, recursive: true);
+                            }
                             ++ProgressCurrent;
                         }
 
@@ -578,12 +628,17 @@ namespace Knossos.NET.ViewModels
                     else
                     {
                         installed.ReLoadJson();
-                        if (reinstallPkgs == null)
+                        if (reinstallCurrentVersion)
+                        {
+                            installed.packages = mod.packages;
+                        }
+                        else if (reinstallPkgs == null)
                         {
                             installed.packages.AddRange(mod.packages);
                         }
                         //mark all pkgs as enabled
-                        mod.packages?.ForEach(pkg => pkg.isEnabled = true);
+                        installed.packages?.ForEach(pkg => pkg.isEnabled = developerActivation?.GetValueOrDefault(pkg.name, true) ?? true);
+                        ApplyActivation(installed);
                         installed.SaveJson();
                         mod.ClearUnusedData();
                     }
@@ -603,7 +658,9 @@ namespace Knossos.NET.ViewModels
                         {
                             TaskList.Insert(0, cpTask);
                         });
-                        await cpTask.CompressMod(mod, cancellationTokenSource, true);
+                        var compressionSucceeded = await cpTask.CompressMod(mod, cancellationTokenSource, true);
+                        if (!compressionSucceeded && (reinstallCurrentVersion || stageRepairFiles))
+                            throw new InvalidOperationException("Compression did not complete.");
                         ProgressCurrent++;
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                     }
@@ -670,8 +727,8 @@ namespace Knossos.NET.ViewModels
                                         //Check if it is inferior to the one we just installed
                                         if (SemanticVersion.Compare(mod.version, version.version) >= 1)
                                         {
-                                            bool inUse = false;
-                                            string inUseMods = "";
+                                            bool inUse = ModInstallOperation.IsVersionPending(version.id, version.version);
+                                            string inUseMods = inUse ? "a pending installation, " : "";
                                             foreach (var m in Knossos.GetInstalledModList(null))
                                             {
                                                 if (m != null && m.id != mod.id)
@@ -735,14 +792,9 @@ namespace Knossos.NET.ViewModels
                         }
                     }
 
-                    /*
-                        Always Dequeue, always check for check size and verify that the first is this TaskItemViewModel object
-                    */
-                    if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
-                    {
-                        TaskViewModel.Instance!.taskQueue.Dequeue();
-                    }
+                    // The queue slot is released in finally after all cleanup has finished.
 
+                    reinstallBackup?.Commit();
                     Info = string.Empty;
                     IsCompleted = true;
                     CancelButtonVisible = false;
@@ -754,7 +806,7 @@ namespace Knossos.NET.ViewModels
                     throw new Exception("The task is already set, it cant be changed or re-assigned.");
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 /*
                     Task cancel requested by user
@@ -763,14 +815,6 @@ namespace Knossos.NET.ViewModels
                 IsCancelled = true;
                 CancelButtonVisible = false;
                 Info = "Cancel Requested";
-                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
-                {
-                    await Task.Delay(500);
-                }
-                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
-                {
-                    TaskViewModel.Instance!.taskQueue.Dequeue();
-                }
                 await Task.Delay(2000); //give time for child tasks to cancel first
                 Info = "Task Cancelled";
                 try
@@ -803,16 +847,9 @@ namespace Knossos.NET.ViewModels
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
                     //Messagebox is not thread safe!
-                    await MessageBox.Show(MainWindow.instance, "An error was ocurred during the download of the mod: " + mod.ToString() + ". Error: " + ex.Message, "Error", MessageBox.MessageBoxButtons.OK);
+                    if (reportError != null) reportError(mod + ": " + ex.Message);
+                    else await MessageBox.Show(MainWindow.instance, "An error was ocurred during the download of the mod: " + mod.ToString() + ". Error: " + ex.Message, "Error", MessageBox.MessageBoxButtons.OK);
                 });
-                while (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() != this)
-                {
-                    await Task.Delay(500);
-                }
-                if (TaskViewModel.Instance!.taskQueue.Count > 0 && TaskViewModel.Instance!.taskQueue.Peek() == this)
-                {
-                    TaskViewModel.Instance!.taskQueue.Dequeue();
-                }
 
                 await Task.Delay(2000); //give time for child tasks to cancel first
                 Info = "Task Failed";
@@ -833,6 +870,19 @@ namespace Knossos.NET.ViewModels
                 }
                 Log.Add(Log.LogSeverity.Error, "TaskItemViewModel.InstallMod()", ex);
                 return false;
+            }
+            finally
+            {
+                try
+                {
+                    if (reinstallBackup != null)
+                    {
+                        reinstallBackup.Dispose();
+                        installed?.ReLoadJson();
+                        if (installed != null) installed.modSettings.Load(installed.fullPath);
+                    }
+                }
+                finally { TaskViewModel.Instance?.CompleteQueuedTask(this); }
             }
         }
     }

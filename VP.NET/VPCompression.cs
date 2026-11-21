@@ -51,7 +51,7 @@ namespace VP.NET
         /// <param name="output"></param>
         /// <param name="originalFileSize"></param>
         /// <exception cref="Exception"></exception>
-        public static int CompressStream(Stream input, Stream output, int? originalFileSize = null)
+        public static int CompressStream(Stream input, Stream output, int? originalFileSize = null, CancellationToken cancellationToken = default)
         {
             int compressedSize = 0;
             if (CompressionLevel < 3 || CompressionLevel > 12)
@@ -62,13 +62,22 @@ namespace VP.NET
             switch (CompressionHeader)
             {
                 case CompressionHeader.LZ41:
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo? failure = null;
                     var cpThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        compressedSize = LZ4RawUtility.LZ41_Stream_Compress_HC(input, output, BlockSize, CompressionLevel, originalFileSize);
+                        try
+                        {
+                            compressedSize = LZ4RawUtility.LZ41_Stream_Compress_HC(input, output, BlockSize, CompressionLevel, originalFileSize, cancellationToken);
+                        }
+                        catch (Exception ex)
+                        {
+                            failure = System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex);
+                        }
                     }, 1048576);
                     cpThread.Start();
                     cpThread.Join();
+                    failure?.Throw();
                     break;
             }
             return compressedSize;
@@ -83,7 +92,7 @@ namespace VP.NET
         /// <param name="header"></param>
         /// <param name="compressedFileSize"></param>
         /// <returns>Uncompressed file size</returns>
-        public static int DecompressStream(Stream input, Stream output, CompressionHeader? header = null, int? compressedFileSize = null)
+        public static int DecompressStream(Stream input, Stream output, CompressionHeader? header = null, int? compressedFileSize = null, CancellationToken cancellationToken = default)
         {
             int uncompressedSize = 0;
 
@@ -110,7 +119,7 @@ namespace VP.NET
                         Thread.CurrentThread.IsBackground = true;
                         try
                         {
-                            uncompressedSize = LZ4RawUtility.LZ41_Stream_Decompress(input, output, compressedFileSize);
+                            uncompressedSize = LZ4RawUtility.LZ41_Stream_Decompress(input, output, compressedFileSize, cancellationToken: cancellationToken);
                         }
                         catch (Exception ex)
                         {
