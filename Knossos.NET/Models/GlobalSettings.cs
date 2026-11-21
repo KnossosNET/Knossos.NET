@@ -125,6 +125,8 @@ namespace Knossos.NET.Models
         public bool enableLogFile { get; set; } = true;
         [JsonPropertyName("single_view_mode")]
         public bool singleViewMode { get; set; } = false;
+        [JsonPropertyName("use_nebula_development_server")]
+        public bool useNebulaDevelopmentServer { get; set; }
         [JsonPropertyName("log_level")]
         public int logLevel { get; set; } = 1;
         [JsonPropertyName("global_cmdline")]
@@ -690,6 +692,7 @@ namespace Knossos.NET.Models
                         antiStuck = tempSettings.antiStuck;
                         maxUploadRetries = tempSettings.maxUploadRetries;
                         singleViewMode = tempSettings.singleViewMode;
+                        useNebulaDevelopmentServer = tempSettings.useNebulaDevelopmentServer;
                         if (hiddenModIds.Any())
                         {
                             foreach (var hiddenMod in hiddenModIds)
