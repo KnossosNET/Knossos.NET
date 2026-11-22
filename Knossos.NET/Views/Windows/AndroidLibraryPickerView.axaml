@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:classes="using:Knossos.NET.Classes"
+             xmlns:views="using:Knossos.NET.Views"
+             x:Class="Knossos.NET.Views.AndroidLibraryPickerView"
+             x:DataType="views:AndroidLibraryPickerView">
+    <Border HorizontalAlignment="Stretch" VerticalAlignment="Center"
+            MaxWidth="520" MaxHeight="340" Margin="12" Padding="16" CornerRadius="12"
+            BorderThickness="1" BorderBrush="{StaticResource BackgroundColorTertiary}"
+            Background="{StaticResource BackgroundColorPrimary}" BoxShadow="0 8 24 0 #60000000">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+            <TextBlock Classes="h1" FontWeight="SemiBold" Text="Add Library"/>
+            <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <TextBlock IsVisible="{Binding HasNoVolumes}" TextWrapping="Wrap"
+                               Text="No storage volumes are available to add."/>
+                    <ItemsControl ItemsSource="{Binding Volumes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="classes:AndroidLibraryVolume">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,0,0,12">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{Binding Description}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding FreeSpace}"/>
+                                        <TextBlock Text="{Binding Path}" FontSize="11" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" VerticalAlignment="Center" Classes="Accept" Click="AddClicked">Add</Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+            <Button x:Name="CancelButton" Grid.Row="2" HorizontalAlignment="Right" Classes="Cancel" Click="CancelClicked">Cancel</Button>
+        </Grid>
+    </Border>
+</UserControl>

@@ -388,7 +388,7 @@ static partial class Program
 
     static void SessionChecks(string output)
     {
-        Knossos.NET.Knossos.globalSettings.basePath = Path.Combine(output, "session-library");
+        Knossos.NET.Knossos.globalSettings.basePath = Directory.CreateDirectory(Path.Combine(output, "session-library")).FullName;
         Knossos.NET.Knossos.globalSettings.modCompression = CompressionSettings.Disabled;
         var tasks = new TaskViewModel();
         var queue = (Queue<TaskItemViewModel>)typeof(TaskViewModel).GetProperty("taskQueue",
@@ -881,6 +881,7 @@ static partial class Program
         Directory.CreateDirectory(output);
         if (args.Contains("--launch-options")) { LaunchOptionsChecks(output); LaunchViewChecks(output); }
         else if (args.Contains("--local-files")) LocalFilesChecks(output);
+        else if (args.Contains("--libraries")) LibraryChecks(output);
         else { LocalFilesChecks(output); PlannerChecks(); EnginePackageChecks(); IncrementalChecks(output); BackupChecks(output); TaskChecks(output); SessionChecks(output); DeletionChecks(output); QueueChecks(output); SharedBuildChecks(output); HiddenEngineChecks(output); ViewChecks(output); LaunchOptionsChecks(output); TextEditorChecks(output); LaunchViewChecks(output); }
         Console.WriteLine("All " + assertions + " checks passed. Preview images: " + output);
     }

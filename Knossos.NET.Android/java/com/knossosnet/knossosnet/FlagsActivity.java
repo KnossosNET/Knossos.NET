@@ -78,6 +78,9 @@ public class FlagsActivity extends org.libsdl.app.SDLActivity {
 
     @Override
     protected void onDestroy() {
+        if (!_delivered && _receiver != null) {
+            _receiver.send(Activity.RESULT_CANCELED, null);
+        }
         super.onDestroy();
         _self = null;
         try {

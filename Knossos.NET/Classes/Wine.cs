@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
 using System.ComponentModel;
+using System.Linq;
+using System.Threading;
 
 namespace Knossos.NET.Classes
 {
@@ -79,40 +81,15 @@ namespace Knossos.NET.Classes
             }
         }
 
-        public static async Task<WineResult> RunFred2(string exePath, string exeCmdLine, string? workingFolder, FsoExecArch fsoArch)
+        public static async Task<WineResult> RunFred2(string exePath, string exeCmdLine, string? workingFolder, FsoExecArch fsoArch,
+            bool waitForExit = true)
         {
             try
             {
-                var wineArch = GetWineArch(fsoArch);
-                if (wineArch == null)
-                {
-                    return new WineResult(false, "Unsupported WINEARCH: " + fsoArch.ToString());
-                }
-
-                var prefixResult = await SetWinePrefixFred2(wineArch);
-                if(!prefixResult.IsSuccess)
-                {
-                    return prefixResult;
-                }
-
-                var winePrefix = GetWinePrefixPath();
-                Log.Add(Log.LogSeverity.Information, "Wine.RunFred2()", "Executing wine with the following cmdline: WINEPREFIX=" + winePrefix +
-                    " WINEARCH=" + wineArch + " wine " + exePath + " " + exeCmdLine);
-
-                using (var wine = new Process())
-                {
-                    wine.StartInfo.FileName = "wine";
-                    wine.StartInfo.Arguments = $"\"{exePath}\" {exeCmdLine}";
-                    if (workingFolder != null)
-                    {
-                        wine.StartInfo.WorkingDirectory = workingFolder;
-                    }
-                    wine.StartInfo.EnvironmentVariables["WINEPREFIX"] = winePrefix;
-                    wine.StartInfo.EnvironmentVariables["WINEARCH"] = wineArch;
-                    wine.StartInfo.UseShellExecute = false;
-                    wine.Start();
+                var startInfo = await PrepareFred2Async(exePath, exeCmdLine, workingFolder, fsoArch).ConfigureAwait(false);
+                using var wine = Process.Start(startInfo)!;
+                if (waitForExit)
                     await wine.WaitForExitAsync();
-                }
 
                 return new WineResult(true);
             }
@@ -128,6 +105,50 @@ namespace Knossos.NET.Classes
             }
         }
 
+        internal static async Task<ProcessStartInfo> PrepareFred2Async(string executable, string args, string? workingFolder,
+            FsoExecArch architecture)
+        {
+            var wineArch = GetWineArch(architecture) ?? throw new InvalidOperationException("Unsupported WINEARCH: " + architecture);
+            var prefix = await SetWinePrefixFred2(wineArch).ConfigureAwait(false);
+            if (!prefix.IsSuccess)
+                throw new InvalidOperationException(prefix.ErrorMessage);
+
+            var startInfo = CreateStartInfo(workingFolder, wineArch);
+            startInfo.Arguments = $"\"{executable}\" {args}";
+            Log.Add(Log.LogSeverity.Information, "Wine.PrepareFred2Async",
+                "Executing wine with the following command line: " + startInfo.Arguments);
+            return startInfo;
+        }
+
+        internal static async Task<string[]> ConvertPathsAsync(string workingFolder, FsoExecArch architecture,
+            bool toWindows, params string[] paths)
+        {
+            var wineArch = GetWineArch(architecture) ?? throw new InvalidOperationException("Unsupported WINEARCH: " + architecture);
+            var startInfo = CreateStartInfo(workingFolder, wineArch);
+            startInfo.ArgumentList.Add("winepath.exe");
+            startInfo.ArgumentList.Add("-0");
+            startInfo.ArgumentList.Add(toWindows ? "-w" : "-u");
+            startInfo.ArgumentList.Add("--");
+            foreach (var path in paths)
+                startInfo.ArgumentList.Add(path);
+
+            var (output, error, exitCode) = await FsoBuild.ReadProcessOutputAsync(startInfo, CancellationToken.None).ConfigureAwait(false);
+            var converted = output.Split('\0', StringSplitOptions.RemoveEmptyEntries);
+            if (exitCode != 0 || converted.Length != paths.Length || converted.Any(string.IsNullOrWhiteSpace))
+                throw new IOException("Wine could not convert the FSO paths. " + error);
+
+            return converted;
+        }
+
+        private static ProcessStartInfo CreateStartInfo(string? workingFolder, string wineArch)
+        {
+            var startInfo = new ProcessStartInfo("wine") { UseShellExecute = false };
+            if (workingFolder != null)
+                startInfo.WorkingDirectory = workingFolder;
+            startInfo.EnvironmentVariables["WINEPREFIX"] = GetWinePrefixPath();
+            startInfo.EnvironmentVariables["WINEARCH"] = wineArch;
+            return startInfo;
+        }
 
         /// <summary>
         /// Sets the WinePrefix folder with the correct configuration for Fred2
@@ -148,7 +169,17 @@ namespace Knossos.NET.Classes
                     wine.StartInfo.EnvironmentVariables["WINEDLLOVERRIDES"] = "mscoree=d";
                     wine.StartInfo.UseShellExecute = false;
                     wine.Start();
-                    await wine.WaitForExitAsync();
+                    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                    try
+                    {
+                        await wine.WaitForExitAsync(timeout.Token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        if (!wine.HasExited)
+                            wine.Kill(true);
+                        return new WineResult(false, "Wine did not finish initializing its prefix.");
+                    }
                     //Create a symlink to the Knossos library, this is not critical
                     try
                     {
@@ -234,7 +265,7 @@ namespace Knossos.NET.Classes
         /// Get the WinePrefix directory, a "wine" directory inside Knet data folder
         /// </summary>
         /// <returns>WinePrefix string</returns>
-        private static string GetWinePrefixPath()
+        internal static string GetWinePrefixPath()
         {
             return Path.Combine(KnUtils.GetKnossosDataFolderPath(), "wine");
         }

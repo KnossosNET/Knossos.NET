@@ -310,7 +310,7 @@ namespace Knossos.NET.ViewModels
         public async void InstallMod(Mod mod, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true)
             => await InstallModAsync(mod, reinstallPkgs, manualCompress, cleanupOldVersions, cleanInstall, allowHardlinks);
 
-        public async Task<bool> InstallModAsync(Mod mod, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true, bool reinstallCurrentVersion = false, Action<string>? reportError = null, bool addOnly = false, ModInstallOperation? operation = null, IReadOnlyDictionary<string, bool>? packageActivation = null, IReadOnlyCollection<string>? removePackages = null)
+        public async Task<bool> InstallModAsync(Mod mod, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true, bool reinstallCurrentVersion = false, Action<string>? reportError = null, bool addOnly = false, ModInstallOperation? operation = null, IReadOnlyDictionary<string, bool>? packageActivation = null, IReadOnlyCollection<string>? removePackages = null, string? libraryPath = null)
         {
             try
             {
@@ -345,7 +345,7 @@ namespace Knossos.NET.ViewModels
                             TaskList.Add(newTask);
                             taskQueue.Enqueue(newTask);
                         });
-                        var res = await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress, cleanupOldVersions, cleanInstall, allowHardlinks, reinstallCurrentVersion, reportError, addOnly, packageActivation, removePackages).ConfigureAwait(false);
+                        var res = await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress, cleanupOldVersions, cleanInstall, allowHardlinks, reinstallCurrentVersion, reportError, addOnly, packageActivation, removePackages, libraryPath).ConfigureAwait(false);
                         if(res && Knossos.inSingleTCMode)
                         {
                             try

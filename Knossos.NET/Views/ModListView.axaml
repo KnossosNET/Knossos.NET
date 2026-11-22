@@ -12,7 +12,7 @@
 		<vm:ModListViewModel/>
 	</Design.DataContext>
 	
-	<Grid RowDefinitions="Auto,*">
+	<Grid RowDefinitions="Auto,Auto,*">
 		<Grid Grid.Row="0">
 			<WrapPanel Margin="10" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
 				<Button Name="FilterFlyout" ToolTip.Tip="Sort by and filters" Margin="0,0,5,0" HorizontalAlignment="Right">
@@ -80,7 +80,16 @@
 				</Button>
 			</WrapPanel>
 		</Grid>
-		<ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AllowAutoHide="False">
+		<ComboBox Grid.Row="1" Margin="10,0,10,10" HorizontalAlignment="Stretch" MaxWidth="560"
+				  IsVisible="{Binding ShowLibraryFilter}" ItemsSource="{Binding LibraryFilters}"
+				  SelectedItem="{Binding SelectedLibraryFilter, Mode=TwoWay}" AutomationProperties.Name="Filter by library">
+			<ComboBox.ItemTemplate>
+				<DataTemplate x:DataType="vm:LibraryFilterOption">
+					<TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}"/>
+				</DataTemplate>
+			</ComboBox.ItemTemplate>
+		</ComboBox>
+		<ScrollViewer Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AllowAutoHide="False">
 			<StackPanel>
 				<StackPanel IsVisible="{Binding Sorting}">
 					<v:LoadingIconView Width="80" Height="80" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="50,50,0,0" Content="{Binding LoadingAnimation}"/>

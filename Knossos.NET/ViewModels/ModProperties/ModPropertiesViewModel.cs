@@ -116,6 +116,7 @@ namespace Knossos.NET.ViewModels
         {
             runningSessions[ActiveVersion.id] = this;
             OnPropertyChanged(nameof(CanChangeInformationVersion));
+            MoveCommand.NotifyCanExecuteChanged();
         }
 
         internal void OperationEnded()
@@ -123,6 +124,7 @@ namespace Knossos.NET.ViewModels
             if (runningSessions.TryGetValue(ActiveVersion.id, out var session) && ReferenceEquals(session, this))
                 runningSessions.Remove(ActiveVersion.id);
             OnPropertyChanged(nameof(CanChangeInformationVersion));
+            MoveCommand.NotifyCanExecuteChanged();
             if (!disposed && releaseWhenIdle && attachedViews.Count == 0) Dispose();
             else if (!disposed) Files.OperationCompleted();
         }
@@ -131,6 +133,7 @@ namespace Knossos.NET.ViewModels
         {
             Versions.RefreshCommands();
             Files.RefreshCommands();
+            MoveCommand.NotifyCanExecuteChanged();
         }
 
         partial void OnPreviewPathChanged(string? value) => OnPropertyChanged(nameof(IsPreviewUnavailable));
@@ -169,6 +172,7 @@ namespace Knossos.NET.ViewModels
             Information = new ModInformationViewModel(this);
             Versions = new ModVersionsViewModel(this, forceDeveloper, catalog);
             Files = new ModLocalFilesViewModel(this);
+            Knossos.LibraryPathsChanged += OnMoveLibraryPathsChanged;
             selectedPage = menuPageEntry;
             RefreshVersion();
         }
@@ -182,6 +186,7 @@ namespace Knossos.NET.ViewModels
             OnPropertyChanged(nameof(CanManageVersions));
             OnPropertyChanged(nameof(CanDownload));
             OnPropertyChanged(nameof(CanChangeInformationVersion));
+            MoveCommand.NotifyCanExecuteChanged();
             Files.VersionChanged();
             Navigate(SelectedPage);
             _ = Information.LoadAsync(ActiveVersion);
@@ -349,6 +354,8 @@ namespace Knossos.NET.ViewModels
             pendingCompressionScope?.TrySetResult(null);
             pendingCompressionScope = null;
             IsCompressionScopeModal = false;
+            IsMoveModal = false;
+            SelectedMoveLibrary = null;
             IsMediaModal = IsVideoModal = IsReportModal = IsConfirmationModal = false;
             PreviewPath = null;
             ModalText = ReportReason = string.Empty;
@@ -509,6 +516,7 @@ namespace Knossos.NET.ViewModels
             options?.Dispose();
             options = null;
             Information.Dispose();
+            Knossos.LibraryPathsChanged -= OnMoveLibraryPathsChanged;
             Files.Dispose();
             Versions.Dispose();
             ResetModal();

@@ -64,6 +64,12 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty] private bool canReport;
         [ObservableProperty] private bool canDelete;
         [ObservableProperty] private bool showVideos;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasLibraryLocation))]
+        private string? libraryLocation;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasDuplicateInstallations))]
+        private string duplicateInstallationPaths = string.Empty;
         public ModPropertiesViewModel Properties => owner;
         public ObservableCollection<ModMediaItemViewModel> Screenshots { get; } = new();
         public ObservableCollection<ModMediaItemViewModel> Videos { get; } = new();
@@ -73,6 +79,8 @@ namespace Knossos.NET.ViewModels
         public bool HasMedia => Screenshots.Count + Videos.Count > 0;
         public bool HasVisibleMedia => ShowVideos ? Videos.Count > 0 : Screenshots.Count > 0;
         public bool HasLoadError => !string.IsNullOrEmpty(LoadError);
+        public bool HasLibraryLocation => LibraryLocation != null;
+        public bool HasDuplicateInstallations => DuplicateInstallationPaths.Length > 0;
 
         public ModInformationViewModel() : this(new ModPropertiesViewModel()) { }
         public ModInformationViewModel(ModPropertiesViewModel properties) { owner = properties; }
@@ -168,6 +176,15 @@ namespace Knossos.NET.ViewModels
                 (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp);
             CanReport = mod?.modSource != ModSource.local && (!CustomLauncher.IsCustomMode || CustomLauncher.UseNebulaServices);
             CanDelete = mod?.installed == true && !mod.devMode && mod.id != "FS2";
+            RefreshLibraryLocation();
+        }
+
+        internal void RefreshLibraryLocation()
+        {
+            LibraryLocation = mod?.installed == true ? Knossos.GetLibraryForPath(mod.fullPath) : null;
+            DuplicateInstallationPaths = mod?.installed == true
+                ? string.Join(Environment.NewLine, Knossos.GetDuplicateModPaths(mod))
+                : string.Empty;
         }
 
         public void RefreshLaunchAvailability()

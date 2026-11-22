@@ -83,6 +83,19 @@
           </StackPanel>
         </WrapPanel>
       </Border>
+      <Border Classes="surface" Padding="12,10" IsVisible="{Binding HasLibraryLocation}">
+        <StackPanel Spacing="4">
+          <TextBlock Text="Installed library" Classes="muted"/>
+          <TextBlock Text="{Binding LibraryLocation}" TextWrapping="Wrap"/>
+        </StackPanel>
+      </Border>
+      <Border Classes="surface" Padding="12,10" IsVisible="{Binding HasDuplicateInstallations}">
+        <StackPanel Spacing="4">
+          <TextBlock Text="Duplicate installation" Foreground="#FFC78A" FontWeight="SemiBold"/>
+          <TextBlock Text="Knossos uses the copy from the first library. The copies below are ignored." TextWrapping="Wrap"/>
+          <TextBlock Text="{Binding DuplicateInstallationPaths}" TextWrapping="Wrap"/>
+        </StackPanel>
+      </Border>
       <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True" Height="3"/>
       <Border Classes="surface" Padding="12" IsVisible="{Binding HasLoadError}">
         <StackPanel Spacing="8">

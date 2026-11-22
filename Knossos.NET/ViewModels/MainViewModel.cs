@@ -422,6 +422,7 @@ namespace Knossos.NET.ViewModels
             FsoBuildsView?.ClearView();
             NebulaModsView?.ClearView();
             DeveloperModView?.ClearView();
+            CustomHomeVM?.ClearInstalledVersions();
         }
 
         /// <summary>
@@ -534,6 +535,7 @@ namespace Knossos.NET.ViewModels
         {
             Dispatcher.UIThread.Invoke(() => {
                 IsMenuOpen = Knossos.globalSettings.mainMenuOpen;
+                InstalledModsView?.RefreshLibraryFilter();
                 InstalledModsView?.ChangeSort(Knossos.globalSettings.sortType);
                 NebulaModsView?.ChangeSort(Knossos.globalSettings.sortType);
             });

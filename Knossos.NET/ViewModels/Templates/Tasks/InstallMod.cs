@@ -17,9 +17,10 @@ namespace Knossos.NET.ViewModels
 {
     public partial class TaskItemViewModel : ViewModelBase
     {
-        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true, bool reinstallCurrentVersion = false, Action<string>? reportError = null, bool addOnly = false, IReadOnlyDictionary<string, bool>? packageActivation = null, IReadOnlyCollection<string>? removePackages = null)
+        public async Task<bool> InstallMod(Mod mod, CancellationTokenSource cancelSource, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true, bool reinstallCurrentVersion = false, Action<string>? reportError = null, bool addOnly = false, IReadOnlyDictionary<string, bool>? packageActivation = null, IReadOnlyCollection<string>? removePackages = null, string? libraryPath = null)
         {
             string? modPath = null;
+            var createdModDirectory = false;
             Mod? installed = null;
             Dictionary<string, bool>? developerActivation = null;
             ModReinstallBackup? reinstallBackup = null;
@@ -175,7 +176,21 @@ namespace Knossos.NET.ViewModels
                         }
                     }
 
-                    modPath = Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + rootPack + Path.DirectorySeparatorChar + modFolder;
+                    var targetLibrary = installed == null
+                        ? libraryPath ?? Knossos.GetDefaultModLibrary(mod)
+                        : Knossos.GetLibraryForPath(installed.fullPath);
+                    if (targetLibrary == null || !Knossos.GetLibraryPaths().Contains(targetLibrary, Knossos.LibraryPathComparer) ||
+                        !Directory.Exists(targetLibrary))
+                    {
+                        throw new IOException($"The library '{targetLibrary}' is unavailable. Check its connection or choose an available library.");
+                    }
+                    modPath = installed == null
+                        ? Path.Combine(targetLibrary, rootPack, modFolder)
+                        : Path.TrimEndingDirectorySeparator(installed.fullPath);
+                    if (!Knossos.IsPathInLibrary(targetLibrary, modPath))
+                        throw new IOException($"The installation path '{modPath}' is outside the selected library.");
+                    if (installed == null && (Directory.Exists(modPath) || File.Exists(modPath)))
+                        throw new IOException($"The installation path '{modPath}' already exists.");
 
                     if (reinstallCurrentVersion)
                     {
@@ -187,7 +202,7 @@ namespace Knossos.NET.ViewModels
                             if (requested != null) requested.isSelected = true;
                             else { pkg.isSelected = true; mod.packages.Add(pkg); }
                         }
-                        reinstallBackup = new ModReinstallBackup(Knossos.GetKnossosLibraryPath()!, modPath, installed.fullPath);
+                        reinstallBackup = new ModReinstallBackup(targetLibrary, modPath, installed.fullPath);
                         reinstallPkgs = mod.packages.Where(p => p.isSelected).ToList();
                     }
 
@@ -317,6 +332,7 @@ namespace Knossos.NET.ViewModels
                     }
 
                     Directory.CreateDirectory(modPath);
+                    createdModDirectory = installed == null;
 
                     foreach (var file in files)
                     {
@@ -615,7 +631,7 @@ namespace Knossos.NET.ViewModels
                     ++ProgressCurrent;
                     Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                     mod.fullPath = modPath + Path.DirectorySeparatorChar;
-                    mod.folderName = modFolder;
+                    mod.folderName = Path.GetFileName(modPath);
                     mod.installed = true;
                     mod.inNebula = true;
 
@@ -820,7 +836,7 @@ namespace Knossos.NET.ViewModels
                 try
                 {
                     /* If a error ocurred while updating do not delete the whole mod */
-                    if (modPath != null && installed == null)
+                    if (modPath != null && createdModDirectory)
                     {
                         Directory.Delete(modPath, true);
                     }
@@ -856,7 +872,7 @@ namespace Knossos.NET.ViewModels
                 try
                 {
                     /* If a error ocurred while updating do not delete the whole mod */
-                    if (modPath != null && installed == null)
+                    if (modPath != null && createdModDirectory)
                     {
                         Directory.Delete(modPath, true);
                     }

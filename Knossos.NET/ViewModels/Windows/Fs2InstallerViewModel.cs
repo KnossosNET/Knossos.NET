@@ -24,25 +24,8 @@ namespace Knossos.NET.ViewModels
     /// </summary>
     public partial class Fs2InstallerViewModel : ViewModelBase
     {
-        /// <summary>
-        /// Must have file list
-        /// </summary>
-        private readonly string[] required =
-        {
-            "root_fs2.vp", "smarty_fs2.vp", "sparky_fs2.vp",
-            "sparky_hi_fs2.vp", "stu_fs2.vp", "tango1_fs2.vp",
-            "tango2_fs2.vp", "tango3_fs2.vp", "warble_fs2.vp"
-        };
-
-        /// <summary>
-        /// Additional files to find and copy
-        /// </summary>
-        private readonly string[] optional =
-        {
-            "hud_1.hcf", "hud_2.hcf", "hud_3.hcf", "movies_fs2.vp", "multi-mission-pack.vp", "multi-voice-pack.vp", "bastion.ogg", "colossus.ogg",
-            "endpart1.ogg", "endprt2a.ogg", "endprt2b.ogg", "intro.ogg", "mono1.ogg", "mono2.ogg", "mono3.ogg", "mono4.ogg", "bastion.mve",
-            "colossus.mve", "endpart1.mve", "endprt2a.mve", "endprt2b.mve", "intro.mve", "mono1.mve", "mono2.mve", "mono3.mve", "mono4.mve"
-        };
+        private static readonly string[] required = Fs2RetailFiles.Required;
+        private static readonly string[] optional = Fs2RetailFiles.Optional;
 
         private List<IStorageFile> filePaths = new List<IStorageFile>();
         private IStorageFile? compressedFile;
@@ -57,6 +40,10 @@ namespace Knossos.NET.ViewModels
         public bool CanSelectSource => !IsInstalling && !IsSelectingSource;
         [ObservableProperty]
         internal bool canInstall = false;
+        [ObservableProperty]
+        internal IReadOnlyList<string> installationLibraries = Array.Empty<string>();
+        [ObservableProperty]
+        internal string? selectedInstallationLibrary;
         [ObservableProperty]
         internal int progressMax = 100;
         [ObservableProperty]
@@ -73,12 +60,25 @@ namespace Knossos.NET.ViewModels
 
         public Fs2InstallerViewModel() 
         { 
+            LoadInstallationLibraries();
         }
 
-        public Fs2InstallerViewModel(KnossosWindow window)
+        public Fs2InstallerViewModel(KnossosWindow window) : this()
         {
             this.window = window;
         }
+
+        private void LoadInstallationLibraries()
+        {
+            var previous = SelectedInstallationLibrary;
+            InstallationLibraries = Knossos.GetLibraryPaths();
+            SelectedInstallationLibrary = previous == null ? InstallationLibraries.FirstOrDefault() :
+                InstallationLibraries.FirstOrDefault(path => Knossos.LibraryPathComparer.Equals(path, previous)) ??
+                InstallationLibraries.FirstOrDefault();
+        }
+
+        private static bool IsInstallationLibraryAvailable(string path) =>
+            Directory.Exists(path) && Knossos.GetLibraryPaths().Contains(path, Knossos.LibraryPathComparer);
 
         /// <summary>
         /// The main install process
@@ -87,9 +87,13 @@ namespace Knossos.NET.ViewModels
         {
             if (!CanSelectSource || !CanInstall)
                 return;
-            if(Knossos.GetKnossosLibraryPath() == null)
+            var library = SelectedInstallationLibrary;
+            if (library == null || !IsInstallationLibraryAvailable(library))
             {
-                await MessageBox.Show(MainWindow.instance, "The KnossosNET library path is not set, first set the library path in the settings tab before installing FS2 Retail.", "Library path is null", MessageBox.MessageBoxButtons.OK);
+                LoadInstallationLibraries();
+                await MessageBox.Show(MainWindow.instance,
+                    "Select an available library or add one in Global Settings before installing FreeSpace 2 Retail.",
+                    "Library unavailable", MessageBox.MessageBoxButtons.OK);
                 return;
             }
             
@@ -109,7 +113,10 @@ namespace Knossos.NET.ViewModels
                 try
                 {
                     Dispatcher.UIThread.Invoke(new Action(() => { ProgressCurrent = 0; }));
-                    var fs2Path = Path.Combine(Knossos.GetKnossosLibraryPath()!, "FS2");
+                    if (!IsInstallationLibraryAvailable(library))
+                        throw new IOException($"The selected library at '{library}' is no longer available.");
+                    var fs2Path = Path.Combine(library, "FS2");
+                    Fs2RetailFiles.CheckDestination(fs2Path, Fs2RetailFiles.KnownInstalledPaths());
                     var moviesPath = Path.Combine(fs2Path, "data", "movies");
                     var playersPath = Path.Combine(fs2Path, "data", "players");
                     Directory.CreateDirectory(fs2Path);
@@ -235,11 +242,11 @@ namespace Knossos.NET.ViewModels
                     fs2Mod.version = "1.20.0";
                     fs2Mod.stability = "stable"; //wut?
                     fs2Mod.description = "[b][i]The year is 2367, thirty two years after the Great War. Or at least that is what YOU thought was the Great War. The endless line of Shivan capital ships, bombers and fighters with super advanced technology was nearly overwhelming.\n\nAs the Terran and Vasudan races finish rebuilding their decimated societies, a disturbance lurks in the not-so-far reaches of the Gamma Draconis system.\n\nYour nemeses have arrived... and they are wondering what happened to their scouting party.[/i][/b]\n\n[hr]FreeSpace 2 is a 1999 space combat simulation computer game developed by Volition as the sequel to Descent: FreeSpace \u2013 The Great War. It was completed ahead of schedule in less than a year, and released to very positive reviews.\n\nThe game continues on the story from Descent: FreeSpace, once again thrusting the player into the role of a pilot fighting against the mysterious aliens, the Shivans. While defending the human race and its alien Vasudan allies, the player also gets involved in putting down a rebellion. The game features large numbers of fighters alongside gigantic capital ships in a battlefield fraught with beams, shells and missiles in detailed star systems and nebulae.";
-                    fs2Mod.tile = "kn_tile.png";
-                    fs2Mod.banner = "kn_banner.png";
+                    fs2Mod.tile = Fs2RetailFiles.Tile;
+                    fs2Mod.banner = Fs2RetailFiles.Banner;
                     fs2Mod.releaseThread = "http://www.hard-light.net/forums/index.php";
                     fs2Mod.videos = new string[] { "https://www.youtube.com/watch?v=ufViyhrXzTE" };
-                    fs2Mod.screenshots = new string[] { "kn_screen_0.jpg", "kn_screen_1.jpg", "kn_screen_2.jpg", "kn_screen_3.jpg", "kn_screen_4.jpg", "kn_screen_5.jpg", "kn_screen_6.jpg", "kn_screen_7.jpg", "kn_screen_8.jpg", "kn_screen_9.jpg", "kn_screen_10.jpg", "kn_screen_11.jpg" };
+                    fs2Mod.screenshots = Fs2RetailFiles.Screenshots.ToArray();
                     fs2Mod.firstRelease = "1999-09-30";
                     fs2Mod.lastUpdate = "1999-12-03";
                     fs2Mod.notes = string.Empty;
@@ -255,7 +262,7 @@ namespace Knossos.NET.ViewModels
                     fs2Pkg.dependencies = new ModDependency[] { fs2Dep };
                     fs2Mod.packages.Add(fs2Pkg);
                     fs2Mod.modSource = ModSource.local;
-                    foreach (var name in new[] { "kn_tile.png", "kn_banner.png" }.Concat(fs2Mod.screenshots))
+                    foreach (var name in new[] { Fs2RetailFiles.Tile, Fs2RetailFiles.Banner }.Concat(fs2Mod.screenshots))
                     {
                         using var source = AssetLoader.Open(new Uri($"avares://Knossos.NET/Assets/fs2_res/{name}"));
                         using var destination = CreateInstallFile(Path.Combine(fs2Path, name));
@@ -265,7 +272,7 @@ namespace Knossos.NET.ViewModels
                     // Metadata marks a completed installation. Write it only after
                     // every data and asset stream has closed successfully. SaveJson()
                     // swallows write errors, so serialize here and let them abort.
-                    using (var metadata = CreateInstallFile(Path.Combine(fs2Path, "mod.json")))
+                    using (var metadata = CreateInstallFile(Path.Combine(fs2Path, Fs2RetailFiles.Metadata)))
                     {
                         JsonSerializer.Serialize(metadata, fs2Mod, new JsonSerializerOptions
                         {
