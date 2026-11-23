@@ -78,6 +78,9 @@ static partial class Program
                 !Directory.Exists(otherVersion.fullPath),
                 "the queued move retains the payload and updates the installed version's path");
 
+            RetailMoveChecks(first, second, scan);
+            BuildLibraryChecks(output, first, second);
+
             settings.libraryPaths = new();
             normalize.Invoke(null, new object[] { settings });
             Check(Knossos.NET.Knossos.GetLibraryPaths().Count == 0 && settings.basePath == null,
@@ -87,5 +90,77 @@ static partial class Program
         {
             Knossos.NET.Knossos.globalSettings = previousSettings;
         }
+    }
+
+    static void RetailMoveChecks(string first, string second, MethodInfo scan)
+    {
+        var retail = Make("FS2", "1.20.0");
+        retail.parent = "FS2";
+        retail.fullPath = first;
+        retail.SaveJson();
+
+        var child = Make("retail-child-fixture", "1.0.0");
+        child.parent = "FS2";
+        child.type = ModType.mod;
+        var childFolder = Directory.CreateDirectory(Path.Combine(first, child.id)).FullName;
+        child.fullPath = childFolder;
+        child.SaveJson();
+        File.WriteAllText(Path.Combine(childFolder, "child.vp"), "mod content");
+        File.WriteAllText(Path.Combine(first, "SDL2.dll"), "unrelated file");
+
+        string[] retailPaths = { "root_fs2.vp", "kn_tile.png", "kn_banner.png", "kn_screen_0.jpg",
+            "mod_settings.json", Path.Combine("data", "movies", "intro.mve"),
+            Path.Combine("data", "tables", "retail.tbl") };
+        foreach (var path in retailPaths)
+        {
+            var file = Path.Combine(first, path);
+            Directory.CreateDirectory(Path.GetDirectoryName(file)!);
+            File.WriteAllText(file, path == "mod_settings.json" ? "{}" : path);
+        }
+        Directory.CreateDirectory(Path.Combine(first, "data", "empty"));
+
+        var destination = Path.Combine(second, "FS2");
+        Directory.CreateDirectory(Path.Combine(destination, "data", "tables"));
+        var destinationContent = Path.Combine(destination, "data", "tables", "existing.tbl");
+        File.WriteAllText(destinationContent, "already at destination");
+        var destinationMod = Directory.CreateDirectory(Path.Combine(destination, "other-mod")).FullName;
+        File.WriteAllText(Path.Combine(destinationMod, "other.vp"), "destination mod content");
+
+        Pump((Task)scan.Invoke(null, new object[] { first, true, 0 })!);
+        var installed = Knossos.NET.Knossos.GetInstalledMod(retail.id, retail.version)!;
+        Check(Path.TrimEndingDirectorySeparator(installed.fullPath) == first,
+            "the scanner finds legacy Retail FS2 at the library root");
+
+        var conflictingPath = Path.Combine(destination, "data", "tables", "retail.tbl");
+        File.WriteAllText(conflictingPath, "conflicting content");
+        using (var conflictingMove = new ModPropertiesViewModel(installed))
+        {
+            conflictingMove.MoveCommand.Execute(null);
+            Pump(conflictingMove.ConfirmMoveCommand.ExecuteAsync(null));
+            Check(conflictingMove.Versions.Status.Contains("already contains") &&
+                Path.TrimEndingDirectorySeparator(installed.fullPath) == first &&
+                File.Exists(Path.Combine(first, "mod.json")) && !File.Exists(Path.Combine(destination, "mod.json")) &&
+                File.ReadAllText(conflictingPath) == "conflicting content" &&
+                retailPaths.All(path => File.Exists(Path.Combine(first, path))),
+                "a conflicting data file aborts the retail move with both libraries intact");
+        }
+        File.Delete(conflictingPath);
+
+        using var properties = new ModPropertiesViewModel(installed);
+        properties.MoveCommand.Execute(null);
+        Check(properties.IsMoveModal && properties.SelectedMoveLibrary == second,
+            "legacy Retail FS2 can select the other library as its destination");
+        Pump(properties.ConfirmMoveCommand.ExecuteAsync(null));
+        Check(Path.TrimEndingDirectorySeparator(installed.fullPath) == destination,
+            "the queued retail move updates the installed path: " + properties.Versions.Status);
+        Check(File.Exists(Path.Combine(destination, "mod.json")) && !File.Exists(Path.Combine(first, "mod.json")) &&
+            retailPaths.All(path => File.Exists(Path.Combine(destination, path)) && !File.Exists(Path.Combine(first, path))) &&
+            File.ReadAllText(conflictingPath) == Path.Combine("data", "tables", "retail.tbl") &&
+            Directory.Exists(Path.Combine(destination, "data", "empty")) && !Directory.Exists(Path.Combine(first, "data")),
+            "retail packs, images, metadata and the entire data tree move to the new library");
+        Check(File.Exists(Path.Combine(childFolder, "mod.json")) && File.Exists(Path.Combine(childFolder, "child.vp")) &&
+            File.Exists(Path.Combine(first, "SDL2.dll")) && File.Exists(Path.Combine(destinationMod, "other.vp")) &&
+            File.ReadAllText(destinationContent) == "already at destination" && !Directory.Exists(Path.Combine(destination, child.id)),
+            "the retail move preserves installed mods and unrelated files in both libraries");
     }
 }

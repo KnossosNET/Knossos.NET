@@ -882,7 +882,8 @@ static partial class Program
         if (args.Contains("--launch-options")) { LaunchOptionsChecks(output); LaunchViewChecks(output); }
         else if (args.Contains("--local-files")) LocalFilesChecks(output);
         else if (args.Contains("--libraries")) LibraryChecks(output);
-        else { LocalFilesChecks(output); PlannerChecks(); EnginePackageChecks(); IncrementalChecks(output); BackupChecks(output); TaskChecks(output); SessionChecks(output); DeletionChecks(output); QueueChecks(output); SharedBuildChecks(output); HiddenEngineChecks(output); ViewChecks(output); LaunchOptionsChecks(output); TextEditorChecks(output); LaunchViewChecks(output); }
+        else if (args.Contains("--missing-dependency")) MissingDependencyChecks(output);
+        else { LocalFilesChecks(output); PlannerChecks(); EnginePackageChecks(); IncrementalChecks(output); BackupChecks(output); TaskChecks(output); SessionChecks(output); DeletionChecks(output); QueueChecks(output); MissingDependencyChecks(output); SharedBuildChecks(output); HiddenEngineChecks(output); ViewChecks(output); LaunchOptionsChecks(output); TextEditorChecks(output); LaunchViewChecks(output); }
         Console.WriteLine("All " + assertions + " checks passed. Preview images: " + output);
     }
 }

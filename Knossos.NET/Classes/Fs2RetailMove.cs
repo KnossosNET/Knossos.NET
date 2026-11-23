@@ -11,12 +11,15 @@ namespace Knossos.NET.Classes
 {
     internal static class Fs2RetailMove
     {
+        internal const string DataDirectory = "data";
         private static readonly StringComparer fileNames = Fs2RetailFiles.FileNameComparer;
 
         private sealed record RetailFile(string RelativePath, long Length, DateTime LastWriteTimeUtc)
         {
             internal bool IsMetadata => fileNames.Equals(RelativePath, Fs2RetailFiles.Metadata);
         }
+
+        private sealed record RetailDirectory(string RelativePath, DateTime LastWriteTimeUtc);
 
         internal static bool IsRetail(Mod mod) => mod.id == "FS2" && mod.parent == "FS2" && mod.type == ModType.tc;
 
@@ -27,29 +30,43 @@ namespace Knossos.NET.Classes
             if (Knossos.LibraryPathComparer.Equals(source, destination))
                 throw new IOException("FreeSpace 2 is already in this library.");
 
-            var files = FindRetailFiles(source);
+            var rootFiles = FindRootFiles(source);
+            var dataFiles = new List<RetailFile>();
+            var dataDirectories = new List<RetailDirectory>();
+            CollectData(source, dataFiles, dataDirectories, token);
+            var files = rootFiles.Concat(dataFiles).OrderBy(file => file.IsMetadata).ToArray();
             var destinationPaths = files.Select(file => file.RelativePath);
             Fs2RetailFiles.CheckDestination(destination, destinationPaths);
             token.ThrowIfCancellationRequested();
 
-            var transactionName = ".knossos-retail-move-" + Guid.NewGuid().ToString("N");
-            var sourceTransaction = Path.Combine(Path.GetDirectoryName(source)!, transactionName);
+            var transactionName = ModLibraryMove.TemporaryDirectoryPrefix + "retail-" + Guid.NewGuid().ToString("N");
+            var sourceTransaction = Path.Combine(source, transactionName);
             var destinationTransaction = Path.Combine(Path.GetDirectoryName(destination)!, transactionName);
             // Store inactive copies beneath the library scanner's discovery depth.
             var backup = Path.Combine(sourceTransaction, "files", "original");
             var stage = Path.Combine(destinationTransaction, "files", "staged");
+            var sourceData = Path.Combine(source, DataDirectory);
+            var backupData = Path.Combine(backup, DataDirectory);
             var published = new List<RetailFile>();
             var originals = new List<RetailFile>();
+            var createdDirectories = new List<string>();
+            bool dataBackedUp = false;
             bool keepRecoveryFiles = false;
             try
             {
                 await StageAsync(source, stage, files, token, progress).ConfigureAwait(false);
                 Fs2RetailFiles.CheckDestination(destination, destinationPaths);
-                CheckOriginals(source, files);
+                CheckOriginals(source, files, dataDirectories);
                 token.ThrowIfCancellationRequested();
 
-                // Publish the known retail files without overwriting any existing files.
+                // Publish the retail files and data tree without overwriting existing content.
                 // The installation becomes visible to Knossos when its metadata arrives.
+                CreateDestinationDirectory(destination, createdDirectories);
+                foreach (var directory in dataDirectories)
+                {
+                    Fs2RetailFiles.EnsureOrdinaryDirectoryPath(destination, directory.RelativePath);
+                    CreateDestinationDirectory(Path.Combine(destination, directory.RelativePath), createdDirectories);
+                }
                 foreach (var file in files)
                 {
                     Rename(file, stage, destination);
@@ -58,17 +75,29 @@ namespace Knossos.NET.Classes
 
                 // Keep a valid destination throughout source cleanup. Removing the
                 // original metadata first also leaves child mods in FS2 discoverable.
-                foreach (var file in files.Reverse())
+                foreach (var file in rootFiles.Reverse())
                 {
                     Rename(file, source, backup);
                     originals.Add(file);
                 }
+                if (dataDirectories.Count > 0)
+                {
+                    Directory.Move(sourceData, backupData);
+                    dataBackedUp = true;
+                    CheckOriginals(backup, dataFiles, dataDirectories);
+                }
             }
             catch (Exception moveError)
             {
-                var recoveryErrors = Restore(originals, backup, source);
+                var recoveryErrors = new List<Exception>();
+                if (dataBackedUp)
+                {
+                    try { Directory.Move(backupData, sourceData); }
+                    catch (Exception error) { recoveryErrors.Add(error); }
+                }
+                Restore(originals, backup, source, recoveryErrors);
                 if (recoveryErrors.Count == 0)
-                    recoveryErrors = Restore(published, destination, stage);
+                    Restore(published, destination, stage, recoveryErrors);
 
                 if (recoveryErrors.Count > 0)
                 {
@@ -79,40 +108,36 @@ namespace Knossos.NET.Classes
                         sourceTransaction + "' and '" + destinationTransaction + "'.",
                         new AggregateException(recoveryErrors));
                 }
+                foreach (var directory in createdDirectories.AsEnumerable().Reverse())
+                    CleanDirectory(directory, recursive: false);
                 throw;
             }
             finally
             {
                 if (!keepRecoveryFiles)
                 {
-                    CleanTransaction(sourceTransaction);
-                    CleanTransaction(destinationTransaction);
+                    CleanDirectory(sourceTransaction);
+                    CleanDirectory(destinationTransaction);
                 }
             }
             progress(1);
         }
 
-        private static RetailFile[] FindRetailFiles(string source)
+        private static RetailFile[] FindRootFiles(string source)
         {
             var found = new List<RetailFile>();
-
-            foreach (var group in Fs2RetailFiles.KnownInstalledPaths().GroupBy(path => Path.GetDirectoryName(path) ?? string.Empty))
+            Fs2RetailFiles.EnsureOrdinaryDirectoryPath(source, string.Empty);
+            var wanted = Fs2RetailFiles.KnownInstalledPaths()
+                .Where(path => string.IsNullOrEmpty(Path.GetDirectoryName(path))).ToHashSet(fileNames);
+            var matched = new HashSet<string>(fileNames);
+            foreach (var file in new DirectoryInfo(source).EnumerateFiles())
             {
-                var directory = Path.Combine(source, group.Key);
-                Fs2RetailFiles.EnsureOrdinaryDirectoryPath(source, group.Key);
-                if (!Directory.Exists(directory)) continue;
-
-                var wanted = group.Select(Path.GetFileName).ToHashSet(fileNames);
-                var matched = new HashSet<string>(fileNames);
-                foreach (var entry in new DirectoryInfo(directory).EnumerateFiles())
-                {
-                    if (!wanted.Contains(entry.Name)) continue;
-                    if (!matched.Add(entry.Name))
-                        throw new IOException($"Several FreeSpace 2 files in '{directory}' match '{entry.Name}'.");
-                    if ((entry.Attributes & FileAttributes.ReparsePoint) != 0)
-                        throw new IOException($"Cannot move a linked FreeSpace 2 file at '{entry.FullName}'.");
-                    found.Add(new RetailFile(Path.Combine(group.Key, entry.Name), entry.Length, entry.LastWriteTimeUtc));
-                }
+                if (!wanted.Contains(file.Name)) continue;
+                if (!matched.Add(file.Name))
+                    throw new IOException($"Several FreeSpace 2 files in '{source}' match '{file.Name}'.");
+                if ((file.Attributes & FileAttributes.ReparsePoint) != 0)
+                    throw new IOException($"Cannot move a linked FreeSpace 2 file at '{file.FullName}'.");
+                found.Add(new RetailFile(file.Name, file.Length, file.LastWriteTimeUtc));
             }
 
             if (!found.Any(file => file.IsMetadata) || !found.Any(file =>
@@ -120,6 +145,33 @@ namespace Knossos.NET.Classes
                 throw new IOException("The FreeSpace 2 installation is missing its metadata or root data pack.");
 
             return found.OrderBy(file => file.IsMetadata).ToArray();
+        }
+
+        private static void CollectData(string source, List<RetailFile> files, List<RetailDirectory> directories,
+            CancellationToken token)
+        {
+            Fs2RetailFiles.EnsureOrdinaryDirectoryPath(source, DataDirectory);
+            var data = new DirectoryInfo(Path.Combine(source, DataDirectory));
+            if (!data.Exists) return;
+
+            var pending = new Stack<DirectoryInfo>();
+            pending.Push(data);
+            while (pending.TryPop(out var directory))
+            {
+                token.ThrowIfCancellationRequested();
+                var path = Path.GetRelativePath(source, directory.FullName);
+                Fs2RetailFiles.EnsureOrdinaryDirectoryPath(source, path);
+                directories.Add(new RetailDirectory(path, directory.LastWriteTimeUtc));
+                foreach (var entry in directory.EnumerateFileSystemInfos())
+                {
+                    if ((entry.Attributes & FileAttributes.ReparsePoint) != 0)
+                        throw new IOException($"Cannot move a linked FreeSpace 2 path at '{entry.FullName}'.");
+                    if (entry is DirectoryInfo child)
+                        pending.Push(child);
+                    else if (entry is FileInfo file)
+                        files.Add(new RetailFile(Path.Combine(path, file.Name), file.Length, file.LastWriteTimeUtc));
+                }
+            }
         }
 
         private static async Task StageAsync(string source, string stage, IReadOnlyList<RetailFile> files,
@@ -164,8 +216,15 @@ namespace Knossos.NET.Classes
             }
         }
 
-        private static void CheckOriginals(string source, IEnumerable<RetailFile> files)
+        private static void CheckOriginals(string source, IEnumerable<RetailFile> files, IEnumerable<RetailDirectory> directories)
         {
+            foreach (var directory in directories)
+            {
+                Fs2RetailFiles.EnsureOrdinaryDirectoryPath(source, directory.RelativePath);
+                var original = new DirectoryInfo(Path.Combine(source, directory.RelativePath));
+                if (!original.Exists || original.LastWriteTimeUtc != directory.LastWriteTimeUtc)
+                    throw new IOException($"'{original.FullName}' changed while it was being copied. Try the move again.");
+            }
             foreach (var file in files)
             {
                 var original = new FileInfo(Path.Combine(source, file.RelativePath));
@@ -173,6 +232,13 @@ namespace Knossos.NET.Classes
                     original.Length != file.Length || original.LastWriteTimeUtc != file.LastWriteTimeUtc)
                     throw new IOException($"'{original.FullName}' changed while it was being copied. Try the move again.");
             }
+        }
+
+        private static void CreateDestinationDirectory(string path, ICollection<string> createdDirectories)
+        {
+            if (Directory.Exists(path)) return;
+            Directory.CreateDirectory(path);
+            createdDirectories.Add(path);
         }
 
         private static void Rename(RetailFile file, string source, string destination)
@@ -185,9 +251,8 @@ namespace Knossos.NET.Classes
             File.Move(Path.Combine(source, file.RelativePath), target);
         }
 
-        private static List<Exception> Restore(IEnumerable<RetailFile> files, string source, string destination)
+        private static void Restore(IEnumerable<RetailFile> files, string source, string destination, List<Exception> errors)
         {
-            var errors = new List<Exception>();
             foreach (var file in files.Reverse())
             {
                 // Keep metadata unpublished if its associated source files could not be restored.
@@ -199,19 +264,19 @@ namespace Knossos.NET.Classes
                     if (file.IsMetadata) break;
                 }
             }
-            return errors;
         }
 
-        private static void CleanTransaction(string path)
+        private static void CleanDirectory(string path, bool recursive = true)
         {
             try
             {
-                if (Directory.Exists(path)) Directory.Delete(path, recursive: true);
+                if (Directory.Exists(path) && (recursive || !Directory.EnumerateFileSystemEntries(path).Any()))
+                    Directory.Delete(path, recursive);
             }
             catch (Exception error)
             {
                 Log.Add(Log.LogSeverity.Warning, nameof(Fs2RetailMove),
-                    $"Unable to remove the FreeSpace 2 staging folder '{path}': {error.Message}");
+                    $"Unable to clean up the FreeSpace 2 move folder '{path}': {error.Message}");
             }
         }
     }

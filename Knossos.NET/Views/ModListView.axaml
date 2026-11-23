@@ -12,7 +12,7 @@
 		<vm:ModListViewModel/>
 	</Design.DataContext>
 	
-	<Grid RowDefinitions="Auto,Auto,*">
+	<Grid RowDefinitions="Auto,*">
 		<Grid Grid.Row="0">
 			<WrapPanel Margin="10" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
 				<Button Name="FilterFlyout" ToolTip.Tip="Sort by and filters" Margin="0,0,5,0" HorizontalAlignment="Right">
@@ -36,11 +36,22 @@
 									<Expander.Header>
 										Filters
 									</Expander.Header>
-									<ScrollViewer MaxWidth="650" MaxHeight="700">
-										<WrapPanel Name="FilterPanel" MaxWidth="630">
+									<ScrollViewer MaxWidth="570" MaxHeight="700">
+										<WrapPanel Name="FilterPanel" MaxWidth="550">
 											<!--Buttons to be added by code on the view-->
 										</WrapPanel>
 									</ScrollViewer>
+								</Expander>
+								<Expander Header="Library" Margin="2" Width="220" IsExpanded="True" VerticalAlignment="Top"
+										  IsVisible="{Binding ShowLibraryFilter}">
+									<ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding LibraryFilters}"
+											  SelectedItem="{Binding SelectedLibraryFilter, Mode=TwoWay}" AutomationProperties.Name="Filter by library">
+										<ComboBox.ItemTemplate>
+											<DataTemplate x:DataType="vm:LibraryFilterOption">
+												<TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}"/>
+											</DataTemplate>
+										</ComboBox.ItemTemplate>
+									</ComboBox>
 								</Expander>
 							</WrapPanel>
 						</Flyout>
@@ -80,16 +91,7 @@
 				</Button>
 			</WrapPanel>
 		</Grid>
-		<ComboBox Grid.Row="1" Margin="10,0,10,10" HorizontalAlignment="Stretch" MaxWidth="560"
-				  IsVisible="{Binding ShowLibraryFilter}" ItemsSource="{Binding LibraryFilters}"
-				  SelectedItem="{Binding SelectedLibraryFilter, Mode=TwoWay}" AutomationProperties.Name="Filter by library">
-			<ComboBox.ItemTemplate>
-				<DataTemplate x:DataType="vm:LibraryFilterOption">
-					<TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}"/>
-				</DataTemplate>
-			</ComboBox.ItemTemplate>
-		</ComboBox>
-		<ScrollViewer Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AllowAutoHide="False">
+		<ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AllowAutoHide="False">
 			<StackPanel>
 				<StackPanel IsVisible="{Binding Sorting}">
 					<v:LoadingIconView Width="80" Height="80" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="50,50,0,0" Content="{Binding LoadingAnimation}"/>

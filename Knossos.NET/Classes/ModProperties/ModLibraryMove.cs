@@ -16,22 +16,26 @@ namespace Knossos.NET.Classes
         {
             var source = Path.TrimEndingDirectorySeparator(Path.GetFullPath(mod.fullPath));
             var sourceLibrary = Knossos.GetLibraryForPath(source);
-            if (sourceLibrary == null || Knossos.LibraryPathComparer.Equals(sourceLibrary, source) ||
+            var retail = Fs2RetailMove.IsRetail(mod);
+            if (sourceLibrary == null || (!retail && Knossos.LibraryPathComparer.Equals(sourceLibrary, source)) ||
                 !Knossos.IsPathInLibrary(sourceLibrary, source))
                 throw new IOException($"'{source}' is not a mod folder within a configured library.");
             CheckLibrary(library, libraries);
             if (Knossos.LibraryPathComparer.Equals(sourceLibrary, library))
                 return source;
 
-            var retail = Fs2RetailMove.IsRetail(mod);
             var destination = Path.Combine(library, retail ? "FS2" : Path.GetRelativePath(sourceLibrary, source));
             if (!Knossos.IsPathInLibrary(library, destination))
                 throw new IOException($"'{destination}' is outside the destination library.");
             if (!retail && (File.Exists(destination) || Directory.Exists(destination)))
                 throw new IOException($"'{destination}' already exists.");
-            if (!retail && Knossos.GetInstalledModList(null).Any(other => !ReferenceEquals(other, mod) &&
-                KnUtils.IsSubPath(source, Path.GetRelativePath(source, other.fullPath))))
-                throw new IOException($"'{source}' contains other installed mods.");
+            var movedFolder = retail ? Path.Combine(source, Fs2RetailMove.DataDirectory) : source;
+            foreach (var other in Knossos.GetInstalledModList(null).Where(other => !ReferenceEquals(other, mod)))
+            {
+                var relative = Path.GetRelativePath(movedFolder, other.fullPath);
+                if (relative == "." || KnUtils.IsSubPath(movedFolder, relative))
+                    throw new IOException($"'{movedFolder}' contains other installed mods.");
+            }
 
             var earlierLibraries = libraries.TakeWhile(path => !Knossos.LibraryPathComparer.Equals(path, library)).Append(library);
             var shadowingCopy = Knossos.GetDuplicateModPaths(mod).FirstOrDefault(path =>

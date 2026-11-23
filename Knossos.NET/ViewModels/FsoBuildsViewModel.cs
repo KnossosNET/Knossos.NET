@@ -61,7 +61,14 @@ namespace Knossos.NET.ViewModels
             var list = stability switch { FsoStability.Stable => StableItems, FsoStability.RC => RcItems,
                 FsoStability.Nightly => NightlyItems, _ => CustomItems };
             var item = list.FirstOrDefault(b => b.CompareIdAndVersionToMod(mod));
-            return item != null && await item.DownloadBuildExternalAsync(mod, reportError: reportError, operation: operation);
+            // A dependency can be resolved before its build appears in Engine.
+            var installer = item ?? new FsoBuildItemViewModel(new FsoBuild(mod));
+            if (!await installer.DownloadBuildExternalAsync(mod, reportError: reportError, operation: operation))
+                return false;
+
+            if (item == null && installer.build is { } installed)
+                await Dispatcher.UIThread.InvokeAsync(() => UpdateBuildUI(installed));
+            return true;
         }
 
         public void RelayInstallBuild(Mod mod)

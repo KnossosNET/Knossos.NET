@@ -66,7 +66,7 @@ namespace Knossos.NET.Classes
                     .ConfigureAwait(false);
                 if (maximumVersion == 0)
                 {
-                    return new FsoResult(false, $"This mod uses content from multiple libraries, and FSO {build.version} does not report bootstrap support. " +
+                    return new FsoResult(false, $"This mod uses content from multiple libraries, and FSO {build.version} does not report support for multiple libraries. " +
                         "Select a compatible engine build or move the mod and its dependencies into the same library.");
                 }
 
@@ -87,9 +87,10 @@ namespace Knossos.NET.Classes
                     ? await Wine.ConvertPathsAsync(workingFolder, wineArch.Value, toWindows: true,
                         launch.Roots.Select(Path.GetFullPath).ToArray()).ConfigureAwait(false)
                     : launch.Roots.Select(FormatEnginePath).ToArray();
+                var version = Math.Min(maximumVersion, LatestSupportedVersion);
                 var contents = JsonSerializer.Serialize(new
                 {
-                    version = Math.Min(maximumVersion, LatestSupportedVersion),
+                    version,
                     mod_id = modId,
                     workfolder = (string?)null,
                     roots
@@ -103,6 +104,11 @@ namespace Knossos.NET.Classes
                     WriteFileAtomically(path, contents);
                 }
                 Log.Add(Log.LogSeverity.Information, "FsoBootstrap", "Used bootstrap file: " + path);
+                Log.Add(Log.LogSeverity.Information, "FsoBootstrap", $"Using bootstrap version: {version}");
+                Log.Add(Log.LogSeverity.Information, "FsoBootstrap", $"Using mod ID: {modId}");
+                Log.Add(Log.LogSeverity.Information, "FsoBootstrap", $"Using roots (in order, count: {roots.Length})");
+                for (var index = 0; index < roots.Length; index++)
+                    Log.Add(Log.LogSeverity.Information, "FsoBootstrap", $"Root {index + 1}: {roots[index]}");
 
                 var result = await build.RunFSO(executableType, cmdline, workingFolder).ConfigureAwait(false);
                 if (!result.IsSuccess)

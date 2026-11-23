@@ -246,27 +246,16 @@ namespace Knossos.NET.ViewModels
 
             await UpdateBuildCompatibility(build.modData).ConfigureAwait(false);
             await Dispatcher.UIThread.InvokeAsync(async () => {
-                bool installInDevMode = false;
-                if (HasWriteAccess)
-                {
-                    var result = await MessageBox.Show(MainWindow.instance,
-                        "You have developer access to the FSO Build: " + build.ToString() + ".\n\n" +
-                        "Choose normal mode to install a package for your computer, or developer mode to install all platform packages for editing and uploading.",
-                        "Install FSO engine build", MessageBox.MessageBoxButtons.InstallBuildModes);
-                    if (result != MessageBox.MessageBoxResult.InstallNormal && result != MessageBox.MessageBoxResult.InstallDeveloper)
-                    {
-                        return;
-                    }
-                    installInDevMode = result == MessageBox.MessageBoxResult.InstallDeveloper;
-                }
-                else
-                {
-                    var result = await MessageBox.Show(MainWindow.instance, "This will download and install the FSO Build: " + build.ToString() + ". Do you want to continue?", "Install FSO engine build", MessageBox.MessageBoxButtons.YesNo);
-                    if (result != MessageBox.MessageBoxResult.Yes)
-                    {
-                        return;
-                    }
-                }
+                var (result, libraryPath) = await MessageBox.ShowWithLibrary(MainWindow.instance,
+                    HasWriteAccess
+                        ? $"You have developer access to {build}.\n\nChoose normal mode to install a package for your computer, or developer mode to install all platform packages for editing and uploading."
+                        : $"This will download and install {build}. Do you want to continue?",
+                    "Install FSO engine build",
+                    HasWriteAccess ? MessageBox.MessageBoxButtons.InstallBuildModes : MessageBox.MessageBoxButtons.YesNo);
+                if (result is not (MessageBox.MessageBoxResult.Yes or MessageBox.MessageBoxResult.InstallNormal or MessageBox.MessageBoxResult.InstallDeveloper))
+                    return;
+
+                bool installInDevMode = result == MessageBox.MessageBoxResult.InstallDeveloper;
 
                 //Only an explicit developer-mode install may bypass OS/CPU compatibility.
                 if (!IsValid && !installInDevMode)
@@ -277,7 +266,8 @@ namespace Knossos.NET.ViewModels
 
                 IsDownloading = true;
                 cancellationTokenSource = new CancellationTokenSource();
-                FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build, this, build.modData, installInDevMode: installInDevMode)!;
+                FsoBuild? newBuild = await TaskViewModel.Instance?.InstallBuild(build, this, build.modData,
+                    installInDevMode: installInDevMode, libraryPath: libraryPath)!;
                 if (newBuild != null)
                 {
                     //Install completed

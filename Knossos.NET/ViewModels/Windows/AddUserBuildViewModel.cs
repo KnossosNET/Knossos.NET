@@ -60,9 +60,16 @@ namespace Knossos.NET.ViewModels
         internal int copyProgress = 0;
         [ObservableProperty]
         internal int maxFiles = 100;
+        [ObservableProperty]
+        internal bool isCopying;
 
         [ObservableProperty]
         internal string buildNewPath = string.Empty;
+        [ObservableProperty]
+        internal string? selectedLibrary;
+
+        internal IReadOnlyList<string> LibraryPaths { get; } = Knossos.GetLibraryPaths();
+        internal bool ShowLibrarySelector => LibraryPaths.Count > 1;
 
         [ObservableProperty]
         internal bool collapseData = false;
@@ -75,22 +82,27 @@ namespace Knossos.NET.ViewModels
         private string? folderPath = null;
         private KnossosWindow? window = null;
 
-        public AddUserBuildViewModel() 
-        {
-        }
+        public AddUserBuildViewModel() => SelectedLibrary = LibraryPaths.FirstOrDefault();
 
-        public AddUserBuildViewModel(KnossosWindow window)
+        public AddUserBuildViewModel(KnossosWindow window) : this()
         {
             this.window = window;
         }
+
+        partial void OnSelectedLibraryChanged(string? value) => UpdateBuildNewPath();
+
+        private void UpdateBuildNewPath() =>
+            BuildNewPath = SelectedLibrary != null && buildId.Length > 0
+                ? Path.Combine(SelectedLibrary, "bin", buildId)
+                : string.Empty;
 
         internal async void OpenFolderCommand()
         {
             try
             {
-                folderPath = await OpenDir();
-                if (folderPath != null)
+                if (await OpenDir() is { } sourceFolder)
                 {
+                    folderPath = sourceFolder;
                     ScanResults = "Folder:\n" + folderPath;
                     List<string> execs;
                     if (KnUtils.IsWindows)
@@ -181,7 +193,7 @@ namespace Knossos.NET.ViewModels
                     }
                     Stage2 = true;
                     buildId = @"user_build_" + KnUtils.GetTimestamp(DateTime.Now);
-                    BuildNewPath = Knossos.GetKnossosLibraryPath()+ Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + buildId;
+                    UpdateBuildNewPath();
                 }
             }catch(Exception ex)
             {
@@ -340,21 +352,37 @@ namespace Knossos.NET.ViewModels
 
         internal async void AddCommand()
         {
-            if(!Verify())
+            if(IsCopying || !Verify())
             {
                 return;
             }
             
             if (folderPath != null)
             {
+                var library = SelectedLibrary;
+                var destination = BuildNewPath;
+                if (library == null || !Knossos.GetLibraryPaths().Contains(library, Knossos.LibraryPathComparer) ||
+                    !Directory.Exists(library))
+                {
+                    await MessageBox.Show(MainWindow.instance, "Choose an available library before importing this build.",
+                        "Library unavailable", MessageBox.MessageBoxButtons.OK);
+                    return;
+                }
+                if (!Knossos.IsPathInLibrary(library, destination) ||
+                    KnUtils.IsSubPath(folderPath, Path.GetRelativePath(folderPath, destination)))
+                {
+                    await MessageBox.Show(MainWindow.instance, "The destination must be inside the selected library and outside the source folder.",
+                        "Invalid import destination", MessageBox.MessageBoxButtons.OK);
+                    return;
+                }
+
                 CollapseData = true;
                 CollapseExecs = true;
                 CollapseArch = true;
-                string[] ignoreList = { ".pdb", ".lib", ".exp", ".a", ".map", ".vp", ".vpc" };
-                if(await KnUtils.CopyDirectoryAsync(folderPath, BuildNewPath, true, new CancellationTokenSource(), copyCallback, ignoreList))
+                if(await CopyBuildAsync(folderPath, destination))
                 {
                     Mod mod = new Mod();
-                    mod.fullPath = BuildNewPath + Path.DirectorySeparatorChar;
+                    mod.fullPath = destination + Path.DirectorySeparatorChar;
                     mod.folderName = buildId;
                     mod.firstRelease = mod.lastUpdate = DateTime.Now.Year.ToString("0000") + "-" + DateTime.Now.Month.ToString("00") + "-" + DateTime.Now.Day.ToString("00");
                     mod.installed = true;
@@ -511,6 +539,44 @@ namespace Knossos.NET.ViewModels
                     CollapseArch = false;
                     await MessageBox.Show(null, "An error has ocurred while copying files", "Filecopy error", MessageBox.MessageBoxButtons.OK);
                 }
+            }
+        }
+
+        private async Task<bool> CopyBuildAsync(string source, string destination)
+        {
+            // The payload stays below the library scanner's discovery depth while copying.
+            var staging = Path.Combine(Path.GetDirectoryName(destination)!, ".import-" + Guid.NewGuid().ToString("N"));
+            var payload = Path.Combine(staging, "build");
+            string[] ignoreList = { ".pdb", ".lib", ".exp", ".a", ".map", ".vp", ".vpc" };
+            using var cancellation = new CancellationTokenSource();
+            IsCopying = true;
+            CopyProgress = 0;
+            try
+            {
+                if (Directory.Exists(destination) || File.Exists(destination))
+                    throw new IOException($"The destination folder '{destination}' already exists.");
+                if (!await KnUtils.CopyDirectoryAsync(source, payload, true, cancellation, copyCallback, ignoreList))
+                    return false;
+                Directory.Move(payload, destination);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, nameof(CopyBuildAsync), ex);
+                return false;
+            }
+            finally
+            {
+                try
+                {
+                    if (Directory.Exists(staging))
+                        Directory.Delete(staging, recursive: true);
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Warning, nameof(CopyBuildAsync), ex);
+                }
+                IsCopying = false;
             }
         }
 
