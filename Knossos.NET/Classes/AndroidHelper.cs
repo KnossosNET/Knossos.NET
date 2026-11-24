@@ -229,7 +229,8 @@ public static class AndroidHelper
     /// <param name="engineLibPath"></param>
     /// <param name="workingFolder"></param>
     /// <param name="cmdline"></param>
-    public static void LaunchFSO(string engineLibPath, string? workingFolder, string cmdline)
+    /// <param name="bootstrapPath">Absolute path to the bootstrap file, if used.</param>
+    public static void LaunchFSO(string engineLibPath, string? workingFolder, string cmdline, string? bootstrapPath = null)
     {
         try
         {
@@ -250,8 +251,9 @@ public static class AndroidHelper
                 intent.PutExtra("workingFolder", workingFolder);
             }
             
-            if (cmdline.Length > 0)
-                intent.PutStringArrayListExtra("fsoArgs", cmdline.Split(" "));
+            var args = GetLaunchArguments(cmdline, bootstrapPath);
+            if (args.Count > 0)
+                intent.PutStringArrayListExtra("fsoArgs", args);
 
             ctx.StartActivity(intent);
         }
@@ -345,9 +347,21 @@ public static class AndroidHelper
     public static string GetDefaultKnetDataDir() => "";
     public static string GetDefaultFSODataDir() => "";
     public static string GetUpdateApkPath() => "";
-    public static void LaunchFSO(string engineLibPath, string? workingFolder, string cmdline) {  }
+    public static void LaunchFSO(string engineLibPath, string? workingFolder, string cmdline, string? bootstrapPath = null) {  }
     public static Task<string> GetFlagsStringFSOAsync(string engineLibPath, int timeoutMs = 30000,
         string? workingFolder = null, bool portableMode = false) => Task.FromResult(string.Empty);
 #endif
+
+    internal static List<string> GetLaunchArguments(string cmdline, string? bootstrapPath)
+    {
+        var args = new List<string>(cmdline.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+        if (bootstrapPath != null)
+        {
+            // SDL receives an argv array. Keep the whole path in one entry, including any spaces.
+            args.Add(FsoBootstrap.CommandLineOption);
+            args.Add(bootstrapPath);
+        }
+        return args;
+    }
 }
 

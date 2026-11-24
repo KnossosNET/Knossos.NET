@@ -876,6 +876,7 @@ static partial class Program
     [STAThread]
     static void Main(string[] args)
     {
+        if (CaptureBootstrapLaunch(args)) return;
         AppBuilder.Configure<CheckApplication>().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false }).UseSkia().WithInterFont().SetupWithoutStarting();
         var output = Path.GetFullPath(Path.Combine("artifacts", "mod-versions-checks", Guid.NewGuid().ToString("N")));
         Directory.CreateDirectory(output);

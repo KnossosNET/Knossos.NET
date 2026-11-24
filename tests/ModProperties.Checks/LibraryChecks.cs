@@ -80,6 +80,7 @@ static partial class Program
 
             RetailMoveChecks(first, second, scan);
             BuildLibraryChecks(output, first, second);
+            BootstrapLaunchChecks(output);
 
             settings.libraryPaths = new();
             normalize.Invoke(null, new object[] { settings });

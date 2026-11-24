@@ -12,6 +12,7 @@ namespace Knossos.NET.Classes
 {
     internal static class FsoBootstrap
     {
+        internal const string CommandLineOption = "-bootstrap";
         private const string FileName = "bootstrap.json";
         private const int LatestSupportedVersion = 1;
         private static readonly SemaphoreSlim LaunchGate = new(1, 1);
@@ -27,41 +28,19 @@ namespace Knossos.NET.Classes
             try
             {
                 var workingFolder = launch.WorkingFolder;
-                var wineArch = build.GetWineArchitecture(executableType);
                 // Store ownership in the launcher data folder so it survives a restart
                 // or a change in which preferences directory the engine reports.
                 var registration = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "managed-fso-bootstrap.json");
                 var managed = ReadRegistration(registration);
-                var portableMode = KnUtils.SplitCmdLineFlags(cmdline)?.Any(flag =>
-                    string.Equals(flag.Trim(), "portable_mode", StringComparison.OrdinalIgnoreCase)) == true;
-
                 if (!launch.UsesMultipleLibraries)
                 {
                     RemoveManagedBootstrap(managed, registration);
-                    // Older engines ignore bootstrap.json. Only probe when there is a
-                    // user-managed file that could override the ordinary -mod launch.
-                    var configured = GetBootstrapPath(GetConfiguredPreferences(), workingFolder);
-                    var fallback = GetBootstrapPath(KnUtils.GetFSODataFolderPath(), workingFolder);
-                    var local = GetBootstrapPath(workingFolder, workingFolder);
-                    var wineDefault = wineArch.HasValue
-                        ? Path.Combine(Wine.GetWinePrefixPath(), "drive_c", "users", Environment.UserName, "AppData",
-                            "Roaming", "HardLightProductions", "FreeSpaceOpen", FileName)
-                        : null;
-                    if (File.Exists(configured) || File.Exists(fallback) || File.Exists(local) || File.Exists(wineDefault))
-                    {
-                        var (reportedVersion, reportedPath) = await build.GetBootstrapSupportAsync(
-                            executableType, workingFolder, portableMode).ConfigureAwait(false);
-                        if (reportedVersion > 0)
-                        {
-                            var effectivePath = await ResolveBootstrapPathAsync(reportedPath, workingFolder, portableMode, wineArch)
-                                .ConfigureAwait(false);
-                            if (File.Exists(effectivePath))
-                                return ExistingBootstrapError(effectivePath);
-                        }
-                    }
                     return await build.RunFSO(executableType, cmdline, workingFolder).ConfigureAwait(false);
                 }
 
+                var wineArch = build.GetWineArchitecture(executableType);
+                var portableMode = KnUtils.SplitCmdLineFlags(cmdline)?.Any(flag =>
+                    string.Equals(flag.Trim(), "portable_mode", StringComparison.OrdinalIgnoreCase)) == true;
                 var (maximumVersion, preferencesPath) = await build.GetBootstrapSupportAsync(executableType, workingFolder, portableMode)
                     .ConfigureAwait(false);
                 if (maximumVersion == 0)
@@ -83,10 +62,12 @@ namespace Knossos.NET.Classes
                 if (existingHash != null && managed?.Owns(existingHash) != true)
                     return ExistingBootstrapError(path);
 
-                var roots = wineArch.HasValue && launch.Roots.Count > 0
+                var winePaths = wineArch.HasValue
                     ? await Wine.ConvertPathsAsync(workingFolder, wineArch.Value, toWindows: true,
-                        launch.Roots.Select(Path.GetFullPath).ToArray()).ConfigureAwait(false)
-                    : launch.Roots.Select(FormatEnginePath).ToArray();
+                        launch.Roots.Prepend(path).Select(Path.GetFullPath).ToArray()).ConfigureAwait(false)
+                    : null;
+                var bootstrapArgumentPath = winePaths?[0] ?? path;
+                var roots = winePaths != null ? winePaths[1..] : launch.Roots.Select(FormatEnginePath).ToArray();
                 var version = Math.Min(maximumVersion, LatestSupportedVersion);
                 var contents = JsonSerializer.Serialize(new
                 {
@@ -110,7 +91,8 @@ namespace Knossos.NET.Classes
                 for (var index = 0; index < roots.Length; index++)
                     Log.Add(Log.LogSeverity.Information, "FsoBootstrap", $"Root {index + 1}: {roots[index]}");
 
-                var result = await build.RunFSO(executableType, cmdline, workingFolder).ConfigureAwait(false);
+                var result = await build.RunFSO(executableType, cmdline, workingFolder, bootstrapPath: bootstrapArgumentPath)
+                    .ConfigureAwait(false);
                 if (!result.IsSuccess)
                     RemoveManagedBootstrap(current, registration);
                 return result;

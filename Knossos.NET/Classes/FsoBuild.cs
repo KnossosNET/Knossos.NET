@@ -224,11 +224,13 @@ namespace Knossos.NET.Models
         /// <param name="cmdline"></param>
         /// <param name="workingFolder"></param>
         /// <param name="waitForExit"></param>
+        /// <param name="bootstrapPath">Absolute path to the bootstrap file as seen by the engine.</param>
         /// <returns>
         /// A FsoResult structure with IsSuccess = true if the FSO buld was executed fine
         /// or IsSuccess = false and a ErrorMessage with the reason if failed
         /// </returns>
-        public async Task<FsoResult> RunFSO(FsoExecType executableType, string cmdline, string? workingFolder = null, bool waitForExit = false)
+        public async Task<FsoResult> RunFSO(FsoExecType executableType, string cmdline, string? workingFolder = null,
+            bool waitForExit = false, string? bootstrapPath = null)
         {
             try
             {
@@ -240,8 +242,10 @@ namespace Knossos.NET.Models
                     Log.Add(Log.LogSeverity.Error, "FsoBuild.RunFSO()", "Could not find a executable type for the requested fso build :" + executableType.ToString() + " Requested Type: " + executableType);
                     return new FsoResult(false, "Could not find a executable type for the requested fso build :" + executableType.ToString() + " Requested Type: " + executableType);
                 }
+                var launchCmdline = bootstrapPath == null ? cmdline : AppendBootstrapArgument(cmdline, bootstrapPath);
+                Log.Add(Log.LogSeverity.Information, "FsoBuild.RunFSO()", "Used cmdLine : " + launchCmdline);
 #if ANDROID
-                AndroidHelper.LaunchFSO(execPath, workingFolder, cmdline);
+                AndroidHelper.LaunchFSO(execPath, workingFolder, cmdline, bootstrapPath);
                 await Task.Delay(100);
                 return new FsoResult(true);
 #else
@@ -249,7 +253,7 @@ namespace Knossos.NET.Models
                 {
                     //We can assume we are in Linux and this is a cpu arch compatible Fred2 Windows executable
                     //Lets TRY to run this with Wine
-                    return new FsoResult(await Wine.RunFred2(execPath, cmdline, workingFolder, executable.arch, waitForExit));
+                    return new FsoResult(await Wine.RunFred2(execPath, launchCmdline, workingFolder, executable.arch, waitForExit));
                 }
                 else
                 {
@@ -261,7 +265,7 @@ namespace Knossos.NET.Models
 
                     using (var fso = new Process())
                     {
-                        SetProcessCommand(fso.StartInfo, execPath, cmdline, includePrefix: true);
+                        SetProcessCommand(fso.StartInfo, execPath, launchCmdline, includePrefix: true);
                         fso.StartInfo.UseShellExecute = false;
                         if (workingFolder != null)
                             fso.StartInfo.WorkingDirectory = workingFolder;
@@ -280,6 +284,21 @@ namespace Knossos.NET.Models
                 Log.Add(Log.LogSeverity.Error, "FsoBuild.RunFSO()", ex);
                 return new FsoResult(false, ex.ToString());
             }
+        }
+
+        private static string AppendBootstrapArgument(string cmdline, string bootstrapPath)
+        {
+            var arguments = new StringBuilder(cmdline).Append(' ').Append(FsoBootstrap.CommandLineOption).Append(" \"");
+            // Escape backslashes immediately before a quote in ProcessStartInfo.Arguments.
+            var backslashes = 0;
+            foreach (var character in bootstrapPath)
+            {
+                if (character == '"')
+                    arguments.Append('\\', backslashes + 1);
+                arguments.Append(character);
+                backslashes = character == '\\' ? backslashes + 1 : 0;
+            }
+            return arguments.Append('\\', backslashes).Append('"').ToString();
         }
 
         /// <summary>

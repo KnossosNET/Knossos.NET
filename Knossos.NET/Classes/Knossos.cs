@@ -1473,8 +1473,6 @@ namespace Knossos.NET
                 }
             }
 
-            Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used cmdLine : " + cmdline);
-
             //Launch FSO!!!
             var fsoResult = await FsoBootstrap.RunAsync(fsoBuild, fsoExecType, cmdline, mod.id, launch);
 
