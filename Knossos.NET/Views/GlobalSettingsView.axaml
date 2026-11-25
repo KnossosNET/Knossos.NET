@@ -225,6 +225,13 @@
 					</StackPanel>
 				</Expander>
 
+				<Expander IsVisible="{Binding IsAndroid}" VerticalAlignment="Top" Margin="5" MinWidth="740">
+					<Expander.Header>
+						<Label Margin="5,0,0,0" FontWeight="Bold" FontSize="18">Custom Vulkan Drivers</Label>
+					</Expander.Header>
+					<v:VulkanDriverManagerView DataContext="{Binding VulkanDrivers}" />
+				</Expander>
+
 				<!--Developer Settings-->
 				<Expander IsVisible="{Binding ShowDevOptions}" VerticalAlignment="Top" Margin="5" MinWidth="740">
 					<Expander.Header>

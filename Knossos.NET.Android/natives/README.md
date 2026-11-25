@@ -25,3 +25,18 @@ its existing AndroidNativeLibrary items. Do not copy binaries across ABI directo
 
 The native SDL regression tests are in the wrapper C++ `tests` directory. SCPUI on Android also
 needs the engine-side text conversion fix; updating this library alone does not replace that fix.
+
+## Custom Vulkan drivers
+
+Android builds can include the libadrenotools loader for ARM64. From the repository root,
+clone the dependency and its submodules into the optional native source directory.
+
+```sh
+git clone --recurse-submodules https://github.com/bylaws/libadrenotools.git Knossos.NET.Android/natives/3rdparty/libadrenotools
+```
+
+Install CMake 3.22.1 and NDK 28.2.13676358 through the Android SDK Manager. The Android
+project builds and packages the loader and its hooks. An existing checkout can be used
+with `-p:AdrenotoolsDirectory=/path/to/libadrenotools`. Use `-p:AndroidSdkDirectory=...`
+if the build resolves a different SDK, or `-p:VulkanAndroidNdkDirectory=...` to select
+an installed NDK. Builds without the checkout use the system Vulkan driver.
