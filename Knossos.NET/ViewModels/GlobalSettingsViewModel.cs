@@ -32,6 +32,7 @@ namespace Knossos.NET.ViewModels
         }
 
         internal bool IsAndroid { get; } = KnUtils.IsAndroid;
+        public VulkanDriverManagerViewModel? VulkanDrivers { get; } = KnUtils.IsAndroid ? new() : null;
 
         /* Limiters definition */
         private const long speedUnlimited = 0;

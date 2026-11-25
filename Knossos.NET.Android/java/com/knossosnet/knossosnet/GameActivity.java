@@ -107,6 +107,7 @@ public class GameActivity extends org.libsdl.app.SDLActivity {
     @Override
     protected String[] getArguments() {
         Intent intent = getIntent();
+        VulkanDriverLoader.prepare(this, intent, new File(getFilesDir(), "natives/libSDL3.so"));
         ArrayList<String> args = intent != null
                 ? intent.getStringArrayListExtra("fsoArgs")
                 : null;

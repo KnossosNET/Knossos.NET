@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Knossos.NET.ViewModels"
+             xmlns:models="using:Knossos.NET.Models"
+             x:Class="Knossos.NET.Views.VulkanDriverManagerView"
+             x:DataType="vm:VulkanDriverManagerViewModel"
+             Loaded="OnLoaded">
+    <StackPanel Margin="5" Spacing="10">
+        <TextBlock IsVisible="{Binding SupportsCustomDrivers}"
+                   Text="Load a custom Vulkan driver compatible with libadrenotools." />
+        <TextBlock IsVisible="{Binding !SupportsCustomDrivers}"
+                   Text="Custom Vulkan drivers are unavailable in this Android build." />
+        <Button HorizontalAlignment="Left" IsVisible="{Binding SupportsCustomDrivers}"
+                IsEnabled="{Binding !IsBusy}" Click="OnImportClick" Content="Import from ZIP" />
+        <TextBlock Text="{Binding Status}" IsVisible="{Binding !!Status}" TextWrapping="Wrap" />
+
+        <TextBlock FontWeight="Bold" Text="Installed Drivers" />
+        <ItemsControl ItemsSource="{Binding InstalledDrivers}" IsEnabled="{Binding !IsBusy}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:InstalledVulkanDriverRow">
+                    <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                            Padding="4,6">
+                        <Grid ColumnDefinitions="*,*,Auto,Auto" ColumnSpacing="8">
+                            <TextBlock Text="{Binding Name}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding ZipName}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                            <Button Grid.Column="2" IsVisible="{Binding CanDelete}" Content="Delete" Click="OnDeleteClick" />
+                            <Button Grid.Column="3" MinWidth="88" IsEnabled="{Binding !IsActive}"
+                                    Content="{Binding ActivationLabel}" Click="OnActivateClick" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <StackPanel IsVisible="{Binding SupportsCustomDrivers}" Spacing="8" Margin="0,6,0,0">
+            <TextBlock FontWeight="Bold" Text="Internet Drivers" />
+            <WrapPanel IsEnabled="{Binding !IsBusy}">
+                <ComboBox MinWidth="300" Margin="0,0,8,0" PlaceholderText="Select a repository"
+                          ItemsSource="{Binding Repositories}" SelectedItem="{Binding SelectedRepository}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:VulkanDriverRepository">
+                            <TextBlock Text="{Binding Label}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button Content="Reload releases" Click="OnReloadClick" />
+            </WrapPanel>
+            <TextBlock Text="{Binding CatalogStatus}" IsVisible="{Binding !!CatalogStatus}" TextWrapping="Wrap" />
+            <ItemsControl ItemsSource="{Binding AvailableZips}" IsEnabled="{Binding !IsBusy}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:VulkanDriverDownloadRow">
+                        <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                                Padding="4,6">
+                            <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8">
+                                <TextBlock Text="{Binding Zip.ReleaseName}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding Zip.ZipName}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                <Button Grid.Column="2" MinWidth="106" IsEnabled="{Binding !IsDownloaded}"
+                                        Content="{Binding DownloadLabel}" Click="OnDownloadClick" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

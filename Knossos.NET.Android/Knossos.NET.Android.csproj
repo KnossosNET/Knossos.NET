@@ -46,4 +46,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Knossos.NET\Knossos.NET.csproj" />
   </ItemGroup>
+
+  <Import Project="natives/VulkanDrivers.targets" />
 </Project>

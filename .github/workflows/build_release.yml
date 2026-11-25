@@ -148,6 +148,20 @@ jobs:
           dotnet workload install android
           dotnet workload list
 
+      - name: Checkout libadrenotools
+        uses: actions/checkout@v5
+        with:
+          repository: bylaws/libadrenotools
+          ref: 8fae8ce254dfc1344527e05301e43f37dea2df80
+          path: Knossos.NET.Android/natives/3rdparty/libadrenotools
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install Android Vulkan build tools
+        run: >-
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME"
+          --install "cmake;3.22.1" "ndk;28.2.13676358"
+
       - name: Publish Linux/Android RIDs
         shell: bash
         run: ./ci/publish_all_host.sh

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.Classes;
@@ -68,6 +69,21 @@ public static class AndroidHelper
     }
 
 #if ANDROID
+    private static readonly Lazy<VulkanDriverStore> VulkanDriverStorage = new(() =>
+        new VulkanDriverStore(Path.Combine(GetInternalAppFilesDir(), "vulkan-drivers"), (int)Build.VERSION.SdkInt));
+
+    internal static VulkanDriverStore? VulkanDrivers
+    {
+        get
+        {
+            var nativeDir = Application.Context.ApplicationInfo?.NativeLibraryDir;
+            return RuntimeInformation.ProcessArchitecture == Architecture.Arm64 && !string.IsNullOrEmpty(nativeDir) &&
+                File.Exists(Path.Combine(nativeDir, "libfsovulkan.so")) &&
+                File.Exists(Path.Combine(nativeDir, "libmain_hook.so")) &&
+                File.Exists(Path.Combine(nativeDir, "libhook_impl.so")) ? VulkanDriverStorage.Value : null;
+        }
+    }
+
     /// <summary>
     /// App main storage inside the internal phone memory
     /// </summary>
@@ -201,6 +217,20 @@ public static class AndroidHelper
             if (cmdline.Length > 0)
                 intent.PutStringArrayListExtra("fsoArgs", cmdline.Split(" "));
 
+            try
+            {
+                var drivers = VulkanDrivers;
+                if (drivers?.GetActive() is { } driver)
+                {
+                    intent.PutExtra("vulkanDriverDirectory", drivers.GetDirectory(driver.Id));
+                    intent.PutExtra("vulkanDriverLibrary", driver.LibraryName);
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Log.Add(Log.LogSeverity.Warning, "AndroidHelper.LaunchFSO", ex);
+            }
+
             ctx.StartActivity(intent);
         }
         catch (Exception ex)
@@ -278,6 +308,7 @@ public static class AndroidHelper
 
 #else
     //Stubs
+    internal static VulkanDriverStore? VulkanDrivers => null;
     public static string? GetExternalAppFilesDir() => "";
     public static string GetInternalAppFilesDir() => "";
     public static string[] GetAllExternalAppFilesDirs() => new string[] { };

@@ -402,3 +402,6 @@ FodyWeavers.xsd
 
 # macOS spam
 .DS_Store
+
+# Optional Android Vulkan driver loader dependency
+/Knossos.NET.Android/natives/3rdparty/libadrenotools/
