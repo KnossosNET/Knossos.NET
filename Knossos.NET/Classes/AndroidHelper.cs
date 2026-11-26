@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.Classes;
@@ -199,7 +200,7 @@ public static class AndroidHelper
             }
             
             if (cmdline.Length > 0)
-                intent.PutStringArrayListExtra("fsoArgs", cmdline.Split(" "));
+                intent.PutStringArrayListExtra("fsoArgs", LaunchCommandLine.SplitArguments(cmdline));
 
             ctx.StartActivity(intent);
         }
@@ -209,71 +210,74 @@ public static class AndroidHelper
         }
     }
 
-    /// <summary>
-    /// Gets FSO flags
-    /// </summary>
-    /// <param name="engineLibPath"></param>
-    /// <param name="timeoutMs"></param>
-    /// <returns>json string or empty string</returns>
-    public static async Task<string> GetFlagsStringFSOAsync(string engineLibPath, int timeoutMs = 30000)
+    private static readonly SemaphoreSlim queryGate = new(1, 1);
+
+    public static async Task<string> QueryFSOAsync(string engineLibPath, string workingFolder,
+        IReadOnlyList<string> args, CancellationToken token)
     {
+        var context = Application.Context;
+        var resultPath = Path.Combine(context.CacheDir!.AbsolutePath, "fso-query-" + Guid.NewGuid().ToString("N") + ".json");
+        await queryGate.WaitAsync(token).ConfigureAwait(false);
         try
         {
-            var ctx = Application.Context;
-            string dstAbiDir = System.IO.Path.Combine(ctx.FilesDir!.AbsolutePath, "natives");
-            var fi = new FileInfo(engineLibPath);
-            var folderPath = fi.Directory!.FullName;
-            if (!folderPath.EndsWith("/"))
-                folderPath += "/";
-            StageAllToInternal(folderPath, dstAbiDir);
-            var libName = fi.Name;
+            var engine = new FileInfo(engineLibPath);
+            var queryLibraries = Path.Combine(context.FilesDir!.AbsolutePath, "query-natives");
+            StageAllToInternal(engine.Directory!.FullName, queryLibraries);
+            var result = new TaskCompletionSource<IBinder?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            using var receiver = new QueryResultReceiver(result);
 
-            var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
-            using var receiver = new FlagsResultReceiver(tcs);
-
-            var intent = new Intent();
-            intent.SetClassName(ctx, "com.knossosnet.knossosnet.FlagsActivity");
+            using var intent = new Intent();
+            intent.SetClassName(context, "com.knossosnet.knossosnet.FlagsActivity");
             intent.AddFlags(ActivityFlags.NewTask);
-            intent.PutExtra("engineLibName", System.IO.Path.Combine(dstAbiDir, libName));
-
-            intent.PutStringArrayListExtra("fsoArgs", new List<string> { "-get_flags", "json_v2" });
+            intent.PutExtra("engineLibName", Path.Combine(queryLibraries, engine.Name));
+            intent.PutExtra("workingFolder", workingFolder);
+            intent.PutExtra("resultPath", resultPath);
+            intent.PutStringArrayListExtra("fsoArgs", new List<string>(args));
             intent.PutExtra("flagsReceiver", receiver);
 
-            ctx.StartActivity(intent);
-
-            var completed = await Task.WhenAny(tcs.Task, Task.Delay(timeoutMs)).ConfigureAwait(false);
-            if (completed != tcs.Task)
+            token.ThrowIfCancellationRequested();
+            context.StartActivity(intent);
+            // Let the isolated process exit before another query loads the engine in it.
+            var process = await result.Task.WaitAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            if (process != null)
             {
-                Log.Add(Log.LogSeverity.Error, "AndroidHelper.GetFlagsStringFSO", "Timeout waiting for fso flags (" + timeoutMs + "ms).");
-                return "";
+                using var death = new QueryProcessDeath();
+                try
+                {
+                    process.LinkToDeath(death, 0);
+                    await death.Completion.Task.WaitAsync(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
+                }
+                catch (RemoteException) { /* The query process already exited. */ }
             }
 
-            return await tcs.Task.ConfigureAwait(false);
+            token.ThrowIfCancellationRequested();
+            if (!File.Exists(resultPath)) throw new IOException("FSO exited without sending a launcher query result.");
+            return await File.ReadAllTextAsync(resultPath, token).ConfigureAwait(false);
         }
-        catch (Exception ex)
+        finally
         {
-            Log.Add(Log.LogSeverity.Error, "AndroidHelper.GetFlagsStringFSO", ex);
+            try { File.Delete(resultPath); }
+            finally { queryGate.Release(); }
         }
-        return "";
     }
 
-    private sealed class FlagsResultReceiver : ResultReceiver
+    private sealed class QueryResultReceiver : ResultReceiver
     {
-        private readonly TaskCompletionSource<string> _tcs;
+        private readonly TaskCompletionSource<IBinder?> result;
 
-        public FlagsResultReceiver(TaskCompletionSource<string> tcs)
-            : base(new Handler(Looper.MainLooper!))
+        public QueryResultReceiver(TaskCompletionSource<IBinder?> result) : base(new Handler(Looper.MainLooper!))
         {
-            _tcs = tcs;
+            this.result = result;
         }
 
         protected override void OnReceiveResult(int resultCode, Bundle? resultData)
-        {
-            if (resultCode == (int)Result.Ok)
-                _tcs.TrySetResult(resultData?.GetString("flagsJson") ?? "");
-            else
-                _tcs.TrySetResult("");
-        }
+            => result.TrySetResult(resultData?.GetBinder("queryProcess"));
+    }
+
+    private sealed class QueryProcessDeath : Java.Lang.Object, IBinderDeathRecipient
+    {
+        public TaskCompletionSource<bool> Completion { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public void BinderDied() => Completion.TrySetResult(true);
     }
 
 #else
@@ -287,7 +291,6 @@ public static class AndroidHelper
     public static string GetDefaultFSODataDir() => "";
     public static string GetUpdateApkPath() => "";
     public static void LaunchFSO(string engineLibPath, string? workingFolder, string cmdline) {  }
-    public static async Task<string> GetFlagsStringFSOAsync(string engineLibPath, int timeoutMs = 30000) { await Task.Delay(1); return ""; }
 #endif
 }
 

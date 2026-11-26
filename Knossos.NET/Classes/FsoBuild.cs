@@ -331,152 +331,194 @@ namespace Knossos.NET.Models
         /// <returns>A FlagsJsonV1 structure or null if failed</returns>
         public Task<FlagsJsonV1?> GetFlagsV1Async() => GetFlagsV1Async(CancellationToken.None);
 
-        private static readonly SemaphoreSlim androidFlagsGate = new(1, 1);
         public async Task<FlagsJsonV1?> GetFlagsV1Async(CancellationToken cancellationToken, bool showErrors = true)
         {
-            var executable = GetExecutable(FsoExecType.Flags);
-            var fullpath = GetExecutablePath(executable);
-            if (fullpath == null)
+            var executable = GetExecutablePath(GetExecutable(FsoExecType.Flags))
+                ?? GetGameQueryExecutable();
+            if (executable == null)
             {
-                executable = GetExecutable(FsoExecType.Release);
-                fullpath = GetExecutablePath(executable);
-            }
-            if (fullpath == null)
-            {
-                executable = GetExecutable(FsoExecType.Debug);
-                fullpath = GetExecutablePath(executable);
-            }
-            if (fullpath == null)
-            {
-                Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlags()", "Unable to find a valid executable for this build: " + this.ToString());
+                Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1", "No executable found for " + this);
                 return null;
             }
 
-            Log.Add(Log.LogSeverity.Information, "FsoBuild.GetFlags()", "Getting FSO Flags from file: " + fullpath);
-            string output = string.Empty;
-            string stderr = string.Empty;
             try
             {
 #if ANDROID
-                await androidFlagsGate.WaitAsync(cancellationToken);
+                const string format = "json_v2";
+#else
+                const string format = "json_v1";
+#endif
+                var result = await RunLauncherQueryAsync(executable, new[] { "-get_flags", format }, folderPath, cancellationToken)
+                    .ConfigureAwait(false);
+                var flags = ReadFlagsJson(result.Output);
+                if (flags != null) return flags;
+
+                if (KnUtils.IsLinux && (result.Error.Contains("fuse", StringComparison.OrdinalIgnoreCase)
+                    || result.Output.Contains("fuse", StringComparison.OrdinalIgnoreCase)) && !_flagErrorOneWarn && showErrors)
+                {
+                    _flagErrorOneWarn = true;
+                    const string message = "libfuse is missing! FSO AppImages needs fuse to run. Install with:\n" +
+                        "Ubuntu/Debian: sudo apt install libfuse2\nFedora: sudo dnf install fuse\nArch: sudo pacman -S fuse2";
+                    await Dispatcher.UIThread.InvokeAsync(async () => await MessageBox.Show(MainWindow.instance, message,
+                        "Unable to run FSO", MessageBox.MessageBoxButtons.OK));
+                }
+                var legacyFlags = Path.Combine(folderPath, "flags.lch");
+                if (File.Exists(legacyFlags)) File.Delete(legacyFlags);
+                Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1",
+                    $"FSO exited with code {result.ExitCode} without flags JSON.\n{result.Error}\n{result.Output}");
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex) { Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1", ex); }
+            return null;
+        }
+
+        internal string? GetGameQueryExecutable() => GetExecutablePath(GetExecutable(FsoExecType.Release))
+            ?? GetExecutablePath(GetExecutable(FsoExecType.Debug));
+
+        internal async Task<FlagsJsonV1?> GetFlagsV2Async(string executable, string workingFolder, bool portableMode, CancellationToken token)
+        {
+            var args = new List<string> { "-get_flags", "json_v2" };
+            if (portableMode) args.Add("-portable_mode");
+            var result = await RunLauncherQueryAsync(executable, args, workingFolder, token, useLaunchEnvironment: true).ConfigureAwait(false);
+            // FSO can print valid flags and exit with 1 because the command-line handler stops normal startup.
+            var flags = ReadFlagsJson(result.Output);
+            if (flags != null || result.ExitCode == 0 || result.Output.Contains("OUTPUT TYPE NOT SUPPORTED!", StringComparison.Ordinal))
+                return flags;
+            throw new IOException(QueryError(result, "get_flags"));
+        }
+
+        internal async Task<FsoOptionsJson> GetOptionsAsync(string executable, string workingFolder, IReadOnlyList<string> launchArgs, CancellationToken token)
+        {
+            var args = new List<string> { "-get_options", "json_v1" };
+            args.AddRange(launchArgs);
+            var skipGpuProbe = args.Contains("-get_options_no_gpu", StringComparer.OrdinalIgnoreCase);
+#if ANDROID
+            // The Android query activity does not run the game's graphics surface.
+            if (!skipGpuProbe) args.Add("-get_options_no_gpu");
+            skipGpuProbe = true;
+#endif
+            LauncherQueryResult result;
+            try
+            {
+                result = await Query().ConfigureAwait(false);
+            }
+            catch (TimeoutException ex) when (!skipGpuProbe)
+            {
+                result = new LauncherQueryResult(string.Empty, ex.Message, -1);
+            }
+            var options = ReadOptions(result);
+            if (options != null) return options;
+            if (!skipGpuProbe)
+            {
+                // A driver may fail during the windowless GPU probe. Retry with the rest of the query intact.
+                args.Add("-get_options_no_gpu");
+                result = await Query().ConfigureAwait(false);
+                options = ReadOptions(result);
+            }
+            return options ?? throw new IOException(QueryError(result, "get_options"));
+
+            Task<LauncherQueryResult> Query() => RunLauncherQueryAsync(executable, args, workingFolder, token, useLaunchEnvironment: true);
+            static FsoOptionsJson? ReadOptions(LauncherQueryResult reply) => reply.ExitCode == 0
+                ? ReadLauncherJson<FsoOptionsJson>(reply.Output, json => json.Version == 1 && json.Options != null) : null;
+        }
+
+        private static string QueryError(LauncherQueryResult result, string query)
+        {
+            var detail = string.IsNullOrWhiteSpace(result.Error) ? result.Output : result.Error;
+            var message = $"FSO did not return a valid {query} response (exit code {result.ExitCode}).";
+            if (string.IsNullOrWhiteSpace(detail)) return message;
+            Log.Add(Log.LogSeverity.Error, "FsoBuild." + query, message + "\n" + detail[..Math.Min(4096, detail.Length)].Trim());
+            return message + " See the Knossos log for details.";
+        }
+
+        private static FlagsJsonV1? ReadFlagsJson(string output) => ReadLauncherJson<FlagsJsonV1>(output,
+            flags => flags.version != null || flags.flags != null || flags.caps != null);
+
+        private static T? ReadLauncherJson<T>(string output, Func<T, bool> isResponse) where T : class
+        {
+            var start = output.IndexOf('{');
+            var end = output.LastIndexOf('}');
+            if (start < 0 || end <= start) return null;
+            var response = Read(output.Substring(start, end - start + 1));
+            if (response != null) return response;
+            // Graphics drivers can print their own lines before or after the compact JSON reply.
+            foreach (var line in output.Split('\n'))
+            {
+                if (!line.TrimStart().StartsWith('{')) continue;
+                response = Read(line);
+                if (response != null) return response;
+            }
+            return null;
+
+            T? Read(string json)
+            {
                 try
                 {
-                    output = await AndroidHelper.GetFlagsStringFSOAsync(fullpath!);
-                    cancellationToken.ThrowIfCancellationRequested();
-                    if (output == "") return null;
-                    return JsonSerializer.Deserialize<FlagsJsonV1>(output);
+                    var item = JsonSerializer.Deserialize<T>(json);
+                    return item != null && isResponse(item) ? item : null;
                 }
-                finally { androidFlagsGate.Release(); }
+                catch (JsonException) { return null; }
+            }
+        }
+
+        private sealed record LauncherQueryResult(string Output, string Error, int ExitCode);
+
+        private static async Task<LauncherQueryResult> RunLauncherQueryAsync(string executable, IReadOnlyList<string> args,
+            string workingFolder, CancellationToken token, bool useLaunchEnvironment = false)
+        {
+#if ANDROID
+            var output = await AndroidHelper.QueryFSOAsync(executable, workingFolder, args, token).ConfigureAwait(false);
+            return new LauncherQueryResult(output, string.Empty, 0);
 #else
+            if (KnUtils.IsLinux || KnUtils.IsMacOS) KnUtils.Chmod(executable, "+x");
+            using var process = new Process();
+            var start = process.StartInfo;
+            start.FileName = executable;
+            start.UseShellExecute = false;
+            start.CreateNoWindow = true;
+            start.RedirectStandardOutput = true;
+            start.RedirectStandardError = true;
+            start.StandardOutputEncoding = new UTF8Encoding(false);
+            start.WorkingDirectory = workingFolder;
+            foreach (var argument in args) start.ArgumentList.Add(argument);
 
-                if (KnUtils.IsLinux || KnUtils.IsMacOS)
+            if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences ||
+                CustomLauncher.IsCustomMode && CustomLauncher.UseCustomFSODataFolder)
+                start.Environment["FSO_PREFERENCES_PATH"] = KnUtils.GetFSODataFolderPath();
+            if (useLaunchEnvironment)
+            {
+                foreach (var variable in Knossos.globalSettings.envVars.Split(','))
                 {
-                    KnUtils.Chmod(fullpath!,"+x");
+                    var pair = variable.Split('=');
+                    if (pair.Length == 2) start.Environment[pair[0]] = pair[1];
                 }
+            }
+            // Keep FSO's stdout on the redirected pipe when Knossos has a parent console on Windows.
+            if (KnUtils.IsWindows) start.Environment["FSO_KEEP_STDOUT"] = "1";
 
-                using (var cmd = new Process())
-                {
-                    cmd.StartInfo.FileName = fullpath;
-                    cmd.StartInfo.Arguments = "-get_flags json_v1";
-                    cmd.StartInfo.UseShellExecute = false;
-                    cmd.StartInfo.CreateNoWindow = true;
-                    cmd.StartInfo.RedirectStandardOutput = true;
-                    cmd.StartInfo.RedirectStandardInput = true;
-                    cmd.StartInfo.RedirectStandardError = true;
-                    cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
-                    cmd.StartInfo.WorkingDirectory = folderPath;
-                    if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences ||
-                        CustomLauncher.IsCustomMode && CustomLauncher.UseCustomFSODataFolder)
-                    {
-                        var prefPath = KnUtils.GetFSODataFolderPath();
-                        if (!prefPath.EndsWith(Path.DirectorySeparatorChar))
-                        {
-                            prefPath += Path.DirectorySeparatorChar;
-                        }
-                        cmd.StartInfo.EnvironmentVariables.Add("FSO_PREFERENCES_PATH", prefPath);
-                    }
-
-                    cancellationToken.ThrowIfCancellationRequested();
-                    cmd.Start();
-                    using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                    timeout.CancelAfter(TimeSpan.FromSeconds(30));
-                    using var registration = timeout.Token.Register(() =>
-                    {
-                        try { if (!cmd.HasExited) cmd.Kill(true); }
-                        catch (InvalidOperationException) { }
-                        catch (System.ComponentModel.Win32Exception) { }
-                    });
-                    // Read stdout and stderr concurrently to prevent pipe deadlock.
-                    // Sequential reads deadlock if stderr output exceeds the pipe buffer (~4 KB).
-                    var stdoutTask = cmd.StandardOutput.ReadToEndAsync();
-                    var stderrTask = cmd.StandardError.ReadToEndAsync();
-                    await Task.WhenAll(stdoutTask, stderrTask).WaitAsync(timeout.Token).ConfigureAwait(false);
-                    string result = stdoutTask.Result;
-                    stderr = stderrTask.Result;
-                    output = result;
-                    await cmd.WaitForExitAsync(timeout.Token).ConfigureAwait(false);
-
-                    if (KnUtils.IsLinux && !result.Contains("{"))
-                    {
-                        //Possible missing dependency libs on linux like libfuse for appimage
-                        var errorMsg = $"FSO exited with code {cmd.ExitCode}\n\nStdout:\n{output}\n\nStderr:\n{stderr}";
-                        Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", errorMsg);
-
-                        if (stderr.Contains("fuse", StringComparison.OrdinalIgnoreCase) || output.Contains("fuse", StringComparison.OrdinalIgnoreCase))
-                        {
-                            var libfuseError = $"libfuse is missing! FSO AppImages needs fuse to run. Install with:\n" +
-                                "Ubuntu/Debian: sudo apt install libfuse2\n" +
-                                "Fedora: sudo dnf install fuse\n" +
-                                "Arch: sudo pacman -S fuse2";
-                            Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", libfuseError);
-                            if (!_flagErrorOneWarn && showErrors)
-                            {
-                                _flagErrorOneWarn = true;
-                                await Dispatcher.UIThread.InvokeAsync(async () => { await MessageBox.Show(MainWindow.instance, libfuseError, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); });
-                            }
-                        }
-                        else
-                        {
-                            if (!_flagErrorOneWarn)
-                            {
-                                _flagErrorOneWarn = true;
-                            }
-                        }
-                        return null;
-                    }
-
-                    cmd.Dispose();
-                    //avoiding the "fso is running in legacy config mode..."
-                    if (result.Contains("{"))
-                    {
-                        result = result.Substring(result.IndexOf('{'));
-                    }
-                    return JsonSerializer.Deserialize<FlagsJsonV1>(result);
-                }
+            token.ThrowIfCancellationRequested();
+            process.Start();
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(token);
+            timeout.CancelAfter(TimeSpan.FromSeconds(30));
+            using var registration = timeout.Token.Register(() =>
+            {
+                try { if (!process.HasExited) process.Kill(true); }
+                catch (InvalidOperationException) { }
+                catch (System.ComponentModel.Win32Exception) { }
+            });
+            var stdout = process.StandardOutput.ReadToEndAsync();
+            var stderr = process.StandardError.ReadToEndAsync();
+            try
+            {
+                await Task.WhenAll(process.WaitForExitAsync(timeout.Token), stdout, stderr)
+                    .WaitAsync(timeout.Token).ConfigureAwait(false);
+                return new LauncherQueryResult(await stdout.ConfigureAwait(false), await stderr.ConfigureAwait(false), process.ExitCode);
+            }
+            catch (OperationCanceledException) when (!token.IsCancellationRequested)
+            {
+                throw new TimeoutException("Timed out waiting for the FSO launcher query.");
+            }
 #endif
-            }
-            catch (OperationCanceledException) { return null; }
-            catch (JsonException exJson)
-            {
-                //json failed try to see if it exported a binary
-                if(File.Exists(folderPath+Path.DirectorySeparatorChar+"flags.lch"))
-                {
-                    Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", "FSO build "+ this +" seems to be below the minimum supported version (3.8.1) and does not support exporting flags as Json.");
-                    File.Delete(folderPath + Path.DirectorySeparatorChar + "flags.lch");
-                }
-                else
-                {
-                    Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlags()", exJson);
-                    Log.Add(Log.LogSeverity.Error, "FSO EXE OUTPUT ", output);
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlags()", ex);
-                Log.Add(Log.LogSeverity.Error, "FSO EXE OUTPUT ", output);
-                return null;
-            }
         }
 
         /// <summary>

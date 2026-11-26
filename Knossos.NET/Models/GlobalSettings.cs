@@ -189,6 +189,9 @@ namespace Knossos.NET.Models
         [JsonPropertyName("expanded_launch_flag_categories")]
         public HashSet<string> expandedLaunchFlagCategories { get; set; } = new();
 
+        [JsonPropertyName("expanded_ingame_settings_categories")]
+        public HashSet<string> expandedIngameSettingsCategories { get; set; } = new();
+
         /* 
          * Settings that can wait to be saved at app close so we dont have to call save() all the time
          * use JsonIgnore, private and '_' for the actual variable name
@@ -665,6 +668,7 @@ namespace Knossos.NET.Models
                         hideBuildRC = tempSettings.hideBuildRC;
                         expandedLaunchFlagCategories = tempSettings.expandedLaunchFlagCategories ?? new();
                         expandedLaunchSections = tempSettings.expandedLaunchSections ?? new();
+                        expandedIngameSettingsCategories = tempSettings.expandedIngameSettingsCategories ?? new();
                         forceSSE2 = tempSettings.forceSSE2;
                         maxConcurrentSubtasks = tempSettings.maxConcurrentSubtasks;
                         maxDownloadSpeed = tempSettings.maxDownloadSpeed;

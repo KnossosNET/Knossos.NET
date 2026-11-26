@@ -15,7 +15,7 @@ namespace Knossos.NET.ViewModels
     /// <summary>Owns navigation, the selected version and all ModProperties overlays.</summary>
     public partial class ModPropertiesViewModel : ViewModelBase, IDisposable
     {
-        public enum MenuPageEntry { Information, Versions, DLC, Options, Files, Settings = Options }
+        public enum MenuPageEntry { Information, Versions, DLC, Options, Files, IngameSettings, Settings = Options }
 
         private ModPropertiesView? view;
         private ModCardViewModel? modCard;
@@ -25,6 +25,7 @@ namespace Knossos.NET.ViewModels
         private bool releaseWhenIdle;
         private readonly List<Mod> versions;
         private ModLaunchOptionsViewModel? options;
+        private readonly ModIngameSettingsViewModel ingameSettings = new();
         private bool disposed;
         private bool modalBusy;
         private string? modalAction;
@@ -65,6 +66,7 @@ namespace Knossos.NET.ViewModels
         public Mod ActiveVersion => versions[selectedVersionIndex];
         public bool IsInformationSelected => SelectedPage == MenuPageEntry.Information;
         public bool IsOptionsSelected => SelectedPage == MenuPageEntry.Options;
+        public bool IsIngameSettingsSelected => SelectedPage == MenuPageEntry.IngameSettings;
         public bool CanConfigure => IsInstalled && ActiveVersion.type != ModType.engine;
         public bool CanBrowseMedia => IsMediaModal && mediaItems.Count > 1;
         public bool IsPreviewUnavailable => IsMediaModal && PreviewPath == null;
@@ -105,6 +107,7 @@ namespace Knossos.NET.ViewModels
             modCard = null;
             options?.Dispose();
             options = null;
+            ingameSettings.Dispose();
             Knossos.Tts(string.Empty);
             ResetModal();
             IsModalOpen = false;
@@ -192,7 +195,14 @@ namespace Knossos.NET.ViewModels
         {
             if (disposed || IsModalOpen || IsSubmitting) return;
             SaveOptions();
-            if (page == MenuPageEntry.Versions && CanManageVersions)
+            if (page != MenuPageEntry.IngameSettings) ingameSettings.CancelLoad();
+            if (page == MenuPageEntry.IngameSettings && CanConfigure && !Versions.IsApplying)
+            {
+                CurrentPage = ingameSettings;
+                SelectedPage = MenuPageEntry.IngameSettings;
+                _ = ingameSettings.OpenAsync(ActiveVersion, ActiveVersion.ResolveInstalledBuild());
+            }
+            else if (page == MenuPageEntry.Versions && CanManageVersions)
             {
                 CurrentPage = Versions;
                 SelectedPage = MenuPageEntry.Versions;
@@ -218,6 +228,7 @@ namespace Knossos.NET.ViewModels
             }
             OnPropertyChanged(nameof(IsInformationSelected));
             OnPropertyChanged(nameof(IsOptionsSelected));
+            OnPropertyChanged(nameof(IsIngameSettingsSelected));
             OnPropertyChanged(nameof(IsFilesSelected));
             OnPropertyChanged(nameof(IsVersionsSelected));
         }
@@ -243,6 +254,21 @@ namespace Knossos.NET.ViewModels
         public void SaveOptions()
         {
             if (options != null && ReferenceEquals(CurrentPage, options)) options.SaveSettings();
+        }
+
+        internal bool SaveIngameSettings()
+        {
+            try
+            {
+                ingameSettings.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "ModProperties.SaveIngameSettings", ex);
+                ShowMessage("Unable to save in-game settings", ex.Message);
+                return false;
+            }
         }
 
         public void InstalledVersionChanged(Mod installed)
@@ -508,6 +534,7 @@ namespace Knossos.NET.ViewModels
             modCard = null;
             options?.Dispose();
             options = null;
+            ingameSettings.Dispose();
             Information.Dispose();
             Files.Dispose();
             Versions.Dispose();

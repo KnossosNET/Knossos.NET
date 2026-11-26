@@ -1167,7 +1167,6 @@ namespace Knossos.NET
 
             /* Build cmdline */
             var cmdline = "-parse_cmdline_only";
-            var modFlag = string.Empty;
             var modList = new List<Mod>();
             FsoBuild? fsoBuild = specifiedBuild;
 
@@ -1251,44 +1250,7 @@ namespace Knossos.NET
                 }
             }
 
-            /* Determine root folder */
-            var rootPath = string.Empty;
-
-            /* Others TCs: WCS, Solaris, etc */
-            if (mod.type == ModType.tc && mod.parent == null)
-            {
-                rootPath = mod.fullPath.Replace(mod.folderName+Path.DirectorySeparatorChar,"");
-            }
-            else
-            {
-                /* Most likely FS2 Retail only */
-                if (mod.type == ModType.tc && mod.parent != null || mod.parent == mod.id)
-                {
-                    rootPath = mod.fullPath;
-                }
-                else
-                {
-                    /* Regular mods */
-                    if(mod.type == ModType.mod && mod.parent != null)
-                    {
-                        foreach(var installedMod in installedMods) 
-                        { 
-                            if(installedMod.type == ModType.tc && installedMod.id == mod.parent)
-                            {
-                                if (installedMod.parent != null)
-                                {
-                                    rootPath = installedMod.fullPath;
-                                }
-                                else
-                                {
-                                    rootPath = mod.fullPath.Replace(mod.folderName + Path.DirectorySeparatorChar, "");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
+            var rootPath = GetModLaunchFolder(mod);
             if(rootPath == string.Empty)
             {
                 Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", "Unable to determine working folder for mod: " + mod.folderName);
@@ -1300,146 +1262,7 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used working folder : " + rootPath);
             }
 
-            /* Build mod flag */
-            foreach (var modid in mod.GetModFlagList())
-            {
-                /* Load this mod */
-                if (modid == mod.id)
-                {
-                    /* Dev Mode ON */
-                    if (mod.devMode)
-                    {
-                        foreach (var pkg in mod.packages.OrderBy(x => x.name))
-                        {
-                            if (pkg.isEnabled)
-                            {
-                                if (modFlag.Length > 0)
-                                {
-                                    modFlag += "," + Path.GetRelativePath(rootPath, mod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                }
-                                else
-                                {
-                                    modFlag += Path.GetRelativePath(rootPath, mod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                }
-                            }
-                        }
-
-                        //If standalone the multi.cfg will be on mod root\data to avoid uploading it to nebula
-                        if (standaloneServer)
-                        {
-                            if (modFlag.Length > 0)
-                            {
-                                modFlag += "," + Path.GetRelativePath(rootPath, mod.fullPath).TrimEnd('/').TrimEnd('\\');
-                            }
-                            else
-                            {
-                                modFlag += Path.GetRelativePath(rootPath, mod.fullPath).TrimEnd('/').TrimEnd('\\');
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //avoid passing FS2 in modflag because fs2retail runs off the working folder
-                        if (mod.id != "FS2")
-                        {
-                            if (modFlag.Length > 0)
-                            {
-                                modFlag += "," + mod.folderName;
-                            }
-                            else
-                            {
-                                modFlag += mod.folderName;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    var depMod = modList.FirstOrDefault(d => d.id == modid);
-                    //Found the modflag id in mod dependencies list
-                    if (depMod != null)
-                    {
-                        /* Dev Mode ON */
-                        if (depMod.devMode)
-                        {
-                            foreach (var pkg in depMod.packages)
-                            {
-                                if (modFlag.Length > 0)
-                                {
-                                    modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                }
-                                else
-                                {
-                                    modFlag += Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (modFlag.Length > 0)
-                            {
-                                modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath).TrimEnd('/').TrimEnd('\\');
-                            }
-                            else
-                            {
-                                modFlag += Path.GetRelativePath(rootPath, depMod.fullPath).TrimEnd('/').TrimEnd('\\');
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //Unofficial feature
-                        //https://github.com/KnossosNET/Knossos.NET/issues/195
-                        //Try to load a mod thats not on the dependencies list, but it is on the modflag list, if found installed
-                        try
-                        {
-                            var optionalDep = Knossos.GetInstalledModList(modid);
-                            if (optionalDep != null && optionalDep.Count() > 0)
-                            {
-                                var newerOpt = optionalDep.MaxBy(o =>  new SemanticVersion(o.version));
-                                if(newerOpt != null)
-                                {
-                                    Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Loading optional dependency: " + newerOpt);
-                                    /* Dev Mode ON */
-                                    if (newerOpt.devMode)
-                                    {
-                                        foreach (var pkg in newerOpt.packages)
-                                        {
-                                            if (modFlag.Length > 0)
-                                            {
-                                                modFlag += "," + Path.GetRelativePath(rootPath, newerOpt.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                            }
-                                            else
-                                            {
-                                                modFlag += Path.GetRelativePath(rootPath, newerOpt.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (modFlag.Length > 0)
-                                        {
-                                            modFlag += "," + Path.GetRelativePath(rootPath, newerOpt.fullPath).TrimEnd('/').TrimEnd('\\');
-                                        }
-                                        else
-                                        {
-                                            modFlag += Path.GetRelativePath(rootPath, newerOpt.fullPath).TrimEnd('/').TrimEnd('\\');
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                //Mod has a optional dependency but it is not found installed
-                                Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Mod requested a optional dependency that is not found: " + modid + ". This is not critical.");
-                            }
-                        }catch(Exception ex)
-                        {
-                            Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod(optional dependency)", ex);
-                        }
-                    }
-                }
-            }
+            var modFlag = GetModLaunchFlag(mod, rootPath, modList, standaloneServer);
 
             if (fsoBuild == null)
             {
@@ -1504,32 +1327,9 @@ namespace Knossos.NET
                 }
             }
 
-            /* Build the cmdline, take in consideration systemcmd, globalcmd, modcmd(with user changes if any) */
-            var modCmd = KnUtils.SplitCmdLineFlags(mod.GetModCmdLine())?.ToList();
-            var systemCmd = KnUtils.SplitCmdLineFlags(Knossos.globalSettings.GetSystemCMD(fsoBuild));
-            var globalCmd = KnUtils.SplitCmdLineFlags(Knossos.globalSettings.globalCmdLine);
-
             if(!standaloneServer)
             {
-                if (!mod.modSettings.ignoreGlobalCmd)
-                {
-                    if (modCmd != null && modCmd.Any() && !globalSettings.noSystemCMD)
-                    {
-                        foreach(var flag in modCmd.ToList())
-                        {
-                            if(GlobalSettings.SystemFlags.Contains(flag.ToLower().Trim().Split(' ')[0]))
-                                modCmd.Remove(flag);
-                        }
-                    }
-                    if (!globalSettings.noSystemCMD)
-                        cmdline = KnUtils.CmdLineBuilder(cmdline, systemCmd);
-                    cmdline = KnUtils.CmdLineBuilder(cmdline, globalCmd);
-                }
-                cmdline = KnUtils.CmdLineBuilder(cmdline, modCmd?.ToArray());
-                if (inSingleTCMode && CustomLauncher.CustomCmdlineArray != null && CustomLauncher.CustomCmdlineArray.Any())
-                {
-                    cmdline = KnUtils.CmdLineBuilder(cmdline, CustomLauncher.CustomCmdlineArray);
-                }
+                cmdline = ApplyModLaunchFlags(cmdline, mod, fsoBuild);
             }
             else
             {
@@ -1542,7 +1342,7 @@ namespace Knossos.NET
 
             if (modFlag.Length > 0)
             {
-                cmdline += " -mod " + modFlag;
+                cmdline += " -mod " + LaunchCommandLine.Quote(modFlag, windows: true);
             }
 
             
@@ -1611,6 +1411,99 @@ namespace Knossos.NET
                 Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", fsoResult.ErrorMessage);
                 await MessageBox.Show(MainWindow.instance, fsoResult.ErrorMessage, "Error launching mod", MessageBox.MessageBoxButtons.OK);
             }
+        }
+
+        internal static string GetModLaunchFolder(Mod mod)
+        {
+            if (mod.type == ModType.tc && mod.parent == null)
+                return mod.fullPath.Replace(mod.folderName + Path.DirectorySeparatorChar, "");
+            if (mod.type == ModType.tc || mod.parent == mod.id)
+                return mod.fullPath;
+            if (mod.type != ModType.mod || mod.parent == null)
+                return string.Empty;
+
+            var parent = installedMods.LastOrDefault(item => item.type == ModType.tc && item.id == mod.parent);
+            if (parent == null) return string.Empty;
+            return parent.parent != null ? parent.fullPath : mod.fullPath.Replace(mod.folderName + Path.DirectorySeparatorChar, "");
+        }
+
+        internal static string GetModLaunchFlag(Mod mod, string rootPath, IReadOnlyList<Mod> dependencies, bool standaloneServer = false)
+        {
+            var folders = new List<string>();
+            foreach (var modId in mod.GetModFlagList())
+            {
+                if (modId == mod.id)
+                {
+                    if (mod.devMode)
+                    {
+                        foreach (var package in mod.packages.OrderBy(package => package.name).Where(package => package.isEnabled))
+                            folders.Add(RelativePath(mod.fullPath + Path.DirectorySeparatorChar + package.folder));
+                        if (standaloneServer)
+                            folders.Add(RelativePath(mod.fullPath));
+                    }
+                    else if (mod.id != "FS2")
+                    {
+                        folders.Add(mod.folderName);
+                    }
+                    continue;
+                }
+
+                var dependency = dependencies.FirstOrDefault(item => item.id == modId);
+                if (dependency == null)
+                {
+                    // Some mods optionally load installed mods that are only listed in the mod flags.
+                    try
+                    {
+                        dependency = GetInstalledModList(modId).MaxBy(item => new SemanticVersion(item.version));
+                        Log.Add(Log.LogSeverity.Information, "Knossos.GetModLaunchFlag",
+                            dependency == null ? "Optional dependency not installed: " + modId : "Loading optional dependency: " + dependency);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Add(Log.LogSeverity.Error, "Knossos.GetModLaunchFlag", ex);
+                    }
+                }
+
+                if (dependency?.devMode == true)
+                {
+                    foreach (var package in dependency.packages)
+                        folders.Add(RelativePath(dependency.fullPath + Path.DirectorySeparatorChar + package.folder));
+                }
+                else if (dependency != null)
+                {
+                    folders.Add(RelativePath(dependency.fullPath));
+                }
+            }
+            return string.Join(",", folders);
+
+            string RelativePath(string folder) => Path.GetRelativePath(rootPath, folder).TrimEnd('/', '\\');
+        }
+
+        internal static string ApplyModLaunchFlags(string cmdline, Mod mod, FsoBuild build)
+        {
+            var modCmd = KnUtils.SplitCmdLineFlags(mod.GetModCmdLine())?.ToList();
+            var systemCmd = KnUtils.SplitCmdLineFlags(globalSettings.GetSystemCMD(build));
+            var globalCmd = KnUtils.SplitCmdLineFlags(globalSettings.globalCmdLine);
+            if (!mod.modSettings.ignoreGlobalCmd)
+            {
+                if (modCmd != null && modCmd.Any() && !globalSettings.noSystemCMD)
+                {
+                    foreach(var flag in modCmd.ToList())
+                    {
+                        if(GlobalSettings.SystemFlags.Contains(flag.ToLower().Trim().Split(' ')[0]))
+                            modCmd.Remove(flag);
+                    }
+                }
+                if (!globalSettings.noSystemCMD)
+                    cmdline = KnUtils.CmdLineBuilder(cmdline, systemCmd);
+                cmdline = KnUtils.CmdLineBuilder(cmdline, globalCmd);
+            }
+            cmdline = KnUtils.CmdLineBuilder(cmdline, modCmd?.ToArray());
+            if (inSingleTCMode && CustomLauncher.CustomCmdlineArray != null && CustomLauncher.CustomCmdlineArray.Any())
+            {
+                cmdline = KnUtils.CmdLineBuilder(cmdline, CustomLauncher.CustomCmdlineArray);
+            }
+            return cmdline;
         }
 
         /// <summary>

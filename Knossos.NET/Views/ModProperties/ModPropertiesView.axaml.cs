@@ -74,7 +74,7 @@ namespace Knossos.NET.Views
             if (model?.IsSubmitting == true) return Task.FromResult(false);
             if (model?.IsModalOpen == true) { model.CloseModalCommand.Execute(null); return Task.FromResult(false); }
             model?.SaveOptions();
-            return Task.FromResult(true);
+            return Task.FromResult(model?.SaveIngameSettings() ?? true);
         }
     }
 }
