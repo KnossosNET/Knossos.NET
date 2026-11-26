@@ -41,6 +41,8 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty] private string status = string.Empty;
         [ObservableProperty] private string downloadSize = "—";
         [ObservableProperty] private string freeSpace = "—";
+        [ObservableProperty] private IReadOnlyList<string> installationLibraries = Array.Empty<string>();
+        [ObservableProperty] private string? selectedInstallationLibrary;
         public ObservableCollection<ModVersionChoice> Versions { get; } = new();
         public ObservableCollection<ModPackageTreeItem> Dependencies { get; } = new();
         public bool HasError => Error.Length > 0;
@@ -65,6 +67,7 @@ namespace Knossos.NET.ViewModels
         public bool CanCleanReinstall => !IsEngine && IsInstalled && !Developer;
         public bool ShowRemoveOldVersions => !IsEngine && !IsInstalled && hasOtherVersions;
         public bool CanEdit => !IsLoading && !IsApplying && !owner.IsSubmitting;
+        public bool ShowInstallationLibrary => Root != null && !IsEngine && !IsInstalled;
         public bool CanApply => CanEdit && !IsUpdatingDependencies && Root != null && Error.Length == 0 && (CleanReinstall || plan.Any(n => n.HasChanges));
         public string ApplyLabel => !IsInstalled ? "Download & Install" : CleanReinstall ? "Reinstall version" : "Apply Changes";
         public string PackageSummary => Root == null ? "" : Root.Packages.Count(p => p.IsSelected) + " of " + Root.Packages.Count + " packages selected";
@@ -73,7 +76,12 @@ namespace Knossos.NET.ViewModels
         public Task CurrentLoad { get; private set; } = Task.CompletedTask;
 
         public ModVersionsViewModel(ModPropertiesViewModel owner, bool forceDeveloper = false, ModPackageCatalog? catalog = null)
-        { this.owner = owner; this.forceDeveloper = forceDeveloper; this.catalog = catalog ?? new ModPackageCatalog(); }
+        {
+            this.owner = owner;
+            this.forceDeveloper = forceDeveloper;
+            this.catalog = catalog ?? new ModPackageCatalog();
+            Knossos.LibraryPathsChanged += RefreshInstallationLibraries;
+        }
 
         public void SelectInstalledVersion(string version)
         {
@@ -156,6 +164,7 @@ namespace Knossos.NET.ViewModels
             if (disposed) return;
             hasOtherVersions = planningCache.GetInstalled(catalog, root.Mod.id).Count > 0;
             Root = root;
+            RefreshInstallationLibraries(versionChanged);
             // Publish only a complete, current plan. Stale requests never update the displayed tree.
             plan = planner.Nodes.ToList();
             displayedNodes.Clear();
@@ -248,6 +257,31 @@ namespace Knossos.NET.ViewModels
             NotifyState();
         }
         partial void OnCleanReinstallChanged(bool value) { UpdateSize(); NotifyState(); }
+        partial void OnSelectedInstallationLibraryChanged(string? value) => RefreshFreeSpace();
+
+        private void RefreshInstallationLibraries() => RefreshInstallationLibraries(resetSelection: false);
+
+        private void RefreshInstallationLibraries(bool resetSelection)
+        {
+            var previousSelection = SelectedInstallationLibrary;
+            InstallationLibraries = Knossos.GetLibraryPaths();
+            SelectedInstallationLibrary = !resetSelection && previousSelection != null &&
+                InstallationLibraries.Contains(previousSelection, Knossos.LibraryPathComparer)
+                ? previousSelection
+                : Root == null ? null : Knossos.GetDefaultModLibrary(Root.Mod);
+            RefreshFreeSpace();
+        }
+
+        private void RefreshFreeSpace()
+        {
+            var library = Root?.Installed is { } installed
+                ? Knossos.GetLibraryForPath(installed.fullPath)
+                : IsEngine ? Knossos.GetKnossosLibraryPath() : SelectedInstallationLibrary;
+            FreeSpace = library == null ? "Library not configured" :
+                !System.IO.Directory.Exists(library) ? "Library unavailable" :
+                KnUtils.FormatBytes(KnUtils.CheckDiskSpace(library));
+        }
+
         private void UpdateSize(bool refreshFreeSpace = false)
         {
             long bytes = 0;
@@ -255,11 +289,7 @@ namespace Knossos.NET.ViewModels
                 foreach (var pkg in node.Packages.Where(p => p.IsSelected && (!p.Installed || node == Root && CleanReinstall)))
                     bytes += pkg.Package.files?.Sum(f => f.filesize) ?? 0;
             DownloadSize = KnUtils.FormatBytes(bytes);
-            if (refreshFreeSpace)
-            {
-                var library = Knossos.GetKnossosLibraryPath();
-                FreeSpace = string.IsNullOrEmpty(library) ? "Library not configured" : KnUtils.FormatBytes(KnUtils.CheckDiskSpace(library));
-            }
+            if (refreshFreeSpace) RefreshFreeSpace();
         }
         internal void RefreshCommands() => NotifyState();
 
@@ -267,7 +297,8 @@ namespace Knossos.NET.ViewModels
         {
             foreach (var property in new[] { nameof(ReleaseDate), nameof(IsEngine), nameof(ShowVerifyHint), nameof(ShowCompression), nameof(IsInstalled), nameof(IsPrivate), nameof(VisibilityLabel), nameof(VisibilityColor), nameof(IsCompressed),
                 nameof(CanDelete), nameof(CanVerify), nameof(VerifyHint), nameof(CanChooseDeveloper), nameof(ShowDeveloper), nameof(CanCompress), nameof(CanCleanReinstall), nameof(ShowRemoveOldVersions),
-                nameof(CanEdit), nameof(CanApply), nameof(ApplyLabel), nameof(PackageSummary), nameof(PackageHint), nameof(HasDependencies) }) OnPropertyChanged(property);
+                nameof(CanEdit), nameof(CanApply), nameof(ApplyLabel), nameof(PackageSummary), nameof(PackageHint), nameof(HasDependencies),
+                nameof(ShowInstallationLibrary) }) OnPropertyChanged(property);
             ApplyCommand.NotifyCanExecuteChanged();
             VerifyCommand.NotifyCanExecuteChanged();
             DeleteCommand.NotifyCanExecuteChanged();
@@ -335,6 +366,12 @@ namespace Knossos.NET.ViewModels
             if (!CanApply || Root == null) return;
             if (TaskViewModel.Instance == null) return;
             if (string.IsNullOrEmpty(Knossos.GetKnossosLibraryPath())) { owner.ShowMessage("Library not configured", "Select a library folder in Settings before installing mods."); return; }
+            var installLibrary = ShowInstallationLibrary ? SelectedInstallationLibrary : null;
+            if (ShowInstallationLibrary && !System.IO.Directory.Exists(installLibrary))
+            {
+                owner.ShowMessage("Library unavailable", "Select an available library before installing this version.");
+                return;
+            }
             if (CleanReinstall && !await owner.ConfirmAsync("Reinstall this version?",
                 "The current version's files will be replaced. Your selected packages will be reinstalled; other versions can still supply verified files. A failed installation restores the current version.", "Reinstall version")) return;
             BeginOperation(plan.Select(n => n.Mod));
@@ -363,7 +400,8 @@ namespace Knossos.NET.ViewModels
                             cleanupOldVersions: node == Root && ShowRemoveOldVersions && RemoveOldVersions, allowHardlinks: true,
                             reinstallCurrentVersion: node == Root && CleanReinstall, reportError: message => owner.ShowMessage("Installation failed", message),
                             addOnly: addOnly, operation: operation, packageActivation: activation,
-                            removePackages: addOnly ? Array.Empty<string>() : node.Packages.Where(p => p.Installed && !p.IsSelected).Select(p => p.Name).ToArray());
+                            removePackages: addOnly ? Array.Empty<string>() : node.Packages.Where(p => p.Installed && !p.IsSelected).Select(p => p.Name).ToArray(),
+                            libraryPath: node == Root ? installLibrary : null);
                         if (!success || operationCancelled) { Status = "Installation stopped. Review Tasks for details."; return; }
                     }
 
@@ -457,6 +495,13 @@ namespace Knossos.NET.ViewModels
             finally { EndOperation(); }
         }
 
-        public void Dispose() { disposed = true; loadSource?.Cancel(); loadSource?.Dispose(); operation?.Dispose(); }
+        public void Dispose()
+        {
+            disposed = true;
+            Knossos.LibraryPathsChanged -= RefreshInstallationLibraries;
+            loadSource?.Cancel();
+            loadSource?.Dispose();
+            operation?.Dispose();
+        }
     }
 }

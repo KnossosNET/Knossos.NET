@@ -112,10 +112,17 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public void CheckBasePath()
         {
-            if (!Knossos.inPortableMode && Knossos.GetKnossosLibraryPath() == null)
-            {
-                ShowBasePathSelector = true;
-            }
+            ShowBasePathSelector = !Knossos.inPortableMode && Knossos.GetKnossosLibraryPath() == null;
+        }
+
+        internal void ClearInstalledVersions()
+        {
+            modVersions.Clear();
+            VersionItems.Clear();
+            ActiveVersionIndex = -1;
+            Installed = false;
+            CheckBasePath();
+            RefreshQtFredAvailability();
         }
 
         /// <summary>
@@ -522,14 +529,14 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal void ChangeBasePath()
+        internal async void ChangeBasePath()
         {
             if (NewBasePath != string.Empty)
             {
-                Knossos.globalSettings.basePath = NewBasePath;
-                Knossos.globalSettings.Save();
-                Knossos.ResetBasePath();
-                ShowBasePathSelector = false;
+                if (Knossos.TryAddLibrary(NewBasePath, out var error))
+                    ShowBasePathSelector = false;
+                else
+                    await MessageBox.Show(MainWindow.instance, error!, "Cannot Select Folder", MessageBox.MessageBoxButtons.OK);
             }
         }
 

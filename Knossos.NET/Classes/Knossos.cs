@@ -11,12 +11,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using VP.NET;
 
 namespace Knossos.NET
 {
-    public static class Knossos
+    public static partial class Knossos
     {
         public static readonly string AppVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion?.Split('+')[0] ?? "0.0.0";
         public readonly static string ToolRepoURL = "https://raw.githubusercontent.com/KnossosNET/Knet-Tool-Repo/main/knet_tools.json";
@@ -27,6 +28,7 @@ namespace Knossos.NET
         private static List<FsoBuild> engineBuilds = new List<FsoBuild>();
         private static List<Tool> modTools = new List<Tool>();
         private static readonly TaskCompletionSource<bool> initialLibraryScanCompletion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        private static int libraryLoadInProgress;
         public static GlobalSettings globalSettings = new GlobalSettings();
         public static bool retailFs2RootFound = false;
         public static bool flagDataLoaded = false;
@@ -187,6 +189,7 @@ namespace Knossos.NET
 
                 File.Delete(writeTestPath);
                 writeTestPath = null;
+                globalSettings.libraryPaths = new List<string> { fullPath };
                 globalSettings.basePath = fullPath;
                 return true;
             }
@@ -295,16 +298,7 @@ namespace Knossos.NET
                     }
                 }
 
-                if(globalSettings.basePath != null && !isQuickLaunch && !Directory.Exists(globalSettings.basePath))
-                {
-                    //Reset and warn
-                    Dispatcher.UIThread.Invoke(() => {
-                        MessageBox.Show(MainWindow.instance, $"The previusly selected library folder:\n\n'{globalSettings.basePath}'\n\nNot longer exists, the library folder will be reset back to default.", "Library folder not found" , MessageBox.MessageBoxButtons.OK);
-                    });
-                    globalSettings.basePath = null;
-                }
-
-                if (globalSettings.basePath == null && !inSingleTCMode)
+                if (globalSettings.libraryPaths == null && globalSettings.basePath == null && !inSingleTCMode)
                 {
                     DetermineDefaultBasePath();
                     if (!isQuickLaunch)
@@ -509,7 +503,7 @@ namespace Knossos.NET
 
                     if(mod != null)
                     {
-                        PlayMod(mod, execType, false, 0, false, fsoBuild, cmdline);
+                        await Dispatcher.UIThread.InvokeAsync(() => PlayModAsync(mod, execType, false, 0, false, fsoBuild, cmdline));
                     }
                     else
                     {
@@ -539,7 +533,7 @@ namespace Knossos.NET
 
                         if(mod != null)
                         {
-                            PlayMod(mod, execType, false, 0, false, fsoBuild, cmdline);
+                            await Dispatcher.UIThread.InvokeAsync(() => PlayModAsync(mod, execType, false, 0, false, fsoBuild, cmdline));
                         }
                     }
                     else
@@ -926,20 +920,31 @@ namespace Knossos.NET
         /// </summary>
         public static void ResetBasePath()
         {
+            if (Interlocked.CompareExchange(ref libraryLoadInProgress, 1, 0) != 0)
+                return;
+
             Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                MainViewModel.Instance?.ClearViews();
-                FreespaceViewModel.Instance?.SetLoading(true);
-                FreespaceViewModel.Instance?.SetFS2RootFound(false);
-                FreespaceViewModel.Instance?.SetInstalling(null, false);
-                installedMods.Clear();
-                engineBuilds.Clear();
-                retailFs2RootFound = false;
-                TaskViewModel.Instance?.CancelAllRunningTasks();
-                Nebula.CancelOperations();
-                await Task.Delay(2000).ConfigureAwait(false);
-                KnUtils.ClearDownloadedRemoteResourceList();
-                LoadBasePath();
+                try
+                {
+                    MainViewModel.Instance?.ClearViews();
+                    FreespaceViewModel.Instance?.SetLoading(true);
+                    FreespaceViewModel.Instance?.SetFS2RootFound(false);
+                    FreespaceViewModel.Instance?.SetInstalling(null, false);
+                    TaskViewModel.Instance?.CancelAllRunningTasks();
+                    Nebula.CancelOperations();
+                    await Task.Delay(2000).ConfigureAwait(false);
+                    KnUtils.ClearDownloadedRemoteResourceList();
+                    await ScanLibrariesAsync(false).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    Log.Add(Log.LogSeverity.Error, nameof(ResetBasePath), ex);
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref libraryLoadInProgress, 0);
+                }
             });
         }
 
@@ -947,15 +952,46 @@ namespace Knossos.NET
         /// Loads knossos library and connects to Nebula
         /// </summary>
         /// <param name="isQuickLaunch"></param>
-        public async static void LoadBasePath(bool isQuickLaunch = false)
+        public static async void LoadBasePath(bool isQuickLaunch = false)
         {
-            if (globalSettings.basePath != null)
+            if (Interlocked.CompareExchange(ref libraryLoadInProgress, 1, 0) != 0)
+                return;
+            try
             {
+                await ScanLibrariesAsync(isQuickLaunch).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, nameof(LoadBasePath), ex);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref libraryLoadInProgress, 0);
+            }
+        }
+
+        private static async Task ScanLibrariesAsync(bool isQuickLaunch)
+        {
+            try
+            {
+                installedMods.Clear();
+                engineBuilds.Clear();
+                modTools.Clear();
+                duplicateModPaths.Clear();
+                retailFs2RootFound = false;
+
                 //Clear Mod Tags
                 ModTags.Clear();
-                MainViewModel.Instance?.tagFilter.Clear();
+                if (!isQuickLaunch)
+                    await Dispatcher.UIThread.InvokeAsync(() => MainViewModel.Instance?.tagFilter.Clear());
 
-                await FolderSearchRecursive(globalSettings.basePath, isQuickLaunch).ConfigureAwait(false);
+                foreach (var root in GetLibraryPaths())
+                {
+                    if (Directory.Exists(root))
+                        await FolderSearchRecursive(root, isQuickLaunch).ConfigureAwait(false);
+                    else
+                        Log.Add(Log.LogSeverity.Warning, nameof(ScanLibrariesAsync), $"Library '{root}' is unavailable.");
+                }
                 initialLibraryScanCompletion.TrySetResult(true);
 
                 Log.Add(Log.LogSeverity.Information, "Knossos.LoadBasePath()", "Loaded: " + installedMods.Count() +" installed mods or tcs and " + engineBuilds.Count() + " engine builds." );
@@ -982,7 +1018,8 @@ namespace Knossos.NET
                     await Task.Run(async () => { 
                         await Nebula.Trinity();
                         //Auto-Update FSO Builds function, has to run after the repo is loaded
-                        _ = Task.Run(() => AutoUpdateBuilds());
+                        if (Directory.Exists(GetKnossosLibraryPath()))
+                            _ = Task.Run(() => AutoUpdateBuilds());
                     }).ConfigureAwait(false);
                 }
                 else
@@ -1003,7 +1040,7 @@ namespace Knossos.NET
 
                 initIsComplete = true;
             }
-            else
+            finally
             {
                 initialLibraryScanCompletion.TrySetResult(true);
             }
@@ -1102,7 +1139,7 @@ namespace Knossos.NET
         /// <returns>fullpath or null if not set</returns>
         public static string? GetKnossosLibraryPath()
         {
-            return globalSettings.basePath;
+            return GetLibraryPaths().FirstOrDefault();
         }
 
         /// <summary>
@@ -1113,6 +1150,11 @@ namespace Knossos.NET
         /// <param name="standaloneServer"></param>
         /// <param name="standalonePort"></param>
         public static async void PlayMod(Mod mod, FsoExecType fsoExecType, bool standaloneServer = false, int standalonePort = 0, bool vrMode = false, FsoBuild? specifiedBuild = null, string? additionalCmd = null)
+        {
+            await PlayModAsync(mod, fsoExecType, standaloneServer, standalonePort, vrMode, specifiedBuild, additionalCmd);
+        }
+
+        private static async Task PlayModAsync(Mod mod, FsoExecType fsoExecType, bool standaloneServer, int standalonePort, bool vrMode, FsoBuild? specifiedBuild, string? additionalCmd)
         {
             if (TaskViewModel.Instance?.IsSafeState() == false)
             {
@@ -1167,7 +1209,6 @@ namespace Knossos.NET
 
             /* Build cmdline */
             var cmdline = "-parse_cmdline_only";
-            var modFlag = string.Empty;
             var modList = new List<Mod>();
             FsoBuild? fsoBuild = specifiedBuild;
 
@@ -1251,195 +1292,26 @@ namespace Knossos.NET
                 }
             }
 
-            /* Determine root folder */
-            var rootPath = string.Empty;
-
-            /* Others TCs: WCS, Solaris, etc */
-            if (mod.type == ModType.tc && mod.parent == null)
+            FsoModLaunch? launch;
+            try
             {
-                rootPath = mod.fullPath.Replace(mod.folderName+Path.DirectorySeparatorChar,"");
+                launch = FsoModLaunch.Create(mod, modList, standaloneServer);
             }
-            else
+            catch (Exception ex)
             {
-                /* Most likely FS2 Retail only */
-                if (mod.type == ModType.tc && mod.parent != null || mod.parent == mod.id)
-                {
-                    rootPath = mod.fullPath;
-                }
-                else
-                {
-                    /* Regular mods */
-                    if(mod.type == ModType.mod && mod.parent != null)
-                    {
-                        foreach(var installedMod in installedMods) 
-                        { 
-                            if(installedMod.type == ModType.tc && installedMod.id == mod.parent)
-                            {
-                                if (installedMod.parent != null)
-                                {
-                                    rootPath = installedMod.fullPath;
-                                }
-                                else
-                                {
-                                    rootPath = mod.fullPath.Replace(mod.folderName + Path.DirectorySeparatorChar, "");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if(rootPath == string.Empty)
-            {
-                Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", "Unable to determine working folder for mod: " + mod.folderName);
-                await MessageBox.Show(MainWindow.instance, "Unable to determine working folder for mod: " + mod.folderName, "Error launching mod", MessageBox.MessageBoxButtons.OK);
+                Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", ex);
+                await MessageBox.Show(MainWindow.instance, "Unable to read mod paths. " + ex.Message, "Error launching mod", MessageBox.MessageBoxButtons.OK);
                 return;
             }
-            else
+            if (launch == null)
             {
-                Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used working folder : " + rootPath);
+                var message = "Unable to determine working folder for mod: " + mod.folderName;
+                Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod()", message);
+                await MessageBox.Show(MainWindow.instance, message, "Error launching mod", MessageBox.MessageBoxButtons.OK);
+                return;
             }
-
-            /* Build mod flag */
-            foreach (var modid in mod.GetModFlagList())
-            {
-                /* Load this mod */
-                if (modid == mod.id)
-                {
-                    /* Dev Mode ON */
-                    if (mod.devMode)
-                    {
-                        foreach (var pkg in mod.packages.OrderBy(x => x.name))
-                        {
-                            if (pkg.isEnabled)
-                            {
-                                if (modFlag.Length > 0)
-                                {
-                                    modFlag += "," + Path.GetRelativePath(rootPath, mod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                }
-                                else
-                                {
-                                    modFlag += Path.GetRelativePath(rootPath, mod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                }
-                            }
-                        }
-
-                        //If standalone the multi.cfg will be on mod root\data to avoid uploading it to nebula
-                        if (standaloneServer)
-                        {
-                            if (modFlag.Length > 0)
-                            {
-                                modFlag += "," + Path.GetRelativePath(rootPath, mod.fullPath).TrimEnd('/').TrimEnd('\\');
-                            }
-                            else
-                            {
-                                modFlag += Path.GetRelativePath(rootPath, mod.fullPath).TrimEnd('/').TrimEnd('\\');
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //avoid passing FS2 in modflag because fs2retail runs off the working folder
-                        if (mod.id != "FS2")
-                        {
-                            if (modFlag.Length > 0)
-                            {
-                                modFlag += "," + mod.folderName;
-                            }
-                            else
-                            {
-                                modFlag += mod.folderName;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    var depMod = modList.FirstOrDefault(d => d.id == modid);
-                    //Found the modflag id in mod dependencies list
-                    if (depMod != null)
-                    {
-                        /* Dev Mode ON */
-                        if (depMod.devMode)
-                        {
-                            foreach (var pkg in depMod.packages)
-                            {
-                                if (modFlag.Length > 0)
-                                {
-                                    modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                }
-                                else
-                                {
-                                    modFlag += Path.GetRelativePath(rootPath, depMod.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (modFlag.Length > 0)
-                            {
-                                modFlag += "," + Path.GetRelativePath(rootPath, depMod.fullPath).TrimEnd('/').TrimEnd('\\');
-                            }
-                            else
-                            {
-                                modFlag += Path.GetRelativePath(rootPath, depMod.fullPath).TrimEnd('/').TrimEnd('\\');
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //Unofficial feature
-                        //https://github.com/KnossosNET/Knossos.NET/issues/195
-                        //Try to load a mod thats not on the dependencies list, but it is on the modflag list, if found installed
-                        try
-                        {
-                            var optionalDep = Knossos.GetInstalledModList(modid);
-                            if (optionalDep != null && optionalDep.Count() > 0)
-                            {
-                                var newerOpt = optionalDep.MaxBy(o =>  new SemanticVersion(o.version));
-                                if(newerOpt != null)
-                                {
-                                    Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Loading optional dependency: " + newerOpt);
-                                    /* Dev Mode ON */
-                                    if (newerOpt.devMode)
-                                    {
-                                        foreach (var pkg in newerOpt.packages)
-                                        {
-                                            if (modFlag.Length > 0)
-                                            {
-                                                modFlag += "," + Path.GetRelativePath(rootPath, newerOpt.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                            }
-                                            else
-                                            {
-                                                modFlag += Path.GetRelativePath(rootPath, newerOpt.fullPath + Path.DirectorySeparatorChar + pkg.folder).TrimEnd('/').TrimEnd('\\');
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (modFlag.Length > 0)
-                                        {
-                                            modFlag += "," + Path.GetRelativePath(rootPath, newerOpt.fullPath).TrimEnd('/').TrimEnd('\\');
-                                        }
-                                        else
-                                        {
-                                            modFlag += Path.GetRelativePath(rootPath, newerOpt.fullPath).TrimEnd('/').TrimEnd('\\');
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                //Mod has a optional dependency but it is not found installed
-                                Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Mod requested a optional dependency that is not found: " + modid + ". This is not critical.");
-                            }
-                        }catch(Exception ex)
-                        {
-                            Log.Add(Log.LogSeverity.Error, "Knossos.PlayMod(optional dependency)", ex);
-                        }
-                    }
-                }
-            }
+            var rootPath = launch.WorkingFolder;
+            Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used working folder: " + rootPath);
 
             if (fsoBuild == null)
             {
@@ -1540,9 +1412,9 @@ namespace Knossos.NET
                 }
             }
 
-            if (modFlag.Length > 0)
+            if (!launch.UsesMultipleLibraries && launch.Roots.Count > 0)
             {
-                cmdline += " -mod " + modFlag;
+                cmdline += " -mod " + launch.GetLegacyModFlag(mod);
             }
 
             
@@ -1601,10 +1473,8 @@ namespace Knossos.NET
                 }
             }
 
-            Log.Add(Log.LogSeverity.Information, "Knossos.PlayMod()", "Used cmdLine : " + cmdline);
-
             //Launch FSO!!!
-            var fsoResult = await fsoBuild.RunFSO(fsoExecType, cmdline, rootPath, false);
+            var fsoResult = await FsoBootstrap.RunAsync(fsoBuild, fsoExecType, cmdline, mod.id, launch);
 
             if (!fsoResult.IsSuccess)
             {
@@ -1698,12 +1568,19 @@ namespace Knossos.NET
                 {
                     foreach (DirectoryInfo dir in arrDir)
                     {
-                        await FolderSearchRecursive(dir.ToString() + Path.DirectorySeparatorChar, isQuickLaunch, folderLevel + 1);
+                        // A linked directory can lead back into this library or into a different library.
+                        if ((dir.Attributes & FileAttributes.ReparsePoint) == 0 &&
+                            !dir.Name.StartsWith(ModLibraryMove.TemporaryDirectoryPrefix, StringComparison.Ordinal))
+                            await FolderSearchRecursive(dir.FullName, isQuickLaunch, folderLevel + 1);
                     }
                 }
 
-                if(File.Exists(path + Path.DirectorySeparatorChar + "knossos_net_download.token"))
+                if (folderLevel > 0 && File.Exists(Path.Combine(path, "knossos_net_download.token")))
                 {
+                    if (!isQuickLaunch && !Dispatcher.UIThread.Invoke(() =>
+                            TaskViewModel.Instance?.IsSafeState() != false && !ModInstallOperation.HasPendingVersions))
+                        return;
+
                     /* This is a incomplete download, delete the folder */
                     Log.Add(Log.LogSeverity.Warning, "Knossos.FolderSearchRecursive()", "Deleting incomplete download found at "+path);
                     Directory.Delete(path, true);
@@ -1716,16 +1593,16 @@ namespace Knossos.NET
                 {
                     try
                     {
-                        var modJson = new Mod(path,di.Name);
+                        var modJson = new Mod(Path.TrimEndingDirectorySeparator(path) + Path.DirectorySeparatorChar, di.Name);
                         switch (modJson.type)
                         {
                             case ModType.tc:
                             case ModType.mod: 
-                                installedMods.Add(modJson);
+                                if (!RegisterScannedMod(modJson))
+                                    return;
                                 if (modJson.id == "FS2" && modJson.type == ModType.tc && modJson.parent == "FS2")
                                 {
-                                    var fs2RootFiles = Directory.GetFiles(modJson.fullPath);
-                                    if (fs2RootFiles != null && fs2RootFiles.FirstOrDefault(f=>f.ToLower().Contains("root_fs2.vp")) != null)
+                                    if (Fs2RetailFiles.HasRootPack(modJson.fullPath))
                                     {
                                         retailFs2RootFound = true;
                                         Log.Add(Log.LogSeverity.Information, "Knossos.FolderSearchRecursive", "Found FS2 Root Pack!");
@@ -1737,6 +1614,12 @@ namespace Knossos.NET
 
                             case ModType.engine:
                                 var build = new FsoBuild(modJson);
+                                if (GetInstalledBuild(build.id, build.version) is { } existingBuild)
+                                {
+                                    Log.Add(Log.LogSeverity.Warning, nameof(FolderSearchRecursive),
+                                        $"Duplicate build {build.id} {build.version} at '{path}' ignored. Using '{existingBuild.folderPath}'.");
+                                    return;
+                                }
                                 engineBuilds.Add(build);
                                 if(!isQuickLaunch)
                                     await Dispatcher.UIThread.InvokeAsync(() => FsoBuildsViewModel.Instance?.AddBuildToUi(build), DispatcherPriority.Background);
@@ -1755,9 +1638,9 @@ namespace Knossos.NET
                 }
                 else if(File.Exists(path + Path.DirectorySeparatorChar + "mod.ini"))
                 {
-                    var modLegacy = new Mod(path, di.Name, ModType.modlegacy);
-                    installedMods.Add(modLegacy);
-                    await Dispatcher.UIThread.InvokeAsync(() => MainViewModel.Instance?.AddInstalledMod(modLegacy), DispatcherPriority.Background);
+                    var modLegacy = new Mod(Path.TrimEndingDirectorySeparator(path) + Path.DirectorySeparatorChar, di.Name, ModType.modlegacy);
+                    if (RegisterScannedMod(modLegacy) && !isQuickLaunch)
+                        await Dispatcher.UIThread.InvokeAsync(() => MainViewModel.Instance?.AddInstalledMod(modLegacy), DispatcherPriority.Background);
                 }
             }catch (Exception ex)
             {

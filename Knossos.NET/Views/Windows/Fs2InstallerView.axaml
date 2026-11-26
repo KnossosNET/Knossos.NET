@@ -47,6 +47,16 @@
 			<Border IsVisible="{Binding CanInstall}" Margin="0,5,0,0" Grid.Row="2" BorderBrush="AliceBlue" BorderThickness="2" CornerRadius="2">
 				<StackPanel>
 					<Label HorizontalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="5" Foreground="Green">Freespace 2 files detected! You can proceed to install</Label>
+					<TextBlock Text="Install to library" Margin="10,4"/>
+					<ComboBox Name="InstallationLibrarySelector" Margin="10,0" HorizontalAlignment="Stretch"
+							  ItemsSource="{Binding InstallationLibraries}" SelectedItem="{Binding SelectedInstallationLibrary, Mode=TwoWay}"
+							  IsEnabled="{Binding CanSelectSource}" AutomationProperties.Name="Library to install to">
+						<ComboBox.ItemTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
 					<Button Classes="Accept" IsEnabled="{Binding CanSelectSource}" Command="{Binding InstallFS2Command}" HorizontalAlignment="Center" Margin="10">Install FS2 Retail</Button>
 					<ProgressBar Margin="10" Height="20" ShowProgressText="False" Minimum="0" Maximum="{Binding ProgressMax}" Value="{Binding ProgressCurrent}" IsVisible="{Binding IsInstalling}"></ProgressBar>
 					<TextBlock Margin="5" TextWrapping="Wrap" HorizontalAlignment="Center" Text="{Binding InstallText}"></TextBlock>

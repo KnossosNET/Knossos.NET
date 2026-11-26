@@ -1,9 +1,9 @@
 ﻿#if ANDROID
 using Android.App;
-using System.Linq;
 using Android.Content;
 using Avalonia.Threading;
 using Android.OS;
+using Android.OS.Storage;
 #endif
 
 using System;
@@ -13,6 +13,8 @@ using System.IO;
 using System.Threading.Tasks;
 
 namespace Knossos.NET.Classes;
+
+internal sealed record AndroidLibraryVolume(string Path, string Description, string FreeSpace);
 
 public static class AndroidHelper
 {
@@ -79,13 +81,63 @@ public static class AndroidHelper
     public static string GetInternalAppFilesDir() => Application.Context.FilesDir!.AbsolutePath;
 
     /// <summary>
-    /// List of app all external locations, SD, USB drives, etc
+    /// Mounted storage volumes where Android provides an app-specific library folder.
     /// </summary>
-    public static string[] GetAllExternalAppFilesDirs()
-        => (Application.Context.GetExternalFilesDirs(null) ?? System.Array.Empty<Java.IO.File>())
-            .Where(f => f is not null)
-            .Select(f => Path.Combine(f!.AbsolutePath, "library") )
-            .ToArray();
+    internal static IReadOnlyList<AndroidLibraryVolume> GetLibraryVolumes()
+    {
+        var context = Application.Context;
+        var storage = context.GetSystemService(Context.StorageService) as StorageManager;
+        var volumes = new List<AndroidLibraryVolume>();
+        var paths = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var directory in context.GetExternalFilesDirs(null) ?? Array.Empty<Java.IO.File>())
+        {
+            if (directory == null)
+                continue;
+
+            try
+            {
+                if (Android.OS.Environment.GetExternalStorageState(directory) != Android.OS.Environment.MediaMounted)
+                    continue;
+
+                var path = Path.Combine(directory.AbsolutePath, "library");
+                if (!paths.Add(path))
+                    continue;
+
+                var description = OperatingSystem.IsAndroidVersionAtLeast(24)
+                    ? storage?.GetStorageVolume(directory)?.GetDescription(context)
+                    : null;
+                if (string.IsNullOrWhiteSpace(description))
+                    description = Android.OS.Environment.InvokeIsExternalStorageRemovable(directory) ? "Removable storage" : "Internal storage";
+
+                volumes.Add(new AndroidLibraryVolume(path, description, GetVolumeFreeSpace(directory.AbsolutePath)));
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Warning, "AndroidHelper.GetLibraryVolumes()", ex);
+            }
+        }
+
+        if (volumes.Count == 0)
+        {
+            var directory = GetInternalAppFilesDir();
+            volumes.Add(new AndroidLibraryVolume(Path.Combine(directory, "library"), "Internal app storage", GetVolumeFreeSpace(directory)));
+        }
+        return volumes;
+    }
+
+    private static string GetVolumeFreeSpace(string directory)
+    {
+        try
+        {
+            using var stats = new StatFs(directory);
+            return $"{KnUtils.FormatBytes(stats.AvailableBytes)} free";
+        }
+        catch (Exception ex)
+        {
+            Log.Add(Log.LogSeverity.Warning, "AndroidHelper.GetVolumeFreeSpace()", ex);
+            return "Free space unavailable";
+        }
+    }
 
     /// <summary>
     /// Default knossos library folder in android
@@ -177,7 +229,8 @@ public static class AndroidHelper
     /// <param name="engineLibPath"></param>
     /// <param name="workingFolder"></param>
     /// <param name="cmdline"></param>
-    public static void LaunchFSO(string engineLibPath, string? workingFolder, string cmdline)
+    /// <param name="bootstrapPath">Absolute path to the bootstrap file, if used.</param>
+    public static void LaunchFSO(string engineLibPath, string? workingFolder, string cmdline, string? bootstrapPath = null)
     {
         try
         {
@@ -198,14 +251,16 @@ public static class AndroidHelper
                 intent.PutExtra("workingFolder", workingFolder);
             }
             
-            if (cmdline.Length > 0)
-                intent.PutStringArrayListExtra("fsoArgs", cmdline.Split(" "));
+            var args = GetLaunchArguments(cmdline, bootstrapPath);
+            if (args.Count > 0)
+                intent.PutStringArrayListExtra("fsoArgs", args);
 
             ctx.StartActivity(intent);
         }
         catch (Exception ex)
         {
             Log.Add(Log.LogSeverity.Error, "AndroidHelper.LaunchFSO", ex);
+            throw;
         }
     }
 
@@ -215,7 +270,8 @@ public static class AndroidHelper
     /// <param name="engineLibPath"></param>
     /// <param name="timeoutMs"></param>
     /// <returns>json string or empty string</returns>
-    public static async Task<string> GetFlagsStringFSOAsync(string engineLibPath, int timeoutMs = 30000)
+    public static async Task<string> GetFlagsStringFSOAsync(string engineLibPath, int timeoutMs = 30000,
+        string? workingFolder = null, bool portableMode = false)
     {
         try
         {
@@ -235,8 +291,13 @@ public static class AndroidHelper
             intent.SetClassName(ctx, "com.knossosnet.knossosnet.FlagsActivity");
             intent.AddFlags(ActivityFlags.NewTask);
             intent.PutExtra("engineLibName", System.IO.Path.Combine(dstAbiDir, libName));
+            if (workingFolder != null)
+                intent.PutExtra("workingFolder", workingFolder);
 
-            intent.PutStringArrayListExtra("fsoArgs", new List<string> { "-get_flags", "json_v2" });
+            var args = new List<string> { "-get_flags", "json_v2" };
+            if (portableMode)
+                args.Insert(0, "-portable_mode");
+            intent.PutStringArrayListExtra("fsoArgs", args);
             intent.PutExtra("flagsReceiver", receiver);
 
             ctx.StartActivity(intent);
@@ -280,14 +341,27 @@ public static class AndroidHelper
     //Stubs
     public static string? GetExternalAppFilesDir() => "";
     public static string GetInternalAppFilesDir() => "";
-    public static string[] GetAllExternalAppFilesDirs() => new string[] { };
+    internal static IReadOnlyList<AndroidLibraryVolume> GetLibraryVolumes() => Array.Empty<AndroidLibraryVolume>();
     public static string GetDefaultLibraryDir() => "";
     public static string GetDefaultKnetDir() => "";
     public static string GetDefaultKnetDataDir() => "";
     public static string GetDefaultFSODataDir() => "";
     public static string GetUpdateApkPath() => "";
-    public static void LaunchFSO(string engineLibPath, string? workingFolder, string cmdline) {  }
-    public static async Task<string> GetFlagsStringFSOAsync(string engineLibPath, int timeoutMs = 30000) { await Task.Delay(1); return ""; }
+    public static void LaunchFSO(string engineLibPath, string? workingFolder, string cmdline, string? bootstrapPath = null) {  }
+    public static Task<string> GetFlagsStringFSOAsync(string engineLibPath, int timeoutMs = 30000,
+        string? workingFolder = null, bool portableMode = false) => Task.FromResult(string.Empty);
 #endif
+
+    internal static List<string> GetLaunchArguments(string cmdline, string? bootstrapPath)
+    {
+        var args = new List<string>(cmdline.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+        if (bootstrapPath != null)
+        {
+            // SDL receives an argv array. Keep the whole path in one entry, including any spaces.
+            args.Add(FsoBootstrap.CommandLineOption);
+            args.Add(bootstrapPath);
+        }
+        return args;
+    }
 }
 

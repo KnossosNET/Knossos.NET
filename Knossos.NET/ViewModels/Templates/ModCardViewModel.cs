@@ -11,28 +11,20 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
 using Avalonia.Threading;
-using System.Diagnostics;
 
 namespace Knossos.NET.ViewModels
 {
     public partial class ModCardViewModel : ViewModelBase, IComparable<ModCardViewModel>
     {
         /* General Mod variables */
-        private List<Mod> modVersions = new List<Mod>();
-        private int activeVersionIndex = 0;
-        private bool devMode { get; set; } = false;
+        private readonly List<Mod> modVersions = new();
+        private Mod? preferredVersion;
+        private string? libraryFilter;
         public string ID { get; set; }
 
-        public Mod? ActiveVersion
-        {
-            get
-            {
-                if (modVersions.Count() > activeVersionIndex)
-                    return modVersions[activeVersionIndex];
-                else
-                    return null;
-            }
-        }
+        public Mod? ActiveVersion { get; private set; }
+        private int ActiveVersionIndex => ActiveVersion == null ? -1 : modVersions.IndexOf(ActiveVersion);
+        internal bool MatchesLibraryFilter { get; private set; } = true;
 
         /* UI Bindings */
         [ObservableProperty]
@@ -99,6 +91,7 @@ namespace Knossos.NET.ViewModels
         {
             modJson.ClearUnusedData();
             modVersions.Add(modJson);
+            ActiveVersion = preferredVersion = modJson;
             Name = modJson.title;
             ModVersion = modJson.version;
             if (modJson.modSource == ModSource.local)
@@ -106,17 +99,7 @@ namespace Knossos.NET.ViewModels
                 isLocalMod = true;
             }
             ID = modJson.id;
-            if (ID == "FS2")
-            {
-                //This is to disable mod delete and mod modify for retail fs2
-                devMode = true;
-            }
-            else
-            {
-                devMode = modJson.devMode;
-            }
-
-            if (devMode && ID != "FS2")
+            if (modJson.devMode && ID != "FS2")
             {
                 BorderColor = KnUtils.GetResourceColor("ModCardBorderDevMode");
             }
@@ -138,30 +121,28 @@ namespace Knossos.NET.ViewModels
         {
             modJson.ClearUnusedData();
             Log.Add(Log.LogSeverity.Information, "ModCardViewModel.AddModVersion()", "Adding additional version for mod id: " + ID + " -> " + modJson.folderName);
-            string currentVersion = modVersions[activeVersionIndex].version;
             modVersions.Add(modJson);
             modVersions.Sort((o1, o2) => -SemanticVersion.Compare(o1.version, o2.version));
-            if (SemanticVersion.Compare(modJson.version, currentVersion) > 0)
+            if (preferredVersion == null || SemanticVersion.Compare(modJson.version, preferredVersion.version) > 0)
             {
-                Log.Add(Log.LogSeverity.Information, "ModCardViewModel.AddModVersion()", "Changing active version for " + modJson.title + " from " + currentVersion + " to " + modJson.version);
-                activeVersionIndex = modVersions.FindIndex((m) => m.version.Equals(modJson.version));
-                Name = modJson.title;
-                ModVersion = modJson.version + " (+" + (modVersions.Count - 1) + ")";
-                LoadImage();
+                preferredVersion = modJson;
             }
+            UpdateActiveVersion();
         }
 
         public async void CheckDependencyActiveVersion()
         {
+            if (ActiveVersion is not { } activeVersion) return;
+
             await Task.Run(() =>
             {
-                if (modVersions[activeVersionIndex].installed && !modVersions[activeVersionIndex].devMode && !UpdateAvailable)
+                if (activeVersion.installed && !activeVersion.devMode && !UpdateAvailable)
                 {
-                    var missingDeps = modVersions[activeVersionIndex].GetMissingDependenciesList();
+                    var missingDeps = activeVersion.GetMissingDependenciesList();
                     foreach (var dependency in missingDeps.ToList())
                     {
                         //If we are missing the FSO dep and the user selected a custom build, ignore it
-                        if (modVersions[activeVersionIndex].modSettings.customBuildId != null && dependency.id == "FSO")
+                        if (activeVersion.modSettings.customBuildId != null && dependency.id == "FSO")
                         {
                             missingDeps.Remove(dependency);
                         }
@@ -170,14 +151,16 @@ namespace Knossos.NET.ViewModels
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            BorderColor = KnUtils.GetResourceColor("ModCardBorderError");
+                            if (ActiveVersion == activeVersion && !UpdateAvailable)
+                                BorderColor = KnUtils.GetResourceColor("ModCardBorderError");
                         });
                     }
                     else
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            BorderColor = KnUtils.GetResourceColor("ModCardBorderNormal");
+                            if (ActiveVersion == activeVersion && !UpdateAvailable)
+                                BorderColor = KnUtils.GetResourceColor("ModCardBorderNormal");
                         });
                     }
                 }
@@ -188,29 +171,43 @@ namespace Knossos.NET.ViewModels
 
         public void SwitchModVersion(int newIndex, bool force = false)
         {
-            if (force || newIndex != activeVersionIndex)
-            {
-                Log.Add(Log.LogSeverity.Information, "ModCardViewModel.SwitchModVersion()", "Changing active version for mod id " + ID + " to " + modVersions[newIndex].version);
-                activeVersionIndex = newIndex;
-                Name = modVersions[newIndex].title;
-                if (modVersions.Count() > 1)
-                    ModVersion = modVersions[newIndex].version + " (+" + (modVersions.Count - 1) + ")";
-                else
-                    ModVersion = modVersions[newIndex].version;
-                if (modVersions[newIndex].modSource == ModSource.local)
-                {
-                    IsLocalMod = true;
-                }
-                else
-                {
-                    IsLocalMod = false;
-                }
-                LoadImage();
-                CheckDependencyActiveVersion();
-                RefreshSpecialIcons();
-                RefreshQtFredAvailability();
-            }
+            preferredVersion = modVersions[newIndex];
+            UpdateActiveVersion(force);
         }
+
+        internal bool SetLibraryFilter(string? path)
+        {
+            libraryFilter = path;
+            return UpdateActiveVersion();
+        }
+
+        private bool UpdateActiveVersion(bool force = false)
+        {
+            var versionsInLibrary = libraryFilter == null ? modVersions : modVersions.Where(IsInFilteredLibrary).ToList();
+            MatchesLibraryFilter = libraryFilter == null || versionsInLibrary.Count > 0;
+            var selected = preferredVersion != null && versionsInLibrary.Contains(preferredVersion)
+                ? preferredVersion
+                : versionsInLibrary.FirstOrDefault() ?? preferredVersion;
+            if (selected == null) return false;
+
+            var count = versionsInLibrary.Count;
+            ModVersion = count > 1 ? selected.version + " (+" + (count - 1) + ")" : selected.version;
+            if (!force && ActiveVersion == selected) return false;
+
+            ActiveVersion = selected;
+            Name = selected.title;
+            IsLocalMod = selected.modSource == ModSource.local;
+            if (!UpdateAvailable)
+                BorderColor = KnUtils.GetResourceColor(selected.devMode && ID != "FS2" ? "ModCardBorderDevMode" : "ModCardBorderNormal");
+            LoadImage();
+            CheckDependencyActiveVersion();
+            RefreshSpecialIcons();
+            RefreshQtFredAvailability();
+            return true;
+        }
+
+        private bool IsInFilteredLibrary(Mod mod) =>
+            Knossos.LibraryPathComparer.Equals(libraryFilter, Knossos.GetLibraryForPath(mod.fullPath));
 
         /// <summary>
         /// Deletes a mod from the mod versions list and switches the active version to the newerest
@@ -221,8 +218,8 @@ namespace Knossos.NET.ViewModels
             try
             {
                 modVersions.Remove(mod);
-                // Removing an entry can change the version at the same numeric index.
-                SwitchModVersion(modVersions.Count() - 1, true);
+                if (preferredVersion == mod) preferredVersion = modVersions.FirstOrDefault();
+                UpdateActiveVersion();
             }
             catch (Exception ex)
             {
@@ -254,12 +251,12 @@ namespace Knossos.NET.ViewModels
 
         public void RefreshSpecialIcons()
         {
-            IsCustomConfig = !modVersions[activeVersionIndex].modSettings.IsDefaultConfig();
+            IsCustomConfig = ActiveVersion?.modSettings.IsDefaultConfig() == false;
         }
 
         public void RefreshQtFredAvailability()
         {
-            var bools = modVersions[activeVersionIndex].IsQtFredAvailable();
+            var bools = ActiveVersion?.IsQtFredAvailable();
 
             if (bools == null || bools.Length < 2)
             {
@@ -284,16 +281,18 @@ namespace Knossos.NET.ViewModels
 
         internal void ButtonCommandRelay(object command)
         {
+            if (ActiveVersion is not { } activeVersion) return;
+
             switch ((string)command)
             {
-                case "play": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release); break;
-                case "playvr": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Release, false, 0, true); break;
-                case "playvrdebug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Debug, false, 0, true); break;
-                case "fred2": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2); break;
-                case "fred2debug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Fred2Debug); break;
-                case "debug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.Debug); break;
-                case "qtfred": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.QtFred); break;
-                case "qtfreddebug": Knossos.PlayMod(modVersions[activeVersionIndex], FsoExecType.QtFredDebug); break;
+                case "play": Knossos.PlayMod(activeVersion, FsoExecType.Release); break;
+                case "playvr": Knossos.PlayMod(activeVersion, FsoExecType.Release, false, 0, true); break;
+                case "playvrdebug": Knossos.PlayMod(activeVersion, FsoExecType.Debug, false, 0, true); break;
+                case "fred2": Knossos.PlayMod(activeVersion, FsoExecType.Fred2); break;
+                case "fred2debug": Knossos.PlayMod(activeVersion, FsoExecType.Fred2Debug); break;
+                case "debug": Knossos.PlayMod(activeVersion, FsoExecType.Debug); break;
+                case "qtfred": Knossos.PlayMod(activeVersion, FsoExecType.QtFred); break;
+                case "qtfreddebug": Knossos.PlayMod(activeVersion, FsoExecType.QtFredDebug); break;
                 case "update": ButtonCommandUpdate(); break;
                 case "modify": ButtonCommandModify(); break;
                 case "delete": ButtonCommandDelete(); break;
@@ -311,20 +310,22 @@ namespace Knossos.NET.ViewModels
         internal async void ButtonCommandUpdate()
         {
             var dialog = new ModPropertiesView();
-            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, activeVersionIndex, this, dialog, ModPropertiesViewModel.MenuPageEntry.Versions);
+            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, ActiveVersionIndex, this, dialog, ModPropertiesViewModel.MenuPageEntry.Versions);
             await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
         }
 
         internal async void ButtonCommandModify()
         {
             var dialog = new ModPropertiesView();
-            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, activeVersionIndex, this, dialog, ModPropertiesViewModel.MenuPageEntry.Versions);
+            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, ActiveVersionIndex, this, dialog, ModPropertiesViewModel.MenuPageEntry.Versions);
             await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
         }
 
         internal async void ButtonCommandDelete()
         {
-            if (!modVersions[activeVersionIndex].devMode)
+            if (ActiveVersion is not { } activeVersion) return;
+
+            if (!activeVersion.devMode)
             {
                 if (TaskViewModel.Instance!.IsSafeState())
                 {
@@ -336,12 +337,11 @@ namespace Knossos.NET.ViewModels
                         {
                             MainViewModel.Instance?.AddNebulaMod(modVersions[modVersions.Count - 1]);
                         }
-                        Knossos.RemoveMod(modVersions[activeVersionIndex].id);
+                        Knossos.RemoveMod(activeVersion.id);
                         MainViewModel.Instance?.RunModStatusChecks();
                         FreespaceViewModel.Instance?.SetInstalled(ID, false);
-                        if (Knossos.globalSettings.hiddenModIds.Contains(modVersions[activeVersionIndex].id))
+                        if (Knossos.globalSettings.hiddenModIds.Remove(activeVersion.id))
                         {
-                            Knossos.globalSettings.hiddenModIds.Remove(modVersions[activeVersionIndex].id);
                             Knossos.globalSettings.Save();
                         }
                     }
@@ -360,14 +360,14 @@ namespace Knossos.NET.ViewModels
         internal async void ButtonCommandDetails()
         {
             var dialog = new ModPropertiesView();
-            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, activeVersionIndex, this, dialog);
+            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, ActiveVersionIndex, this, dialog);
             await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
         }
 
         internal async void ButtonCommandSettings()
         {
             var dialog = new ModPropertiesView();
-            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, activeVersionIndex, this, dialog,
+            dialog.DataContext = ModPropertiesViewModel.GetOrCreate(modVersions, ActiveVersionIndex, this, dialog,
                 ModPropertiesViewModel.MenuPageEntry.Options);
             await dialog.ShowDialog<ModPropertiesView?>(MainWindow.instance);
         }
@@ -375,15 +375,17 @@ namespace Knossos.NET.ViewModels
         private void LoadImage()
         {
             Image = MainViewModel.Instance?.placeholderTileImage;
+            tileModBitmap = null;
+            if (ActiveVersion is not { } activeVersion) return;
 
             try
             {
-                var tile = modVersions[activeVersionIndex].tile;
+                var tile = activeVersion.tile;
                 if (!string.IsNullOrEmpty(tile))
                 {
                     if (!tile.ToLower().Contains("http"))
                     {
-                        tileModBitmap = new Bitmap(modVersions[activeVersionIndex].fullPath + Path.DirectorySeparatorChar + tile);
+                        tileModBitmap = new Bitmap(activeVersion.fullPath + Path.DirectorySeparatorChar + tile);
                     }
                     else
                     {
@@ -391,8 +393,20 @@ namespace Knossos.NET.ViewModels
                         {
                             using (var fs = await KnUtils.GetRemoteResourceStream(tile))
                             {
-                                if (fs != null)
-                                    tileModBitmap = new Bitmap(fs);
+                                if (fs == null) return;
+                                var bitmap = new Bitmap(fs);
+                                Dispatcher.UIThread.Post(() =>
+                                {
+                                    if (ActiveVersion == activeVersion)
+                                    {
+                                        tileModBitmap = bitmap;
+                                        if (Visible) Image = bitmap;
+                                    }
+                                    else
+                                    {
+                                        bitmap.Dispose();
+                                    }
+                                });
                             }
                         });
                     }

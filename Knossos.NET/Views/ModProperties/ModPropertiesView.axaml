@@ -85,6 +85,13 @@
                   </Button>
                   <Button Content="Cancel" Command="{Binding CloseModalCommand}" Margin="0,0,0,8"/>
                 </WrapPanel>
+                <StackPanel IsVisible="{Binding IsMoveModal}" Spacing="12">
+                  <CheckBox Content="Move all installed versions" IsVisible="{Binding CanMoveAllVersions}" IsChecked="{Binding MoveAllVersions, Mode=TwoWay}"/>
+                  <ComboBox ItemsSource="{Binding MoveLibraries}" SelectedItem="{Binding SelectedMoveLibrary, Mode=TwoWay}"
+                            HorizontalAlignment="Stretch" AutomationProperties.Name="Destination library">
+                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding}" TextWrapping="Wrap"/></DataTemplate></ComboBox.ItemTemplate>
+                  </ComboBox>
+                </StackPanel>
                 <TextBox IsVisible="{Binding IsReportModal}" Text="{Binding ReportReason}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="160" MaxLength="4000" Watermark="Describe the problem…" IsEnabled="{Binding !IsSubmitting}"/>
               </StackPanel>
             </ScrollViewer>
@@ -95,6 +102,7 @@
             <Button Classes="accent" Content="Play on YouTube ↗" IsVisible="{Binding IsVideoModal}" Command="{Binding PlayVideoCommand}" Margin="4"/>
             <Button Content="Next →" IsVisible="{Binding CanBrowseMedia}" Command="{Binding ChangeMediaCommand}" CommandParameter="1" Margin="4"/>
             <Button Classes="accent" Content="{Binding ConfirmLabel}" IsVisible="{Binding IsConfirmationModal}" Command="{Binding ConfirmModalCommand}" IsEnabled="{Binding !IsSubmitting}" Margin="4"/>
+            <Button Classes="accent" Content="Move" IsVisible="{Binding IsMoveModal}" Command="{Binding ConfirmMoveCommand}" Margin="4"/>
             <ProgressBar IsVisible="{Binding IsSubmitting}" IsIndeterminate="True" Width="120" Height="4" Margin="12"/>
           </WrapPanel>
         </Grid>

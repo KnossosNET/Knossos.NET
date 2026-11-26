@@ -224,11 +224,13 @@ namespace Knossos.NET.Models
         /// <param name="cmdline"></param>
         /// <param name="workingFolder"></param>
         /// <param name="waitForExit"></param>
+        /// <param name="bootstrapPath">Absolute path to the bootstrap file as seen by the engine.</param>
         /// <returns>
         /// A FsoResult structure with IsSuccess = true if the FSO buld was executed fine
         /// or IsSuccess = false and a ErrorMessage with the reason if failed
         /// </returns>
-        public async Task<FsoResult> RunFSO(FsoExecType executableType, string cmdline, string? workingFolder = null, bool waitForExit = false)
+        public async Task<FsoResult> RunFSO(FsoExecType executableType, string cmdline, string? workingFolder = null,
+            bool waitForExit = false, string? bootstrapPath = null)
         {
             try
             {
@@ -240,8 +242,10 @@ namespace Knossos.NET.Models
                     Log.Add(Log.LogSeverity.Error, "FsoBuild.RunFSO()", "Could not find a executable type for the requested fso build :" + executableType.ToString() + " Requested Type: " + executableType);
                     return new FsoResult(false, "Could not find a executable type for the requested fso build :" + executableType.ToString() + " Requested Type: " + executableType);
                 }
+                var launchCmdline = bootstrapPath == null ? cmdline : AppendBootstrapArgument(cmdline, bootstrapPath);
+                Log.Add(Log.LogSeverity.Information, "FsoBuild.RunFSO()", "Used cmdLine : " + launchCmdline);
 #if ANDROID
-                AndroidHelper.LaunchFSO(execPath, workingFolder, cmdline);
+                AndroidHelper.LaunchFSO(execPath, workingFolder, cmdline, bootstrapPath);
                 await Task.Delay(100);
                 return new FsoResult(true);
 #else
@@ -249,12 +253,7 @@ namespace Knossos.NET.Models
                 {
                     //We can assume we are in Linux and this is a cpu arch compatible Fred2 Windows executable
                     //Lets TRY to run this with Wine
-                    var wineTask = Wine.RunFred2(execPath, cmdline, workingFolder, executable.arch);
-                    if (waitForExit)
-                    {
-                        return new FsoResult(await wineTask);
-                    }
-                    return new FsoResult(true);
+                    return new FsoResult(await Wine.RunFred2(execPath, launchCmdline, workingFolder, executable.arch, waitForExit));
                 }
                 else
                 {
@@ -266,49 +265,11 @@ namespace Knossos.NET.Models
 
                     using (var fso = new Process())
                     {
-                        if (Knossos.globalSettings.prefixCMD == "")
-                        {
-                            fso.StartInfo.FileName = execPath;
-                            fso.StartInfo.Arguments = cmdline;
-                        }
-                        else
-                        {
-                            var prefixCMD = Knossos.globalSettings.prefixCMD.Split(" ", 2);
-                            fso.StartInfo.FileName = prefixCMD[0];
-                            if (prefixCMD.Length > 1)
-                            {
-                                fso.StartInfo.Arguments = $"{prefixCMD[1]} \"{execPath}\" {cmdline}";
-                            }
-                            else
-                            {
-                                fso.StartInfo.Arguments = $"\"{execPath}\" {cmdline}";
-                            }
-                        }
-
+                        SetProcessCommand(fso.StartInfo, execPath, launchCmdline, includePrefix: true);
                         fso.StartInfo.UseShellExecute = false;
                         if (workingFolder != null)
                             fso.StartInfo.WorkingDirectory = workingFolder;
-                        if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences ||
-                            CustomLauncher.IsCustomMode && CustomLauncher.UseCustomFSODataFolder)
-                        {
-                            var prefPath = KnUtils.GetFSODataFolderPath();
-                            if (!prefPath.EndsWith(Path.DirectorySeparatorChar))
-                            {
-                                prefPath += Path.DirectorySeparatorChar;
-                            }
-                            Log.Add(Log.LogSeverity.Information, "FsoBuild.RunFSO()", "Used preferences path: " + prefPath);
-                            fso.StartInfo.EnvironmentVariables.Add("FSO_PREFERENCES_PATH", prefPath);
-                        }
-                        if (Knossos.globalSettings.envVars != "")
-                        {
-                            foreach (var envVar in Knossos.globalSettings.envVars.Split(","))
-                            {
-                                var envVarComponents = envVar.Split("=");
-                                if (envVarComponents.Length != 2)
-                                    continue;
-                                fso.StartInfo.EnvironmentVariables.Add(envVarComponents[0], envVarComponents[1]);
-                            }
-                        }
+                        SetProcessEnvironment(fso.StartInfo, includeGlobalVariables: true);
                         fso.Start();
                         if (waitForExit)
                             await fso.WaitForExitAsync();
@@ -325,13 +286,68 @@ namespace Knossos.NET.Models
             }
         }
 
+        private static string AppendBootstrapArgument(string cmdline, string bootstrapPath)
+        {
+            var arguments = new StringBuilder(cmdline).Append(' ').Append(FsoBootstrap.CommandLineOption).Append(" \"");
+            // Escape backslashes immediately before a quote in ProcessStartInfo.Arguments.
+            var backslashes = 0;
+            foreach (var character in bootstrapPath)
+            {
+                if (character == '"')
+                    arguments.Append('\\', backslashes + 1);
+                arguments.Append(character);
+                backslashes = character == '\\' ? backslashes + 1 : 0;
+            }
+            return arguments.Append('\\', backslashes).Append('"').ToString();
+        }
+
         /// <summary>
         /// Get FSO flags structure of this build using the JSON format V1
         /// </summary>
         /// <returns>A FlagsJsonV1 structure or null if failed</returns>
         public Task<FlagsJsonV1?> GetFlagsV1Async() => GetFlagsV1Async(CancellationToken.None);
 
+#if ANDROID
         private static readonly SemaphoreSlim androidFlagsGate = new(1, 1);
+#endif
+
+        internal FsoExecArch? GetWineArchitecture(FsoExecType executableType)
+        {
+            var executable = GetExecutable(executableType);
+            return executable?.useWine == true ? executable.arch : null;
+        }
+
+        internal async Task<(int MaximumVersion, string? PreferencesPath)> GetBootstrapSupportAsync(
+            FsoExecType executableType, string workingFolder, bool portableMode)
+        {
+            var executable = GetExecutable(executableType);
+            var fullpath = GetExecutablePath(executable);
+            if (fullpath == null)
+                return (0, null);
+            try
+            {
+                var (output, _, _) = await ReadFlagsAsync(fullpath, "json_v2", workingFolder,
+                    portableMode, CancellationToken.None, executable?.useWine == true ? executable.arch : null)
+                    .ConfigureAwait(false);
+                if (string.IsNullOrWhiteSpace(output) ||
+                    output.Contains("OUTPUT TYPE NOT SUPPORTED", StringComparison.OrdinalIgnoreCase))
+                    return (0, null);
+
+                var root = ParseFlagsJson(output);
+                var prefPath = root.TryGetProperty("pref_path", out var preferences) &&
+                               preferences.ValueKind == JsonValueKind.String ? preferences.GetString() : null;
+                var maximumVersion = root.TryGetProperty("bootstrap_version", out var bootstrapVersion) &&
+                                     bootstrapVersion.ValueKind == JsonValueKind.Number &&
+                                     bootstrapVersion.TryGetInt32(out var version) && version > 0 ? version : 0;
+                return (maximumVersion, prefPath);
+            }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Warning, "FsoBuild.GetBootstrapSupportAsync", ex);
+                return (0, null);
+            }
+        }
+
         public async Task<FlagsJsonV1?> GetFlagsV1Async(CancellationToken cancellationToken, bool showErrors = true)
         {
             var executable = GetExecutable(FsoExecType.Flags);
@@ -354,106 +370,38 @@ namespace Knossos.NET.Models
 
             Log.Add(Log.LogSeverity.Information, "FsoBuild.GetFlags()", "Getting FSO Flags from file: " + fullpath);
             string output = string.Empty;
-            string stderr = string.Empty;
             try
             {
-#if ANDROID
-                await androidFlagsGate.WaitAsync(cancellationToken);
-                try
+                var (result, stderr, exitCode) = await ReadFlagsAsync(fullpath, "json_v1", folderPath,
+                    false, cancellationToken).ConfigureAwait(false);
+                output = result;
+                if (KnUtils.IsLinux && !result.Contains("{"))
                 {
-                    output = await AndroidHelper.GetFlagsStringFSOAsync(fullpath!);
-                    cancellationToken.ThrowIfCancellationRequested();
-                    if (output == "") return null;
-                    return JsonSerializer.Deserialize<FlagsJsonV1>(output);
-                }
-                finally { androidFlagsGate.Release(); }
-#else
-
-                if (KnUtils.IsLinux || KnUtils.IsMacOS)
-                {
-                    KnUtils.Chmod(fullpath!,"+x");
-                }
-
-                using (var cmd = new Process())
-                {
-                    cmd.StartInfo.FileName = fullpath;
-                    cmd.StartInfo.Arguments = "-get_flags json_v1";
-                    cmd.StartInfo.UseShellExecute = false;
-                    cmd.StartInfo.CreateNoWindow = true;
-                    cmd.StartInfo.RedirectStandardOutput = true;
-                    cmd.StartInfo.RedirectStandardInput = true;
-                    cmd.StartInfo.RedirectStandardError = true;
-                    cmd.StartInfo.StandardOutputEncoding = new UTF8Encoding(false);
-                    cmd.StartInfo.WorkingDirectory = folderPath;
-                    if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences ||
-                        CustomLauncher.IsCustomMode && CustomLauncher.UseCustomFSODataFolder)
+                    // Possible missing dependency libraries on Linux, such as libfuse for AppImages.
+                    var errorMsg = $"FSO exited with code {exitCode}\n\nStdout:\n{output}\n\nStderr:\n{stderr}";
+                    Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", errorMsg);
+                    if (stderr.Contains("fuse", StringComparison.OrdinalIgnoreCase) || output.Contains("fuse", StringComparison.OrdinalIgnoreCase))
                     {
-                        var prefPath = KnUtils.GetFSODataFolderPath();
-                        if (!prefPath.EndsWith(Path.DirectorySeparatorChar))
+                        var libfuseError = "libfuse is missing! FSO AppImages needs fuse to run. Install with:\n" +
+                            "Ubuntu/Debian: sudo apt install libfuse2\n" +
+                            "Fedora: sudo dnf install fuse\n" +
+                            "Arch: sudo pacman -S fuse2";
+                        Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", libfuseError);
+                        if (!_flagErrorOneWarn && showErrors)
                         {
-                            prefPath += Path.DirectorySeparatorChar;
+                            _flagErrorOneWarn = true;
+                            await Dispatcher.UIThread.InvokeAsync(async () => { await MessageBox.Show(MainWindow.instance, libfuseError, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); });
                         }
-                        cmd.StartInfo.EnvironmentVariables.Add("FSO_PREFERENCES_PATH", prefPath);
                     }
-
-                    cancellationToken.ThrowIfCancellationRequested();
-                    cmd.Start();
-                    using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                    timeout.CancelAfter(TimeSpan.FromSeconds(30));
-                    using var registration = timeout.Token.Register(() =>
+                    else
                     {
-                        try { if (!cmd.HasExited) cmd.Kill(true); }
-                        catch (InvalidOperationException) { }
-                        catch (System.ComponentModel.Win32Exception) { }
-                    });
-                    // Read stdout and stderr concurrently to prevent pipe deadlock.
-                    // Sequential reads deadlock if stderr output exceeds the pipe buffer (~4 KB).
-                    var stdoutTask = cmd.StandardOutput.ReadToEndAsync();
-                    var stderrTask = cmd.StandardError.ReadToEndAsync();
-                    await Task.WhenAll(stdoutTask, stderrTask).WaitAsync(timeout.Token).ConfigureAwait(false);
-                    string result = stdoutTask.Result;
-                    stderr = stderrTask.Result;
-                    output = result;
-                    await cmd.WaitForExitAsync(timeout.Token).ConfigureAwait(false);
-
-                    if (KnUtils.IsLinux && !result.Contains("{"))
-                    {
-                        //Possible missing dependency libs on linux like libfuse for appimage
-                        var errorMsg = $"FSO exited with code {cmd.ExitCode}\n\nStdout:\n{output}\n\nStderr:\n{stderr}";
-                        Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", errorMsg);
-
-                        if (stderr.Contains("fuse", StringComparison.OrdinalIgnoreCase) || output.Contains("fuse", StringComparison.OrdinalIgnoreCase))
-                        {
-                            var libfuseError = $"libfuse is missing! FSO AppImages needs fuse to run. Install with:\n" +
-                                "Ubuntu/Debian: sudo apt install libfuse2\n" +
-                                "Fedora: sudo dnf install fuse\n" +
-                                "Arch: sudo pacman -S fuse2";
-                            Log.Add(Log.LogSeverity.Error, "FsoBuild.GetFlagsV1()", libfuseError);
-                            if (!_flagErrorOneWarn && showErrors)
-                            {
-                                _flagErrorOneWarn = true;
-                                await Dispatcher.UIThread.InvokeAsync(async () => { await MessageBox.Show(MainWindow.instance, libfuseError, "Unable to run FSO", MessageBox.MessageBoxButtons.OK); });
-                            }
-                        }
-                        else
-                        {
-                            if (!_flagErrorOneWarn)
-                            {
-                                _flagErrorOneWarn = true;
-                            }
-                        }
-                        return null;
+                        _flagErrorOneWarn = true;
                     }
-
-                    cmd.Dispose();
-                    //avoiding the "fso is running in legacy config mode..."
-                    if (result.Contains("{"))
-                    {
-                        result = result.Substring(result.IndexOf('{'));
-                    }
-                    return JsonSerializer.Deserialize<FlagsJsonV1>(result);
+                    return null;
                 }
-#endif
+                if (KnUtils.IsAndroid && string.IsNullOrWhiteSpace(result))
+                    return null;
+                return ParseFlagsJson(result).Deserialize<FlagsJsonV1>();
             }
             catch (OperationCanceledException) { return null; }
             catch (JsonException exJson)
@@ -477,6 +425,134 @@ namespace Knossos.NET.Models
                 Log.Add(Log.LogSeverity.Error, "FSO EXE OUTPUT ", output);
                 return null;
             }
+        }
+
+        private static JsonElement ParseFlagsJson(string output)
+        {
+            // FSO can log a legacy configuration message before the JSON.
+            var start = output.IndexOf('{');
+            using var json = JsonDocument.Parse(start < 0 ? output : output[start..]);
+            return json.RootElement.Clone();
+        }
+
+        private static async Task<(string Output, string Error, int ExitCode)> ReadFlagsAsync(
+            string executablePath, string format, string workingFolder, bool portableMode, CancellationToken cancellationToken,
+            FsoExecArch? wineArch = null)
+        {
+            var forLaunch = format == "json_v2";
+#if ANDROID
+            // Android already uses json_v2 for the flags shown in the launcher.
+            await androidFlagsGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                var output = await AndroidHelper.GetFlagsStringFSOAsync(executablePath,
+                    workingFolder: forLaunch ? workingFolder : null, portableMode: portableMode).ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+                return (output, string.Empty, 0);
+            }
+            finally
+            {
+                androidFlagsGate.Release();
+            }
+#else
+            var args = (portableMode ? "-portable_mode " : "") + "-get_flags " + format;
+            ProcessStartInfo startInfo;
+            if (wineArch.HasValue)
+            {
+                startInfo = await Wine.PrepareFred2Async(executablePath, args, workingFolder, wineArch.Value).ConfigureAwait(false);
+            }
+            else
+            {
+                if (KnUtils.IsLinux || KnUtils.IsMacOS)
+                    KnUtils.Chmod(executablePath, "+x");
+
+                startInfo = new ProcessStartInfo { WorkingDirectory = workingFolder };
+                SetProcessCommand(startInfo, executablePath, args, includePrefix: forLaunch);
+                SetProcessEnvironment(startInfo, includeGlobalVariables: forLaunch);
+            }
+            // Preserve the JSON response when FSO would otherwise redirect stdout.
+            startInfo.Environment["FSO_KEEP_STDOUT"] = "1";
+            return await ReadProcessOutputAsync(startInfo, cancellationToken).ConfigureAwait(false);
+#endif
+        }
+
+        internal static async Task<(string Output, string Error, int ExitCode)> ReadProcessOutputAsync(
+            ProcessStartInfo startInfo, CancellationToken cancellationToken)
+        {
+            startInfo.UseShellExecute = false;
+            startInfo.CreateNoWindow = true;
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardInput = true;
+            startInfo.RedirectStandardError = true;
+            startInfo.StandardOutputEncoding = new UTF8Encoding(false);
+            using var cmd = new Process { StartInfo = startInfo };
+            cancellationToken.ThrowIfCancellationRequested();
+            cmd.Start();
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(TimeSpan.FromSeconds(30));
+            using var registration = timeout.Token.Register(() =>
+            {
+                try { if (!cmd.HasExited) cmd.Kill(true); }
+                catch (InvalidOperationException) { }
+                catch (System.ComponentModel.Win32Exception) { }
+            });
+            // Drain both pipes concurrently so large diagnostics cannot block the process.
+            var stdout = cmd.StandardOutput.ReadToEndAsync();
+            var stderr = cmd.StandardError.ReadToEndAsync();
+            await Task.WhenAll(stdout, stderr).WaitAsync(timeout.Token).ConfigureAwait(false);
+            await cmd.WaitForExitAsync(timeout.Token).ConfigureAwait(false);
+            return (stdout.Result, stderr.Result, cmd.ExitCode);
+        }
+
+#if !ANDROID
+        private static void SetProcessCommand(ProcessStartInfo startInfo, string executable, string args, bool includePrefix)
+        {
+            var prefix = Knossos.globalSettings.prefixCMD;
+            if (!includePrefix || prefix.Length == 0)
+            {
+                startInfo.FileName = executable;
+                startInfo.Arguments = args;
+                return;
+            }
+
+            var parts = prefix.Split(" ", 2);
+            startInfo.FileName = parts[0];
+            startInfo.Arguments = parts.Length > 1
+                ? $"{parts[1]} \"{executable}\" {args}"
+                : $"\"{executable}\" {args}";
+        }
+
+        private static void SetProcessEnvironment(ProcessStartInfo startInfo, bool includeGlobalVariables)
+        {
+            var prefPath = GetPreferencesPathOverride();
+            if (prefPath != null)
+                startInfo.EnvironmentVariables["FSO_PREFERENCES_PATH"] = prefPath;
+
+            if (!includeGlobalVariables)
+                return;
+
+            foreach (var envVar in Knossos.globalSettings.envVars.Split(","))
+            {
+                var parts = envVar.Split("=");
+                if (parts.Length == 2)
+                    startInfo.EnvironmentVariables[parts[0]] = parts[1];
+            }
+        }
+#endif
+
+        internal static string? GetPreferencesPathOverride()
+        {
+            if (KnUtils.IsAndroid)
+                return null;
+
+            if (Knossos.inPortableMode && Knossos.globalSettings.portableFsoPreferences ||
+                CustomLauncher.IsCustomMode && CustomLauncher.UseCustomFSODataFolder)
+            {
+                var path = KnUtils.GetFSODataFolderPath();
+                return Path.EndsInDirectorySeparator(path) ? path : path + Path.DirectorySeparatorChar;
+            }
+
+            return null;
         }
 
         /// <summary>

@@ -33,21 +33,27 @@
 							<Label Width="200">Knossos Version</Label>
 							<TextBlock Margin="10,5,0,0" Text="{Binding KnossosVersion}"></TextBlock>
 						</WrapPanel>
-						<!-- Base Path -->
-						<WrapPanel Margin="7,10,0,0" IsVisible="{Binding !IsAndroid}">
-							<TextBlock VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
-							<TextBox HorizontalAlignment="Left" Width="400" Text="{Binding BasePath}" Margin="10,0,0,0" IsReadOnly="True" ></TextBox>
-							<Button IsVisible="{Binding !IsPortableMode}" Margin="5,0,0,0" Classes="Quaternary" Command="{Binding BrowseFolderCommand}" ToolTip.Tip="It is highly recommended to set this as an empty folder in a location with a large amount of available storage. Do not set it to a shared or cloud drive (such as OneDrive or Google Drive) because syncing issues will prevent Knossos from downloading mod files correctly.">Browse</Button>
-						</WrapPanel>
-						<WrapPanel Margin="7,10,0,0" IsVisible="{Binding IsAndroid}">
-							<TextBlock VerticalAlignment="Center" Width="200">Library Folder </TextBlock>
-							<ComboBox HorizontalAlignment="Left" Width="400" SelectedIndex="{Binding AndroidFolderPathsSelectedIndex}" ItemsSource="{Binding AndroidFolderPaths}" Margin="10,0,0,0" ></ComboBox>
-						</WrapPanel>
+						<Grid ColumnDefinitions="200,Auto" Margin="7,10,0,0">
+							<TextBlock Margin="0,6,0,0">Library Folders</TextBlock>
+							<StackPanel Grid.Column="1" Width="420" Margin="10,0,0,0" Spacing="6">
+								<ItemsControl ItemsSource="{Binding LibraryPaths}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="x:String">
+											<Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,0,0,4">
+												<SelectableTextBlock Text="{Binding}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+												<Button Grid.Column="1" Classes="Cancel" Click="RemoveLibraryClicked">Remove</Button>
+											</Grid>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+								<Button Classes="Quaternary" Command="{Binding AddLibraryCommand}" ToolTip.Tip="Choose a location with enough space for mods. Cloud-synced folders can interfere with installation.">Add Library</Button>
+							</StackPanel>
+						</Grid>
 						<!-- Lib Info -->
 						<Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto, Auto" Margin="6,10,0,0">
 							<TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Width="200">Stats</TextBlock>
 							<WrapPanel Grid.Column="1" Grid.Row="0"  Margin="8,2,0,0">
-								<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications (collectively known as mods) are installed in your KnossosNET Library Folder.">Mods:</Label>
+								<Label Margin="0,5,0,0" FontWeight="Bold" ToolTip.Tip="How many standalone games and modifications are installed across your KnossosNET libraries.">Mods:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfMods}"></TextBlock>
 								<Label Margin="40,5,0,0" FontWeight="Bold">Builds:</Label>
 								<TextBlock Margin="5,8,0,0" Text="{Binding NumberOfBuilds}"></TextBlock>

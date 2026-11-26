@@ -28,6 +28,11 @@ namespace Knossos.NET.Classes
         {
             lock (pendingVersions) return pendingVersions.ContainsKey(id + "@" + version);
         }
+
+        internal static bool HasPendingVersions
+        {
+            get { lock (pendingVersions) return pendingVersions.Count != 0; }
+        }
         internal void Track(TaskItemViewModel task) => Dispatcher.UIThread.Invoke(() => taskChanged?.Invoke(task));
         public void Cancel() => cancellation.Cancel();
         public void Dispose()

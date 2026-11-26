@@ -263,8 +263,9 @@ namespace Knossos.NET.ViewModels
         /// <param name="sender">Optional engine tab item; dependency installs can run without the tab.</param>
         /// <param name="modJson"></param>
         /// <param name="installInDevMode">Opt in to developer mode for a new install; requires write access.</param>
+        /// <param name="libraryPath">Destination chosen for a manual install.</param>
         /// <returns>FsoBuild class of the installed build or null if failed or cancelled</returns>
-        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel? sender, Mod? modJson=null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false, bool installInDevMode = false, Action<string>? reportError = null, ModInstallOperation? operation = null)
+        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel? sender, Mod? modJson=null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false, bool installInDevMode = false, Action<string>? reportError = null, ModInstallOperation? operation = null, string? libraryPath = null)
         {
             if(Knossos.GetKnossosLibraryPath() == null)
             {
@@ -284,7 +285,7 @@ namespace Knossos.NET.ViewModels
                 TaskList.Add(newTask);
                 taskQueue.Enqueue(newTask);
             });
-            var res = await newTask.InstallBuild(build, sender,scopedCancellation ?? sender?.cancellationTokenSource,modJson, modifyPkgs, cleanupOldVersions, installInDevMode, reportError).ConfigureAwait(false);
+            var res = await newTask.InstallBuild(build, sender,scopedCancellation ?? sender?.cancellationTokenSource,modJson, modifyPkgs, cleanupOldVersions, installInDevMode, reportError, libraryPath).ConfigureAwait(false);
             if (res != null && Knossos.inSingleTCMode)
             {
                 try
@@ -310,7 +311,7 @@ namespace Knossos.NET.ViewModels
         public async void InstallMod(Mod mod, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true)
             => await InstallModAsync(mod, reinstallPkgs, manualCompress, cleanupOldVersions, cleanInstall, allowHardlinks);
 
-        public async Task<bool> InstallModAsync(Mod mod, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true, bool reinstallCurrentVersion = false, Action<string>? reportError = null, bool addOnly = false, ModInstallOperation? operation = null, IReadOnlyDictionary<string, bool>? packageActivation = null, IReadOnlyCollection<string>? removePackages = null)
+        public async Task<bool> InstallModAsync(Mod mod, List<ModPackage>? reinstallPkgs = null, bool manualCompress = false, bool cleanupOldVersions = false, bool cleanInstall = false, bool allowHardlinks = true, bool reinstallCurrentVersion = false, Action<string>? reportError = null, bool addOnly = false, ModInstallOperation? operation = null, IReadOnlyDictionary<string, bool>? packageActivation = null, IReadOnlyCollection<string>? removePackages = null, string? libraryPath = null)
         {
             try
             {
@@ -345,7 +346,7 @@ namespace Knossos.NET.ViewModels
                             TaskList.Add(newTask);
                             taskQueue.Enqueue(newTask);
                         });
-                        var res = await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress, cleanupOldVersions, cleanInstall, allowHardlinks, reinstallCurrentVersion, reportError, addOnly, packageActivation, removePackages).ConfigureAwait(false);
+                        var res = await newTask.InstallMod(mod, cancelSource, reinstallPkgs, manualCompress, cleanupOldVersions, cleanInstall, allowHardlinks, reinstallCurrentVersion, reportError, addOnly, packageActivation, removePackages, libraryPath).ConfigureAwait(false);
                         if(res && Knossos.inSingleTCMode)
                         {
                             try

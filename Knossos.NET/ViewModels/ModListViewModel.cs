@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,9 +11,12 @@ using ObservableCollections;
 
 namespace Knossos.NET.ViewModels
 {
-    /// <summary>
-    /// Installed mod card container view, this is the "Home" tab
-    /// </summary>
+    public sealed record LibraryFilterOption(string? Path)
+    {
+        public string Name => Path ?? "All libraries";
+    }
+
+    /// <summary>Installed mod cards for the Play tab.</summary>
     public partial class ModListViewModel : ViewModelBase
     {
         [ObservableProperty]
@@ -52,6 +56,17 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty]
         internal String filterString = String.Empty;
 
+        private static readonly LibraryFilterOption allLibraries = new(Path: null);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowLibraryFilter))]
+        internal IReadOnlyList<LibraryFilterOption> libraryFilters = new[] { allLibraries };
+
+        [ObservableProperty]
+        internal LibraryFilterOption? selectedLibraryFilter = allLibraries;
+
+        internal bool ShowLibraryFilter => LibraryFilters.Count > 2;
+
 
         //The actual collection were the mods are
         private ObservableList<ModCardViewModel> Mods = new ObservableList<ModCardViewModel>();
@@ -62,6 +77,39 @@ namespace Knossos.NET.ViewModels
         {
             LoadingAnimation = new LoadingIconViewModel();
             CardsView = Mods.ToNotifyCollectionChangedSlim(SynchronizationContextCollectionEventDispatcher.Current);
+        }
+
+        partial void OnSelectedLibraryFilterChanged(LibraryFilterOption? value) => ApplyLibraryFilter();
+
+        public void RefreshLibraryFilter()
+        {
+            var paths = Knossos.GetLibraryPaths();
+            var selectedPath = SelectedLibraryFilter?.Path;
+            if (!LibraryFilters.Skip(1).Select(option => option.Path!).SequenceEqual(paths, Knossos.LibraryPathComparer))
+            {
+                LibraryFilters = new[] { allLibraries }.Concat(paths.Select(path => new LibraryFilterOption(path))).ToArray();
+                var selection = paths.Count > 1
+                    ? LibraryFilters.FirstOrDefault(option => Knossos.LibraryPathComparer.Equals(option.Path, selectedPath))
+                    : null;
+                SelectedLibraryFilter = selection ?? allLibraries;
+            }
+
+            ApplyLibraryFilter();
+        }
+
+        private void ApplyLibraryFilter()
+        {
+            var path = SelectedLibraryFilter?.Path;
+            bool orderChanged = false;
+            foreach (var card in Mods)
+            {
+                orderChanged |= card.SetLibraryFilter(path);
+            }
+            if (orderChanged)
+            {
+                Mods.Sort();
+            }
+            ApplyFilters();
         }
 
         public void ApplyTagFilter(int tagIndex)
@@ -95,62 +143,60 @@ namespace Knossos.NET.ViewModels
         {
             BuildFilterString();
 
-            Parallel.ForEach(Mods, new ParallelOptions { MaxDegreeOfParallelism = 4 }, card =>
+            Parallel.ForEach(Mods, new ParallelOptions { MaxDegreeOfParallelism = 4 }, ApplyFilters);
+        }
+
+        private void ApplyFilters(ModCardViewModel card)
+        {
+            bool visibility = true;
+            //By search
+            if (Search.Trim() != string.Empty)
             {
-                bool visibility = true;
-                //By search
-                if (Search.Trim() != string.Empty)
+                if (card.Name == null || !card.Name.Contains(Search, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    if (card.Name == null || !card.Name.Contains(Search, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        //if it dosent passes title search check tags
-                        visibility = ModTags.IsTagPresentInModID(card.ID!, search);
-                    }
+                    visibility = ModTags.IsTagPresentInModID(card.ID!, search);
                 }
-                //Filters
-                if (ModTags.IsFilterPresentInModID(card.ID, "Hidden"))
+            }
+            //Filters
+            if (ModTags.IsFilterPresentInModID(card.ID, "Hidden"))
+            {
+                visibility = false;
+                if (MainViewModel.Instance != null && MainViewModel.Instance.tagFilter.FirstOrDefault(f => f == "Hidden") != null)
                 {
-                    visibility = false;
-                    if (MainViewModel.Instance != null && MainViewModel.Instance.tagFilter.FirstOrDefault(f => f == "Hidden") != null)
+                    visibility = true;
+                }
+            }
+            else if (MainViewModel.Instance != null && MainViewModel.Instance.tagFilter.Any())
+            {
+                visibility = false;
+                foreach (var filter in MainViewModel.Instance.tagFilter)
+                {
+                    if (filter == "Hidden")
+                    {
+                        if (MainViewModel.Instance.tagFilter.Count == 1)
+                            visibility = true;
+                        continue;
+                    }
+                    if (card.ID != null && ModTags.IsFilterPresentInModID(card.ID, filter))
                     {
                         visibility = true;
+                        break;
                     }
                 }
-                else
-                { 
-                    if (MainViewModel.Instance != null && MainViewModel.Instance.tagFilter.Any())
-                    {
-                        visibility = false;
-                        foreach (var filter in MainViewModel.Instance.tagFilter)
-                        {
-                            if(filter == "Hidden")
-                            {
-                                if(MainViewModel.Instance.tagFilter.Count == 1)
-                                    visibility = true;
-                                continue;
-                            }
-                            if (card.ID != null && ModTags.IsFilterPresentInModID(card.ID, filter))
-                            {
-                                visibility = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                card.Visible = visibility;
-            });
+            }
+            card.Visible = visibility && card.MatchesLibraryFilter;
         }
 
         private void BuildFilterString(){
             if (MainViewModel.Instance == null){
-                FilterString = "No Filters Applied";
+                FilterString = "No tag filters";
                 return;
             }
             
             int externalCount = MainViewModel.Instance.tagFilter.Count;
 
             if (externalCount == 0 ){
-                FilterString = "No Filters Applied";
+                FilterString = "No tag filters";
                 return;
             }
 
@@ -199,25 +245,16 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public void OpenTab()
         {
-            if (MainViewModel.Instance != null)
-            {
-                if (Search != MainViewModel.Instance.sharedSearch)
-                {
-                    Search = MainViewModel.Instance.sharedSearch;
-                }
-                else
-                {
-                    ApplyFilters();
-                }
-            }
+            if (MainViewModel.Instance is { } main)
+                SetProperty(ref search, main.sharedSearch, nameof(Search));
+            RefreshLibraryFilter();
 
             if (Knossos.initIsComplete)
             {
                 Fs2Present = Knossos.retailFs2RootFound;
             }
 
-            SortString = "Sorted by " + localSort;         
-            BuildFilterString();
+            SortString = "Sorted by " + localSort;
         }
 
         /// <summary>
@@ -246,6 +283,7 @@ namespace Knossos.NET.ViewModels
         public void ClearView()
         {
             Mods.Clear();
+            RefreshLibraryFilter();
         }
 
         /// <summary>
@@ -266,6 +304,8 @@ namespace Knossos.NET.ViewModels
             var modCard = Mods.FirstOrDefault(m => m.ID == modJson.id);
             if (modCard == null)
             {
+                modCard = new ModCardViewModel(modJson);
+                modCard.SetLibraryFilter(SelectedLibraryFilter?.Path);
                 int i;
                 for (i = 0; i < Mods.Count; i++)
                 {
@@ -277,13 +317,15 @@ namespace Knossos.NET.ViewModels
                         }
                     }
                 }
-                Mods.Insert(i, new ModCardViewModel(modJson));
+                Mods.Insert(i, modCard);
                 ModTags.AddModFiltersRuntime(modJson);
             }
             else
             {
                 modCard.AddModVersion(modJson);
             }
+
+            ApplyFilters(modCard);
         }
 
         /// <summary>
@@ -355,6 +397,7 @@ namespace Knossos.NET.ViewModels
                 if(modCard.GetNumberOfModVersions() > 1)
                 {
                     modCard.DeleteModVersion(mod);
+                    ApplyFilters(modCard);
                 }
                 else
                 {

@@ -2,6 +2,7 @@
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Knossos.NET.Classes;
 using Knossos.NET.Models;
 using Knossos.NET.Views;
@@ -21,17 +22,10 @@ namespace Knossos.NET.ViewModels
     {
         private bool UnCommitedChanges = false;
 
-        [ObservableProperty]
-        internal ObservableCollection<string> androidFolderPaths = new ObservableCollection<string>();
-
-        internal int androidFolderPathsSelectedIndex = 0;
-        internal int AndroidFolderPathsSelectedIndex
-        {
-            get { return androidFolderPathsSelectedIndex; }
-            set { if (androidFolderPathsSelectedIndex != value) { this.SetProperty(ref androidFolderPathsSelectedIndex, value); UpdateBasePathAndroid(); } }
-        }
-
         internal bool IsAndroid { get; } = KnUtils.IsAndroid;
+
+        [ObservableProperty]
+        private IReadOnlyList<string> libraryPaths = Array.Empty<string>();
 
         /* Limiters definition */
         private const long speedUnlimited = 0;
@@ -88,9 +82,6 @@ namespace Knossos.NET.ViewModels
         internal bool expandKnossosSettings = false;
 
         /* Knossos Settings */
-        [ObservableProperty]
-        internal string basePath = string.Empty; //When this is changed settings are saved immediately.
-
         private bool antiStuck = true;
         internal bool AntiStuck
         {
@@ -634,34 +625,7 @@ namespace Knossos.NET.ViewModels
             }
         }
 
-        internal async void UpdateBasePathAndroid()
-        {
-            try
-            {
-                if (AndroidFolderPathsSelectedIndex == -1 || AndroidFolderPaths.Count() - 1 < AndroidFolderPathsSelectedIndex)
-                    return;
-                var path = AndroidFolderPaths[AndroidFolderPathsSelectedIndex];
-                if (path == BasePath)
-                    return;
-                // Test if we can write to the new library directory
-                Directory.CreateDirectory(path);
-                using (StreamWriter writer = new StreamWriter(path + Path.DirectorySeparatorChar + "test.txt"))
-                {
-                    writer.WriteLine("test");
-                }
-                File.Delete(Path.Combine(path + Path.DirectorySeparatorChar + "test.txt"));
-
-                Knossos.globalSettings.basePath = path;
-                Knossos.globalSettings.Save();
-                Knossos.ResetBasePath();
-                await LoadDataAsync();
-            }
-            catch (Exception ex) 
-            {
-                Log.Add(Log.LogSeverity.Error, "GlobalSettingsViewModel.UpdateBasePathAndroid()", "Index " + AndroidFolderPathsSelectedIndex + " Collection "+AndroidFolderPaths.Count());
-                Log.Add(Log.LogSeverity.Error, "GlobalSettingsViewModel.UpdateBasePathAndroid()", ex);
-            }
-        }
+        internal void RefreshLibraryPaths() => LibraryPaths = Knossos.GetLibraryPaths();
 
         /// <summary>
         /// Loads data from the GlobalSettings.cs class into this one to display it in the UI
@@ -669,6 +633,7 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         public async Task LoadDataAsync()
         {
+            RefreshLibraryPaths();
             var old_path = KnUtils.GetFSODataFolderPath();
             // Fetch flag data on a background thread so the UI thread stays responsive.
             // await resumes on Avalonia's UI synchronization context, so all ObservableProperty
@@ -679,24 +644,7 @@ namespace Knossos.NET.ViewModels
             if (old_path != KnUtils.GetFSODataFolderPath()){
                 Knossos.globalSettings.Load();
             }
-            /* Knossos Settings */
-            if (Knossos.globalSettings.basePath != null)
-            {
-                BasePath = Knossos.globalSettings.basePath;
-            }
-            /* Android Folder Paths */
-            if (KnUtils.IsAndroid)
-            {
-                AndroidFolderPaths.Clear();
-                AndroidFolderPaths.Add(BasePath);
-                AndroidFolderPathsSelectedIndex = 0;
-                foreach (var path in AndroidHelper.GetAllExternalAppFilesDirs())
-                {
-                    if (!AndroidFolderPaths.Contains(path))
-                    { AndroidFolderPaths.Add(path); }
-                }
-                AndroidFolderPathsSelectedIndex = 0;
-            }
+            RefreshLibraryPaths();
 
             EnableLogFile = Knossos.globalSettings.enableLogFile;
             LogLevel= Knossos.globalSettings.logLevel;
@@ -1242,48 +1190,72 @@ namespace Knossos.NET.ViewModels
         }
 
         /* UI Buttons */
-        /// <summary>
-        /// Changes the knossos library path, reloads settings and nebula repo
-        /// </summary>
-        internal async void BrowseFolderCommand()
+        [RelayCommand]
+        private async Task AddLibraryAsync()
         {
-            FolderPickerOpenOptions options = new FolderPickerOpenOptions(); 
-            if (BasePath != string.Empty)
+            try
             {
-                try
+                string? path;
+                if (IsAndroid)
                 {
-                    options.SuggestedStartLocation = await KnUtils.GetTopLevel().StorageProvider.TryGetFolderFromPathAsync(BasePath);
+                    var volumes = await Task.Run(AndroidHelper.GetLibraryVolumes);
+                    var available = volumes.Where(volume =>
+                        !LibraryPaths.Contains(volume.Path, Knossos.LibraryPathComparer)).ToArray();
+                    path = await AndroidLibraryPickerView.PickAsync(available);
                 }
-                catch { }
-            }
-            options.AllowMultiple = false;
-
-            var result = await KnUtils.GetTopLevel().StorageProvider.OpenFolderPickerAsync(options);
-
-            try 
-            {
-                if (result != null && result.Count > 0)
+                else
                 {
-                      // Test if we can write to the new library directory
-                      using (StreamWriter writer = new StreamWriter(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"))
-                      {
-                          writer.WriteLine("test");
-                      }
-                      File.Delete(Path.Combine(result[0].Path.LocalPath.ToString() + Path.DirectorySeparatorChar + "test.txt"));
+                    var storage = KnUtils.GetTopLevel().StorageProvider;
+                    var options = new FolderPickerOpenOptions
+                    {
+                        Title = "Select a library folder",
+                        AllowMultiple = false
+                    };
+                    if (LibraryPaths.FirstOrDefault(Directory.Exists) is string previous)
+                        options.SuggestedStartLocation = await storage.TryGetFolderFromPathAsync(previous);
 
-                      Knossos.globalSettings.basePath = result[0].Path.LocalPath.ToString();
-                      Knossos.globalSettings.Save();
-                      Knossos.ResetBasePath();
-                      await LoadDataAsync();
-                } 
-            } 
-            catch (Exception ex) 
-            {
-                Log.Add(Log.LogSeverity.Error, "GlobalSettings.BrowseFolderCommand() - test read/write was not successful: ", ex);
-                await Dispatcher.UIThread.Invoke(async () => {
-                    await MessageBox.Show(null, "KnossosNET was not able to write to this folder.  Please select another library folder.", "Cannot Select Folder", MessageBox.MessageBoxButtons.OK);
-                }).ConfigureAwait(false);
+                    var folders = await storage.OpenFolderPickerAsync(options);
+                    if (folders.Count == 0)
+                        return;
+
+                    path = folders[0].TryGetLocalPath();
+                    if (path == null)
+                    {
+                        await MessageBox.Show(MainWindow.instance, "Select a folder with a local filesystem path.",
+                            "Cannot Add Library", MessageBox.MessageBoxButtons.OK);
+                        return;
+                    }
+                }
+
+                if (path == null)
+                    return;
+
+                CommitPendingChanges();
+                if (!Knossos.TryAddLibrary(path, out var error))
+                    await MessageBox.Show(MainWindow.instance, error ?? "The library could not be added.",
+                        "Cannot Add Library", MessageBox.MessageBoxButtons.OK);
             }
+            catch (Exception ex)
+            {
+                Log.Add(Log.LogSeverity.Error, "GlobalSettingsViewModel.AddLibraryAsync()", ex);
+                await MessageBox.Show(MainWindow.instance, ex.Message,
+                    "Cannot Add Library", MessageBox.MessageBoxButtons.OK);
+            }
+        }
+
+        internal async Task RemoveLibraryAsync(string path)
+        {
+            var result = await MessageBox.Show(MainWindow.instance,
+                $"Remove this library from KnossosNET? Its files will stay on disk.\n\n{path}",
+                "Remove Library", MessageBox.MessageBoxButtons.YesNo);
+            if (result != MessageBox.MessageBoxResult.Yes)
+                return;
+
+            CommitPendingChanges();
+            if (!Knossos.RemoveLibrary(path))
+                await MessageBox.Show(MainWindow.instance,
+                    "The library could not be removed. If KnossosNET is loading libraries or running tasks, wait for them to finish and try again.",
+                    "Cannot Remove Library", MessageBox.MessageBoxButtons.OK);
         }
 
         /// <summary>
@@ -1291,12 +1263,15 @@ namespace Knossos.NET.ViewModels
         /// </summary>
         internal async void ResetCommand()
         {
-            var pxoUser = Knossos.globalSettings.pxoLogin;
-            var pxoPassword = Knossos.globalSettings.pxoPassword;
-            Knossos.globalSettings = new GlobalSettings();
+            var previous = Knossos.globalSettings;
+            Knossos.globalSettings = new GlobalSettings
+            {
+                basePath = previous.basePath,
+                libraryPaths = previous.libraryPaths?.ToList()
+            };
             await LoadDataAsync();
-            Knossos.globalSettings.pxoPassword = pxoPassword;
-            Knossos.globalSettings.pxoLogin = pxoUser;
+            Knossos.globalSettings.pxoPassword = previous.pxoPassword;
+            Knossos.globalSettings.pxoLogin = previous.pxoLogin;
             SaveCommand();
         }
 
@@ -1306,10 +1281,6 @@ namespace Knossos.NET.ViewModels
         internal void SaveCommand()
         {
             /* Knossos Settings */
-            if (BasePath != string.Empty)
-            {
-                Knossos.globalSettings.basePath = BasePath;
-            }
             Knossos.globalSettings.enableLogFile = EnableLogFile;
             Knossos.globalSettings.logLevel = LogLevel;
             Knossos.globalSettings.forceSSE2 = ForceSSE2;

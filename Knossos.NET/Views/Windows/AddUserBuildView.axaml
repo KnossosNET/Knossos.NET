@@ -21,10 +21,10 @@
 		<vm:AddUserBuildViewModel/>
 	</Design.DataContext>
 
-	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}">
+	<ScrollViewer Background="{StaticResource BackgroundColorPrimary}" HorizontalScrollBarVisibility="Disabled">
 	<Grid Margin="5" RowDefinitions="*,Auto,Auto">
-		<StackPanel Grid.Row="0" IsEnabled="{Binding !CopyProgress}">
-			<Label>1) Click on the button and select the folders where the executables are located.</Label>
+		<StackPanel Grid.Row="0" IsEnabled="{Binding !IsCopying}">
+			<TextBlock TextWrapping="Wrap">1) Select the folder containing the executables.</TextBlock>
 			<Button Classes="Secondary" Command="{Binding OpenFolderCommand}">Open Folder</Button>
 			<TextBlock TextWrapping="Wrap" Text="{Binding ScanResults}"></TextBlock>
 			<StackPanel Margin="0,15,0,0" IsVisible="{Binding Stage2}">
@@ -87,13 +87,24 @@
 				</Expander>
 			</StackPanel>
 			<StackPanel IsVisible="{Binding Stage2}" Margin="5,30,0,0">
-				<Label>3) Click the button when ready, the folder will be copied to:</Label>
+				<StackPanel IsVisible="{Binding ShowLibrarySelector}" Spacing="4" Margin="0,0,0,10">
+					<TextBlock Text="Library" FontWeight="Bold"/>
+					<ComboBox ItemsSource="{Binding LibraryPaths}" SelectedItem="{Binding SelectedLibrary, Mode=TwoWay}"
+							  HorizontalAlignment="Stretch" AutomationProperties.Name="Destination library">
+						<ComboBox.ItemTemplate>
+							<DataTemplate x:CompileBindings="False">
+								<TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding}"/>
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
+				</StackPanel>
+				<TextBlock TextWrapping="Wrap">3) Click Add new build to copy the folder to:</TextBlock>
 				<TextBlock TextWrapping="Wrap" Text="{Binding BuildNewPath}"></TextBlock>
-				<Label>Any (.lib, .a, .pdb and .exp) will be ignored, and a mod.json file will be generated.</Label>
+				<TextBlock TextWrapping="Wrap">The importer skips .lib, .a, .pdb and .exp files and creates a mod.json.</TextBlock>
 				<Button VerticalAlignment="Center" Classes="Accept" Command="{Binding AddCommand}">Add new build</Button>
 			</StackPanel>
 		</StackPanel>
-		<ProgressBar Grid.Row="1" IsVisible="{Binding CopyProgress}" Value="{Binding CopyProgress}" Maximum="{Binding MaxFiles}" Height="50" Minimum="0" Width="200" HorizontalAlignment="Center"></ProgressBar>
+		<ProgressBar Grid.Row="1" IsVisible="{Binding IsCopying}" Value="{Binding CopyProgress}" Maximum="{Binding MaxFiles}" Height="50" Minimum="0" Width="200" HorizontalAlignment="Center"></ProgressBar>
 	</Grid>
 	</ScrollViewer>
 </KnossosWindow>

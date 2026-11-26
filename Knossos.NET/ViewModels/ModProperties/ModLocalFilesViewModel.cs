@@ -32,6 +32,7 @@ namespace Knossos.NET.ViewModels
         [ObservableProperty] private bool isMeasuring;
         [ObservableProperty] private bool hasCompressedFiles;
 
+        public ModPropertiesViewModel Properties => owner;
         public ModVersionsViewModel Operation => owner.Versions;
         public string Name => owner.ActiveVersion.title;
         public string Version => "Version " + owner.ActiveVersion.version;
@@ -48,7 +49,8 @@ namespace Knossos.NET.ViewModels
         public bool CanVerify => owner.CanConfigure && !Operation.IsApplying && !owner.IsSubmitting && TaskViewModel.Instance != null;
         public bool CanChangeCompression => CanVerify && (ShowDecompress ||
             Knossos.globalSettings.modCompression != CompressionSettings.Disabled);
-        public bool CanOpenLibrary => canOpenFolders && Directory.Exists(Knossos.GetKnossosLibraryPath());
+        private string? ActiveLibrary => Knossos.GetLibraryForPath(owner.ActiveVersion.fullPath);
+        public bool CanOpenLibrary => canOpenFolders && Directory.Exists(ActiveLibrary);
         public bool CanOpenMod => canOpenFolders && Directory.Exists(owner.ActiveVersion.fullPath);
         public bool CanMeasure => owner.CanConfigure && !IsMeasuring && !Operation.IsApplying;
         public Task CurrentMeasurement { get; private set; } = Task.CompletedTask;
@@ -62,7 +64,7 @@ namespace Knossos.NET.ViewModels
 
         internal void Open()
         {
-            LibraryLocation = Knossos.GetKnossosLibraryPath() ?? "Library not configured";
+            LibraryLocation = ActiveLibrary ?? "No configured library for this version";
             RefreshCommands();
             if (!IsMeasuring && !Operation.IsApplying)
                 CurrentMeasurement = MeasureAsync();
@@ -72,6 +74,10 @@ namespace Knossos.NET.ViewModels
         {
             StopMeasuring();
             ActiveSize = AllVersionsSize = "—";
+            LibraryLocation = ActiveLibrary ?? "No configured library for this version";
+            FreeSpace = "—";
+            Capacity = string.Empty;
+            PercentFree = 0;
             HasCompressedFiles = false;
             OnPropertyChanged(nameof(Name));
             OnPropertyChanged(nameof(Version));
@@ -110,7 +116,10 @@ namespace Knossos.NET.ViewModels
         partial void OnIsMeasuringChanged(bool value) => MeasureAllCommand.NotifyCanExecuteChanged();
 
         [RelayCommand(CanExecute = nameof(CanOpenLibrary))]
-        private void OpenLibrary() => KnUtils.OpenFolder(Knossos.GetKnossosLibraryPath()!);
+        private void OpenLibrary()
+        {
+            if (ActiveLibrary is { } library) KnUtils.OpenFolder(library);
+        }
 
         [RelayCommand(CanExecute = nameof(CanOpenMod))]
         private void OpenMod() => KnUtils.OpenFolder(owner.ActiveVersion.fullPath);
@@ -183,8 +192,8 @@ namespace Knossos.NET.ViewModels
             MeasurementError = string.Empty;
 
             var active = owner.ActiveVersion;
-            var library = Knossos.GetKnossosLibraryPath();
-            LibraryLocation = string.IsNullOrWhiteSpace(library) ? "Library not configured" : library;
+            var library = ActiveLibrary;
+            LibraryLocation = library ?? "No configured library for this version";
             var all = includeAllVersions;
             var versions = all ? Knossos.GetInstalledModList(active.id).Append(active)
                 .Where(mod => mod.installed && !string.IsNullOrWhiteSpace(mod.fullPath))

@@ -91,7 +91,7 @@ namespace Knossos.NET.ViewModels
             }     
         }
 
-        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel? sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false, bool installInDevMode = false, Action<string>? reportError = null)
+        public async Task<FsoBuild?> InstallBuild(FsoBuild build, FsoBuildItemViewModel? sender, CancellationTokenSource? cancelSource = null, Mod? modJson = null, List<ModPackage>? modifyPkgs = null, bool cleanupOldVersions = false, bool installInDevMode = false, Action<string>? reportError = null, string? libraryPath = null)
         {
             string? modPath = null;
             bool installed = false;
@@ -211,7 +211,26 @@ namespace Knossos.NET.ViewModels
 
                         List<ModFile> files = new List<ModFile>();
                         string modFolder = modJson.id + "-" + modJson.version;
-                        modPath = Knossos.GetKnossosLibraryPath() + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + modFolder;
+                        var installedPath = modifyPkgs != null ? (existing ?? build).folderPath : existing?.folderPath;
+                        var installedLibrary = Knossos.GetLibraryForPath(installedPath);
+                        var destinationLibrary = installedLibrary ?? libraryPath ?? Knossos.GetKnossosLibraryPath();
+                        if (destinationLibrary == null || modifyPkgs != null && installedLibrary == null)
+                            throw new IOException("The build library is no longer configured.");
+                        if (installedLibrary != null && !Directory.Exists(installedLibrary))
+                            throw new IOException($"The installed build's library '{installedLibrary}' is unavailable.");
+                        if (libraryPath != null && (!Knossos.LibraryPathComparer.Equals(destinationLibrary, libraryPath) ||
+                            !Knossos.GetLibraryPaths().Contains(libraryPath, Knossos.LibraryPathComparer) || !Directory.Exists(libraryPath)))
+                            throw new IOException($"The build cannot be installed in '{libraryPath}'. Check that the library is available and that the build is not already present in another library.");
+
+                        var destination = installedLibrary != null
+                            ? Path.TrimEndingDirectorySeparator(installedPath!)
+                            : Path.Combine(destinationLibrary, "bin", modFolder);
+                        if (!Knossos.IsPathInLibrary(destinationLibrary, destination) ||
+                            Knossos.LibraryPathComparer.Equals(destination, destinationLibrary))
+                            throw new IOException($"The build folder '{destination}' must be inside the library.");
+                        if (libraryPath != null && installedLibrary == null && (Directory.Exists(destination) || File.Exists(destination)))
+                            throw new IOException($"The build folder '{destination}' already exists.");
+                        modPath = destination;
                         if (modifyPkgs != null)
                         {
                             //Modify Build
@@ -548,7 +567,7 @@ namespace Knossos.NET.ViewModels
                         ++ProgressCurrent;
                         Info = "Tasks: " + ProgressCurrent + "/" + ProgressBarMax;
                         modJson.fullPath = modPath + Path.DirectorySeparatorChar;
-                        modJson.folderName = modFolder;
+                        modJson.folderName = Path.GetFileName(modPath);
                         modJson.installed = true;
                         modJson.inNebula = true;
                         modJson.SaveJson();

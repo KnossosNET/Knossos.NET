@@ -36,11 +36,22 @@
 									<Expander.Header>
 										Filters
 									</Expander.Header>
-									<ScrollViewer MaxWidth="650" MaxHeight="700">
-										<WrapPanel Name="FilterPanel" MaxWidth="630">
+									<ScrollViewer MaxWidth="570" MaxHeight="700">
+										<WrapPanel Name="FilterPanel" MaxWidth="550">
 											<!--Buttons to be added by code on the view-->
 										</WrapPanel>
 									</ScrollViewer>
+								</Expander>
+								<Expander Header="Library" Margin="2" Width="220" IsExpanded="True" VerticalAlignment="Top"
+										  IsVisible="{Binding ShowLibraryFilter}">
+									<ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding LibraryFilters}"
+											  SelectedItem="{Binding SelectedLibraryFilter, Mode=TwoWay}" AutomationProperties.Name="Filter by library">
+										<ComboBox.ItemTemplate>
+											<DataTemplate x:DataType="vm:LibraryFilterOption">
+												<TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}"/>
+											</DataTemplate>
+										</ComboBox.ItemTemplate>
+									</ComboBox>
 								</Expander>
 							</WrapPanel>
 						</Flyout>

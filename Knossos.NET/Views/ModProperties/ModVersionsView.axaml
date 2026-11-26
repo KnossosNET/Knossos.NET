@@ -33,6 +33,13 @@
           <StackPanel Margin="0,0,24,8" Spacing="8"><TextBlock Classes="muted" Text="Download Size (estimated)"/><TextBlock Text="{Binding DownloadSize}" FontSize="16"/></StackPanel>
           <StackPanel Margin="0,0,24,8" Spacing="8"><TextBlock Classes="muted" Text="Free Space in Library"/><TextBlock Text="{Binding FreeSpace}" FontSize="16"/></StackPanel>
         </WrapPanel>
+        <StackPanel IsVisible="{Binding ShowInstallationLibrary}" Spacing="4" HorizontalAlignment="Stretch">
+          <TextBlock Text="Install to Library" Classes="muted"/>
+          <ComboBox ItemsSource="{Binding InstallationLibraries}" SelectedItem="{Binding SelectedInstallationLibrary, Mode=TwoWay}"
+                    AutomationProperties.Name="Library to install to" IsEnabled="{Binding CanEdit}" HorizontalAlignment="Stretch">
+            <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding}" TextWrapping="Wrap"/></DataTemplate></ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
         <TextBlock Text="{Binding Status}" Foreground="#8DE38A" TextWrapping="Wrap"/>
         <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True" Height="3"/>
         <ProgressBar IsVisible="{Binding IsUpdatingDependencies}" IsIndeterminate="True" Height="3"/>

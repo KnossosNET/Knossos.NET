@@ -121,6 +121,9 @@ namespace Knossos.NET.Models
         /* Knossos Settings */
         [JsonPropertyName("base_path")]
         public string? basePath { get; set; } = null;
+        public List<string>? libraryPaths { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? portableLibraryPath { get; set; }
         [JsonPropertyName("enable_log")]
         public bool enableLogFile { get; set; } = true;
         [JsonPropertyName("single_view_mode")]
@@ -641,6 +644,7 @@ namespace Knossos.NET.Models
         /// </summary>
         public void Load()
         {
+            var migrateLibraryPath = false;
             try
             {
                 if (File.Exists(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json"))
@@ -651,6 +655,9 @@ namespace Knossos.NET.Models
                     if (tempSettings != null)
                     {
                         basePath = tempSettings.basePath;
+                        libraryPaths = tempSettings.libraryPaths;
+                        portableLibraryPath = tempSettings.portableLibraryPath;
+                        migrateLibraryPath = libraryPaths == null && !string.IsNullOrWhiteSpace(basePath);
                         enableLogFile = tempSettings.enableLogFile;
                         logLevel = tempSettings.logLevel;
                         globalCmdLine = tempSettings.globalCmdLine;
@@ -727,10 +734,24 @@ namespace Knossos.NET.Models
             {
                 Log.Add(Log.LogSeverity.Error, "GlobalSettings.Load()", ex);
             }
-            if(Knossos.inPortableMode)
+            if (Knossos.inPortableMode)
             {
-                basePath = Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "Library");
+                var localLibrary = Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "Library");
+                if (libraryPaths == null)
+                    basePath = localLibrary;
+                else if (portableLibraryPath != null && !Knossos.LibraryPathComparer.Equals(portableLibraryPath, localLibrary))
+                {
+                    var index = libraryPaths.FindIndex(path => Knossos.LibraryPathComparer.Equals(path, portableLibraryPath));
+                    if (index >= 0)
+                    {
+                        libraryPaths[index] = localLibrary;
+                        migrateLibraryPath = true;
+                    }
+                }
             }
+            Knossos.NormalizeLibrarySettings(this);
+            if (migrateLibraryPath && !Knossos.isKnDataFolderReadOnly)
+                Save(false);
         }
 
         /// <summary>
@@ -933,7 +954,11 @@ namespace Knossos.NET.Models
         /// Writing the ini is optional, it should not be done for Knossos-only settings.
         /// </summary>
         /// <param name="writeIni"></param>
-        public void Save(bool writeIni = true) 
+        public void Save(bool writeIni = true) => TrySave(writeIni);
+
+        private static readonly object settingsWriteLock = new();
+
+        internal bool TrySave(bool writeIni)
         {
             SetCustomModeValues();
             if (writeIni)
@@ -953,14 +978,35 @@ namespace Knossos.NET.Models
                     WriteIndented = true
                 };
 
-                var json = JsonSerializer.Serialize(this, options);
-                File.WriteAllText(KnUtils.GetKnossosDataFolderPath() + Path.DirectorySeparatorChar + "settings.json", json, new UTF8Encoding(false));
+                lock (settingsWriteLock)
+                {
+                    if (libraryPaths != null)
+                        basePath = libraryPaths.FirstOrDefault();
+                    portableLibraryPath = Knossos.inPortableMode
+                        ? Path.Combine(KnUtils.KnetFolderPath!, "kn_portable", "Library")
+                        : null;
+
+                    var settingsPath = Path.Combine(KnUtils.GetKnossosDataFolderPath(), "settings.json");
+                    var temporaryPath = settingsPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                    try
+                    {
+                        File.WriteAllText(temporaryPath, JsonSerializer.Serialize(this, options), new UTF8Encoding(false));
+                        File.Move(temporaryPath, settingsPath, overwrite: true);
+                    }
+                    finally
+                    {
+                        if (File.Exists(temporaryPath))
+                            File.Delete(temporaryPath);
+                    }
+                }
                 Log.Add(Log.LogSeverity.Information, "GlobalSettings.Save()", "Global settings have been saved.");
                 pendingChangesOnAppClose = false;
+                return true;
             }
             catch (Exception ex)
             {
                 Log.Add(Log.LogSeverity.Error, "GlobalSettings.Save()", ex);
+                return false;
             }
         }
 

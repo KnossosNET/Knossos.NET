@@ -80,12 +80,12 @@
       <ProgressBar IsVisible="{Binding IsMeasuring}" IsIndeterminate="True" Height="4" Margin="0,0,12,4"/>
       <TextBlock Text="{Binding MeasurementError}" IsVisible="{Binding HasMeasurementError}" Foreground="#FFB88A" Margin="0,0,12,0"/>
       <Grid x:Name="FileActions">
-        <Button Classes="fileAction accent" IsEnabled="False">
+        <Button Classes="fileAction accent" Command="{Binding Properties.MoveCommand}">
           <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
             <PathIcon Data="{StaticResource FuturisticFolderIcon}" Foreground="#9DCDFF" Width="26" Height="26" VerticalAlignment="Top"/>
             <StackPanel Grid.Column="1" Spacing="4">
               <TextBlock Text="Move to Different Library" FontWeight="SemiBold"/>
-              <TextBlock Text="Move this mod to another library." Classes="muted"/>
+              <TextBlock Text="Move this version or all installed versions." Classes="muted"/>
             </StackPanel>
           </Grid>
         </Button>
