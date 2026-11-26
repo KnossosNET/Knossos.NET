@@ -15,6 +15,7 @@
     <DataTemplate DataType="vm:ModLocalFilesViewModel"><views:ModLocalFilesView/></DataTemplate>
     <DataTemplate DataType="vm:ModVersionsViewModel"><views:ModVersionsView/></DataTemplate>
     <DataTemplate DataType="vm:ModLaunchOptionsViewModel"><views:ModLaunchOptionsView/></DataTemplate>
+    <DataTemplate DataType="vm:ModIngameSettingsViewModel"><views:ModIngameSettingsView/></DataTemplate>
   </views:KnossosWindow.DataTemplates>
   <Grid Background="{DynamicResource FuturisticBackdrop}">
     <Grid x:Name="PropertiesLayout" ColumnDefinitions="224,*" IsEnabled="{Binding !IsModalOpen}">
@@ -49,6 +50,12 @@
               <Grid ColumnDefinitions="24,*">
                 <PathIcon Data="{StaticResource FuturisticPlayIcon}"/>
                 <TextBlock Grid.Column="1" Text="Launch Options" TextWrapping="Wrap" VerticalAlignment="Center"/>
+              </Grid>
+            </Button>
+            <Button Classes="navigation" Classes.selected="{Binding IsIngameSettingsSelected}" IsEnabled="{Binding CanConfigure}" Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:ModPropertiesViewModel+MenuPageEntry.IngameSettings}">
+              <Grid ColumnDefinitions="24,*">
+                <PathIcon Data="{StaticResource FuturisticSettingsIcon}"/>
+                <TextBlock Grid.Column="1" Text="Ingame Settings" TextWrapping="Wrap" VerticalAlignment="Center"/>
               </Grid>
             </Button>
             <Button Classes="navigation" Classes.selected="{Binding IsFilesSelected}" IsEnabled="{Binding CanConfigure}" Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:ModPropertiesViewModel+MenuPageEntry.Files}">

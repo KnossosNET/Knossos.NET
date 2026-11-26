@@ -876,12 +876,14 @@ static partial class Program
     [STAThread]
     static void Main(string[] args)
     {
+        if (AnswerFsoQuery(args)) return;
         AppBuilder.Configure<CheckApplication>().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false }).UseSkia().WithInterFont().SetupWithoutStarting();
         var output = Path.GetFullPath(Path.Combine("artifacts", "mod-versions-checks", Guid.NewGuid().ToString("N")));
         Directory.CreateDirectory(output);
         if (args.Contains("--launch-options")) { LaunchOptionsChecks(output); LaunchViewChecks(output); }
         else if (args.Contains("--local-files")) LocalFilesChecks(output);
-        else { LocalFilesChecks(output); PlannerChecks(); EnginePackageChecks(); IncrementalChecks(output); BackupChecks(output); TaskChecks(output); SessionChecks(output); DeletionChecks(output); QueueChecks(output); SharedBuildChecks(output); HiddenEngineChecks(output); ViewChecks(output); LaunchOptionsChecks(output); TextEditorChecks(output); LaunchViewChecks(output); }
+        else if (args.Contains("--ingame-settings")) IngameSettingsChecks(output);
+        else { LocalFilesChecks(output); PlannerChecks(); EnginePackageChecks(); IncrementalChecks(output); BackupChecks(output); TaskChecks(output); SessionChecks(output); DeletionChecks(output); QueueChecks(output); SharedBuildChecks(output); HiddenEngineChecks(output); ViewChecks(output); LaunchOptionsChecks(output); TextEditorChecks(output); LaunchViewChecks(output); IngameSettingsChecks(output); }
         Console.WriteLine("All " + assertions + " checks passed. Preview images: " + output);
     }
 }

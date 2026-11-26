@@ -1,8 +1,13 @@
 package com.knossosnet.knossosnet;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
-import android.view.WindowManager;
+import android.os.Handler;
+import android.os.Looper;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.lang.ref.WeakReference;
@@ -15,6 +20,10 @@ public class FlagsActivity extends org.libsdl.app.SDLActivity {
     private static String _workingFolder = "";
     private static volatile boolean _delivered = false;
     private ResultReceiver _receiver = null;
+    private String _resultPath;
+    private final Binder _queryProcess = new Binder();
+    private final Handler _handler = new Handler(Looper.getMainLooper());
+    private final Runnable _timeout = () -> finish();
 
     /* FSO API */
     public static String getWorkingFolder() { return _workingFolder; }
@@ -67,6 +76,7 @@ public class FlagsActivity extends org.libsdl.app.SDLActivity {
             _workingFolder = i.getStringExtra("workingFolder");
             if (_workingFolder == null) _workingFolder = "";
             _receiver = i.getParcelableExtra("flagsReceiver");
+            _resultPath = i.getStringExtra("resultPath");
         }
 
         loadNatives();
@@ -74,10 +84,13 @@ public class FlagsActivity extends org.libsdl.app.SDLActivity {
         setResult(RESULT_CANCELED);
 
         super.onCreate(savedInstanceState);
+        _handler.postDelayed(_timeout, 25000);
     }
 
     @Override
     protected void onDestroy() {
+        _handler.removeCallbacks(_timeout);
+        sendResult(Activity.RESULT_CANCELED);
         super.onDestroy();
         _self = null;
         try {
@@ -95,7 +108,9 @@ public class FlagsActivity extends org.libsdl.app.SDLActivity {
     };
 
     private void loadNatives() {
-        File dir = new File(getFilesDir(), "natives/");
+        String engine = getMainSharedObject();
+        if (engine == null) return;
+        File dir = new File(engine).getParentFile();
         List<File> loadList = orderForLoad(dir);
         List<File> failed = new ArrayList<>();
         for (File so : loadList) if (!tryLoad(so)) failed.add(so);
@@ -141,12 +156,27 @@ public class FlagsActivity extends org.libsdl.app.SDLActivity {
         if (_delivered) return;
         _delivered = true;
         runOnUiThread(() -> {
-            if (_receiver != null) {
-                Bundle b = new Bundle();
-                b.putString("flagsJson", json);
-                _receiver.send(Activity.RESULT_OK, b);
+            int result = Activity.RESULT_CANCELED;
+            if (json != null && _resultPath != null) {
+                // Keep the full JSON out of Binder transactions. Both processes share this cache.
+                try (FileOutputStream output = new FileOutputStream(_resultPath)) {
+                    output.write(json.getBytes(StandardCharsets.UTF_8));
+                    result = Activity.RESULT_OK;
+                } catch (IOException e) {
+                    new File(_resultPath).delete();
+                    android.util.Log.e("FlagsActivity", "Unable to write FSO query result", e);
+                }
             }
+            sendResult(result);
             finish();
         });
+    }
+
+    private void sendResult(int result) {
+        if (_receiver == null) return;
+        Bundle data = new Bundle();
+        data.putBinder("queryProcess", _queryProcess);
+        _receiver.send(result, data);
+        _receiver = null;
     }
 }

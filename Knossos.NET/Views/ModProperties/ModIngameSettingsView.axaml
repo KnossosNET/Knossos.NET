@@ -1,0 +1,78 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Knossos.NET.ViewModels" xmlns:fso="using:Knossos.NET.Classes"
+    x:Class="Knossos.NET.Views.ModIngameSettingsView" x:DataType="vm:ModIngameSettingsViewModel">
+  <UserControl.Styles>
+    <Style Selector="ComboBox, NumericUpDown">
+      <Setter Property="Background" Value="#101920"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource FuturisticBorder}"/>
+      <Setter Property="MinHeight" Value="40"/>
+      <Setter Property="MinWidth" Value="146"/>
+      <Setter Property="MaxWidth" Value="420"/>
+    </Style>
+    <Style Selector="StackPanel.settingControls">
+      <Setter Property="Orientation" Value="Horizontal"/>
+    </Style>
+    <Style Selector=".compact StackPanel.settingControls">
+      <Setter Property="Orientation" Value="Vertical"/>
+    </Style>
+    <Style Selector=".compact ComboBox, .compact NumericUpDown">
+      <Setter Property="MinWidth" Value="0"/>
+    </Style>
+  </UserControl.Styles>
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+    <StackPanel x:Name="SettingsLayout" Margin="24,20" Spacing="12">
+      <StackPanel Spacing="4" Margin="4,0,0,4">
+        <TextBlock Classes="heading" Text="Ingame Settings"/>
+        <TextBlock Classes="muted" Text="{Binding BuildLabel}" TextWrapping="Wrap" FontSize="16"/>
+      </StackPanel>
+      <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" Height="3" Foreground="{DynamicResource FuturisticAccent}"/>
+      <Border Classes="surface" IsVisible="{Binding HasMessage}" Padding="14">
+        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Foreground="#FFBD86"/>
+      </Border>
+      <ItemsControl ItemsSource="{Binding Groups}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:IngameSettingsGroup">
+            <Expander Classes="launchSection" Theme="{StaticResource FuturisticExpander}" Margin="0,0,0,12"
+                IsExpanded="{Binding IsExpanded, Mode=TwoWay}" HorizontalAlignment="Stretch">
+              <Expander.Header>
+                <Grid ColumnDefinitions="42,*" ColumnSpacing="12">
+                  <Border Background="#253747" CornerRadius="6" Padding="9">
+                    <PathIcon Data="{StaticResource FuturisticSettingsIcon}" Foreground="#89C8FF" Width="24" Height="24"/>
+                  </Border>
+                  <TextBlock Grid.Column="1" Text="{Binding Name}" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="19" FontWeight="SemiBold"/>
+                </Grid>
+              </Expander.Header>
+              <ItemsControl ItemsSource="{Binding Options}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:IngameSetting">
+                    <Border BorderBrush="{DynamicResource FuturisticBorder}" BorderThickness="0,0,0,1" Padding="2,9,2,12">
+                      <StackPanel Spacing="5">
+                        <TextBlock Text="{Binding Title}" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding Description}" IsVisible="{Binding HasDescription}" Classes="muted" TextWrapping="Wrap" FontSize="13"/>
+                        <StackPanel Classes="settingControls" Spacing="8" IsEnabled="{Binding CanEdit}">
+                          <ComboBox ItemsSource="{Binding Choices}" SelectedItem="{Binding SelectedChoice, Mode=TwoWay}"
+                              IsVisible="{Binding IsSelection}" HorizontalAlignment="Stretch" AutomationProperties.Name="{Binding Title}">
+                            <ComboBox.ItemTemplate>
+                              <DataTemplate x:DataType="fso:FsoOptionChoice"><TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis"/></DataTemplate>
+                            </ComboBox.ItemTemplate>
+                          </ComboBox>
+                          <NumericUpDown Value="{Binding Number, Mode=TwoWay}" Minimum="{Binding Min}" Maximum="{Binding Max}"
+                              Increment="{Binding Increment}" FormatString="{Binding Format}" ParsingNumberStyle="{Binding NumberStyle}" ClipValueToMinMax="True"
+                              IsVisible="{Binding IsRange}" HorizontalAlignment="Stretch" AutomationProperties.Name="{Binding Title}"/>
+                          <Button Content="Restore Default" IsVisible="{Binding CanRestoreDefault}" Command="{Binding RestoreDefaultCommand}"
+                              HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding RangeLabel}" Classes="muted" IsVisible="{Binding IsRange}" FontSize="12" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding Status}" IsVisible="{Binding HasStatus}" Foreground="#89C8FF" FontSize="12" TextWrapping="Wrap"/>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Expander>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

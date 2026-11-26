@@ -70,6 +70,8 @@ namespace Knossos.NET.Classes
             var first = Tokens(command, true).FirstOrDefault() ?? throw new ArgumentException("Enter a launcher command first.");
             return (first.Value, command[first.End..].TrimStart());
         }
+        internal static string[] SplitArguments(string command) => Tokens(command, windows: true).Select(token => token.Value).ToArray();
+
         public static bool HasFlag(string command, string flag) => Tokens(command).Any(t => t.Switch && t.Value.Equals(flag, StringComparison.OrdinalIgnoreCase));
         public static string SetFlag(string command, string flag, bool enabled)
         {
