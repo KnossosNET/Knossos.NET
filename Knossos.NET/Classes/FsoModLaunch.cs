@@ -6,11 +6,13 @@ using System.Linq;
 
 namespace Knossos.NET.Classes
 {
-    internal sealed record FsoModLaunch(string WorkingFolder, List<string> Roots, bool UsesMultipleLibraries)
+    internal sealed record FsoModRoot(string Path, Mod Mod);
+
+    internal sealed record FsoModLaunch(string WorkingFolder, List<FsoModRoot> Roots, bool UsesMultipleLibraries)
     {
         public string GetLegacyModFlag(Mod mod)
         {
-            return string.Join(",", Roots.Select(path => !mod.devMode && path == mod.fullPath
+            return string.Join(",", Roots.Select(root => root.Path).Select(path => !mod.devMode && path == mod.fullPath
                 ? mod.folderName
                 : Path.GetRelativePath(WorkingFolder, path).TrimEnd('/', '\\')));
         }
@@ -30,7 +32,7 @@ namespace Knossos.NET.Classes
             if (parent != null)
                 loadedMods.Add(parent);
 
-            var roots = new List<string>();
+            var roots = new List<FsoModRoot>();
             foreach (var id in mod.GetModFlagList())
             {
                 if (id == mod.id)
@@ -38,15 +40,15 @@ namespace Knossos.NET.Classes
                     if (mod.devMode)
                     {
                         foreach (var pkg in mod.packages.Where(pkg => pkg.isEnabled).OrderBy(pkg => pkg.name))
-                            roots.Add(Path.Combine(mod.fullPath, pkg.folder ?? ""));
+                            roots.Add(new(Path.Combine(mod.fullPath, pkg.folder ?? ""), mod));
 
                         // The dedicated server reads multi.cfg from the mod root's data directory.
                         if (standaloneServer)
-                            roots.Add(mod.fullPath);
+                            roots.Add(new(mod.fullPath, mod));
                     }
                     else if (id != "FS2")
                     {
-                        roots.Add(mod.fullPath);
+                        roots.Add(new(mod.fullPath, mod));
                     }
                     continue;
                 }
@@ -59,11 +61,11 @@ namespace Knossos.NET.Classes
                 if (dependency.devMode)
                 {
                     foreach (var pkg in dependency.packages)
-                        roots.Add(Path.Combine(dependency.fullPath, pkg.folder ?? ""));
+                        roots.Add(new(Path.Combine(dependency.fullPath, pkg.folder ?? ""), dependency));
                 }
                 else
                 {
-                    roots.Add(dependency.fullPath);
+                    roots.Add(new(dependency.fullPath, dependency));
                 }
             }
 

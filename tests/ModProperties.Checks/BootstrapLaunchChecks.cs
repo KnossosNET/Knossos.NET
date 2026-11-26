@@ -49,4 +49,51 @@ static partial class Program
             settings.prefixCMD = prefix;
         }
     }
+
+    static void BootstrapManifestChecks(string firstLibrary, string secondLibrary)
+    {
+        var dependency = new Mod
+        {
+            id = "shared-content", type = ModType.mod, version = "1.4.0", title = "Shared Content",
+            fullPath = Path.Combine(secondLibrary, "shared-content-1.4.0")
+        };
+        var primary = new Mod
+        {
+            id = "primary-tc", type = ModType.tc, version = "2.5.0", title = "Conversión Principal",
+            parent = "primary-tc", devMode = true, fullPath = Path.Combine(firstLibrary, "primary-tc-2.5.0"),
+            modFlag = new() { dependency.id, "primary-tc" },
+            packages = new() { new ModPackage { name = "Audio", folder = "audio" }, new ModPackage { name = "Core", folder = "core" } }
+        };
+
+        var assembly = typeof(FsoBuild).Assembly;
+        var launchType = assembly.GetType("Knossos.NET.Classes.FsoModLaunch")!;
+        var launch = launchType.GetMethod("Create")!.Invoke(null, new object[] { primary, new List<Mod> { dependency }, false })!;
+        Check((bool)launchType.GetProperty("UsesMultipleLibraries")!.GetValue(launch)!,
+            "the dependency and primary package roots span two libraries");
+        var legacyFlag = (string)launchType.GetMethod("GetLegacyModFlag")!.Invoke(launch, new object[] { primary })!;
+        Check(legacyFlag == string.Join(",", Path.GetRelativePath(primary.fullPath, dependency.fullPath), "audio", "core"),
+            "tracking root metadata preserves the original -mod ordering and paths");
+
+        var serialize = assembly.GetType("Knossos.NET.Classes.FsoBootstrap")!
+            .GetMethod("SerializeManifest", BindingFlags.NonPublic | BindingFlags.Static)!;
+        var enginePaths = new[] { @"Z:\\shared-content", @"Z:\\primary-tc\\audio", @"Z:\\primary-tc\\core" };
+        using var json = JsonDocument.Parse((string)serialize.Invoke(null, new object[] { 1, primary.id, launch, enginePaths })!);
+        var manifest = json.RootElement;
+        Check(manifest.GetProperty("version").GetInt32() == 1 && manifest.GetProperty("mod_id").GetString() == primary.id &&
+            manifest.GetProperty("workfolder").ValueKind == JsonValueKind.Null,
+            "the structured manifest keeps version 1, the primary ID and the null workfolder");
+
+        var roots = manifest.GetProperty("roots");
+        var expectedMods = new[] { dependency, primary, primary };
+        Check(roots.GetArrayLength() == expectedMods.Length, "the manifest contains one object for every mount path");
+        for (var index = 0; index < expectedMods.Length; index++)
+        {
+            var mod = expectedMods[index];
+            var metadata = roots[index].GetProperty("metadata");
+            Check(roots[index].GetProperty("path").GetString() == enginePaths[index] &&
+                metadata.GetProperty("id").GetString() == mod.id && metadata.GetProperty("type").GetString() == mod.type.ToString() &&
+                metadata.GetProperty("version").GetString() == mod.version && metadata.GetProperty("title").GetString() == mod.title,
+                $"root {index + 1} pairs its engine path with the owning mod's complete metadata");
+        }
+    }
 }

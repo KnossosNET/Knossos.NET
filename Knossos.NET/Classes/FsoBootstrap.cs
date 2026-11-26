@@ -62,20 +62,15 @@ namespace Knossos.NET.Classes
                 if (existingHash != null && managed?.Owns(existingHash) != true)
                     return ExistingBootstrapError(path);
 
+                var roots = launch.Roots.Select(root => root.Path);
                 var winePaths = wineArch.HasValue
                     ? await Wine.ConvertPathsAsync(workingFolder, wineArch.Value, toWindows: true,
-                        launch.Roots.Prepend(path).Select(Path.GetFullPath).ToArray()).ConfigureAwait(false)
+                        roots.Prepend(path).Select(Path.GetFullPath).ToArray()).ConfigureAwait(false)
                     : null;
                 var bootstrapArgumentPath = winePaths?[0] ?? path;
-                var roots = winePaths != null ? winePaths[1..] : launch.Roots.Select(FormatEnginePath).ToArray();
+                var rootPaths = winePaths != null ? winePaths[1..] : roots.Select(FormatEnginePath).ToArray();
                 var version = Math.Min(maximumVersion, LatestSupportedVersion);
-                var contents = JsonSerializer.Serialize(new
-                {
-                    version,
-                    mod_id = modId,
-                    workfolder = (string?)null,
-                    roots
-                });
+                var contents = SerializeManifest(version, modId, launch, rootPaths);
                 var current = new ManagedBootstrap(path, GetHash(contents), existingHash);
                 if (contents != existing)
                 {
@@ -87,9 +82,9 @@ namespace Knossos.NET.Classes
                 Log.Add(Log.LogSeverity.Information, "FsoBootstrap", "Used bootstrap file: " + path);
                 Log.Add(Log.LogSeverity.Information, "FsoBootstrap", $"Using bootstrap version: {version}");
                 Log.Add(Log.LogSeverity.Information, "FsoBootstrap", $"Using mod ID: {modId}");
-                Log.Add(Log.LogSeverity.Information, "FsoBootstrap", $"Using roots (in order, count: {roots.Length})");
-                for (var index = 0; index < roots.Length; index++)
-                    Log.Add(Log.LogSeverity.Information, "FsoBootstrap", $"Root {index + 1}: {roots[index]}");
+                Log.Add(Log.LogSeverity.Information, "FsoBootstrap", $"Using roots (in order, count: {rootPaths.Length})");
+                for (var index = 0; index < rootPaths.Length; index++)
+                    Log.Add(Log.LogSeverity.Information, "FsoBootstrap", $"Root {index + 1}: {rootPaths[index]}");
 
                 var result = await build.RunFSO(executableType, cmdline, workingFolder, bootstrapPath: bootstrapArgumentPath)
                     .ConfigureAwait(false);
@@ -106,6 +101,27 @@ namespace Knossos.NET.Classes
             {
                 LaunchGate.Release();
             }
+        }
+
+        private static string SerializeManifest(int version, string modId, FsoModLaunch launch, string[] rootPaths)
+        {
+            return JsonSerializer.Serialize(new
+            {
+                version,
+                mod_id = modId,
+                workfolder = (string?)null,
+                roots = launch.Roots.Select((root, index) => new
+                {
+                    path = rootPaths[index],
+                    metadata = new
+                    {
+                        id = root.Mod.id,
+                        type = (root.Mod.type ?? ModType.mod).ToString(),
+                        version = root.Mod.version,
+                        title = root.Mod.title
+                    }
+                })
+            });
         }
 
         private static FsoResult ExistingBootstrapError(string path) =>
